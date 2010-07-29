@@ -1,0 +1,157 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+
+  <parent>
+    <groupId>de.adito.aditoweb.modules</groupId>
+    <artifactId>nb-ide</artifactId>
+    <version>3.2</version>
+  </parent>
+
+
+  <groupId>de.adito.aditoweb.nbm</groupId>
+  <artifactId>org-netbeans-modules-javascript-refactoring</artifactId>
+  <packaging>nbm</packaging>
+  <version>RELEASE691</version>
+  <name>Netbeans IDE module: javascript-refactoring</name>
+
+
+  <dependencies>
+
+    <dependency>
+      <groupId>de.adito.aditoweb.nbm</groupId>
+      <artifactId>org-netbeans-modules-javascript-editing</artifactId>
+      <version>RELEASE691</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.netbeans.api</groupId>
+      <artifactId>org-mozilla-rhino-patched</artifactId>
+      <version>RELEASE691</version>
+    </dependency>
+    <dependency>
+      <groupId>org.netbeans.api</groupId>
+      <artifactId>org-netbeans-api-annotations-common</artifactId>
+      <version>RELEASE691</version>
+    </dependency>
+    <dependency>
+      <groupId>org.netbeans.api</groupId>
+      <artifactId>org-netbeans-api-java-classpath</artifactId>
+      <version>RELEASE691</version>
+    </dependency>
+    <dependency>
+      <groupId>org.netbeans.api</groupId>
+      <artifactId>org-netbeans-modules-csl-api</artifactId>
+      <version>RELEASE691</version>
+    </dependency>
+    <dependency>
+      <groupId>org.netbeans.api</groupId>
+      <artifactId>org-netbeans-modules-editor-lib</artifactId>
+      <version>RELEASE691</version>
+    </dependency>
+    <dependency>
+      <groupId>org.netbeans.api</groupId>
+      <artifactId>org-netbeans-modules-editor-mimelookup</artifactId>
+      <version>RELEASE691</version>
+    </dependency>
+    <dependency>
+      <groupId>org.netbeans.api</groupId>
+      <artifactId>org-netbeans-modules-editor-settings</artifactId>
+      <version>RELEASE691</version>
+    </dependency>
+    <dependency>
+      <groupId>org.netbeans.api</groupId>
+      <artifactId>org-netbeans-modules-lexer</artifactId>
+      <version>RELEASE691</version>
+    </dependency>
+    <dependency>
+      <groupId>org.netbeans.api</groupId>
+      <artifactId>org-netbeans-modules-parsing-api</artifactId>
+      <version>RELEASE691</version>
+    </dependency>
+    <dependency>
+      <groupId>org.netbeans.api</groupId>
+      <artifactId>org-netbeans-modules-projectapi</artifactId>
+      <version>RELEASE691</version>
+    </dependency>
+    <dependency>
+      <groupId>org.netbeans.api</groupId>
+      <artifactId>org-netbeans-modules-projectuiapi</artifactId>
+      <version>RELEASE691</version>
+    </dependency>
+    <dependency>
+      <groupId>org.netbeans.api</groupId>
+      <artifactId>org-netbeans-modules-queries</artifactId>
+      <version>RELEASE691</version>
+    </dependency>
+    <dependency>
+      <groupId>org.netbeans.api</groupId>
+      <artifactId>org-netbeans-modules-refactoring-api</artifactId>
+      <version>RELEASE691</version>
+    </dependency>
+    <dependency>
+      <groupId>org.netbeans.api</groupId>
+      <artifactId>org-openide-awt</artifactId>
+      <version>RELEASE691</version>
+    </dependency>
+    <dependency>
+      <groupId>org.netbeans.api</groupId>
+      <artifactId>org-openide-explorer</artifactId>
+      <version>RELEASE691</version>
+    </dependency>
+    <dependency>
+      <groupId>org.netbeans.api</groupId>
+      <artifactId>org-openide-filesystems</artifactId>
+      <version>RELEASE691</version>
+    </dependency>
+    <dependency>
+      <groupId>org.netbeans.api</groupId>
+      <artifactId>org-openide-loaders</artifactId>
+      <version>RELEASE691</version>
+    </dependency>
+    <dependency>
+      <groupId>org.netbeans.api</groupId>
+      <artifactId>org-openide-nodes</artifactId>
+      <version>RELEASE691</version>
+    </dependency>
+    <dependency>
+      <groupId>org.netbeans.api</groupId>
+      <artifactId>org-openide-text</artifactId>
+      <version>RELEASE691</version>
+    </dependency>
+    <dependency>
+      <groupId>org.netbeans.api</groupId>
+      <artifactId>org-openide-util</artifactId>
+      <version>RELEASE691</version>
+    </dependency>
+    <dependency>
+      <groupId>org.netbeans.api</groupId>
+      <artifactId>org-openide-util-lookup</artifactId>
+      <version>RELEASE691</version>
+    </dependency>
+    <dependency>
+      <groupId>org.netbeans.api</groupId>
+      <artifactId>org-openide-windows</artifactId>
+      <version>RELEASE691</version>
+    </dependency>
+
+  </dependencies>
+
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>nbm-maven-plugin</artifactId>
+        <configuration>
+          <publicPackages>
+
+          </publicPackages>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+
+
+</project>

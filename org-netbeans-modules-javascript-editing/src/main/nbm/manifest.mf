@@ -1,0 +1,5 @@
+Manifest-Version: 1.0
+AutoUpdate-Show-In-Client: false
+OpenIDE-Module-Install: org/netbeans/modules/javascript/editing/Installer.class
+OpenIDE-Module-Layer: org/netbeans/modules/javascript/editing/layer.xml
+OpenIDE-Module-Localizing-Bundle: org/netbeans/modules/javascript/editing/Bundle.properties

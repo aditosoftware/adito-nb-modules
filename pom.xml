@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+
+  <parent>
+    <groupId>de.adito.aditoweb</groupId>
+    <artifactId>modules</artifactId>
+    <version>3.2</version>
+  </parent>
+
+
+  <groupId>de.adito.aditoweb.modules</groupId>
+  <artifactId>nb-ide</artifactId>
+  <packaging>pom</packaging>
+  <name>Netbeans IDE modules</name>
+
+
+  <modules>
+    <module>org-netbeans-modules-javascript-editing</module>
+    <module>org-netbeans-modules-javascript-hints</module>
+    <module>org-netbeans-modules-javascript-refactoring</module>
+  </modules>
+
+
+</project>
