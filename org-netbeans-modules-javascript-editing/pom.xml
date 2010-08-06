@@ -13,7 +13,7 @@
   <groupId>de.adito.aditoweb.nbm</groupId>
   <artifactId>org-netbeans-modules-javascript-editing</artifactId>
   <packaging>nbm</packaging>
-  <version>RELEASE691</version>
+  <version>3.2-RELEASE691</version>
   <name>Netbeans IDE module: javascript-editing</name>
 
 
