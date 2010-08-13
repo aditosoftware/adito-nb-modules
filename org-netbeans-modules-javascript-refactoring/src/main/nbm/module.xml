@@ -1,6 +1,6 @@
 <nbm>
    <!--moduleType>autoload</moduleType-->
    <!--codeNameBase>de.adito/1</codeNameBase-->
-   <licenseName>Apache License, Version 2.0</licenseName>
-   <licenseFile>license.txt</licenseFile>
+   <!--licenseName>ADITO License</licenseName-->
+   <!--licenseFile>license.txt</licenseFile-->
 </nbm>
