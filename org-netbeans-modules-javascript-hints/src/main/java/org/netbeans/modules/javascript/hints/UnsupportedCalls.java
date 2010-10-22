@@ -148,7 +148,7 @@ public class UnsupportedCalls extends JsAstRule {
         Boolean skipFqnCheck = MUST_CHECK_FQN.get(name);
         if (skipFqnCheck == null) {
             // Check index to see if 
-            JsIndex index = JsIndex.get(QuerySupport.findRoots(info.getSnapshot().getSource().getFileObject(), null, Collections.singleton(JsClassPathProvider.BOOT_CP), Collections.<String>emptySet()));
+            JsIndex index = JsIndex.get(QuerySupport.findRoots(info.getSnapshot().getSource().getFileObject(), Collections.singleton(JsClassPathProvider.SOURCE_CP), Collections.singleton(JsClassPathProvider.BOOT_CP), Collections.<String>emptySet()));
             Set<IndexedElement> elements = index.getAllNames(name, QuerySupport.Kind.EXACT, info);
             if (elements.size() <= 1) {
                 // Exactly one match, or no such known element - don't bother looking

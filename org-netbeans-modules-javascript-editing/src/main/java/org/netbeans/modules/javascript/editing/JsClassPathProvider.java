@@ -48,7 +48,6 @@ import java.util.List;
 
 import de.adito.aditoweb.core.util.Generic;
 import de.adito.aditoweb.core.util.collection.EnumerationUtility;
-import de.adito.aditoweb.core.util.debug.Debug;
 import de.adito.aditoweb.filesystem.common.AfsUrlUtil;
 import de.adito.aditoweb.filesystem.databasefs.IAditoDatabaseFsConstants;
 import org.netbeans.api.java.classpath.ClassPath;
@@ -68,6 +67,7 @@ import org.openide.util.lookup.ServiceProvider;
 public final class JsClassPathProvider implements ClassPathProvider {
 
     public static final String BOOT_CP = "JavascriptBootClassPath"; //NOI18N
+  public static final String SOURCE_CP = "adito/classpath/source"; //NOI18N
 
     private static FileObject jsStubsFO;
     private static ClassPath bootClassPath;
@@ -77,16 +77,15 @@ public final class JsClassPathProvider implements ClassPathProvider {
     public JsClassPathProvider() {
 
     }
-    
+
     public ClassPath findClassPath(FileObject file, String type) {
         if (type.equals(BOOT_CP) ) {
             return getBootClassPath();
         }
-        /*else if (type.equals(ClassPath.SOURCE))
-        {          
+        else if (type.equals(ClassPath.SOURCE))
+        {
           if (prjSrcClassPath == null)
           {
-            Debug.write("-- JSCLASSPATHPROVIDER findClassPath", file); // DEBUG: remove it!
             FileObject prjRoot = FileOwnerQuery.getOwner(file).getProjectDirectory(); //.getFileObject("PROCESS");
             List<URL> urls = Generic.newArrayList();
             for (FileObject child : EnumerationUtility.createIterable(prjRoot.getChildren(true)))
@@ -109,7 +108,7 @@ public final class JsClassPathProvider implements ClassPathProvider {
             prjSrcClassPath = ClassPathSupport.createClassPath(urls.toArray(new URL[urls.size()]));
           }
           return prjSrcClassPath;
-        }*/
+        }
         return null;
     }
 

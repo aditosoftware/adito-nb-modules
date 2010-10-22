@@ -341,7 +341,7 @@ public class JsCodeCompletion implements CodeCompletionHandler {
             request.result = parseResult;
             request.lexOffset = lexOffset;
             request.astOffset = astOffset;
-            request.index = JsIndex.get(QuerySupport.findRoots(fileObject, null, Collections.singleton(JsClassPathProvider.BOOT_CP), Collections.<String>emptySet()));
+            request.index = JsIndex.get(QuerySupport.findRoots(fileObject, Collections.singleton(JsClassPathProvider.SOURCE_CP), Collections.singleton(JsClassPathProvider.BOOT_CP), Collections.<String>emptySet()));
             request.doc = doc;
             request.info = AstUtilities.getParseResult(info);
             request.prefix = prefix;

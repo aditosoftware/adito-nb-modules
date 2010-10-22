@@ -64,7 +64,8 @@ import org.netbeans.modules.parsing.spi.indexing.PathRecognizerRegistration;
  * @author Tor Norbye
  */
 @LanguageRegistration(mimeType="text/x-json") //NOI18N
-@PathRecognizerRegistration(mimeTypes="text/x-json", libraryPathIds=JsClassPathProvider.BOOT_CP, binaryLibraryPathIds={})
+@PathRecognizerRegistration(mimeTypes="text/x-json", sourcePathIds = JsClassPathProvider.SOURCE_CP,
+                            libraryPathIds=JsClassPathProvider.BOOT_CP, binaryLibraryPathIds={})
 public class JsonLanguage extends DefaultLanguageConfig {
 
     public JsonLanguage() {
@@ -96,7 +97,13 @@ public class JsonLanguage extends DefaultLanguageConfig {
         return "json"; // NOI18N
     }
 
-    @Override
+  @Override
+  public Set<String> getSourcePathIds()
+  {
+    return Collections.singleton(JsClassPathProvider.SOURCE_CP);
+  }
+
+  @Override
     public Set<String> getLibraryPathIds() {
         return Collections.singleton(JsClassPathProvider.BOOT_CP);
     }

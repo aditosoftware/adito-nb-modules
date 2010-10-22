@@ -465,7 +465,7 @@ public class JsTypeAnalyzer {
     }
     
     public static String getCallFqn(JsParseResult info, Node callNode, boolean resolveLocals) {
-        JsIndex index = JsIndex.get(QuerySupport.findRoots(info.getSnapshot().getSource().getFileObject(), null, Collections.singleton(JsClassPathProvider.BOOT_CP), Collections.<String>emptySet()));
+        JsIndex index = JsIndex.get(QuerySupport.findRoots(info.getSnapshot().getSource().getFileObject(), Collections.singleton(JsClassPathProvider.SOURCE_CP), Collections.singleton(JsClassPathProvider.BOOT_CP), Collections.<String>emptySet()));
         Node methodNode = callNode.getParentNode();
         while (methodNode != null) {
             if (methodNode.getType() == Token.FUNCTION) {
