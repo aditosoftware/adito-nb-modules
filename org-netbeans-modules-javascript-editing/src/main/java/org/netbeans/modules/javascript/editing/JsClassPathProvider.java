@@ -43,8 +43,16 @@
 package org.netbeans.modules.javascript.editing;
 
 import java.io.File;
-import java.net.URISyntaxException;
+import java.net.*;
+import java.util.List;
+
+import de.adito.aditoweb.core.util.Generic;
+import de.adito.aditoweb.core.util.collection.EnumerationUtility;
+import de.adito.aditoweb.core.util.debug.Debug;
+import de.adito.aditoweb.filesystem.common.AfsUrlUtil;
+import de.adito.aditoweb.filesystem.databasefs.IAditoDatabaseFsConstants;
 import org.netbeans.api.java.classpath.ClassPath;
+import org.netbeans.api.project.FileOwnerQuery;
 import org.netbeans.spi.java.classpath.ClassPathProvider;
 import org.netbeans.spi.java.classpath.support.ClassPathSupport;
 import org.openide.filesystems.FileObject;
@@ -64,6 +72,8 @@ public final class JsClassPathProvider implements ClassPathProvider {
     private static FileObject jsStubsFO;
     private static ClassPath bootClassPath;
 
+  private ClassPath prjSrcClassPath;
+
     public JsClassPathProvider() {
 
     }
@@ -71,9 +81,36 @@ public final class JsClassPathProvider implements ClassPathProvider {
     public ClassPath findClassPath(FileObject file, String type) {
         if (type.equals(BOOT_CP) ) {
             return getBootClassPath();
-        } else {
-            return null;
         }
+        /*else if (type.equals(ClassPath.SOURCE))
+        {          
+          if (prjSrcClassPath == null)
+          {
+            Debug.write("-- JSCLASSPATHPROVIDER findClassPath", file); // DEBUG: remove it!
+            FileObject prjRoot = FileOwnerQuery.getOwner(file).getProjectDirectory(); //.getFileObject("PROCESS");
+            List<URL> urls = Generic.newArrayList();
+            for (FileObject child : EnumerationUtility.createIterable(prjRoot.getChildren(true)))
+            {
+              try
+              {
+                if (child.getMIMEType().equals(IAditoDatabaseFsConstants.MIME_TYPE))
+                {
+                  URL url = AfsUrlUtil.createAdmFsUrl(child.getURL());
+                  // wegen einer falschen Annahme in einer NB-Bibliothek müssen hier die URLS mit '/' enden. Sonst wird
+                  // eine Exception geworfen.
+                  urls.add(new URL(url.toString() + "/"));
+                }
+              }
+              catch (Exception e)
+              {
+                e.printStackTrace(); // TODO: stacktrace
+              }
+            }
+            prjSrcClassPath = ClassPathSupport.createClassPath(urls.toArray(new URL[urls.size()]));
+          }
+          return prjSrcClassPath;
+        }*/
+        return null;
     }
 
     public static synchronized ClassPath getBootClassPath() {

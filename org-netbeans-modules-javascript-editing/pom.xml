@@ -19,6 +19,19 @@
 
   <dependencies>
 
+    <!-- eigene Bibliotheken start -->
+    <dependency>
+      <groupId>de.adito.aditoweb.packages</groupId>
+      <artifactId>lwcore</artifactId>
+      <version>${project.parent.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>de.adito.aditoweb.packages</groupId>
+      <artifactId>lwfilesystem</artifactId>
+      <version>${project.parent.version}</version>
+    </dependency>
+    <!-- eigene Bibliotheken stop -->
+
     <dependency>
       <groupId>org.netbeans.api</groupId>
       <artifactId>org-netbeans-modules-editor-codetemplates</artifactId>

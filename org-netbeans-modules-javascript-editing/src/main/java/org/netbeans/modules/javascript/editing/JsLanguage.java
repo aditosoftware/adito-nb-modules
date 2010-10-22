@@ -72,7 +72,8 @@ import org.netbeans.modules.parsing.spi.indexing.PathRecognizerRegistration;
  * @author Tor Norbye
  */
 @LanguageRegistration(mimeType="text/javascript") //NOI18N
-@PathRecognizerRegistration(mimeTypes="text/javascript", libraryPathIds=JsClassPathProvider.BOOT_CP, binaryLibraryPathIds={})
+@PathRecognizerRegistration(mimeTypes="text/javascript", sourcePathIds = ClassPath.SOURCE,
+                            libraryPathIds=JsClassPathProvider.BOOT_CP, binaryLibraryPathIds={})
 public class JsLanguage extends DefaultLanguageConfig {
 
     private static boolean jsClassPathRegistered = false;

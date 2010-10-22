@@ -347,7 +347,7 @@ public final class JsIndex {
                 }
             }
         }
-        
+
         return new Pair<Set<IndexedElement>,Boolean>(elements, false);
     }
     
