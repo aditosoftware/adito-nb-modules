@@ -71,11 +71,13 @@ import org.netbeans.modules.parsing.spi.indexing.PathRecognizerRegistration;
  *
  * @author Tor Norbye
  */
-@LanguageRegistration(mimeType="text/javascript") //NOI18N
+@LanguageRegistration(mimeType=JsLanguage.MIME_TYPE) //NOI18N
 @PathRecognizerRegistration(mimeTypes="text/javascript", sourcePathIds = JsClassPathProvider.SOURCE_CP,
                             libraryPathIds=JsClassPathProvider.BOOT_CP, binaryLibraryPathIds={})
 public class JsLanguage extends DefaultLanguageConfig {
 
+  public final static String MIME_TYPE = "text/javascript";
+  
     private static boolean jsClassPathRegistered = false;
 
     public JsLanguage() {
