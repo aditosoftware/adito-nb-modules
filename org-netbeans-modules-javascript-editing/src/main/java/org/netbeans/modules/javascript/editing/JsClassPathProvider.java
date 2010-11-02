@@ -43,15 +43,9 @@
 package org.netbeans.modules.javascript.editing;
 
 import java.io.File;
-import java.net.*;
-import java.util.List;
-
-import de.adito.aditoweb.core.util.Generic;
-import de.adito.aditoweb.core.util.collection.EnumerationUtility;
-import de.adito.aditoweb.filesystem.common.AfsUrlUtil;
-import de.adito.aditoweb.filesystem.databasefs.IAditoDatabaseFsConstants;
+import java.net.URISyntaxException;
 import org.netbeans.api.java.classpath.ClassPath;
-import org.netbeans.api.project.FileOwnerQuery;
+import org.netbeans.api.project.*;
 import org.netbeans.spi.java.classpath.ClassPathProvider;
 import org.netbeans.spi.java.classpath.support.ClassPathSupport;
 import org.openide.filesystems.FileObject;
@@ -67,47 +61,23 @@ import org.openide.util.lookup.ServiceProvider;
 public final class JsClassPathProvider implements ClassPathProvider {
 
     public static final String BOOT_CP = "JavascriptBootClassPath"; //NOI18N
-  public static final String SOURCE_CP = "adito/classpath/source"; //NOI18N
+    public static final String SOURCE_CP = "adito/classpath/source"; //NOI18N
 
     private static FileObject jsStubsFO;
     private static ClassPath bootClassPath;
-
-  private ClassPath prjSrcClassPath;
 
     public JsClassPathProvider() {
 
     }
 
     public ClassPath findClassPath(FileObject file, String type) {
-        if (type.equals(BOOT_CP) ) {
+      if (type.equals(BOOT_CP) ) {
             return getBootClassPath();
         }
-        else if (type.equals(ClassPath.SOURCE))
+        else if (type.equals(SOURCE_CP))
         {
-          if (prjSrcClassPath == null)
-          {
-            FileObject prjRoot = FileOwnerQuery.getOwner(file).getProjectDirectory(); //.getFileObject("PROCESS");
-            List<URL> urls = Generic.newArrayList();
-            for (FileObject child : EnumerationUtility.createIterable(prjRoot.getChildren(true)))
-            {
-              try
-              {
-                if (child.getMIMEType().equals(IAditoDatabaseFsConstants.MIME_TYPE))
-                {
-                  URL url = AfsUrlUtil.createAdmFsUrl(child.getURL());
-                  // wegen einer falschen Annahme in einer NB-Bibliothek müssen hier die URLS mit '/' enden. Sonst wird
-                  // eine Exception geworfen.
-                  urls.add(new URL(url.toString() + "/"));
-                }
-              }
-              catch (Exception e)
-              {
-                e.printStackTrace(); // TODO: stacktrace
-              }
-            }
-            prjSrcClassPath = ClassPathSupport.createClassPath(urls.toArray(new URL[urls.size()]));
-          }
-          return prjSrcClassPath;
+          Project prj = FileOwnerQuery.getOwner(file);
+          return prj.getLookup().lookup(ClassPathProvider.class).findClassPath(prj.getProjectDirectory(), type);
         }
         return null;
     }

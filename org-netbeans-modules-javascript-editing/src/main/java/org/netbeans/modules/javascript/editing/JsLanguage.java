@@ -43,8 +43,6 @@
  */
 package org.netbeans.modules.javascript.editing;
 
-import java.util.Collections;
-import java.util.Set;
 import javax.swing.SwingUtilities;
 import org.netbeans.api.java.classpath.ClassPath;
 import org.netbeans.api.java.classpath.GlobalPathRegistry;
@@ -77,7 +75,7 @@ import org.netbeans.modules.parsing.spi.indexing.PathRecognizerRegistration;
 public class JsLanguage extends DefaultLanguageConfig {
 
   public final static String MIME_TYPE = "text/javascript";
-  
+
     private static boolean jsClassPathRegistered = false;
 
     public JsLanguage() {
@@ -131,17 +129,6 @@ public class JsLanguage extends DefaultLanguageConfig {
     @Override
     public String getPreferredExtension() {
         return "js"; // NOI18N
-    }
-
-  @Override
-  public Set<String> getSourcePathIds()
-  {
-    return Collections.singleton(JsClassPathProvider.SOURCE_CP);
-  }
-
-  @Override
-    public Set<String> getLibraryPathIds() {
-        return Collections.singleton(JsClassPathProvider.BOOT_CP);
     }
 
     // Service Registrations

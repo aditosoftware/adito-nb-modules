@@ -53,6 +53,7 @@ import org.netbeans.api.project.ProjectUtils;
 import org.netbeans.api.project.SourceGroup;
 import org.netbeans.api.project.Sources;
 import org.netbeans.modules.csl.api.UiUtils;
+import org.netbeans.modules.javascript.editing.JsClassPathProvider;
 import org.netbeans.modules.refactoring.spi.ui.*;
 import org.openide.filesystems.FileObject;
 import org.openide.filesystems.FileUtil;
@@ -95,7 +96,7 @@ public class FolderTreeElement implements TreeElement {
     }
 
     public String getText(boolean isLogical) {
-        ClassPath cp = ClassPath.getClassPath(fo, ClassPath.SOURCE);
+        ClassPath cp = ClassPath.getClassPath(fo, JsClassPathProvider.SOURCE_CP);
         if (cp==null) {
             return fo.getPath();
         } else {
