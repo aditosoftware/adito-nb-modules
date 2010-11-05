@@ -19,6 +19,7 @@
 
 
   <modules>
+    <module>org-netbeans-core-windows</module>
     <module>org-netbeans-modules-javascript-editing</module>
     <module>org-netbeans-modules-javascript-hints</module>
     <module>org-netbeans-modules-javascript-refactoring</module>
