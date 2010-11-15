@@ -5,12 +5,12 @@ OpenIDE-Module-Friends: org.netbeans.core.nativeaccess, org.netbeans.m
  odules.visualweb.gravy
 OpenIDE-Module-Module-Dependencies: org.netbeans.core/2 > 3.18, org.ne
  tbeans.modules.options.api/1 > 1.6, org.netbeans.modules.settings/1 >
-  1.8, org.netbeans.swing.plaf, org.netbeans.swing.tabcontrol > 1.13, 
+  1.8, org.netbeans.swing.plaf, org.netbeans.swing.tabcontrol > 1.13,
  org.openide.actions > 6.2, org.openide.awt > 6.2, org.openide.dialogs
   > 7.10, org.openide.explorer > 6.25, org.openide.filesystems > 7.19,
   org.openide.loaders > 4.15, org.openide.modules > 6.2, org.openide.n
  odes > 6.2, org.openide.util > 8.0, org.openide.util.lookup > 8.0, or
- g.openide.windows > 6.15
+ g.openide.windows > 6.15, de.adito.aditoweb.nbm.AditoNetBeansUtil > 3.2
 OpenIDE-Module-Java-Dependencies: Java > 1.6
 OpenIDE-Module-Implementation-Version: 201007151553
 AutoUpdate-Show-In-Client: false

@@ -16,6 +16,14 @@
   <name>Netbeans IDE module: org-netbeans-modules-core-windows</name>
 
   <dependencies>
+
+    <!-- ADITO -->
+    <dependency>
+      <groupId>de.adito.aditoweb.nbm</groupId>
+      <artifactId>AditoNetBeansUtil</artifactId>
+      <version>3.2</version>
+    </dependency>
+
     <dependency>
       <groupId>org.netbeans.modules</groupId>
       <artifactId>org-netbeans-core</artifactId>

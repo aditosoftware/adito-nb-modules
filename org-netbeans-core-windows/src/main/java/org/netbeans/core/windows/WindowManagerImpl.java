@@ -53,6 +53,8 @@ import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.*;
+
+import de.adito.aditoweb.nbm.aditonetbeansutil.services.IAlwaysOpenTopComponentRegistry;
 import org.netbeans.core.windows.actions.ActionUtils;
 import org.netbeans.core.windows.persistence.PersistenceManager;
 import org.openide.nodes.Node;
@@ -978,10 +980,13 @@ public final class WindowManagerImpl extends WindowManager implements Workspace 
     }
     
     public void notifyTopComponentClosed(TopComponent tc) {
+      if (!Lookup.getDefault().lookup(IAlwaysOpenTopComponentRegistry.class).contains(tc))
+      {
         // Inform component instance.
         componentCloseNotify(tc);
         // let others know that top component was closed...
         notifyRegistryTopComponentClosed(tc);
+      }
     }
     // Notifications<<
     /////////////////////////
