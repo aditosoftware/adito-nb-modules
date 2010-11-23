@@ -62,11 +62,6 @@
       <version>RELEASE691</version>
     </dependency>
 
-    <!--<dependency>-->
-    <!--<groupId>com.kenai.nbpwr</groupId>-->
-    <!--<artifactId>org-jdesktop-swingx</artifactId>-->
-    <!--<version>1.6-201002261215</version>-->
-    <!--</dependency>-->
     <dependency>
       <groupId>de.adito.aditoweb.packages.external</groupId>
       <artifactId>lwswingx</artifactId>
