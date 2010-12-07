@@ -1,5 +1,39 @@
-Manifest-Version: 1.0
+OpenIDE-Module-Public-Packages: org.netbeans.modules.javascript.editin
+ g.*, org.netbeans.modules.javascript.editing.embedding.*, org.netbean
+ s.modules.javascript.editing.lexer.*, org.netbeans.modules.javascript
+ .editing.spi.*
+OpenIDE-Module-Friends: org.netbeans.modules.html.editor, org.netbeans
+ .modules.javascript.hints, org.netbeans.modules.javascript.refactorin
+ g, org.netbeans.modules.languages.ejs, org.netbeans.modules.php.prado
+ , org.netbeans.modules.php.symfony, org.netbeans.modules.web.client.t
+ ools.impl, de.adito.aditoweb.nbm.EditorProvider
+OpenIDE-Module-Module-Dependencies: org.jdesktop.layout/1 > 1.4, org.m
+ ozilla.rhino.patched/1 > 1.104, org.netbeans.api.annotations.common/1
+  > 1.0, org.netbeans.api.java.classpath/1 > 1.19, org.netbeans.libs.x
+ erces/1 > 1.13, org.netbeans.modules.csl.api/2 > 2.1, org.netbeans.mo
+ dules.editor/3 > 1.41, org.netbeans.modules.editor.bracesmatching/0-1
+  > 1.8, org.netbeans.modules.editor.indent/2 > 1.5, org.netbeans.modu
+ les.editor.lib/2 > 2.1, org.netbeans.modules.editor.mimelookup/1 > 1.
+ 6, org.netbeans.modules.editor.settings/1 > 1.9, org.netbeans.modules
+ .html.editor/1 > 1.12, org.netbeans.modules.html.editor.lib/1 > 1.2,
+ org.netbeans.modules.html.lexer/1 > 1.0, org.netbeans.modules.lexer/2
+  > 1.25, org.netbeans.modules.options.api/1 > 1.5, org.netbeans.modul
+ es.parsing.api/1 > 1.26, org.netbeans.modules.projectapi/1 > 1.3, org
+ .netbeans.spi.tasklist/1, org.openide.awt > 6.8.0.1, org.openide.dial
+ ogs > 6.2, org.openide.filesystems > 7.0, org.openide.io > 1.11, org.
+ openide.loaders > 5.11, org.openide.modules > 7.2, org.openide.nodes
+  > 6.9.0.1, org.openide.text > 6.16, org.openide.util > 8.0, org.open
+ ide.util.lookup > 8.0, org.openide.windows > 6.9
+OpenIDE-Module-Java-Dependencies: Java > 1.6
+OpenIDE-Module-Implementation-Version: 201008021402
 AutoUpdate-Show-In-Client: false
-OpenIDE-Module-Install: org/netbeans/modules/javascript/editing/Installer.class
-OpenIDE-Module-Layer: org/netbeans/modules/javascript/editing/layer.xml
-OpenIDE-Module-Localizing-Bundle: org/netbeans/modules/javascript/editing/Bundle.properties
+OpenIDE-Module: org.netbeans.modules.javascript.editing/1
+OpenIDE-Module-Install: org/netbeans/modules/javascript/editing/Instal
+ ler.class
+OpenIDE-Module-Layer: org/netbeans/modules/javascript/editing/layer.xm
+ l
+OpenIDE-Module-Localizing-Bundle: org/netbeans/modules/javascript/edit
+ ing/Bundle.properties
+OpenIDE-Module-Specification-Version: 0.95.1
+OpenIDE-Module-Requires: org.openide.modules.ModuleFormat1
+

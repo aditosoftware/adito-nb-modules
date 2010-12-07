@@ -875,7 +875,7 @@ public class JsIndexer extends EmbeddingIndexer {
     private static String getClusterUrl() {
         if (clusterUrl == null) {
             File f = InstalledFileLocator.getDefault().locate(
-                "modules/de-adito-aditoweb-nbm-org-netbeans-modules-javascript-editing.jar", null, false); // NOI18N
+                "modules/org-netbeans-modules-org-netbeans-modules-javascript-editing.jar", null, false); // NOI18N
 //            File f =
 //                    InstalledFileLocator.getDefault().locate("jsstubs/sdocs.zip", // NOI18N
 //                            "org-netbeans-modules-javascript-editing", false); // NOI18N

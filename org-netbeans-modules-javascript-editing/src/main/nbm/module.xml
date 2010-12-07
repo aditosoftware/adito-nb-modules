@@ -1,25 +1,4 @@
 <nbm>
-  <!--moduleType>autoload</moduleType-->
-  <!--codeNameBase>de.adito/1</codeNameBase-->
-  <!--licenseName>ADITO License</licenseName-->
-  <!--licenseFile>license.txt</licenseFile-->
 
-  <dependencies>
-    
-    <dependency>
-      <id>org.netbeans.modules:org-netbeans-modules-html-editor</id>
-      <type>impl</type>
-      <!-- implementation dependency -->
-      <explicitValue>org.netbeans.modules.html.editor/1 = 201008021402</explicitValue>
-    </dependency>
-
-    <dependency>
-      <id>org.netbeans.modules:org-netbeans-modules-html-editor-lib</id>
-      <type>impl</type>
-      <!-- implementation dependency -->
-      <explicitValue>org.netbeans.modules.html.editor.lib/1 = 201008021402</explicitValue>
-    </dependency>
-
-  </dependencies>
 
 </nbm>

@@ -1,5 +1,5 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
 
@@ -10,11 +10,11 @@
   </parent>
 
 
-  <groupId>de.adito.aditoweb.nbm</groupId>
+  <groupId>org.netbeans.modules</groupId>
   <artifactId>org-netbeans-modules-javascript-editing</artifactId>
   <packaging>nbm</packaging>
-  <version>3.2-RELEASE691</version>
-  <name>Netbeans IDE module: javascript-editing</name>
+  <version>RELEASE691</version>
+  <name>Netbeans IDE module: org-netbeans-modules-javascript-editing</name>
 
 
   <dependencies>
@@ -42,7 +42,7 @@
       <artifactId>org-netbeans-modules-editor-errorstripe</artifactId>
       <version>RELEASE691</version>
     </dependency>
-    
+
 
     <dependency>
       <groupId>org.netbeans.api</groupId>
@@ -104,7 +104,7 @@
       <artifactId>org-netbeans-modules-editor-settings</artifactId>
       <version>RELEASE691</version>
     </dependency>
-    
+
     <dependency>
       <groupId>org.netbeans.modules</groupId>
       <artifactId>org-netbeans-modules-html-editor</artifactId>
@@ -120,7 +120,7 @@
       <artifactId>org-netbeans-modules-html-lexer</artifactId>
       <version>RELEASE691</version>
     </dependency>
-    
+
     <dependency>
       <groupId>org.netbeans.api</groupId>
       <artifactId>org-netbeans-modules-lexer</artifactId>
@@ -210,14 +210,6 @@
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>nbm-maven-plugin</artifactId>
-        <configuration>
-          <publicPackages>
-            <publicPackage>org.netbeans.modules.javascript.editing.*</publicPackage>
-            <publicPackage>org.netbeans.modules.javascript.editing.embedding.*</publicPackage>
-            <publicPackage>org.netbeans.modules.javascript.editing.lexer.*</publicPackage>
-            <publicPackage>org.netbeans.modules.javascript.editing.spi.*</publicPackage>
-          </publicPackages>
-        </configuration>
       </plugin>
 
       <!-- kopiert die jsstubs -->

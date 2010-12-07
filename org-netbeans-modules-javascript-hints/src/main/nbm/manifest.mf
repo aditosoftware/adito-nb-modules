@@ -1,4 +1,23 @@
-Manifest-Version: 1.0
+OpenIDE-Module-Public-Packages: -
+OpenIDE-Module-Module-Dependencies: org.jdesktop.layout/1 > 1.4, org.m
+ ozilla.rhino.patched/1 > 1.102, org.netbeans.modules.csl.api/2 > 2.1,
+  org.netbeans.modules.diff/1 > 1.16, org.netbeans.modules.editor.lib/
+ 2 > 2.1, org.netbeans.modules.editor.lib2/1 > 1.4, org.netbeans.modul
+ es.javascript.editing/1 > 0.50.0, org.netbeans.modules.lexer/2 > 1.12
+ , org.netbeans.modules.options.api/1 > 1.5, org.netbeans.modules.pars
+ ing.api/1 > 1.26, org.netbeans.modules.projectapi/1 > 1.3, org.netbea
+ ns.modules.refactoring.api > 1.0, org.netbeans.spi.editor.hints/0-1 >
+  1.7, org.openide.awt > 6.11, org.openide.dialogs > 7.0, org.openide.
+ filesystems > 7.0, org.openide.loaders > 5.11, org.openide.nodes > 6.
+ 9.0.1, org.openide.text > 6.16, org.openide.util > 8.0, org.openide.u
+ til.lookup > 8.0, org.openide.windows > 6.2
+OpenIDE-Module-Java-Dependencies: Java > 1.6
+OpenIDE-Module-Implementation-Version: 201008021402
 AutoUpdate-Show-In-Client: false
-OpenIDE-Module-Localizing-Bundle: org/netbeans/modules/javascript/hints/Bundle.properties
+OpenIDE-Module: org.netbeans.modules.javascript.hints/1
+OpenIDE-Module-Specification-Version: 0.45.1
+OpenIDE-Module-Localizing-Bundle: org/netbeans/modules/javascript/hint
+ s/Bundle.properties
 OpenIDE-Module-Layer: org/netbeans/modules/javascript/hints/layer.xml
+OpenIDE-Module-Requires: org.openide.modules.ModuleFormat1
+

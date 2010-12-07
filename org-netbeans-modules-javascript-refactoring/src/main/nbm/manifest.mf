@@ -1,4 +1,25 @@
-Manifest-Version: 1.0
+OpenIDE-Module-Public-Packages: -
+OpenIDE-Module-Module-Dependencies: org.mozilla.rhino.patched/1 > 1.10
+ 2, org.netbeans.api.annotations.common/1 > 1.0, org.netbeans.api.java
+ .classpath/1 > 1.19, org.netbeans.modules.csl.api/2 > 2.1, org.netbea
+ ns.modules.editor.lib/2 > 2.1, org.netbeans.modules.editor.mimelookup
+ /1 > 1.6, org.netbeans.modules.editor.settings/1 > 1.9, org.netbeans.
+ modules.javascript.editing/1 > 0.50.0, org.netbeans.modules.lexer/2 >
+  1.25, org.netbeans.modules.parsing.api/1 > 1.26, org.netbeans.module
+ s.projectapi/1 > 1.12, org.netbeans.modules.projectuiapi/1 > 1.22, or
+ g.netbeans.modules.queries/1 > 1.8, org.netbeans.modules.refactoring.
+ api > 1.0, org.openide.awt > 6.9, org.openide.explorer > 6.8, org.ope
+ nide.filesystems > 7.0, org.openide.loaders > 5.11, org.openide.nodes
+  > 6.9.0.1, org.openide.text > 6.16, org.openide.util > 8.0, org.open
+ ide.util.lookup > 8.0, org.openide.windows > 6.12
+OpenIDE-Module-Java-Dependencies: Java > 1.6
+OpenIDE-Module-Implementation-Version: 201007142301
 AutoUpdate-Show-In-Client: false
-OpenIDE-Module-Layer: org/netbeans/modules/refactoring/javascript/resources/mf-layer.xml
-OpenIDE-Module-Localizing-Bundle: org/netbeans/modules/refactoring/javascript/resources/Bundle.properties
+OpenIDE-Module: org.netbeans.modules.javascript.refactoring/1
+OpenIDE-Module-Layer: org/netbeans/modules/refactoring/javascript/reso
+ urces/mf-layer.xml
+OpenIDE-Module-Localizing-Bundle: org/netbeans/modules/refactoring/jav
+ ascript/resources/Bundle.properties
+OpenIDE-Module-Specification-Version: 0.70.1
+OpenIDE-Module-Requires: org.openide.modules.ModuleFormat1
+
