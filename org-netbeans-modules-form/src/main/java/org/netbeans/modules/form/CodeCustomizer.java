@@ -92,8 +92,9 @@ public class CodeCustomizer implements CustomCodeView.Listener {
     }
 
     private void show() {
-        JavaCodeGenerator codeGen = (JavaCodeGenerator) FormEditor.getCodeGenerator(formModel);
-        codeGen.regenerateCode(); // to have fresh code for code completion
+      // TODO: stripped
+//        JavaCodeGenerator codeGen = (JavaCodeGenerator) FormEditor.getCodeGenerator(formModel);
+//        codeGen.regenerateCode(); // to have fresh code for code completion
 
         DialogDescriptor dd = new DialogDescriptor(codeView,
                 NbBundle.getMessage(CodeCustomizer.class, "TITLE_CodeCustomizer"), // NOI18N
@@ -122,12 +123,13 @@ public class CodeCustomizer implements CustomCodeView.Listener {
 
     private void selectComponent(RADComponent metacomp) {
         customizedComponent = metacomp;
-        CustomCodeData codeData = changedDataMap.get(metacomp);
-        if (codeData == null) {
-            codeData = JavaCodeGenerator.getCodeData(metacomp);
-            codeData.check();
-        }
-        codeView.setCodeData(customizedComponent.getName(), codeData, getSourceFile(), getSourcePositions());
+      // TODO: stripped
+//        CustomCodeData codeData = changedDataMap.get(metacomp);
+//        if (codeData == null) {
+//            codeData = JavaCodeGenerator.getCodeData(metacomp);
+//            codeData.check();
+//        }
+//        codeView.setCodeData(customizedComponent.getName(), codeData, getSourceFile(), getSourcePositions());
     }
 
     private FileObject getSourceFile() {
@@ -165,7 +167,7 @@ public class CodeCustomizer implements CustomCodeView.Listener {
     {
         storeCodeCategory(metacomp, codeData, CodeCategory.CREATE_AND_INIT, definite);
         storeCodeCategory(metacomp, codeData, CodeCategory.DECLARATION, definite);
-        storeDeclaration(metacomp, codeData.getDeclarationData(), definite);
+//        storeDeclaration(metacomp, codeData.getDeclarationData(), definite); // TODO: stripped
     }
 
     private static void storeCodeCategory(RADComponent metacomp,
@@ -207,20 +209,21 @@ public class CodeCustomizer implements CustomCodeView.Listener {
             else if (entry.isPropertyPostInit()) {
                 prop.setPostCode(code);
             }
-            else if (prop instanceof RADProperty) { // custom code for bean property
-                if (code != null) { // custom code specified
-                    Object codeValue = new FormProperty.ValueWithEditor(
-                        new RADConnectionPropertyEditor.RADConnectionDesignValue(code),
-                        new RADConnectionPropertyEditor(prop.getValueType()));
-                    prop.setValue(codeValue);
-                }
-                else if (JavaCodeGenerator.isPropertyWithCustomCode(prop)) { // default code
-                    prop.restoreDefaultValue(); // cancel custom code
-                    if (!definite && prop.getPreCode() == null && prop.getPostCode() == null)
-                        prop.setPreCode("\n"); // set something to get the property generated again // NOI18N
-                }
-                // otherwise do nothing (property does not contain custom code)
-            }
+            // TODO: stripped
+//            else if (prop instanceof RADProperty) { // custom code for bean property
+//                if (code != null) { // custom code specified
+//                    Object codeValue = new FormProperty.ValueWithEditor(
+//                        new RADConnectionPropertyEditor.RADConnectionDesignValue(code),
+//                        new RADConnectionPropertyEditor(prop.getValueType()));
+//                    prop.setValue(codeValue);
+//                }
+//                else if (JavaCodeGenerator.isPropertyWithCustomCode(prop)) { // default code
+//                    prop.restoreDefaultValue(); // cancel custom code
+//                    if (!definite && prop.getPreCode() == null && prop.getPostCode() == null)
+//                        prop.setPreCode("\n"); // set something to get the property generated again // NOI18N
+//                }
+//                // otherwise do nothing (property does not contain custom code)
+//            }
             else { // synthetic code property
                 prop.setValue(code != null ? code : ""); // NOI18N
             }
@@ -233,37 +236,38 @@ public class CodeCustomizer implements CustomCodeView.Listener {
             prop.setChangeFiring(firing);
     }
 
-    private static void storeDeclaration(RADComponent metacomp, VariableDeclaration decl, boolean definite) {
-        FormProperty varProp = (FormProperty) metacomp.getSyntheticProperty(
-                JavaCodeGenerator.PROP_VARIABLE_LOCAL);
-        FormProperty modifProp = (FormProperty) metacomp.getSyntheticProperty(
-                JavaCodeGenerator.PROP_VARIABLE_MODIFIER);
-
-        boolean firing;
-        if (!definite) {
-            firing = varProp.isChangeFiring();
-            varProp.setChangeFiring(false);
-            modifProp.setChangeFiring(false);
-        }
-        else firing = true;
-
-        try {
-            varProp.setValue(decl.local);
-            int modif = decl.modifiers;
-            if (modif < 0)
-                modif = (((Integer)modifProp.getValue()).intValue() & ~Modifier.FINAL)
-                        | (modif & Modifier.FINAL);
-            modifProp.setValue(modif);
-        }
-        catch (Exception ex) { // should not happen 
-            ErrorManager.getDefault().notify(ErrorManager.INFORMATIONAL, ex);
-        }
-
-        if (!definite) {
-            varProp.setChangeFiring(firing);
-            modifProp.setChangeFiring(firing);
-        }
-    }
+  // TODO: stripped
+//    private static void storeDeclaration(RADComponent metacomp, VariableDeclaration decl, boolean definite) {
+//        FormProperty varProp = (FormProperty) metacomp.getSyntheticProperty(
+//                JavaCodeGenerator.PROP_VARIABLE_LOCAL);
+//        FormProperty modifProp = (FormProperty) metacomp.getSyntheticProperty(
+//                JavaCodeGenerator.PROP_VARIABLE_MODIFIER);
+//
+//        boolean firing;
+//        if (!definite) {
+//            firing = varProp.isChangeFiring();
+//            varProp.setChangeFiring(false);
+//            modifProp.setChangeFiring(false);
+//        }
+//        else firing = true;
+//
+//        try {
+//            varProp.setValue(decl.local);
+//            int modif = decl.modifiers;
+//            if (modif < 0)
+//                modif = (((Integer)modifProp.getValue()).intValue() & ~Modifier.FINAL)
+//                        | (modif & Modifier.FINAL);
+//            modifProp.setValue(modif);
+//        }
+//        catch (Exception ex) { // should not happen
+//            ErrorManager.getDefault().notify(ErrorManager.INFORMATIONAL, ex);
+//        }
+//
+//        if (!definite) {
+//            varProp.setChangeFiring(firing);
+//            modifProp.setChangeFiring(firing);
+//        }
+//    }
 
     // -----
     // CustomCodeView.Listener implementation
@@ -308,26 +312,28 @@ public class CodeCustomizer implements CustomCodeView.Listener {
             }
 
             setupComponentNames();
-            codeData = JavaCodeGenerator.getCodeData(customizedComponent);
-            codeData.check();
-            codeView.setCodeData(customizedComponent.getName(), codeData, getSourceFile(), getSourcePositions());
+          // TODO: stripped
+//            codeData = JavaCodeGenerator.getCodeData(customizedComponent);
+//            codeData.check();
+//            codeView.setCodeData(customizedComponent.getName(), codeData, getSourceFile(), getSourcePositions());
         }
     }
 
     @Override
     public void declarationChanged() {
         // remeber the current data - we'll return to it so there is no change in the model
-        CustomCodeData original = JavaCodeGenerator.getCodeData(customizedComponent);
-        // write the customized configuration to the component
-        retreiveCurrentData();
-        CustomCodeData actual = changedDataMap.get(customizedComponent);
-        storeComponent(customizedComponent, actual, false);
-        // get the new code data for the changed configuartion
-        CustomCodeData renewed = JavaCodeGenerator.getCodeData(customizedComponent);
-        renewed.check();
-        // restore the original data in the component
-        storeComponent(customizedComponent, original, false);
-        // set the new data to the view
-        codeView.setCodeData(customizedComponent.getName(), renewed, getSourceFile(), getSourcePositions());
+      // TODO: stripped
+//        CustomCodeData original = JavaCodeGenerator.getCodeData(customizedComponent);
+//        // write the customized configuration to the component
+//        retreiveCurrentData();
+//        CustomCodeData actual = changedDataMap.get(customizedComponent);
+//        storeComponent(customizedComponent, actual, false);
+//        // get the new code data for the changed configuartion
+//        CustomCodeData renewed = JavaCodeGenerator.getCodeData(customizedComponent);
+//        renewed.check();
+//        // restore the original data in the component
+//        storeComponent(customizedComponent, original, false);
+//        // set the new data to the view
+//        codeView.setCodeData(customizedComponent.getName(), renewed, getSourceFile(), getSourcePositions());
     }
 }

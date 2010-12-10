@@ -295,10 +295,12 @@ public class TableColumnModelEditor extends PropertyEditorSupport
                     if (subNode.getNodeType() == Node.ELEMENT_NODE) {
                         String propEdName = attributes.getNamedItem(ATTR_PROP_EDITOR).getNodeValue();
                         XMLPropertyEditor xmlPropEd = null;
-                        if (propEdName.equals(RADConnectionPropertyEditor.class.getName())) {
-                            xmlPropEd = new RADConnectionPropertyEditor(property.getValueType());
-                            ((FormAwareEditor)xmlPropEd).setContext(formModel, property);
-                        } else {
+                      // TODO: stripped
+//                        if (propEdName.equals(RADConnectionPropertyEditor.class.getName())) {
+//                            xmlPropEd = new RADConnectionPropertyEditor(property.getValueType());
+//                            ((FormAwareEditor)xmlPropEd).setContext(formModel, property);
+//                        } else
+                        {
                             Class propEdClass = PersistenceObjectRegistry.loadClass(propEdName,
                                 FormEditor.getFormDataObject(formModel).getFormFile());
                             Object propEd = propEdClass.newInstance();

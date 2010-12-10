@@ -57,7 +57,7 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import org.jdesktop.layout.GroupLayout;
 import org.netbeans.api.java.classpath.ClassPath;
-import org.netbeans.api.java.project.JavaProjectConstants;
+//import org.netbeans.api.java.project.JavaProjectConstants;
 import org.netbeans.api.java.queries.SourceForBinaryQuery;
 import org.netbeans.api.project.FileOwnerQuery;
 import org.netbeans.api.project.Project;
@@ -516,11 +516,12 @@ public class ClassPathFileChooser extends JPanel implements ExplorerManager.Prov
     }
 
     private static SourceGroup getSourceGroup(FileObject file, Project prj) {
-        Sources src = ProjectUtils.getSources(prj);
-        for (SourceGroup g : src.getSourceGroups(JavaProjectConstants.SOURCES_TYPE_JAVA)) {
-            if (file == g.getRootFolder())
-                return g;
-        }
+      // TODO: stripped
+//        Sources src = ProjectUtils.getSources(prj);
+//        for (SourceGroup g : src.getSourceGroups(JavaProjectConstants.SOURCES_TYPE_JAVA)) {
+//            if (file == g.getRootFolder())
+//                return g;
+//        }
         return null;
     }
 

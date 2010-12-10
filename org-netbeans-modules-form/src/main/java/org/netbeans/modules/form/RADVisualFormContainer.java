@@ -460,7 +460,7 @@ public class RADVisualFormContainer extends RADVisualContainer implements FormCo
 
         java.util.List<Node.Property> propList = new java.util.ArrayList<Node.Property>();
 
-        propList.add(JavaCodeGenerator.createBeanClassNameProperty(this));
+//        propList.add(JavaCodeGenerator.createBeanClassNameProperty(this)); // TODO: stripped
 
         if (java.awt.Window.class.isAssignableFrom(getBeanClass())
             || javax.swing.JInternalFrame.class.isAssignableFrom(getBeanClass()))

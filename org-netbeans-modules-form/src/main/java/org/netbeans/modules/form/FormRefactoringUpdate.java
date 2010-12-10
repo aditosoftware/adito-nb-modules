@@ -542,29 +542,30 @@ public class FormRefactoringUpdate extends SimpleRefactoringElementImplementatio
                 if (newCode != null) {
                     formProp.setPostCode(newCode);
                 }
-                if (formProp.isChanged()) {
-                    try {
-                        Object value = formProp.getValue();
-                        if (value instanceof RADConnectionPropertyEditor.RADConnectionDesignValue) {
-                            RADConnectionPropertyEditor.RADConnectionDesignValue rr
-                                    = (RADConnectionPropertyEditor.RADConnectionDesignValue) value;
-                            if (rr.getType() == RADConnectionPropertyEditor.RADConnectionDesignValue.TYPE_CODE) {
-                                newCode = replaceCode(rr.getCode(), oldName, newName);
-                                if (newCode != null) {
-                                    value = new RADConnectionPropertyEditor.RADConnectionDesignValue(newCode);
-                                    formProp.setValue(value);
-                                }
-                            }
-                        } else if (value instanceof String && formProp instanceof JavaCodeGenerator.CodeProperty) {
-                            newCode = replaceCode((String)value, oldName, newName);
-                            if (newCode != null) {
-                                formProp.setValue(newCode);
-                            }
-                        }
-                    } catch (Exception ex) {
-                        Exceptions.printStackTrace(ex);
-                    }
-                }
+              // TODO: stripped
+//                if (formProp.isChanged()) {
+//                    try {
+//                        Object value = formProp.getValue();
+//                        if (value instanceof RADConnectionPropertyEditor.RADConnectionDesignValue) {
+//                            RADConnectionPropertyEditor.RADConnectionDesignValue rr
+//                                    = (RADConnectionPropertyEditor.RADConnectionDesignValue) value;
+//                            if (rr.getType() == RADConnectionPropertyEditor.RADConnectionDesignValue.TYPE_CODE) {
+//                                newCode = replaceCode(rr.getCode(), oldName, newName);
+//                                if (newCode != null) {
+//                                    value = new RADConnectionPropertyEditor.RADConnectionDesignValue(newCode);
+//                                    formProp.setValue(value);
+//                                }
+//                            }
+//                        } else if (value instanceof String && formProp instanceof JavaCodeGenerator.CodeProperty) {
+//                            newCode = replaceCode((String)value, oldName, newName);
+//                            if (newCode != null) {
+//                                formProp.setValue(newCode);
+//                            }
+//                        }
+//                    } catch (Exception ex) {
+//                        Exceptions.printStackTrace(ex);
+//                    }
+//                }
             }
         }
     }

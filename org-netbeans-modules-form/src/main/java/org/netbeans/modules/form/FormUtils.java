@@ -815,24 +815,25 @@ public class FormUtils
                 }
                 else tnProp.setValue(copiedValue);
 
-                if (sfProp != null && tfProp != null) {
+              // TODO: stripped
+//                if (sfProp != null && tfProp != null) {
                     // also clone current PropertyEditor
-                    PropertyEditor sPrEd = sfProp.getCurrentEditor();
-                    PropertyEditor tPrEd = tfProp.getCurrentEditor();
-                    if (sPrEd != null
-                        && (tPrEd == null
-                            || sPrEd.getClass() != tPrEd.getClass())
-                        && (propertyValue == copiedValue
-                            || (propertyValue != null && copiedValue != null
-                                && propertyValue.getClass() == copiedValue.getClass())))
-                    {
-                        tPrEd = sPrEd instanceof RADConnectionPropertyEditor ?
-                            new RADConnectionPropertyEditor(tfProp.getValueType()) :
-                            (PropertyEditor)CreationFactory.createDefaultInstance(
-                                                             sPrEd.getClass());
-                        tfProp.setCurrentEditor(tPrEd);
-                    }
-                }
+//                    PropertyEditor sPrEd = sfProp.getCurrentEditor();
+//                    PropertyEditor tPrEd = tfProp.getCurrentEditor();
+//                    if (sPrEd != null
+//                        && (tPrEd == null
+//                            || sPrEd.getClass() != tPrEd.getClass())
+//                        && (propertyValue == copiedValue
+//                            || (propertyValue != null && copiedValue != null
+//                                && propertyValue.getClass() == copiedValue.getClass())))
+//                    {
+//                        tPrEd = sPrEd instanceof RADConnectionPropertyEditor ?
+//                            new RADConnectionPropertyEditor(tfProp.getValueType()) :
+//                            (PropertyEditor)CreationFactory.createDefaultInstance(
+//                                                             sPrEd.getClass());
+//                        tfProp.setCurrentEditor(tPrEd);
+//                    }
+//                }
 
                 // also copy the resource/i18n attributes set on the property
                 copyPropertyAttrs(snProp, tnProp, ResourceSupport.getPropertyAttrNames());
@@ -873,7 +874,8 @@ public class FormUtils
                     Object value = prop.getValue();
                     if (value instanceof RADComponent
                             || value instanceof RADComponent.ComponentReference
-                            || isRelativeConnectionValue(value)) {
+//                            || isRelativeConnectionValue(value) // TODO: stripped
+                        ) {
                         relativeProperties.add(prop);
                         continue;
                     }
@@ -906,16 +908,17 @@ public class FormUtils
         }
     }
 
-    static boolean isRelativeConnectionValue(Object value) {
-        if (value instanceof RADConnectionPropertyEditor.RADConnectionDesignValue) {
-            RADConnectionPropertyEditor.RADConnectionDesignValue conValue
-                = (RADConnectionPropertyEditor.RADConnectionDesignValue) value;
-            return conValue.type == RADConnectionPropertyEditor.RADConnectionDesignValue.TYPE_BEAN
-                    || conValue.type == RADConnectionPropertyEditor.RADConnectionDesignValue.TYPE_METHOD
-                    || conValue.type == RADConnectionPropertyEditor.RADConnectionDesignValue.TYPE_PROPERTY;
-        }
-        return false;
-    }
+  // TODO: stripped
+//    static boolean isRelativeConnectionValue(Object value) {
+//        if (value instanceof RADConnectionPropertyEditor.RADConnectionDesignValue) {
+//            RADConnectionPropertyEditor.RADConnectionDesignValue conValue
+//                = (RADConnectionPropertyEditor.RADConnectionDesignValue) value;
+//            return conValue.type == RADConnectionPropertyEditor.RADConnectionDesignValue.TYPE_BEAN
+//                    || conValue.type == RADConnectionPropertyEditor.RADConnectionDesignValue.TYPE_METHOD
+//                    || conValue.type == RADConnectionPropertyEditor.RADConnectionDesignValue.TYPE_PROPERTY;
+//        }
+//        return false;
+//    }
 
     public static Method getPropertyWriteMethod(RADProperty property, Class targetClass) {
         Method method = property.getPropertyDescriptor().getWriteMethod();

@@ -161,16 +161,17 @@ public class PropertyPicker extends javax.swing.JPanel {
                     filtered.put(item.getPropertyName(), item);
                 }
             }
-	    
-	    if(sel == sel.getFormModel().getTopRADComponent() ) {
-		String[] names = FormEditor.getFormJavaSource(sel.getFormModel()).getPropertyReadMethodNames(requiredType);
-		for (int i = 0; i < names.length; i++) {
-		    PropertyPickerItem item = createItem(names[i]);
-		    if(!filtered.keySet().contains(item.getPropertyName())){
-			filtered.put(item.getPropertyName(), item);	
-		    }                    
-		}		
-	    } 
+
+          // TODO: stripped
+//	    if(sel == sel.getFormModel().getTopRADComponent() ) {
+//		String[] names = FormEditor.getFormJavaSource(sel.getFormModel()).getPropertyReadMethodNames(requiredType);
+//		for (int i = 0; i < names.length; i++) {
+//		    PropertyPickerItem item = createItem(names[i]);
+//		    if(!filtered.keySet().contains(item.getPropertyName())){
+//			filtered.put(item.getPropertyName(), item);
+//		    }
+//		}
+//	    }
 	    
 	    items = new PropertyPickerItem[filtered.size()];
             filtered.values().toArray(items);	    
@@ -209,23 +210,24 @@ public class PropertyPicker extends javax.swing.JPanel {
 	    }
 	};		
     }
-	    
-    private PropertyPickerItem createItem(final String name) {
-	return new PropertyPickerItem() {
-            @Override
-	    public String getPropertyName() {
-		return FormJavaSource.extractPropertyName(name);
-	    }
-            @Override
-	    public String getReadMethodName() {
-		return FormUtils.getMethodName(name, NO_PARAMETERS);
-	    }
-            @Override
-	    public PropertyDescriptor getPropertyDescriptor() {
-		return null;
-	    }
-	};		
-    }
+
+  // TODO: stripped
+//    private PropertyPickerItem createItem(final String name) {
+//	return new PropertyPickerItem() {
+//            @Override
+//	    public String getPropertyName() {
+//		return FormJavaSource.extractPropertyName(name);
+//	    }
+//            @Override
+//	    public String getReadMethodName() {
+//		return FormUtils.getMethodName(name, NO_PARAMETERS);
+//	    }
+//            @Override
+//	    public PropertyDescriptor getPropertyDescriptor() {
+//		return null;
+//	    }
+//	};
+//    }
 
     private void updateState() {
         setPickerValid((getSelectedComponent() != null) &&(getSelectedProperty() != null));

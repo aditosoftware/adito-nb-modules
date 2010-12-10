@@ -57,7 +57,7 @@ import org.netbeans.api.project.*;
 import org.netbeans.api.project.ant.*;
 import org.netbeans.api.java.classpath.ClassPath;
 import org.netbeans.spi.java.classpath.support.ClassPathSupport;
-import org.netbeans.api.java.queries.SourceForBinaryQuery;
+//import org.netbeans.api.java.queries.SourceForBinaryQuery;
 
 /**
  * Utility methods related to classpath in projects.
@@ -202,17 +202,18 @@ public class ClassPathUtils {
         if (artifacts.length == 0)
             return null; // there is no project output
 
-        for (AntArtifact aa : artifacts) {
-            ClassSource.Entry entry = new ClassSource.ProjectEntry(aa);
-            for (URL binaryRoot : entry.getClasspath()) {
-                for (FileObject sourceRoot : SourceForBinaryQuery.findSourceRoots(binaryRoot).getRoots()) {
-                    if (FileUtil.isParentOf(sourceRoot, fileInProject)) {
-                        // Looks like the one.
-                        return new ClassSource(classname, entry);
-                    }
-                }
-            }
-        }
+      // TODO: stripped
+//        for (AntArtifact aa : artifacts) {
+//            ClassSource.Entry entry = new ClassSource.ProjectEntry(aa);
+//            for (URL binaryRoot : entry.getClasspath()) {
+//                for (FileObject sourceRoot : SourcefForBinaryQuery.findSourceRoots(binaryRoot).getRoots()) {
+//                    if (FileUtil.isParentOf(sourceRoot, fileInProject)) {
+//                        // Looks like the one.
+//                        return new ClassSource(classname, entry);
+//                    }
+//                }
+//            }
+//        }
 
         // no output found for given source file - the file might not be
         // a source file ... but a binary output file - in this case return

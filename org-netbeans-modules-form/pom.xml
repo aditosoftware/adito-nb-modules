@@ -27,11 +27,11 @@
       <artifactId>org-jdesktop-layout</artifactId>
       <version>RELEASE691</version>
     </dependency>
-    <dependency>
-      <groupId>org.netbeans.api</groupId>
-      <artifactId>org-netbeans-api-java</artifactId>
-      <version>RELEASE691</version>
-    </dependency>
+    <!--<dependency>-->
+      <!--<groupId>org.netbeans.api</groupId>-->
+      <!--<artifactId>org-netbeans-api-java</artifactId>-->
+      <!--<version>RELEASE691</version>-->
+    <!--</dependency>-->
     <dependency>
       <groupId>org.netbeans.api</groupId>
       <artifactId>org-netbeans-api-java-classpath</artifactId>
@@ -47,21 +47,21 @@
       <artifactId>org-netbeans-core-multiview</artifactId>
       <version>RELEASE691</version>
     </dependency>
-    <dependency>
-      <groupId>org.netbeans.api</groupId>
-      <artifactId>org-netbeans-libs-javacapi</artifactId>
-      <version>RELEASE691</version>
-    </dependency>
+    <!--<dependency>-->
+      <!--<groupId>org.netbeans.api</groupId>-->
+      <!--<artifactId>org-netbeans-libs-javacapi</artifactId>-->
+      <!--<version>RELEASE691</version>-->
+    <!--</dependency>-->
     <dependency>
       <groupId>org.netbeans.api</groupId>
       <artifactId>org-netbeans-libs-xerces</artifactId>
       <version>RELEASE691</version>
     </dependency>
-    <dependency>
-      <groupId>org.netbeans.api</groupId>
-      <artifactId>org-netbeans-modules-classfile</artifactId>
-      <version>RELEASE691</version>
-    </dependency>
+    <!--<dependency>-->
+      <!--<groupId>org.netbeans.api</groupId>-->
+      <!--<artifactId>org-netbeans-modules-classfile</artifactId>-->
+      <!--<version>RELEASE691</version>-->
+    <!--</dependency>-->
     <dependency>
       <groupId>org.netbeans.api</groupId>
       <artifactId>org-netbeans-modules-editor-fold</artifactId>
@@ -82,21 +82,21 @@
       <artifactId>org-netbeans-modules-editor-lib2</artifactId>
       <version>RELEASE691</version>
     </dependency>
-    <dependency>
-      <groupId>org.netbeans.api</groupId>
-      <artifactId>org-netbeans-modules-java-project</artifactId>
-      <version>RELEASE691</version>
-    </dependency>
-    <dependency>
-      <groupId>org.netbeans.api</groupId>
-      <artifactId>org-netbeans-modules-java-source</artifactId>
-      <version>RELEASE691</version>
-    </dependency>
-    <dependency>
-      <groupId>org.netbeans.api</groupId>
-      <artifactId>org-netbeans-modules-javahelp</artifactId>
-      <version>RELEASE691</version>
-    </dependency>
+    <!--<dependency>-->
+      <!--<groupId>org.netbeans.api</groupId>-->
+      <!--<artifactId>org-netbeans-modules-java-project</artifactId>-->
+      <!--<version>RELEASE691</version>-->
+    <!--</dependency>-->
+    <!--<dependency>-->
+      <!--<groupId>org.netbeans.api</groupId>-->
+      <!--<artifactId>org-netbeans-modules-java-source</artifactId>-->
+      <!--<version>RELEASE691</version>-->
+    <!--</dependency>-->
+    <!--<dependency>-->
+      <!--<groupId>org.netbeans.api</groupId>-->
+      <!--<artifactId>org-netbeans-modules-javahelp</artifactId>-->
+      <!--<version>RELEASE691</version>-->
+    <!--</dependency>-->
     <dependency>
       <groupId>org.netbeans.api</groupId>
       <artifactId>org-netbeans-modules-options-api</artifactId>
@@ -197,11 +197,12 @@
       <artifactId>org-openide-windows</artifactId>
       <version>RELEASE691</version>
     </dependency>
-    <dependency>
-      <groupId>org.netbeans.external</groupId>
-      <artifactId>AbsoluteLayout</artifactId>
-      <version>RELEASE691</version>
-    </dependency>
+    <!--<dependency>-->
+      <!--<groupId>org.netbeans.external</groupId>-->
+      <!--<artifactId>AbsoluteLayout</artifactId>-->
+      <!--<version>RELEASE691</version>-->
+      <!--<scope>provided</scope>-->
+    <!--</dependency>-->
 
   </dependencies>
 

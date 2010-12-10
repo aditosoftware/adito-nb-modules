@@ -84,7 +84,7 @@ public class RADComponent {
 
     static final NewType[] NO_NEW_TYPES = {};
     static final RADProperty[] NO_PROPERTIES = {};
-    static final BindingProperty[] NO_BINDINGS = {};
+//    static final BindingProperty[] NO_BINDINGS = {}; // TODO: stripped
 
     // -----------------------------------------------------------------------------
     // Private variables
@@ -103,7 +103,7 @@ public class RADComponent {
     private Node.Property[] syntheticProperties;
     private RADProperty[] beanProperties1;
     private RADProperty[] beanProperties2;
-    private BindingProperty[][] bindingProperties;
+//    private BindingProperty[][] bindingProperties; // TODO: stripped
     private EventProperty[] eventProperties;
     private Map<Object,RADProperty[]> otherProperties;
     private List actionProperties;
@@ -370,17 +370,18 @@ public class RADComponent {
 
     Object createDefaultDeserializedInstance() throws Exception {
         FileObject formFile = FormEditor.getFormDataObject(getFormModel()).getFormFile();
-        String serFile = (String)getAuxValue(JavaCodeGenerator.AUX_SERIALIZE_TO);
-        if (serFile == null) {
-            serFile = formFile.getName() + "_" + getName(); // NOI18N
-        }
+      // TODO: stripped
+//        String serFile = (String)getAuxValue(JavaCodeGenerator.AUX_SERIALIZE_TO);
+//        if (serFile == null) {
+//            serFile = formFile.getName() + "_" + getName(); // NOI18N
+//        }
 
         ClassPath sourcePath = ClassPath.getClassPath(formFile, ClassPath.SOURCE);
         String serName = sourcePath.getResourceName(formFile.getParent());
         if (!"".equals(serName)) { // NOI18N
             serName += "."; // NOI18N
         }
-        serName += serFile;
+//        serName += serFile; // TODO: stripped
 
         Object instance = null;
         try {
@@ -401,9 +402,10 @@ public class RADComponent {
     public Object cloneBeanInstance(Collection<RADProperty> relativeProperties) {
         Object clone;
         try {
-            if (JavaCodeGenerator.VALUE_SERIALIZE.equals(getAuxValue(JavaCodeGenerator.AUX_CODE_GENERATION))) {
+          // TODO: stripped
+            /*if (JavaCodeGenerator.VALUE_SERIALIZE.equals(getAuxValue(JavaCodeGenerator.AUX_CODE_GENERATION))) {
                 clone = createDefaultDeserializedInstance();
-            } else {
+            } else */{
                 clone = createBeanInstance();
             }
         }
@@ -671,43 +673,44 @@ public class RADComponent {
                    filter);
     }
 
-    public BindingProperty[] getAllBindingProperties() {
-        BindingProperty[][] bprop = getBindingProperties();
-        BindingProperty[] prop = new BindingProperty[bprop[0].length + bprop[1].length + bprop[2].length];
-        System.arraycopy(bprop[0], 0, prop, 0, bprop[0].length);
-        System.arraycopy(bprop[1], 0, prop, bprop[0].length, bprop[1].length);
-        System.arraycopy(bprop[2], 0, prop, bprop[0].length+bprop[1].length, bprop[2].length);
-        return prop;
-    }
-    
-    public synchronized BindingProperty[][] getBindingProperties() {
-        if (bindingProperties == null) {
-            createBindingProperties();
-        }
-        return bindingProperties;
-    }
-
-    public final BindingProperty getBindingProperty(String name) {
-        for (BindingProperty prop : getAllBindingProperties()) {
-            if (prop.getName().equals(name))
-                return prop;
-        }
-        return null;
-    }
-
-    synchronized BindingProperty[] getKnownBindingProperties() {
-        return bindingProperties != null ? getAllBindingProperties() : NO_BINDINGS;
-    }
-
-    synchronized boolean hasBindings() {
-        if (bindingProperties != null) {
-            for (BindingProperty p : getAllBindingProperties()) {
-                if (p.getValue() != null)
-                    return true;
-            }
-        }
-        return false;
-    }
+  // TODO: stripped
+//    public BindingProperty[] getAllBindingProperties() {
+//        BindingProperty[][] bprop = getBindingProperties();
+//        BindingProperty[] prop = new BindingProperty[bprop[0].length + bprop[1].length + bprop[2].length];
+//        System.arraycopy(bprop[0], 0, prop, 0, bprop[0].length);
+//        System.arraycopy(bprop[1], 0, prop, bprop[0].length, bprop[1].length);
+//        System.arraycopy(bprop[2], 0, prop, bprop[0].length+bprop[1].length, bprop[2].length);
+//        return prop;
+//    }
+//
+//    public synchronized BindingProperty[][] getBindingProperties() {
+//        if (bindingProperties == null) {
+//            createBindingProperties();
+//        }
+//        return bindingProperties;
+//    }
+//
+//    public final BindingProperty getBindingProperty(String name) {
+//        for (BindingProperty prop : getAllBindingProperties()) {
+//            if (prop.getName().equals(name))
+//                return prop;
+//        }
+//        return null;
+//    }
+//
+//    synchronized BindingProperty[] getKnownBindingProperties() {
+//        return bindingProperties != null ? getAllBindingProperties() : NO_BINDINGS;
+//    }
+//
+//    synchronized boolean hasBindings() {
+//        if (bindingProperties != null) {
+//            for (BindingProperty p : getAllBindingProperties()) {
+//                if (p.getValue() != null)
+//                    return true;
+//            }
+//        }
+//        return false;
+//    }
 
     /** Provides access to the Node which represents this RADComponent
      * @return the RADComponentNode which represents this RADComponent
@@ -1142,24 +1145,25 @@ public class RADComponent {
                 });
             }
 
-            if (getAllBindingProperties().length > 0) {
-                BindingProperty[][] bprop = getBindingProperties();
-                for (int i=0; i<bprop.length; i++) {
-                    final int index = i;
-                    ps = new Node.PropertySet(
-                            "binding" + i, // NOI18N
-                            bundle.getString("CTL_BindingTab" + i), // NOI18N
-                            bundle.getString("CTL_BindingTabHint" + i)) // NOI18N
-                    {
-                        @Override
-                        public Node.Property[] getProperties() {
-                            return getBindingProperties()[index];
-                        }
-                    };
-                    ps.setValue("tabName", bundle.getString("CTL_BindingTab")); // NOI18N
-                    propSets.add(ps);
-                }
-            }
+          // TODO: stripped
+//            if (getAllBindingProperties().length > 0) {
+//                BindingProperty[][] bprop = getBindingProperties();
+//                for (int i=0; i<bprop.length; i++) {
+//                    final int index = i;
+//                    ps = new Node.PropertySet(
+//                            "binding" + i, // NOI18N
+//                            bundle.getString("CTL_BindingTab" + i), // NOI18N
+//                            bundle.getString("CTL_BindingTabHint" + i)) // NOI18N
+//                    {
+//                        @Override
+//                        public Node.Property[] getProperties() {
+//                            return getBindingProperties()[index];
+//                        }
+//                    };
+//                    ps.setValue("tabName", bundle.getString("CTL_BindingTab")); // NOI18N
+//                    propSets.add(ps);
+//                }
+//            }
 
             ps = new Node.PropertySet(
                     "events", // NOI18N
@@ -1209,8 +1213,10 @@ public class RADComponent {
     }
 
     protected Node.Property[] createSyntheticProperties() {
-        CodeGenerator codeGen = FormEditor.getCodeGenerator(formModel);
-        return codeGen != null ? codeGen.getSyntheticProperties(this) : new Node.Property[0];
+      // TODO: stripped
+//        CodeGenerator codeGen = FormEditor.getCodeGenerator(formModel);
+//        return codeGen != null ? codeGen.getSyntheticProperties(this) : new Node.Property[0];
+      return null;
     }
 
     private void createBeanProperties() {
@@ -1369,17 +1375,18 @@ public class RADComponent {
         actionProperties = actionProps;
     }
 
-    private synchronized void createBindingProperties() {
-        Collection<BindingDescriptor>[] props = FormEditor.getBindingSupport(formModel).getBindingDescriptors(this);
-        bindingProperties = new BindingProperty[props.length][];
-        for (int i=0; i<props.length; i++) {
-            bindingProperties[i] = new BindingProperty[props[i].size()];
-            int j = 0;
-            for (BindingDescriptor desc : props[i]) {
-                bindingProperties[i][j++] = new BindingProperty(this, desc);
-            }
-        }       
-    }
+  // TODO: stripped
+//    private synchronized void createBindingProperties() {
+//        Collection<BindingDescriptor>[] props = FormEditor.getBindingSupport(formModel).getBindingDescriptors(this);
+//        bindingProperties = new BindingProperty[props.length][];
+//        for (int i=0; i<props.length; i++) {
+//            bindingProperties[i] = new BindingProperty[props[i].size()];
+//            int j = 0;
+//            for (BindingDescriptor desc : props[i]) {
+//                bindingProperties[i][j++] = new BindingProperty(this, desc);
+//            }
+//        }
+//    }
 
     private void createEventProperties() {
         EventSetDescriptor[] eventSets = getBeanInfo().getEventSetDescriptors();

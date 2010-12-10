@@ -121,52 +121,55 @@ public class BindAction extends CookieAction {
         if (radCookie == null)
             return;
 
-        BindingProperty[][] bindingProps = radCookie.getRADComponent().getBindingProperties();
-        BindingProperty[] props = bindingProps[(bindingProps[0].length==0) ? 1 : 0];
-        if (props.length > 0) {
-            for (BindingProperty prop : props) {
-                BindingMenuItem mi = new BindingMenuItem(prop);
-                mi.addActionListener(mi);
-                menu.add(mi);
-            }
-        } else {
+      // TODO: stripped
+//        BindingProperty[][] bindingProps = radCookie.getRADComponent().getBindingProperties();
+//        BindingProperty[] props = bindingProps[(bindingProps[0].length==0) ? 1 : 0];
+//        if (props.length > 0) {
+//            for (BindingProperty prop : props) {
+//                BindingMenuItem mi = new BindingMenuItem(prop);
+//                mi.addActionListener(mi);
+//                menu.add(mi);
+//            }
+//        } else
+        {
             JMenuItem item = new JMenuItem(NbBundle.getMessage(BindAction.class, "MSG_NoBinding")); // NOI18N
             item.setEnabled(false);
             menu.add(item);
         }
     }
 
-    private static class BindingMenuItem extends JMenuItem implements ActionListener {
-        private BindingProperty bindingProperty;
-
-        private BindingMenuItem(BindingProperty prop) {
-            bindingProperty = prop;
-            setText(prop.getDisplayName());
-            updateFont();
-        }
-
-        private void updateFont() {
-            java.awt.Font font = getFont();
-            if (bindingProperty.getValue() != null) {
-                setFont(font.deriveFont(font.getStyle() | java.awt.Font.BOLD));
-            }
-            else {
-                setFont(font.deriveFont(font.getStyle() & ~java.awt.Font.BOLD));
-            }
-        }
-
-        @Override
-        public void actionPerformed(ActionEvent ev) {
-            MetaBinding binding = bindingProperty.getValue();
-            final BindingCustomizer customizer = new BindingCustomizer(bindingProperty);
-            customizer.setBinding(binding);
-            customizer.getDialog(new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent ev) {
-                    bindingProperty.setValue(customizer.getBinding());
-                    updateFont();
-                }
-            }).setVisible(true);
-        }
-    }
+  // TODO: stripped
+//    private static class BindingMenuItem extends JMenuItem implements ActionListener {
+//        private BindingProperty bindingProperty;
+//
+//        private BindingMenuItem(BindingProperty prop) {
+//            bindingProperty = prop;
+//            setText(prop.getDisplayName());
+//            updateFont();
+//        }
+//
+//        private void updateFont() {
+//            java.awt.Font font = getFont();
+//            if (bindingProperty.getValue() != null) {
+//                setFont(font.deriveFont(font.getStyle() | java.awt.Font.BOLD));
+//            }
+//            else {
+//                setFont(font.deriveFont(font.getStyle() & ~java.awt.Font.BOLD));
+//            }
+//        }
+//
+//        @Override
+//        public void actionPerformed(ActionEvent ev) {
+//            MetaBinding binding = bindingProperty.getValue();
+//            final BindingCustomizer customizer = new BindingCustomizer(bindingProperty);
+//            customizer.setBinding(binding);
+//            customizer.getDialog(new ActionListener() {
+//                @Override
+//                public void actionPerformed(ActionEvent ev) {
+//                    bindingProperty.setValue(customizer.getBinding());
+//                    updateFont();
+//                }
+//            }).setVisible(true);
+//        }
+//    }
 }

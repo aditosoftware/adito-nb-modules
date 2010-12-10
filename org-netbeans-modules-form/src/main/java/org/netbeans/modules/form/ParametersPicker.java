@@ -175,98 +175,100 @@ public class ParametersPicker extends javax.swing.JPanel {
         getAccessibleContext().setAccessibleDescription(
             FormUtils.getBundleString("ACSD_ParametersPicker")); // NOI18N
     }
-    
-    public void setPropertyValue(RADConnectionPropertyEditor.RADConnectionDesignValue value, Object realValue) {        
-        if (value == null) {
-            previousValue = realValue != null;
-            return; // can happen if starting without previously set value
-        } else {
-            previousValue = true;               
-        }
-        
-        switch (value.type) {
-            case RADConnectionPropertyEditor.RADConnectionDesignValue.TYPE_VALUE:
-                valueButton.setSelected(true);
-                valueField.setText(value.value);
-                break;
-            case RADConnectionPropertyEditor.RADConnectionDesignValue.TYPE_BEAN:
-                beanButton.setSelected(true);
-                selectedComponent = value.getRADComponent();
-                int index = beansList.indexOf(selectedComponent);
-                if (index > -1)
-                    beanCombo.setSelectedIndex(index+1);
-                break;
-            case RADConnectionPropertyEditor.RADConnectionDesignValue.TYPE_PROPERTY:
-                propertyButton.setSelected(true);
-                selectedComponent = value.getRADComponent();
-                selectedProperty = value.getProperty();
-                if (selectedComponent.getCodeExpression() == null) {
-                    propertyLabel.setText(
-                        FormUtils.getBundleString("CTL_CONNECTION_INVALID")); // NOI18N
-                }
-                else if (selectedComponent == formModel.getTopRADComponent()) {
-                    propertyLabel.setText(selectedProperty.getName());
-                }
-                else {
-                    propertyLabel.setText(selectedComponent.getName() + "." + selectedProperty.getName()); // NOI18N
-                }
-                propertyLabel.selectAll();
-                break;
-            case RADConnectionPropertyEditor.RADConnectionDesignValue.TYPE_METHOD:
-                methodButton.setSelected(true);
-                selectedComponent = value.getRADComponent();
-                selectedMethod = value.getMethod();
-                if (selectedComponent.getCodeExpression() == null) {
-                    methodLabel.setText(
-                        FormUtils.getBundleString("CTL_CONNECTION_INVALID")); // NOI18N
-                }
-                else if (selectedComponent == formModel.getTopRADComponent()) {
-                    methodLabel.setText(selectedMethod.getName());
-                }
-                else {
-                    methodLabel.setText(selectedComponent.getName() + "." + selectedMethod.getName()); // NOI18N
-                }
-                methodLabel.selectAll();
-                break;
-            case RADConnectionPropertyEditor.RADConnectionDesignValue.TYPE_CODE:
-            default:
-                codeButton.setSelected(true);
-                codeArea.setText(value.userCode);
-                break;
-        }
 
-        // update enabled state
-        updateParameterTypes();
-    }
+  // TODO: stripped
+//    public void setPropertyValue(RADConnectionPropertyEditor.RADConnectionDesignValue value, Object realValue) {
+//        if (value == null) {
+//            previousValue = realValue != null;
+//            return; // can happen if starting without previously set value
+//        } else {
+//            previousValue = true;
+//        }
+//
+//        switch (value.type) {
+//            case RADConnectionPropertyEditor.RADConnectionDesignValue.TYPE_VALUE:
+//                valueButton.setSelected(true);
+//                valueField.setText(value.value);
+//                break;
+//            case RADConnectionPropertyEditor.RADConnectionDesignValue.TYPE_BEAN:
+//                beanButton.setSelected(true);
+//                selectedComponent = value.getRADComponent();
+//                int index = beansList.indexOf(selectedComponent);
+//                if (index > -1)
+//                    beanCombo.setSelectedIndex(index+1);
+//                break;
+//            case RADConnectionPropertyEditor.RADConnectionDesignValue.TYPE_PROPERTY:
+//                propertyButton.setSelected(true);
+//                selectedComponent = value.getRADComponent();
+//                selectedProperty = value.getProperty();
+//                if (selectedComponent.getCodeExpression() == null) {
+//                    propertyLabel.setText(
+//                        FormUtils.getBundleString("CTL_CONNECTION_INVALID")); // NOI18N
+//                }
+//                else if (selectedComponent == formModel.getTopRADComponent()) {
+//                    propertyLabel.setText(selectedProperty.getName());
+//                }
+//                else {
+//                    propertyLabel.setText(selectedComponent.getName() + "." + selectedProperty.getName()); // NOI18N
+//                }
+//                propertyLabel.selectAll();
+//                break;
+//            case RADConnectionPropertyEditor.RADConnectionDesignValue.TYPE_METHOD:
+//                methodButton.setSelected(true);
+//                selectedComponent = value.getRADComponent();
+//                selectedMethod = value.getMethod();
+//                if (selectedComponent.getCodeExpression() == null) {
+//                    methodLabel.setText(
+//                        FormUtils.getBundleString("CTL_CONNECTION_INVALID")); // NOI18N
+//                }
+//                else if (selectedComponent == formModel.getTopRADComponent()) {
+//                    methodLabel.setText(selectedMethod.getName());
+//                }
+//                else {
+//                    methodLabel.setText(selectedComponent.getName() + "." + selectedMethod.getName()); // NOI18N
+//                }
+//                methodLabel.selectAll();
+//                break;
+//            case RADConnectionPropertyEditor.RADConnectionDesignValue.TYPE_CODE:
+//            default:
+//                codeButton.setSelected(true);
+//                codeArea.setText(value.userCode);
+//                break;
+//        }
+//
+//        // update enabled state
+//        updateParameterTypes();
+//    }
 
     /** Get the customized property value.
      * @return the property value
      * @exception IllegalStateException when the custom property editor does not contain a valid property value
      *(and thus it should not be set)
      */
-    public Object getPropertyValue() throws IllegalStateException {
-        if (valueButton.isSelected() && !"".equals(valueField.getText())) {            
-            return new RADConnectionPropertyEditor.RADConnectionDesignValue(requiredType, valueField.getText());
-        } else if (beanButton.isSelected() && selectedComponent != null) {
-            return new RADConnectionPropertyEditor.RADConnectionDesignValue(selectedComponent);
-        } else if (codeButton.isSelected() && !"".equals(codeArea.getText())) {            
-            return new RADConnectionPropertyEditor.RADConnectionDesignValue(codeArea.getText());
-        } else if (propertyButton.isSelected() && selectedProperty != null) {            
-            return new RADConnectionPropertyEditor.RADConnectionDesignValue(selectedComponent, selectedProperty);
-        } else if (methodButton.isSelected() && selectedMethod != null) {            
-            return new RADConnectionPropertyEditor.RADConnectionDesignValue(selectedComponent, selectedMethod);
-        } else if(!previousValue) {            
-            return BeanSupport.NO_VALUE;               
-        }
-        
-        IllegalStateException exc = new IllegalStateException();
-        ErrorManager.getDefault().annotate(
-            exc, ErrorManager.USER, null, 
-            FormUtils.getBundleString("ERR_NothingEntered"), // NOI18N
-            null, null);
-        throw exc;
-        
-    }
+  // TODO: stripped
+//    public Object getPropertyValue() throws IllegalStateException {
+//        if (valueButton.isSelected() && !"".equals(valueField.getText())) {
+//            return new RADConnectionPropertyEditor.RADConnectionDesignValue(requiredType, valueField.getText());
+//        } else if (beanButton.isSelected() && selectedComponent != null) {
+//            return new RADConnectionPropertyEditor.RADConnectionDesignValue(selectedComponent);
+//        } else if (codeButton.isSelected() && !"".equals(codeArea.getText())) {
+//            return new RADConnectionPropertyEditor.RADConnectionDesignValue(codeArea.getText());
+//        } else if (propertyButton.isSelected() && selectedProperty != null) {
+//            return new RADConnectionPropertyEditor.RADConnectionDesignValue(selectedComponent, selectedProperty);
+//        } else if (methodButton.isSelected() && selectedMethod != null) {
+//            return new RADConnectionPropertyEditor.RADConnectionDesignValue(selectedComponent, selectedMethod);
+//        } else if(!previousValue) {
+//            return BeanSupport.NO_VALUE;
+//        }
+//
+//        IllegalStateException exc = new IllegalStateException();
+//        ErrorManager.getDefault().annotate(
+//            exc, ErrorManager.USER, null,
+//            FormUtils.getBundleString("ERR_NothingEntered"), // NOI18N
+//            null, null);
+//        throw exc;
+//
+//    }
 
     public String getPreviewText() {
         if (!isFilled())

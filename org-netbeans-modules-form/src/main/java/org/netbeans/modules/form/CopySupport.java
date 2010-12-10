@@ -583,7 +583,8 @@ class CopySupport {
 
         private Transferable doPaste() throws IOException {
             if ((classSource.getClassName().indexOf('.') == -1) // Issue 79573
-                && !FormJavaSource.isInDefaultPackage(targetForm)) {
+//                && !FormJavaSource.isInDefaultPackage(targetForm) // TODO: stripped
+                ) {
                 String message = FormUtils.getBundleString("MSG_DefaultPackageBean"); // NOI18N
                 NotifyDescriptor nd = new NotifyDescriptor.Message(message, NotifyDescriptor.WARNING_MESSAGE);
                 DialogDisplayer.getDefault().notify(nd);

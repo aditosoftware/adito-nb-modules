@@ -81,8 +81,8 @@ public class VisualReplicator {
 
     private Map<String,SwingLayoutBuilder> layoutBuilders = new HashMap<String,SwingLayoutBuilder>();
 
-    private BindingGroup bindingGroup;
-    private BindingDesignSupport bindingSupport;
+//    private BindingGroup bindingGroup; // TODO: stripped
+//    private BindingDesignSupport bindingSupport; // TODO: stripped
 
     private boolean designRestrictions;
 
@@ -91,11 +91,11 @@ public class VisualReplicator {
     // ---------
 
     public VisualReplicator(boolean designRestrictions,
-                            ViewConverter[] converters,
-                            BindingDesignSupport bindingSupport) {
+                            ViewConverter[] converters/*,
+                            BindingDesignSupport bindingSupport*/) {
         this.designRestrictions = designRestrictions;
         this.converters = converters;
-        this.bindingSupport = bindingSupport;
+//        this.bindingSupport = bindingSupport; // TODO: stripped
     }
 
     // ---------
@@ -139,13 +139,14 @@ public class VisualReplicator {
         return builder;
     }
 
-    private BindingGroup getBindingGroup() {
-        if (bindingGroup == null) {
-            bindingGroup = new BindingGroup();
-            bindingGroup.bind();
-        }
-        return bindingGroup;
-    }
+  // TODO: stripped
+//    private BindingGroup getBindingGroup() {
+//        if (bindingGroup == null) {
+//            bindingGroup = new BindingGroup();
+//            bindingGroup.bind();
+//        }
+//        return bindingGroup;
+//    }
 
     // ---------
     // getters & setters
@@ -159,7 +160,7 @@ public class VisualReplicator {
         idToClone.clear();
         cloneToId.clear();
         layoutBuilders.clear();
-        bindingGroup = null;
+//        bindingGroup = null; // TODO: stripped
     }
 
     public boolean getDesignRestrictions() {
@@ -200,22 +201,23 @@ public class VisualReplicator {
                     entry.setValue(rc.getBeanInstance());
                 }
             }
-            BindingGroup group = getBindingGroup();
-            boolean restrictions = getDesignRestrictions();
-            for (String id : mapToClones.keySet()) {
-                RADComponent rc = formModel.getMetaComponent(id);
-                if (rc != null) {
-                    if (restrictions) { // this is an updated view (designer)
-                        bindingSupport.establishUpdatedBindings(
-                                rc, false, mapToClones, group, false);
-                        // BindingDesignSupport will unbind and remove these bindings
-                        // automatically if user removes a binding or whole component
-                    } else { // this is a one-off view (preview)
-                        BindingDesignSupport.establishOneOffBindings(
-                                rc, false, mapToClones, group);
-                    }
-                }
-            }
+          // TODO: stripped
+//            BindingGroup group = getBindingGroup();
+//            boolean restrictions = getDesignRestrictions();
+//            for (String id : mapToClones.keySet()) {
+//                RADComponent rc = formModel.getMetaComponent(id);
+//                if (rc != null) {
+//                    if (restrictions) { // this is an updated view (designer)
+//                        bindingSupport.establishUpdatedBindings(
+//                                rc, false, mapToClones, group, false);
+//                        // BindingDesignSupport will unbind and remove these bindings
+//                        // automatically if user removes a binding or whole component
+//                    } else { // this is a one-off view (preview)
+//                        BindingDesignSupport.establishOneOffBindings(
+//                                rc, false, mapToClones, group);
+//                    }
+//                }
+//            }
         }
         catch (Exception ex) {
             ErrorManager.getDefault().notify(ErrorManager.INFORMATIONAL, ex);
@@ -547,7 +549,8 @@ public class VisualReplicator {
         if ("text".equals(property.getName()) // NOI18N
             && (targetComp instanceof AbstractButton
                 || targetComp instanceof JLabel)
-            && JavaCodeGenerator.isUsingMnemonics(property.getRADComponent()))
+//            && JavaCodeGenerator.isUsingMnemonics(property.getRADComponent()) // TODO: stripped
+            )
         {
             try {
                 String str = (String) property.getRealValue();
@@ -573,9 +576,12 @@ public class VisualReplicator {
             RADComponent valueComp;
             if (value instanceof RADComponent.ComponentReference) {
                 valueComp = ((RADComponent.ComponentReference)value).getComponent();
-            } else if (FormUtils.isRelativeConnectionValue(value)) {
-                valueComp = ((RADConnectionPropertyEditor.RADConnectionDesignValue)value).getRADComponent();
-            } else {
+            }
+            // TODO: stripped
+//            else if (FormUtils.isRelativeConnectionValue(value)) {
+//                valueComp = ((RADConnectionPropertyEditor.RADConnectionDesignValue)value).getRADComponent();
+//            }
+            else {
                 valueComp = null;
             }
             
@@ -586,10 +592,12 @@ public class VisualReplicator {
                 if (clonedComp == null) { // there's no cloned instance yet
                     clonedComp = createClone(valueComp);
                 }
-                if (value instanceof RADConnectionPropertyEditor.RADConnectionDesignValue) {
-                    clonedValue = ((RADConnectionPropertyEditor.RADConnectionDesignValue)value)
-                            .getValueForBean(clonedComp);
-                } else {
+              // TODO: stripped
+//                if (value instanceof RADConnectionPropertyEditor.RADConnectionDesignValue) {
+//                    clonedValue = ((RADConnectionPropertyEditor.RADConnectionDesignValue)value)
+//                            .getValueForBean(clonedComp);
+//                } else
+                {
                     clonedValue = clonedComp;
                 }
             } else { // this is not a relative property (another component)
@@ -635,20 +643,21 @@ public class VisualReplicator {
         }
     }
 
-    public void updateBinding(MetaBinding newBinding) {
-        if (newBinding != null && bindingSupport != null) {
-            RADComponent metaTarget = newBinding.getTarget();
-            // Converted components may not have the right properties to bind to
-            Object target = isConverted(metaTarget) ? metaTarget.getBeanInstance() : getClonedComponent(metaTarget);
-            if (target != null) {
-                RADComponent metaSource = newBinding.getSource();
-                Object source = isConverted(metaSource) ? metaSource.getBeanInstance() : getClonedComponent(metaSource);
-                if (source == null) // source not cloned - let's use the bean instance directly
-                    source = newBinding.getSource().getBeanInstance();
-                bindingSupport.addBinding(newBinding, source, target, getBindingGroup(), false);
-            }
-        }
-    }
+  // TODO: stripped
+//    public void updateBinding(MetaBinding newBinding) {
+//        if (newBinding != null && bindingSupport != null) {
+//            RADComponent metaTarget = newBinding.getTarget();
+//            // Converted components may not have the right properties to bind to
+//            Object target = isConverted(metaTarget) ? metaTarget.getBeanInstance() : getClonedComponent(metaTarget);
+//            if (target != null) {
+//                RADComponent metaSource = newBinding.getSource();
+//                Object source = isConverted(metaSource) ? metaSource.getBeanInstance() : getClonedComponent(metaSource);
+//                if (source == null) // source not cloned - let's use the bean instance directly
+//                    source = newBinding.getSource().getBeanInstance();
+//                bindingSupport.addBinding(newBinding, source, target, getBindingGroup(), false);
+//            }
+//        }
+//    }
 
     // ---------
     // executive private methods
@@ -786,7 +795,8 @@ public class VisualReplicator {
 
         // Mnemonics support - start -
         if ((clone instanceof AbstractButton || clone instanceof JLabel)
-            && JavaCodeGenerator.isUsingMnemonics(metacomp))
+//            && JavaCodeGenerator.isUsingMnemonics(metacomp) // TODO: stripped
+            )
         {
             FormProperty prop = metacomp.getBeanProperty("text"); // NOI18N
             if (prop != null && prop.isChanged()) {
@@ -930,8 +940,9 @@ public class VisualReplicator {
                 RADComponent valueComp;
                 if (value instanceof RADComponent.ComponentReference) {
                     valueComp = ((RADComponent.ComponentReference)value).getComponent();
-                } else if (FormUtils.isRelativeConnectionValue(value)) {
-                    valueComp = ((RADConnectionPropertyEditor.RADConnectionDesignValue)value).getRADComponent();
+                  // TODO: stripped
+//                } else if (FormUtils.isRelativeConnectionValue(value)) {
+//                    valueComp = ((RADConnectionPropertyEditor.RADConnectionDesignValue)value).getRADComponent();
                 } else {
                     valueComp = null;
                 }
@@ -943,10 +954,12 @@ public class VisualReplicator {
                         clonedComp = cloneComponent(valueComp, relativeProperties);
                     }
                     Object clonedValue;
-                    if (value instanceof RADConnectionPropertyEditor.RADConnectionDesignValue) {
-                        clonedValue = ((RADConnectionPropertyEditor.RADConnectionDesignValue)value)
-                            .getValueForBean(clonedComp);
-                    } else {
+                  // TODO: stripped
+//                    if (value instanceof RADConnectionPropertyEditor.RADConnectionDesignValue) {
+//                        clonedValue = ((RADConnectionPropertyEditor.RADConnectionDesignValue)value)
+//                            .getValueForBean(clonedComp);
+//                    } else
+                    {
                         clonedValue = clonedComp;
                     }
 

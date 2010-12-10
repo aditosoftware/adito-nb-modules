@@ -304,13 +304,14 @@ public class FormPropertyEditor implements PropertyEditor,
     public Component getCustomEditor() {
         // hack: PropertyPicker wants code regenerated - it might lead to
         // setting values to property editors
-        FormModel formModel = property.getPropertyContext().getFormModel();
-        if (formModel != null) {
-            JavaCodeGenerator codeGen = (JavaCodeGenerator) FormEditor.getCodeGenerator(formModel);
-            if (codeGen != null) { // may happen property sheet wants something from an already closed form (#111205)
-                codeGen.regenerateCode();
-            }
-        }
+      // TODO: stripped
+//        FormModel formModel = property.getPropertyContext().getFormModel();
+//        if (formModel != null) {
+//            JavaCodeGenerator codeGen = (JavaCodeGenerator) FormEditor.getCodeGenerator(formModel);
+//            if (codeGen != null) { // may happen property sheet wants something from an already closed form (#111205)
+//                codeGen.regenerateCode();
+//            }
+//        }
 
         Component customEditor;
 
@@ -336,8 +337,8 @@ public class FormPropertyEditor implements PropertyEditor,
 
         if (!property.canWrite()) { // read only property
             for (int i=0; i < editors.length; i++)
-                if (!editors[i].getClass().equals(RADConnectionPropertyEditor.class)
-                        && editors[i].supportsCustomEditor())
+                if (/*!editors[i].getClass().equals(RADConnectionPropertyEditor.class) // TODO: stripped
+                        &&*/ editors[i].supportsCustomEditor())
                     return true;
             return false;
         }
@@ -399,11 +400,12 @@ public class FormPropertyEditor implements PropertyEditor,
                             wrapper.attachEnv(env);
                     }
                     else {
-                        if (prEd instanceof RADConnectionPropertyEditor
-                            && ((RADConnectionPropertyEditor)prEd).getEditorType()
-                                != ((RADConnectionPropertyEditor)currentEditor).getEditorType()) {
-                            continue; // there are two types of RAD... editors
-                        }
+                      // TODO: stripped
+//                        if (prEd instanceof RADConnectionPropertyEditor
+//                            && ((RADConnectionPropertyEditor)prEd).getEditorType()
+//                                != ((RADConnectionPropertyEditor)currentEditor).getEditorType()) {
+//                            continue; // there are two types of RAD... editors
+//                        }
                         typeEditors[i] = currentEditor;
                     }
                     currentEditor = null;

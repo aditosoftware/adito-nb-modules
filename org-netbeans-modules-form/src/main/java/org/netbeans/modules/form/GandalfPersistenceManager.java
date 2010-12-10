@@ -57,18 +57,18 @@ import org.openide.util.Utilities;
 import org.openide.*;
 import org.openide.xml.XMLUtil;
 
-import com.sun.source.tree.ClassTree;
-import com.sun.source.tree.Tree;
-import com.sun.source.util.TreePath;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javax.lang.model.element.Element;
-import javax.lang.model.element.ElementKind;
-import javax.lang.model.element.TypeElement;
+//import com.sun.source.tree.ClassTree;
+//import com.sun.source.tree.Tree;
+//import com.sun.source.util.TreePath;
+//import java.util.logging.Level;
+//import java.util.logging.Logger;
+//import javax.lang.model.element.Element;
+//import javax.lang.model.element.ElementKind;
+//import javax.lang.model.element.TypeElement;
 import org.apache.xerces.parsers.DOMParser;
-import org.netbeans.api.java.source.CancellableTask;
-import org.netbeans.api.java.source.CompilationController;
-import org.netbeans.api.java.source.JavaSource;
+//import org.netbeans.api.java.source.CancellableTask;
+//import org.netbeans.api.java.source.CompilationController;
+//import org.netbeans.api.java.source.JavaSource;
 
 import org.netbeans.modules.form.layoutsupport.*;
 import org.netbeans.modules.form.layoutsupport.delegates.*;
@@ -78,8 +78,8 @@ import org.netbeans.modules.form.layoutdesign.LayoutComponent;
 import org.netbeans.modules.form.layoutdesign.support.SwingLayoutBuilder;
 
 import org.netbeans.modules.form.editors.EnumEditor;
-import org.openide.nodes.Node.Property;
-import org.openide.util.TopologicalSortException;
+//import org.openide.nodes.Node.Property;
+//import org.openide.util.TopologicalSortException;
 import org.w3c.dom.NamedNodeMap;
 
 /**
@@ -212,8 +212,8 @@ public class GandalfPersistenceManager extends PersistenceManager {
     // map of loaded components (not necessarily added to FormModel yet)
     private Map<String,RADComponent> loadedComponents;
 
-    private List<Object> bindingProperties; // <property, name of source, name of target, MetaBinding, node>
-    private ConnectedProperties connectedProperties;
+//    private List<Object> bindingProperties; // <property, name of source, name of target, MetaBinding, node> // TODO: stripped
+//    private ConnectedProperties connectedProperties; // TODO: stripped
 
     // XML persistence of code structure
     private Map<Object,Object> expressions; // map of expressions/IDs already saved/loaded
@@ -512,8 +512,8 @@ public class GandalfPersistenceManager extends PersistenceManager {
         mainMenuBarName = null;
         parentDependentProperties = null;
         childrenDependentProperties = null;
-        bindingProperties = null;
-        connectedProperties = null;
+//        bindingProperties = null; // TODO: stripped
+//        connectedProperties = null; // TODO: stripped
 
         this.formModel = formModel;
         this.nonfatalErrors = nonfatalErrors;
@@ -559,19 +559,22 @@ public class GandalfPersistenceManager extends PersistenceManager {
         formModel.getCodeStructure().setDefaultVariableType(type);
 
         // Update code vartiables
-        for (RADComponent comp : formModel.getAllComponents()) {
-            JavaCodeGenerator.setupComponentFromAuxValues(comp);
-        }
+      // TODO: stripped
+//        for (RADComponent comp : formModel.getAllComponents()) {
+//            JavaCodeGenerator.setupComponentFromAuxValues(comp);
+//        }
 
-        if (bindingProperties != null) {
-            setBindingProperties();
-            bindingProperties = null;
-        }
-        
-        if(connectedProperties != null) {  
-           connectedProperties.setValues();          
-           connectedProperties = null;    
-        }        
+      // TODO: stripped
+//        if (bindingProperties != null) {
+//            setBindingProperties();
+//            bindingProperties = null;
+//        }
+
+      // TODO: stripped
+//        if(connectedProperties != null) {
+//           connectedProperties.setValues();
+//           connectedProperties = null;
+//        }
                 
         if (Boolean.TRUE.equals(newLayout) && (!underTest)) { // for sure update project classpath with layout extensions library
             FormEditor.updateProjectForNaturalLayout(formModel);
@@ -618,93 +621,96 @@ public class GandalfPersistenceManager extends PersistenceManager {
      * gets superclass if the 'extends' keyword is present
      */
     static String determineSuperClassName(final FileObject javaFile) throws IllegalArgumentException, IOException {
-        final String javaFileName = javaFile.getName();
-        final String[] result = new String[1];
-        JavaSource js = JavaSource.forFileObject(javaFile);
-        js.runUserActionTask(new CancellableTask<CompilationController>() {
-            @Override
-            public void cancel() {
-            }
-            @Override
-            public void run(CompilationController controller) throws Exception {
-                controller.toPhase(JavaSource.Phase.ELEMENTS_RESOLVED);
-                ClassTree formClass = null;
-                for (Tree t: controller.getCompilationUnit().getTypeDecls()) {
-                    if (t.getKind() == Tree.Kind.CLASS) {
-                        ClassTree ct = (ClassTree) t;
-                        if (isClass(ct, controller)) {
-                            if (javaFileName.equals(ct.getSimpleName().toString())) {
-                                formClass = ct;
-                                break;
-                            }
-                            if (formClass == null
-                                    || ct.getModifiers().getFlags().contains(javax.lang.model.element.Modifier.PUBLIC)) {
-                                formClass = ct; // find at least something (if not matching file name - issue 105626)
-                            }
-                        }
-                    }
-                }
-                if (formClass != null) {
-                    if (!javaFileName.equals(formClass.getSimpleName().toString())) {
-                        // may happen during refactoring - see issue 105626
-                        Logger.getLogger(GandalfPersistenceManager.class.getName())
-                            .log(Level.INFO, "Form class not matching the java file name: " // NOI18N
-                                + formClass.getSimpleName().toString() + " in " + javaFileName + ".java"); // NOI18N
-                    }
-                    Tree superT = formClass.getExtendsClause();
-                    if (superT != null) {
-                        TreePath superTPath = controller.getTrees().getPath(controller.getCompilationUnit(), superT);
-                        Element superEl = controller.getTrees().getElement(superTPath);
-                        if (superEl != null && superEl.getKind() == ElementKind.CLASS) {
-                            result[0] = controller.getElements().getBinaryName((TypeElement)superEl).toString(); // .getQualifiedName()
-                        }
-                    } else {
-                        result[0] = "java.lang.Object"; // NOI18N
-                    }
-                }
-            }
-        }, true);
-        return result[0];
+//        final String javaFileName = javaFile.getName();
+//        final String[] result = new String[1];
+//        JavaSource js = JavaSource.forFileObject(javaFile);
+//        js.runUserActionTask(new CancellableTask<CompilationController>() {
+//            @Override
+//            public void cancel() {
+//            }
+//            @Override
+//            public void run(CompilationController controller) throws Exception {
+//                controller.toPhase(JavaSource.Phase.ELEMENTS_RESOLVED);
+//                ClassTree formClass = null;
+//                for (Tree t: controller.getCompilationUnit().getTypeDecls()) {
+//                    if (t.getKind() == Tree.Kind.CLASS) {
+//                        ClassTree ct = (ClassTree) t;
+//                        if (isClass(ct, controller)) {
+//                            if (javaFileName.equals(ct.getSimpleName().toString())) {
+//                                formClass = ct;
+//                                break;
+//                            }
+//                            if (formClass == null
+//                                    || ct.getModifiers().getFlags().contains(javax.lang.model.element.Modifier.PUBLIC)) {
+//                                formClass = ct; // find at least something (if not matching file name - issue 105626)
+//                            }
+//                        }
+//                    }
+//                }
+//                if (formClass != null) {
+//                    if (!javaFileName.equals(formClass.getSimpleName().toString())) {
+//                        // may happen during refactoring - see issue 105626
+//                        Logger.getLogger(GandalfPersistenceManager.class.getName())
+//                            .log(Level.INFO, "Form class not matching the java file name: " // NOI18N
+//                                + formClass.getSimpleName().toString() + " in " + javaFileName + ".java"); // NOI18N
+//                    }
+//                    Tree superT = formClass.getExtendsClause();
+//                    if (superT != null) {
+//                        TreePath superTPath = controller.getTrees().getPath(controller.getCompilationUnit(), superT);
+//                        Element superEl = controller.getTrees().getElement(superTPath);
+//                        if (superEl != null && superEl.getKind() == ElementKind.CLASS) {
+//                            result[0] = controller.getElements().getBinaryName((TypeElement)superEl).toString(); // .getQualifiedName()
+//                        }
+//                    } else {
+//                        result[0] = "java.lang.Object"; // NOI18N
+//                    }
+//                }
+//            }
+//        }, true);
+//        return result[0];
+      return "java.lang.Object"; // TODO: stripped
     }
 
-    private static boolean isClass(ClassTree ct, CompilationController controller) {
-        return !controller.getTreeUtilities().isEnum(ct)
-                && !controller.getTreeUtilities().isInterface(ct)
-                && !controller.getTreeUtilities().isAnnotation(ct);
-    }
+  // TODO: stripped
+//    private static boolean isClass(ClassTree ct, CompilationController controller) {
+//        return !controller.getTreeUtilities().isEnum(ct)
+//                && !controller.getTreeUtilities().isInterface(ct)
+//                && !controller.getTreeUtilities().isAnnotation(ct);
+//    }
 
-    private void setBindingProperties() {
-        FormEditor.getBindingSupport(formModel);
-        Iterator iter = bindingProperties.iterator();
-        while (iter.hasNext()) {
-            BindingProperty property = (BindingProperty)iter.next();
-            String sourceName = (String)iter.next();
-            String targetName = (String)iter.next();
-            MetaBinding value = (MetaBinding)iter.next();
-            org.w3c.dom.Node propNode = (org.w3c.dom.Node)iter.next();
-            
-            RADComponent source = formModel.findRADComponent(sourceName);
-            RADComponent target = formModel.findRADComponent(targetName);
-            
-            if ((source == null) || (target == null)) {
-                // PENDING error handling
-                continue;
-            }
-        
-            try {
-                value.setSource(source);
-                value.setTarget(target);
-                property.setValue(value);
-            } catch (Exception ex) {
-                String msg = createLoadingErrorMessage(
-                    FormUtils.getBundleString("MSG_ERR_CannotSetLoadedValue"), // NOI18N
-                    propNode);
-                annotateException(ex, msg);
-                nonfatalErrors.add(ex);
-                continue;
-            }
-        }
-    }
+  // TODO: stripped
+//    private void setBindingProperties() {
+//        FormEditor.getBindingSupport(formModel);
+//        Iterator iter = bindingProperties.iterator();
+//        while (iter.hasNext()) {
+//            BindingProperty property = (BindingProperty)iter.next();
+//            String sourceName = (String)iter.next();
+//            String targetName = (String)iter.next();
+//            MetaBinding value = (MetaBinding)iter.next();
+//            org.w3c.dom.Node propNode = (org.w3c.dom.Node)iter.next();
+//
+//            RADComponent source = formModel.findRADComponent(sourceName);
+//            RADComponent target = formModel.findRADComponent(targetName);
+//
+//            if ((source == null) || (target == null)) {
+//                // PENDING error handling
+//                continue;
+//            }
+//
+//            try {
+//                value.setSource(source);
+//                value.setTarget(target);
+//                property.setValue(value);
+//            } catch (Exception ex) {
+//                String msg = createLoadingErrorMessage(
+//                    FormUtils.getBundleString("MSG_ERR_CannotSetLoadedValue"), // NOI18N
+//                    propNode);
+//                annotateException(ex, msg);
+//                nonfatalErrors.add(ex);
+//                continue;
+//            }
+//        }
+//    }
     
     private void loadNonVisuals(org.w3c.dom.Node node) throws PersistenceException {
         org.w3c.dom.Node nonVisualsNode =
@@ -923,9 +929,10 @@ public class GandalfPersistenceManager extends PersistenceManager {
             else if (XML_SYNTHETIC_PROPERTIES.equals(nodeName)) {
                 loadSyntheticProperties(childNode, component);
             }
-            else if (XML_BINDING_PROPERTIES.equals(nodeName)) {
-                loadBindingProperties(childNode, component);
-            }
+          // TODO: stripped
+//            else if (XML_BINDING_PROPERTIES.equals(nodeName)) {
+//                loadBindingProperties(childNode, component);
+//            }
             // ignore unknown elements?
         }
 
@@ -2243,8 +2250,9 @@ public class GandalfPersistenceManager extends PersistenceManager {
 	try {
             if (prEd != null) {
                 property.setCurrentEditor(prEd);
-            }            
-            if(value instanceof RADConnectionPropertyEditor.RADConnectionDesignValue) {         
+            }
+    // TODO: stripped
+            /*if(value instanceof RADConnectionPropertyEditor.RADConnectionDesignValue) {
                 boolean accepted = setConnectedProperty(property, 
                                                        (RADConnectionPropertyEditor.RADConnectionDesignValue) value,
                                                        (metacomp == null) ? null : metacomp.getName(), 
@@ -2255,23 +2263,24 @@ public class GandalfPersistenceManager extends PersistenceManager {
                     // we must set it now.
                     property.setValue(value);
                 }
-            } else {
-                if(prEd instanceof BeanPropertyEditor) {
-                    // value is no RADConnection, but it still could have
-                    // properties which are RADConnection-s                    
-                    Property[] properties = ((BeanPropertyEditor)prEd).getProperties();
-                    for (int i = 0; i < properties.length; i++) {
-                        Object propValue = properties[i].getValue();
-                        if(propValue instanceof RADConnectionPropertyEditor.RADConnectionDesignValue) {
-                            setConnectedProperty(properties[i], 
-                                                 (RADConnectionPropertyEditor.RADConnectionDesignValue)propValue, 
-                                                 value.toString(), // XXX getBeanName() ?
-                                                 propNode);                            
-                            // value was already set, so don't care 
-                            // if it also was or wasn't set for further handling.
-                        }
-                    }
-                }     
+            } else */{
+      // TODO: stripped
+//                if(prEd instanceof BeanPropertyEditor) {
+//                    // value is no RADConnection, but it still could have
+//                    // properties which are RADConnection-s
+//                    Property[] properties = ((BeanPropertyEditor)prEd).getProperties();
+//                    for (int i = 0; i < properties.length; i++) {
+//                        Object propValue = properties[i].getValue();
+//                        if(propValue instanceof RADConnectionPropertyEditor.RADConnectionDesignValue) {
+//                            setConnectedProperty(properties[i],
+//                                                 (RADConnectionPropertyEditor.RADConnectionDesignValue)propValue,
+//                                                 value.toString(), // XXX getBeanName() ?
+//                                                 propNode);
+//                            // value was already set, so don't care
+//                            // if it also was or wasn't set for further handling.
+//                        }
+//                    }
+//                }
                 property.setValue(value);    	                     
             }                        
         } catch (Exception ex) {
@@ -2279,25 +2288,26 @@ public class GandalfPersistenceManager extends PersistenceManager {
 	    return;
 	}	
     }
-    
-    private boolean setConnectedProperty(Property property, 
-                                         RADConnectionPropertyEditor.RADConnectionDesignValue value,
-                                         String beanName,
-                                         org.w3c.dom.Node propNode) {
-        if(connectedProperties==null) {
-            connectedProperties = new ConnectedProperties();
-        }
-        int type = value.getType();
-        if(type == RADConnectionPropertyEditor.RADConnectionDesignValue.TYPE_PROPERTY ||
-           type == RADConnectionPropertyEditor.RADConnectionDesignValue.TYPE_METHOD ||
-           (type == RADConnectionPropertyEditor.RADConnectionDesignValue.TYPE_BEAN && value.getDesignValue() == FormDesignValue.IGNORED_VALUE)) // Issue 155654
-        {    
-            // makes sense only for PROPERTY, and METHOD type ...                    
-            connectedProperties.put(property, value, beanName, propNode);        
-            return true;
-        }
-        return false;
-    }
+
+  // TODO: stripped
+//    private boolean setConnectedProperty(Property property,
+//                                         RADConnectionPropertyEditor.RADConnectionDesignValue value,
+//                                         String beanName,
+//                                         org.w3c.dom.Node propNode) {
+//        if(connectedProperties==null) {
+//            connectedProperties = new ConnectedProperties();
+//        }
+//        int type = value.getType();
+//        if(type == RADConnectionPropertyEditor.RADConnectionDesignValue.TYPE_PROPERTY ||
+//           type == RADConnectionPropertyEditor.RADConnectionDesignValue.TYPE_METHOD ||
+//           (type == RADConnectionPropertyEditor.RADConnectionDesignValue.TYPE_BEAN && value.getDesignValue() == FormDesignValue.IGNORED_VALUE)) // Issue 155654
+//        {
+//            // makes sense only for PROPERTY, and METHOD type ...
+//            connectedProperties.put(property, value, beanName, propNode);
+//            return true;
+//        }
+//        return false;
+//    }
     
     private void createLoadingErrorMessage(Exception ex, org.w3c.dom.Node propNode) {
        String msg = createLoadingErrorMessage(
@@ -2542,157 +2552,159 @@ public class GandalfPersistenceManager extends PersistenceManager {
 
         return null;
     }
-    
-    private void loadBindingProperties(org.w3c.dom.Node node,
-                                         RADComponent metacomp)
-    {
-        org.w3c.dom.Node[] propNodes = findSubNodes(node, XML_BINDING_PROPERTY);
-        for (int i=0; i < propNodes.length; i++) {
-            org.w3c.dom.Node propNode = propNodes[i];
-            // get the attributes of property node element
-            org.w3c.dom.NamedNodeMap attrs = propNode.getAttributes();
 
-            // get the property name from attributes
-            org.w3c.dom.Node nameNode = attrs.getNamedItem(ATTR_PROPERTY_NAME);
-            if (nameNode == null) {
-                PersistenceException ex = new PersistenceException(
-                                 "Missing binding property name"); // NOI18N
-                String msg = createLoadingErrorMessage(
-                    FormUtils.getBundleString("MSG_ERR_MissingPropertyName"), // NOI18N
-                    propNode);
-                annotateException(ex, ErrorManager.ERROR, msg);
-                nonfatalErrors.add(ex);
-                continue;
-            }
+  // TODO: stripped
+//    private void loadBindingProperties(org.w3c.dom.Node node,
+//                                         RADComponent metacomp)
+//    {
+//        org.w3c.dom.Node[] propNodes = findSubNodes(node, XML_BINDING_PROPERTY);
+//        for (int i=0; i < propNodes.length; i++) {
+//            org.w3c.dom.Node propNode = propNodes[i];
+//            // get the attributes of property node element
+//            org.w3c.dom.NamedNodeMap attrs = propNode.getAttributes();
+//
+//            // get the property name from attributes
+//            org.w3c.dom.Node nameNode = attrs.getNamedItem(ATTR_PROPERTY_NAME);
+//            if (nameNode == null) {
+//                PersistenceException ex = new PersistenceException(
+//                                 "Missing binding property name"); // NOI18N
+//                String msg = createLoadingErrorMessage(
+//                    FormUtils.getBundleString("MSG_ERR_MissingPropertyName"), // NOI18N
+//                    propNode);
+//                annotateException(ex, ErrorManager.ERROR, msg);
+//                nonfatalErrors.add(ex);
+//                continue;
+//            }
+//
+//            // find the property in the metacomponent
+//            String propName = nameNode.getNodeValue();
+//            BindingProperty property = metacomp.getBindingProperty(propName);
+//
+//            // Backward compatibility with NB 6.0 Beta 1
+//            boolean ignoreAdjusting = false;
+//            if ((property == null) && "value_IGNORE_ADJUSTING".equals(propName)
+//                    && javax.swing.JSlider.class.isAssignableFrom(metacomp.getBeanClass())) { // NOI18N
+//                property = metacomp.getBindingProperty("value"); // NOI18N
+//                ignoreAdjusting = true;
+//            }
+//
+//            if (property == null) {
+//                // unknown binding property
+//                PersistenceException ex = new PersistenceException(
+//                                       "Unknown binding property"); // NOI18N
+//                String msg = createLoadingErrorMessage(
+//                    FormUtils.getBundleString("MSG_ERR_UnknownProperty"), // NOI18N
+//                    propNode);
+//                annotateException(ex, ErrorManager.ERROR, msg);
+//                nonfatalErrors.add(ex);
+//                continue;
+//            }
+//
+//            org.w3c.dom.Node sourceNode = attrs.getNamedItem(ATTR_BINDING_SOURCE);
+//            org.w3c.dom.Node sourcePathNode = attrs.getNamedItem(ATTR_BINDING_SOURCE_PATH);
+//            org.w3c.dom.Node targetNode = attrs.getNamedItem(ATTR_BINDING_TARGET);
+//            org.w3c.dom.Node targetPathNode = attrs.getNamedItem(ATTR_BINDING_TARGET_PATH);
+//            org.w3c.dom.Node updateStrategyNode = attrs.getNamedItem(ATTR_BINDING_UPDATE_STRATEGY);
+//            org.w3c.dom.Node immediatelyNode = attrs.getNamedItem(ATTR_BINDING_IMMEDIATELY);
+//
+//            // load the property value
+//            if ((sourceNode == null) || (targetNode == null)) { // the value is missing
+//                PersistenceException ex = new PersistenceException(
+//                                 "Missing binding property value"); // NOI18N
+//                String msg = createLoadingErrorMessage(
+//                    FormUtils.getBundleString("MSG_ERR_MissingPropertyValue"), // NOI18N
+//                    propNode);
+//                annotateException(ex, ErrorManager.ERROR, msg);
+//                nonfatalErrors.add(ex);
+//                continue;
+//            }
+//
+//            String source = sourceNode.getNodeValue();
+//            String sourcePath = (sourcePathNode == null) ? null : sourcePathNode.getNodeValue();
+//            String target = targetNode.getNodeValue();
+//            String targetPath = (targetPathNode == null) ? null : targetPathNode.getNodeValue();
+//            if (ignoreAdjusting) {
+//                targetPath = targetPath.substring(0, targetPath.length() - "_IGNORE_ADJUSTING".length()); // NOI18N
+//            }
+//            MetaBinding value = new MetaBinding(null, sourcePath, null, targetPath);
+//            if (ignoreAdjusting) {
+//                value.setParameter(MetaBinding.IGNORE_ADJUSTING_PARAMETER, "Y"); // NOI18N
+//            }
+//
+//            if (updateStrategyNode != null) {
+//                String updateStrategyTxt = updateStrategyNode.getNodeValue();
+//                value.setUpdateStrategy(Integer.parseInt(updateStrategyTxt));
+//            }
+//
+//            if (immediatelyNode != null) {
+//                String immediatelyTxt = immediatelyNode.getNodeValue();
+//                value.setBindImmediately(Boolean.parseBoolean(immediatelyTxt));
+//            }
+//
+//            if (bindingProperties == null) bindingProperties = new LinkedList<Object>();
+//            bindingProperties.add(property);
+//            bindingProperties.add(source);
+//            bindingProperties.add(target);
+//            bindingProperties.add(value);
+//            bindingProperties.add(propNode);
+//
+//            // load properties
+//            org.w3c.dom.Node[] subNodes = findSubNodes(propNode, XML_PROPERTY);
+//            for (int j=0; j<subNodes.length; j++) {
+//                org.w3c.dom.NamedNodeMap subAttrs = subNodes[j].getAttributes();
+//                org.w3c.dom.Node propNameNode = subAttrs.getNamedItem(ATTR_PROPERTY_NAME);
+//                if (propNameNode != null) {
+//                    String subPropName = propNameNode.getNodeValue();
+//                    if ("nullValue".equals(subPropName)) { // NOI18N
+//                        loadProperty(subNodes[j], null, property.getNullValueProperty());
+//                        value.setNullValueSpecified(true);
+//                    } else if ("incompletePathValue".equals(subPropName)) { // NOI18N
+//                        loadProperty(subNodes[j], null, property.getIncompleteValueProperty());
+//                        value.setIncompletePathValueSpecified(true);
+//                    } else if ("converter".equals(subPropName)) { // NOI18N
+//                        loadProperty(subNodes[j], null, property.getConverterProperty());
+//                    } else if ("validator".equals(subPropName)) { // NOI18N
+//                        loadProperty(subNodes[j], null, property.getValidatorProperty());
+//                    } else if ("name".equals(subPropName)) { // NOI18N
+//                        loadProperty(subNodes[j], null, property.getNameProperty());
+//                    }
+//                }
+//            }
+//
+//            // load parameters
+//            loadBindingParameters(propNode, value);
+//
+//            // load subbindings
+//            subNodes = findSubNodes(propNode, XML_SUBBINDING);
+//            for (int j=0; j<subNodes.length; j++) {
+//                org.w3c.dom.Node subNode = subNodes[j];
+//                org.w3c.dom.NamedNodeMap subAttrs = subNode.getAttributes();
+//                org.w3c.dom.Node sourcePathSubNode = subAttrs.getNamedItem(ATTR_BINDING_SOURCE_PATH);
+//                org.w3c.dom.Node targetPathSubNode = subAttrs.getNamedItem(ATTR_BINDING_TARGET_PATH);
+//
+//                String subSourcePath = (sourcePathSubNode == null) ? null : sourcePathSubNode.getNodeValue();
+//                String subTargetPath = (targetPathSubNode == null) ? null : targetPathSubNode.getNodeValue();
+//                MetaBinding subBinding = value.addSubBinding(subSourcePath, subTargetPath);
+//
+//                // load parameters of subbinding
+//                loadBindingParameters(subNode, subBinding);
+//            }
+//        }
+//    }
 
-            // find the property in the metacomponent
-            String propName = nameNode.getNodeValue();
-            BindingProperty property = metacomp.getBindingProperty(propName);
-            
-            // Backward compatibility with NB 6.0 Beta 1
-            boolean ignoreAdjusting = false;
-            if ((property == null) && "value_IGNORE_ADJUSTING".equals(propName)
-                    && javax.swing.JSlider.class.isAssignableFrom(metacomp.getBeanClass())) { // NOI18N
-                property = metacomp.getBindingProperty("value"); // NOI18N
-                ignoreAdjusting = true;
-            }
-
-            if (property == null) {
-                // unknown binding property
-                PersistenceException ex = new PersistenceException(
-                                       "Unknown binding property"); // NOI18N
-                String msg = createLoadingErrorMessage(
-                    FormUtils.getBundleString("MSG_ERR_UnknownProperty"), // NOI18N
-                    propNode);
-                annotateException(ex, ErrorManager.ERROR, msg);
-                nonfatalErrors.add(ex);
-                continue;
-            }
-
-            org.w3c.dom.Node sourceNode = attrs.getNamedItem(ATTR_BINDING_SOURCE);
-            org.w3c.dom.Node sourcePathNode = attrs.getNamedItem(ATTR_BINDING_SOURCE_PATH);
-            org.w3c.dom.Node targetNode = attrs.getNamedItem(ATTR_BINDING_TARGET);
-            org.w3c.dom.Node targetPathNode = attrs.getNamedItem(ATTR_BINDING_TARGET_PATH);
-            org.w3c.dom.Node updateStrategyNode = attrs.getNamedItem(ATTR_BINDING_UPDATE_STRATEGY);
-            org.w3c.dom.Node immediatelyNode = attrs.getNamedItem(ATTR_BINDING_IMMEDIATELY);
-
-            // load the property value
-            if ((sourceNode == null) || (targetNode == null)) { // the value is missing
-                PersistenceException ex = new PersistenceException(
-                                 "Missing binding property value"); // NOI18N
-                String msg = createLoadingErrorMessage(
-                    FormUtils.getBundleString("MSG_ERR_MissingPropertyValue"), // NOI18N
-                    propNode);
-                annotateException(ex, ErrorManager.ERROR, msg);
-                nonfatalErrors.add(ex);
-                continue;
-            }
-            
-            String source = sourceNode.getNodeValue();
-            String sourcePath = (sourcePathNode == null) ? null : sourcePathNode.getNodeValue();
-            String target = targetNode.getNodeValue();
-            String targetPath = (targetPathNode == null) ? null : targetPathNode.getNodeValue();
-            if (ignoreAdjusting) {
-                targetPath = targetPath.substring(0, targetPath.length() - "_IGNORE_ADJUSTING".length()); // NOI18N
-            }
-            MetaBinding value = new MetaBinding(null, sourcePath, null, targetPath);
-            if (ignoreAdjusting) {
-                value.setParameter(MetaBinding.IGNORE_ADJUSTING_PARAMETER, "Y"); // NOI18N
-            }
-
-            if (updateStrategyNode != null) {
-                String updateStrategyTxt = updateStrategyNode.getNodeValue();
-                value.setUpdateStrategy(Integer.parseInt(updateStrategyTxt));
-            }
-
-            if (immediatelyNode != null) {
-                String immediatelyTxt = immediatelyNode.getNodeValue();
-                value.setBindImmediately(Boolean.parseBoolean(immediatelyTxt));
-            }
-            
-            if (bindingProperties == null) bindingProperties = new LinkedList<Object>();
-            bindingProperties.add(property);
-            bindingProperties.add(source);
-            bindingProperties.add(target);
-            bindingProperties.add(value);
-            bindingProperties.add(propNode);
-            
-            // load properties
-            org.w3c.dom.Node[] subNodes = findSubNodes(propNode, XML_PROPERTY);
-            for (int j=0; j<subNodes.length; j++) {
-                org.w3c.dom.NamedNodeMap subAttrs = subNodes[j].getAttributes();
-                org.w3c.dom.Node propNameNode = subAttrs.getNamedItem(ATTR_PROPERTY_NAME);
-                if (propNameNode != null) {
-                    String subPropName = propNameNode.getNodeValue();
-                    if ("nullValue".equals(subPropName)) { // NOI18N
-                        loadProperty(subNodes[j], null, property.getNullValueProperty());
-                        value.setNullValueSpecified(true);
-                    } else if ("incompletePathValue".equals(subPropName)) { // NOI18N
-                        loadProperty(subNodes[j], null, property.getIncompleteValueProperty());
-                        value.setIncompletePathValueSpecified(true);
-                    } else if ("converter".equals(subPropName)) { // NOI18N
-                        loadProperty(subNodes[j], null, property.getConverterProperty());
-                    } else if ("validator".equals(subPropName)) { // NOI18N
-                        loadProperty(subNodes[j], null, property.getValidatorProperty());
-                    } else if ("name".equals(subPropName)) { // NOI18N
-                        loadProperty(subNodes[j], null, property.getNameProperty());
-                    }
-                }
-            }
-            
-            // load parameters
-            loadBindingParameters(propNode, value);
-
-            // load subbindings
-            subNodes = findSubNodes(propNode, XML_SUBBINDING);
-            for (int j=0; j<subNodes.length; j++) {
-                org.w3c.dom.Node subNode = subNodes[j];
-                org.w3c.dom.NamedNodeMap subAttrs = subNode.getAttributes();
-                org.w3c.dom.Node sourcePathSubNode = subAttrs.getNamedItem(ATTR_BINDING_SOURCE_PATH);
-                org.w3c.dom.Node targetPathSubNode = subAttrs.getNamedItem(ATTR_BINDING_TARGET_PATH);
-
-                String subSourcePath = (sourcePathSubNode == null) ? null : sourcePathSubNode.getNodeValue();
-                String subTargetPath = (targetPathSubNode == null) ? null : targetPathSubNode.getNodeValue();
-                MetaBinding subBinding = value.addSubBinding(subSourcePath, subTargetPath);
-
-                // load parameters of subbinding
-                loadBindingParameters(subNode, subBinding);
-            }
-        }
-    }
-
-    private void loadBindingParameters(org.w3c.dom.Node node, MetaBinding binding) {
-        org.w3c.dom.Node[] subNodes = findSubNodes(node, XML_BINDING_PARAMETER);
-        for (int j=0; j<subNodes.length; j++) {
-            org.w3c.dom.Node subNode = subNodes[j];
-            org.w3c.dom.NamedNodeMap subAttrs = subNode.getAttributes();
-            org.w3c.dom.Node paramNameNode = subAttrs.getNamedItem(ATTR_BINDING_PARAMETER_NAME);
-            org.w3c.dom.Node paramValueNode = subAttrs.getNamedItem(ATTR_BINDING_PARAMETER_VALUE);
-            if ((paramNameNode != null) || (paramValueNode != null)) {
-                binding.setParameter(paramNameNode.getNodeValue(), paramValueNode.getNodeValue());
-            }
-        }
-    }
+  // TODO: stripped
+//    private void loadBindingParameters(org.w3c.dom.Node node, MetaBinding binding) {
+//        org.w3c.dom.Node[] subNodes = findSubNodes(node, XML_BINDING_PARAMETER);
+//        for (int j=0; j<subNodes.length; j++) {
+//            org.w3c.dom.Node subNode = subNodes[j];
+//            org.w3c.dom.NamedNodeMap subAttrs = subNode.getAttributes();
+//            org.w3c.dom.Node paramNameNode = subAttrs.getNamedItem(ATTR_BINDING_PARAMETER_NAME);
+//            org.w3c.dom.Node paramValueNode = subAttrs.getNamedItem(ATTR_BINDING_PARAMETER_VALUE);
+//            if ((paramNameNode != null) || (paramValueNode != null)) {
+//                binding.setParameter(paramNameNode.getNodeValue(), paramValueNode.getNodeValue());
+//            }
+//        }
+//    }
 
     private void loadSyntheticProperties(org.w3c.dom.Node node,
                                          RADComponent metacomp)
@@ -3049,15 +3061,16 @@ public class GandalfPersistenceManager extends PersistenceManager {
         }
 
         // VALUE_SERIALIZE indicates serialized component
-        if (JavaCodeGenerator.VALUE_SERIALIZE.equals(
-                comp.getAuxValue(JavaCodeGenerator.AUX_CODE_GENERATION)))
-        {   // the component has a serialized instance => deserialize it
-            try {
-                comp.setInstance(comp.createDefaultDeserializedInstance());
-            } catch (Exception ex) { // ignore
-                org.openide.ErrorManager.getDefault().notify(org.openide.ErrorManager.INFORMATIONAL, ex);
-            }
-        }
+      // TODO: stripped
+//        if (JavaCodeGenerator.VALUE_SERIALIZE.equals(
+//                comp.getAuxValue(JavaCodeGenerator.AUX_CODE_GENERATION)))
+//        {   // the component has a serialized instance => deserialize it
+//            try {
+//                comp.setInstance(comp.createDefaultDeserializedInstance());
+//            } catch (Exception ex) { // ignore
+//                org.openide.ErrorManager.getDefault().notify(org.openide.ErrorManager.INFORMATIONAL, ex);
+//            }
+//        }
     }
 
     // -----------
@@ -3703,8 +3716,9 @@ public class GandalfPersistenceManager extends PersistenceManager {
 
     private void saveComponent(RADComponent component, StringBuffer buf, String indent) {
         // 1. Properties
-        if (!JavaCodeGenerator.VALUE_SERIALIZE.equals(
-                component.getAuxValue(JavaCodeGenerator.AUX_CODE_GENERATION)))
+      // TODO: stripped
+//        if (!JavaCodeGenerator.VALUE_SERIALIZE.equals(
+//                component.getAuxValue(JavaCodeGenerator.AUX_CODE_GENERATION)))
         {   // save properties only if the component is not to be serialized
             saveProperties(component.getKnownBeanProperties(),
                            XML_PROPERTIES, buf, indent);
@@ -3715,7 +3729,7 @@ public class GandalfPersistenceManager extends PersistenceManager {
         }
 
         // 2. Binding properties
-        saveBindingProperties(component, buf, indent);
+//        saveBindingProperties(component, buf, indent); // TODO: stripped
         
         // 3. Synthetic properties
         if (component instanceof RADVisualFormContainer)
@@ -4072,170 +4086,173 @@ public class GandalfPersistenceManager extends PersistenceManager {
         return true;
     }
 
-    private void saveBindingProperties(RADComponent component, StringBuffer buf, String indent) {
-        boolean anyProp = false;
-        String indent2 = null;
+  // TODO: stripped
+//    private void saveBindingProperties(RADComponent component, StringBuffer buf, String indent) {
+//        boolean anyProp = false;
+//        String indent2 = null;
+//
+//        BindingProperty[] props = component.getKnownBindingProperties();
+//        for (int i=0; i < props.length; i++) {
+//            BindingProperty prop = props[i];
+//
+//            Object value = null;
+//            try {
+//                value = prop.getValue();
+//            }
+//            catch (Exception ex) {
+//                annotateException(ex,
+//                        FormUtils.getFormattedBundleString(
+//                            "FMT_ERR_CannotGetPropertyValue", // NOI18N
+//                            new Object[] { prop.getName() })
+//                        );
+//                nonfatalErrors.add(ex);
+//                continue;
+//            }
+//
+//            // don't save default values
+//            if (value == null) continue;
+//
+//            // PENDING encodePrimitiveValue(value);
+//
+//            if (!anyProp) {
+//                buf.append(indent);
+//                addElementOpen(buf, XML_BINDING_PROPERTIES);
+//                indent2 = indent + ONE_INDENT;
+//                anyProp = true;
+//            }
+//
+//            saveBinding(prop, buf, indent2);
+//        }
+//
+//        if (anyProp) {
+//            buf.append(indent);
+//            addElementClose(buf, XML_BINDING_PROPERTIES);
+//        }
+//    }
 
-        BindingProperty[] props = component.getKnownBindingProperties();
-        for (int i=0; i < props.length; i++) {
-            BindingProperty prop = props[i];
+  // TODO: stripped
+//    private void saveBindingParameters(MetaBinding binding, StringBuffer buf, String indent) {
+//        Map<String,String> parameters = binding.getParameters();
+//        Iterator<Map.Entry<String,String>> iter = parameters.entrySet().iterator();
+//        while (iter.hasNext()) {
+//            Map.Entry<String,String> entry = iter.next();
+//            buf.append(indent);
+//            addLeafElementOpenAttr(
+//                buf,
+//                XML_BINDING_PARAMETER,
+//                new String[] {
+//                    ATTR_BINDING_PARAMETER_NAME,
+//                    ATTR_BINDING_PARAMETER_VALUE
+//                },
+//                new String[] {
+//                    entry.getKey(),
+//                    entry.getValue()
+//                });
+//        }
+//    }
 
-            Object value = null;
-            try {
-                value = prop.getValue();
-            }
-            catch (Exception ex) {
-                annotateException(ex,
-                        FormUtils.getFormattedBundleString(
-                            "FMT_ERR_CannotGetPropertyValue", // NOI18N
-                            new Object[] { prop.getName() })
-                        );
-                nonfatalErrors.add(ex);
-                continue;
-            }
-            
-            // don't save default values
-            if (value == null) continue;
-            
-            // PENDING encodePrimitiveValue(value);
-
-            if (!anyProp) {
-                buf.append(indent);
-                addElementOpen(buf, XML_BINDING_PROPERTIES);
-                indent2 = indent + ONE_INDENT;
-                anyProp = true;
-            }
-
-            saveBinding(prop, buf, indent2);            
-        }
-
-        if (anyProp) {
-            buf.append(indent);
-            addElementClose(buf, XML_BINDING_PROPERTIES);
-        }
-    }
-
-    private void saveBindingParameters(MetaBinding binding, StringBuffer buf, String indent) {
-        Map<String,String> parameters = binding.getParameters();
-        Iterator<Map.Entry<String,String>> iter = parameters.entrySet().iterator();
-        while (iter.hasNext()) {
-            Map.Entry<String,String> entry = iter.next();
-            buf.append(indent);
-            addLeafElementOpenAttr(
-                buf,
-                XML_BINDING_PARAMETER,
-                new String[] {
-                    ATTR_BINDING_PARAMETER_NAME,
-                    ATTR_BINDING_PARAMETER_VALUE
-                },
-                new String[] {
-                    entry.getKey(),
-                    entry.getValue()
-                });
-        }
-    }
-    
-    private void saveBinding(BindingProperty prop, StringBuffer buf, String indent) {        
-        String propName = prop.getName();
-        MetaBinding binding = prop.getValue();
-        buf.append(indent);
-        if (binding.hasSubBindings() || !binding.getParameters().isEmpty()
-                || binding.isIncompletePathValueSpecified() || binding.isNullValueSpecified()
-                || binding.isConverterSpecified() || binding.isValidatorSpecified()
-                || binding.isNameSpecified()) {
-            addElementOpenAttr(
-                buf,
-                XML_BINDING_PROPERTY,
-                new String[] {
-                    ATTR_PROPERTY_NAME,
-                    ATTR_BINDING_SOURCE,
-                    ATTR_BINDING_SOURCE_PATH,
-                    ATTR_BINDING_TARGET,
-                    ATTR_BINDING_TARGET_PATH,
-                    ATTR_BINDING_UPDATE_STRATEGY,
-                    ATTR_BINDING_IMMEDIATELY
-                },
-                new String[] {
-                    propName,
-                    binding.getSource().getName(),
-                    binding.getSourcePath(),
-                    binding.getTarget().getName(),
-                    binding.getTargetPath(),
-                    Integer.toString(binding.getUpdateStrategy()),
-                    Boolean.toString(binding.isBindImmediately())
-                });
-            
-            // Save parameters
-            String indent2 = indent + ONE_INDENT;
-            saveBindingParameters(binding, buf, indent2);
-
-            if (binding.isNullValueSpecified()) {
-                saveProperty(prop.getNullValueProperty(), prop.getNullValueProperty().getName(), buf, indent2);
-            }
-            if (binding.isIncompletePathValueSpecified()) {
-                saveProperty(prop.getIncompleteValueProperty(), prop.getIncompleteValueProperty().getName(), buf, indent2);
-            }
-            if (binding.isConverterSpecified()) {
-                saveProperty(prop.getConverterProperty(), prop.getConverterProperty().getName(), buf, indent2);
-            }
-            if (binding.isValidatorSpecified()) {
-                saveProperty(prop.getValidatorProperty(), prop.getValidatorProperty().getName(), buf, indent2);
-            }
-            if (binding.isNameSpecified()) {
-                saveProperty(prop.getNameProperty(), prop.getNameProperty().getName(), buf, indent2);
-            }
-
-            // Save subbindings    
-            if (binding.hasSubBindings()) {
-                for (MetaBinding subbinding : binding.getSubBindings()) {
-                    buf.append(indent2);
-                    addElementOpenAttr(
-                        buf,
-                        XML_SUBBINDING,
-                        new String[] {
-                            ATTR_BINDING_SOURCE_PATH,
-                            ATTR_BINDING_TARGET_PATH
-                        },
-                        new String[] {
-                            subbinding.getSourcePath(),
-                            subbinding.getTargetPath()
-                        });
-
-                    // Save parameters
-                    String indent3 = indent2 + ONE_INDENT;
-                    saveBindingParameters(subbinding, buf, indent3);
-
-                    buf.append(indent2);
-                    addElementClose(buf, XML_SUBBINDING);
-                }
-            }
-            
-            buf.append(indent);
-            addElementClose(buf, XML_BINDING_PROPERTY);
-        } else {
-            addLeafElementOpenAttr(
-                buf,
-                XML_BINDING_PROPERTY,
-                new String[] {
-                    ATTR_PROPERTY_NAME,
-                    ATTR_BINDING_SOURCE,
-                    ATTR_BINDING_SOURCE_PATH,
-                    ATTR_BINDING_TARGET,
-                    ATTR_BINDING_TARGET_PATH,
-                    ATTR_BINDING_UPDATE_STRATEGY,
-                    ATTR_BINDING_IMMEDIATELY
-                },
-                new String[] {
-                    propName,
-                    binding.getSource().getName(),
-                    binding.getSourcePath(),
-                    binding.getTarget().getName(),
-                    binding.getTargetPath(),
-                    Integer.toString(binding.getUpdateStrategy()),
-                    Boolean.toString(binding.isBindImmediately())
-                });
-        }
-    }
+  // TODO: stripped
+//    private void saveBinding(BindingProperty prop, StringBuffer buf, String indent) {
+//        String propName = prop.getName();
+//        MetaBinding binding = prop.getValue();
+//        buf.append(indent);
+//        if (binding.hasSubBindings() || !binding.getParameters().isEmpty()
+//                || binding.isIncompletePathValueSpecified() || binding.isNullValueSpecified()
+//                || binding.isConverterSpecified() || binding.isValidatorSpecified()
+//                || binding.isNameSpecified()) {
+//            addElementOpenAttr(
+//                buf,
+//                XML_BINDING_PROPERTY,
+//                new String[] {
+//                    ATTR_PROPERTY_NAME,
+//                    ATTR_BINDING_SOURCE,
+//                    ATTR_BINDING_SOURCE_PATH,
+//                    ATTR_BINDING_TARGET,
+//                    ATTR_BINDING_TARGET_PATH,
+//                    ATTR_BINDING_UPDATE_STRATEGY,
+//                    ATTR_BINDING_IMMEDIATELY
+//                },
+//                new String[] {
+//                    propName,
+//                    binding.getSource().getName(),
+//                    binding.getSourcePath(),
+//                    binding.getTarget().getName(),
+//                    binding.getTargetPath(),
+//                    Integer.toString(binding.getUpdateStrategy()),
+//                    Boolean.toString(binding.isBindImmediately())
+//                });
+//
+//            // Save parameters
+//            String indent2 = indent + ONE_INDENT;
+//            saveBindingParameters(binding, buf, indent2);
+//
+//            if (binding.isNullValueSpecified()) {
+//                saveProperty(prop.getNullValueProperty(), prop.getNullValueProperty().getName(), buf, indent2);
+//            }
+//            if (binding.isIncompletePathValueSpecified()) {
+//                saveProperty(prop.getIncompleteValueProperty(), prop.getIncompleteValueProperty().getName(), buf, indent2);
+//            }
+//            if (binding.isConverterSpecified()) {
+//                saveProperty(prop.getConverterProperty(), prop.getConverterProperty().getName(), buf, indent2);
+//            }
+//            if (binding.isValidatorSpecified()) {
+//                saveProperty(prop.getValidatorProperty(), prop.getValidatorProperty().getName(), buf, indent2);
+//            }
+//            if (binding.isNameSpecified()) {
+//                saveProperty(prop.getNameProperty(), prop.getNameProperty().getName(), buf, indent2);
+//            }
+//
+//            // Save subbindings
+//            if (binding.hasSubBindings()) {
+//                for (MetaBinding subbinding : binding.getSubBindings()) {
+//                    buf.append(indent2);
+//                    addElementOpenAttr(
+//                        buf,
+//                        XML_SUBBINDING,
+//                        new String[] {
+//                            ATTR_BINDING_SOURCE_PATH,
+//                            ATTR_BINDING_TARGET_PATH
+//                        },
+//                        new String[] {
+//                            subbinding.getSourcePath(),
+//                            subbinding.getTargetPath()
+//                        });
+//
+//                    // Save parameters
+//                    String indent3 = indent2 + ONE_INDENT;
+//                    saveBindingParameters(subbinding, buf, indent3);
+//
+//                    buf.append(indent2);
+//                    addElementClose(buf, XML_SUBBINDING);
+//                }
+//            }
+//
+//            buf.append(indent);
+//            addElementClose(buf, XML_BINDING_PROPERTY);
+//        } else {
+//            addLeafElementOpenAttr(
+//                buf,
+//                XML_BINDING_PROPERTY,
+//                new String[] {
+//                    ATTR_PROPERTY_NAME,
+//                    ATTR_BINDING_SOURCE,
+//                    ATTR_BINDING_SOURCE_PATH,
+//                    ATTR_BINDING_TARGET,
+//                    ATTR_BINDING_TARGET_PATH,
+//                    ATTR_BINDING_UPDATE_STRATEGY,
+//                    ATTR_BINDING_IMMEDIATELY
+//                },
+//                new String[] {
+//                    propName,
+//                    binding.getSource().getName(),
+//                    binding.getSourcePath(),
+//                    binding.getTarget().getName(),
+//                    binding.getTargetPath(),
+//                    Integer.toString(binding.getUpdateStrategy()),
+//                    Boolean.toString(binding.isBindImmediately())
+//                });
+//        }
+//    }
 
     private void saveSyntheticProperties(RADComponent component, StringBuffer buf, String indent) {
         boolean anyProp = false;
@@ -4439,9 +4456,10 @@ public class GandalfPersistenceManager extends PersistenceManager {
                IllegalAccessException
     {
         PropertyEditor ed = null;
-        if (editorClass.equals(RADConnectionPropertyEditor.class)) {
+      // TODO: stripped
+        /*if (editorClass.equals(RADConnectionPropertyEditor.class)) {
             ed = new RADConnectionPropertyEditor(propertyType);
-        } else if (editorClass.equals(ComponentChooserEditor.class)) {
+        } else*/ if (editorClass.equals(ComponentChooserEditor.class)) {
             ed = new ComponentChooserEditor(new Class[] {propertyType});
         } else if (editorClass.equals(EnumEditor.class)) {
             if (property instanceof RADProperty) {
@@ -6112,148 +6130,149 @@ public class GandalfPersistenceManager extends PersistenceManager {
         return null;
     }
 
-    private class ConnectedProperties {        
-        private class ConnectedProperty {
-            private final Property property;            
-            private final String beanName;   
-            private final RADConnectionPropertyEditor.RADConnectionDesignValue value;
-            private final String tostring;    
-            private final Object auxiliaryValue;
-            private String valueName = null;
-            private ConnectedProperty(Property property,                                                             
-                              RADConnectionPropertyEditor.RADConnectionDesignValue value,
-                              String beanName,                                                            
-                              Object auxiliaryValue) 
-            {
-                this.property = property;
-                this.beanName = beanName;
-                this.value = value;                                                     
-                this.tostring = getKey(beanName, property.getName());
-                this.auxiliaryValue = auxiliaryValue;
-            }            
-            @Override
-            public boolean equals(Object obj) {
-                if(!(obj instanceof ConnectedProperty)) return false;
-                if(this == obj) return true;
-                ConnectedProperty cp = (ConnectedProperty) obj;
-                return beanName.equals(cp.beanName) && 
-                       property.equals(cp.property);
-            }
-            @Override
-            public int hashCode() {            
-                return tostring.hashCode();
-            }            
-            RADConnectionPropertyEditor.RADConnectionDesignValue getValue() {
-                return value;
-            }               
-            private String getValueName() {
-                if(valueName == null) {
-                    if(value.getType() == RADConnectionPropertyEditor.RADConnectionDesignValue.TYPE_PROPERTY) {
-                        valueName = value.getProperty().getName();
-                    } else if (value.getType() == RADConnectionPropertyEditor.RADConnectionDesignValue.TYPE_METHOD) {
-                        RADComponent component = value.getRADComponent();
-                        String methodName = value.getMethod().getName();
-                        PropertyDescriptor[] descs = component.getBeanInfo().getPropertyDescriptors();
-                        for (int i = 0; i < descs.length; i++) {
-                            Method method = descs[i].getReadMethod();
-                            if(method!=null && method.getName().equals(methodName)) {
-                                methodName = descs[i].getName();
-                                break;
-                            }
-                        }
-                        valueName = methodName;
-                    }                                       
-                }     
-                return valueName;
-            }
-            Object getAuxiliaryValue() {
-                return auxiliaryValue;
-            }
-            String getKey() {                
-                return getKey(beanName, property.getName());
-            }                        
-            String getSourceKey() {
-                RADComponent comp = value.getRADComponent();
-                String key = null;
-                if (comp!=null) { // Issue 180640
-                    key = getKey(comp.getName(), getValueName());
-                }
-                return key;
-            }                
-            private String getKey(String beanName, String propertyName) {
-                StringBuilder sb = new StringBuilder();
-                sb.append("["); // NOI18N
-                sb.append(beanName);
-                sb.append(", "); // NOI18N
-                sb.append(propertyName);
-                sb.append("]"); // NOI18N
-                return sb.toString();
-            }            
-            @Override
-            public String toString() {
-                return tostring;
-            }       
-        }                
-        private Map<String,ConnectedProperty> properties = new HashMap<String,ConnectedProperty>();      
-        public void put(Property property, 
-                        RADConnectionPropertyEditor.RADConnectionDesignValue value,
-                        String beanName,
-                        Object auxiliaryValue)                        
-        {
-            ConnectedProperty cp = new ConnectedProperty(property, value, beanName, auxiliaryValue);
-            properties.put(cp.getKey(), cp);
-        }     
-        private ConnectedProperty get(String key) {
-            return properties.get(key);
-        }           
-        public void setValues() { 
-            Collection sorted = sort();
-            for (Iterator it = sorted.iterator(); it.hasNext();) {                
-                ConnectedProperty compProperty = (ConnectedProperty) it.next();                
-                try {                    
-                    compProperty.property.setValue(compProperty.getValue()); 
-                } catch(Exception ex) {
-                    org.w3c.dom.Node node = 
-                        (org.w3c.dom.Node) compProperty.getAuxiliaryValue();                    
-                    createLoadingErrorMessage(ex, node);
-                }
-            }
-        }
-        private Collection<ConnectedProperty> sort() {                                           
-            List<ConnectedProperty> sortedValues = null;
-            try {
-                sortedValues = Utilities.topologicalSort(properties.values(), getEdges());                                                            
-            } catch (TopologicalSortException tse) {
-                Set[] sets = tse.topologicalSets();                
-                sortedValues = new ArrayList<ConnectedProperty>();
-                for (int i = 0; i < sets.length; i++) {
-                    for (Iterator it = sets[i].iterator(); it.hasNext();) {
-                        sortedValues.add((ConnectedProperty)it.next());
-                    }
-                }    
-            }
-            if(sortedValues!=null) {
-                Collections.reverse(sortedValues);             
-                return sortedValues;
-            }
-            // something went wrong, let's fall back
-            // on the unsorted values
-            return properties.values();
-        } 
-        private Map<ConnectedProperty,List<ConnectedProperty>> getEdges() {
-            Map<ConnectedProperty,List<ConnectedProperty>> edges = new HashMap<ConnectedProperty,List<ConnectedProperty>>();
-            for (Iterator it = properties.values().iterator(); it.hasNext();) {
-                ConnectedProperty target = (ConnectedProperty) it.next();                                
-                ConnectedProperty source = get(target.getSourceKey());
-                if(source!=null) {
-                    List<ConnectedProperty> l = new ArrayList<ConnectedProperty>();
-                    l.add(source);
-                    edges.put(target, l);
-                } 
-            }            
-            return edges;
-        }                
-    }           
+  // TODO: stripped
+//    private class ConnectedProperties {
+//        private class ConnectedProperty {
+//            private final Property property;
+//            private final String beanName;
+//            private final RADConnectionPropertyEditor.RADConnectionDesignValue value;
+//            private final String tostring;
+//            private final Object auxiliaryValue;
+//            private String valueName = null;
+//            private ConnectedProperty(Property property,
+//                              RADConnectionPropertyEditor.RADConnectionDesignValue value,
+//                              String beanName,
+//                              Object auxiliaryValue)
+//            {
+//                this.property = property;
+//                this.beanName = beanName;
+//                this.value = value;
+//                this.tostring = getKey(beanName, property.getName());
+//                this.auxiliaryValue = auxiliaryValue;
+//            }
+//            @Override
+//            public boolean equals(Object obj) {
+//                if(!(obj instanceof ConnectedProperty)) return false;
+//                if(this == obj) return true;
+//                ConnectedProperty cp = (ConnectedProperty) obj;
+//                return beanName.equals(cp.beanName) &&
+//                       property.equals(cp.property);
+//            }
+//            @Override
+//            public int hashCode() {
+//                return tostring.hashCode();
+//            }
+//            RADConnectionPropertyEditor.RADConnectionDesignValue getValue() {
+//                return value;
+//            }
+//            private String getValueName() {
+//                if(valueName == null) {
+//                    if(value.getType() == RADConnectionPropertyEditor.RADConnectionDesignValue.TYPE_PROPERTY) {
+//                        valueName = value.getProperty().getName();
+//                    } else if (value.getType() == RADConnectionPropertyEditor.RADConnectionDesignValue.TYPE_METHOD) {
+//                        RADComponent component = value.getRADComponent();
+//                        String methodName = value.getMethod().getName();
+//                        PropertyDescriptor[] descs = component.getBeanInfo().getPropertyDescriptors();
+//                        for (int i = 0; i < descs.length; i++) {
+//                            Method method = descs[i].getReadMethod();
+//                            if(method!=null && method.getName().equals(methodName)) {
+//                                methodName = descs[i].getName();
+//                                break;
+//                            }
+//                        }
+//                        valueName = methodName;
+//                    }
+//                }
+//                return valueName;
+//            }
+//            Object getAuxiliaryValue() {
+//                return auxiliaryValue;
+//            }
+//            String getKey() {
+//                return getKey(beanName, property.getName());
+//            }
+//            String getSourceKey() {
+//                RADComponent comp = value.getRADComponent();
+//                String key = null;
+//                if (comp!=null) { // Issue 180640
+//                    key = getKey(comp.getName(), getValueName());
+//                }
+//                return key;
+//            }
+//            private String getKey(String beanName, String propertyName) {
+//                StringBuilder sb = new StringBuilder();
+//                sb.append("["); // NOI18N
+//                sb.append(beanName);
+//                sb.append(", "); // NOI18N
+//                sb.append(propertyName);
+//                sb.append("]"); // NOI18N
+//                return sb.toString();
+//            }
+//            @Override
+//            public String toString() {
+//                return tostring;
+//            }
+//        }
+//        private Map<String,ConnectedProperty> properties = new HashMap<String,ConnectedProperty>();
+//        public void put(Property property,
+//                        RADConnectionPropertyEditor.RADConnectionDesignValue value,
+//                        String beanName,
+//                        Object auxiliaryValue)
+//        {
+//            ConnectedProperty cp = new ConnectedProperty(property, value, beanName, auxiliaryValue);
+//            properties.put(cp.getKey(), cp);
+//        }
+//        private ConnectedProperty get(String key) {
+//            return properties.get(key);
+//        }
+//        public void setValues() {
+//            Collection sorted = sort();
+//            for (Iterator it = sorted.iterator(); it.hasNext();) {
+//                ConnectedProperty compProperty = (ConnectedProperty) it.next();
+//                try {
+//                    compProperty.property.setValue(compProperty.getValue());
+//                } catch(Exception ex) {
+//                    org.w3c.dom.Node node =
+//                        (org.w3c.dom.Node) compProperty.getAuxiliaryValue();
+//                    createLoadingErrorMessage(ex, node);
+//                }
+//            }
+//        }
+//        private Collection<ConnectedProperty> sort() {
+//            List<ConnectedProperty> sortedValues = null;
+//            try {
+//                sortedValues = Utilities.topologicalSort(properties.values(), getEdges());
+//            } catch (TopologicalSortException tse) {
+//                Set[] sets = tse.topologicalSets();
+//                sortedValues = new ArrayList<ConnectedProperty>();
+//                for (int i = 0; i < sets.length; i++) {
+//                    for (Iterator it = sets[i].iterator(); it.hasNext();) {
+//                        sortedValues.add((ConnectedProperty)it.next());
+//                    }
+//                }
+//            }
+//            if(sortedValues!=null) {
+//                Collections.reverse(sortedValues);
+//                return sortedValues;
+//            }
+//            // something went wrong, let's fall back
+//            // on the unsorted values
+//            return properties.values();
+//        }
+//        private Map<ConnectedProperty,List<ConnectedProperty>> getEdges() {
+//            Map<ConnectedProperty,List<ConnectedProperty>> edges = new HashMap<ConnectedProperty,List<ConnectedProperty>>();
+//            for (Iterator it = properties.values().iterator(); it.hasNext();) {
+//                ConnectedProperty target = (ConnectedProperty) it.next();
+//                ConnectedProperty source = get(target.getSourceKey());
+//                if(source!=null) {
+//                    List<ConnectedProperty> l = new ArrayList<ConnectedProperty>();
+//                    l.add(source);
+//                    edges.put(target, l);
+//                }
+//            }
+//            return edges;
+//        }
+//    }
 
     // FormInfo names used in NB 3.2
     private static final String[] defaultFormInfoNames = {

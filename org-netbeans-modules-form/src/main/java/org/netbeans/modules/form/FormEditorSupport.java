@@ -1307,21 +1307,22 @@ public class FormEditorSupport extends DataEditorSupport implements EditorCookie
         @Override
         public void componentShowing() {
             super.componentShowing();
-            DataObject dob = ((DataEditorSupport)cloneableEditorSupport()).getDataObject();
-            FormDataObject formDO = (FormDataObject)dob;
-            FormModel model = null;
-            if (formDO != null) {
-                FormEditorSupport fe = formDO.getFormEditor();
-                if (fe != null) {
-                    model = fe.getFormModel();
-                    if (model != null) {
-                        JavaCodeGenerator codeGen = (JavaCodeGenerator)FormEditor.getCodeGenerator(model);
-                        if (codeGen != null) {
-                            codeGen.regenerateCode();
-                        }
-                    }
-                }
-            }
+          // TODO: stripped
+//            DataObject dob = ((DataEditorSupport)cloneableEditorSupport()).getDataObject();
+//            FormDataObject formDO = (FormDataObject)dob;
+//            FormModel model = null;
+//            if (formDO != null) {
+//                FormEditorSupport fe = formDO.getFormEditor();
+//                if (fe != null) {
+//                    model = fe.getFormModel();
+//                    if (model != null) {
+//                        JavaCodeGenerator codeGen = (JavaCodeGenerator)FormEditor.getCodeGenerator(model);
+//                        if (codeGen != null) {
+//                            codeGen.regenerateCode();
+//                        }
+//                    }
+//                }
+//            }
             
         }
         

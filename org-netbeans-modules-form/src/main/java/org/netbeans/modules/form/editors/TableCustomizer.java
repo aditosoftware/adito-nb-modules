@@ -82,19 +82,19 @@ public class TableCustomizer extends JPanel implements Customizer, FormAwareEdit
     private static final int COLUMN_MAX = 100;
     
     /** Property editor for model from component section. */
-    private RADConnectionPropertyEditor modelFromComponentEd;
+//    private RADConnectionPropertyEditor modelFromComponentEd; // TODO: stripped
     /** Property editor for custom code model section. */
-    private RADConnectionPropertyEditor modelCustomEd;
+//    private RADConnectionPropertyEditor modelCustomEd; // TODO: stripped
 
     /** Customizer for model from component. */
-    private Component modelFromComponentCustomizer;
+//    private Component modelFromComponentCustomizer;
     /** Customizer for custom code model. */
-    private Component modelCustomCustomizer;
+//    private Component modelCustomCustomizer;
     /** Customizer for bound model. */
-    private BindingCustomizer modelBoundCustomizer;
+//    private BindingCustomizer modelBoundCustomizer; // TODO: stripped
 
     /** Elements binding property. */
-    private BindingProperty bindingProperty;   
+//    private BindingProperty bindingProperty; // TODO: stripped
     /** Model property. */
     private FormProperty modelProperty;
     /** TableHeader property. */
@@ -123,8 +123,9 @@ public class TableCustomizer extends JPanel implements Customizer, FormAwareEdit
         initColumnTypeCombo();
         initSelectionTypeCombo();
         initWidthCombos();
-        modelFromComponentEd = new RADConnectionPropertyEditor(TableModel.class, RADConnectionPropertyEditor.Type.FormConnection);
-        modelCustomEd = new RADConnectionPropertyEditor(TableModel.class, RADConnectionPropertyEditor.Type.CustomCode);
+      // TODO: stripped
+//        modelFromComponentEd = new RADConnectionPropertyEditor(TableModel.class, RADConnectionPropertyEditor.Type.FormConnection);
+//        modelCustomEd = new RADConnectionPropertyEditor(TableModel.class, RADConnectionPropertyEditor.Type.CustomCode);
         columnTableModel = new CustomizerTableModel();
         columnsTable.setModel(columnTableModel);
         columnsTable.getSelectionModel().addListSelectionListener(new ColumnSelectionListener());
@@ -967,19 +968,23 @@ public class TableCustomizer extends JPanel implements Customizer, FormAwareEdit
         boolean fromComponent = modelFromComponentChoice.isSelected();
         boolean hardcoded = modelHardcodedChoice.isSelected();
         boolean bound = modelBoundChoice.isSelected();
-        modelBoundCustomizer.getBindingPanel().setVisible(bound);
-        modelFromComponentCustomizer.setVisible(fromComponent);
-        modelCustomCustomizer.setVisible(userCode);
+      // TODO: stripped
+//        modelBoundCustomizer.getBindingPanel().setVisible(bound);
+//        modelFromComponentCustomizer.setVisible(fromComponent);
+//        modelCustomCustomizer.setVisible(userCode);
         tabbedPane.setEnabledAt(2, hardcoded);
-        if (bound) {
-            checkBindingType();
-        } else {
+      // TODO: stripped
+//        if (bound) {
+//            checkBindingType();
+//        } else
+        {
             tabbedPane.setEnabledAt(1, true);
         }
-        if (fromComponent) {
-            checkModelFromComponent();
-            if (columns.isEmpty()) userCode = true; // Hide content of columns section
-        }
+      // TODO: stripped
+//        if (fromComponent) {
+//            checkModelFromComponent();
+//            if (columns.isEmpty()) userCode = true; // Hide content of columns section
+//        }
         columnsScrollPane.setVisible(!userCode);
         columnCountLabel.setVisible(!userCode && !fromComponent);
         columnCountSpinner.setVisible(!userCode && !fromComponent);
@@ -1166,14 +1171,16 @@ public class TableCustomizer extends JPanel implements Customizer, FormAwareEdit
             columnsTable.getCellEditor().stopCellEditing();
         }
         updateColumnSection();
-        if (!modelBoundChoice.isSelected() && !bindingProperty.isDefaultValue()) {
-            bindingProperty.restoreDefaultValue();
-        }
-        if (modelFromComponentChoice.isSelected()) {
-            updateModel(modelFromComponentEd);
-        } else if (modelCustomChoice.isSelected()) {
-            updateModel(modelCustomEd);
-        } else if (modelBoundChoice.isSelected()) {
+      // TODO: stripped
+//        if (!modelBoundChoice.isSelected() && !bindingProperty.isDefaultValue()) {
+//            bindingProperty.restoreDefaultValue();
+//        }
+//        if (modelFromComponentChoice.isSelected()) {
+//            updateModel(modelFromComponentEd);
+//        } else if (modelCustomChoice.isSelected()) {
+//            updateModel(modelCustomEd);
+//        } else
+        if (modelBoundChoice.isSelected()) {
             if (modelProperty.isChanged()) {
                 try {
                     modelProperty.restoreDefaultValue();
@@ -1181,45 +1188,47 @@ public class TableCustomizer extends JPanel implements Customizer, FormAwareEdit
                     Logger.getLogger(getClass().getName()).log(Level.INFO, ex.getMessage(), ex);
                 }
             }
-            modelBoundCustomizer.getBindingFromUI();
-            MetaBinding binding = modelBoundCustomizer.getBinding();
-            if (binding != null) {
-                if (binding.hasSubBindings()) {
-                    binding.clearSubBindings();
-                }
-                if (tabbedPane.isEnabledAt(1)) {
-                    for (ColumnInfo info : columns) {
-                        String expression = info.getExpression();
-                        MetaBinding subBinding = binding.addSubBinding(expression, null);
-                        FormProperty titleProp = info.getColumn().getTitle();
-                        Object value = null;
-                        try {
-                            value = titleProp.getValue();
-                        } catch (Exception ex) {
-                            Logger.getLogger(getClass().getName()).log(Level.INFO, ex.getMessage(), ex);
-                        }
-                        if (value instanceof String) {
-                            try {
-                                subBinding.setParameter(MetaBinding.NAME_PARAMETER, (String)value);
-                                titleProp.restoreDefaultValue();
-                            } catch (Exception ex) {
-                                Logger.getLogger(getClass().getName()).log(Level.INFO, ex.getMessage(), ex);
-                            }
-                        } else {
-                            subBinding.setParameter(MetaBinding.NAME_PARAMETER, null);
-                        }
-                        String clazz = info.getClazz();
-                        if ((clazz != null) && (!clazz.equals("Object"))) { // NOI18N
-                            subBinding.setParameter(MetaBinding.TABLE_COLUMN_CLASS_PARAMETER, clazz + ".class"); // NOI18N
-                        }
-                        if (!info.isEditable()) {
-                            subBinding.setParameter(MetaBinding.EDITABLE_PARAMETER, "false"); // NOI18N
-                        }
-                    }
-                }
-            }
-            bindingProperty.setValue(binding);
-        } else if (modelHardcodedChoice.isSelected()) {
+          // TODO: stripped
+//            modelBoundCustomizer.getBindingFromUI();
+//            MetaBinding binding = modelBoundCustomizer.getBinding();
+//            if (binding != null) {
+//                if (binding.hasSubBindings()) {
+//                    binding.clearSubBindings();
+//                }
+//                if (tabbedPane.isEnabledAt(1)) {
+//                    for (ColumnInfo info : columns) {
+//                        String expression = info.getExpression();
+//                        MetaBinding subBinding = binding.addSubBinding(expression, null);
+//                        FormProperty titleProp = info.getColumn().getTitle();
+//                        Object value = null;
+//                        try {
+//                            value = titleProp.getValue();
+//                        } catch (Exception ex) {
+//                            Logger.getLogger(getClass().getName()).log(Level.INFO, ex.getMessage(), ex);
+//                        }
+//                        if (value instanceof String) {
+//                            try {
+//                                subBinding.setParameter(MetaBinding.NAME_PARAMETER, (String)value);
+//                                titleProp.restoreDefaultValue();
+//                            } catch (Exception ex) {
+//                                Logger.getLogger(getClass().getName()).log(Level.INFO, ex.getMessage(), ex);
+//                            }
+//                        } else {
+//                            subBinding.setParameter(MetaBinding.NAME_PARAMETER, null);
+//                        }
+//                        String clazz = info.getClazz();
+//                        if ((clazz != null) && (!clazz.equals("Object"))) { // NOI18N
+//                            subBinding.setParameter(MetaBinding.TABLE_COLUMN_CLASS_PARAMETER, clazz + ".class"); // NOI18N
+//                        }
+//                        if (!info.isEditable()) {
+//                            subBinding.setParameter(MetaBinding.EDITABLE_PARAMETER, "false"); // NOI18N
+//                        }
+//                    }
+//                }
+//            }
+//            bindingProperty.setValue(binding);
+        } else
+        if (modelHardcodedChoice.isSelected()) {
             int count = columns.size();
             for (int i=0; i<count; i++) {
                 ColumnInfo info = columns.get(i);
@@ -1300,38 +1309,40 @@ public class TableCustomizer extends JPanel implements Customizer, FormAwareEdit
         // Obtain relevant properties
         RADProperty prop = (RADProperty)property;
         RADComponent comp = prop.getRADComponent();
-        modelProperty = (FormProperty)comp.getPropertyByName("model"); // NOI18N        
-        modelFromComponentEd.setContext(formModel, modelProperty);
-        modelCustomEd.setContext(formModel, modelProperty);
+        modelProperty = (FormProperty)comp.getPropertyByName("model"); // NOI18N
+      // TODO: stripped
+//        modelFromComponentEd.setContext(formModel, modelProperty);
+//        modelCustomEd.setContext(formModel, modelProperty);
         headerProperty = (FormProperty)comp.getPropertyByName("tableHeader"); // NOI18N
         columnModelProperty = (RADProperty)comp.getPropertyByName("columnModel"); // NOI18N
         columnSelectionAllowedProperty = (FormProperty)comp.getPropertyByName("columnSelectionAllowed"); // NOI18N
 
         // Determine type of model
-        try {
-            Object value = modelProperty.getValue();
-            PropertyEditor propEd = modelProperty.getCurrentEditor();
-            if (propEd instanceof RADConnectionPropertyEditor) {
-                RADConnectionPropertyEditor.Type type = ((RADConnectionPropertyEditor)propEd).getEditorType();
-                if (type == RADConnectionPropertyEditor.Type.CustomCode) {
-                    modelCustomEd.setValue(value);
-                    modelCustomChoice.setSelected(true);
-                } else {
-                    modelFromComponentEd.setValue(value);
-                    modelFromComponentChoice.setSelected(true);
-                }
-            }
-        } catch (Exception ex) {
-            Logger.getLogger(getClass().getName()).log(Level.INFO, ex.getMessage(), ex);
-        }
-        bindingProperty = comp.getBindingProperty("elements"); // NOI18N
-        MetaBinding binding = bindingProperty.getValue();
-        modelBoundCustomizer = new BindingCustomizer(bindingProperty);
-        modelBoundCustomizer.setBinding(binding);
-        if (binding != null) {
-            modelBoundChoice.setSelected(true);
-        }
-        expressionCombo = modelBoundCustomizer.getSubExpressionCombo();
+      // TODO: stripped
+//        try {
+//            Object value = modelProperty.getValue();
+//            PropertyEditor propEd = modelProperty.getCurrentEditor();
+//            if (propEd instanceof RADConnectionPropertyEditor) {
+//                RADConnectionPropertyEditor.Type type = ((RADConnectionPropertyEditor)propEd).getEditorType();
+//                if (type == RADConnectionPropertyEditor.Type.CustomCode) {
+//                    modelCustomEd.setValue(value);
+//                    modelCustomChoice.setSelected(true);
+//                } else {
+//                    modelFromComponentEd.setValue(value);
+//                    modelFromComponentChoice.setSelected(true);
+//                }
+//            }
+//        } catch (Exception ex) {
+//            Logger.getLogger(getClass().getName()).log(Level.INFO, ex.getMessage(), ex);
+//        }
+//        bindingProperty = comp.getBindingProperty("elements"); // NOI18N
+//        MetaBinding binding = bindingProperty.getValue();
+//        modelBoundCustomizer = new BindingCustomizer(bindingProperty);
+//        modelBoundCustomizer.setBinding(binding);
+//        if (binding != null) {
+//            modelBoundChoice.setSelected(true);
+//        }
+//        expressionCombo = modelBoundCustomizer.getSubExpressionCombo();
         expressionCombo.setEnabled(false);
         expressionCombo.addActionListener(new ActionListener() {
             @Override
@@ -1341,43 +1352,45 @@ public class TableCustomizer extends JPanel implements Customizer, FormAwareEdit
                 info.setExpression((expression == null) ? null : expression.toString());
                 String clazz = "Object"; // NOI18N
                 TreePath treePath = expressionCombo.getSelectedTreePath();
-                if (treePath != null) {
-                    Object pComp = treePath.getLastPathComponent();
-                    if (pComp instanceof BindingCustomizer.ExpressionNode) {
-                        clazz = ((BindingCustomizer.ExpressionNode)pComp).getTypeName();
-                        clazz = FormUtils.autobox(clazz);
-                        if (clazz.startsWith("java.lang.")) { // NOI18N
-                            clazz = clazz.substring(10);
-                        }
-                    }
-                }
+              // TODO: stripped
+//                if (treePath != null) {
+//                    Object pComp = treePath.getLastPathComponent();
+//                    if (pComp instanceof BindingCustomizer.ExpressionNode) {
+//                        clazz = ((BindingCustomizer.ExpressionNode)pComp).getTypeName();
+//                        clazz = FormUtils.autobox(clazz);
+//                        if (clazz.startsWith("java.lang.")) { // NOI18N
+//                            clazz = clazz.substring(10);
+//                        }
+//                    }
+//                }
                 columnTypeCombo.setSelectedItem(clazz);
                 columnTableModel.fireTableRowsUpdated(lastSelectedColumn, lastSelectedColumn);
             }
         });
-        modelBoundCustomizer.addTypeChangeListener(new PropertyChangeListener() {
-            @Override
-            public void propertyChange(PropertyChangeEvent evt) {
-                if (modelBoundChoice.isSelected()) {
-                    checkBindingType();
-                }
-            }            
-        });
-
-        // Replace dummy panels by customizers
-        GroupLayout layout = (GroupLayout)modelTab.getLayout();
-        modelFromComponentCustomizer = modelFromComponentEd.getCustomEditor();
-        layout.replace(modelFromComponentPanel, modelFromComponentCustomizer);
-        modelCustomCustomizer = modelCustomEd.getCustomEditor();
-        layout.replace(modelCustomPanel, modelCustomCustomizer);
-        layout.replace(modelBoundPanel, modelBoundCustomizer.getBindingPanel());
-        
-        modelFromComponentEd.addPropertyChangeListener(new PropertyChangeListener() {
-            @Override
-            public void propertyChange(PropertyChangeEvent evt) {
-                updateModelCustomizers();
-            }
-        });
+      // TODO: stripped
+//        modelBoundCustomizer.addTypeChangeListener(new PropertyChangeListener() {
+//            @Override
+//            public void propertyChange(PropertyChangeEvent evt) {
+//                if (modelBoundChoice.isSelected()) {
+//                    checkBindingType();
+//                }
+//            }
+//        });
+//
+////        Replace dummy panels by customizers
+//        GroupLayout layout = (GroupLayout)modelTab.getLayout();
+//        modelFromComponentCustomizer = modelFromComponentEd.getCustomEditor();
+//        layout.replace(modelFromComponentPanel, modelFromComponentCustomizer);
+//        modelCustomCustomizer = modelCustomEd.getCustomEditor();
+//        layout.replace(modelCustomPanel, modelCustomCustomizer);
+//        layout.replace(modelBoundPanel, modelBoundCustomizer.getBindingPanel());
+//
+//        modelFromComponentEd.addPropertyChangeListener(new PropertyChangeListener() {
+//            @Override
+//            public void propertyChange(PropertyChangeEvent evt) {
+//                updateModelCustomizers();
+//            }
+//        });
 
         columns = new LinkedList<ColumnInfo>();
         Object value = null;
@@ -1429,40 +1442,42 @@ public class TableCustomizer extends JPanel implements Customizer, FormAwareEdit
      * Called when bound model is selected to enable/disable
      * the columns tab. 
      */
-    private void checkBindingType() {
-        FormUtils.TypeHelper type = modelBoundCustomizer.getSelectedType();
-        Class clazz = (type == null) ? null : FormUtils.typeToClass(type);
-        boolean collection = (clazz != null) && (Collection.class.isAssignableFrom(clazz) || Object.class.equals(clazz));
-        tabbedPane.setEnabledAt(1, collection);
-        expressionCombo.setEnabled(false);
-    }
+  // TODO: stripped
+//    private void checkBindingType() {
+//        FormUtils.TypeHelper type = modelBoundCustomizer.getSelectedType();
+//        Class clazz = (type == null) ? null : FormUtils.typeToClass(type);
+//        boolean collection = (clazz != null) && (Collection.class.isAssignableFrom(clazz) || Object.class.equals(clazz));
+//        tabbedPane.setEnabledAt(1, collection);
+//        expressionCombo.setEnabled(false);
+//    }
 
     /**
      * Called when model from existing component is selected
      * to update columns tab. 
      */
-    private void checkModelFromComponent() {
-        try {
-            Object value = modelFromComponentEd.getValue();
-            if (value instanceof FormDesignValue) {
-                value = ((FormDesignValue)value).getDesignValue();
-            }
-            if (value instanceof TableModel) {
-                TableModel model = (TableModel)value;
-                ensureColumnCount(model.getColumnCount());
-                for (int i=0; i<model.getColumnCount(); i++) {
-                    FormProperty title = columns.get(i).getColumn().getTitle();
-                    if (!title.isChanged()) {
-                        title.setValue(model.getColumnName(i));
-                    }
-                }
-            } else {
-                ensureColumnCount(0);
-            }
-        } catch (Exception ex) {
-            Logger.getLogger(getClass().getName()).log(Level.INFO, ex.getMessage(), ex);
-        }
-    }
+    // TODO: stripped
+//    private void checkModelFromComponent() {
+//        try {
+//            Object value = modelFromComponentEd.getValue();
+//            if (value instanceof FormDesignValue) {
+//                value = ((FormDesignValue)value).getDesignValue();
+//            }
+//            if (value instanceof TableModel) {
+//                TableModel model = (TableModel)value;
+//                ensureColumnCount(model.getColumnCount());
+//                for (int i=0; i<model.getColumnCount(); i++) {
+//                    FormProperty title = columns.get(i).getColumn().getTitle();
+//                    if (!title.isChanged()) {
+//                        title.setValue(model.getColumnName(i));
+//                    }
+//                }
+//            } else {
+//                ensureColumnCount(0);
+//            }
+//        } catch (Exception ex) {
+//            Logger.getLogger(getClass().getName()).log(Level.INFO, ex.getMessage(), ex);
+//        }
+//    }
 
     private void setColumnsToUI() {
         rowTableModel = new TableModelEditor.NbTableModel(new String[0], new Class[0], new boolean[0], 0);
@@ -1505,53 +1520,55 @@ public class TableCustomizer extends JPanel implements Customizer, FormAwareEdit
             } catch (Exception ex) {
                 Logger.getLogger(getClass().getName()).log(Level.INFO, ex.getMessage(), ex);
             }
-        } else if (modelBoundChoice.isSelected()) {
-            MetaBinding binding = bindingProperty.getValue();
-            if (binding != null) {
-                TableModel model = table.getModel();
-                ensureColumnCount(binding.hasSubBindings() ? binding.getSubBindings().size() : 0);
-                int index = 0;
-                if (binding.hasSubBindings()) {
-                    for (MetaBinding subBinding : binding.getSubBindings()) {
-                        ColumnInfo info = columns.get(index);
-                        String columnClass = subBinding.getParameter(MetaBinding.TABLE_COLUMN_CLASS_PARAMETER);
-                        if ((columnClass != null) && columnClass.trim().endsWith(".class")) { // NOI18N
-                            columnClass = columnClass.trim();
-                            columnClass = columnClass.substring(0, columnClass.length()-6);
-                        }
-                        info.setClazz(columnClass);
-                        info.setExpression(subBinding.getSourcePath());
-                        FormProperty title = info.getColumn().getTitle();
-                        if (!title.isChanged()) {
-                            String columnName = subBinding.getParameter(MetaBinding.NAME_PARAMETER);
-                            if (columnName == null) {
-                                if ((model != null) && (model.getColumnCount() > index)) {
-                                    columnName = model.getColumnName(index);
-                                } else {
-                                    String name = subBinding.getSourcePath();
-                                    if (BindingDesignSupport.isSimpleExpression(name)) {
-                                        columnName = BindingDesignSupport.unwrapSimpleExpression(name);
-                                        columnName = BindingDesignSupport.capitalize(columnName);
-                                    }
-                                }
-                            }
-                            if (columnName != null) {
-                                try {
-                                    title.setValue(columnName);
-                                } catch (Exception ex) {
-                                    Logger.getLogger(getClass().getName()).log(Level.INFO, ex.getMessage(), ex);
-                                }
-                            }
-                        }
-                        String editableColumn = subBinding.getParameter(MetaBinding.EDITABLE_PARAMETER);
-                        if (editableColumn != null) {
-                            info.setEditable(!"false".equals(editableColumn)); // NOI18N
-                        }
-                        index++;
-                    }
-                }
-            }
         }
+      // TODO: stripped
+//        else if (modelBoundChoice.isSelected()) {
+//            MetaBinding binding = bindingProperty.getValue();
+//            if (binding != null) {
+//                TableModel model = table.getModel();
+//                ensureColumnCount(binding.hasSubBindings() ? binding.getSubBindings().size() : 0);
+//                int index = 0;
+//                if (binding.hasSubBindings()) {
+//                    for (MetaBinding subBinding : binding.getSubBindings()) {
+//                        ColumnInfo info = columns.get(index);
+//                        String columnClass = subBinding.getParameter(MetaBinding.TABLE_COLUMN_CLASS_PARAMETER);
+//                        if ((columnClass != null) && columnClass.trim().endsWith(".class")) { // NOI18N
+//                            columnClass = columnClass.trim();
+//                            columnClass = columnClass.substring(0, columnClass.length()-6);
+//                        }
+//                        info.setClazz(columnClass);
+//                        info.setExpression(subBinding.getSourcePath());
+//                        FormProperty title = info.getColumn().getTitle();
+//                        if (!title.isChanged()) {
+//                            String columnName = subBinding.getParameter(MetaBinding.NAME_PARAMETER);
+//                            if (columnName == null) {
+//                                if ((model != null) && (model.getColumnCount() > index)) {
+//                                    columnName = model.getColumnName(index);
+//                                } else {
+//                                    String name = subBinding.getSourcePath();
+//                                    if (BindingDesignSupport.isSimpleExpression(name)) {
+//                                        columnName = BindingDesignSupport.unwrapSimpleExpression(name);
+//                                        columnName = BindingDesignSupport.capitalize(columnName);
+//                                    }
+//                                }
+//                            }
+//                            if (columnName != null) {
+//                                try {
+//                                    title.setValue(columnName);
+//                                } catch (Exception ex) {
+//                                    Logger.getLogger(getClass().getName()).log(Level.INFO, ex.getMessage(), ex);
+//                                }
+//                            }
+//                        }
+//                        String editableColumn = subBinding.getParameter(MetaBinding.EDITABLE_PARAMETER);
+//                        if (editableColumn != null) {
+//                            info.setEditable(!"false".equals(editableColumn)); // NOI18N
+//                        }
+//                        index++;
+//                    }
+//                }
+//            }
+//        }
         rowsTable.setModel(rowTableModel);
         rowCountSpinner.setValue(rowTableModel.getRowCount());
     }

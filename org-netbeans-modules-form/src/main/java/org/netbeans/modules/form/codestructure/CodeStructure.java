@@ -46,7 +46,7 @@ package org.netbeans.modules.form.codestructure;
 
 import java.util.*;
 import java.lang.reflect.*;
-import org.netbeans.modules.form.FormJavaSource;
+//import org.netbeans.modules.form.FormJavaSource;
 
 /**
  * Class representing code structure of one form. Also manages a pool
@@ -81,7 +81,7 @@ public class CodeStructure {
     private Map<Integer,CodeStructureChange> undoMap;
     private Map<Integer,CodeStructureChange> redoMap;    
     
-    private FormJavaSource javaSource;
+//    private FormJavaSource javaSource; // TODO: stripped
 	    
     // --------
     // constructor
@@ -91,9 +91,9 @@ public class CodeStructure {
             setUndoRedoRecording(true);
     }
 
-    public void setFormJavaSource(FormJavaSource formJavaSource) {	
-	javaSource = formJavaSource;
-    }
+//    public void setFormJavaSource(FormJavaSource formJavaSource) {
+//	javaSource = formJavaSource;
+//    }
     
     // -------
     // expressions
@@ -473,8 +473,10 @@ public class CodeStructure {
     }
 
     /** Checks whether given name is already used by some variable. */
-    public boolean isVariableNameReserved(String name) {		
-        return namesToVariables.get(name) != null || javaSource.containsField(name, true);
+    public boolean isVariableNameReserved(String name) {
+        //return namesToVariables.get(name) != null || javaSource.containsField(name, true); // TODO: stripped
+      System.out.println("isVariableNameReserved(String name) called in " + getClass().getSimpleName() + " with name " + name);
+      return false;
     }
 
     public CodeVariable createVariableForExpression(CodeExpression expression,
@@ -560,11 +562,11 @@ public class CodeStructure {
                            + typeName.substring(i+2);
             }
 
-	    javaSource.refresh();
+//	    javaSource.refresh();
             do { // find a free name
                 name = baseName + (++n);
             }
-	    while ( namesToVariables.get(name) != null || javaSource.containsField(name, false) );
+	    while ( namesToVariables.get(name) != null); // || javaSource.containsField(name, false) ); // TODO: stripped
         }	
 	return name;
     }        

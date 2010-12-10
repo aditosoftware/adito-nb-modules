@@ -45,7 +45,7 @@
 package org.netbeans.modules.form.actions;
 
 import java.util.Arrays;
-import org.netbeans.api.java.source.JavaSource;
+//import org.netbeans.api.java.source.JavaSource;
 import org.netbeans.api.project.FileOwnerQuery;
 import org.netbeans.api.project.Project;
 import org.netbeans.modules.form.palette.BeanInstaller;
@@ -96,7 +96,7 @@ public class InstallToPaletteAction extends NodeAction {
     protected boolean enable(Node[] activatedNodes) {
         for (Node n: activatedNodes) {
             FileObject fobj = n.getLookup().lookup(FileObject.class);
-            if (fobj == null || JavaSource.forFileObject(fobj) == null) {
+            if (fobj == null /*|| JavaSource.forFileObject(fobj) == null*/) {
                 return false;
             }
             // Issue 73641

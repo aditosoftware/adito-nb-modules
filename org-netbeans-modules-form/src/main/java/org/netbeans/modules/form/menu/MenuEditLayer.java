@@ -1201,7 +1201,9 @@ public class MenuEditLayer extends JPanel {
                                     configureEditedComponent(evt.getComponent());
                                 }
                             }
-                            if(evt.getChangeType() == FormModelEvent.COMPONENT_PROPERTY_CHANGED || evt.getChangeType() == FormModelEvent.BINDING_PROPERTY_CHANGED) {
+                            if(evt.getChangeType() == FormModelEvent.COMPONENT_PROPERTY_CHANGED
+//                                || evt.getChangeType() == FormModelEvent.BINDING_PROPERTY_CHANGED // TODO: stripped
+                                ) {
                                 if(evt.getContainer() == metacomp || evt.getComponent() == metacomp) {
                                     rebuildOnScreenMenu(metacomp);
                                 }

@@ -46,7 +46,9 @@
 package org.netbeans.modules.form;
 
 import javax.swing.Action;
-import org.netbeans.api.java.loaders.JavaDataSupport;
+//import org.netbeans.api.java.loaders.JavaDataSupport;
+import org.openide.filesystems.FileObject;
+import org.openide.loaders.*;
 import org.openide.nodes.AbstractNode;
 import org.openide.nodes.FilterNode;
 import org.openide.nodes.Node;
@@ -69,7 +71,8 @@ public class FormDataNode extends FilterNode {
      * @param fdo form data object
      */
     public FormDataNode(FormDataObject fdo) {
-        this(JavaDataSupport.createJavaNode(fdo.getPrimaryFile()));
+//        this(JavaDataSupport.createJavaNode(fdo.getPrimaryFile())); // TODO: stripped
+      this(createNode(fdo.getPrimaryFile()));
     }
     
     private FormDataNode(Node orig) {
@@ -100,5 +103,18 @@ public class FormDataNode extends FilterNode {
         System.arraycopy(javaActions, 1, formActions, 3, javaActions.length-1);
         return formActions;
     }
+
+  public static Node createNode(FileObject pBaseDataobject)
+  {
+    try
+    {
+      DataObject bdo = DataObject.find(pBaseDataobject);
+      return bdo.getNodeDelegate();
+    }
+    catch (DataObjectNotFoundException ex)
+    {
+      return new AbstractNode(Children.LEAF);
+    }
+  }
 
 }

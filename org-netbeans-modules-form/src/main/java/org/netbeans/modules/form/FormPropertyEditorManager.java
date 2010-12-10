@@ -179,8 +179,9 @@ final public class FormPropertyEditorManager {
         }
 
         // 5th - add the RADConnectionPropertyEditor - twice
-        editorList.add(new RADConnectionPropertyEditor(type, RADConnectionPropertyEditor.Type.FormConnection));
-        editorList.add(new RADConnectionPropertyEditor(type, RADConnectionPropertyEditor.Type.CustomCode));
+      // TODO: stripped
+//        editorList.add(new RADConnectionPropertyEditor(type, RADConnectionPropertyEditor.Type.FormConnection));
+//        editorList.add(new RADConnectionPropertyEditor(type, RADConnectionPropertyEditor.Type.CustomCode));
 
         return editorList;
     }

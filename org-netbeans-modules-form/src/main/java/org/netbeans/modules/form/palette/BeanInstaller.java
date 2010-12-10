@@ -44,29 +44,29 @@
 
 package org.netbeans.modules.form.palette;
 
-import com.sun.source.tree.ClassTree;
-import com.sun.source.tree.Tree;
-import com.sun.source.util.TreePath;
+//import com.sun.source.tree.ClassTree;
+//import com.sun.source.tree.Tree;
+//import com.sun.source.util.TreePath;
 import java.lang.ref.WeakReference;
 import java.util.jar.*;
 import java.util.*;
 import java.io.*;
 import java.lang.ref.Reference;
-import java.lang.reflect.Modifier;
+//import java.lang.reflect.Modifier;
 import java.net.URL;
 import java.text.MessageFormat;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+//import java.util.logging.Level;
+//import java.util.logging.Logger;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
-import org.netbeans.api.java.source.CancellableTask;
-import org.netbeans.api.java.source.CompilationController;
-import org.netbeans.api.java.source.JavaSource;
-import org.netbeans.api.java.source.JavaSource.Phase;
-import org.netbeans.modules.classfile.ClassFile;
-import org.netbeans.modules.classfile.Method;
+//import org.netbeans.api.java.source.CancellableTask;
+//import org.netbeans.api.java.source.CompilationController;
+//import org.netbeans.api.java.source.JavaSource;
+//import org.netbeans.api.java.source.JavaSource.Phase;
+//import org.netbeans.modules.classfile.ClassFile;
+//import org.netbeans.modules.classfile.Method;
 
 import org.openide.*;
 import org.openide.nodes.Node;
@@ -350,12 +350,13 @@ public final class BeanInstaller {
         }
     }    
     
-    private static void scanFileObject(FileObject folder, final FileObject fileObject, final JavaClassHandler handler) {          
-        if ("class".equals(fileObject.getExt())) { // NOI18N
-            processClassFile(fileObject, handler);
-        } else if ("java".equals(fileObject.getExt())) { // NOI18N
-            processJavaFile(fileObject, handler);
-        }
+    private static void scanFileObject(FileObject folder, final FileObject fileObject, final JavaClassHandler handler) {
+      // TODO: stripped
+//        if ("class".equals(fileObject.getExt())) { // NOI18N
+//            processClassFile(fileObject, handler);
+//        } else if ("java".equals(fileObject.getExt())) { // NOI18N
+//            processJavaFile(fileObject, handler);
+//        }
     }     
     
     /**
@@ -375,63 +376,66 @@ public final class BeanInstaller {
         });
         return fqn[0];
     }
-    
-    private static void processJavaFile(final FileObject javaFO, final JavaClassHandler handler) {
-        try {
-            JavaSource js = JavaSource.forFileObject(javaFO);
-            js.runUserActionTask(new CancellableTask<CompilationController>() {
-                @Override
-                public void cancel() {
-                }
 
-                @Override
-                public void run(CompilationController ctrl) throws Exception {
-                    ctrl.toPhase(Phase.ELEMENTS_RESOLVED);
-                    TypeElement clazz = findClass(ctrl, javaFO.getName());
-                    if (clazz != null) {
-                        handler.handle(clazz.getQualifiedName().toString(), isDeclaredAsJavaBean(clazz));
-                    }
-                }
-            }, true);
-        } catch (IOException ex) {
-            Logger.getLogger(BeanInstaller.class.getClass().getName()).
-                    log(Level.SEVERE, javaFO.toString(), ex);
-        }
-    }
-    
-    private static TypeElement findClass(CompilationController ctrl, String className) {
-        for (Tree decl : ctrl.getCompilationUnit().getTypeDecls()) {
-            if (className.equals(((ClassTree) decl).getSimpleName().toString())) {
-                TreePath path = ctrl.getTrees().getPath(ctrl.getCompilationUnit(), decl);
-                TypeElement clazz = (TypeElement) ctrl.getTrees().getElement(path);
-                return clazz;
-            }
-        }
-        return null;
-    }
-    
-    private static void processClassFile(FileObject classFO, JavaClassHandler handler) {
-        try {
-            // XXX rewrite this to use javax.lang.model.element.* as soon as JavaSource introduce .class files support
-            InputStream is = null;
-            ClassFile clazz;
-            try {
-                is = classFO.getInputStream();
-                clazz = new ClassFile(is, false);
-            } finally {
-                if (is != null) {
-                    is.close();
-                }
-            }
-            if (clazz != null) {
-                handler.handle(clazz.getName().getExternalName(), isDeclaredAsJavaBean(clazz));
-            }
-        } catch (IOException ex) {
-            Logger.getLogger(BeanInstaller.class.getClass().getName()).
-                    log(Level.SEVERE, classFO.toString(), ex);
-        }
-        
-    }
+  // TODO: stripped
+//    private static void processJavaFile(final FileObject javaFO, final JavaClassHandler handler) {
+//        try {
+//            JavaSource js = JavaSource.forFileObject(javaFO);
+//            js.runUserActionTask(new CancellableTask<CompilationController>() {
+//                @Override
+//                public void cancel() {
+//                }
+//
+//                @Override
+//                public void run(CompilationController ctrl) throws Exception {
+//                    ctrl.toPhase(Phase.ELEMENTS_RESOLVED);
+//                    TypeElement clazz = findClass(ctrl, javaFO.getName());
+//                    if (clazz != null) {
+//                        handler.handle(clazz.getQualifiedName().toString(), isDeclaredAsJavaBean(clazz));
+//                    }
+//                }
+//            }, true);
+//        } catch (IOException ex) {
+//            Logger.getLogger(BeanInstaller.class.getClass().getName()).
+//                    log(Level.SEVERE, javaFO.toString(), ex);
+//        }
+//    }
+
+  // TODO: stripped
+//    private static TypeElement findClass(CompilationController ctrl, String className) {
+//        for (Tree decl : ctrl.getCompilationUnit().getTypeDecls()) {
+//            if (className.equals(((ClassTree) decl).getSimpleName().toString())) {
+//                TreePath path = ctrl.getTrees().getPath(ctrl.getCompilationUnit(), decl);
+//                TypeElement clazz = (TypeElement) ctrl.getTrees().getElement(path);
+//                return clazz;
+//            }
+//        }
+//        return null;
+//    }
+
+  // TODO: stripped
+//    private static void processClassFile(FileObject classFO, JavaClassHandler handler) {
+//        try {
+//            // XXX rewrite this to use javax.lang.model.element.* as soon as JavaSource introduce .class files support
+//            InputStream is = null;
+//            ClassFile clazz;
+//            try {
+//                is = classFO.getInputStream();
+//                clazz = new ClassFile(is, false);
+//            } finally {
+//                if (is != null) {
+//                    is.close();
+//                }
+//            }
+//            if (clazz != null) {
+//                handler.handle(clazz.getName().getExternalName(), isDeclaredAsJavaBean(clazz));
+//            }
+//        } catch (IOException ex) {
+//            Logger.getLogger(BeanInstaller.class.getClass().getName()).
+//                    log(Level.SEVERE, classFO.toString(), ex);
+//        }
+//
+//    }
         
     public static String isDeclaredAsJavaBean(TypeElement clazz) {
         if (ElementKind.CLASS != clazz.getKind()) {
@@ -458,32 +462,33 @@ public final class BeanInstaller {
         
         return PaletteUtils.getBundleString("MSG_noPublicConstructor"); // NOI18N
     }
-    
-    public static String isDeclaredAsJavaBean(ClassFile clazz) {
-        int access = clazz.getAccess();
-        
-        if (Modifier.isInterface(access) || clazz.isAnnotation() ||
-                clazz.isEnum() || clazz.isSynthetic()) {
-            return PaletteUtils.getBundleString("MSG_notAClass"); // NOI18N
-        }
-        
-        if (Modifier.isAbstract(access)) {
-            return PaletteUtils.getBundleString("MSG_abstractClass"); // NOI18N
-        }
-        
-        if (!Modifier.isPublic(access)) {
-            return PaletteUtils.getBundleString("MSG_notPublic"); // NOI18N
-        }
 
-        for (Object omethod : clazz.getMethods()) {
-            Method method = (Method) omethod;
-            if (method.isPublic() && method.getParameters().isEmpty() &&
-                    "<init>".equals(method.getName())) { // NOI18N
-                return null;
-            }
-        }
-        return PaletteUtils.getBundleString("MSG_noPublicConstructor"); // NOI18N
-    }
+  // TODO: stripped
+//    public static String isDeclaredAsJavaBean(ClassFile clazz) {
+//        int access = clazz.getAccess();
+//
+//        if (Modifier.isInterface(access) || clazz.isAnnotation() ||
+//                clazz.isEnum() || clazz.isSynthetic()) {
+//            return PaletteUtils.getBundleString("MSG_notAClass"); // NOI18N
+//        }
+//
+//        if (Modifier.isAbstract(access)) {
+//            return PaletteUtils.getBundleString("MSG_abstractClass"); // NOI18N
+//        }
+//
+//        if (!Modifier.isPublic(access)) {
+//            return PaletteUtils.getBundleString("MSG_notPublic"); // NOI18N
+//        }
+//
+//        for (Object omethod : clazz.getMethods()) {
+//            Method method = (Method) omethod;
+//            if (method.isPublic() && method.getParameters().isEmpty() &&
+//                    "<init>".equals(method.getName())) { // NOI18N
+//                return null;
+//            }
+//        }
+//        return PaletteUtils.getBundleString("MSG_noPublicConstructor"); // NOI18N
+//    }
     
     private static AddToPaletteWizard getAddWizard() {
         AddToPaletteWizard wizard = null;

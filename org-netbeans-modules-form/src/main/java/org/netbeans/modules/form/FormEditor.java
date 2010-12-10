@@ -44,13 +44,13 @@
 
 package org.netbeans.modules.form;
 
-import com.sun.source.tree.AnnotationTree;
-import com.sun.source.tree.ClassTree;
-import com.sun.source.tree.CompilationUnitTree;
-import com.sun.source.tree.MethodTree;
-import com.sun.source.tree.ModifiersTree;
-import com.sun.source.tree.Tree;
-import com.sun.source.util.SourcePositions;
+//import com.sun.source.tree.AnnotationTree;
+//import com.sun.source.tree.ClassTree;
+//import com.sun.source.tree.CompilationUnitTree;
+//import com.sun.source.tree.MethodTree;
+//import com.sun.source.tree.ModifiersTree;
+//import com.sun.source.tree.Tree;
+//import com.sun.source.util.SourcePositions;
 import java.awt.EventQueue;
 import java.beans.*;
 import java.io.IOException;
@@ -62,13 +62,13 @@ import java.util.prefs.PreferenceChangeListener;
 import javax.swing.*;
 import org.netbeans.api.project.libraries.Library;
 import org.netbeans.api.project.libraries.LibraryManager;
-import javax.swing.text.BadLocationException;
+//import javax.swing.text.BadLocationException;
 import org.netbeans.api.editor.guards.SimpleSection;
 import org.netbeans.api.java.classpath.ClassPath;
-import org.netbeans.api.java.queries.SourceLevelQuery;
-import org.netbeans.api.java.source.CancellableTask;
-import org.netbeans.api.java.source.JavaSource;
-import org.netbeans.api.java.source.WorkingCopy;
+//import org.netbeans.api.java.queries.SourceLevelQuery;
+//import org.netbeans.api.java.source.CancellableTask;
+//import org.netbeans.api.java.source.JavaSource;
+//import org.netbeans.api.java.source.WorkingCopy;
 import org.netbeans.api.project.FileOwnerQuery;
 import org.netbeans.api.project.Project;
 import org.netbeans.modules.form.actions.EditContainerAction;
@@ -112,13 +112,13 @@ public class FormEditor {
     private CodeGenerator codeGenerator;
 
     /** The FormJavaSource for the form */
-    private FormJavaSource formJavaSource;
+//    private FormJavaSource formJavaSource; //TODO: stripped
     
     /** ResourceSupport instance for the form */
     private ResourceSupport resourceSupport;
 
     /** Instance of binding support for the form.*/
-    private BindingDesignSupport bindingSupport;
+//    private BindingDesignSupport bindingSupport; // TODO: stripped
 
     /** List of exceptions occurred during the last persistence operation */
     private List<Throwable> persistenceErrors;
@@ -180,17 +180,18 @@ public class FormEditor {
         return formDataObject;
     }
 
-    private final FormJavaSource getFormJavaSource() {
-        return formJavaSource;
-    }
+  // TODO: stripped
+//    private final FormJavaSource getFormJavaSource() {
+//        return formJavaSource;
+//    }
     
-    CodeGenerator getCodeGenerator() {
-        if (!formLoaded)
-            return null;
-        if (codeGenerator == null)
-            codeGenerator = new JavaCodeGenerator();
-        return codeGenerator;
-    }
+//    CodeGenerator getCodeGenerator() {
+//        if (!formLoaded)
+//            return null;
+//        if (codeGenerator == null)
+//            codeGenerator = new JavaCodeGenerator();
+//        return codeGenerator;
+//    }
 
     ResourceSupport getResourceSupport() {
         if (resourceSupport == null && formModel != null) {
@@ -200,12 +201,13 @@ public class FormEditor {
         return resourceSupport;
     }
 
-    BindingDesignSupport getBindingSupport() {
-        if (bindingSupport == null && formModel != null) {
-            bindingSupport = new BindingDesignSupport(formModel);
-        }
-        return bindingSupport;
-    }
+  // TODO: stripped
+//    BindingDesignSupport getBindingSupport() {
+//        if (bindingSupport == null && formModel != null) {
+//            bindingSupport = new BindingDesignSupport(formModel);
+//        }
+//        return bindingSupport;
+//    }
 
     /**
      * To be used just before loading a form to set a persistence manager that
@@ -314,9 +316,10 @@ public class FormEditor {
         // create and register new FormModel instance
         formModel = new FormModel();
         formModel.setName(formDataObject.getName());        
-        formModel.setReadOnly(formDataObject.isReadOnly());		
-        formJavaSource = new FormJavaSource(formDataObject);
-	formModel.getCodeStructure().setFormJavaSource(formJavaSource);
+        formModel.setReadOnly(formDataObject.isReadOnly());
+      // TODO: stripped
+//        formJavaSource = new FormJavaSource(formDataObject);
+//	formModel.getCodeStructure().setFormJavaSource(formJavaSource);
 	
         openForms.put(formModel, this);
 
@@ -357,13 +360,13 @@ public class FormEditor {
         // form is successfully loaded...
         formLoaded = true;
 	
-        getCodeGenerator().initialize(formModel);
+//        getCodeGenerator().initialize(formModel); // TODO: stripped
         ResourceSupport resupport = getResourceSupport(); // make sure ResourceSupport is created and initialized
         if (resupport.getDesignLocale() != null) {
             resupport.updateDesignLocale();
         }
 
-        getBindingSupport();
+//        getBindingSupport(); // TODO: stripped
         formModel.fireFormLoaded();
         if (formModel.wasCorrected()) // model repaired or upgraded
             formModel.fireFormChanged(false);
@@ -693,7 +696,7 @@ public class FormEditor {
                 }
             });
             // make sure layout code generation type is detected
-            formModel.getSettings().getLayoutCodeTarget();
+//            formModel.getSettings().getLayoutCodeTarget(); // TODO: stripped
             // hack: regenerate code immediately
             // - needs to be forced since there might be no change fired
             // - don't wait for the next round, we want to save now
@@ -792,9 +795,9 @@ public class FormEditor {
             persistenceErrors = null;
             formModel = null;
             codeGenerator = null;
-	    formJavaSource = null;
+//	    formJavaSource = null; // TODO: stripped
             resourceSupport = null;
-            bindingSupport = null;
+//            bindingSupport = null; // TODO: stripped
         }
     }
     
@@ -1127,8 +1130,9 @@ public class FormEditor {
      * @return JEditorPane set up with the actuall forms java source*/
     public static JEditorPane createCodeEditorPane(FormModel formModel) {                        
         FormDataObject dobj = getFormDataObject(formModel);
-        JavaCodeGenerator codeGen = (JavaCodeGenerator) FormEditor.getCodeGenerator(formModel);
-        codeGen.regenerateCode();
+      // TODO: stripped
+//        JavaCodeGenerator codeGen = (JavaCodeGenerator) FormEditor.getCodeGenerator(formModel);
+//        codeGen.regenerateCode();
 
         JEditorPane codePane = new JEditorPane();
         SimpleSection sec = dobj.getFormEditorSupport().getInitComponentSection();
@@ -1160,10 +1164,11 @@ public class FormEditor {
      * 
      * @param formModel form model.
      * @return CodeGenerator for given form */
-    public static CodeGenerator getCodeGenerator(FormModel formModel) {
-        FormEditor formEditor = openForms.get(formModel);
-        return formEditor != null ? formEditor.getCodeGenerator() : null;
-    }
+  // TODO: stripped
+//    public static CodeGenerator getCodeGenerator(FormModel formModel) {
+//        FormEditor formEditor = openForms.get(formModel);
+//        return formEditor != null ? formEditor.getCodeGenerator() : null;
+//    }
 
     /**
      * Returns form data object for the specified form.
@@ -1180,10 +1185,10 @@ public class FormEditor {
      * 
      * @param formModel form model.
      * @return FormJavaSource of given form */
-    public static FormJavaSource getFormJavaSource(FormModel formModel) {
-        FormEditor formEditor = openForms.get(formModel);
-        return formEditor != null ? formEditor.getFormJavaSource() : null;
-    }
+//    public static FormJavaSource getFormJavaSource(FormModel formModel) {
+//        FormEditor formEditor = openForms.get(formModel);
+//        return formEditor != null ? formEditor.getFormJavaSource() : null;
+//    }
 
     /**
      * Returns <code>ResourceSupport</code> for the specified form.
@@ -1200,10 +1205,11 @@ public class FormEditor {
      * 
      * @param formModel form model.
      * @return BindingDesignSupport of given form */
-    static BindingDesignSupport getBindingSupport(FormModel formModel) {
-        FormEditor formEditor = openForms.get(formModel);
-        return formEditor != null ? formEditor.getBindingSupport() : null;
-    }
+  // TODO: stripped
+//    static BindingDesignSupport getBindingSupport(FormModel formModel) {
+//        FormEditor formEditor = openForms.get(formModel);
+//        return formEditor != null ? formEditor.getBindingSupport() : null;
+//    }
 
     /**
      * Returns form editor for the specified form.
@@ -1269,7 +1275,7 @@ public class FormEditor {
     public static boolean updateProjectForNaturalLayout(FormModel formModel) {
         FormEditor formEditor = getFormEditor(formModel);
         if (formEditor != null
-                && formModel.getSettings().getLayoutCodeTarget() != JavaCodeGenerator.LAYOUT_CODE_JDK6
+//                && formModel.getSettings().getLayoutCodeTarget() != JavaCodeGenerator.LAYOUT_CODE_JDK6 // TODO: stripped
                 && !ClassPathUtils.isOnClassPath(formEditor.getFormDataObject().getFormFile(), org.jdesktop.layout.GroupLayout.class.getName())) {
             try {
                 Library lib = LibraryManager.getDefault().getLibrary("swing-layout"); // NOI18N
@@ -1321,71 +1327,72 @@ public class FormEditor {
     }
 
     private void checkSuppressWarningsAnnotation() {
-        FileObject fo = getFormDataObject().getPrimaryFile();
-        String sourceLevel = SourceLevelQuery.getSourceLevel(fo);
-        boolean invalidSL = (sourceLevel != null) && ("1.5".compareTo(sourceLevel) > 0); // NOI18N
-        ClassPath cp = ClassPath.getClassPath(fo, ClassPath.BOOT);
-        if (invalidSL || cp.findResource("java/lang/SuppressWarnings.class") == null) { // NOI18N
-            // The project's bootclasspath doesn't contain SuppressWarnings class.
-            // So, remove this annotation from initComponents() method.
-            final String foName = fo.getName();
-            JavaSource js = JavaSource.forFileObject(fo);
-            final int[] positions = new int[] {-1,-1};
-            try {
-                js.runModificationTask(new CancellableTask<WorkingCopy>() {
-                    @Override
-                    public void cancel() {
-                    }
-                    @Override
-                    public void run(WorkingCopy wcopy) throws Exception {
-                        wcopy.toPhase(JavaSource.Phase.RESOLVED);
-
-                        ClassTree clazz = null;
-                        CompilationUnitTree cu = wcopy.getCompilationUnit();
-                        for (Tree tree : cu.getTypeDecls()) {
-                            if (tree.getKind() == Tree.Kind.CLASS) {
-                                ClassTree cand = (ClassTree)tree;
-                                if (foName.equals(cand.getSimpleName().toString())) {
-                                    clazz = cand;
-                                }
-                            }
-                        }
-                        if (clazz == null) return;
-                        
-                        for (Tree tree : clazz.getMembers()) {
-                            if (tree.getKind() == Tree.Kind.METHOD) {
-                                MethodTree method = (MethodTree)tree;
-                                if ("initComponents".equals(method.getName().toString()) // NOI18N
-                                        && (method.getParameters().isEmpty())) {
-                                    ModifiersTree modifiers = method.getModifiers();
-                                    for (AnnotationTree annotation : modifiers.getAnnotations()) {
-                                        if (annotation.getAnnotationType().toString().contains("SuppressWarnings")) { // NOI18N
-                                            SourcePositions sp = wcopy.getTrees().getSourcePositions();
-                                            positions[0] = (int)sp.getStartPosition(cu, annotation);
-                                            positions[1] = (int)sp.getEndPosition(cu, annotation);
-                                            // We cannot use the following code because
-                                            // part of the modifier is in guarded block
-                                            //ModifiersTree newModifiers = wcopy.getTreeMaker().removeModifiersAnnotation(method.getModifiers(), annotation);
-                                            //wcopy.rewrite(modifiers, newModifiers);
-                                        }
-                                    }
-                                }
-                            }
-                        }
-
-                    }
-                }).commit();
-            } catch (IOException ioex) {
-                Logger.getLogger(FormEditor.class.getName()).log(Level.INFO, ioex.getLocalizedMessage(), ioex);
-            }
-            if (positions[0] != -1) {
-                try {
-                    getFormDataObject().getFormEditorSupport().getDocument().remove(positions[0], positions[1]-positions[0]);
-                } catch (BadLocationException blex) {
-                    Logger.getLogger(FormEditor.class.getName()).log(Level.INFO, blex.getLocalizedMessage(), blex);
-                }
-            }
-        }
+      // TODO: stripped
+//        FileObject fo = getFormDataObject().getPrimaryFile();
+//        String sourceLevel = SourceLevelQuery.getSourceLevel(fo);
+//        boolean invalidSL = (sourceLevel != null) && ("1.5".compareTo(sourceLevel) > 0); // NOI18N
+//        ClassPath cp = ClassPath.getClassPath(fo, ClassPath.BOOT);
+//        if (invalidSL || cp.findResource("java/lang/SuppressWarnings.class") == null) { // NOI18N
+//            // The project's bootclasspath doesn't contain SuppressWarnings class.
+//            // So, remove this annotation from initComponents() method.
+//            final String foName = fo.getName();
+//            JavaSource js = JavaSource.forFileObject(fo);
+//            final int[] positions = new int[] {-1,-1};
+//            try {
+//                js.runModificationTask(new CancellableTask<WorkingCopy>() {
+//                    @Override
+//                    public void cancel() {
+//                    }
+//                    @Override
+//                    public void run(WorkingCopy wcopy) throws Exception {
+//                        wcopy.toPhase(JavaSource.Phase.RESOLVED);
+//
+//                        ClassTree clazz = null;
+//                        CompilationUnitTree cu = wcopy.getCompilationUnit();
+//                        for (Tree tree : cu.getTypeDecls()) {
+//                            if (tree.getKind() == Tree.Kind.CLASS) {
+//                                ClassTree cand = (ClassTree)tree;
+//                                if (foName.equals(cand.getSimpleName().toString())) {
+//                                    clazz = cand;
+//                                }
+//                            }
+//                        }
+//                        if (clazz == null) return;
+//
+//                        for (Tree tree : clazz.getMembers()) {
+//                            if (tree.getKind() == Tree.Kind.METHOD) {
+//                                MethodTree method = (MethodTree)tree;
+//                                if ("initComponents".equals(method.getName().toString()) // NOI18N
+//                                        && (method.getParameters().isEmpty())) {
+//                                    ModifiersTree modifiers = method.getModifiers();
+//                                    for (AnnotationTree annotation : modifiers.getAnnotations()) {
+//                                        if (annotation.getAnnotationType().toString().contains("SuppressWarnings")) { // NOI18N
+//                                            SourcePositions sp = wcopy.getTrees().getSourcePositions();
+//                                            positions[0] = (int)sp.getStartPosition(cu, annotation);
+//                                            positions[1] = (int)sp.getEndPosition(cu, annotation);
+//                                            // We cannot use the following code because
+//                                            // part of the modifier is in guarded block
+//                                            //ModifiersTree newModifiers = wcopy.getTreeMaker().removeModifiersAnnotation(method.getModifiers(), annotation);
+//                                            //wcopy.rewrite(modifiers, newModifiers);
+//                                        }
+//                                    }
+//                                }
+//                            }
+//                        }
+//
+//                    }
+//                }).commit();
+//            } catch (IOException ioex) {
+//                Logger.getLogger(FormEditor.class.getName()).log(Level.INFO, ioex.getLocalizedMessage(), ioex);
+//            }
+//            if (positions[0] != -1) {
+//                try {
+//                    getFormDataObject().getFormEditorSupport().getDocument().remove(positions[0], positions[1]-positions[0]);
+//                } catch (BadLocationException blex) {
+//                    Logger.getLogger(FormEditor.class.getName()).log(Level.INFO, blex.getLocalizedMessage(), blex);
+//                }
+//            }
+//        }
     }
 
 }

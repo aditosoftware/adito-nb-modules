@@ -45,13 +45,10 @@
 
 package org.netbeans.modules.form;
 
-import org.netbeans.api.java.loaders.JavaDataSupport;
+//import org.netbeans.api.java.loaders.JavaDataSupport;
 import org.openide.filesystems.FileObject;
 import org.openide.filesystems.FileUtil;
-import org.openide.loaders.DataObjectExistsException;
-import org.openide.loaders.FileEntry;
-import org.openide.loaders.MultiDataObject;
-import org.openide.loaders.MultiFileLoader;
+import org.openide.loaders.*;
 
 /** Loader for Forms. Recognizes file with extension .form and .java and with extension class if
  * there is their source and form file.
@@ -62,7 +59,7 @@ public class FormDataLoader extends MultiFileLoader {
     /** The standard extensions of the recognized files */
     public static final String FORM_EXTENSION = "form"; // NOI18N
     /** The standard extension for Java source files. */
-    public static final String JAVA_EXTENSION = "java"; // NOI18N
+    public static final String ADITO_EXTENSION = "aod"; // NOI18N
 
     static final long serialVersionUID =7259146057404524013L;
     /** Constructs a new FormDataLoader */
@@ -95,7 +92,7 @@ public class FormDataLoader extends MultiFileLoader {
         if (fo.isFolder()) return null;
         String ext = fo.getExt();
         if (ext.equals(FORM_EXTENSION))
-            return FileUtil.findBrother(fo, JAVA_EXTENSION);
+            return FileUtil.findBrother(fo, ADITO_EXTENSION);
 
         FileObject javaFile = findJavaPrimaryFile(fo);
         return javaFile != null
@@ -136,11 +133,13 @@ public class FormDataLoader extends MultiFileLoader {
 
     @Override
     protected MultiDataObject.Entry createPrimaryEntry(MultiDataObject obj, FileObject primaryFile) {
-        return JavaDataSupport.createJavaFileEntry(obj, primaryFile);
+//        return JavaDataSupport.createJavaFileEntry(obj, primaryFile); // TODO: stripped
+//      System.out.println("createPrimaryEntry(..) at " + getClass().getSimpleName() + " currently not supported");
+      return new FileEntry(obj, primaryFile);
     }
 
     private FileObject findJavaPrimaryFile(FileObject fo) {
-        if (fo.getExt().equals(JAVA_EXTENSION))
+        if (fo.getExt().equals(ADITO_EXTENSION))
             return fo;
         return null;
     }

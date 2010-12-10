@@ -153,7 +153,9 @@ class FormRootNode extends FormNode {
     }
     
     private Node.Property[] createCodeGenProperties() {
-        return FormEditor.getCodeGenerator(getFormModel()).getSyntheticProperties(null);
+      // TODO: stripped
+//        return FormEditor.getCodeGenerator(getFormModel()).getSyntheticProperties(null);
+      return null;
     }
 
     Node.Property[] getResourceProperties() {

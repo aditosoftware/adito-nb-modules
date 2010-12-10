@@ -54,7 +54,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import org.netbeans.api.java.project.classpath.ProjectClassPathModifier;
+//import org.netbeans.api.java.project.classpath.ProjectClassPathModifier;
 import org.netbeans.api.project.FileOwnerQuery;
 import org.netbeans.api.project.Project;
 import org.netbeans.api.project.ant.AntArtifact;
@@ -236,7 +236,8 @@ public final class ClassSource {
             if (FileUtil.isArchiveFile(jarFile)) {
                 u = FileUtil.getArchiveRoot(u);
             }
-            return Boolean.valueOf(ProjectClassPathModifier.addRoots(new URL[] {u}, projectArtifact, classPathType));
+          // TODO: stripped
+            return false; //Boolean.valueOf(ProjectClassPathModifier.addRoots(new URL[] {u}, projectArtifact, classPathType));
         }
         @Override
         public String getDisplayName() {
@@ -269,7 +270,8 @@ public final class ClassSource {
         }
         @Override
         public Boolean addToProjectClassPath(FileObject projectArtifact, String classPathType) throws IOException, UnsupportedOperationException {
-            return  Boolean.valueOf(ProjectClassPathModifier.addLibraries(new Library[] {lib}, projectArtifact, classPathType));
+          // TODO: stripped
+            return false; //Boolean.valueOf(ProjectClassPathModifier.addLibraries(new Library[] {lib}, projectArtifact, classPathType));
         }
         @Override
         public String getDisplayName() {
@@ -317,7 +319,8 @@ public final class ClassSource {
         @Override
         public Boolean addToProjectClassPath(FileObject projectArtifact, String classPathType) throws IOException, UnsupportedOperationException {
             if (artifact.getProject() != FileOwnerQuery.getOwner(projectArtifact)) {
-                return Boolean.valueOf(ProjectClassPathModifier.addAntArtifacts(new AntArtifact[] {artifact}, artifact.getArtifactLocations(), projectArtifact, classPathType));
+              // TODO: stripped
+                return false; //Boolean.valueOf(ProjectClassPathModifier.addAntArtifacts(new AntArtifact[] {artifact}, artifact.getArtifactLocations(), projectArtifact, classPathType));
             }
             return Boolean.FALSE;
         }

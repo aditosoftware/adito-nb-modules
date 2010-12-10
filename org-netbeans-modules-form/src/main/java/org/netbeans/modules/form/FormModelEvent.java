@@ -74,7 +74,7 @@ public class FormModelEvent extends EventObject
     public static final int COMPONENT_REMOVED = 8;
     public static final int COMPONENTS_REORDERED = 9;
     public static final int COMPONENT_PROPERTY_CHANGED = 10;
-    public static final int BINDING_PROPERTY_CHANGED = 16;
+//    public static final int BINDING_PROPERTY_CHANGED = 16;
     public static final int SYNTHETIC_PROPERTY_CHANGED = 11;
     public static final int EVENT_HANDLER_ADDED = 12;
     public static final int EVENT_HANDLER_REMOVED = 13;
@@ -275,13 +275,15 @@ public class FormModelEvent extends EventObject
         return newPropertyValue;
     }
 
-    public final MetaBinding getOldBinding() {
-        return (MetaBinding) oldPropertyValue;
-    }
+  // TODO: stripped
+//    public final MetaBinding getOldBinding() {
+//        return (MetaBinding) oldPropertyValue;
+//    }
 
-    public final MetaBinding getNewBinding() {
-        return (MetaBinding) newPropertyValue;
-    }
+  // TODO: stripped
+//    public final MetaBinding getNewBinding() {
+//        return (MetaBinding) newPropertyValue;
+//    }
 
     public final LayoutSupportDelegate getOldLayoutSupport() {
         return (LayoutSupportDelegate) oldPropertyValue;
@@ -458,10 +460,11 @@ public class FormModelEvent extends EventObject
                     FormModel.t("UNDO: event handler renaming"); // NOI18N
                     undoEventHandlerRenaming();
                     break;
-                case BINDING_PROPERTY_CHANGED:
-                    FormModel.t("UNDO: binding property change"); // NOI18N
-                    undoBindingPropertyChange();
-                    break;                    
+                // TODO: stripped
+//                case BINDING_PROPERTY_CHANGED:
+//                    FormModel.t("UNDO: binding property change"); // NOI18N
+//                    undoBindingPropertyChange();
+//                    break;
 
                 default: FormModel.t("UNDO: "+changeType); // NOI18N
                          break;
@@ -525,10 +528,11 @@ public class FormModelEvent extends EventObject
                     FormModel.t("REDO: event handler renaming"); // NOI18N
                     redoEventHandlerRenaming();
                     break;
-               case BINDING_PROPERTY_CHANGED:
-                    FormModel.t("REDO: binding property change"); // NOI18N
-                    redoBindingPropertyChange();
-                    break;
+              // TODO: stripped
+//               case BINDING_PROPERTY_CHANGED:
+//                    FormModel.t("REDO: binding property change"); // NOI18N
+//                    redoBindingPropertyChange();
+//                    break;
 
                 default: FormModel.t("REDO: "+changeType); // NOI18N
                          break;
@@ -763,47 +767,49 @@ public class FormModelEvent extends EventObject
                 }
         }
 
-        private void undoBindingPropertyChange() {
-            String subPropName = getSubPropertyName();
-            BindingProperty prop = getComponent().getBindingProperty(getPropertyName());
-            if (subPropName == null) {
-                if (prop != null) {
-                    try {
-                        prop.setValue(getOldBinding());
-                    } catch (Exception ex) { // should not happen
-                        Logger.getLogger(getClass().getName()).log(Level.INFO, ex.getMessage(), ex);
-                    }
-                }
-            } else {
-                FormProperty subProp = prop.getSubProperty(subPropName);
-                try {
-                    subProp.setValue(getOldPropertyValue());
-                } catch (Exception ex) {
-                    Logger.getLogger(getClass().getName()).log(Level.INFO, ex.getMessage(), ex);
-                }
-            }
-        }
+      // TODO: stripped
+//        private void undoBindingPropertyChange() {
+//            String subPropName = getSubPropertyName();
+//            BindingProperty prop = getComponent().getBindingProperty(getPropertyName());
+//            if (subPropName == null) {
+//                if (prop != null) {
+//                    try {
+//                        prop.setValue(getOldBinding());
+//                    } catch (Exception ex) { // should not happen
+//                        Logger.getLogger(getClass().getName()).log(Level.INFO, ex.getMessage(), ex);
+//                    }
+//                }
+//            } else {
+//                FormProperty subProp = prop.getSubProperty(subPropName);
+//                try {
+//                    subProp.setValue(getOldPropertyValue());
+//                } catch (Exception ex) {
+//                    Logger.getLogger(getClass().getName()).log(Level.INFO, ex.getMessage(), ex);
+//                }
+//            }
+//        }
 
-        private void redoBindingPropertyChange() {
-            String subPropName = getSubPropertyName();
-            BindingProperty prop = getComponent().getBindingProperty(getPropertyName());
-            if (subPropName == null) {
-                if (prop != null) {
-                    try {
-                        prop.setValue(getNewBinding());
-                    } catch (Exception ex) { // should not happen
-                        Logger.getLogger(getClass().getName()).log(Level.INFO, ex.getMessage(), ex);
-                    }
-                }
-            } else {
-                FormProperty subProp = prop.getSubProperty(subPropName);
-                try {
-                    subProp.setValue(getNewPropertyValue());
-                } catch (Exception ex) {
-                    Logger.getLogger(getClass().getName()).log(Level.INFO, ex.getMessage(), ex);
-                }
-            }
-        }
+      // TODO: stripped
+//        private void redoBindingPropertyChange() {
+//            String subPropName = getSubPropertyName();
+//            BindingProperty prop = getComponent().getBindingProperty(getPropertyName());
+//            if (subPropName == null) {
+//                if (prop != null) {
+//                    try {
+//                        prop.setValue(getNewBinding());
+//                    } catch (Exception ex) { // should not happen
+//                        Logger.getLogger(getClass().getName()).log(Level.INFO, ex.getMessage(), ex);
+//                    }
+//                }
+//            } else {
+//                FormProperty subProp = prop.getSubProperty(subPropName);
+//                try {
+//                    subProp.setValue(getNewPropertyValue());
+//                } catch (Exception ex) {
+//                    Logger.getLogger(getClass().getName()).log(Level.INFO, ex.getMessage(), ex);
+//                }
+//            }
+//        }
 
         private void undoSyntheticPropertyChange() {
             String propName = getPropertyName();

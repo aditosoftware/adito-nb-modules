@@ -76,7 +76,7 @@ import org.openide.ErrorManager;
 import org.openide.explorer.ExplorerManager;
 
 import org.netbeans.modules.form.assistant.*;
-import org.netbeans.modules.form.wizard.ConnectionWizard;
+//import org.netbeans.modules.form.wizard.ConnectionWizard;
 import org.netbeans.modules.form.layoutsupport.LayoutSupportManager;
 import org.netbeans.modules.form.layoutdesign.*;
 import org.netbeans.modules.form.layoutdesign.LayoutConstants.PaddingType;
@@ -296,8 +296,8 @@ public class FormDesigner extends TopComponent implements MultiViewElement
             formModelListener = new FormListener();
         formModel.addFormModelListener(formModelListener);
 
-        replicator = new VisualReplicator(true, FormUtils.getViewConverters(), 
-            FormEditor.getBindingSupport(formModel));
+        replicator = new VisualReplicator(true, FormUtils.getViewConverters()/*,
+            FormEditor.getBindingSupport(formModel)*/); // TODO: stripped
 
         resetTopDesignComponent(false);
         handleLayer.setViewOnly(formModel.isReadOnly());
@@ -592,7 +592,7 @@ public class FormDesigner extends TopComponent implements MultiViewElement
             new Mutex.ExceptionAction () {
                 @Override
                 public Object run() throws Exception {
-                    VisualReplicator r = new VisualReplicator(false, FormUtils.getViewConverters(), null);
+                    VisualReplicator r = new VisualReplicator(false, FormUtils.getViewConverters()/*, null*/); // TODO: stripped
                     r.setTopMetaComponent(metacomp);
                     Object container = r.createClone();
                     if (container instanceof RootPaneContainer) {
@@ -1499,7 +1499,7 @@ public class FormDesigner extends TopComponent implements MultiViewElement
             if (showDialog) {
                 if (connectionTarget != null)  {
                     FormEditor.getAssistantModel(formModel).setContext("connectWizard"); // NOI18N
-                    createConnection(connectionSource, connectionTarget);
+//                    createConnection(connectionSource, connectionTarget); // TODO: stripped
                 }
 //                resetConnection();
                 toggleSelectionMode();
@@ -1523,25 +1523,26 @@ public class FormDesigner extends TopComponent implements MultiViewElement
         }
     }
 
-    private void createConnection(RADComponent source, RADComponent target) {
-        ConnectionWizard cw = new ConnectionWizard(formModel, source,target);
-
-        if (cw.show()) {
-            final Event event = cw.getSelectedEvent();
-            final String eventName = cw.getEventName();
-            String bodyText = cw.getGeneratedCode();
-
-            formModel.getFormEvents().attachEvent(event, eventName, bodyText);
-
-            // hack: after all updates, switch to editor
-            SwingUtilities.invokeLater(new Runnable() {
-                @Override
-                public void run() {
-                    formModel.getFormEvents().attachEvent(event, eventName, null);
-                }
-            });
-        }
-    }
+  // TODO: stripped
+//    private void createConnection(RADComponent source, RADComponent target) {
+//        ConnectionWizard cw = new ConnectionWizard(formModel, source,target);
+//
+//        if (cw.show()) {
+//            final Event event = cw.getSelectedEvent();
+//            final String eventName = cw.getEventName();
+//            String bodyText = cw.getGeneratedCode();
+//
+//            formModel.getFormEvents().attachEvent(event, eventName, bodyText);
+//
+//            // hack: after all updates, switch to editor
+//            SwingUtilities.invokeLater(new Runnable() {
+//                @Override
+//                public void run() {
+//                    formModel.getFormEvents().attachEvent(event, eventName, null);
+//                }
+//            });
+//        }
+//    }
 
     // -----------------
     // in-place editing
@@ -2320,7 +2321,8 @@ public class FormDesigner extends TopComponent implements MultiViewElement
                         modifying = true;
                     if ((ev.getChangeType() == FormModelEvent.COMPONENT_ADDED)
                             || (ev.getChangeType() == FormModelEvent.COMPONENT_PROPERTY_CHANGED)
-                            || (ev.getChangeType() == FormModelEvent.BINDING_PROPERTY_CHANGED)) {
+//                            || (ev.getChangeType() == FormModelEvent.BINDING_PROPERTY_CHANGED) // TODO: stripped
+                        ) {
                         lafBlock = true;
                         break;
                     }
@@ -2449,17 +2451,18 @@ public class FormDesigner extends TopComponent implements MultiViewElement
                     RADComponent eventComponent = ev.getComponent();
                     
                     replicator.updateComponentProperty(eventProperty);
-                    updateConnectedProperties(eventProperty, eventComponent);
+//                    updateConnectedProperties(eventProperty, eventComponent); // TODO: stripped
                     
                     updateDone = true;
                 }
-                else if (type == FormModelEvent.BINDING_PROPERTY_CHANGED) {
-                    if (ev.getSubPropertyName() == null) {
-                        replicator.updateBinding(ev.getNewBinding());
-                    }
-                    // Note: BindingDesignSupport takes care of removing the old binding
-                    updateDone = true;
-                }
+                // TODO: stripped
+//                else if (type == FormModelEvent.BINDING_PROPERTY_CHANGED) {
+//                    if (ev.getSubPropertyName() == null) {
+//                        replicator.updateBinding(ev.getNewBinding());
+//                    }
+//                    // Note: BindingDesignSupport takes care of removing the old binding
+//                    updateDone = true;
+//                }
                 else if (type == FormModelEvent.SYNTHETIC_PROPERTY_CHANGED
                          && PROP_DESIGNER_SIZE.equals(ev.getPropertyName()))
                 {
@@ -2493,34 +2496,35 @@ public class FormDesigner extends TopComponent implements MultiViewElement
                 updateComponentLayer(true);
             }
         }
-        
-        private void updateConnectedProperties(RADProperty eventProperty, RADComponent eventComponent){
-            for (RADComponent component : formModel.getAllComponents()){
-                RADProperty[] properties = component.getKnownBeanProperties();
-                for(int i = 0; i < properties.length; i++){
-                    try{
-                        if (properties[i].isChanged()) {
-                            Object value = properties[i].getValue();
-                            if (value instanceof RADConnectionPropertyEditor.RADConnectionDesignValue) {
-                                RADConnectionPropertyEditor.RADConnectionDesignValue propertyValue = 
-                                    (RADConnectionPropertyEditor.RADConnectionDesignValue)value;
 
-                                if (propertyValue.getRADComponent() != null
-                                   && propertyValue.getProperty() != null
-                                   && eventComponent.getName().equals(propertyValue.getRADComponent().getName())
-                                   && eventProperty.getName().equals(propertyValue.getProperty().getName())) {
-
-                                    replicator.updateComponentProperty(properties[i]);
-                                }
-                            }
-                        }
-                    } catch(Exception e){
-                        ErrorManager.getDefault().notify(e);
-                    }                                                        
-                }
-            }
-                                
-        }
+      // TODO: stripped
+//        private void updateConnectedProperties(RADProperty eventProperty, RADComponent eventComponent){
+//            for (RADComponent component : formModel.getAllComponents()){
+//                RADProperty[] properties = component.getKnownBeanProperties();
+//                for(int i = 0; i < properties.length; i++){
+//                    try{
+//                        if (properties[i].isChanged()) {
+//                            Object value = properties[i].getValue();
+//                            if (value instanceof RADConnectionPropertyEditor.RADConnectionDesignValue) {
+//                                RADConnectionPropertyEditor.RADConnectionDesignValue propertyValue =
+//                                    (RADConnectionPropertyEditor.RADConnectionDesignValue)value;
+//
+//                                if (propertyValue.getRADComponent() != null
+//                                   && propertyValue.getProperty() != null
+//                                   && eventComponent.getName().equals(propertyValue.getRADComponent().getName())
+//                                   && eventProperty.getName().equals(propertyValue.getProperty().getName())) {
+//
+//                                    replicator.updateComponentProperty(properties[i]);
+//                                }
+//                            }
+//                        }
+//                    } catch(Exception e){
+//                        ErrorManager.getDefault().notify(e);
+//                    }
+//                }
+//            }
+//
+//        }
     }
 
     /**

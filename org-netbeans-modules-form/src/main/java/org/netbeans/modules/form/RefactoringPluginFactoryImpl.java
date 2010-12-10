@@ -53,10 +53,10 @@ import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
 import org.netbeans.api.fileinfo.NonRecursiveFolder;
 import org.netbeans.api.java.classpath.ClassPath;
-import org.netbeans.api.java.source.CancellableTask;
-import org.netbeans.api.java.source.CompilationController;
-import org.netbeans.api.java.source.JavaSource;
-import org.netbeans.api.java.source.TreePathHandle;
+//import org.netbeans.api.java.source.CancellableTask;
+//import org.netbeans.api.java.source.CompilationController;
+//import org.netbeans.api.java.source.JavaSource;
+//import org.netbeans.api.java.source.TreePathHandle;
 import org.netbeans.modules.refactoring.api.AbstractRefactoring;
 import org.netbeans.modules.refactoring.api.MoveRefactoring;
 import org.netbeans.modules.refactoring.api.Problem;
@@ -98,7 +98,8 @@ public class RefactoringPluginFactoryImpl implements RefactoringPluginFactory {
             Lookup sourceLookup = refactoring.getRefactoringSource();
             FileObject file = sourceLookup.lookup(FileObject.class);
             NonRecursiveFolder pkgFolder = sourceLookup.lookup(NonRecursiveFolder.class);
-            final TreePathHandle tpHandle = sourceLookup.lookup(TreePathHandle.class);
+          // TODO: stripped
+//            final TreePathHandle tpHandle = sourceLookup.lookup(TreePathHandle.class);
             // assumption: if file is being renamed (even as result of renaming
             // a class) then file != null, and if something inside the class
             // is renamed then file == null
@@ -111,49 +112,52 @@ public class RefactoringPluginFactoryImpl implements RefactoringPluginFactory {
                     primaryFile = file;
                     oldName = file.getName();
                  }
-            } else if (file == null && tpHandle != null) {
-                // renaming an element inside a java file
-                primaryFile = tpHandle.getFileObject();
-                if (RefactoringInfo.isJavaFileOfForm(primaryFile)) {
-                    JavaSource source = JavaSource.forFileObject(tpHandle.getFileObject());
-                    final RefactoringInfo.ChangeType[] changeTypes = new RefactoringInfo.ChangeType[1];
-                    final String[] oldNames = new String[1];
-                    try {
-                        source.runUserActionTask(new CancellableTask<CompilationController>() {
-                            @Override
-                            public void cancel() {
-                            }
-                            @Override
-                            public void run(CompilationController controller) throws Exception {
-                                controller.toPhase(JavaSource.Phase.RESOLVED);
-                                Element el = tpHandle.resolveElement(controller);
-                                if (el != null) {
-                                    switch(el.getKind()) {
-                                    case FIELD:
-                                        changeTypes[0] = RefactoringInfo.ChangeType.VARIABLE_RENAME;
-                                        break;
-                                    case LOCAL_VARIABLE:
-                                        Element parentEl = el.getEnclosingElement();
-                                        if (parentEl.getKind() == ElementKind.METHOD
-                                                && "initComponents".equals(parentEl.getSimpleName().toString()) // NOI18N
-                                                && ((ExecutableElement)parentEl).getParameters().isEmpty()) {
-                                            changeTypes[0] = RefactoringInfo.ChangeType.VARIABLE_RENAME;
-                                        }
-                                        break;
-                                    }
-                                    // [should we also check if it really matches an existing component in the form?]
-                                    oldNames[0] = el.getSimpleName().toString();
-                                }
-                            }
-                        }, true);
-                    } catch (IOException ex) {
-                        Exceptions.printStackTrace(ex);
-                    }
-                    changeType = changeTypes[0];
-                    oldName = oldNames[0];
-                }
-                // TBD: changing a property method of a component
-            } else if (file != null && file.isFolder()) {
+            }
+            // TODO: stripped
+//            else if (file == null && tpHandle != null) {
+//                // renaming an element inside a java file
+//                primaryFile = tpHandle.getFileObject();
+//                if (RefactoringInfo.isJavaFileOfForm(primaryFile)) {
+//                    JavaSource source = JavaSource.forFileObject(tpHandle.getFileObject());
+//                    final RefactoringInfo.ChangeType[] changeTypes = new RefactoringInfo.ChangeType[1];
+//                    final String[] oldNames = new String[1];
+//                    try {
+//                        source.runUserActionTask(new CancellableTask<CompilationController>() {
+//                            @Override
+//                            public void cancel() {
+//                            }
+//                            @Override
+//                            public void run(CompilationController controller) throws Exception {
+//                                controller.toPhase(JavaSource.Phase.RESOLVED);
+//                                Element el = tpHandle.resolveElement(controller);
+//                                if (el != null) {
+//                                    switch(el.getKind()) {
+//                                    case FIELD:
+//                                        changeTypes[0] = RefactoringInfo.ChangeType.VARIABLE_RENAME;
+//                                        break;
+//                                    case LOCAL_VARIABLE:
+//                                        Element parentEl = el.getEnclosingElement();
+//                                        if (parentEl.getKind() == ElementKind.METHOD
+//                                                && "initComponents".equals(parentEl.getSimpleName().toString()) // NOI18N
+//                                                && ((ExecutableElement)parentEl).getParameters().isEmpty()) {
+//                                            changeTypes[0] = RefactoringInfo.ChangeType.VARIABLE_RENAME;
+//                                        }
+//                                        break;
+//                                    }
+//                                    // [should we also check if it really matches an existing component in the form?]
+//                                    oldNames[0] = el.getSimpleName().toString();
+//                                }
+//                            }
+//                        }, true);
+//                    } catch (IOException ex) {
+//                        Exceptions.printStackTrace(ex);
+//                    }
+//                    changeType = changeTypes[0];
+//                    oldName = oldNames[0];
+//                }
+//                // TBD: changing a property method of a component
+//            }
+            else if (file != null && file.isFolder()) {
                 // renaming a folder (incl. subfolders)
                 if (isOnSourceClasspath(file)) {
                     changeType = RefactoringInfo.ChangeType.FOLDER_RENAME;

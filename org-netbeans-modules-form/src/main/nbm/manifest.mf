@@ -1,25 +1,4 @@
-OpenIDE-Module-Public-Packages: -
-OpenIDE-Module-Module-Dependencies: org.jdesktop.beansbinding/1, org.j
- desktop.layout/1, org.netbeans.api.java/1 > 1.18, org.netbeans.api.ja
- va.classpath/1 > 1.0, org.netbeans.api.progress/1 > 1.9, org.netbeans
- .core.multiview/1 > 1.10, org.netbeans.libs.javacapi > 0.5, org.netbe
- ans.libs.xerces/1 > 1.17, org.netbeans.modules.classfile/1 > 1.19, or
- g.netbeans.modules.editor.fold/1, org.netbeans.modules.editor.guards/
- 1 > 1.0, org.netbeans.modules.editor.lib/2 > 2.1, org.netbeans.module
- s.editor.lib2/1 > 1.9, org.netbeans.modules.java.project/1, org.netbe
- ans.modules.java.source > 0.1, org.netbeans.modules.javahelp/1, org.n
- etbeans.modules.options.api/1 > 1.3, org.netbeans.modules.project.ant
- /1, org.netbeans.modules.project.libraries/1 > 1.15, org.netbeans.mod
- ules.projectapi/1, org.netbeans.modules.projectuiapi/1, org.netbeans.
- modules.queries/1 > 1.10, org.netbeans.modules.refactoring.api > 1.0,
-  org.netbeans.spi.palette/1 > 1.0, org.openide.actions > 6.15, org.op
- enide.awt > 6.2, org.openide.dialogs > 7.8, org.openide.explorer > 6.
- 8, org.openide.filesystems > 7.19, org.openide.loaders > 7.7, org.ope
- nide.modules > 6.2, org.openide.nodes > 6.2, org.openide.text > 6.16,
-  org.openide.util > 8.0, org.openide.util.lookup > 8.0, org.openide.w
- indows > 6.2
 OpenIDE-Module-Java-Dependencies: Java > 1.6
-OpenIDE-Module-Build-Version: 201007282301
 OpenIDE-Module-Specification-Version: 1.31.1.2
 AutoUpdate-Show-In-Client: false
 OpenIDE-Module: org.netbeans.modules.form/2
@@ -31,7 +10,5 @@ OpenIDE-Module-Install: org/netbeans/modules/form/FormEditorModule.cla
 OpenIDE-Module-Package-Dependencies: [javax.swing.JComponentBeanInfo]
 OpenIDE-Module-Needs: javax.script.ScriptEngine.freemarker
 OpenIDE-Module-Layer: org/netbeans/modules/form/resources/layer.xml
-OpenIDE-Module-Requires: org.netbeans.api.editor.guards.Java, org.open
- ide.modules.InstalledFileLocator, org.openide.modules.ModuleFormat1
-Class-Path: ext/AbsoluteLayout.jar
+OpenIDE-Module-Requires: org.openide.modules.InstalledFileLocator, org.openide.modules.ModuleFormat1
 

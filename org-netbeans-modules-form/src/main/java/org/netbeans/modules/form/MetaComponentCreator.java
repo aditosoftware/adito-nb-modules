@@ -48,18 +48,18 @@ import java.awt.*;
 import javax.swing.*;
 import javax.swing.border.Border;
 import java.util.*;
-import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+//import java.io.IOException;
+//import java.util.logging.Level;
+//import java.util.logging.Logger;
 
-import com.sun.source.tree.ClassTree;
-import com.sun.source.tree.Tree;
-import com.sun.source.util.TreePath;
-import javax.lang.model.element.Element;
-import javax.lang.model.element.TypeElement;
-import org.netbeans.api.java.source.CancellableTask;
-import org.netbeans.api.java.source.CompilationController;
-import org.netbeans.api.java.source.JavaSource;
+//import com.sun.source.tree.ClassTree;
+//import com.sun.source.tree.Tree;
+//import com.sun.source.util.TreePath;
+//import javax.lang.model.element.Element;
+//import javax.lang.model.element.TypeElement;
+//import org.netbeans.api.java.source.CancellableTask;
+//import org.netbeans.api.java.source.CompilationController;
+//import org.netbeans.api.java.source.JavaSource;
 
 import org.openide.*;
 import org.openide.nodes.Node;
@@ -132,11 +132,12 @@ public class MetaComponentCreator {
             return null; // class loading failed
 
         RADComponent metacomp = createAndAddComponent(compClass, targetComp, constraints, exactTargetMatch);
-        String typeParams = classSource.getTypeParameters();
+      // TODO: stripped
+        /*String typeParams = classSource.getTypeParameters();
         if (typeParams != null) {
             metacomp.setAuxValue(JavaCodeGenerator.AUX_TYPE_PARAMETERS, typeParams);
             JavaCodeGenerator.setupComponentFromAuxValues(metacomp);
-        }
+        }*/
         return metacomp;
     }
 
@@ -241,11 +242,12 @@ public class MetaComponentCreator {
                     @Override
                     public Object run() throws Exception {
                         preMetaComp = createVisualComponent(compClass);
-                        String typeParams = classSource.getTypeParameters();
-                        if (typeParams != null) {
-                            preMetaComp.setAuxValue(JavaCodeGenerator.AUX_TYPE_PARAMETERS, typeParams);
-                            JavaCodeGenerator.setupComponentFromAuxValues(preMetaComp);
-                        }
+                      // TODO: stripped
+//                        String typeParams = classSource.getTypeParameters();
+//                        if (typeParams != null) {
+//                            preMetaComp.setAuxValue(JavaCodeGenerator.AUX_TYPE_PARAMETERS, typeParams);
+//                            JavaCodeGenerator.setupComponentFromAuxValues(preMetaComp);
+//                        }
                         return preMetaComp;
                     }
                 }
@@ -745,7 +747,7 @@ public class MetaComponentCreator {
                 }
                 catch (Exception e) {} // ignore problem with aux value
             }
-            JavaCodeGenerator.setupComponentFromAuxValues(newComp);
+//            JavaCodeGenerator.setupComponentFromAuxValues(newComp);// TODO: stripped
         }
 	
         // 5th - copy layout constraints
@@ -802,9 +804,10 @@ public class MetaComponentCreator {
 		String bodyText = null;
 		if(sourceComp.getFormModel() != formModel) {
 		    // copying to different form -> let's copy also the event handler content
-		    JavaCodeGenerator javaCodeGenerator = 
-			    ((JavaCodeGenerator)FormEditor.getCodeGenerator(sourceComp.getFormModel()));
-		    bodyText = javaCodeGenerator.getEventHandlerText(oldHandlerName);
+      // TODO: stripped
+//		    JavaCodeGenerator javaCodeGenerator =
+//			    ((JavaCodeGenerator)FormEditor.getCodeGenerator(sourceComp.getFormModel()));
+//		    bodyText = javaCodeGenerator.getEventHandlerText(oldHandlerName);
 		}		
 		
 		try {		    		   
@@ -1352,7 +1355,7 @@ public class MetaComponentCreator {
     }
 
     private static String getClassBinaryName(final FileObject fo) {
-        final String[] result = new String[1];
+        /*final String[] result = new String[1];
         JavaSource js = JavaSource.forFileObject(fo);
         try {
             js.runUserActionTask(new CancellableTask<CompilationController>() {
@@ -1378,7 +1381,8 @@ public class MetaComponentCreator {
         } catch (IOException ex) {
             Logger.getLogger(MetaComponentCreator.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
         }
-        return result[0];
+        return result[0];*/
+      return ""; // TODO
     }
 
     private static void showClassLoadingErrorMessage(Throwable ex,

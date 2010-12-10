@@ -1027,32 +1027,33 @@ public class FormModel
         return ev;
     }
 
-    private static boolean bindingModifiedLogged = false;
-    public FormModelEvent fireBindingChanged(RADComponent metacomp,
-                                             String path,
-                                             String subProperty,
-                                             Object oldValue,
-                                             Object newValue)
-    {
-        FormModelEvent ev = new FormModelEvent(this, FormModelEvent.BINDING_PROPERTY_CHANGED);
-        ev.setComponentAndContainer(metacomp, null);
-        ev.setProperty(path, oldValue, newValue);
-        ev.setSubProperty(subProperty);
-        sendEvent(ev);
-
-        if (undoRedoRecording && oldValue != newValue) {
-            if (!bindingModifiedLogged) {
-                Logger logger = Logger.getLogger("org.netbeans.ui.metrics.form"); // NOI18N
-                LogRecord rec = new LogRecord(Level.INFO, "USG_FORM_BINDING_MODIFIED"); // NOI18N
-                rec.setLoggerName(logger.getName());
-                logger.log(rec);
-                bindingModifiedLogged = true;
-            }
-            addUndoableEdit(ev.getUndoableEdit());
-        }
-
-        return ev;
-    }
+  // TODO: stripped
+//    private static boolean bindingModifiedLogged = false;
+//    public FormModelEvent fireBindingChanged(RADComponent metacomp,
+//                                             String path,
+//                                             String subProperty,
+//                                             Object oldValue,
+//                                             Object newValue)
+//    {
+//        FormModelEvent ev = new FormModelEvent(this, FormModelEvent.BINDING_PROPERTY_CHANGED);
+//        ev.setComponentAndContainer(metacomp, null);
+//        ev.setProperty(path, oldValue, newValue);
+//        ev.setSubProperty(subProperty);
+//        sendEvent(ev);
+//
+//        if (undoRedoRecording && oldValue != newValue) {
+//            if (!bindingModifiedLogged) {
+//                Logger logger = Logger.getLogger("org.netbeans.ui.metrics.form"); // NOI18N
+//                LogRecord rec = new LogRecord(Level.INFO, "USG_FORM_BINDING_MODIFIED"); // NOI18N
+//                rec.setLoggerName(logger.getName());
+//                logger.log(rec);
+//                bindingModifiedLogged = true;
+//            }
+//            addUndoableEdit(ev.getUndoableEdit());
+//        }
+//
+//        return ev;
+//    }
 
     /** Fires an event informing about changing a synthetic property of
      * a component. An undoable edit is created and registered automatically.

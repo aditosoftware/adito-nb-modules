@@ -151,42 +151,44 @@ public class FormSettings {
         settings.put(FormLoaderSettings.PROP_LISTENER_GENERATION_STYLE, new Integer(value));
     }
 
-    public int getLayoutCodeTarget() {
-        return checkLayoutCodeTarget();
-    }
+  // TODO: stripped
+//    public int getLayoutCodeTarget() {
+//        return checkLayoutCodeTarget();
+//    }
 
     public void setLayoutCodeTarget(int value) {
         settings.put(FormLoaderSettings.PROP_LAYOUT_CODE_TARGET, new Integer(value));
     }
 
-    private int checkLayoutCodeTarget() {
-        Integer lctSetting = (Integer)settings.get(FormLoaderSettings.PROP_LAYOUT_CODE_TARGET);
-        int layoutCodeTarget;
-        if (lctSetting != null) {
-            layoutCodeTarget = lctSetting.intValue();
-        }
-        else { // no setting
-            layoutCodeTarget = FormEditor.getFormEditor(formModel).needPostCreationUpdate() ?
-                JavaCodeGenerator.LAYOUT_CODE_AUTO : // newly created form - detect
-                JavaCodeGenerator.LAYOUT_CODE_LIBRARY; // old form - use library
-        }
-        if (layoutCodeTarget == JavaCodeGenerator.LAYOUT_CODE_AUTO) {
-            int globalLCT = FormLoaderSettings.getInstance().getLayoutCodeTarget();
-            if (globalLCT == JavaCodeGenerator.LAYOUT_CODE_AUTO) {
-                boolean isAquaLookAndFeel = "Aqua".equals(UIManager.getLookAndFeel().getID()); // NOI18N
-                layoutCodeTarget = !isAquaLookAndFeel && ClassPathUtils.isJava6ProjectPlatform(
-                        FormEditor.getFormDataObject(formModel).getPrimaryFile()) ?
-                    JavaCodeGenerator.LAYOUT_CODE_JDK6 : JavaCodeGenerator.LAYOUT_CODE_LIBRARY;
-            }
-            else layoutCodeTarget = globalLCT;
-            setLayoutCodeTarget(layoutCodeTarget);
-        }
-        else if (lctSetting == null) {
-            setLayoutCodeTarget(layoutCodeTarget);
-        }
-
-        return layoutCodeTarget;
-    }
+  // TODO: stripped
+//    private int checkLayoutCodeTarget() {
+//        Integer lctSetting = (Integer)settings.get(FormLoaderSettings.PROP_LAYOUT_CODE_TARGET);
+//        int layoutCodeTarget;
+//        if (lctSetting != null) {
+//            layoutCodeTarget = lctSetting.intValue();
+//        }
+//        else { // no setting
+//            layoutCodeTarget = FormEditor.getFormEditor(formModel).needPostCreationUpdate() ?
+//                JavaCodeGenerator.LAYOUT_CODE_AUTO : // newly created form - detect
+//                JavaCodeGenerator.LAYOUT_CODE_LIBRARY; // old form - use library
+//        }
+//        if (layoutCodeTarget == JavaCodeGenerator.LAYOUT_CODE_AUTO) {
+//            int globalLCT = FormLoaderSettings.getInstance().getLayoutCodeTarget();
+//            if (globalLCT == JavaCodeGenerator.LAYOUT_CODE_AUTO) {
+//                boolean isAquaLookAndFeel = "Aqua".equals(UIManager.getLookAndFeel().getID()); // NOI18N
+//                layoutCodeTarget = !isAquaLookAndFeel && ClassPathUtils.isJava6ProjectPlatform(
+//                        FormEditor.getFormDataObject(formModel).getPrimaryFile()) ?
+//                    JavaCodeGenerator.LAYOUT_CODE_JDK6 : JavaCodeGenerator.LAYOUT_CODE_LIBRARY;
+//            }
+//            else layoutCodeTarget = globalLCT;
+//            setLayoutCodeTarget(layoutCodeTarget);
+//        }
+//        else if (lctSetting == null) {
+//            setLayoutCodeTarget(layoutCodeTarget);
+//        }
+//
+//        return layoutCodeTarget;
+//    }
 
     // -----
     // resource management / internationalization

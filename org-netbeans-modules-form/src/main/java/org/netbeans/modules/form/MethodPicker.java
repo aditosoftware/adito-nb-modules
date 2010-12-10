@@ -157,16 +157,17 @@ public class MethodPicker extends javax.swing.JPanel {
 		    filtered.put(item.getMethodName(), item);
 		}
 	    }
-	    
-	    if(sel == sel.getFormModel().getTopRADComponent() ) {
-		String[] names = FormEditor.getFormJavaSource(sel.getFormModel()).getMethodNames(requiredType);
-		for (int i = 0; i < names.length; i++) {		    
-		    MethodPickerItem item = createItem(names[i]);
-		    if(!filtered.containsKey(item.getMethodName())){
-			filtered.put(item.getMethodName(), item);		    
-		    }		    
-		}		
-	    } 
+
+          // TODO: stripped
+//	    if(sel == sel.getFormModel().getTopRADComponent() ) {
+//		String[] names = FormEditor.getFormJavaSource(sel.getFormModel()).getMethodNames(requiredType);
+//		for (int i = 0; i < names.length; i++) {
+//		    MethodPickerItem item = createItem(names[i]);
+//		    if(!filtered.containsKey(item.getMethodName())){
+//			filtered.put(item.getMethodName(), item);
+//		    }
+//		}
+//	    }
 	    	    
 	    items = new MethodPickerItem[filtered.size()];
 	    filtered.values().toArray(items);

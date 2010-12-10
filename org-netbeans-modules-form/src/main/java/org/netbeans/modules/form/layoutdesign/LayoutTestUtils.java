@@ -44,11 +44,11 @@
 
 package org.netbeans.modules.form.layoutdesign;
 
-import com.sun.source.tree.ClassTree;
-import com.sun.source.tree.ExpressionTree;
-import com.sun.source.tree.MethodTree;
-import com.sun.source.tree.TypeParameterTree;
-import com.sun.source.tree.VariableTree;
+//import com.sun.source.tree.ClassTree;
+//import com.sun.source.tree.ExpressionTree;
+//import com.sun.source.tree.MethodTree;
+//import com.sun.source.tree.TypeParameterTree;
+//import com.sun.source.tree.VariableTree;
 import java.awt.Rectangle;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -56,20 +56,20 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.LineNumberReader;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.EnumSet;
+//import java.util.Collections;
+//import java.util.EnumSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import javax.lang.model.element.Modifier;
-import javax.lang.model.element.TypeElement;
-import javax.lang.model.type.TypeKind;
-import org.netbeans.api.java.classpath.ClassPath;
-import org.netbeans.api.java.source.CancellableTask;
-import org.netbeans.api.java.source.CompilationController;
-import org.netbeans.api.java.source.JavaSource;
-import org.netbeans.api.java.source.TreeMaker;
-import org.netbeans.api.java.source.WorkingCopy;
+//import javax.lang.model.element.Modifier;
+//import javax.lang.model.element.TypeElement;
+//import javax.lang.model.type.TypeKind;
+//import org.netbeans.api.java.classpath.ClassPath;
+//import org.netbeans.api.java.source.CancellableTask;
+//import org.netbeans.api.java.source.CompilationController;
+//import org.netbeans.api.java.source.JavaSource;
+//import org.netbeans.api.java.source.TreeMaker;
+//import org.netbeans.api.java.source.WorkingCopy;
 import org.netbeans.modules.form.FormDataObject;
 import org.netbeans.modules.form.FormDesigner;
 import org.openide.awt.StatusDisplayer;
@@ -157,72 +157,75 @@ public class LayoutTestUtils implements LayoutConstants {
                 String line = (String)i.next();
                 code.append(line).append('\n');
             }
-	    
-            //Find a name for the test file
-            ClassPath cpath = ClassPath.getClassPath(primaryFile, ClassPath.SOURCE);
-            final String primaryFileClassFQN = cpath.getResourceName(primaryFile, '.', false);
-            final boolean[] resolved = new boolean[1];
-            JavaSource js = JavaSource.forFileObject(primaryFile);
-            js.runUserActionTask(new CancellableTask<CompilationController>() {
-                @Override
-                public void cancel() {
-                }
-                @Override
-                public void run(CompilationController controller) throws Exception {
-                    controller.toPhase(JavaSource.Phase.ELEMENTS_RESOLVED);
-                    TypeElement clazz = controller.getElements().getTypeElement(primaryFileClassFQN);
-                    resolved[0] = clazz != null;
-                }
-            }, true);
-            
-            if (!resolved[0]) return;
-            
-            String testClassName = primaryFile.getName() + "Test"; //NOI18N
-            
-            FileObject testFO = primaryFile.getParent().getFileObject(testClassName, "java");//NOI18N
-            if (testFO == null) {
-                testFO = primaryFile.getParent().createData(testClassName, "java"); //NOI18N
-                
-                //Rename the class in template to correct class name
-                String output = template.toString().replace("${CLASS_NAME}", testFO.getName()); //NOI18N
 
-                //Write the file to disc
-                fw = new FileWriter(FileUtil.toFile(testFO));
-                fw.write(output);
-                fw.close();
-            }
+          // TODO: stripped
+//            //Find a name for the test file
+//            ClassPath cpath = ClassPath.getClassPath(primaryFile, ClassPath.SOURCE);
+//            final String primaryFileClassFQN = cpath.getResourceName(primaryFile, '.', false);
+//            final boolean[] resolved = new boolean[1];
+//            JavaSource js = JavaSource.forFileObject(primaryFile);
+//            js.runUserActionTask(new CancellableTask<CompilationController>() {
+//                @Override
+//                public void cancel() {
+//                }
+//                @Override
+//                public void run(CompilationController controller) throws Exception {
+//                    controller.toPhase(JavaSource.Phase.ELEMENTS_RESOLVED);
+//                    TypeElement clazz = controller.getElements().getTypeElement(primaryFileClassFQN);
+//                    resolved[0] = clazz != null;
+//                }
+//            }, true);
+//
+//            if (!resolved[0]) return;
+          return;
 
-            //8. Add the method to test class
-            final String testClassFQN = "org.netbeans.modules.form.layoutdesign." + testFO.getName(); //NOI18N
-            js = JavaSource.forFileObject(testFO);
-            js.runModificationTask(new CancellableTask<WorkingCopy>() {
-                @Override
-                public void cancel() {
-                }
-                @Override
-                public void run(WorkingCopy wcopy) throws Exception {
-                    wcopy.toPhase(JavaSource.Phase.RESOLVED);
-                    
-                    TypeElement classElm = wcopy.getElements().getTypeElement(testClassFQN);
-                    if (classElm != null) {
-                        ClassTree classTree = wcopy.getTrees().getTree(classElm);
-                        TreeMaker make = wcopy.getTreeMaker();
-                        MethodTree method = make.Method(
-                                make.Modifiers(EnumSet.of(Modifier.PUBLIC)),
-                                "doChanges" + modelCounter, // NOI18N
-                                make.PrimitiveType(TypeKind.VOID),
-                                Collections.<TypeParameterTree>emptyList(),
-                                Collections.<VariableTree>emptyList(),
-                                Collections.<ExpressionTree>emptyList(),
-                                "{\n" + code.toString() + "}", // NOI18N
-                                null
-                                );
-                        ClassTree classCopy = make.addClassMember(classTree, method);
-                        wcopy.rewrite(classTree, classCopy);
-                    }
-                    
-                }
-            }).commit();
+          // TODO: stripped
+//            String testClassName = primaryFile.getName() + "Test"; //NOI18N
+//
+//            FileObject testFO = primaryFile.getParent().getFileObject(testClassName, "java");//NOI18N
+//            if (testFO == null) {
+//                testFO = primaryFile.getParent().createData(testClassName, "java"); //NOI18N
+//
+//                //Rename the class in template to correct class name
+//                String output = template.toString().replace("${CLASS_NAME}", testFO.getName()); //NOI18N
+//
+//                //Write the file to disc
+//                fw = new FileWriter(FileUtil.toFile(testFO));
+//                fw.write(output);
+//                fw.close();
+//            }
+//
+//            //8. Add the method to test class
+//            final String testClassFQN = "org.netbeans.modules.form.layoutdesign." + testFO.getName(); //NOI18N
+//            js = JavaSource.forFileObject(testFO);
+//            js.runModificationTask(new CancellableTask<WorkingCopy>() {
+//                @Override
+//                public void cancel() {
+//                }
+//                @Override
+//                public void run(WorkingCopy wcopy) throws Exception {
+//                    wcopy.toPhase(JavaSource.Phase.RESOLVED);
+//
+//                    TypeElement classElm = wcopy.getElements().getTypeElement(testClassFQN);
+//                    if (classElm != null) {
+//                        ClassTree classTree = wcopy.getTrees().getTree(classElm);
+//                        TreeMaker make = wcopy.getTreeMaker();
+//                        MethodTree method = make.Method(
+//                                make.Modifiers(EnumSet.of(Modifier.PUBLIC)),
+//                                "doChanges" + modelCounter, // NOI18N
+//                                make.PrimitiveType(TypeKind.VOID),
+//                                Collections.<TypeParameterTree>emptyList(),
+//                                Collections.<VariableTree>emptyList(),
+//                                Collections.<ExpressionTree>emptyList(),
+//                                "{\n" + code.toString() + "}", // NOI18N
+//                                null
+//                                );
+//                        ClassTree classCopy = make.addClassMember(classTree, method);
+//                        wcopy.rewrite(classTree, classCopy);
+//                    }
+//
+//                }
+//            }).commit();
             
         } catch (IOException ex) {
             ex.printStackTrace();
