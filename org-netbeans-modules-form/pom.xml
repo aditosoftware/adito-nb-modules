@@ -87,11 +87,11 @@
       <!--<artifactId>org-netbeans-modules-java-project</artifactId>-->
       <!--<version>RELEASE691</version>-->
     <!--</dependency>-->
-    <!--<dependency>-->
-      <!--<groupId>org.netbeans.api</groupId>-->
-      <!--<artifactId>org-netbeans-modules-java-source</artifactId>-->
-      <!--<version>RELEASE691</version>-->
-    <!--</dependency>-->
+    <dependency>
+      <groupId>org.netbeans.api</groupId>
+      <artifactId>org-netbeans-modules-java-source</artifactId>
+      <version>RELEASE691</version>
+    </dependency>
     <!--<dependency>-->
       <!--<groupId>org.netbeans.api</groupId>-->
       <!--<artifactId>org-netbeans-modules-javahelp</artifactId>-->
@@ -212,9 +212,9 @@
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>nbm-maven-plugin</artifactId>
-        <configuration>
-          <cluster>java</cluster>
-        </configuration>
+        <!--<configuration>-->
+          <!--<cluster>java</cluster>-->
+        <!--</configuration>-->
       </plugin>
     </plugins>
   </build>

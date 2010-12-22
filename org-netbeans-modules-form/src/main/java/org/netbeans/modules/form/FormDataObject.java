@@ -100,6 +100,8 @@ public class FormDataObject extends MultiDataObject {
                 getFormEditorSupport().saveAs( folder, fileName );
             }
         });
+      System.out.println("create FormDataObject: " + this + "          " +
+                             getPrimaryFile() + "               " + getFormFile());
     }
 
     //--------------------------------------------------------------------

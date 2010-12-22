@@ -109,6 +109,7 @@ public class FormDataNode extends FilterNode {
     try
     {
       DataObject bdo = DataObject.find(pBaseDataobject);
+
       return bdo.getNodeDelegate();
     }
     catch (DataObjectNotFoundException ex)

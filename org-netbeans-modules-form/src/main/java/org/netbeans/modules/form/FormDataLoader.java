@@ -77,7 +77,7 @@ public class FormDataLoader extends MultiFileLoader {
 
     @Override
     protected String actionsContext () {
-        return "Loaders/text/x-java/Actions/"; // NOI18N
+        return "Loaders/text/aod/Actions/"; // NOI18N
     }
 
     /** For a given file finds a primary file.
