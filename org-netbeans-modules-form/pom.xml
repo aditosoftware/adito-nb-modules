@@ -17,6 +17,21 @@
 
   <dependencies>
 
+    <!-- Adito dependencies -->
+
+    <dependency>
+      <groupId>de.adito.aditoweb.packages</groupId>
+      <artifactId>lwcore</artifactId>
+      <version>3.2</version>
+    </dependency>
+    <dependency>
+      <groupId>de.adito.aditoweb.nbm</groupId>
+      <artifactId>DesignerEditorTest</artifactId>
+      <version>3.2</version>
+    </dependency>
+
+    <!-- Netbeans dependencies -->
+
     <dependency>
       <groupId>org.netbeans.api</groupId>
       <artifactId>org-jdesktop-beansbinding</artifactId>
@@ -28,9 +43,9 @@
       <version>RELEASE691</version>
     </dependency>
     <!--<dependency>-->
-      <!--<groupId>org.netbeans.api</groupId>-->
-      <!--<artifactId>org-netbeans-api-java</artifactId>-->
-      <!--<version>RELEASE691</version>-->
+    <!--<groupId>org.netbeans.api</groupId>-->
+    <!--<artifactId>org-netbeans-api-java</artifactId>-->
+    <!--<version>RELEASE691</version>-->
     <!--</dependency>-->
     <dependency>
       <groupId>org.netbeans.api</groupId>
@@ -48,9 +63,9 @@
       <version>RELEASE691</version>
     </dependency>
     <!--<dependency>-->
-      <!--<groupId>org.netbeans.api</groupId>-->
-      <!--<artifactId>org-netbeans-libs-javacapi</artifactId>-->
-      <!--<version>RELEASE691</version>-->
+    <!--<groupId>org.netbeans.api</groupId>-->
+    <!--<artifactId>org-netbeans-libs-javacapi</artifactId>-->
+    <!--<version>RELEASE691</version>-->
     <!--</dependency>-->
     <dependency>
       <groupId>org.netbeans.api</groupId>
@@ -58,9 +73,9 @@
       <version>RELEASE691</version>
     </dependency>
     <!--<dependency>-->
-      <!--<groupId>org.netbeans.api</groupId>-->
-      <!--<artifactId>org-netbeans-modules-classfile</artifactId>-->
-      <!--<version>RELEASE691</version>-->
+    <!--<groupId>org.netbeans.api</groupId>-->
+    <!--<artifactId>org-netbeans-modules-classfile</artifactId>-->
+    <!--<version>RELEASE691</version>-->
     <!--</dependency>-->
     <dependency>
       <groupId>org.netbeans.api</groupId>
@@ -83,19 +98,20 @@
       <version>RELEASE691</version>
     </dependency>
     <!--<dependency>-->
-      <!--<groupId>org.netbeans.api</groupId>-->
-      <!--<artifactId>org-netbeans-modules-java-project</artifactId>-->
-      <!--<version>RELEASE691</version>-->
+    <!--<groupId>org.netbeans.api</groupId>-->
+    <!--<artifactId>org-netbeans-modules-java-project</artifactId>-->
+    <!--<version>RELEASE691</version>-->
     <!--</dependency>-->
     <dependency>
       <groupId>org.netbeans.api</groupId>
       <artifactId>org-netbeans-modules-java-source</artifactId>
       <version>RELEASE691</version>
+      <scope>test</scope>
     </dependency>
     <!--<dependency>-->
-      <!--<groupId>org.netbeans.api</groupId>-->
-      <!--<artifactId>org-netbeans-modules-javahelp</artifactId>-->
-      <!--<version>RELEASE691</version>-->
+    <!--<groupId>org.netbeans.api</groupId>-->
+    <!--<artifactId>org-netbeans-modules-javahelp</artifactId>-->
+    <!--<version>RELEASE691</version>-->
     <!--</dependency>-->
     <dependency>
       <groupId>org.netbeans.api</groupId>
@@ -197,12 +213,12 @@
       <artifactId>org-openide-windows</artifactId>
       <version>RELEASE691</version>
     </dependency>
-    <!--<dependency>-->
-      <!--<groupId>org.netbeans.external</groupId>-->
-      <!--<artifactId>AbsoluteLayout</artifactId>-->
-      <!--<version>RELEASE691</version>-->
-      <!--<scope>provided</scope>-->
-    <!--</dependency>-->
+    <dependency>
+      <groupId>org.netbeans.external</groupId>
+      <artifactId>AbsoluteLayout</artifactId>
+      <version>RELEASE691</version>
+      <scope>provided</scope>
+    </dependency>
 
   </dependencies>
 
@@ -213,7 +229,7 @@
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>nbm-maven-plugin</artifactId>
         <!--<configuration>-->
-          <!--<cluster>java</cluster>-->
+        <!--<cluster>java</cluster>-->
         <!--</configuration>-->
       </plugin>
     </plugins>

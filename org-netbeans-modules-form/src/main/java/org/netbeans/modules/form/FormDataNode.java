@@ -47,6 +47,7 @@ package org.netbeans.modules.form;
 
 import javax.swing.Action;
 //import org.netbeans.api.java.loaders.JavaDataSupport;
+import de.adito.aditoweb.designer.filetype.DataModelDataNode;
 import org.openide.filesystems.FileObject;
 import org.openide.loaders.*;
 import org.openide.nodes.AbstractNode;
@@ -109,8 +110,7 @@ public class FormDataNode extends FilterNode {
     try
     {
       DataObject bdo = DataObject.find(pBaseDataobject);
-
-      return bdo.getNodeDelegate();
+      return new DataModelDataNode(bdo);
     }
     catch (DataObjectNotFoundException ex)
     {
