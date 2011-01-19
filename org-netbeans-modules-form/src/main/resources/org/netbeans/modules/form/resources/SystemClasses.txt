@@ -5,3 +5,4 @@ org.netbeans.lib.awtextra.*
 org.openide.explorer.propertysheet.editors.*
 org.jdesktop.layout.*
 org.jdesktop.beansbinding.*
+de.adito.aditoweb.swingcommon.**

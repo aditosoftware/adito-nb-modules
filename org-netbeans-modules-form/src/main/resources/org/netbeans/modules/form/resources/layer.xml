@@ -160,276 +160,278 @@ made subject to such option by the copyright holder.
             <file name="JPanel.palette_item" url="palette/JPanel.palette_item">
                 <attr name="position" intvalue="100"/>
             </file>
-            <file name="JTabbedPane.palette_item" url="palette/JTabbedPane.palette_item">
-                <attr name="position" intvalue="200"/>
-            </file>
-            <file name="JSplitPane.palette_item" url="palette/JSplitPane.palette_item">
-                <attr name="position" intvalue="300"/>
-            </file>
-            <file name="JScrollPane.palette_item" url="palette/JScrollPane.palette_item">
-                <attr name="position" intvalue="400"/>
-            </file>
-            <file name="JToolBar.palette_item" url="palette/JToolBar.palette_item">
-                <attr name="position" intvalue="500"/>
-            </file>
-            <file name="JDesktopPane.palette_item" url="palette/JDesktopPane.palette_item">
-                <attr name="position" intvalue="600"/>
-            </file>
-            <file name="JInternalFrame.palette_item" url="palette/JInternalFrame.palette_item">
-                <attr name="position" intvalue="700"/>
-            </file>
-            <file name="JLayeredPane.palette_item" url="palette/JLayeredPane.palette_item">
-                <attr name="position" intvalue="800"/>
-            </file>
+            <!--<file name="JTabbedPane.palette_item" url="palette/JTabbedPane.palette_item">-->
+                <!--<attr name="position" intvalue="200"/>-->
+            <!--</file>-->
+            <!--<file name="JSplitPane.palette_item" url="palette/JSplitPane.palette_item">-->
+                <!--<attr name="position" intvalue="300"/>-->
+            <!--</file>-->
+            <!--<file name="JScrollPane.palette_item" url="palette/JScrollPane.palette_item">-->
+                <!--<attr name="position" intvalue="400"/>-->
+            <!--</file>-->
+            <!--<file name="JToolBar.palette_item" url="palette/JToolBar.palette_item">-->
+                <!--<attr name="position" intvalue="500"/>-->
+            <!--</file>-->
+            <!--<file name="JDesktopPane.palette_item" url="palette/JDesktopPane.palette_item">-->
+                <!--<attr name="position" intvalue="600"/>-->
+            <!--</file>-->
+            <!--<file name="JInternalFrame.palette_item" url="palette/JInternalFrame.palette_item">-->
+                <!--<attr name="position" intvalue="700"/>-->
+            <!--</file>-->
+            <!--<file name="JLayeredPane.palette_item" url="palette/JLayeredPane.palette_item">-->
+                <!--<attr name="position" intvalue="800"/>-->
+            <!--</file>-->
 
             </folder>
 
-        <folder name="SwingMenus">
-            <attr name="SystemFileSystem.localizingBundle" stringvalue="org.netbeans.modules.form.resources.Bundle"/>
+        <!--<folder name="SwingMenus">-->
+            <!--<attr name="SystemFileSystem.localizingBundle" stringvalue="org.netbeans.modules.form.resources.Bundle"/>-->
 
-            <attr name="position" intvalue="300"/>
-            <file name="JMenuBar.palette_item" url="palette/JMenuBar.palette_item">
-                <attr name="position" intvalue="100"/>
-            </file>
-            <file name="JMenu.palette_item" url="palette/JMenu.palette_item">
-                <attr name="position" intvalue="200"/>
-            </file>
-            <file name="JMenuItem.palette_item" url="palette/JMenuItem.palette_item">
-                <attr name="position" intvalue="300"/>
-            </file>
-            <file name="JCheckBoxMenuItem.palette_item" url="palette/JCheckBoxMenuItem.palette_item">
-                <attr name="position" intvalue="400"/>
-            </file>
-            <file name="JRadioButtonMenuItem.palette_item" url="palette/JRadioButtonMenuItem.palette_item">
-                <attr name="position" intvalue="500"/>
-            </file>
-            <file name="JPopupMenu.palette_item" url="palette/JPopupMenu.palette_item">
-                <attr name="position" intvalue="600"/>
-            </file>
-            <file name="JSeparator.palette_item" url="palette/JSeparator.palette_item">
-                <attr name="position" intvalue="700"/>
-            </file>
-            
-            </folder>
+            <!--<attr name="position" intvalue="300"/>-->
+            <!--<file name="JMenuBar.palette_item" url="palette/JMenuBar.palette_item">-->
+                <!--<attr name="position" intvalue="100"/>-->
+            <!--</file>-->
+            <!--<file name="JMenu.palette_item" url="palette/JMenu.palette_item">-->
+                <!--<attr name="position" intvalue="200"/>-->
+            <!--</file>-->
+            <!--<file name="JMenuItem.palette_item" url="palette/JMenuItem.palette_item">-->
+                <!--<attr name="position" intvalue="300"/>-->
+            <!--</file>-->
+            <!--<file name="JCheckBoxMenuItem.palette_item" url="palette/JCheckBoxMenuItem.palette_item">-->
+                <!--<attr name="position" intvalue="400"/>-->
+            <!--</file>-->
+            <!--<file name="JRadioButtonMenuItem.palette_item" url="palette/JRadioButtonMenuItem.palette_item">-->
+                <!--<attr name="position" intvalue="500"/>-->
+            <!--</file>-->
+            <!--<file name="JPopupMenu.palette_item" url="palette/JPopupMenu.palette_item">-->
+                <!--<attr name="position" intvalue="600"/>-->
+            <!--</file>-->
+            <!--<file name="JSeparator.palette_item" url="palette/JSeparator.palette_item">-->
+                <!--<attr name="position" intvalue="700"/>-->
+            <!--</file>-->
+            <!---->
+            <!--</folder>-->
 
-        <folder name="SwingWindows">
-            <attr name="SystemFileSystem.localizingBundle" stringvalue="org.netbeans.modules.form.resources.Bundle"/>
+        <!--<folder name="SwingWindows">-->
+            <!--<attr name="SystemFileSystem.localizingBundle" stringvalue="org.netbeans.modules.form.resources.Bundle"/>-->
 
-            <attr name="position" intvalue="400"/>
-            <file name="JDialog.palette_item" url="palette/JDialog.palette_item">
-                <attr name="position" intvalue="100"/>
-            </file>
-            <file name="JFrame.palette_item" url="palette/JFrame.palette_item">
-                <attr name="position" intvalue="200"/>
-            </file>
-            <file name="JColorChooser.palette_item" url="palette/JColorChooser.palette_item">
-                <attr name="position" intvalue="300"/>
-            </file>
-            <file name="JFileChooser.palette_item" url="palette/JFileChooser.palette_item">
-                <attr name="position" intvalue="400"/>
-            </file>
-            <file name="JOptionPane.palette_item" url="palette/JOptionPane.palette_item">
-                <attr name="position" intvalue="500"/>
-            </file>
+            <!--<attr name="position" intvalue="400"/>-->
+            <!--<file name="JDialog.palette_item" url="palette/JDialog.palette_item">-->
+                <!--<attr name="position" intvalue="100"/>-->
+            <!--</file>-->
+            <!--<file name="JFrame.palette_item" url="palette/JFrame.palette_item">-->
+                <!--<attr name="position" intvalue="200"/>-->
+            <!--</file>-->
+            <!--<file name="JColorChooser.palette_item" url="palette/JColorChooser.palette_item">-->
+                <!--<attr name="position" intvalue="300"/>-->
+            <!--</file>-->
+            <!--<file name="JFileChooser.palette_item" url="palette/JFileChooser.palette_item">-->
+                <!--<attr name="position" intvalue="400"/>-->
+            <!--</file>-->
+            <!--<file name="JOptionPane.palette_item" url="palette/JOptionPane.palette_item">-->
+                <!--<attr name="position" intvalue="500"/>-->
+            <!--</file>-->
 
-            </folder>
+            <!--</folder>-->
 
         <folder name="SwingControls">
             <attr name="SystemFileSystem.localizingBundle" stringvalue="org.netbeans.modules.form.resources.Bundle"/>
             <attr name="isExpanded" boolvalue="true"/>
 
             <attr name="position" intvalue="200"/>
-            <file name="JLabel.palette_item" url="palette/JLabel.palette_item">
-                <attr name="position" intvalue="100"/>
-            </file>
-            <file name="JButton.palette_item" url="palette/JButton.palette_item">
+            <!--<file name="JLabel.palette_item" url="palette/JLabel.palette_item">-->
+                <!--<attr name="position" intvalue="100"/>-->
+            <!--</file>-->
+            <!--<file name="JButton.palette_item" url="palette/JButton.palette_item">-->
+                <!--<attr name="position" intvalue="200"/>-->
+            <!--</file>-->
+            <file name="GraphicButton.palette_item" url="palette/GraphicButton.palette_item">
                 <attr name="position" intvalue="200"/>
             </file>
-            <file name="JToggleButton.palette_item" url="palette/JToggleButton.palette_item">
-                <attr name="position" intvalue="300"/>
-            </file>
-            <file name="JCheckBox.palette_item" url="palette/JCheckBox.palette_item">
-                <attr name="position" intvalue="400"/>
-            </file>
-            <file name="JRadioButton.palette_item" url="palette/JRadioButton.palette_item">
-                <attr name="position" intvalue="500"/>
-            </file>
-            <file name="ButtonGroup.palette_item" url="palette/ButtonGroup.palette_item">
-                <attr name="position" intvalue="600"/>
-            </file>
-            <file name="JComboBox.palette_item" url="palette/JComboBox.palette_item">
-                <attr name="position" intvalue="700"/>
-            </file>
-            <file name="JList.palette_item" url="palette/JList.palette_item">
-                <attr name="position" intvalue="800"/>
-            </file>
-            <file name="JTextField.palette_item" url="palette/JTextField.palette_item">
-                <attr name="position" intvalue="900"/>
-            </file>
-            <file name="JTextArea.palette_item" url="palette/JTextArea.palette_item">
-                <attr name="position" intvalue="1000"/>
-            </file>
-            <file name="JScrollBar.palette_item" url="palette/JScrollBar.palette_item">
-                <attr name="position" intvalue="1100"/>
-            </file>
-            <file name="JSlider.palette_item" url="palette/JSlider.palette_item">
-                <attr name="position" intvalue="1200"/>
-            </file>
-            <file name="JProgressBar.palette_item" url="palette/JProgressBar.palette_item">
-                <attr name="position" intvalue="1300"/>
-            </file>
-            <file name="JFormattedTextField.palette_item" url="palette/JFormattedTextField.palette_item">
-                <attr name="position" intvalue="1400"/>
-            </file>
-            <file name="JPasswordField.palette_item" url="palette/JPasswordField.palette_item">
-                <attr name="position" intvalue="1500"/>
-            </file>
-            <file name="JSpinner.palette_item" url="palette/JSpinner.palette_item">
-                <attr name="position" intvalue="1600"/>
-            </file>
-            <file name="JSeparator.palette_item" url="palette/JSeparator.palette_item">
-                <attr name="position" intvalue="1700"/>
-            </file>
-            <file name="JTextPane.palette_item" url="palette/JTextPane.palette_item">
-                <attr name="position" intvalue="1800"/>
-            </file>
-            <file name="JEditorPane.palette_item" url="palette/JEditorPane.palette_item">
-                <attr name="position" intvalue="1900"/>
-            </file>
-            <file name="JTree.palette_item" url="palette/JTree.palette_item">
-                <attr name="position" intvalue="2000"/>
-            </file>
-            <file name="JTable.palette_item" url="palette/JTable.palette_item">
-                <attr name="position" intvalue="2100"/>
-            </file>
+            <!--<file name="JToggleButton.palette_item" url="palette/JToggleButton.palette_item">-->
+                <!--<attr name="position" intvalue="300"/>-->
+            <!--</file>-->
+            <!--<file name="JCheckBox.palette_item" url="palette/JCheckBox.palette_item">-->
+                <!--<attr name="position" intvalue="400"/>-->
+            <!--</file>-->
+            <!--<file name="JRadioButton.palette_item" url="palette/JRadioButton.palette_item">-->
+                <!--<attr name="position" intvalue="500"/>-->
+            <!--</file>-->
+            <!--<file name="ButtonGroup.palette_item" url="palette/ButtonGroup.palette_item">-->
+                <!--<attr name="position" intvalue="600"/>-->
+            <!--</file>-->
+            <!--<file name="JComboBox.palette_item" url="palette/JComboBox.palette_item">-->
+                <!--<attr name="position" intvalue="700"/>-->
+            <!--</file>-->
+            <!--<file name="JList.palette_item" url="palette/JList.palette_item">-->
+                <!--<attr name="position" intvalue="800"/>-->
+            <!--</file>-->
+            <!--<file name="JTextField.palette_item" url="palette/JTextField.palette_item">-->
+                <!--<attr name="position" intvalue="900"/>-->
+            <!--</file>-->
+            <!--<file name="JTextArea.palette_item" url="palette/JTextArea.palette_item">-->
+                <!--<attr name="position" intvalue="1000"/>-->
+            <!--</file>-->
+            <!--<file name="JScrollBar.palette_item" url="palette/JScrollBar.palette_item">-->
+                <!--<attr name="position" intvalue="1100"/>-->
+            <!--</file>-->
+            <!--<file name="JSlider.palette_item" url="palette/JSlider.palette_item">-->
+                <!--<attr name="position" intvalue="1200"/>-->
+            <!--</file>-->
+            <!--<file name="JProgressBar.palette_item" url="palette/JProgressBar.palette_item">-->
+                <!--<attr name="position" intvalue="1300"/>-->
+            <!--</file>-->
+            <!--<file name="JFormattedTextField.palette_item" url="palette/JFormattedTextField.palette_item">-->
+                <!--<attr name="position" intvalue="1400"/>-->
+            <!--</file>-->
+            <!--<file name="JPasswordField.palette_item" url="palette/JPasswordField.palette_item">-->
+                <!--<attr name="position" intvalue="1500"/>-->
+            <!--</file>-->
+            <!--<file name="JSpinner.palette_item" url="palette/JSpinner.palette_item">-->
+                <!--<attr name="position" intvalue="1600"/>-->
+            <!--</file>-->
+            <!--<file name="JSeparator.palette_item" url="palette/JSeparator.palette_item">-->
+                <!--<attr name="position" intvalue="1700"/>-->
+            <!--</file>-->
+            <!--<file name="JTextPane.palette_item" url="palette/JTextPane.palette_item">-->
+                <!--<attr name="position" intvalue="1800"/>-->
+            <!--</file>-->
+            <!--<file name="JEditorPane.palette_item" url="palette/JEditorPane.palette_item">-->
+                <!--<attr name="position" intvalue="1900"/>-->
+            <!--</file>-->
+            <!--<file name="JTree.palette_item" url="palette/JTree.palette_item">-->
+                <!--<attr name="position" intvalue="2000"/>-->
+            <!--</file>-->
+            <!--<file name="JTable.palette_item" url="palette/JTable.palette_item">-->
+                <!--<attr name="position" intvalue="2100"/>-->
+            <!--</file>-->
 
-            </folder>
-
-        <folder name="AWT">
-            <attr name="SystemFileSystem.localizingBundle" stringvalue="org.netbeans.modules.form.resources.Bundle"/>
-
-            <attr name="position" intvalue="500"/>
-            <file name="Label.palette_item" url="palette/Label.palette_item">
-                <attr name="position" intvalue="100"/>
-            </file>
-            <file name="Button.palette_item" url="palette/Button.palette_item">
-                <attr name="position" intvalue="200"/>
-            </file>
-            <file name="TextField.palette_item" url="palette/TextField.palette_item">
-                <attr name="position" intvalue="300"/>
-            </file>
-            <file name="TextArea.palette_item" url="palette/TextArea.palette_item">
-                <attr name="position" intvalue="400"/>
-            </file>
-            <file name="Checkbox.palette_item" url="palette/Checkbox.palette_item">
-                <attr name="position" intvalue="500"/>
-            </file>
-            <file name="Choice.palette_item" url="palette/Choice.palette_item">
-                <attr name="position" intvalue="600"/>
-            </file>
-            <file name="List.palette_item" url="palette/List.palette_item">
-                <attr name="position" intvalue="700"/>
-            </file>
-            <file name="Scrollbar.palette_item" url="palette/Scrollbar.palette_item">
-                <attr name="position" intvalue="800"/>
-            </file>
-            <file name="ScrollPane.palette_item" url="palette/ScrollPane.palette_item">
-                <attr name="position" intvalue="900"/>
-            </file>
-            <file name="Panel.palette_item" url="palette/Panel.palette_item">
-                <attr name="position" intvalue="1000"/>
-            </file>
-            <file name="Canvas.palette_item" url="palette/Canvas.palette_item">
-                <attr name="position" intvalue="1100"/>
-            </file>
-            <file name="MenuBar.palette_item" url="palette/MenuBar.palette_item">
-                <attr name="position" intvalue="1200"/>
-            </file>
-            <file name="PopupMenu.palette_item" url="palette/PopupMenu.palette_item">
-                <attr name="position" intvalue="1300"/>
-            </file>
-
-            </folder>
-
-        <folder name="_Layouts_only_for_internal_use_">
-            <attr name="SystemFileSystem.localizingBundle" stringvalue="org.netbeans.modules.form.resources.Bundle"/>
-            <attr name="isNoPaletteCategory" boolvalue="true"/>
-            <attr name="position" intvalue="0"/>
-            
-            <file name="FlowLayout.palette_item" url="palette/FlowLayout.palette_item">
-                <attr name="position" intvalue="100"/>
-            </file>
-            <file name="BorderLayout.palette_item" url="palette/BorderLayout.palette_item">
-                <attr name="position" intvalue="200"/>
-            </file>
-            <file name="GridLayout.palette_item" url="palette/GridLayout.palette_item">
-                <attr name="position" intvalue="300"/>
-            </file>
-            <file name="GridBagLayout.palette_item" url="palette/GridBagLayout.palette_item">
-                <attr name="position" intvalue="400"/>
-            </file>
-            <file name="CardLayout.palette_item" url="palette/CardLayout.palette_item">
-                <attr name="position" intvalue="500"/>
-            </file>
-            <file name="BoxLayout.palette_item" url="palette/BoxLayout.palette_item">
-                <attr name="position" intvalue="600"/>
-            </file>
-            <file name="AbsoluteLayout.palette_item" url="palette/AbsoluteLayout.palette_item">
-                <attr name="position" intvalue="700"/>
-            </file>
-            <file name="NullLayout.palette_item" url="palette/NullLayout.palette_item">
-                <attr name="position" intvalue="800"/>
-            </file>
-
-            </folder>
-
-        <folder name="Borders">
-            <attr name="SystemFileSystem.localizingBundle" stringvalue="org.netbeans.modules.form.resources.Bundle"/>
-            <attr name="isVisible" boolvalue="false"/>
-
-            <attr name="position" intvalue="600"/>
-            <file name="EmptyBorder.palette_item" url="palette/EmptyBorder.palette_item">
-                <attr name="position" intvalue="100"/>
-            </file>
-            <file name="LineBorder.palette_item" url="palette/LineBorder.palette_item">
-                <attr name="position" intvalue="200"/>
-            </file>
-            <file name="MatteBorder.palette_item" url="palette/MatteBorder.palette_item">
-                <attr name="position" intvalue="300"/>
-            </file>
-            <file name="TitledBorder.palette_item" url="palette/TitledBorder.palette_item">
-                <attr name="position" intvalue="400"/>
-            </file>
-            <file name="EtchedBorder.palette_item" url="palette/EtchedBorder.palette_item">
-                <attr name="position" intvalue="500"/>
-            </file>
-            <file name="BevelBorder.palette_item" url="palette/BevelBorder.palette_item">
-                <attr name="position" intvalue="600"/>
-            </file>
-            <file name="SoftBevelBorder.palette_item" url="palette/SoftBevelBorder.palette_item">
-                <attr name="position" intvalue="700"/>
-            </file>
-            <file name="CompoundBorder.palette_item" url="palette/CompoundBorder.palette_item">
-                <attr name="position" intvalue="800"/>
-            </file>
-
-            </folder>
-
-        <folder name="Beans">
-            <attr name="SystemFileSystem.localizingBundle" stringvalue="org.netbeans.modules.form.resources.Bundle"/>
-            <attr name="position" intvalue="700"/>
-            <file name="ChooseBean.palette_item" url="palette/ChooseBean.palette_item"/>
         </folder>
 
-        <folder name="LookAndFeels">
-            <attr name="SystemFileSystem.localizingBundle" stringvalue="org.netbeans.modules.form.resources.Bundle"/>
-            <attr name="isVisible" boolvalue="false"/>
-            <attr name="isReadonly" boolvalue="true"/>
-            <attr name="position" intvalue="900"/>
-        </folder>
+        <!--<folder name="AWT">-->
+            <!--<attr name="SystemFileSystem.localizingBundle" stringvalue="org.netbeans.modules.form.resources.Bundle"/>-->
 
-                
-        </folder>
+            <!--<attr name="position" intvalue="500"/>-->
+            <!--<file name="Label.palette_item" url="palette/Label.palette_item">-->
+                <!--<attr name="position" intvalue="100"/>-->
+            <!--</file>-->
+            <!--<file name="Button.palette_item" url="palette/Button.palette_item">-->
+                <!--<attr name="position" intvalue="200"/>-->
+            <!--</file>-->
+            <!--<file name="TextField.palette_item" url="palette/TextField.palette_item">-->
+                <!--<attr name="position" intvalue="300"/>-->
+            <!--</file>-->
+            <!--<file name="TextArea.palette_item" url="palette/TextArea.palette_item">-->
+                <!--<attr name="position" intvalue="400"/>-->
+            <!--</file>-->
+            <!--<file name="Checkbox.palette_item" url="palette/Checkbox.palette_item">-->
+                <!--<attr name="position" intvalue="500"/>-->
+            <!--</file>-->
+            <!--<file name="Choice.palette_item" url="palette/Choice.palette_item">-->
+                <!--<attr name="position" intvalue="600"/>-->
+            <!--</file>-->
+            <!--<file name="List.palette_item" url="palette/List.palette_item">-->
+                <!--<attr name="position" intvalue="700"/>-->
+            <!--</file>-->
+            <!--<file name="Scrollbar.palette_item" url="palette/Scrollbar.palette_item">-->
+                <!--<attr name="position" intvalue="800"/>-->
+            <!--</file>-->
+            <!--<file name="ScrollPane.palette_item" url="palette/ScrollPane.palette_item">-->
+                <!--<attr name="position" intvalue="900"/>-->
+            <!--</file>-->
+            <!--<file name="Panel.palette_item" url="palette/Panel.palette_item">-->
+                <!--<attr name="position" intvalue="1000"/>-->
+            <!--</file>-->
+            <!--<file name="Canvas.palette_item" url="palette/Canvas.palette_item">-->
+                <!--<attr name="position" intvalue="1100"/>-->
+            <!--</file>-->
+            <!--<file name="MenuBar.palette_item" url="palette/MenuBar.palette_item">-->
+                <!--<attr name="position" intvalue="1200"/>-->
+            <!--</file>-->
+            <!--<file name="PopupMenu.palette_item" url="palette/PopupMenu.palette_item">-->
+                <!--<attr name="position" intvalue="1300"/>-->
+            <!--</file>-->
+
+            <!--</folder>-->
+
+        <!--<folder name="_Layouts_only_for_internal_use_">-->
+            <!--<attr name="SystemFileSystem.localizingBundle" stringvalue="org.netbeans.modules.form.resources.Bundle"/>-->
+            <!--<attr name="isNoPaletteCategory" boolvalue="true"/>-->
+            <!--<attr name="position" intvalue="0"/>-->
+            <!---->
+            <!--<file name="FlowLayout.palette_item" url="palette/FlowLayout.palette_item">-->
+                <!--<attr name="position" intvalue="100"/>-->
+            <!--</file>-->
+            <!--<file name="BorderLayout.palette_item" url="palette/BorderLayout.palette_item">-->
+                <!--<attr name="position" intvalue="200"/>-->
+            <!--</file>-->
+            <!--<file name="GridLayout.palette_item" url="palette/GridLayout.palette_item">-->
+                <!--<attr name="position" intvalue="300"/>-->
+            <!--</file>-->
+            <!--<file name="GridBagLayout.palette_item" url="palette/GridBagLayout.palette_item">-->
+                <!--<attr name="position" intvalue="400"/>-->
+            <!--</file>-->
+            <!--<file name="CardLayout.palette_item" url="palette/CardLayout.palette_item">-->
+                <!--<attr name="position" intvalue="500"/>-->
+            <!--</file>-->
+            <!--<file name="BoxLayout.palette_item" url="palette/BoxLayout.palette_item">-->
+                <!--<attr name="position" intvalue="600"/>-->
+            <!--</file>-->
+            <!--<file name="AbsoluteLayout.palette_item" url="palette/AbsoluteLayout.palette_item">-->
+                <!--<attr name="position" intvalue="700"/>-->
+            <!--</file>-->
+            <!--<file name="NullLayout.palette_item" url="palette/NullLayout.palette_item">-->
+                <!--<attr name="position" intvalue="800"/>-->
+            <!--</file>-->
+
+            <!--</folder>-->
+
+        <!--<folder name="Borders">-->
+            <!--<attr name="SystemFileSystem.localizingBundle" stringvalue="org.netbeans.modules.form.resources.Bundle"/>-->
+            <!--<attr name="isVisible" boolvalue="false"/>-->
+
+            <!--<attr name="position" intvalue="600"/>-->
+            <!--<file name="EmptyBorder.palette_item" url="palette/EmptyBorder.palette_item">-->
+                <!--<attr name="position" intvalue="100"/>-->
+            <!--</file>-->
+            <!--<file name="LineBorder.palette_item" url="palette/LineBorder.palette_item">-->
+                <!--<attr name="position" intvalue="200"/>-->
+            <!--</file>-->
+            <!--<file name="MatteBorder.palette_item" url="palette/MatteBorder.palette_item">-->
+                <!--<attr name="position" intvalue="300"/>-->
+            <!--</file>-->
+            <!--<file name="TitledBorder.palette_item" url="palette/TitledBorder.palette_item">-->
+                <!--<attr name="position" intvalue="400"/>-->
+            <!--</file>-->
+            <!--<file name="EtchedBorder.palette_item" url="palette/EtchedBorder.palette_item">-->
+                <!--<attr name="position" intvalue="500"/>-->
+            <!--</file>-->
+            <!--<file name="BevelBorder.palette_item" url="palette/BevelBorder.palette_item">-->
+                <!--<attr name="position" intvalue="600"/>-->
+            <!--</file>-->
+            <!--<file name="SoftBevelBorder.palette_item" url="palette/SoftBevelBorder.palette_item">-->
+                <!--<attr name="position" intvalue="700"/>-->
+            <!--</file>-->
+            <!--<file name="CompoundBorder.palette_item" url="palette/CompoundBorder.palette_item">-->
+                <!--<attr name="position" intvalue="800"/>-->
+            <!--</file>-->
+
+        <!--</folder>-->
+
+        <!--<folder name="Beans">-->
+            <!--<attr name="SystemFileSystem.localizingBundle" stringvalue="org.netbeans.modules.form.resources.Bundle"/>-->
+            <!--<attr name="position" intvalue="700"/>-->
+            <!--<file name="ChooseBean.palette_item" url="palette/ChooseBean.palette_item"/>-->
+        <!--</folder>-->
+
+        <!--<folder name="LookAndFeels">-->
+            <!--<attr name="SystemFileSystem.localizingBundle" stringvalue="org.netbeans.modules.form.resources.Bundle"/>-->
+            <!--<attr name="isVisible" boolvalue="false"/>-->
+            <!--<attr name="isReadonly" boolvalue="true"/>-->
+            <!--<attr name="position" intvalue="900"/>-->
+        <!--</folder>  -->
+
+    </folder>
 
     <folder name="Templates">
 	<folder name="Privileged">

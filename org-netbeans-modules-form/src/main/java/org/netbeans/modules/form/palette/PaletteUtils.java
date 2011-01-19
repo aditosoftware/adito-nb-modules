@@ -215,7 +215,7 @@ public final class PaletteUtils {
         ProjectPaletteInfo pInfo = palettes.get(project);
         if (pInfo == null) {
             ClassPath classPath = ClassPath.getClassPath(context, ClassPath.BOOT);
-            classPath.addPropertyChangeListener(new ClassPathListener(classPath, project));
+//            classPath.addPropertyChangeListener(new ClassPathListener(classPath, project));
 
             PaletteLookup lookup = new PaletteLookup();
             final ClassPathFilter filter = new ClassPathFilter(classPath);

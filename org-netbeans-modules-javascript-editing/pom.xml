@@ -230,6 +230,7 @@
               <resources>
                 <resource>
                   <directory>src/main/nbm/jsstubs</directory>
+                  <!--<directory>../../../library/server/target/classes/generated/js/stubs</directory>-->
                 </resource>
               </resources>
             </configuration>

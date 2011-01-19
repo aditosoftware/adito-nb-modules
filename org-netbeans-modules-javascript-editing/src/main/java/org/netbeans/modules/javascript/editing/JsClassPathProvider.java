@@ -77,6 +77,8 @@ public final class JsClassPathProvider implements ClassPathProvider {
         else if (type.equals(SOURCE_CP))
         {
           Project prj = FileOwnerQuery.getOwner(file);
+          if (prj == null)
+            throw new UnsupportedOperationException("can't proceed: " + file + " doesn't belong to a project.");
           return prj.getLookup().lookup(ClassPathProvider.class).findClassPath(prj.getProjectDirectory(), type);
         }
         return null;

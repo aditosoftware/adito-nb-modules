@@ -138,7 +138,7 @@ public class FormEditorSupport extends DataEditorSupport implements EditorCookie
     /** ID of the form designer (in the multiview) */
     private static final String MV_FORM_ID = "form"; //NOI18N
     /** ID of the java editor (in the multiview) */
-    private static final String MV_JAVA_ID = "java"; // NOI18N
+    private static final String MV_JAVA_ID = "aod"; // NOI18N
     
     private static final int JAVA_ELEMENT_INDEX = 0;
     private static final int FORM_ELEMENT_INDEX = 1;
@@ -177,7 +177,7 @@ public class FormEditorSupport extends DataEditorSupport implements EditorCookie
             FormDataObject formDataObject,
             CookieSet cookies) {
         super(formDataObject, new Environment(formDataObject));
-        setMIMEType("text/x-java"); // NOI18N
+        setMIMEType("text/aod"); // NOI18N
         this.formDataObject = formDataObject;
         this.cookies = cookies;
     }
