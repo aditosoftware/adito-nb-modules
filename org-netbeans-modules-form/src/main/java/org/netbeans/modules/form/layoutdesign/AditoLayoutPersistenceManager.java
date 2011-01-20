@@ -44,16 +44,15 @@
 
 package org.netbeans.modules.form.layoutdesign;
 
-import org.w3c.dom.*;
-
 import java.util.*;
+import org.w3c.dom.*;
 
 /**
  * Class responsible for loading and saving of layout model.
  *
  * @author Jan Stola
  */
-class LayoutPersistenceManager implements LayoutConstants {
+class AditoLayoutPersistenceManager implements LayoutConstants {
     /** Layout model to load/save. */
     private LayoutModel layoutModel;
     /** Currently processed layout container. */
@@ -70,13 +69,13 @@ class LayoutPersistenceManager implements LayoutConstants {
     private int indent;
     /** String buffer used to save layout. */
     private StringBuilder sb;
-
+    
     // elements names
     static final String XML_DIMENSION_LAYOUT = "DimensionLayout"; // NOI18N
     static final String XML_GROUP = "Group"; // NOI18N
     static final String XML_COMPONENT = "Component"; // NOI18N
     static final String XML_EMPTY_SPACE = "EmptySpace"; // NOI18N
-
+    
     // attributes names
     static final String ATTR_DIMENSION_DIM = "dim"; // NOI18N
     static final String ATTR_GROUP_TYPE = "type"; // NOI18N
@@ -90,7 +89,7 @@ class LayoutPersistenceManager implements LayoutConstants {
     static final String ATTR_COMPONENT_ID = "id"; // NOI18N
     static final String ATTR_ATTRIBUTES = "attributes"; // NOI18N
     static final String ATTR_ROOT_INDEX = "rootIndex"; // NOI18N
-
+    
     // attribute values
     static final String VALUE_DIMENSION_HORIZONTAL = "horizontal"; // NOI18N
     static final String VALUE_DIMENSION_VERTICAL = "vertical"; // NOI18N
@@ -112,7 +111,7 @@ class LayoutPersistenceManager implements LayoutConstants {
      *
      * @param layoutModel layout model to load/save.
      */
-    private LayoutPersistenceManager(LayoutModel layoutModel) {
+    private AditoLayoutPersistenceManager(LayoutModel layoutModel) {
         this.layoutModel = layoutModel;
     }
 
@@ -131,7 +130,7 @@ class LayoutPersistenceManager implements LayoutConstants {
     static String saveContainer(LayoutModel layoutModel, LayoutComponent container,
                                 Map<String,String> idToNameMap, int indent, boolean humanReadable)
     {
-        LayoutPersistenceManager lpm = new LayoutPersistenceManager(layoutModel);
+        AditoLayoutPersistenceManager lpm = new AditoLayoutPersistenceManager(layoutModel);
         lpm.layoutContainer = container;
         lpm.idNameMap = idToNameMap;
         lpm.indent = indent;
@@ -174,7 +173,7 @@ class LayoutPersistenceManager implements LayoutConstants {
     static String dumpInterval(LayoutModel layoutModel, LayoutInterval interval,
                                int dimension, int indent)
     {
-        LayoutPersistenceManager lpm = new LayoutPersistenceManager(layoutModel);
+        AditoLayoutPersistenceManager lpm = new AditoLayoutPersistenceManager(layoutModel);
         lpm.indent = indent;
         lpm.humanReadable = true;
         lpm.dimension = dimension;
@@ -182,7 +181,7 @@ class LayoutPersistenceManager implements LayoutConstants {
         lpm.saveInterval(interval);
         return lpm.sb.toString();
     }
-
+    
     /**
      * Dumps the information about the given layout interval.
      *
@@ -261,14 +260,14 @@ class LayoutPersistenceManager implements LayoutConstants {
     /**
      * Saves linkSize group identifier
      *
-     * @param linksizeid
+     * @param linksizeid 
      */
     private void saveLinkSize(int linkSizeId) {
         if (linkSizeId != NOT_EXPLICITLY_DEFINED) {
             sb.append(" ").append(ATTR_LINK_SIZE).append("=\"").append(linkSizeId).append("\""); // NOI18N
         }
     }
-
+    
     /**
      * Saves group/interval alignemnt.
      *
@@ -295,7 +294,7 @@ class LayoutPersistenceManager implements LayoutConstants {
             }
         }
     }
-
+    
     /**
      * Saves size parameter of some layout interval.
      *
@@ -303,7 +302,7 @@ class LayoutPersistenceManager implements LayoutConstants {
      * @param attr name of the size parameter.
      */
     private void saveSize(int size, String attr) {
-        String attrPrefix = " " + attr + "=\""; // NOI18N
+        String attrPrefix = " " + attr + "=\""; // NOI18N            
         if (humanReadable) {
             if (size != NOT_EXPLICITLY_DEFINED) {
                 sb.append(attrPrefix);
@@ -325,8 +324,8 @@ class LayoutPersistenceManager implements LayoutConstants {
         }
     }
 
-    private void savePaddingType(PaddingType paddingType) {
-        if (paddingType != null && paddingType != PaddingType.RELATED) {
+    private void savePaddingType(LayoutConstants.PaddingType paddingType) {
+        if (paddingType != null && paddingType != LayoutConstants.PaddingType.RELATED) {
             sb.append(' ').append(ATTR_PADDING_TYPE).append("=\""); // NOI18N
             String str;
             switch (paddingType) {
@@ -361,7 +360,7 @@ class LayoutPersistenceManager implements LayoutConstants {
         Arrays.fill(spaces, ' ');
         return sb.append(spaces);
     }
-
+    
     /**
      * Loads the layout of the given container. Does not load containers
      * recursively, is called for each container separately.
@@ -375,7 +374,7 @@ class LayoutPersistenceManager implements LayoutConstants {
                               NodeList layoutNodeList, Map<String,String> nameToIdMap)
         throws java.io.IOException
     {
-        LayoutPersistenceManager lpm = new LayoutPersistenceManager(layoutModel);
+        AditoLayoutPersistenceManager lpm = new AditoLayoutPersistenceManager(layoutModel);
         lpm.idNameMap = nameToIdMap;
         lpm.loadLayout(containerId, layoutNodeList);
     }
@@ -492,7 +491,7 @@ class LayoutPersistenceManager implements LayoutConstants {
         loadAttributes(space, attrMap);
         parent.add(space, -1);
     }
-
+    
     /**
      * Loads information about component.
      *
@@ -530,14 +529,14 @@ class LayoutPersistenceManager implements LayoutConstants {
         loadAttributes(interval, attrMap);
         parent.add(interval, -1);
     }
-
+    
     /**
      * Loads size information of the given interval.
      *
      * @param interval layout interval whose size information should be loaded.
      * @param attrMap map with size information.
      */
-    private void loadSizes(LayoutInterval interval, NamedNodeMap attrMap) {
+    private void loadSizes(LayoutInterval interval, org.w3c.dom.NamedNodeMap attrMap) {
         Node minNode = attrMap.getNamedItem(ATTR_SIZE_MIN);
         Node prefNode = attrMap.getNamedItem(ATTR_SIZE_PREF);
         Node maxNode = attrMap.getNamedItem(ATTR_SIZE_MAX);
@@ -559,11 +558,11 @@ class LayoutPersistenceManager implements LayoutConstants {
             PaddingType paddingType = null;
             if (paddingStr != null && !paddingStr.equals(VALUE_PADDING_RELATED)) {
                 if (paddingStr.equals(VALUE_PADDING_UNRELATED)) {
-                    paddingType = PaddingType.UNRELATED;
+                    paddingType = LayoutConstants.PaddingType.UNRELATED;
                 } else if (paddingStr.equals(VALUE_PADDING_SEPARATE)) {
-                    paddingType = PaddingType.SEPARATE;
+                    paddingType = LayoutConstants.PaddingType.SEPARATE;
                 } else if (paddingStr.equals(VALUE_PADDING_INDENT)) {
-                    paddingType = PaddingType.INDENT;
+                    paddingType = LayoutConstants.PaddingType.INDENT;
                 }
             }
             if (paddingType != null) {
@@ -572,14 +571,14 @@ class LayoutPersistenceManager implements LayoutConstants {
             }
         }
     }
-
+    
     /**
      * Loads attributes of the given interval.
      *
      * @param interval layout interval whose attributes should be loaded.
      * @param attrMap map with attribute information.
      */
-    private void loadAttributes(LayoutInterval interval, NamedNodeMap attrMap) {
+    private void loadAttributes(LayoutInterval interval, org.w3c.dom.NamedNodeMap attrMap) {
         Node attributesNode = attrMap.getNamedItem(ATTR_ATTRIBUTES);
         int attributes = 0;
         if (attributesNode != null) {

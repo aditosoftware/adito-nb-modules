@@ -1061,7 +1061,7 @@ public class LayoutModel implements LayoutConstants {
      * @param dimension dimension in which the layout interval resides.
      */
     public String dump(LayoutInterval interval, int dimension) {
-        return LayoutPersistenceManager.dumpInterval(this, interval, dimension, 2);
+        return AditoLayoutPersistenceManager.dumpInterval(this, interval, dimension, 2);
     }
     
     /**
@@ -1076,7 +1076,7 @@ public class LayoutModel implements LayoutConstants {
      * @return dump of the layout model of given container
      */
     public String saveContainerLayout(LayoutComponent container, Map<String,String> idToNameMap, int indent, boolean humanReadable) {
-        return LayoutPersistenceManager.saveContainer(this, container, idToNameMap, indent, humanReadable);
+        return AditoLayoutPersistenceManager.saveContainer(this, container, idToNameMap, indent, humanReadable);
     }
 
     /**
@@ -1089,7 +1089,7 @@ public class LayoutModel implements LayoutConstants {
     public void loadContainerLayout(String containerId, org.w3c.dom.NodeList layoutNodeList, Map<String,String> nameToIdMap)
         throws java.io.IOException
     {
-        LayoutPersistenceManager.loadContainer(this, containerId, layoutNodeList, nameToIdMap);
+        AditoLayoutPersistenceManager.loadContainer(this, containerId, layoutNodeList, nameToIdMap);
     }
 
     /**

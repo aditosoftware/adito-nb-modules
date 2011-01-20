@@ -1180,19 +1180,20 @@ public class RADComponent {
             propSets.add(ps);
 
         }        
-        
-        ps = new Node.PropertySet(
-                "synthetic", // NOI18N
-                bundle.getString("CTL_SyntheticTab"), // NOI18N
-                bundle.getString("CTL_SyntheticTabHint")) // NOI18N
-        {
-            @Override
-            public Node.Property[] getProperties() {
-                return getSyntheticProperties();
-            }
-        };
-        ps.setValue("tabName", bundle.getString("CTL_SyntheticTab_Short")); // NOI18N
-        propSets.add(ps);
+
+      // TODO: stripped
+//        ps = new Node.PropertySet(
+//                "synthetic", // NOI18N
+//                bundle.getString("CTL_SyntheticTab"), // NOI18N
+//                bundle.getString("CTL_SyntheticTabHint")) // NOI18N
+//        {
+//            @Override
+//            public Node.Property[] getProperties() {
+//                return getSyntheticProperties();
+//            }
+//        };
+//        ps.setValue("tabName", bundle.getString("CTL_SyntheticTab_Short")); // NOI18N
+//        propSets.add(ps);
 
         if (accessibilityProperties == null) {
             createAccessibilityProperties();

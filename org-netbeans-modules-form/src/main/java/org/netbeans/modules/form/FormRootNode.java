@@ -123,16 +123,17 @@ class FormRootNode extends FormNode {
     
     @Override
     public Node.PropertySet[] getPropertySets() {
-        Node.PropertySet codeSet = new Node.PropertySet(
-                "codeGeneration", // NOI18N
-                FormUtils.getBundleString("CTL_SyntheticTab"), // NOI18N
-                FormUtils.getBundleString("CTL_SyntheticTabHint")) // NOI18N
-        {
-            @Override
-            public Node.Property[] getProperties() {
-                return getCodeGenProperties();
-            }
-        };
+      // TODO: stripped
+//        Node.PropertySet codeSet = new Node.PropertySet(
+//                "codeGeneration", // NOI18N
+//                FormUtils.getBundleString("CTL_SyntheticTab"), // NOI18N
+//                FormUtils.getBundleString("CTL_SyntheticTabHint")) // NOI18N
+//        {
+//            @Override
+//            public Node.Property[] getProperties() {
+//                return getCodeGenProperties();
+//            }
+//        };
         Node.PropertySet resourceSet = new Node.PropertySet(
                 "resources", // NOI18N
                 FormUtils.getBundleString("CTL_ResourceTab"), // NOI18N
@@ -143,7 +144,7 @@ class FormRootNode extends FormNode {
                 return getResourceProperties();
             }
         };
-        return new Node.PropertySet[] { codeSet, resourceSet };
+        return new Node.PropertySet[] { /*codeSet,*/ resourceSet };
     }
 
     Node.Property[] getCodeGenProperties() {

@@ -350,11 +350,13 @@ public class FormDesigner extends TopComponent implements MultiViewElement
         }
         initialized = false;
 
-        if (formEditor == null && preLoadTask != null) {
-            // designer closed before form loading started
-            preLoadTask = null;
-            StatusDisplayer.getDefault().setStatusText(""); // NOI18N
-        }
+      // TODO: stripped
+//        if (formEditor == null && preLoadTask != null) {
+//            // designer closed before form loading started
+//            preLoadTask = null;
+//            StatusDisplayer.getDefault().setStatusText(""); // NOI18N
+//        }
+      formEditor.setPersistenceManager(PersistenceManager.getManagers().next());
 
         removeAll();
                 
@@ -1808,88 +1810,89 @@ public class FormDesigner extends TopComponent implements MultiViewElement
     @Override
     public void componentShowing() {
         super.componentShowing();
-        if (!formEditor.isFormLoaded()) {
-            // Let the TC showing finish, just invoke a task out of EDT to find
-            // out form's superclass, then continue form loading in EDT again.
-            if (preLoadTask == null) {
-                preLoadTask = new PreLoadTask(formEditor.getFormDataObject());
-                FormUtils.getRequestProcessor().post(preLoadTask);
-
-                EventQueue.invokeLater(new Runnable() {
-                    @Override
-                    public void run() {
-                        if (formEditor != null) {
-                            StatusDisplayer.getDefault().setStatusText(
-                                FormUtils.getFormattedBundleString(
-                                    "FMT_PreparingForm", // NOI18N
-                                    new Object[] { formEditor.getFormDataObject().getName() }));
-                        }
-                    }
-                });
-            }
-        } else {
+      // TODO: stripped
+//        if (!formEditor.isFormLoaded()) {
+//            // Let the TC showing finish, just invoke a task out of EDT to find
+//            // out form's superclass, then continue form loading in EDT again.
+//            if (preLoadTask == null) {
+//                preLoadTask = new PreLoadTask(formEditor.getFormDataObject());
+//                FormUtils.getRequestProcessor().post(preLoadTask);
+//
+//                EventQueue.invokeLater(new Runnable() {
+//                    @Override
+//                    public void run() {
+//                        if (formEditor != null) {
+//                            StatusDisplayer.getDefault().setStatusText(
+//                                FormUtils.getFormattedBundleString(
+//                                    "FMT_PreparingForm", // NOI18N
+//                                    new Object[] { formEditor.getFormDataObject().getName() }));
+//                        }
+//                    }
+//                });
+//            }
+//        } else {
             finishComponentShowing();
-        }
+//        }
     }
-
-    private PreLoadTask preLoadTask;
-
-    private class PreLoadTask implements Runnable {
-        private FormDataObject formDataObject;
-
-        PreLoadTask(FormDataObject fdo) {
-            formDataObject = fdo;
-        }
-
-        @Override
-        public void run() {
-            long ms = System.currentTimeMillis();
-            final GandalfPersistenceManager persistenceManager = getPersistenceManager();
-            final String superClassName = (persistenceManager != null) ? computeSuperClass() : null;
-            Logger.getLogger(FormEditor.class.getName()).log(Level.FINER, "Opening form time 2: {0}ms", (System.currentTimeMillis()-ms)); // NOI18N
-
-            EventQueue.invokeLater(new Runnable() {
-                @Override
-                public void run() {
-                    if (formEditor != null) {
-                        try {
-                            if (persistenceManager != null) {
-                                // Persistence manager will load the form in the same
-                                // EDT round (can't be used for other forms during that time).
-                                persistenceManager.setPrefetchedSuperclassName(superClassName);
-                                formEditor.setPersistenceManager(persistenceManager);
-                            }
-                            preLoadTask = null; // set back to null in EDT
-                            finishComponentShowing();
-                        } finally {
-                            if (persistenceManager != null) { // cleanup just for sure
-                                persistenceManager.setPrefetchedSuperclassName(null);
-                            }
-                        }
-                    }
-                }
-            });
-        }
-
-        private GandalfPersistenceManager getPersistenceManager() {
-            try {
-                GandalfPersistenceManager gandalf = (GandalfPersistenceManager) PersistenceManager.getManagers().next();
-                if (gandalf.canLoadForm(formDataObject)) {
-                    return gandalf;
-                }
-            } catch (Exception ex) { // failure not interesting here
-            }
-            return null;
-        }
-
-        private String computeSuperClass() {
-            try {
-                return GandalfPersistenceManager.determineSuperClassName(formDataObject.getPrimaryFile());
-            } catch (Exception ex) { // failure not interesting here
-            }
-            return null;
-        }
-    }
+  // TODO: stripped
+//    private PreLoadTask preLoadTask;
+//
+//    private class PreLoadTask implements Runnable {
+//        private FormDataObject formDataObject;
+//
+//        PreLoadTask(FormDataObject fdo) {
+//            formDataObject = fdo;
+//        }
+//
+//        @Override
+//        public void run() {
+//            long ms = System.currentTimeMillis();
+//            final GandalfPersistenceManager persistenceManager = getPersistenceManager();
+//            final String superClassName = (persistenceManager != null) ? computeSuperClass() : null;
+//            Logger.getLogger(FormEditor.class.getName()).log(Level.FINER, "Opening form time 2: {0}ms", (System.currentTimeMillis()-ms)); // NOI18N
+//
+//            EventQueue.invokeLater(new Runnable() {
+//                @Override
+//                public void run() {
+//                    if (formEditor != null) {
+//                        try {
+//                            if (persistenceManager != null) {
+//                                // Persistence manager will load the form in the same
+//                                // EDT round (can't be used for other forms during that time).
+//                                persistenceManager.setPrefetchedSuperclassName(superClassName);
+//                                formEditor.setPersistenceManager(persistenceManager);
+//                            }
+//                            preLoadTask = null; // set back to null in EDT
+//                            finishComponentShowing();
+//                        } finally {
+//                            if (persistenceManager != null) { // cleanup just for sure
+//                                persistenceManager.setPrefetchedSuperclassName(null);
+//                            }
+//                        }
+//                    }
+//                }
+//            });
+//        }
+//
+//        private GandalfPersistenceManager getPersistenceManager() {
+//            try {
+//                GandalfPersistenceManager gandalf = (GandalfPersistenceManager) PersistenceManager.getManagers().next();
+//                if (gandalf.canLoadForm(formDataObject)) {
+//                    return gandalf;
+//                }
+//            } catch (Exception ex) { // failure not interesting here
+//            }
+//            return null;
+//        }
+//
+//        private String computeSuperClass() {
+//            try {
+//                return GandalfPersistenceManager.determineSuperClassName(formDataObject.getPrimaryFile());
+//            } catch (Exception ex) { // failure not interesting here
+//            }
+//            return null;
+//        }
+//    }
 
     private void finishComponentShowing() {
         long ms = System.currentTimeMillis();

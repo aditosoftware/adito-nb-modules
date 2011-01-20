@@ -140,8 +140,8 @@ public class GandalfPersistenceManager extends PersistenceManager {
     static final String XML_CODE_CONSTRUCTOR = "CodeConstructor"; // NOI18N
     static final String XML_CODE_METHOD = "CodeMethod"; // NOI18N
     static final String XML_CODE_FIELD = "CodeField"; // NOI18N
-    static final String XML_PROPERTY_BEAN = "PropertyBean"; // NOI18N    
-    
+    static final String XML_PROPERTY_BEAN = "PropertyBean"; // NOI18N
+
     // XML attributes names
     static final String ATTR_FORM_VERSION = "version"; // NOI18N
     static final String ATTR_MAX_FORM_VERSION = "maxVersion"; // NOI18N
@@ -197,7 +197,7 @@ public class GandalfPersistenceManager extends PersistenceManager {
     private String prefetchedSuperclassName;
 
     private List<Throwable> nonfatalErrors;
-    
+
     // ErrorManager.findAnnotation() doesnt work properly, I will also store msg
     private Map<Throwable, String> errorMessages;
 
@@ -223,7 +223,7 @@ public class GandalfPersistenceManager extends PersistenceManager {
                                      // or static code structure
 
     private Boolean newLayout; // whether a new layout support was loaded
-    
+
     public String getExceptionAnnotation(Throwable t) {
         if ((errorMessages != null) && errorMessages.containsKey(t)) {
             return errorMessages.get(t);
@@ -231,17 +231,17 @@ public class GandalfPersistenceManager extends PersistenceManager {
           return t.getMessage();
         }
     }
-    
+
     private void annotateException(Throwable t, int severity, String localizedMessage) {
         ErrorManager.getDefault().annotate(t, severity, null, localizedMessage, null, null);
-        
+
         if (errorMessages == null) {
             errorMessages = new HashMap<Throwable, String>();
         }
-        
+
         errorMessages.put(t, localizedMessage);
     }
-    
+
     private void annotateException(Throwable t, String localizedMessage) {
         annotateException(t, ErrorManager.UNKNOWN, localizedMessage);
     }
@@ -250,7 +250,7 @@ public class GandalfPersistenceManager extends PersistenceManager {
         ErrorManager.getDefault().annotate(t,target);
     }
 
-    
+
     /** This method is used to check if the persistence manager can read the
      * given form (if it understands the form file format).
      * @return true if this persistence manager can load the form
@@ -295,14 +295,14 @@ public class GandalfPersistenceManager extends PersistenceManager {
                          List<Throwable> nonfatalErrors)
         throws PersistenceException
     {
-        loadForm(formObject.getFormEntry().getFile(), 
+        loadForm(formObject.getFormEntry().getFile(),
               formObject.getPrimaryFile(),
               formModel,
               nonfatalErrors);
     }
-    
+
     /** This method loads the form from given data object.
-     * 
+     *
      * @param formFile form file corresponding to java file
      * @param javaFile java file
      * @param formModel FormModel to be filled with loaded data
@@ -317,10 +317,10 @@ public class GandalfPersistenceManager extends PersistenceManager {
                          List<Throwable> nonfatalErrors)
         throws PersistenceException
     {
-        this.formFile = formFile;                
-        
+        this.formFile = formFile;
+
         boolean underTest = ((javaFile == null) || (javaFile.equals(formFile)));
-                
+
         if (formModel == null) {
             formModel = new FormModel();
         }
@@ -444,7 +444,7 @@ public class GandalfPersistenceManager extends PersistenceManager {
 
             if (formBaseClass != null) // try to honor the declared superclass
                 substClass = getCompatibleFormClass(formBaseClass);
- 
+
             if (substClass == null && formInfoName != null) // fall back to FormInfo type
                 substClass = getCompatibleFormClass(formInfoName);
 
@@ -575,7 +575,7 @@ public class GandalfPersistenceManager extends PersistenceManager {
 //           connectedProperties.setValues();
 //           connectedProperties = null;
 //        }
-                
+
         if (Boolean.TRUE.equals(newLayout) && (!underTest)) { // for sure update project classpath with layout extensions library
             FormEditor.updateProjectForNaturalLayout(formModel);
         }
@@ -711,7 +711,7 @@ public class GandalfPersistenceManager extends PersistenceManager {
 //            }
 //        }
 //    }
-    
+
     private void loadNonVisuals(org.w3c.dom.Node node) throws PersistenceException {
         org.w3c.dom.Node nonVisualsNode =
                                 findSubNode(node, XML_NON_VISUAL_COMPONENTS);
@@ -774,11 +774,11 @@ public class GandalfPersistenceManager extends PersistenceManager {
             BeanSupport.getDefaultInstance(compClass);
         }
         catch (Exception ex) {
-            compClass = InvalidComponent.class;            
+            compClass = InvalidComponent.class;
             compEx = ex;
         }
         catch (LinkageError ex) {
-            compClass = InvalidComponent.class;            
+            compClass = InvalidComponent.class;
             compEx = ex;
         }
         if (compEx != null) { // loading the component class failed
@@ -787,28 +787,28 @@ public class GandalfPersistenceManager extends PersistenceManager {
                                                    new Object[] { className }),
                 node);
             annotateException(compEx, msg);
-            nonfatalErrors.add(compEx);            
+            nonfatalErrors.add(compEx);
         }
 
         compEx = null;
         // create a new metacomponent
         RADComponent newComponent;
         String nodeName = node.getNodeName();
-                
+
         if (XML_COMPONENT.equals(nodeName)) {
             if (compClass == InvalidComponent.class) {
-                if(parentComponent instanceof RADVisualContainer) {                    
+                if(parentComponent instanceof RADVisualContainer) {
                     newComponent = new RADVisualComponent();
                 } else {
                     newComponent = new RADComponent();
-                }                
+                }
             } else {
                 if (FormUtils.isVisualizableClass(compClass)) {
                     newComponent = new RADVisualComponent();
                 } else {
                     newComponent = new RADComponent();
-                }                
-            }            
+                }
+            }
         }
         else if (XML_MENU_COMPONENT.equals(nodeName)) {
             if (RADVisualComponent.getMenuType(compClass) != null) {
@@ -831,7 +831,7 @@ public class GandalfPersistenceManager extends PersistenceManager {
                 if (java.awt.Container.class.isAssignableFrom(compClass))
                     newComponent = new RADVisualContainer();
                 else newComponent = new RADContainer();
-            }  
+            }
         }
         else {
             PersistenceException ex = new PersistenceException(
@@ -848,13 +848,13 @@ public class GandalfPersistenceManager extends PersistenceManager {
         // initialize the metacomponent
         try {
             if(compClass==InvalidComponent.class){
-                newComponent.setValid(false);                            
+                newComponent.setValid(false);
                 newComponent.setMissingClassName(className);
             }
             newComponent.initialize(formModel);
             newComponent.setStoredName(compName);
             newComponent.initInstance(compClass);
-            newComponent.setInModel(true);            
+            newComponent.setInModel(true);
         }
         catch (Exception ex) {
             compEx = ex;
@@ -1072,7 +1072,7 @@ public class GandalfPersistenceManager extends PersistenceManager {
                         layoutSupport.updatePrimaryContainer();
                     }
                     // can't do anything reasonable on failure, just log stack trace
-                    catch (Exception ex) { 
+                    catch (Exception ex) {
                         ErrorManager.getDefault().notify(ErrorManager.INFORMATIONAL, ex);
                     }
                     catch (Error ex) {
@@ -1407,7 +1407,7 @@ public class GandalfPersistenceManager extends PersistenceManager {
                 CodeStructure.createStatement(
                     contCodeExp,
                     addTabMethod1,
-                    new CodeExpression[] { 
+                    new CodeExpression[] {
                         createExpressionForProperty(
                             codeStructure, String.class, tabName, tabNamePropEd),
                         createExpressionForProperty(
@@ -1708,6 +1708,7 @@ public class GandalfPersistenceManager extends PersistenceManager {
         return setLayoutMethod;
     }
 
+  // ist nur für alte Versionen von Netbeans relevant
     private int loadLayout(org.w3c.dom.Node layoutNode,
                            LayoutSupportManager layoutSupport)
     {
@@ -1944,7 +1945,7 @@ public class GandalfPersistenceManager extends PersistenceManager {
             boolean nullLayout = false;
             int i = findName("useNullLayout", propertyNames); // NOI18N
             if (i >= 0)
-                nullLayout = Boolean.TRUE.equals(propertyValues.get(i)); 
+                nullLayout = Boolean.TRUE.equals(propertyValues.get(i));
 
             layoutParams = CodeStructure.EMPTY_PARAMS;
             layoutClass = nullLayout ? null :
@@ -2021,15 +2022,15 @@ public class GandalfPersistenceManager extends PersistenceManager {
                                          RADComponent metacomp,
                                          String propCategory)
     {
-	FormProperty[] properties;                        
+	FormProperty[] properties;
         org.w3c.dom.Node[] propNodes = findSubNodes(node, XML_PROPERTY);
         String[] propNames = getPropertyAttributes(propNodes, ATTR_PROPERTY_NAME);
-	
+
         if(metacomp.isValid()) {
-            properties = findProperties(propNames, metacomp, propCategory);            
-        } else {                        
-            String[] propTypes = getPropertyAttributes(propNodes, ATTR_PROPERTY_TYPE);            
-            properties = getFakeProperties(propNames, propTypes, propNodes, metacomp, propCategory);            
+            properties = findProperties(propNames, metacomp, propCategory);
+        } else {
+            String[] propTypes = getPropertyAttributes(propNodes, ATTR_PROPERTY_TYPE);
+            properties = getFakeProperties(propNames, propTypes, propNodes, metacomp, propCategory);
         }
 
         for (int i=0; i < propNodes.length; i++) {
@@ -2039,14 +2040,14 @@ public class GandalfPersistenceManager extends PersistenceManager {
             org.w3c.dom.Node propNode = propNodes[i];
             FormProperty property = properties[i];
 
-	    loadProperty(propNode, metacomp, property);            
+	    loadProperty(propNode, metacomp, property);
         }
     }
 
     private void loadProperty(org.w3c.dom.Node propNode, RADComponent metacomp, FormProperty property) {
 	Throwable t = null;
 	org.w3c.dom.Node valueNode = null;
-	
+
 	if (property == null) {
 	    PersistenceException ex = new PersistenceException(
 					     "Unknown property"); // NOI18N
@@ -2086,7 +2087,7 @@ public class GandalfPersistenceManager extends PersistenceManager {
 		return;
 	    } // if we failed to create the property editor we may still decode
               // the saved value from valueStr (i.e. a primitive value)
-	}	    
+	}
 
 	// load the property value
 	Object value = NO_VALUE;
@@ -2145,10 +2146,10 @@ public class GandalfPersistenceManager extends PersistenceManager {
 			}
 		    }
 
-		    if (!serialized) {			
+		    if (!serialized) {
 			// the value is saved by XMLPropertyEditor
 			for (int j=0; j < n; j++) {
-			    org.w3c.dom.Node node = children.item(j);			    
+			    org.w3c.dom.Node node = children.item(j);
 			    if (node.getNodeType()
 				== org.w3c.dom.Node.ELEMENT_NODE)
 			    {   // here is the element of stored value
@@ -2208,7 +2209,7 @@ public class GandalfPersistenceManager extends PersistenceManager {
             ResourceSupport.setExcludedProperty(property, true);
         }
 
-	// hack for properties that can't be set until all children 
+	// hack for properties that can't be set until all children
         // are added to the container
 	if (metacomp != null) {
             List<Object> propList = null;
@@ -2253,13 +2254,13 @@ public class GandalfPersistenceManager extends PersistenceManager {
             }
     // TODO: stripped
             /*if(value instanceof RADConnectionPropertyEditor.RADConnectionDesignValue) {
-                boolean accepted = setConnectedProperty(property, 
+                boolean accepted = setConnectedProperty(property,
                                                        (RADConnectionPropertyEditor.RADConnectionDesignValue) value,
-                                                       (metacomp == null) ? null : metacomp.getName(), 
+                                                       (metacomp == null) ? null : metacomp.getName(),
                                                        propNode);
                 if(!accepted) {
                     // makes sense only for PROPERTY, and METHOD type.
-                    // in case it wasn't set for further handling 
+                    // in case it wasn't set for further handling
                     // we must set it now.
                     property.setValue(value);
                 }
@@ -2281,12 +2282,12 @@ public class GandalfPersistenceManager extends PersistenceManager {
 //                        }
 //                    }
 //                }
-                property.setValue(value);    	                     
-            }                        
+                property.setValue(value);
+            }
         } catch (Exception ex) {
 	    createLoadingErrorMessage(ex, propNode);
 	    return;
-	}	
+	}
     }
 
   // TODO: stripped
@@ -2308,19 +2309,19 @@ public class GandalfPersistenceManager extends PersistenceManager {
 //        }
 //        return false;
 //    }
-    
+
     private void createLoadingErrorMessage(Exception ex, org.w3c.dom.Node propNode) {
        String msg = createLoadingErrorMessage(
 		FormUtils.getBundleString("MSG_ERR_CannotSetLoadedValue"), // NOI18N
 		propNode);
         annotateException(ex, msg);
-        nonfatalErrors.add(ex); 
+        nonfatalErrors.add(ex);
     }
-    
+
     private PropertyEditor getPropertyEditor(String editorStr, FormProperty property, Class propertyType, org.w3c.dom.Node propNode, boolean reportFailure) {
 	// load the property editor class and create an instance of it
 	PropertyEditor prEd = null;
-	Throwable t = null;	
+	Throwable t = null;
 	if (editorStr != null) {
 	    Class editorClass = null;
 	    try {
@@ -2371,10 +2372,10 @@ public class GandalfPersistenceManager extends PersistenceManager {
 		nonfatalErrors.add(t);
 		return null;
 	    }
-	}	
+	}
 	return prEd;
     }
-    
+
     private Class getPropertyType(String typeStr, FormProperty property, org.w3c.dom.Node propNode) {
 	// get the type of stored property value
 	Class propertyType = null;
@@ -2411,12 +2412,12 @@ public class GandalfPersistenceManager extends PersistenceManager {
 		return null;
 	    }
 	}
-	else propertyType = property.getValueType();	
+	else propertyType = property.getValueType();
 	return propertyType;
     }
-    
-    private void loadBeanFromXML(org.w3c.dom.Node node, BeanPropertyEditor beanPropertyEditor) 
-	throws Exception 
+
+    private void loadBeanFromXML(org.w3c.dom.Node node, BeanPropertyEditor beanPropertyEditor)
+	throws Exception
     {
 	String typeStr = node.getAttributes().getNamedItem(ATTR_PROPERTY_TYPE).getNodeValue();
 	Class type = null;
@@ -2432,50 +2433,50 @@ public class GandalfPersistenceManager extends PersistenceManager {
 	    nonfatalErrors.add(ex);
 	    return;
 	}
-	
-	beanPropertyEditor.intializeFromType(type);							    	
-	
+
+	beanPropertyEditor.intializeFromType(type);
+
     }
-    
-    private void loadBeanProperty(BeanPropertyEditor beanPropertyEditor, org.w3c.dom.Node valueNode) {	
+
+    private void loadBeanProperty(BeanPropertyEditor beanPropertyEditor, org.w3c.dom.Node valueNode) {
 	if(beanPropertyEditor.valueIsBeanProperty()) {
-	    org.w3c.dom.NodeList children = valueNode.getChildNodes();	
+	    org.w3c.dom.NodeList children = valueNode.getChildNodes();
 	    Node.Property[] allBeanProperties = beanPropertyEditor.getProperties();
-	    org.w3c.dom.Node node;		
+	    org.w3c.dom.Node node;
 	    FormProperty prop;
 
 	    for (int i=0; i<children.getLength(); i++) {
-		node = children.item(i);	  
-		if (node != null && node.getNodeType() == org.w3c.dom.Node.ELEMENT_NODE) { 
+		node = children.item(i);
+		if (node != null && node.getNodeType() == org.w3c.dom.Node.ELEMENT_NODE) {
 		    prop = (FormProperty) getPropertyOfName(allBeanProperties, getAttribute(node, ATTR_PROPERTY_NAME));
 		    if(prop != null) {
-			loadProperty(node, null, prop);								
-		    }	    
-		}	  
-	    }		    
-	}	
+			loadProperty(node, null, prop);
+		    }
+		}
+	    }
+	}
     }
-    
+
     private String[] getPropertyAttributes(org.w3c.dom.Node[] propNodes, String attribute){
         String[] ret = new String[propNodes.length];
         for (int i=0; i < propNodes.length; i++) {
             org.w3c.dom.Node propNode = propNodes[i];
-            String propAttribute = getAttribute(propNode, attribute);            
+            String propAttribute = getAttribute(propNode, attribute);
             if (propAttribute != null)
                 ret[i] = propAttribute;
             else {
                 PersistenceException ex = new PersistenceException(
                                            "Missing property attribute " + attribute); // NOI18N
                 String msg = FormUtils.getFormattedBundleString("MSG_ERR_MissingPropertyName", // NOI18N
-                                                   new Object[] { attribute });                
+                                                   new Object[] { attribute });
                 annotateException(ex, ErrorManager.ERROR, msg);
                 nonfatalErrors.add(ex);
                 continue;
             }
-        }        
+        }
         return ret;
     }
-    
+
     private FormProperty[] findProperties(String[] propertyNames,
                                           RADComponent metacomp,
                                           String propCategory)
@@ -2484,7 +2485,7 @@ public class GandalfPersistenceManager extends PersistenceManager {
             return metacomp.getBeanProperties(propertyNames);
 
         if (XML_A11Y_PROPERTIES.equals(propCategory)) {
-            return findPropertiesByName(propertyNames, metacomp);            
+            return findPropertiesByName(propertyNames, metacomp);
         }
 
         return new FormProperty[propertyNames.length]; // error
@@ -2492,7 +2493,7 @@ public class GandalfPersistenceManager extends PersistenceManager {
 
     private FormProperty[] findPropertiesByName(String[] propertyNames,
                                                 RADComponent metacomp)
-    {   
+    {
         FormProperty[] properties = new FormProperty[propertyNames.length];
         for (int i=0; i < propertyNames.length; i++) {
             properties[i] = metacomp.getPropertyByName(propertyNames[i], FormProperty.class, true);
@@ -2500,23 +2501,23 @@ public class GandalfPersistenceManager extends PersistenceManager {
 
         return properties;
     }
-    
+
     private FormProperty[] getFakeProperties(String[] propertyNames,
                                              String[] propertyTypes,
                                              org.w3c.dom.Node[] propNodes,
                                              RADComponent metacomp,
                                              String propCategory)
-    {           
-        if (XML_PROPERTIES.equals(propCategory)) { 
-            Class[] propertyClasses = new Class[propertyTypes.length]; 
-            for (int i=0; i < propertyNames.length; i++) {                
-                propertyClasses[i] = getClassByName(propertyTypes[i], propNodes[i]);                                             
-            }            
-            return metacomp.getFakeBeanProperties(propertyNames, propertyClasses);        
-        
-        }        
+    {
+        if (XML_PROPERTIES.equals(propCategory)) {
+            Class[] propertyClasses = new Class[propertyTypes.length];
+            for (int i=0; i < propertyNames.length; i++) {
+                propertyClasses[i] = getClassByName(propertyTypes[i], propNodes[i]);
+            }
+            return metacomp.getFakeBeanProperties(propertyNames, propertyClasses);
+
+        }
         if (XML_A11Y_PROPERTIES.equals(propCategory)) {
-            findPropertiesByName(propertyNames, metacomp);             
+            findPropertiesByName(propertyNames, metacomp);
         }
 
         return new FormProperty[propertyNames.length]; // error
@@ -2531,7 +2532,7 @@ public class GandalfPersistenceManager extends PersistenceManager {
         catch (Exception ex) {
             t = ex;
         }
-        catch (LinkageError ex) {                    
+        catch (LinkageError ex) {
             t = ex;
         }
         if (t != null) { // loading the component class failed
@@ -2540,11 +2541,11 @@ public class GandalfPersistenceManager extends PersistenceManager {
                                                    new Object[] { className }),
                                                    node);
             annotateException(t, msg);
-            nonfatalErrors.add(t);                 
-        }        
+            nonfatalErrors.add(t);
+        }
         return clazz;
     }
-        
+
     private Node.Property getPropertyOfName(Node.Property[] props, String name) {
         for (int i=0; i < props.length; i++)
             if (props[i].getName().equals(name))
@@ -3046,7 +3047,7 @@ public class GandalfPersistenceManager extends PersistenceManager {
                     Object autoResSetting = formSettings.get(ResourceSupport.PROP_AUTO_RESOURCING);
                     if (autoResSetting instanceof Integer && ((Integer)autoResSetting).intValue() == ResourceSupport.AUTO_OFF) {
                         formSettings.set(ResourceSupport.PROP_AUTO_RESOURCING, ResourceSupport.AUTO_I18N);
-                    }                    
+                    }
                     }
             } else {
                 // we have a valid name / value pair
@@ -3301,7 +3302,7 @@ public class GandalfPersistenceManager extends PersistenceManager {
             // compatibility hack for saving form's menu bar (part II)
             if (container instanceof RADVisualFormContainer)
                 children = visualContainer.getSubComponents();
-        } 
+        }
         else saveComponent((RADComponent)container, buf, indent);
 
         if (children == null)
@@ -3730,7 +3731,7 @@ public class GandalfPersistenceManager extends PersistenceManager {
 
         // 2. Binding properties
 //        saveBindingProperties(component, buf, indent); // TODO: stripped
-        
+
         // 3. Synthetic properties
         if (component instanceof RADVisualFormContainer)
             saveSyntheticProperties(component, buf, indent);
@@ -3833,8 +3834,8 @@ public class GandalfPersistenceManager extends PersistenceManager {
         String encodedValue = null;
         String encodedSerializeValue = null;
 
-        PropertyEditor prEd = property.getCurrentEditor();	
-        
+        PropertyEditor prEd = property.getCurrentEditor();
+
 //        if (prEd instanceof FontEditor) { // Issue 82465: new prEd in NB 6.0
 //            raiseFormatVersion(NB60_VERSION);
 //        }
@@ -3897,7 +3898,7 @@ public class GandalfPersistenceManager extends PersistenceManager {
         buf.append(indent);
 
         if (valueNode != null || encodedSerializeValue != null) {
-            // value is encoded by XMLPrpertyEditor or serialized 
+            // value is encoded by XMLPrpertyEditor or serialized
             addElementOpenAttr(
                 buf,
                 XML_PROPERTY,
@@ -3909,23 +3910,23 @@ public class GandalfPersistenceManager extends PersistenceManager {
                     ATTR_PROPERTY_PRE_CODE,
                     ATTR_PROPERTY_POST_CODE },
                 new String[] {
-                    propertyName,		    
+                    propertyName,
                     property.getValueType().getName(),
                     noResource,
                     prEd.getClass().getName(),
                     property.getPreCode(),
                     property.getPostCode() });
 
-	    if (valueNode != null) {					
-		if( prEd instanceof BeanPropertyEditor 
-		    && ((BeanPropertyEditor) prEd).valueIsBeanProperty() ) 
+	    if (valueNode != null) {
+		if( prEd instanceof BeanPropertyEditor
+		    && ((BeanPropertyEditor) prEd).valueIsBeanProperty() )
 		{   // the property is a bean,
 		    // so there could be some children nodes ...
 		    saveBeanProperty((BeanPropertyEditor) prEd, valueNode, buf, indent + ONE_INDENT);
 		} else {
-		    saveNodeIntoText(buf, valueNode, indent + ONE_INDENT);					    		    
-		}                
-            }		    
+		    saveNodeIntoText(buf, valueNode, indent + ONE_INDENT);
+		}
+            }
             else {
                 buf.append(indent).append(ONE_INDENT);
                 addLeafElementOpenAttr(
@@ -3960,14 +3961,14 @@ public class GandalfPersistenceManager extends PersistenceManager {
         }
         return true;
     }
-    
+
     private org.w3c.dom.Node saveBeanToXML(Class type, org.w3c.dom.Document doc) {
 	org.w3c.dom.Element el = doc.createElement(XML_PROPERTY_BEAN);
-	el.setAttribute(ATTR_PROPERTY_TYPE, type.getName());	
+	el.setAttribute(ATTR_PROPERTY_TYPE, type.getName());
 	return el;
     }
-    
-    private void saveBeanProperty(BeanPropertyEditor beanPropertyEditor, org.w3c.dom.Node valueNode, StringBuffer buf, String indent) {	
+
+    private void saveBeanProperty(BeanPropertyEditor beanPropertyEditor, org.w3c.dom.Node valueNode, StringBuffer buf, String indent) {
 	boolean children = false;
 	FormProperty[] props = (FormProperty[]) beanPropertyEditor.getProperties();
 
@@ -3979,38 +3980,38 @@ public class GandalfPersistenceManager extends PersistenceManager {
 	    attrNames[i] = attributes.item(i).getNodeName();
 	    attrValues[i] = attributes.item(i).getNodeValue();
 	}
-			
+
 	for (int i=0; i<props.length; i++) {
 	    if( props[i].isChanged() ) {
 		if(!children) {
-		    // we found the first child property, 		    
-		    // let's start the element tag	    
+		    // we found the first child property,
+		    // let's start the element tag
 		    buf.append(indent);
 		    addElementOpenAttr(buf,
 					valueNode.getNodeName(),
 					attrNames,
 					attrValues);
 		    children = true;
-		}		
+		}
 		saveProperty(props[i],
 			 props[i].getName(),
 			 buf,
-			 indent + ONE_INDENT);	
-	    }			
-	}		    			    					
+			 indent + ONE_INDENT);
+	    }
+	}
 
-	if(children) {	    
+	if(children) {
 	    // there were children properties,
 	    // we should close the element tag
-	    buf.append(indent);	    
-	    addElementClose(buf, valueNode.getNodeName());			    
+	    buf.append(indent);
+	    addElementClose(buf, valueNode.getNodeName());
 	} else {
 	    // there were no children properties,
 	    // let's save the node as it is
-	    saveNodeIntoText(buf, valueNode, indent + ONE_INDENT);	    
+	    saveNodeIntoText(buf, valueNode, indent + ONE_INDENT);
 	}
     }
-    
+
     private boolean saveValue(Object value,
                               Class valueType,
                               PropertyEditor prEd,
@@ -5530,7 +5531,7 @@ public class GandalfPersistenceManager extends PersistenceManager {
     private /*static */Class getClassFromString(String type)
         throws ClassNotFoundException
     {
-        if ("int".equals(type)) // NOI18N   
+        if ("int".equals(type)) // NOI18N
             return Integer.TYPE;
         else if ("short".equals(type)) // NOI18N
             return Short.TYPE;
@@ -5617,7 +5618,7 @@ public class GandalfPersistenceManager extends PersistenceManager {
      * <LI> Class
      * <LI> String
      * <LI> Integer, Short, Byte, Long, Float, Double, Boolean, Character </UL>
-     * 
+     *
      * @param value value to encode.
      * @return String containing encoded value or null if specified object is not of supported type
      */
@@ -5649,7 +5650,7 @@ public class GandalfPersistenceManager extends PersistenceManager {
 
     /** Decodes a value from String containing textual representation of
      * serialized stream.
-     * 
+     *
      * @param strValue value to decode.
      * @return decoded object
      * @exception IOException thrown if an error occurres during deserializing
@@ -5682,7 +5683,7 @@ public class GandalfPersistenceManager extends PersistenceManager {
     }
 
     /** Encodes specified value to a String containing textual representation of serialized stream.
-     * 
+     *
      * @param value value to encode.
      * @return String containing textual representation of the serialized object
      * @throws java.io.IOException when some problem occurs during encoding.
@@ -6341,7 +6342,7 @@ public class GandalfPersistenceManager extends PersistenceManager {
 
         return "org.netbeans.modules.form.forminfo." + shortName; // NOI18N
     }
-    
+
     // --------
     // NB 3.1 compatibility - layout persistence conversion tables
 

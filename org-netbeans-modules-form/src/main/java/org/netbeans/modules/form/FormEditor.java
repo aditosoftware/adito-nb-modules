@@ -524,8 +524,8 @@ public class FormEditor {
             return; // no errors or warnings logged
 
         final ErrorManager errorManager = ErrorManager.getDefault();
-        final GandalfPersistenceManager persistManager = 
-                    (GandalfPersistenceManager) persistenceManager;
+//        final GandalfPersistenceManager persistManager =
+//                    (GandalfPersistenceManager) persistenceManager;
 
         boolean checkLoadingErrors = operation == LOADING && formLoaded;
         boolean anyNonFatalLoadingError = false; // was there a real error?
@@ -562,11 +562,11 @@ public class FormEditor {
             }
             errorManager.notify(ErrorManager.INFORMATIONAL, t);
 
-            if (persistManager != null) {
+            if (persistenceManager != null) {
                 // form file was recognized, there is instance of persistance managager
                 // creating report about problems while loading components, 
                 // setting props of components, ...
-                userErrorMsgs.append(persistManager.getExceptionAnnotation(t));
+                userErrorMsgs.append("Here should be some ExceptionAnnotation Gandalf provides. AditoPersistenceManager doesn't do that (yet)."); // TODO? //persistenceManager.getExceptionAnnotation(t));
                 userErrorMsgs.append("\n\n");  // NOI18N
             } else {
                 // form file was not recognized

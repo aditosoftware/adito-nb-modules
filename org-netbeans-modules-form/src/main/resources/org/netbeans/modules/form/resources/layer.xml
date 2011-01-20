@@ -160,15 +160,15 @@ made subject to such option by the copyright holder.
             <file name="JPanel.palette_item" url="palette/JPanel.palette_item">
                 <attr name="position" intvalue="100"/>
             </file>
-            <!--<file name="JTabbedPane.palette_item" url="palette/JTabbedPane.palette_item">-->
-                <!--<attr name="position" intvalue="200"/>-->
-            <!--</file>-->
+            <file name="JTabbedPane.palette_item" url="palette/JTabbedPane.palette_item">
+                <attr name="position" intvalue="200"/>
+            </file>
             <!--<file name="JSplitPane.palette_item" url="palette/JSplitPane.palette_item">-->
                 <!--<attr name="position" intvalue="300"/>-->
             <!--</file>-->
-            <!--<file name="JScrollPane.palette_item" url="palette/JScrollPane.palette_item">-->
-                <!--<attr name="position" intvalue="400"/>-->
-            <!--</file>-->
+            <file name="JScrollPane.palette_item" url="palette/JScrollPane.palette_item">
+                <attr name="position" intvalue="400"/>
+            </file>
             <!--<file name="JToolBar.palette_item" url="palette/JToolBar.palette_item">-->
                 <!--<attr name="position" intvalue="500"/>-->
             <!--</file>-->
@@ -178,9 +178,9 @@ made subject to such option by the copyright holder.
             <!--<file name="JInternalFrame.palette_item" url="palette/JInternalFrame.palette_item">-->
                 <!--<attr name="position" intvalue="700"/>-->
             <!--</file>-->
-            <!--<file name="JLayeredPane.palette_item" url="palette/JLayeredPane.palette_item">-->
-                <!--<attr name="position" intvalue="800"/>-->
-            <!--</file>-->
+            <file name="JLayeredPane.palette_item" url="palette/JLayeredPane.palette_item">
+                <attr name="position" intvalue="800"/>
+            </file>
 
             </folder>
 
@@ -251,9 +251,9 @@ made subject to such option by the copyright holder.
             <!--<file name="JToggleButton.palette_item" url="palette/JToggleButton.palette_item">-->
                 <!--<attr name="position" intvalue="300"/>-->
             <!--</file>-->
-            <!--<file name="JCheckBox.palette_item" url="palette/JCheckBox.palette_item">-->
-                <!--<attr name="position" intvalue="400"/>-->
-            <!--</file>-->
+            <file name="JCheckBox.palette_item" url="palette/JCheckBox.palette_item">
+                <attr name="position" intvalue="400"/>
+            </file>
             <!--<file name="JRadioButton.palette_item" url="palette/JRadioButton.palette_item">-->
                 <!--<attr name="position" intvalue="500"/>-->
             <!--</file>-->
