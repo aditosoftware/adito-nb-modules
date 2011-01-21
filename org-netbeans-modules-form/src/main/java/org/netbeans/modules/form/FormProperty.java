@@ -536,8 +536,8 @@ public abstract class FormProperty extends Node.Property {
     }
 
     /** This method updates state of the property according to the target
-     * object. This may be useful when property needs to be initialized
-     * with existing target object. But this approach doesn't work well with
+     * object. This may be usefulting target objec when property needs to be initialized
+     * with exist. But this approach doesn't work well with
      * bound and derived properties...
      * 
      * @throws java.lang.IllegalAccessException when there is an access problem.

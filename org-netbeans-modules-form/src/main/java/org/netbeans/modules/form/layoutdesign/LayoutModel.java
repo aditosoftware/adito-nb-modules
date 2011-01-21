@@ -44,6 +44,8 @@
 
 package org.netbeans.modules.form.layoutdesign;
 
+import org.openide.filesystems.FileObject;
+
 import java.awt.*;
 import java.util.*;
 import java.util.List;
@@ -1079,18 +1081,31 @@ public class LayoutModel implements LayoutConstants {
         return AditoLayoutPersistenceManager.saveContainer(this, container, idToNameMap, indent, humanReadable);
     }
 
-    /**
-     * Loads the layout of the given container.
-     *
-     * @param containerId ID of the layout container to be loaded
-     * @param layoutNodeList XML data to load
-     * @param nameToIdMap map from component names to component IDs
-     */
-    public void loadContainerLayout(String containerId, org.w3c.dom.NodeList layoutNodeList, Map<String,String> nameToIdMap)
-        throws java.io.IOException
-    {
-        AditoLayoutPersistenceManager.loadContainer(this, containerId, layoutNodeList, nameToIdMap);
-    }
+//    /**
+//     * Loads the layout of the given container.
+//     *
+//     * @param containerId ID of the layout container to be loaded
+//     * @param layoutNodeList XML data to load
+//     * @param nameToIdMap map from component names to component IDs
+//     */
+//    public void loadContainerLayout(String containerId, org.w3c.dom.NodeList layoutNodeList, Map<String,String> nameToIdMap)
+//        throws java.io.IOException
+//    {
+//        AditoLayoutPersistenceManager.loadContainer(this, containerId, layoutNodeList, nameToIdMap);
+//    }
+
+      /**
+       * Loads the layout of the given container.
+       *
+       * @param containerId ID of the layout container to be loaded
+       * @param pModelComp  component to load from
+       * @param nameToIdMap map from component names to component IDs
+       */
+      public void loadContainerLayout(String containerId, FileObject pModelComp, Map<String, String> nameToIdMap)
+          throws java.io.IOException
+      {
+        AditoLayoutPersistenceManager.loadContainer(this, containerId, pModelComp, nameToIdMap);
+      }
 
     /**
      * Returns whether the model was repaired (because of some error found) or

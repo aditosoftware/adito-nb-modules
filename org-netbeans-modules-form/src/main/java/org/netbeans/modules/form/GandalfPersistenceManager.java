@@ -1040,7 +1040,7 @@ public class GandalfPersistenceManager extends PersistenceManager {
                     nameToIdMap.put(comp.getName(), comp.getId());
                 }
                 try {
-                    layoutModel.loadContainerLayout(visualContainer.getId(), layoutNode.getChildNodes(), nameToIdMap);
+                    layoutModel.loadContainerLayout(visualContainer.getId(), null /*layoutNode.getChildNodes()*/, nameToIdMap);
                     visualContainer.setOldLayoutSupport(false);
                     layoutSupport = null;
                     layoutInitialized = true;

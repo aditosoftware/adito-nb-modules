@@ -1,10 +1,11 @@
 package org.netbeans.modules.form;
 
-import de.adito.aditoweb.core.util.debug.Debug;
+import de.adito.aditoweb.filesystem.common.AfsUrlUtil;
+import de.adito.aditoweb.filesystem.datamodelfs.access.model.*;
 import org.netbeans.modules.form.layoutdesign.*;
 import org.netbeans.modules.form.layoutdesign.support.SwingLayoutBuilder;
 import org.netbeans.modules.form.layoutsupport.LayoutSupportManager;
-import org.openide.filesystems.FileObject;
+import org.openide.filesystems.*;
 
 import javax.swing.*;
 import java.util.*;
@@ -22,41 +23,10 @@ public class AditoPersistenceManager extends PersistenceManager
   }
 
   @Override
-  public void loadForm(FormDataObject formObject, FormModel formModel, List<Throwable> nonfatalErrors)
+  public synchronized void loadForm(FormDataObject formObject, FormModel formModel, List<Throwable> nonfatalErrors)
       throws PersistenceException
   {
-    _loadForm(formObject.getFormEntry().getFile(), formObject.getPrimaryFile(), formModel, nonfatalErrors);
-  }
-
-  private void _loadForm(FileObject pFormFile, FileObject pAodFile,
-                         FormModel pFormModel, List<Throwable> pNonfatalErrors) throws PersistenceException
-  {
-    if (pFormModel == null)
-      pFormModel = new FormModel();
-
-    pFormModel.setCurrentVersionLevel(FormModel.LATEST_VERSION);
-    pFormModel.setMaxVersionLevel(FormModel.LATEST_VERSION);
-    try
-    {
-      Class<JPanel> formBaseClass = JPanel.class;
-      pFormModel.setFormBaseClass(formBaseClass);
-      // Force creation of the default instance in the correct L&F context
-      BeanSupport.getDefaultInstance(formBaseClass);
-    }
-    catch (Exception e)
-    {
-      e.printStackTrace();
-    }
-
-    pFormModel.setName(pAodFile.getName());
-
-    RADComponent topComp = pFormModel.getTopRADComponent();
-    Debug.write("comp to load", topComp); // DEBUG: remove it!
-    if (topComp != null) // load the main form component
-      _loadComponent(pFormModel, topComp, null);
-
-    FormEditor.updateProjectForNaturalLayout(pFormModel);
-    pFormModel.setFreeDesignDefaultLayout(true);
+    _loadForm(new _Info(formObject, formModel, nonfatalErrors));
   }
 
   @Override
@@ -66,8 +36,36 @@ public class AditoPersistenceManager extends PersistenceManager
     //To change body of implemented methods use File | Settings | File Templates.
   }
 
+  private void _loadForm(_Info pInfo)
+      throws PersistenceException
+  {
+    FormModel formModel = pInfo.getFormModel();
+    formModel.setCurrentVersionLevel(FormModel.LATEST_VERSION);
+    formModel.setMaxVersionLevel(FormModel.LATEST_VERSION);
+    try
+    {
+      Class<JPanel> formBaseClass = JPanel.class;
+      formModel.setFormBaseClass(formBaseClass);
+      // Force creation of the default instance in the correct L&F context
+      BeanSupport.getDefaultInstance(formBaseClass);
+    }
+    catch (Exception e)
+    {
+      e.printStackTrace();
+    }
 
-  private void _loadComponent(FormModel pFormModel, RADComponent pComponent, RADComponent pParentComponent)
+    formModel.setName(pInfo.getFormObject().getPrimaryFile().getName());
+
+    RADComponent topComp = formModel.getTopRADComponent();
+    if (topComp != null) // load the main form component
+      _loadComponent(pInfo, pInfo.getModelRoot(), topComp, null);
+
+    FormEditor.updateProjectForNaturalLayout(formModel);
+    formModel.setFreeDesignDefaultLayout(true);
+  }
+
+
+  private void _loadComponent(_Info pInfo, FileObject pModelComp, RADComponent pComponent, RADComponent pParentComponent)
       throws PersistenceException
   {
     ComponentContainer container = // is this component a container?
@@ -92,16 +90,16 @@ public class AditoPersistenceManager extends PersistenceManager
 
     // load subcomponents
     RADComponent[] childComponents;
-    if (false) // childNodes != null)
+    FileObject childModels = pInfo.getModelRoot().getFileObject(FieldConst.CHILDDATAMODELS.getName());
+    if (childModels != null)
     {
       List<RADComponent> list = new ArrayList<RADComponent>();
-      // TODO: process children
-//      for (int i = 0, n = childNodes.getLength(); i < n; i++)
-//      {
-//        RADComponent newComp = restoreComponent(componentNode, component);
-//        if (newComp != null)
-//          list.add(newComp);
-//      }
+      for (FileObject childModel : childModels.getChildren())
+      {
+        RADComponent newComp = _restoreComponent(pInfo, childModel, pComponent);
+        if (newComp != null)
+          list.add(newComp);
+      }
       childComponents = new RADComponent[list.size()];
       list.toArray(childComponents);
     }
@@ -109,7 +107,7 @@ public class AditoPersistenceManager extends PersistenceManager
       childComponents = new RADComponent[0];
 
 
-    Object layout = null;
+    Object layout = null; // TODO: um das layout zu testen muss das hier NICHT 'null' sein!
 
     if (visualContainer != null)
     {
@@ -119,7 +117,7 @@ public class AditoPersistenceManager extends PersistenceManager
 
       if (layout != null)
       {
-        LayoutModel layoutModel = pFormModel.getLayoutModel();
+        LayoutModel layoutModel = pInfo.getFormModel().getLayoutModel();
         Map<String, String> nameToIdMap = new HashMap<String, String>();
         for (int i = 0; i < childComponents.length; i++)
         {
@@ -128,7 +126,7 @@ public class AditoPersistenceManager extends PersistenceManager
         }
         try
         {
-          layoutModel.loadContainerLayout(visualContainer.getId(), null /*layoutNode.getChildNodes()*/, nameToIdMap); // TODO
+          layoutModel.loadContainerLayout(visualContainer.getId(), pModelComp /*layoutNode.getChildNodes()*/, nameToIdMap); // TODO
           visualContainer.setOldLayoutSupport(false);
           layoutSupport = null;
           layoutInitialized = true;
@@ -160,7 +158,7 @@ public class AditoPersistenceManager extends PersistenceManager
             {
               // acknowledged by SwingLayoutBuilder - this is new layout
               visualContainer.setOldLayoutSupport(false);
-              pFormModel.getLayoutModel().addRootComponent(
+              pInfo.getFormModel().getLayoutModel().addRootComponent(
                   new LayoutComponent(visualContainer.getId(), true));
               layoutSupport = null;
               //newLayout = Boolean.TRUE; // TODO?
@@ -251,7 +249,278 @@ public class AditoPersistenceManager extends PersistenceManager
 
     if (pParentComponent == null) // this is a root component
       ResourceSupport.loadInjectedResources(pComponent);
+  }
 
+  // recognizes, creates, initializes and loads a meta component
+  private RADComponent _restoreComponent(_Info pInfo, FileObject pChildModel, RADComponent pParentComponent) throws PersistenceException
+  {
+    EModelAccessType compType;
+    String compName;
+    String className;
+    try
+    {
+      Integer type = FieldConst.TYPE.accessField(pChildModel).getValue();
+      compName = FieldConst.NAME.accessField(pChildModel).getValue();
+      compType = EModelAccessType.get(type);
+      switch (compType)
+      {
+        case BUTTON:
+          className = JButton.class.getName();
+          break;
+        case CHECKBOX:
+          className = JCheckBox.class.getName();
+          break;
+        case COMBOBOX:
+          className = JComboBox.class.getName();
+          break;
+        case EDITFIELD:
+          className = JTextField.class.getName();
+          break;
+        case LABEL:
+          className = JLabel.class.getName();
+          break;
+        case LIST:
+          className = JList.class.getName();
+          break;
+        case RADIOBUTTON:
+          className = JRadioButton.class.getName();
+          break;
+        case REGISTER:
+          className = JTabbedPane.class.getName();
+          break;
+        case TABLE:
+          className = JTable.class.getName();
+          break;
+        case TREE:
+          className = JTree.class.getName();
+          break;
+        default:
+          return null;
+      }
+    }
+    catch (Exception e)
+    {
+      return null; // kein Fehler, aber auch keine Komponente.
+    }
+
+    // first load the component class
+    Class<?> compClass = null;
+    Throwable compEx = null;
+    try
+    {
+      compClass = FormUtils.loadSystemClass(className);
+      // Force creation of the default instance in the correct L&F context
+      BeanSupport.getDefaultInstance(compClass);
+    }
+    catch (Exception ex)
+    {
+      compClass = InvalidComponent.class;
+      compEx = ex;
+    }
+    catch (LinkageError ex)
+    {
+      compClass = InvalidComponent.class;
+      compEx = ex;
+    }
+    if (compEx != null)
+    { // loading the component class failed
+      pInfo.getNonfatalErrors().add(compEx);
+    }
+
+    compEx = null;
+    // create a new metacomponent
+    RADComponent newComponent;
+
+    switch (compType)
+    {
+      case BUTTON:
+      case CHECKBOX:
+      case COMBOBOX:
+      case EDITFIELD:
+      case LABEL:
+      case LIST:
+      case RADIOBUTTON:
+      case REGISTER:
+      case TABLE:
+      case TREE:
+        if (FormUtils.isVisualizableClass(compClass))
+          newComponent = new RADVisualComponent();
+        else
+          newComponent = new RADComponent();
+        break;
+      default:
+        PersistenceException ex = new PersistenceException("Unknown component element: " + pChildModel.toString()); // NOI18N
+        pInfo.getNonfatalErrors().add(ex);
+        return null;
+    }
+
+//    if (XML_COMPONENT.equals(nodeName))
+//    {
+//      if (compClass == InvalidComponent.class)
+//      {
+//        if (parentComponent instanceof RADVisualContainer)
+//        {
+//          newComponent = new RADVisualComponent();
+//        }
+//        else
+//        {
+//          newComponent = new RADComponent();
+//        }
+//      }
+//      else
+//      {
+//        if (FormUtils.isVisualizableClass(compClass))
+//        {
+//          newComponent = new RADVisualComponent();
+//        }
+//        else
+//        {
+//          newComponent = new RADComponent();
+//        }
+//      }
+//    }
+//    else if (XML_MENU_COMPONENT.equals(nodeName))
+//    {
+//      if (RADVisualComponent.getMenuType(compClass) != null)
+//      {
+//        newComponent = new RADVisualComponent();
+//      }
+//      else
+//      {
+//        newComponent = new RADMenuItemComponent();
+//      }
+//    }
+//    else if (XML_MENU_CONTAINER.equals(nodeName))
+//    {
+//      if (RADVisualComponent.getMenuType(compClass) != null)
+//      {
+//        newComponent = new RADVisualContainer();
+//      }
+//      else
+//      {
+//        newComponent = new RADMenuComponent();
+//      }
+//    }
+//    else if (XML_CONTAINER.equals(nodeName))
+//    {
+//      if (compClass == InvalidComponent.class)
+//      {
+//        newComponent = new RADVisualContainer();
+//      }
+//      else
+//      {
+//        if (java.awt.Container.class.isAssignableFrom(compClass))
+//          newComponent = new RADVisualContainer();
+//        else newComponent = new RADContainer();
+//      }
+//    }
+//    else
+//    {
+//      PersistenceException ex = new PersistenceException(
+//          "Unknown component element"); // NOI18N
+//      annotateException(ex,
+//                        ErrorManager.ERROR,
+//                        FormUtils.getFormattedBundleString("FMT_ERR_UnknownElement", // NOI18N
+//                                                           new Object[]{nodeName})
+//      );
+//      nonfatalErrors.add(ex);
+//      return null;
+//    }
+
+    // initialize the metacomponent
+    try
+    {
+      if (compClass == InvalidComponent.class)
+      {
+        newComponent.setValid(false);
+        newComponent.setMissingClassName(className);
+      }
+      newComponent.initialize(pInfo.getFormModel());
+      newComponent.setStoredName(compName);
+      newComponent.initInstance(compClass);
+      newComponent.setInModel(true);
+    }
+    catch (Exception ex)
+    {
+      compEx = ex;
+    }
+    catch (LinkageError ex)
+    {
+      compEx = ex;
+    }
+    if (compEx != null)
+    { // creating component instance failed
+      pInfo.getNonfatalErrors().add(compEx);
+      return null;
+    }
+
+    pInfo.getComponentsMap().put(compName, newComponent);
+
+    // load the metacomponent (properties, events, layout, etc)
+    _loadComponent(pInfo, pChildModel, newComponent, pParentComponent);
+
+    return newComponent;
+  }
+
+
+  /**
+   * Klasse mit Daten über den aktuellen Vorgang.
+   */
+  private class _Info
+  {
+    private FormDataObject formObject;
+    private FormModel formModel;
+    private List<Throwable> nonfatalErrors;
+    private FileObject modelRoot;
+
+    private Map<String, RADComponent> loadedComponents;
+
+
+    private _Info(FormDataObject pFormObject, FormModel pFormModel, List<Throwable> pNonfatalErrors)
+    {
+      formObject = pFormObject;
+      formModel = pFormModel;
+      if (formModel == null)
+        formModel = new FormModel();
+      nonfatalErrors = pNonfatalErrors;
+
+      try
+      {
+        FileObject aodFile = getFormObject().getPrimaryFile();
+        modelRoot = URLMapper.findFileObject(AfsUrlUtil.createAdmFsUrl(aodFile.getURL()));
+      }
+      catch (Exception e)
+      {
+        throw new RuntimeException(e); // TODO: runtimeEx
+      }
+    }
+
+    public FormDataObject getFormObject()
+    {
+      return formObject;
+    }
+
+    public FormModel getFormModel()
+    {
+      return formModel;
+    }
+
+    public List<Throwable> getNonfatalErrors()
+    {
+      return nonfatalErrors;
+    }
+
+    public FileObject getModelRoot()
+    {
+      return modelRoot;
+    }
+
+    public Map<String, RADComponent> getComponentsMap()
+    {
+      if (loadedComponents == null)
+        loadedComponents = new HashMap<String, RADComponent>(50);
+      return loadedComponents;
+    }
   }
 
 }

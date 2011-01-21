@@ -102,8 +102,6 @@ public class FormDataObject extends MultiDataObject {
                 getFormEditorSupport().saveAs( folder, fileName );
             }
         });
-      Debug.write("create FormDataObject: " + this + "          " +
-                             getPrimaryFile() + "               " + getFormFile()); // DEBUG: remove it!
     }
 
     //--------------------------------------------------------------------

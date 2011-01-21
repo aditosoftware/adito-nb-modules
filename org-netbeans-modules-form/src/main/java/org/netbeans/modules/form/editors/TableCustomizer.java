@@ -1010,7 +1010,7 @@ public class TableCustomizer extends JPanel implements Customizer, FormAwareEdit
         widthPrefCombo.setVisible(!userCode);
         widthMaxLabel.setVisible(!userCode);
         widthMaxCombo.setVisible(!userCode);
-        expressionCombo.setVisible(bound);
+//        expressionCombo.setVisible(bound);
         columnExpressionLabel.setVisible(bound);
         boolean switch1 = bound != (columnExpressionLabel.getParent() != null);
         boolean switch2 = fromComponent != (dummyLabel1.getParent() != null);
@@ -1049,14 +1049,14 @@ public class TableCustomizer extends JPanel implements Customizer, FormAwareEdit
         GroupLayout layout = (GroupLayout)columnsTab.getLayout();
         if (modelBoundChoice.isSelected()) {
             layout.replace(columnTypeLabel, columnExpressionLabel);
-            layout.replace(columnTypeCombo, expressionCombo);
+//            layout.replace(columnTypeCombo, expressionCombo);
             layout.replace(placeHolder1, columnTypeLabel);
             layout.replace(placeHolder2, columnTypeCombo);
         } else {
             layout.replace(columnTypeCombo, placeHolder2);
             layout.replace(columnTypeLabel, placeHolder1);
             layout.replace(columnExpressionLabel, columnTypeLabel);
-            layout.replace(expressionCombo, columnTypeCombo);                
+//            layout.replace(expressionCombo, columnTypeCombo);
         }        
     }
 
@@ -1092,7 +1092,7 @@ public class TableCustomizer extends JPanel implements Customizer, FormAwareEdit
         }
     }
 
-    private ComboBoxWithTree expressionCombo;
+//    private ComboBoxWithTree expressionCombo;
     private JLabel dummyLabel1 = new JLabel();
     private JLabel dummyLabel2 = new JLabel();
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -1343,16 +1343,15 @@ public class TableCustomizer extends JPanel implements Customizer, FormAwareEdit
 //            modelBoundChoice.setSelected(true);
 //        }
 //        expressionCombo = modelBoundCustomizer.getSubExpressionCombo();
-        expressionCombo.setEnabled(false);
-        expressionCombo.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                ColumnInfo info = columns.get(lastSelectedColumn);
-                Object expression = expressionCombo.getSelectedItem();
-                info.setExpression((expression == null) ? null : expression.toString());
-                String clazz = "Object"; // NOI18N
-                TreePath treePath = expressionCombo.getSelectedTreePath();
-              // TODO: stripped
+//        expressionCombo.setEnabled(false);
+//        expressionCombo.addActionListener(new ActionListener() {
+//            @Override
+//            public void actionPerformed(ActionEvent e) {
+//                ColumnInfo info = columns.get(lastSelectedColumn);
+//                Object expression = expressionCombo.getSelectedItem();
+//                info.setExpression((expression == null) ? null : expression.toString());
+//                String clazz = "Object"; // NOI18N
+//                TreePath treePath = expressionCombo.getSelectedTreePath();
 //                if (treePath != null) {
 //                    Object pComp = treePath.getLastPathComponent();
 //                    if (pComp instanceof BindingCustomizer.ExpressionNode) {
@@ -1363,11 +1362,10 @@ public class TableCustomizer extends JPanel implements Customizer, FormAwareEdit
 //                        }
 //                    }
 //                }
-                columnTypeCombo.setSelectedItem(clazz);
-                columnTableModel.fireTableRowsUpdated(lastSelectedColumn, lastSelectedColumn);
-            }
-        });
-      // TODO: stripped
+//                columnTypeCombo.setSelectedItem(clazz);
+//                columnTableModel.fireTableRowsUpdated(lastSelectedColumn, lastSelectedColumn);
+//            }
+//        });
 //        modelBoundCustomizer.addTypeChangeListener(new PropertyChangeListener() {
 //            @Override
 //            public void propertyChange(PropertyChangeEvent evt) {
@@ -1744,7 +1742,7 @@ public class TableCustomizer extends JPanel implements Customizer, FormAwareEdit
             } else {
                 info.setClazz(columnTypeCombo.getSelectedItem().toString());
             }
-            Object expression = expressionCombo.getSelectedItem();
+            Object expression = null; //expressionCombo.getSelectedItem();
             info.setExpression((expression == null) ? "null" : expression.toString()); // NOI18N
             if (modelHardcodedChoice.isSelected()) {
                 Class oldClass = rowTableModel.getColumnClass(lastSelectedColumn);
@@ -1789,13 +1787,13 @@ public class TableCustomizer extends JPanel implements Customizer, FormAwareEdit
         widthMinCombo.setEnabled(single);
         widthPrefCombo.setEnabled(single);
         widthMaxCombo.setEnabled(single);
-        expressionCombo.setEnabled(single);
+//        expressionCombo.setEnabled(single);
         if (single) {
             lastSelectedColumn = index[0];
             ColumnInfo info = columns.get(index[0]);
             editableColumnChoice.setSelected(info.isEditable());
             if (modelBoundChoice.isSelected()) {
-                expressionCombo.setSelectedItem(info.getExpression());
+//                expressionCombo.setSelectedItem(info.getExpression());
                 columnTypeCombo.setSelectedItem(info.getClazz());
                 if (columnTypeCombo.getEditor().getEditorComponent().hasFocus()) {
                     columnTypeCombo.getEditor().setItem(info.getClazz());
@@ -2023,7 +2021,7 @@ public class TableCustomizer extends JPanel implements Customizer, FormAwareEdit
                             break;
                         case 1:
                             info.setExpression((String)value);
-                            expressionCombo.setSelectedItem(value);
+//                            expressionCombo.setSelectedItem(value);
                             break;
                         case 2:
                             info.getColumn().setResizable((Boolean)value);

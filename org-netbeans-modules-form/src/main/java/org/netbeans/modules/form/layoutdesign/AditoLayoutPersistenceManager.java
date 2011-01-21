@@ -45,6 +45,8 @@
 package org.netbeans.modules.form.layoutdesign;
 
 import java.util.*;
+
+import org.openide.filesystems.FileObject;
 import org.w3c.dom.*;
 
 /**
@@ -260,7 +262,7 @@ class AditoLayoutPersistenceManager implements LayoutConstants {
     /**
      * Saves linkSize group identifier
      *
-     * @param linksizeid 
+     * @param linkSizeId
      */
     private void saveLinkSize(int linkSizeId) {
         if (linkSizeId != NOT_EXPLICITLY_DEFINED) {
@@ -271,7 +273,7 @@ class AditoLayoutPersistenceManager implements LayoutConstants {
     /**
      * Saves group/interval alignemnt.
      *
-     * @param alignemnt alignment to save.
+     * @param alignment alignment to save.
      * @param group determines whether it is a group alignment.
      */
     private void saveAlignment(int alignment, boolean group) {
@@ -367,21 +369,21 @@ class AditoLayoutPersistenceManager implements LayoutConstants {
      *
      * @param layoutModel layout model to load
      * @param containerId ID of the layout container to be loaded
-     * @param layoutNodeList XML data to load
+     * @param pModelComp XML data to load
      * @param nameToIdMap map from component names to component IDs
      */
     static void loadContainer(LayoutModel layoutModel, String containerId,
-                              NodeList layoutNodeList, Map<String,String> nameToIdMap)
+                              FileObject pModelComp, Map<String,String> nameToIdMap)
         throws java.io.IOException
     {
         AditoLayoutPersistenceManager lpm = new AditoLayoutPersistenceManager(layoutModel);
         lpm.idNameMap = nameToIdMap;
-        lpm.loadLayout(containerId, layoutNodeList);
+        lpm.loadLayout(containerId, pModelComp);
     }
 
     // should be called only on newly created LayoutPersistenceManager for each
     // loaded container (don't call repeatedly)
-    private void loadLayout(String containerId, NodeList layoutNodeList)
+    private void loadLayout(String containerId, FileObject pModelComp)
         throws java.io.IOException
     {
         layoutContainer = layoutModel.getLayoutComponent(containerId);
@@ -389,8 +391,8 @@ class AditoLayoutPersistenceManager implements LayoutConstants {
             layoutContainer = new LayoutComponent(containerId, true);
             layoutModel.addRootComponent(layoutContainer);
         }
-
-        for (int i=0; i<layoutNodeList.getLength(); i++) {
+      // TODO: hier muss das layout richtig geladen werden!
+        /*for (int i=0; i<layoutNodeList.getLength(); i++) {
             Node dimLayoutNode = layoutNodeList.item(i);
             if (!(dimLayoutNode instanceof Element)
                     || !dimLayoutNode.getNodeName().equals(XML_DIMENSION_LAYOUT)) {
@@ -408,7 +410,7 @@ class AditoLayoutPersistenceManager implements LayoutConstants {
                     break; // just one root is loaded
                 }
             }
-        }
+        }*/
 
         correctMissingName(); // recover from missing component name if needed
     }

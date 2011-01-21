@@ -302,9 +302,9 @@ made subject to such option by the copyright holder.
             <!--<file name="JTree.palette_item" url="palette/JTree.palette_item">-->
                 <!--<attr name="position" intvalue="2000"/>-->
             <!--</file>-->
-            <!--<file name="JTable.palette_item" url="palette/JTable.palette_item">-->
-                <!--<attr name="position" intvalue="2100"/>-->
-            <!--</file>-->
+            <file name="JTable.palette_item" url="palette/JTable.palette_item">
+                <attr name="position" intvalue="2100"/>
+            </file>
 
         </folder>
 
