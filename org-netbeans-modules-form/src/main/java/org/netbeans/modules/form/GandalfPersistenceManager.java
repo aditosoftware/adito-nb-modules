@@ -1708,7 +1708,6 @@ public class GandalfPersistenceManager extends PersistenceManager {
         return setLayoutMethod;
     }
 
-  // ist nur für alte Versionen von Netbeans relevant
     private int loadLayout(org.w3c.dom.Node layoutNode,
                            LayoutSupportManager layoutSupport)
     {

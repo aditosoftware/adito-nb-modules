@@ -354,37 +354,36 @@ made subject to such option by the copyright holder.
 
             <!--</folder>-->
 
-        <!--<folder name="_Layouts_only_for_internal_use_">-->
-            <!--<attr name="SystemFileSystem.localizingBundle" stringvalue="org.netbeans.modules.form.resources.Bundle"/>-->
-            <!--<attr name="isNoPaletteCategory" boolvalue="true"/>-->
-            <!--<attr name="position" intvalue="0"/>-->
-            <!---->
-            <!--<file name="FlowLayout.palette_item" url="palette/FlowLayout.palette_item">-->
-                <!--<attr name="position" intvalue="100"/>-->
-            <!--</file>-->
-            <!--<file name="BorderLayout.palette_item" url="palette/BorderLayout.palette_item">-->
-                <!--<attr name="position" intvalue="200"/>-->
-            <!--</file>-->
-            <!--<file name="GridLayout.palette_item" url="palette/GridLayout.palette_item">-->
-                <!--<attr name="position" intvalue="300"/>-->
-            <!--</file>-->
-            <!--<file name="GridBagLayout.palette_item" url="palette/GridBagLayout.palette_item">-->
-                <!--<attr name="position" intvalue="400"/>-->
-            <!--</file>-->
-            <!--<file name="CardLayout.palette_item" url="palette/CardLayout.palette_item">-->
-                <!--<attr name="position" intvalue="500"/>-->
-            <!--</file>-->
-            <!--<file name="BoxLayout.palette_item" url="palette/BoxLayout.palette_item">-->
-                <!--<attr name="position" intvalue="600"/>-->
-            <!--</file>-->
-            <!--<file name="AbsoluteLayout.palette_item" url="palette/AbsoluteLayout.palette_item">-->
-                <!--<attr name="position" intvalue="700"/>-->
-            <!--</file>-->
-            <!--<file name="NullLayout.palette_item" url="palette/NullLayout.palette_item">-->
-                <!--<attr name="position" intvalue="800"/>-->
-            <!--</file>-->
+        <folder name="_Layouts_only_for_internal_use_">
+            <attr name="SystemFileSystem.localizingBundle" stringvalue="org.netbeans.modules.form.resources.Bundle"/>
+            <attr name="isNoPaletteCategory" boolvalue="true"/>
+            <attr name="position" intvalue="0"/>
 
-            <!--</folder>-->
+            <file name="FlowLayout.palette_item" url="palette/FlowLayout.palette_item">
+                <attr name="position" intvalue="100"/>
+            </file>
+            <file name="BorderLayout.palette_item" url="palette/BorderLayout.palette_item">
+                <attr name="position" intvalue="200"/>
+            </file>
+            <file name="GridLayout.palette_item" url="palette/GridLayout.palette_item">
+                <attr name="position" intvalue="300"/>
+            </file>
+            <file name="GridBagLayout.palette_item" url="palette/GridBagLayout.palette_item">
+                <attr name="position" intvalue="400"/>
+            </file>
+            <file name="CardLayout.palette_item" url="palette/CardLayout.palette_item">
+                <attr name="position" intvalue="500"/>
+            </file>
+            <file name="BoxLayout.palette_item" url="palette/BoxLayout.palette_item">
+                <attr name="position" intvalue="600"/>
+            </file>
+            <file name="AbsoluteLayout.palette_item" url="palette/AbsoluteLayout.palette_item">
+                <attr name="position" intvalue="700"/>
+            </file>
+            <file name="NullLayout.palette_item" url="palette/NullLayout.palette_item">
+                <attr name="position" intvalue="800"/>
+            </file>
+        </folder>
 
         <!--<folder name="Borders">-->
             <!--<attr name="SystemFileSystem.localizingBundle" stringvalue="org.netbeans.modules.form.resources.Bundle"/>-->

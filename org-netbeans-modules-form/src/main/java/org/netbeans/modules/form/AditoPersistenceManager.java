@@ -2,12 +2,15 @@ package org.netbeans.modules.form;
 
 import de.adito.aditoweb.filesystem.common.AfsUrlUtil;
 import de.adito.aditoweb.filesystem.datamodelfs.access.model.*;
+import org.netbeans.modules.form.codestructure.*;
 import org.netbeans.modules.form.layoutdesign.*;
 import org.netbeans.modules.form.layoutdesign.support.SwingLayoutBuilder;
 import org.netbeans.modules.form.layoutsupport.LayoutSupportManager;
+import org.openide.ErrorManager;
 import org.openide.filesystems.*;
 
 import javax.swing.*;
+import java.lang.reflect.Method;
 import java.util.*;
 
 /**
@@ -15,6 +18,30 @@ import java.util.*;
  */
 public class AditoPersistenceManager extends PersistenceManager
 {
+
+  // --------
+  // NB 3.1 compatibility - layout persistence conversion tables
+
+  private static final int LAYOUT_BORDER = 0;
+  private static final int LAYOUT_FLOW = 1;
+  private static final int LAYOUT_BOX = 2;
+  private static final int LAYOUT_GRIDBAG = 3;
+  private static final int LAYOUT_GRID = 4;
+  private static final int LAYOUT_CARD = 5;
+  private static final int LAYOUT_ABSOLUTE = 6;
+  private static final int LAYOUT_NULL = 7;
+  private static final int LAYOUT_JSCROLL = 8;
+  private static final int LAYOUT_SCROLL = 9;
+  private static final int LAYOUT_JSPLIT = 10;
+  private static final int LAYOUT_JTAB = 11;
+  private static final int LAYOUT_JLAYER = 12;
+  private static final int LAYOUT_TOOLBAR = 13;
+
+  private static final int LAYOUT_UNKNOWN = -1;
+  private static final int LAYOUT_FROM_CODE = -2;
+  private static final int LAYOUT_NATURAL = -3;
+
+  private static Method setLayoutMethod;
 
   @Override
   public boolean canLoadForm(FormDataObject formObject) throws PersistenceException
@@ -84,8 +111,12 @@ public class AditoPersistenceManager extends PersistenceManager
         pComponent instanceof RADVisualContainer ?
             (RADVisualContainer) pComponent : null;
 
+    int convIndex = LAYOUT_UNKNOWN;
     if (visualContainer != null)
+    {
       visualContainer.setOldLayoutSupport(true);
+      convIndex = _loadLayout(visualContainer.getLayoutSupport());
+    }
 
 
     // load subcomponents
@@ -107,23 +138,18 @@ public class AditoPersistenceManager extends PersistenceManager
       childComponents = new RADComponent[0];
 
 
-    Object layout = null; // TODO: um das layout zu testen muss das hier NICHT 'null' sein!
-
     if (visualContainer != null)
     {
       Throwable layoutEx = null;
       boolean layoutInitialized = false;
       LayoutSupportManager layoutSupport = visualContainer.getLayoutSupport();
 
-      if (layout != null)
+      if (convIndex == LAYOUT_NATURAL)
       {
         LayoutModel layoutModel = pInfo.getFormModel().getLayoutModel();
         Map<String, String> nameToIdMap = new HashMap<String, String>();
-        for (int i = 0; i < childComponents.length; i++)
-        {
-          RADComponent comp = childComponents[i];
+        for (RADComponent comp : childComponents)
           nameToIdMap.put(comp.getName(), comp.getId());
-        }
         try
         {
           layoutModel.loadContainerLayout(visualContainer.getId(), pModelComp /*layoutNode.getChildNodes()*/, nameToIdMap); // TODO
@@ -140,7 +166,41 @@ public class AditoPersistenceManager extends PersistenceManager
         }
         visualContainer.initSubComponents(childComponents);
       }
-      else if (layout == null)
+      else if (convIndex >= 0)
+      {
+        // initialize layout support from restored code
+        try
+        {
+          layoutInitialized = layoutSupport.prepareLayoutDelegate(false, true);
+        }
+        catch (Exception ex)
+        {
+          layoutEx = ex;
+        }
+        catch (LinkageError ex)
+        {
+          layoutEx = ex;
+        }
+        // subcomponents are set after reading from code [for some reason...]
+        visualContainer.initSubComponents(childComponents);
+        if (layoutInitialized)
+        { // successfully initialized - build the primary container
+          try
+          { // some weird problems might occur - see issue 67890
+            layoutSupport.updatePrimaryContainer();
+          }
+          // can't do anything reasonable on failure, just log stack trace
+          catch (Exception ex)
+          {
+            ErrorManager.getDefault().notify(ErrorManager.INFORMATIONAL, ex);
+          }
+          catch (Error ex)
+          {
+            ErrorManager.getDefault().notify(ErrorManager.INFORMATIONAL, ex);
+          }
+        }
+      }
+      else
       { // Issue 63394, 68753: Bean form that is container
         // Issue 70369: Container saved with unknown layout
         // Swing menus go here as well
@@ -252,6 +312,7 @@ public class AditoPersistenceManager extends PersistenceManager
   }
 
   // recognizes, creates, initializes and loads a meta component
+
   private RADComponent _restoreComponent(_Info pInfo, FileObject pChildModel, RADComponent pParentComponent) throws PersistenceException
   {
     EModelAccessType compType;
@@ -460,6 +521,44 @@ public class AditoPersistenceManager extends PersistenceManager
     _loadComponent(pInfo, pChildModel, newComponent, pParentComponent);
 
     return newComponent;
+  }
+
+
+  private int _loadLayout(LayoutSupportManager layoutSupport)
+  {
+    try
+    {
+      CodeExpression layoutExp = layoutSupport.getCodeStructure().createExpression(
+          org.netbeans.lib.awtextra.AbsoluteLayout.class.getConstructor(new Class[0]),
+          CodeStructure.EMPTY_PARAMS);
+      CodeStructure.createStatement(
+          layoutSupport.getContainerDelegateCodeExpression(),
+          getSetLayoutMethod(),
+          new CodeExpression[]{layoutExp});
+    }
+    catch (NoSuchMethodException e)
+    {
+      e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+    }
+    return LAYOUT_ABSOLUTE;
+  }
+
+  private static Method getSetLayoutMethod()
+  {
+    if (setLayoutMethod == null)
+    {
+      try
+      {
+        setLayoutMethod = java.awt.Container.class.getMethod(
+            "setLayout", // NOI18N
+            new Class[]{java.awt.LayoutManager.class});
+      }
+      catch (NoSuchMethodException ex)
+      { // should not happen
+        ex.printStackTrace();
+      }
+    }
+    return setLayoutMethod;
   }
 
 
