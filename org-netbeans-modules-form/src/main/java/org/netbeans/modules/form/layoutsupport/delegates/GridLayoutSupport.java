@@ -236,7 +236,7 @@ public class GridLayoutSupport extends AbstractLayoutSupport
         if (params.length > 0) {
             Object rowsValue = params[0].getOrigin().getValue();
             if (rowsValue instanceof Integer
-                && ((Integer)rowsValue).intValue() == 0)
+                && (Integer) rowsValue == 0)
             {   // number of rows is to be set to 0, we must preset
                 // columns property to something else than 0
                 try {

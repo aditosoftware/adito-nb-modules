@@ -307,12 +307,13 @@ public abstract class AbstractLayoutSupport implements LayoutSupportDelegate
 
         if (propertySets != null) {
             java.util.List<Node.Property> allPropsList = new ArrayList<Node.Property>();
-            for (int i=0; i < propertySets.length; i++) {
-                Node.Property[] props = propertySets[i].getProperties();
-                for (int j=0; j < props.length; j++)
-                    if (props[j] instanceof FormProperty)
-                        allPropsList.add(props[j]);
-            }
+          for (Node.PropertySet propertySet : propertySets)
+          {
+            Node.Property[] props = propertySet.getProperties();
+            for (Node.Property prop : props)
+              if (prop instanceof FormProperty)
+                allPropsList.add(prop);
+          }
             allProperties = new FormProperty[allPropsList.size()];
             allPropsList.toArray(allProperties);
         }
@@ -532,9 +533,9 @@ public abstract class AbstractLayoutSupport implements LayoutSupportDelegate
             return true;
 
         FormProperty[] props = getAllProperties();
-        for (int i=0; i < props.length; i++)
-            if (props[i].isChanged())
-                return true;
+      for (FormProperty prop : props)
+        if (prop.isChanged())
+          return true;
 
         return false;
     }
@@ -653,8 +654,7 @@ public abstract class AbstractLayoutSupport implements LayoutSupportDelegate
     {
         Component[] components = containerDelegate.getComponents();
         containerDelegate.removeAll();
-        for (int i=0; i < components.length; i++)
-            components[i].setBounds(0, 0, 0, 0);
+      for (Component component : components) component.setBounds(0, 0, 0, 0);
         return true;
     }
 

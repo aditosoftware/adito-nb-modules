@@ -322,9 +322,9 @@ public class CodeStructure {
 
         CodeExpression[] params = statement.getStatementParameters();
         if (params != null)
-            for (int i=0; i < params.length; i++)
-                params[i].addUsingObject(
-                    statement, UsedCodeObject.USING, CodeStatement.class);
+          for (CodeExpression param : params)
+            param.addUsingObject(
+                statement, UsedCodeObject.USING, CodeStatement.class);
     }
 
     // Registers usage of expressions used by the origin of an expression.
@@ -339,10 +339,10 @@ public class CodeStructure {
 
         CodeExpression[] params = origin.getCreationParameters();
         if (params != null)
-            for (int i=0; i < params.length; i++)
-                params[i].addUsingObject(expression,
-                                         UsedCodeObject.USING,
-                                         CodeExpression.class);
+          for (CodeExpression param : params)
+            param.addUsingObject(expression,
+                                 UsedCodeObject.USING,
+                                 CodeExpression.class);
     }
 
     // Unregisters usage of all objects used by a using object.
@@ -584,10 +584,11 @@ public class CodeStructure {
     }
     
     public void clearExternalVariableNames() {
-	if(externalVariables!=null) {	    
-	    for (Iterator it = externalVariables.iterator(); it.hasNext();) {
-		releaseVariable((String) it.next());		
-	    }	    
+	if(externalVariables!=null) {
+    for (Object externalVariable : externalVariables)
+    {
+      releaseVariable((String) externalVariable);
+    }
 	    externalVariables.clear();	  	    
 	}
     }
@@ -775,8 +776,8 @@ public class CodeStructure {
     }
 
     public void releaseUndoableChanges(Object fromMark, Object toMark) {
-        int m1 = ((Integer)fromMark).intValue();
-        int m2 = ((Integer)toMark).intValue();
+        int m1 = (Integer) fromMark;
+        int m2 = (Integer) toMark;
 
         t("release marks from " + m1 + " to " + m2); // NOI18N
 
@@ -789,7 +790,7 @@ public class CodeStructure {
     }
 
     public boolean undoToMark(Object mark) {
-        int lastMark = ((Integer)mark).intValue();
+        int lastMark = (Integer) mark;
         int currentMark = undoRedoMark;
         if (currentMark <= lastMark)
             return false; // invalid parameter
@@ -825,7 +826,7 @@ public class CodeStructure {
     public boolean redoToMark(Object mark) {
         if (lastUndone < 0)
             return false;
-        int toMark = ((Integer)mark).intValue();
+        int toMark = (Integer) mark;
         if (lastUndone >= toMark || toMark > undoRedoMark)
             return false; // invalid parameter
 

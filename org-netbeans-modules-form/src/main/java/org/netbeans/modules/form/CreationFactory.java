@@ -229,11 +229,12 @@ public class CreationFactory {
 
         for (int i=0; i < propNames.length; i++) {
             String propName = propNames[i];
-            for (int j=0; j < properties.length; j++)
-                if (propName.equals(properties[j].getName())) {
-                    crProps[i] = properties[j];
-                    break;
-                }
+          for (FormProperty property : properties)
+            if (propName.equals(property.getName()))
+            {
+              crProps[i] = property;
+              break;
+            }
             if (crProps[i] == null)
                 return null; // missing property, should not happen
         }
@@ -250,17 +251,20 @@ public class CreationFactory {
         if (remProps.length == 0) return remProps;
 
         int ii = 0;
-        for (int i=0; i < properties.length; i++) {
-            String propName = properties[i].getName();
-            for (int j=0; j < propNames.length; j++) {
-                if (propName.equals(propNames[j])) break;
-                if (j+1 == propNames.length) {
-                    if (ii > remProps.length)
-                        return null; // should not happen
-                    remProps[ii++] = properties[i];
-                }
-            }
+      for (FormProperty property : properties)
+      {
+        String propName = property.getName();
+        for (int j = 0; j < propNames.length; j++)
+        {
+          if (propName.equals(propNames[j])) break;
+          if (j + 1 == propNames.length)
+          {
+            if (ii > remProps.length)
+              return null; // should not happen
+            remProps[ii++] = property;
+          }
         }
+      }
 
         return remProps;
     }
@@ -272,12 +276,13 @@ public class CreationFactory {
         if (creators == null)
             return false;
 
-        for (int i=0; i < creators.length; i++) {
-            String[] propNames = creators[i].getPropertyNames();
-            for (int j=0; j < propNames.length; j++)
-                if (propNames[j].equals(propName))
-                    return true;
-        }
+      for (CreationDescriptor.Creator creator : creators)
+      {
+        String[] propNames = creator.getPropertyNames();
+        for (String propName1 : propNames)
+          if (propName1.equals(propName))
+            return true;
+      }
         return false;
     }
 
@@ -285,17 +290,17 @@ public class CreationFactory {
                                            String propName)
     {
         String[] propNames = creator.getPropertyNames();
-        for (int j=0; j < propNames.length; j++)
-            if (propNames[j].equals(propName))
-                return true;
+      for (String propName1 : propNames)
+        if (propName1.equals(propName))
+          return true;
         return false;
     }
 
     public static FormProperty findProperty(String propName,
                                             FormProperty[] properties) {
-        for (int i=0; i < properties.length; i++)
-            if (properties[i].getName().equals(propName))
-                return properties[i];
+      for (FormProperty property : properties)
+        if (property.getName().equals(propName))
+          return property;
         return null;
     }
 
@@ -304,20 +309,22 @@ public class CreationFactory {
                                                  Class[] paramTypes)
     {
         CreationDescriptor.Creator[] creators = desc.getCreators();
-        for (int i=0; i < creators.length; i++) {
-            CreationDescriptor.Creator cr = creators[i];
-            if (cr.getParameterCount() == paramTypes.length) {
-                Class[] types = cr.getParameterTypes();
-                boolean match = true;
-                for (int j=0; j < types.length; j++)
-                    if (!types[j].isAssignableFrom(paramTypes[j])) {
-                        match = false;
-                        break;
-                    }
-                if (match)
-                    return cr;
+      for (CreationDescriptor.Creator cr : creators)
+      {
+        if (cr.getParameterCount() == paramTypes.length)
+        {
+          Class[] types = cr.getParameterTypes();
+          boolean match = true;
+          for (int j = 0; j < types.length; j++)
+            if (!types[j].isAssignableFrom(paramTypes[j]))
+            {
+              match = false;
+              break;
             }
+          if (match)
+            return cr;
         }
+      }
         return null;
     }
 
@@ -336,18 +343,21 @@ public class CreationFactory {
         if (creators == null || creators.length == 0) return null;
 
         int[] placed = new int[creators.length];
-        for (int i=0; i < properties.length; i++) {
-            if (!changedOnly || properties[i].isChanged()) {
-                String name = properties[i].getName();
+      for (FormProperty property : properties)
+      {
+        if (!changedOnly || property.isChanged())
+        {
+          String name = property.getName();
 
-                for (int j=0; j < creators.length; j++) {
-                    String[] crNames = creators[j].getPropertyNames();
-                    for (int k=0; k < crNames.length; k++)
-                        if (name.equals(crNames[k]))
-                            placed[j]++;
-                }
-            }
+          for (int j = 0; j < creators.length; j++)
+          {
+            String[] crNames = creators[j].getPropertyNames();
+            for (String crName : crNames)
+              if (name.equals(crName))
+                placed[j]++;
+          }
         }
+      }
         return placed;
     }
 
@@ -428,17 +438,19 @@ public class CreationFactory {
             if (!name1.equals(name2)) {
                 FormProperty prop1 = null;
                 FormProperty prop2 = null;
-                for (int j=0; j < properties.length; j++)
-                    if (prop1 == null && name1.equals(properties[j].getName())) {
-                        prop1 = properties[j];
-                        if (prop2 != null)
-                            break;
-                    }
-                    else if (prop2 == null && name2.equals(properties[j].getName())) {
-                        prop2 = properties[j];
-                        if (prop1 != null)
-                            break;
-                    }
+              for (FormProperty property : properties)
+                if (prop1 == null && name1.equals(property.getName()))
+                {
+                  prop1 = property;
+                  if (prop2 != null)
+                    break;
+                }
+                else if (prop2 == null && name2.equals(property.getName()))
+                {
+                  prop2 = property;
+                  if (prop1 != null)
+                    break;
+                }
 
                 if (prop1 != null && !prop1.getValueType().isPrimitive()) {
                     try {

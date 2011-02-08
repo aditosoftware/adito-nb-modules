@@ -45,9 +45,7 @@
 package org.netbeans.modules.form;
 
 import java.awt.datatransfer.Transferable;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 import javax.swing.Action;
 import org.openide.nodes.*;
 import org.openide.util.actions.SystemAction;
@@ -104,9 +102,7 @@ class FormRootNode extends FormNode {
             }
             l.add(SystemAction.get(ReloadAction.class));
             l.add(null);
-            for (Action a : super.getActions(context)) {
-                l.add(a);
-            }
+          l.addAll(Arrays.asList(super.getActions(context)));
             actions = l.toArray(new Action[l.size()]);
         }
         return actions;
@@ -164,9 +160,11 @@ class FormRootNode extends FormNode {
             resourceProperties = createResourceProperties();
         return resourceProperties;
     }
-    
+
     private Node.Property[] createResourceProperties() {
-        return FormEditor.getResourceSupport(getFormModel()).createFormProperties();
+      return new Node.Property[0];
+      // TODO: stripped
+//        return FormEditor.getResourceSupport(getFormModel()).createFormProperties();
     }
 
     Node.Property[] getAllProperties() {

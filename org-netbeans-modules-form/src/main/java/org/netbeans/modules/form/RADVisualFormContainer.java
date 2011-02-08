@@ -277,7 +277,7 @@ public class RADVisualFormContainer extends RADVisualContainer implements FormCo
             public void setValue(Object val) throws IllegalAccessException,
                                                     IllegalArgumentException, java.lang.reflect.InvocationTargetException {
                 if (!(val instanceof Integer)) throw new IllegalArgumentException();
-                setFormSizePolicy(((Integer)val).intValue());
+                setFormSizePolicy((Integer) val);
                 if (getNodeReference() != null)
                     getNodeReference().fireComponentPropertySetsChange();
             }
@@ -366,7 +366,7 @@ public class RADVisualFormContainer extends RADVisualContainer implements FormCo
             public void setValue(Object val) throws IllegalAccessException,
                                                     IllegalArgumentException, java.lang.reflect.InvocationTargetException {
                 if (!(val instanceof Boolean)) throw new IllegalArgumentException();
-                setGeneratePosition(((Boolean)val).booleanValue());
+                setGeneratePosition((Boolean) val);
                 if (getNodeReference() != null)
                     getNodeReference().fireComponentPropertySetsChange();
             }
@@ -395,7 +395,7 @@ public class RADVisualFormContainer extends RADVisualContainer implements FormCo
             public void setValue(Object val) throws IllegalAccessException,
                                                     IllegalArgumentException, java.lang.reflect.InvocationTargetException {
                 if (!(val instanceof Boolean)) throw new IllegalArgumentException();
-                setGenerateSize(((Boolean)val).booleanValue());
+                setGenerateSize((Boolean) val);
                 if (getNodeReference() != null)
                     getNodeReference().fireComponentPropertySetsChange();
             }
@@ -422,7 +422,7 @@ public class RADVisualFormContainer extends RADVisualContainer implements FormCo
             public void setValue(Object val) throws IllegalAccessException,
                                                     IllegalArgumentException, java.lang.reflect.InvocationTargetException {
                 if (!(val instanceof Boolean)) throw new IllegalArgumentException();
-                setGenerateCenter(((Boolean)val).booleanValue());
+                setGenerateCenter((Boolean) val);
                 if (getNodeReference() != null)
                     getNodeReference().fireComponentPropertySetsChange();
             }
@@ -551,7 +551,7 @@ public class RADVisualFormContainer extends RADVisualContainer implements FormCo
         /** @return text for the current value */
         @Override
         public String getAsText() {
-            int value =((Integer)getValue()).intValue();
+            int value = (Integer) getValue();
             return names[value];
         }
 

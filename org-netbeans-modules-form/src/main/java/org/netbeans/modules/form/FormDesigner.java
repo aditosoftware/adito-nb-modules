@@ -613,9 +613,10 @@ public class FormDesigner extends TopComponent implements MultiViewElement
                         // Copy components from the original layered pane into our one
                         JLayeredPane oldPane = rootPane.getLayeredPane();
                         Component[] comps = oldPane.getComponents();
-                        for (int i=0; i<comps.length; i++) {
-                            newPane.add(comps[i], Integer.valueOf(oldPane.getLayer(comps[i])));
-                        }
+                      for (Component comp : comps)
+                      {
+                        newPane.add(comp, Integer.valueOf(oldPane.getLayer(comp)));
+                      }
                         // Use our layered pane that knows about LAF switching
                         rootPane.setLayeredPane(newPane);
                         // Make the glass pane visible to force repaint of the whole layered pane
@@ -639,20 +640,21 @@ public class FormDesigner extends TopComponent implements MultiViewElement
 
     private static Locale switchToDesignLocale(FormModel formModel) {
         Locale defaultLocale = null;
-        String locale = FormEditor.getResourceSupport(formModel).getDesignLocale();
-        if (locale != null && !locale.equals("")) { // NOI18N
-            defaultLocale = Locale.getDefault();
-
-            String[] parts = locale.split("_"); // NOI18N
-            int i = 0;
-            if ("".equals(parts[i])) // NOI18N
-                i++;
-            String language = i < parts.length ? parts[i++] : null;
-            String country = i < parts.length ? parts[i++] : ""; // NOI18N
-            String variant = i < parts.length ? parts[i] : ""; // NOI18N
-            if (language != null)
-                Locale.setDefault(new Locale(language, country, variant));
-        }
+      // TODO: stripped
+//        String locale = FormEditor.getResourceSupport(formModel).getDesignLocale();
+//        if (locale != null && !locale.equals("")) { // NOI18N
+//            defaultLocale = Locale.getDefault();
+//
+//            String[] parts = locale.split("_"); // NOI18N
+//            int i = 0;
+//            if ("".equals(parts[i])) // NOI18N
+//                i++;
+//            String language = i < parts.length ? parts[i++] : null;
+//            String country = i < parts.length ? parts[i++] : ""; // NOI18N
+//            String variant = i < parts.length ? parts[i] : ""; // NOI18N
+//            if (language != null)
+//                Locale.setDefault(new Locale(language, country, variant));
+//        }
         return defaultLocale;
     }
 
@@ -943,8 +945,7 @@ public class FormDesigner extends TopComponent implements MultiViewElement
     public void setSelectedComponents(RADComponent[] metacomps) {
         clearSelectionImpl();
 
-        for (int i=0; i < metacomps.length; i++)
-            addComponentToSelectionImpl(metacomps[i]);
+      for (RADComponent metacomp : metacomps) addComponentToSelectionImpl(metacomp);
 
         repaintSelection();
         updateComponentInspector();
@@ -981,8 +982,7 @@ public class FormDesigner extends TopComponent implements MultiViewElement
     }
 
     void addComponentsToSelection(RADComponent[] metacomps) {
-        for (int i=0; i < metacomps.length; i++)
-            addComponentToSelectionImpl(metacomps[i]);
+      for (RADComponent metacomp : metacomps) addComponentToSelectionImpl(metacomp);
 
         repaintSelection();
         updateComponentInspector();
@@ -1571,15 +1571,20 @@ public class FormDesigner extends TopComponent implements MultiViewElement
             RADVisualContainer metacont = (RADVisualContainer)metacomp;
             RADVisualComponent tabComp = metacont.getSubComponent(index);
             Node.Property[] props = tabComp.getConstraintsProperties();
-            for (int i=0; i<props.length; i++) {
-                if (props[i].getName().equals("TabConstraints.tabTitle")) { // NOI18N
-                    if (props[i] instanceof FormProperty) {
-                        property = (FormProperty)props[i];
-                    } else {
-                        return;
-                    }
-                }
+          for (Node.Property prop : props)
+          {
+            if (prop.getName().equals("TabConstraints.tabTitle"))
+            { // NOI18N
+              if (prop instanceof FormProperty)
+              {
+                property = (FormProperty) prop;
+              }
+              else
+              {
+                return;
+              }
             }
+          }
             if (property == null) return;
         } else {
             property = metacomp.getBeanProperty("text"); // NOI18N
@@ -2318,18 +2323,19 @@ public class FormDesigner extends TopComponent implements MultiViewElement
             else {
                 lafBlock = false;
                 boolean modifying = false;
-                for (int i=0; i < events.length; i++) {
-                    FormModelEvent ev = events[i];
-                    if (ev.isModifying())
-                        modifying = true;
-                    if ((ev.getChangeType() == FormModelEvent.COMPONENT_ADDED)
-                            || (ev.getChangeType() == FormModelEvent.COMPONENT_PROPERTY_CHANGED)
+              for (FormModelEvent ev : events)
+              {
+                if (ev.isModifying())
+                  modifying = true;
+                if ((ev.getChangeType() == FormModelEvent.COMPONENT_ADDED)
+                    || (ev.getChangeType() == FormModelEvent.COMPONENT_PROPERTY_CHANGED)
 //                            || (ev.getChangeType() == FormModelEvent.BINDING_PROPERTY_CHANGED) // TODO: stripped
-                        ) {
-                        lafBlock = true;
-                        break;
-                    }
+                    )
+                {
+                  lafBlock = true;
+                  break;
                 }
+              }
                 if (!modifying)
                     return;
 
@@ -2391,74 +2397,79 @@ public class FormDesigner extends TopComponent implements MultiViewElement
             boolean updateDone = false;
             boolean deriveDesignerSize = false;
 
-            for (int i=0; i < events.length; i++) {
-                FormModelEvent ev = events[i];
-                int type = ev.getChangeType();
-                ComponentContainer metacont = ev.getContainer();
+          for (FormModelEvent ev : events)
+          {
+            int type = ev.getChangeType();
+            ComponentContainer metacont = ev.getContainer();
 
-                if (type == FormModelEvent.CONTAINER_LAYOUT_EXCHANGED
-                    || type == FormModelEvent.CONTAINER_LAYOUT_CHANGED
-                    || type == FormModelEvent.COMPONENT_LAYOUT_CHANGED)
-                {
-                    if ((prevType != FormModelEvent.CONTAINER_LAYOUT_EXCHANGED
-                         && prevType != FormModelEvent.CONTAINER_LAYOUT_CHANGED
-                         && prevType != FormModelEvent.COMPONENT_LAYOUT_CHANGED)
-                        || prevContainer != metacont)
-                    {
-                        replicator.updateContainerLayout((RADVisualContainer)
-                                                         metacont);
-                        updateDone = true;
-                    }
-                }
-                else if (type == FormModelEvent.COMPONENT_ADDED) {
-                    if ((metacont instanceof RADVisualContainer
-                            || metacont instanceof RADMenuComponent)
-                        && (prevType != FormModelEvent.COMPONENT_ADDED
-                            || prevContainer != metacont))
-                    {
-                        replicator.updateAddedComponents(metacont);
-                        // Note: replicator calls BindingDesignSupport to establish
-                        // bindings for the the cloned instance (e.g. in remove undo)
-                        updateDone = true;
-                    }
-                }
-                else if (type == FormModelEvent.COMPONENT_REMOVED) {
-                    RADComponent removed = ev.getComponent();
+            if (type == FormModelEvent.CONTAINER_LAYOUT_EXCHANGED
+                || type == FormModelEvent.CONTAINER_LAYOUT_CHANGED
+                || type == FormModelEvent.COMPONENT_LAYOUT_CHANGED)
+            {
+              if ((prevType != FormModelEvent.CONTAINER_LAYOUT_EXCHANGED
+                  && prevType != FormModelEvent.CONTAINER_LAYOUT_CHANGED
+                  && prevType != FormModelEvent.COMPONENT_LAYOUT_CHANGED)
+                  || prevContainer != metacont)
+              {
+                replicator.updateContainerLayout((RADVisualContainer)
+                                                     metacont);
+                updateDone = true;
+              }
+            }
+            else if (type == FormModelEvent.COMPONENT_ADDED)
+            {
+              if ((metacont instanceof RADVisualContainer
+                  || metacont instanceof RADMenuComponent)
+                  && (prevType != FormModelEvent.COMPONENT_ADDED
+                  || prevContainer != metacont))
+              {
+                replicator.updateAddedComponents(metacont);
+                // Note: replicator calls BindingDesignSupport to establish
+                // bindings for the the cloned instance (e.g. in remove undo)
+                updateDone = true;
+              }
+            }
+            else if (type == FormModelEvent.COMPONENT_REMOVED)
+            {
+              RADComponent removed = ev.getComponent();
 
-                    // if the top designed component (or some of its parents)
-                    // was removed then whole designer view must be recreated
-                    if (removed instanceof RADVisualComponent
-                        && (removed == topDesignComponent
-                            || removed.isParentComponent(topDesignComponent)))
-                    {
-                        resetTopDesignComponent(false);
-                        updateWholeDesigner();
-                        return;
-                    }
-                    else {
-                        replicator.removeComponent(ev.getComponent(), ev.getContainer());
-                        updateDone = true;
-                    }
-                    // Note: BindingDesignSupport takes care of removing bindings
-                }
-                else if (type == FormModelEvent.COMPONENTS_REORDERED) {
-                    if (prevType != FormModelEvent.COMPONENTS_REORDERED
-                        || prevContainer != metacont)
-                    {
-                        replicator.reorderComponents(metacont);
-                        updateDone = true;
-                    }
-                }
-                else if (type == FormModelEvent.COMPONENT_PROPERTY_CHANGED) {
-                    RADProperty eventProperty = ev.getComponentProperty();
-                    RADComponent eventComponent = ev.getComponent();
-                    
-                    replicator.updateComponentProperty(eventProperty);
+              // if the top designed component (or some of its parents)
+              // was removed then whole designer view must be recreated
+              if (removed instanceof RADVisualComponent
+                  && (removed == topDesignComponent
+                  || removed.isParentComponent(topDesignComponent)))
+              {
+                resetTopDesignComponent(false);
+                updateWholeDesigner();
+                return;
+              }
+              else
+              {
+                replicator.removeComponent(ev.getComponent(), ev.getContainer());
+                updateDone = true;
+              }
+              // Note: BindingDesignSupport takes care of removing bindings
+            }
+            else if (type == FormModelEvent.COMPONENTS_REORDERED)
+            {
+              if (prevType != FormModelEvent.COMPONENTS_REORDERED
+                  || prevContainer != metacont)
+              {
+                replicator.reorderComponents(metacont);
+                updateDone = true;
+              }
+            }
+            else if (type == FormModelEvent.COMPONENT_PROPERTY_CHANGED)
+            {
+              RADProperty eventProperty = ev.getComponentProperty();
+              RADComponent eventComponent = ev.getComponent();
+
+              replicator.updateComponentProperty(eventProperty);
 //                    updateConnectedProperties(eventProperty, eventComponent); // TODO: stripped
-                    
-                    updateDone = true;
-                }
-                // TODO: stripped
+
+              updateDone = true;
+            }
+            // TODO: stripped
 //                else if (type == FormModelEvent.BINDING_PROPERTY_CHANGED) {
 //                    if (ev.getSubPropertyName() == null) {
 //                        replicator.updateBinding(ev.getNewBinding());
@@ -2466,24 +2477,26 @@ public class FormDesigner extends TopComponent implements MultiViewElement
 //                    // Note: BindingDesignSupport takes care of removing the old binding
 //                    updateDone = true;
 //                }
-                else if (type == FormModelEvent.SYNTHETIC_PROPERTY_CHANGED
-                         && PROP_DESIGNER_SIZE.equals(ev.getPropertyName()))
-                {
-                    Dimension size = (Dimension) ev.getNewPropertyValue();
-                    if (size != null) {
-                        componentLayer.setDesignerSize(size);
-                        deriveDesignerSize = false;
-                        updateDone = true;
-                    }
-                    else { // null size to compute designer size based on content (from resetDesignerSize)
-                        deriveDesignerSize = true;
-                        updateDone = true;
-                    }
-                }
-
-                prevType = type;
-                prevContainer = metacont;
+            else if (type == FormModelEvent.SYNTHETIC_PROPERTY_CHANGED
+                && PROP_DESIGNER_SIZE.equals(ev.getPropertyName()))
+            {
+              Dimension size = (Dimension) ev.getNewPropertyValue();
+              if (size != null)
+              {
+                componentLayer.setDesignerSize(size);
+                deriveDesignerSize = false;
+                updateDone = true;
+              }
+              else
+              { // null size to compute designer size based on content (from resetDesignerSize)
+                deriveDesignerSize = true;
+                updateDone = true;
+              }
             }
+
+            prevType = type;
+            prevContainer = metacont;
+          }
 
             if (updateDone) {
                 if (deriveDesignerSize) { // compute from preferred size

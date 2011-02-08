@@ -146,22 +146,29 @@ public class GridBagLayoutSupport extends AbstractLayoutSupport
         // Determine the size of the grid
         insertLines(0, xlines);
         insertLines(0, ylines);
-        
-        for (int i=0; i < components.length; i++) {
-            Rectangle ibounds = components[i].getBounds();
-            
-            if (ibounds.width > 0) {
-                insertLines(ibounds.x + ibounds.width, xlines);
-            } else {
-                insertLines(ibounds.x + 1, xlines);
-            }
-            
-            if (ibounds.height > 0) {
-                insertLines(ibounds.y + ibounds.height, ylines);
-            } else {
-                insertLines(ibounds.y + 1, ylines);
-            }
+
+      for (Component component1 : components)
+      {
+        Rectangle ibounds = component1.getBounds();
+
+        if (ibounds.width > 0)
+        {
+          insertLines(ibounds.x + ibounds.width, xlines);
         }
+        else
+        {
+          insertLines(ibounds.x + 1, xlines);
+        }
+
+        if (ibounds.height > 0)
+        {
+          insertLines(ibounds.y + ibounds.height, ylines);
+        }
+        else
+        {
+          insertLines(ibounds.y + 1, ylines);
+        }
+      }
         
         // Determine grid width of components.
         LayoutInfo[] layouts = new LayoutInfo[components.length];
@@ -202,24 +209,29 @@ public class GridBagLayoutSupport extends AbstractLayoutSupport
             Rectangle curbounds = components[i].getBounds();
             int lastleft = 0;
             int lasttop = 0;
-            
-            for (int j = 0; j < components.length; j++) {
-                Rectangle jbounds = components[j].getBounds();
-                int width = jbounds.width;
-                if(width < 0) width = 0;
-                if(jbounds.x + width - 1 < curbounds.x){
-                    if(jbounds.x + width > lastleft){
-                        lastleft = jbounds.x + width;
-                    }
-                }
-                int height = jbounds.height;
-                if (height < 0) height = 0;
-                if (jbounds.y + height - 1 < curbounds.y) {
-                    if(jbounds.y + height > lasttop){
-                        lasttop = jbounds.y + height;
-                    }
-                }
+
+          for (Component component : components)
+          {
+            Rectangle jbounds = component.getBounds();
+            int width = jbounds.width;
+            if (width < 0) width = 0;
+            if (jbounds.x + width - 1 < curbounds.x)
+            {
+              if (jbounds.x + width > lastleft)
+              {
+                lastleft = jbounds.x + width;
+              }
             }
+            int height = jbounds.height;
+            if (height < 0) height = 0;
+            if (jbounds.y + height - 1 < curbounds.y)
+            {
+              if (jbounds.y + height > lasttop)
+              {
+                lasttop = jbounds.y + height;
+              }
+            }
+          }
             
             layouts[i].setLeft(curbounds.x - lastleft);
             layouts[i].setTop(curbounds.y - lasttop);
@@ -865,10 +877,11 @@ public class GridBagLayoutSupport extends AbstractLayoutSupport
 
         private void reinstateProperties() {
             try {
-                for (int i=0; i < properties.length; i++) {
-                    FormProperty prop = (FormProperty) properties[i];
-                    prop.reinstateProperty();
-                }
+              for (Property property : properties)
+              {
+                FormProperty prop = (FormProperty) property;
+                prop.reinstateProperty();
+              }
             }
             catch(IllegalAccessException e1) {} // should not happen
             catch(InvocationTargetException e2) {} // should not happen

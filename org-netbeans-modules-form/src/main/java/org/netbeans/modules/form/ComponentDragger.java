@@ -584,11 +584,12 @@ class ComponentDragger
                     for (int j=0; j < index; j++) {
                         RADVisualComponent tComp = targetComps[j];
                         boolean isSelected = false;
-                        for (int k=0; k < selectedComponents.length; k++)
-                            if (tComp == selectedComponents[k]) {
-                                isSelected = true;
-                                break;
-                            }
+                      for (RADVisualComponent selectedComponent : selectedComponents)
+                        if (tComp == selectedComponent)
+                        {
+                          isSelected = true;
+                          break;
+                        }
 
                         if (isSelected)
                             correction++;
@@ -625,9 +626,10 @@ class ComponentDragger
         if (metacomp instanceof RADVisualContainer) {
             RADVisualComponent[] children =
                 ((RADVisualContainer)metacomp).getSubComponents();
-            for (int i = 0; i < children.length; i++) {
-                paintDragFeedback(g, children[i]);
-            }
+          for (RADVisualComponent aChildren : children)
+          {
+            paintDragFeedback(g, aChildren);
+          }
         }
     }
 
@@ -669,9 +671,9 @@ class ComponentDragger
             if (undoRedoOn)
                 formModel.setUndoRedoRecording(false);
 
-            for (int i=0; i < componentsMovedFromOutside.length; i++)
-                formModel.removeComponentImpl(
-                                         componentsMovedFromOutside[i], false);
+          for (RADVisualComponent aComponentsMovedFromOutside : componentsMovedFromOutside)
+            formModel.removeComponentImpl(
+                aComponentsMovedFromOutside, false);
 
             if (targetContainer != null) {
                 LayoutSupportManager layoutSupport =
@@ -682,9 +684,9 @@ class ComponentDragger
                                             targetConstraintsBeforeMove,
                                             0);
 
-                for (int i=0; i < componentsMovedWithinTarget.length; i++)
-                    formModel.fireComponentLayoutChanged(
-                        componentsMovedWithinTarget[i], null, null, null);
+              for (RADVisualComponent aComponentsMovedWithinTarget : componentsMovedWithinTarget)
+                formModel.fireComponentLayoutChanged(
+                    aComponentsMovedWithinTarget, null, null, null);
             }
 
             if (undoRedoOn) // turn on undo/redo monitoring again
@@ -711,19 +713,20 @@ class ComponentDragger
             }
             else {
                 ComponentContainer othersMetaCont = formModel.getModelContainer();
-                for (int i=0; i < targetComponentsAfterMove.length; i++) {
-                    othersMetaCont.add(targetComponentsAfterMove[i]);
-                    targetComponentsAfterMove[i].resetConstraintsProperties();
-                }
+              for (RADVisualComponent aTargetComponentsAfterMove : targetComponentsAfterMove)
+              {
+                othersMetaCont.add(aTargetComponentsAfterMove);
+                aTargetComponentsAfterMove.resetConstraintsProperties();
+              }
             }
 
-            for (int i=0; i < componentsMovedFromOutside.length; i++)
-                formModel.fireComponentAdded(componentsMovedFromOutside[i],
-                                             false);
+          for (RADVisualComponent aComponentsMovedFromOutside : componentsMovedFromOutside)
+            formModel.fireComponentAdded(aComponentsMovedFromOutside,
+                                         false);
 
-            for (int i=0; i < componentsMovedWithinTarget.length; i++)
-                formModel.fireComponentLayoutChanged(
-                    componentsMovedWithinTarget[i], null, null, null);
+          for (RADVisualComponent aComponentsMovedWithinTarget : componentsMovedWithinTarget)
+            formModel.fireComponentLayoutChanged(
+                aComponentsMovedWithinTarget, null, null, null);
 
             if (undoRedoOn) // turn on undo/redo monitoring again
                 formModel.setUndoRedoRecording(true);

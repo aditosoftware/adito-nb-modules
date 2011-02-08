@@ -349,23 +349,23 @@ public class FormModel
     private static void collectMetaComponents(ComponentContainer cont,
                                               java.util.List<RADComponent> list) {
         RADComponent[] comps = cont.getSubBeans();
-        for (int i = 0; i < comps.length; i++) {
-            RADComponent comp = comps[i];
-            list.add(comp);
-            if (comp instanceof ComponentContainer)
-                collectMetaComponents((ComponentContainer) comp, list);
-        }
+      for (RADComponent comp : comps)
+      {
+        list.add(comp);
+        if (comp instanceof ComponentContainer)
+          collectMetaComponents((ComponentContainer) comp, list);
+      }
     }
 
     private static void collectVisualMetaComponents(RADVisualContainer cont,
                                                     java.util.List<RADComponent> list) {
         RADVisualComponent[] comps = cont.getSubComponents();
-        for (int i = 0; i < comps.length; i++) {
-            RADComponent comp = comps[i];
-            list.add(comp);
-            if (comp instanceof RADVisualContainer)
-                collectVisualMetaComponents((RADVisualContainer) comp, list);
-        }
+      for (RADVisualComponent comp : comps)
+      {
+        list.add(comp);
+        if (comp instanceof RADVisualContainer)
+          collectVisualMetaComponents((RADVisualContainer) comp, list);
+      }
     }
 
     public FormSettings getSettings() {
@@ -435,7 +435,7 @@ public class FormModel
             LayoutConstraints c = constraints instanceof LayoutConstraints ?
                                   (LayoutConstraints) constraints : null;
             LayoutConstraints[] constrArray = new LayoutConstraints[] { c };
-            int index = constraints instanceof Integer ? ((Integer)constraints).intValue() : -1;
+            int index = constraints instanceof Integer ? (Integer) constraints : -1;
 
             // component needs to be "in model" (have code expression) before added to layout
             if (newlyAdded || !metacomp.isInModel()) {
@@ -596,9 +596,10 @@ public class FormModel
     private void removeLayoutComponentsRecursively(RADComponent metacomp) {
         if (metacomp instanceof ComponentContainer) {
             RADComponent[] comps = ((ComponentContainer)metacomp).getSubBeans();
-            for (int i=0; i<comps.length; i++) {
-                removeLayoutComponentsRecursively(comps[i]);
-            }
+          for (RADComponent comp : comps)
+          {
+            removeLayoutComponentsRecursively(comp);
+          }
         }
         LayoutComponent layoutComp = layoutModel == null ? null : layoutModel.getLayoutComponent(metacomp.getId());
         if (layoutComp != null && layoutComp.getParent() == null) {
@@ -619,21 +620,19 @@ public class FormModel
     private void removeEventHandlersRecursively(RADComponent comp) {
         if (comp instanceof ComponentContainer) {
             RADComponent[] subcomps = ((ComponentContainer)comp).getSubBeans();
-            for (int i=0; i<subcomps.length; i++)
-                removeEventHandlersRecursively(subcomps[i]);
+          for (RADComponent subcomp : subcomps) removeEventHandlersRecursively(subcomp);
         }
 
         Event[] events = comp.getKnownEvents();
-        for (int i=0; i < events.length; i++)
-            if (events[i].hasEventHandlers())
-                getFormEvents().detachEvent(events[i]);
+      for (Event event : events)
+        if (event.hasEventHandlers())
+          getFormEvents().detachEvent(event);
     }
 
     static void setInModelRecursively(RADComponent metacomp, boolean inModel) {
         if (metacomp instanceof ComponentContainer) {
             RADComponent[] comps = ((ComponentContainer)metacomp).getSubBeans();
-            for (int i=0; i < comps.length; i++)
-                setInModelRecursively(comps[i], inModel);
+          for (RADComponent comp : comps) setInModelRecursively(comp, inModel);
         }
         metacomp.setInModel(inModel);
     }
@@ -1292,10 +1291,11 @@ public class FormModel
             }
             targets = (ArrayList) listeners.clone();
         }
-        for (int i=0; i < targets.size(); i++) {
-            FormModelListener l = (FormModelListener) targets.get(i);
-            l.formChanged(events);
-        }
+      for (Object target : targets)
+      {
+        FormModelListener l = (FormModelListener) target;
+        l.formChanged(events);
+      }
     }
 
     // -------------
@@ -1342,9 +1342,9 @@ public class FormModel
         @Override
         public void initSubComponents(RADComponent[] initComponents) {
             otherComponents.clear();
-            for (int i = 0; i < initComponents.length; i++)
-                if (initComponents[i] != topRADComponent)
-                    otherComponents.add(initComponents[i]);
+          for (RADComponent initComponent : initComponents)
+            if (initComponent != topRADComponent)
+              otherComponents.add(initComponent);
         }
 
         @Override

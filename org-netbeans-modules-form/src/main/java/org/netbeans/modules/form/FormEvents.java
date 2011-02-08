@@ -179,10 +179,11 @@ public class FormEvents {
     public void detachEvent(Event event) {
         unregisterEventFromCEDL(event);
         String[] handlerNames = event.getEventHandlers();
-        for (int i=0; i < handlerNames.length; i++) {
-            event.removeEventHandler(handlerNames[i]);
-            detachEventHandler(event, handlerNames[i]);
-        }
+      for (String handlerName : handlerNames)
+      {
+        event.removeEventHandler(handlerName);
+        detachEventHandler(event, handlerName);
+      }
     }
 
     public void renameEventHandler(String oldHandlerName, String newHandlerName)
@@ -196,10 +197,10 @@ public class FormEvents {
             return; // oldHandlerName handler not found
 
         if (eventHandlers.get(newHandlerName) == null) {
-            for (int j=0; j < handlerEventList.size(); j++) {
-                Event event = handlerEventList.get(j);
-                event.renameEventHandler(oldHandlerName, newHandlerName);
-            }
+          for (Event event : handlerEventList)
+          {
+            event.renameEventHandler(oldHandlerName, newHandlerName);
+          }
             eventHandlers.remove(oldHandlerName);
             eventHandlers.put(newHandlerName, handlerEventList);
             formModel.fireEventHandlerRenamed(oldHandlerName, newHandlerName);
@@ -306,12 +307,13 @@ public class FormEvents {
             usedMethods.put(methodName, eventList);
         }
         else {
-            for (Iterator it=eventList.iterator(); it.hasNext(); ) {
-                Event e = (Event) it.next();
-                if (e.getComponent() == event.getComponent())
-                    return false; // same event, or another event of the same
-                                  // component with the same method signature
-            }
+          for (Object anEventList : eventList)
+          {
+            Event e = (Event) anEventList;
+            if (e.getComponent() == event.getComponent())
+              return false; // same event, or another event of the same
+            // component with the same method signature
+          }
             eventList.add(event);
         }
 

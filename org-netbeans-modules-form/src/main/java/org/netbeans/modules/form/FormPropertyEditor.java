@@ -336,10 +336,10 @@ public class FormPropertyEditor implements PropertyEditor,
         PropertyEditor[] editors = getAllEditors();
 
         if (!property.canWrite()) { // read only property
-            for (int i=0; i < editors.length; i++)
-                if (/*!editors[i].getClass().equals(RADConnectionPropertyEditor.class) // TODO: stripped
-                        &&*/ editors[i].supportsCustomEditor())
-                    return true;
+          for (PropertyEditor editor : editors)
+            if (/*!editors[i].getClass().equals(RADConnectionPropertyEditor.class) // TODO: stripped
+                        &&*/ editor.supportsCustomEditor())
+              return true;
             return false;
         }
 
@@ -379,45 +379,45 @@ public class FormPropertyEditor implements PropertyEditor,
             // Explicite editor should be added to editors (if not already present).
             // The current editor should replace the corresponding default editor.
             // Replace the delegate editor in ResourceWrapperEditor if needed.
-            for (int i=0; i < typeEditors.length && (expliciteEditor != null || currentEditor != null); i++) {
-                PropertyEditor prEd = typeEditors[i];
-                ResourceWrapperEditor wrapper = null;
-                if (prEd instanceof ResourceWrapperEditor && !(currentEditor instanceof ResourceWrapperEditor)) {
-                    // the current editor might be just loaded and thus not wrapped...
-                    wrapper = (ResourceWrapperEditor) prEd;
-                    prEd = wrapper.getDelegatedPropertyEditor();
-                }
-                if (currentEditor != null && currentEditor.getClass().equals(prEd.getClass())) {
-                    // current editor matches
-                    if (wrapper != null) { // silently make it the current editor
-                        wrapper.setDelegatedPropertyEditor(currentEditor);
-                        boolean fire = property.isChangeFiring();
-                        property.setChangeFiring(false);
-                        property.setCurrentEditor(wrapper);
-                        property.setChangeFiring(fire);
-                        PropertyEnv env = getPropertyEnv();
-                        if (env != null)
-                            wrapper.attachEnv(env);
-                    }
-                    else {
-                      // TODO: stripped
+          // TODO: stripped
+//            for (int i=0; i < typeEditors.length && (expliciteEditor != null || currentEditor != null); i++) {
+//                PropertyEditor prEd = typeEditors[i];
+//                ResourceWrapperEditor wrapper = null;
+//                if (prEd instanceof ResourceWrapperEditor && !(currentEditor instanceof ResourceWrapperEditor)) {
+//                    // the current editor might be just loaded and thus not wrapped...
+//                    wrapper = (ResourceWrapperEditor) prEd;
+//                    prEd = wrapper.getDelegatedPropertyEditor();
+//                }
+//                if (currentEditor != null && currentEditor.getClass().equals(prEd.getClass())) {
+//                    // current editor matches
+//                    if (wrapper != null) { // silently make it the current editor
+//                        wrapper.setDelegatedPropertyEditor(currentEditor);
+//                        boolean fire = property.isChangeFiring();
+//                        property.setChangeFiring(false);
+//                        property.setCurrentEditor(wrapper);
+//                        property.setChangeFiring(fire);
+//                        PropertyEnv env = getPropertyEnv();
+//                        if (env != null)
+//                            wrapper.attachEnv(env);
+//                    }
+//                    else {
 //                        if (prEd instanceof RADConnectionPropertyEditor
 //                            && ((RADConnectionPropertyEditor)prEd).getEditorType()
 //                                != ((RADConnectionPropertyEditor)currentEditor).getEditorType()) {
 //                            continue; // there are two types of RAD... editors
 //                        }
-                        typeEditors[i] = currentEditor;
-                    }
-                    currentEditor = null;
-                }
-                else if (expliciteEditor != null && expliciteEditor.getClass().equals(prEd.getClass())) {
-                    if (wrapper != null)
-                        wrapper.setDelegatedPropertyEditor(expliciteEditor);
-                    else
-                        typeEditors[i] = expliciteEditor;
-                    expliciteEditor = null;
-                }
-            }
+//                        typeEditors[i] = currentEditor;
+//                    }
+//                    currentEditor = null;
+//                }
+//                else if (expliciteEditor != null && expliciteEditor.getClass().equals(prEd.getClass())) {
+//                    if (wrapper != null)
+//                        wrapper.setDelegatedPropertyEditor(expliciteEditor);
+//                    else
+//                        typeEditors[i] = expliciteEditor;
+//                    expliciteEditor = null;
+//                }
+//            }
 
             int count = typeEditors.length;
             if (expliciteEditor != null)

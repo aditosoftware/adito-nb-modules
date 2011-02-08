@@ -112,14 +112,15 @@ public class ParametersPicker extends javax.swing.JPanel {
             Collections.sort(beansList, new ComponentComparator());
 
             beanCombo.addItem(FormUtils.getBundleString("CTL_CW_SelectBean")); // NOI18N
-            for (Iterator it = beansList.iterator(); it.hasNext(); ) {
-                RADComponent radComp = (RADComponent) it.next();
-                if (radComp == formModel.getTopRADComponent())
-                    beanCombo.addItem(
-                        FormUtils.getBundleString("CTL_FormTopContainerName")); // NOI18N
-                else
-                    beanCombo.addItem(radComp.getName());
-            }
+          for (Object aBeansList : beansList)
+          {
+            RADComponent radComp = (RADComponent) aBeansList;
+            if (radComp == formModel.getTopRADComponent())
+              beanCombo.addItem(
+                  FormUtils.getBundleString("CTL_FormTopContainerName")); // NOI18N
+            else
+              beanCombo.addItem(radComp.getName());
+          }
 
             beanCombo.addItemListener(new ItemListener() {
                 @Override
@@ -357,8 +358,7 @@ public class ParametersPicker extends javax.swing.JPanel {
             return;
         List<ChangeListener> list = new ArrayList<ChangeListener>(listeners);
         ChangeEvent evt = new ChangeEvent(this);
-        for (Iterator<ChangeListener> it = list.iterator(); it.hasNext();)
-            it.next().stateChanged(evt);
+      for (ChangeListener aList : list) aList.stateChanged(evt);
     }
 
     /** This method is called from within the constructor to
@@ -577,7 +577,7 @@ public class ParametersPicker extends javax.swing.JPanel {
         picker.addPropertyChangeListener("pickerValid", new PropertyChangeListener() { // NOI18N
             @Override
             public void propertyChange(PropertyChangeEvent evt2) {
-                dd.setValid(((Boolean)evt2.getNewValue()).booleanValue());
+                dd.setValid((Boolean) evt2.getNewValue());
             }
         });
         java.awt.Dialog dialog = org.openide.DialogDisplayer.getDefault().createDialog(dd);
@@ -625,7 +625,7 @@ public class ParametersPicker extends javax.swing.JPanel {
         propertyPicker.addPropertyChangeListener("pickerValid", new PropertyChangeListener() { // NOI18N
             @Override
             public void propertyChange(PropertyChangeEvent evt2) {
-                dd.setValid(((Boolean)evt2.getNewValue()).booleanValue());
+                dd.setValid((Boolean) evt2.getNewValue());
             }
         });
         java.awt.Dialog dialog = org.openide.DialogDisplayer.getDefault().createDialog(dd);

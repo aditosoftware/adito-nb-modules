@@ -180,7 +180,7 @@ public class FormDataObject extends MultiDataObject {
      * is called only once.
      *
      * @return the node representation for this data object
-     * @see DataNode
+     * @see FormDataNode
      */
     @Override
     protected Node createNodeDelegate() {

@@ -395,8 +395,7 @@ public class FormModelEvent extends EventObject
 
     private static void informInterestedEvents(FormModelEvent newEvent) {
         if (interestList != null)
-            for (Iterator it=interestList.iterator(); it.hasNext(); )
-                ((FormModelEvent)it.next()).newEventCreated(newEvent);
+          for (Object anInterestList : interestList) ((FormModelEvent) anInterestList).newEventCreated(newEvent);
     }
 
     private void newEventCreated(FormModelEvent newEvent) {
@@ -836,17 +835,21 @@ public class FormModelEvent extends EventObject
                 } else { // component synthetic property
                     props = getComponent().getSyntheticProperties();
                 }
-                for (int i=0; i < props.length; i++) {
-                    if (props[i].getName().equals(propName)) {
-                        try {
-                            props[i].setValue(getOldPropertyValue());
-                        }
-                        catch (Exception ex) { // should not happen
-                            Logger.getLogger(getClass().getName()).log(Level.INFO, ex.getMessage(), ex);
-                        }
-                        break;
-                    }
+              for (Node.Property prop : props)
+              {
+                if (prop.getName().equals(propName))
+                {
+                  try
+                  {
+                    prop.setValue(getOldPropertyValue());
+                  }
+                  catch (Exception ex)
+                  { // should not happen
+                    Logger.getLogger(getClass().getName()).log(Level.INFO, ex.getMessage(), ex);
+                  }
+                  break;
                 }
+              }
             }
         }
 
@@ -875,17 +878,21 @@ public class FormModelEvent extends EventObject
                 } else { // component synthetic property
                     props = getComponent().getSyntheticProperties();
                 }
-                for (int i=0; i < props.length; i++) {
-                    if (props[i].getName().equals(propName)) {
-                        try {
-                            props[i].setValue(getNewPropertyValue());
-                        }
-                        catch (Exception ex) { // should not happen
-                            Logger.getLogger(getClass().getName()).log(Level.INFO, ex.getMessage(), ex);
-                        }
-                        break;
-                    }
+              for (Node.Property prop : props)
+              {
+                if (prop.getName().equals(propName))
+                {
+                  try
+                  {
+                    prop.setValue(getNewPropertyValue());
+                  }
+                  catch (Exception ex)
+                  { // should not happen
+                    Logger.getLogger(getClass().getName()).log(Level.INFO, ex.getMessage(), ex);
+                  }
+                  break;
                 }
+              }
             }
         }
 
@@ -991,18 +998,22 @@ public class FormModelEvent extends EventObject
 
             Event[] events = formEvents.getEventsForHandler(
                                             getOldEventHandler());
-            for (int i=0 ; i < events.length; i++) {
-                Node.Property prop = events[i].getComponent()
-                                       .getPropertyByName(events[i].getId());
-                if (prop != null) {
-                    try {
-                        prop.setValue(getOldEventHandler());
-                    }
-                    catch (Exception ex) { // should not happen
-                        Logger.getLogger(getClass().getName()).log(Level.INFO, ex.getMessage(), ex);
-                    }
-                }
+          for (Event event : events)
+          {
+            Node.Property prop = event.getComponent()
+                .getPropertyByName(event.getId());
+            if (prop != null)
+            {
+              try
+              {
+                prop.setValue(getOldEventHandler());
+              }
+              catch (Exception ex)
+              { // should not happen
+                Logger.getLogger(getClass().getName()).log(Level.INFO, ex.getMessage(), ex);
+              }
             }
+          }
         }
 
         private void redoEventHandlerRenaming() {
@@ -1013,18 +1024,22 @@ public class FormModelEvent extends EventObject
 
             Event[] events = formEvents.getEventsForHandler(
                                             getNewEventHandler());
-            for (int i=0 ; i < events.length; i++) {
-                Node.Property prop = events[i].getComponent()
-                                       .getPropertyByName(events[i].getId());
-                if (prop != null) {
-                    try {
-                        prop.setValue(getNewEventHandler());
-                    }
-                    catch (Exception ex) { // should not happen
-                        Logger.getLogger(getClass().getName()).log(Level.INFO, ex.getMessage(), ex);
-                    }
-                }
+          for (Event event : events)
+          {
+            Node.Property prop = event.getComponent()
+                .getPropertyByName(event.getId());
+            if (prop != null)
+            {
+              try
+              {
+                prop.setValue(getNewEventHandler());
+              }
+              catch (Exception ex)
+              { // should not happen
+                Logger.getLogger(getClass().getName()).log(Level.INFO, ex.getMessage(), ex);
+              }
             }
+          }
         }
     }
 }

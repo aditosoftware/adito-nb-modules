@@ -979,8 +979,8 @@ public class LayoutDesigner implements LayoutConstants {
                     while (iter.hasNext()) {
                         LayoutInterval comp = (LayoutInterval)iter.next();
                         LayoutInterval parent = (LayoutInterval)iter.next();
-                        int alignment = ((Integer)iter.next()).intValue();
-                        int index = ((Integer)iter.next()).intValue();
+                        int alignment = (Integer) iter.next();
+                        int index = (Integer) iter.next();
                         if (comp.getParent() != null) { // component reused - not copied, just moved
                             layoutModel.removeInterval(comp);
                         }
@@ -1122,9 +1122,10 @@ public class LayoutDesigner implements LayoutConstants {
     public void removeDraggedComponents() {
         if (dragger != null) {
             LayoutComponent[] components = dragger.getMovingComponents();
-            for (int i=0; i < components.length; i++) {
-                layoutModel.removeComponentAndIntervals(components[i], !components[i].isLayoutContainer());
-            }
+          for (LayoutComponent component : components)
+          {
+            layoutModel.removeComponentAndIntervals(component, !component.isLayoutContainer());
+          }
             endMoving(false);
         }
     }
@@ -1230,13 +1231,15 @@ public class LayoutDesigner implements LayoutConstants {
             List<String> lH = linkGroupsH.get(linkIdH);
             List<String> lV = linkGroupsV.get(linkIdV);
 
-            Set<String> merged = new HashSet<String>(); 
-            for (int i=0; i < lH.size(); i++) {
-                merged.add(lH.get(i));
-            }
-            for (int i=0; i < lV.size(); i++) {
-                merged.add(lV.get(i));
-            }
+            Set<String> merged = new HashSet<String>();
+          for (String aLH : lH)
+          {
+            merged.add(aLH);
+          }
+          for (String aLV : lV)
+          {
+            merged.add(aLV);
+          }
 
             Iterator<String> mergedIt = merged.iterator();
             while (mergedIt.hasNext()) {
@@ -3077,7 +3080,7 @@ public class LayoutDesigner implements LayoutConstants {
         for (int i = list.size()-1; i>=0; i--) {
             List subList = (List)list.get(i);
             if (subList.size() == 2) { // there is just one interval
-                int alignment = ((Integer)subList.get(0)).intValue();
+                int alignment = (Integer) subList.get(0);
                 LayoutInterval li = (LayoutInterval) subList.get(1);
                 if (li.isEmptySpace()) {
                     if (gap == null || li.getMaximumSize() > gap.getMaximumSize()) {
@@ -3118,33 +3121,38 @@ public class LayoutDesigner implements LayoutConstants {
         }
 
         // find common ending gaps, possibility to eliminate some...
-        for (Iterator it=list.iterator(); it.hasNext(); ) {
-            List subList = (List) it.next();
-            if (subList.size() != 2) { // there are more intervals (will form a sequential group)
-                onlyGaps = false;
+      for (Object aList1 : list)
+      {
+        List subList = (List) aList1;
+        if (subList.size() != 2)
+        { // there are more intervals (will form a sequential group)
+          onlyGaps = false;
 
-                boolean first = true;
-                Iterator itr = subList.iterator();
-                itr.next(); // skip seq. alignment
-                do {
-                    LayoutInterval li = (LayoutInterval) itr.next();
-                    if (first) {
-                        first = false;
-                        if (isFixedPadding(li))
-                            leadingGap = li;
-                        else
-                            gapLeads = false;
-                    }
-                    else if (!itr.hasNext()) {
-                        if (isFixedPadding(li))
-                            trailingGap = li;
-                        else
-                            gapTrails = false;
-                    }
-                }
-                while (itr.hasNext());
+          boolean first = true;
+          Iterator itr = subList.iterator();
+          itr.next(); // skip seq. alignment
+          do
+          {
+            LayoutInterval li = (LayoutInterval) itr.next();
+            if (first)
+            {
+              first = false;
+              if (isFixedPadding(li))
+                leadingGap = li;
+              else
+                gapLeads = false;
             }
+            else if (!itr.hasNext())
+            {
+              if (isFixedPadding(li))
+                trailingGap = li;
+              else
+                gapTrails = false;
+            }
+          }
+          while (itr.hasNext());
         }
+      }
 
         if (onlyGaps) {
             operations.insertGapIntoSequence(gap, seq, index, dimension);
@@ -3161,39 +3169,47 @@ public class LayoutDesigner implements LayoutConstants {
 //        group.setGroupAlignment(alignment);
 
         // fill the group
-        for (Iterator it=list.iterator(); it.hasNext(); ) {
-            List subList = (List) it.next();
+      for (Object aList : list)
+      {
+        List subList = (List) aList;
 
-            if (gapLeads) {
-                subList.remove(1);
-            }
-            if (gapTrails) {
-                subList.remove(subList.size()-1);
-            }
-
-            LayoutInterval interval;
-            if (subList.size() == 2) { // there is just one interval - use it directly
-                int alignment = ((Integer)subList.get(0)).intValue();
-                interval = (LayoutInterval) subList.get(1);
-                if (alignment == LEADING || alignment == TRAILING) {
-                    layoutModel.setIntervalAlignment(interval, alignment);
-                }
-            }
-            else { // there are more intervals - group them in a sequence
-                interval = new LayoutInterval(SEQUENTIAL);
-                Iterator itr = subList.iterator();
-                int alignment = ((Integer)itr.next()).intValue();
-                if (alignment == LEADING || alignment == TRAILING) {
-                    interval.setAlignment(alignment);
-                }
-                do {
-                    LayoutInterval li = (LayoutInterval) itr.next();
-                    layoutModel.addInterval(li, interval, -1);
-                }
-                while (itr.hasNext());
-            }
-            layoutModel.addInterval(interval, group, -1);
+        if (gapLeads)
+        {
+          subList.remove(1);
         }
+        if (gapTrails)
+        {
+          subList.remove(subList.size() - 1);
+        }
+
+        LayoutInterval interval;
+        if (subList.size() == 2)
+        { // there is just one interval - use it directly
+          int alignment = (Integer) subList.get(0);
+          interval = (LayoutInterval) subList.get(1);
+          if (alignment == LEADING || alignment == TRAILING)
+          {
+            layoutModel.setIntervalAlignment(interval, alignment);
+          }
+        }
+        else
+        { // there are more intervals - group them in a sequence
+          interval = new LayoutInterval(SEQUENTIAL);
+          Iterator itr = subList.iterator();
+          int alignment = (Integer) itr.next();
+          if (alignment == LEADING || alignment == TRAILING)
+          {
+            interval.setAlignment(alignment);
+          }
+          do
+          {
+            LayoutInterval li = (LayoutInterval) itr.next();
+            layoutModel.addInterval(li, interval, -1);
+          }
+          while (itr.hasNext());
+        }
+        layoutModel.addInterval(interval, group, -1);
+      }
 
         // add the group to the sequence
         if (gapLeads) {

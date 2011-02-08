@@ -51,7 +51,7 @@ import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.jdesktop.beansbinding.BindingGroup;
+//import org.jdesktop.beansbinding.BindingGroup;
 
 import org.openide.ErrorManager;
 
@@ -300,7 +300,7 @@ public class VisualReplicator {
                     visible = defaultComp.isVisible() ? Boolean.TRUE : Boolean.FALSE;
             }
             if (visible != null) {
-                comp.setVisible(visible.booleanValue());
+                comp.setVisible(visible);
             }
 
             // re-attach fake peer
@@ -322,11 +322,12 @@ public class VisualReplicator {
         else { // new layout support
             // Re-attach fake peers
             contDelegate.removeAll();
-            for (int i=0; i<comps.length; i++) {
-                FakePeerSupport.attachFakePeer(comps[i]);
-                if (comps[i] instanceof Container)
-                    FakePeerSupport.attachFakePeerRecursively((Container)comps[i]);
-            }
+          for (Component comp : comps)
+          {
+            FakePeerSupport.attachFakePeer(comp);
+            if (comp instanceof Container)
+              FakePeerSupport.attachFakePeerRecursively((Container) comp);
+          }
 
             setupContainerLayout(metacont, comps, compIds);
         }
@@ -353,16 +354,18 @@ public class VisualReplicator {
         }
 
         RADComponent[] subComps = metacont.getSubBeans();
-        for (int i=0; i < subComps.length; i++) {
-            Object compClone = getClonedComponent(subComps[i]);
-            if (compClone == null)
-                addComponent(subComps[i]);
-            else if (compClone instanceof Component) {
-                Container cloneCont = ((Component)compClone).getParent();
-                if (cloneCont != container && cloneToId.get(cloneCont) != null)
-                    return; // the clone is placed in another container in
-            }               // replicator, there's going to be another update
-        }
+      for (RADComponent subComp : subComps)
+      {
+        Object compClone = getClonedComponent(subComp);
+        if (compClone == null)
+          addComponent(subComp);
+        else if (compClone instanceof Component)
+        {
+          Container cloneCont = ((Component) compClone).getParent();
+          if (cloneCont != container && cloneToId.get(cloneCont) != null)
+            return; // the clone is placed in another container in
+        }               // replicator, there's going to be another update
+      }
     }
 
     // for adding just one component, for adding more components use
@@ -487,12 +490,13 @@ public class VisualReplicator {
                     // Re-attach fake peers
                     contDelegate.removeAll();
                     RADVisualComponent[] metacomps = parentCont.getSubComponents();
-                    for (int i=0; i<metacomps.length; i++) {
-                        Component component = (Component)getClonedComponent(metacomps[i]);
-                        FakePeerSupport.attachFakePeer(component);
-                        if (component instanceof Container)
-                            FakePeerSupport.attachFakePeerRecursively((Container)component);
-                    }
+                  for (RADVisualComponent metacomp1 : metacomps)
+                  {
+                    Component component = (Component) getClonedComponent(metacomp1);
+                    FakePeerSupport.attachFakePeer(component);
+                    if (component instanceof Container)
+                      FakePeerSupport.attachFakePeerRecursively((Container) component);
+                  }
 
                     getLayoutBuilder(parentCont.getId()).removeComponentsFromContainer(
                         new Component[] { comp },
@@ -763,14 +767,15 @@ public class VisualReplicator {
         }
         else if (metacomp instanceof RADMenuComponent) {
             RADComponent[] metacomps = ((RADMenuComponent)metacomp).getSubBeans();
-            for (int i = 0; i < metacomps.length; i++) {
-                RADComponent sub = metacomps[i];
-                Object menuItem = getClonedComponent(sub);
-                if (menuItem == null) {
-                    menuItem = cloneComponent((RADMenuItemComponent)sub, relativeProperties);
-                }
-                addToMenu(compClone, menuItem);
+          for (RADComponent sub : metacomps)
+          {
+            Object menuItem = getClonedComponent(sub);
+            if (menuItem == null)
+            {
+              menuItem = cloneComponent((RADMenuItemComponent) sub, relativeProperties);
             }
+            addToMenu(compClone, menuItem);
+          }
         }
 
         if (clone instanceof Component && getDesignRestrictions()) {
@@ -924,9 +929,9 @@ public class VisualReplicator {
     {
         component.setDoubleBuffered(value);
         Component[] subcomps = component.getComponents();
-        for (int i=0; i < subcomps.length; i++)
-            if (subcomps[i] instanceof JComponent)
-                setDoubleBufferedRecursively((JComponent)subcomps[i], value);
+      for (Component subcomp : subcomps)
+        if (subcomp instanceof JComponent)
+          setDoubleBufferedRecursively((JComponent) subcomp, value);
     }
 
     // -------
@@ -992,8 +997,7 @@ public class VisualReplicator {
         if (metacomp instanceof ComponentContainer) {
             layoutBuilders.remove(metacomp.getId());
             RADComponent[] subcomps = ((ComponentContainer)metacomp).getSubBeans();
-            for (int i=0; i < subcomps.length; i++)
-                removeMapping(subcomps[i]);
+          for (RADComponent subcomp : subcomps) removeMapping(subcomp);
         }
     }
 

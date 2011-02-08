@@ -64,7 +64,7 @@ import org.openide.explorer.propertysheet.editors.NodeCustomizer;
 
 import org.netbeans.modules.form.actions.*;
 import org.netbeans.modules.form.layoutsupport.*;
-import org.netbeans.modules.form.editors.TableCustomizer;
+//import org.netbeans.modules.form.editors.TableCustomizer;
 import org.netbeans.modules.form.menu.AddSubItemAction;
 import org.netbeans.modules.form.menu.InsertMenuAction;
 import org.netbeans.modules.form.menu.MenuEditLayer;
@@ -214,13 +214,15 @@ public class RADComponentNode extends FormNode
                     actions.add(null);
                 }
                 Event[] events = component.getKnownEvents();
-                for (int i=0; i < events.length; i++) {
-                    if (events[i].hasEventHandlers()) {
-                        actions.add(SystemAction.get(EventsAction.class));
-                        actions.add(null);
-                        break;
-                    }
+              for (Event event : events)
+              {
+                if (event.hasEventHandlers())
+                {
+                  actions.add(SystemAction.get(EventsAction.class));
+                  actions.add(null);
+                  break;
                 }
+              }
                 
                 actions.add(SystemAction.get(CopyAction.class));
             } else {
@@ -284,8 +286,7 @@ public class RADComponentNode extends FormNode
             actions.add(null);
             
             javax.swing.Action[] superActions = super.getActions(context);
-            for (int i=0; i < superActions.length; i++)
-                actions.add(superActions[i]);
+          actions.addAll(Arrays.asList(superActions));
             
             this.actions = new Action[actions.size()];
             actions.toArray(this.actions);
@@ -427,11 +428,11 @@ public class RADComponentNode extends FormNode
     protected Component createCustomizer() {
         Class customizerClass = component.getBeanInfo().getBeanDescriptor().getCustomizerClass();
         if (customizerClass == null) {
-            if (javax.swing.JTable.class.isAssignableFrom(component.getBeanClass())) {
-                customizerClass = TableCustomizer.class;
-            } else {
+//            if (javax.swing.JTable.class.isAssignableFrom(component.getBeanClass())) {
+//                customizerClass = TableCustomizer.class;
+//            } else {
                 return null;
-            }
+//            }
         }
         
         Object customizerObject;
@@ -499,18 +500,20 @@ public class RADComponentNode extends FormNode
             public Object run() {
                 Object oldValue = evt != null ? evt.getOldValue() : null;
                 Object newValue = evt != null ? evt.getNewValue() : null;
-                
-                for (int i=0; i < properties.length; i++) {
-                    FormProperty prop = properties[i];
-                    try {
-                        prop.reinstateProperty();
-                        //                        if (prop.isChanged()) // [what if changed to default value?]
-                        prop.propertyValueChanged(oldValue, newValue);
-                    }
-                    catch (Exception ex) { // unlikely to happen
-                        ex.printStackTrace();
-                    }
+
+              for (FormProperty prop : properties)
+              {
+                try
+                {
+                  prop.reinstateProperty();
+                  //                        if (prop.isChanged()) // [what if changed to default value?]
+                  prop.propertyValueChanged(oldValue, newValue);
                 }
+                catch (Exception ex)
+                { // unlikely to happen
+                  ex.printStackTrace();
+                }
+              }
                 return null;
             }
         });
@@ -621,14 +624,13 @@ public class RADComponentNode extends FormNode
                     keyLayout = visualCont.getLayoutSupport().getLayoutDelegate(); //new Object(); // [need not be recreated every time]
                     keys.add(keyLayout);
                 }
-                
-                for (int i=0; i < subComps.length; i++)
-                    if (subComps[i] != menuComp)
-                        keys.add(subComps[i]);
+
+              for (RADComponent subComp : subComps)
+                if (subComp != menuComp)
+                  keys.add(subComp);
             }
             else {
-                for (int i=0; i < subComps.length; i++)
-                    keys.add(subComps[i]);
+              keys.addAll(Arrays.asList(subComps));
             }
             
             setKeys(keys);

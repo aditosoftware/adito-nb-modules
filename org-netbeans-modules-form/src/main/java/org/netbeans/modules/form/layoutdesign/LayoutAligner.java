@@ -101,20 +101,22 @@ class LayoutAligner implements LayoutConstants {
             // Calculate leading and trailing intervals
             Map<LayoutInterval,LayoutInterval> leadingMap = new HashMap<LayoutInterval,LayoutInterval>();
             Map<LayoutInterval,LayoutInterval> trailingMap = new HashMap<LayoutInterval,LayoutInterval>();
-            for (int i=0; i<intervals.length; i++) {
-                LayoutInterval interval = intervals[i];
-                LayoutInterval parent = interval.getParent();
-                // Special handling for standalone component intervals in parParent
-                if (parent == parParent) parent = interval;
-                LayoutInterval leading = leadingMap.get(parent);
-                LayoutInterval trailing = trailingMap.get(parent);
-                if ((leading == null) || (parent.indexOf(leading) > parent.indexOf(interval))) {
-                    leadingMap.put(parent, interval);
-                }
-                if ((trailing == null) || (parent.indexOf(trailing) < parent.indexOf(interval))) {
-                    trailingMap.put(parent, interval);
-                }
-            }        
+          for (LayoutInterval interval : intervals)
+          {
+            LayoutInterval parent = interval.getParent();
+            // Special handling for standalone component intervals in parParent
+            if (parent == parParent) parent = interval;
+            LayoutInterval leading = leadingMap.get(parent);
+            LayoutInterval trailing = trailingMap.get(parent);
+            if ((leading == null) || (parent.indexOf(leading) > parent.indexOf(interval)))
+            {
+              leadingMap.put(parent, interval);
+            }
+            if ((trailing == null) || (parent.indexOf(trailing) < parent.indexOf(interval)))
+            {
+              trailingMap.put(parent, interval);
+            }
+          }
             // Create arrays of leading/trailing intervals
             LayoutInterval[] leadingIntervals = new LayoutInterval[leadingMap.size()];
             LayoutInterval[] trailingIntervals = new LayoutInterval[trailingMap.size()];
@@ -166,25 +168,31 @@ class LayoutAligner implements LayoutConstants {
     private void markByAlignAttributes(LayoutInterval parParent, LayoutInterval[] intervals) {
         layoutModel.changeIntervalAttribute(parParent, LayoutInterval.ATTR_ALIGN_PRE, true);
         layoutModel.changeIntervalAttribute(parParent, LayoutInterval.ATTR_ALIGN_POST, true);
-        for (int i=0; i<intervals.length; i++) {
-            LayoutInterval interval = intervals[i];
-            while (interval != parParent) {
-                LayoutInterval parent = interval.getParent();
-                layoutModel.changeIntervalAttribute(interval, LayoutInterval.ATTR_ALIGN_PRE, true);
-                layoutModel.changeIntervalAttribute(interval, LayoutInterval.ATTR_ALIGN_POST, true);
-                if (parent.isSequential()) {
-                    int index = parent.indexOf(interval);
-                    for (int j=0; j<parent.getSubIntervalCount(); j++) {
-                        if (j < index) {
-                            markByAlignAttribute(parent.getSubInterval(j), LayoutInterval.ATTR_ALIGN_PRE);
-                        } else if (j > index) {
-                            markByAlignAttribute(parent.getSubInterval(j), LayoutInterval.ATTR_ALIGN_POST);
-                        }
-                    }
-                }
-                interval = parent;
+      for (LayoutInterval interval : intervals)
+      {
+        while (interval != parParent)
+        {
+          LayoutInterval parent = interval.getParent();
+          layoutModel.changeIntervalAttribute(interval, LayoutInterval.ATTR_ALIGN_PRE, true);
+          layoutModel.changeIntervalAttribute(interval, LayoutInterval.ATTR_ALIGN_POST, true);
+          if (parent.isSequential())
+          {
+            int index = parent.indexOf(interval);
+            for (int j = 0; j < parent.getSubIntervalCount(); j++)
+            {
+              if (j < index)
+              {
+                markByAlignAttribute(parent.getSubInterval(j), LayoutInterval.ATTR_ALIGN_PRE);
+              }
+              else if (j > index)
+              {
+                markByAlignAttribute(parent.getSubInterval(j), LayoutInterval.ATTR_ALIGN_POST);
+              }
             }
+          }
+          interval = parent;
         }
+      }
     }
 
     /**
@@ -537,24 +545,24 @@ class LayoutAligner implements LayoutConstants {
         int leadingPosition = Short.MAX_VALUE;
         int trailingPosition = 0;
         int targetEffAlignment = LayoutConstants.DEFAULT;
-        for (int i=0; i<intervals.length; i++) {
-            LayoutInterval interval = intervals[i];
-            
-            // This method should be called only for components
-            assert interval.isComponent();
-            
-            LayoutRegion region = interval.getCurrentSpace();
-            int leading = region.positions[dimension][LEADING];
-            int trailing = region.positions[dimension][TRAILING];
-            leadingPosition = Math.min(leading, leadingPosition);
-            trailingPosition = Math.max(trailing, trailingPosition);
-            
-            int effAlignment = LayoutInterval.getEffectiveAlignment(interval);
-            if (((effAlignment == LEADING) || (effAlignment == TRAILING))
-                && ((targetEffAlignment == DEFAULT) || (effAlignment == alignment))) {
-                targetEffAlignment = effAlignment;
-            }
+      for (LayoutInterval interval : intervals)
+      {
+        // This method should be called only for components
+        assert interval.isComponent();
+
+        LayoutRegion region = interval.getCurrentSpace();
+        int leading = region.positions[dimension][LEADING];
+        int trailing = region.positions[dimension][TRAILING];
+        leadingPosition = Math.min(leading, leadingPosition);
+        trailingPosition = Math.max(trailing, trailingPosition);
+
+        int effAlignment = LayoutInterval.getEffectiveAlignment(interval);
+        if (((effAlignment == LEADING) || (effAlignment == TRAILING))
+            && ((targetEffAlignment == DEFAULT) || (effAlignment == alignment)))
+        {
+          targetEffAlignment = effAlignment;
         }
+      }
         
         boolean resizable = false;
         boolean sequenceResizable;
@@ -737,7 +745,7 @@ class LayoutAligner implements LayoutConstants {
                                 int maxSize = gapCandidate.getMaximumSize();
                                 if (diff > 0) {
                                     if (size != null) {
-                                        int actualSize = size.intValue();
+                                        int actualSize = size;
                                         diff += prefSize - actualSize;
                                     }
                                     if (minSize >= 0) {
@@ -895,20 +903,23 @@ class LayoutAligner implements LayoutConstants {
         // find common parallel group for aligned intervals
         LayoutInterval commonGroup = null;
         LayoutInterval[] intervals = leadingInts;
-        for (int i=0; i < intervals.length; i++) {
-            LayoutInterval interval = intervals[i];
-            LayoutInterval parent = interval.getParent();
-            if (!parent.isParallel()) {
-                parent = parent.getParent();
-                assert parent.isParallel();
-            }
-            if (commonGroup == null || (parent != commonGroup && parent.isParentOf(commonGroup))) {
-                commonGroup = parent;
-            }
-            else {
-                assert parent == commonGroup || commonGroup.isParentOf(parent);
-            }
+      for (LayoutInterval interval : intervals)
+      {
+        LayoutInterval parent = interval.getParent();
+        if (!parent.isParallel())
+        {
+          parent = parent.getParent();
+          assert parent.isParallel();
         }
+        if (commonGroup == null || (parent != commonGroup && parent.isParentOf(commonGroup)))
+        {
+          commonGroup = parent;
+        }
+        else
+        {
+          assert parent == commonGroup || commonGroup.isParentOf(parent);
+        }
+      }
 
         // prepare separation to groups
         List<LayoutInterval> aligned = new LinkedList<LayoutInterval>();
@@ -990,14 +1001,15 @@ class LayoutAligner implements LayoutConstants {
 
         // add the intervals and their neighbors to the main aligned group
         // [need to fix the resizability (fill) and compute effective alignment]
-        for (Iterator<LayoutInterval> it=aligned.iterator(); it.hasNext(); ) {
-            LayoutInterval interval = it.next();
-            if (interval.getParent() != group) {
-                layoutModel.removeInterval(interval);
-                operations.addContent(interval, group, -1);
-            }
-            layoutModel.setIntervalAlignment(interval, alignment);
+      for (LayoutInterval interval : aligned)
+      {
+        if (interval.getParent() != group)
+        {
+          layoutModel.removeInterval(interval);
+          operations.addContent(interval, group, -1);
         }
+        layoutModel.setIntervalAlignment(interval, alignment);
+      }
 
         // create the remainder groups around the main one
         if (!restLeading.isEmpty()) {

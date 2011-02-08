@@ -95,9 +95,10 @@ public class EventCustomEditor extends javax.swing.JPanel {
         addButton = new javax.swing.JButton();
         jScrollPane1 = new javax.swing.JScrollPane();
         String[] handlers = eventProperty.getEventHandlers();
-        for (int i=0; i < handlers.length; i++) {
-            handlersModel.addElement(handlers[i]);
-        }
+      for (String handler : handlers)
+      {
+        handlersModel.addElement(handler);
+      }
         handlersList = new javax.swing.JList();
         handlersList.setModel(handlersModel);
         if (handlers.length > 0) {
@@ -236,26 +237,30 @@ public class EventCustomEditor extends javax.swing.JPanel {
 
     private void removeButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_removeButtonActionPerformed
         Object[] handlers = handlersList.getSelectedValues();
-        for (int i=0; i < handlers.length; i++) {
-            int ii = changes.getAdded().indexOf(handlers[i]);
-            if (ii >= 0) { // the handler was previously added - cancel it
-                changes.getAdded().remove(ii);
-            }
-            else {
-                ii = changes.getRenamedNewNames().indexOf(handlers[i]);
-                String toRemove;
-                if (ii >= 0) { // the handler was previously renamed - cancel it
-                    changes.getRenamedNewNames().remove(ii);
-                    toRemove = changes.getRenamedOldNames().get(ii);
-                    changes.getRenamedOldNames().remove(ii);
-                }
-                else toRemove = (String) handlers[i];
-
-                changes.getRemoved().add(toRemove);
-            }
-            handlersModel.removeElement(handlers[i]);
-            enableButtons();
+      for (Object handler : handlers)
+      {
+        int ii = changes.getAdded().indexOf(handler);
+        if (ii >= 0)
+        { // the handler was previously added - cancel it
+          changes.getAdded().remove(ii);
         }
+        else
+        {
+          ii = changes.getRenamedNewNames().indexOf(handler);
+          String toRemove;
+          if (ii >= 0)
+          { // the handler was previously renamed - cancel it
+            changes.getRenamedNewNames().remove(ii);
+            toRemove = changes.getRenamedOldNames().get(ii);
+            changes.getRenamedOldNames().remove(ii);
+          }
+          else toRemove = (String) handler;
+
+          changes.getRemoved().add(toRemove);
+        }
+        handlersModel.removeElement(handler);
+        enableButtons();
+      }
     }//GEN-LAST:event_removeButtonActionPerformed
 
     private void addButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addButtonActionPerformed

@@ -528,7 +528,7 @@ public class AbsoluteLayoutSupport extends AbstractLayoutSupport {
                     }
                     @Override
                     public void setTargetValue(Object value) {
-                        x = ((Integer)value).intValue();
+                        x = (Integer) value;
                     }
                     @Override
                     public void setPropertyContext(
@@ -548,7 +548,7 @@ public class AbsoluteLayoutSupport extends AbstractLayoutSupport {
                     }
                     @Override
                     public void setTargetValue(Object value) {
-                        y = ((Integer)value).intValue();
+                        y = (Integer) value;
                     }
                     @Override
                     public void setPropertyContext(
@@ -568,7 +568,7 @@ public class AbsoluteLayoutSupport extends AbstractLayoutSupport {
                     }
                     @Override
                     public void setTargetValue(Object value) {
-                        w = ((Integer)value).intValue();
+                        w = (Integer) value;
                     }
                     @Override
                     public boolean supportsDefaultValue () {
@@ -613,7 +613,7 @@ public class AbsoluteLayoutSupport extends AbstractLayoutSupport {
                     }
                     @Override
                     public void setTargetValue(Object value) {
-                        h = ((Integer)value).intValue();
+                        h = (Integer) value;
                     }
                     @Override
                     public boolean supportsDefaultValue () {
@@ -651,10 +651,11 @@ public class AbsoluteLayoutSupport extends AbstractLayoutSupport {
 
         private void reinstateProperties() {
             try {
-                for (int i=0; i < properties.length; i++) {
-                    FormProperty prop = (FormProperty) properties[i];
-                    prop.reinstateProperty();
-                }
+              for (Node.Property property : properties)
+              {
+                FormProperty prop = (FormProperty) property;
+                prop.reinstateProperty();
+              }
             }
             catch(IllegalAccessException e1) {} // should not happen
             catch(java.lang.reflect.InvocationTargetException e2) {} // should not happen

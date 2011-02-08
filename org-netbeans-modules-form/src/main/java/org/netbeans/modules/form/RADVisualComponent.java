@@ -301,8 +301,8 @@ public class RADVisualComponent extends RADComponent {
 
     public void resetConstraintsProperties() {
         if (constraintsProperties != null) {
-            for (int i=0; i < constraintsProperties.length; i++)
-                nameToProperty.remove(constraintsProperties[i].getName());
+          for (Node.Property constraintsProperty : constraintsProperties)
+            nameToProperty.remove(constraintsProperty.getName());
 
             constraintsProperties = null;
             propertySets = null;
@@ -359,24 +359,27 @@ public class RADVisualComponent extends RADComponent {
             return;
         }
 
-        for (int i=0; i < constraintsProperties.length; i++) {
-            if (constraintsProperties[i] instanceof FormProperty) {
-                FormProperty prop = (FormProperty)constraintsProperties[i];
+      for (Node.Property constraintsProperty : constraintsProperties)
+      {
+        if (constraintsProperty instanceof FormProperty)
+        {
+          FormProperty prop = (FormProperty) constraintsProperty;
 
-                // we suppose the constraint property is not a RADProperty...
-                prop.addVetoableChangeListener(getConstraintsListener());
-                prop.addPropertyChangeListener(getConstraintsListener());
-                prop.addValueConvertor(getConstraintsListener());
+          // we suppose the constraint property is not a RADProperty...
+          prop.addVetoableChangeListener(getConstraintsListener());
+          prop.addPropertyChangeListener(getConstraintsListener());
+          prop.addValueConvertor(getConstraintsListener());
 
-                prop.setPropertyContext(new FormPropertyContext.Component(this));
+          prop.setPropertyContext(new FormPropertyContext.Component(this));
 
-                if (isReadOnly() || !isValid()) {
-                    int type = prop.getAccessType() | FormProperty.NO_WRITE;
-                    prop.setAccessType(type);
-                }
-                nameToProperty.put(prop.getName(), prop);
-            }
+          if (isReadOnly() || !isValid())
+          {
+            int type = prop.getAccessType() | FormProperty.NO_WRITE;
+            prop.setAccessType(type);
+          }
+          nameToProperty.put(prop.getName(), prop);
         }
+      }
     }
 
     private ConstraintsListenerConvertor getConstraintsListener() {
@@ -480,7 +483,7 @@ public class RADVisualComponent extends RADComponent {
             javax.swing.undo.UndoableEdit ue = layoutModel.getUndoableEdit();
             boolean autoUndo = true;
             try {
-                layoutModel.setIntervalSize(interval, interval.getMinimumSize(false), newValue.intValue(), interval.getMaximumSize(false));
+                layoutModel.setIntervalSize(interval, interval.getMinimumSize(false), newValue, interval.getMaximumSize(false));
                 getNodeReference().firePropertyChangeHelper(
                     getName(), oldValue, newValue);
                 autoUndo = false;
@@ -513,7 +516,7 @@ public class RADVisualComponent extends RADComponent {
         
         @Override
         public boolean isDefaultValue() {
-            return ((Integer)getValue()).intValue() == LayoutConstants.NOT_EXPLICITLY_DEFINED;
+            return (Integer) getValue() == LayoutConstants.NOT_EXPLICITLY_DEFINED;
         }
         
         @Override
@@ -529,7 +532,7 @@ public class RADVisualComponent extends RADComponent {
                 @Override
                 public String getAsText() {
                     Integer value = (Integer)getValue();
-                    if (value.intValue() == LayoutConstants.NOT_EXPLICITLY_DEFINED) {
+                    if (value == LayoutConstants.NOT_EXPLICITLY_DEFINED) {
                         return notExplicitelyDefined;
                     } else {
                         return value.toString();
@@ -588,7 +591,7 @@ public class RADVisualComponent extends RADComponent {
             
             Boolean oldValue = (Boolean)getValue();
             Boolean newValue = (Boolean)value;
-            boolean resizable = newValue.booleanValue();
+            boolean resizable = newValue;
             LayoutModel layoutModel = getFormModel().getLayoutModel();
             LayoutInterval interval = component.getLayoutInterval(dimension);
             Object layoutUndoMark = layoutModel.getChangeMark();

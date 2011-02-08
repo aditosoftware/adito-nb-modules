@@ -149,12 +149,12 @@ public class FakePeerSupport
 
     public static void attachFakePeerRecursively(Container container) {
         Component components[] = getComponents(container);
-        for (int i=0; i < components.length; i++) {
-            Component comp = components[i];
-            attachFakePeer(comp);
-            if (comp instanceof Container)
-                attachFakePeerRecursively((Container) comp);
-        }
+      for (Component comp : components)
+      {
+        attachFakePeer(comp);
+        if (comp instanceof Container)
+          attachFakePeerRecursively((Container) comp);
+      }
     }
 
     static Component[] getComponents(Container container) {

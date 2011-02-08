@@ -400,11 +400,12 @@ final public class GridBagCustomizer extends JPanel implements Customizer
         public void formChanged(FormModelEvent[] events) {
             if (events != null && GridBagCustomizer.this.isShowing()) {
                 boolean modifying = false;
-                for (int i=0; i < events.length; i++)
-                    if (events[i].isModifying()) {
-                        modifying = true;
-                        break;
-                    }
+              for (FormModelEvent event : events)
+                if (event.isModifying())
+                {
+                  modifying = true;
+                  break;
+                }
                 if (!modifying)
                     return;
 
@@ -862,7 +863,7 @@ final public class GridBagCustomizer extends JPanel implements Customizer
                     dragLabel.setLastIndex(dragLabel.getIndex(evt.getPoint()));
                     dragLabel.setOriginalIndex(dragLabel.getIndex(evt.getPoint()));
 
-                    designLayeredPane.setLayer(dragLabel, JLayeredPane.DRAG_LAYER.intValue());
+                    designLayeredPane.setLayer(dragLabel, JLayeredPane.DRAG_LAYER);
                     designLayeredPane.add(dragLabel, BorderLayout.CENTER);
                     dragLabel.setBounds(evt.getPoint().x, evt.getPoint().y);
                     componentLabel.setCursor(Cursor.getPredefinedCursor(Cursor.MOVE_CURSOR));
@@ -1028,9 +1029,9 @@ final public class GridBagCustomizer extends JPanel implements Customizer
         @Override
         public Node.PropertySet[] getPropertySets() {
             Node.PropertySet[] sets = super.getPropertySets();
-            for (int i=0; i < sets.length; i++)
-                if ("layout".equals(sets[i].getName())) // NOI18N
-                    return new Node.PropertySet[] { sets[i] };
+          for (PropertySet set : sets)
+            if ("layout".equals(set.getName())) // NOI18N
+              return new PropertySet[]{set};
                     return new Node.PropertySet[0]; // cannot return null...
         }
     }
@@ -1052,9 +1053,10 @@ final public class GridBagCustomizer extends JPanel implements Customizer
         }
 
         void addAllProxies() {
-            for (int i = 0; i < gbcProxies.length; i++) {
-                add(gbcProxies[i], gbcProxies[i].getProxyConstraints());
-            }
+          for (GBComponentProxy gbcProxy : gbcProxies)
+          {
+            add(gbcProxy, gbcProxy.getProxyConstraints());
+          }
             invalidate();
             validate();
             innerLayoutChanged();
@@ -1178,9 +1180,10 @@ final public class GridBagCustomizer extends JPanel implements Customizer
         /* Updates all proxies */
         void updateAllProxies() {
 
-            for (int i = 0; i < gbcProxies.length; i++) {
-                updateProxy(gbcProxies[i]);
-            }
+          for (GBComponentProxy gbcProxy : gbcProxies)
+          {
+            updateProxy(gbcProxy);
+          }
 
             //invalidate();
 
@@ -1208,9 +1211,10 @@ final public class GridBagCustomizer extends JPanel implements Customizer
         }
 
         void invalidateAllProxies() {
-            for (int i = 0; i < gbcProxies.length; i++) {
-                gbcProxies[i].invalidate();
-            }
+          for (GBComponentProxy gbcProxy : gbcProxies)
+          {
+            gbcProxy.invalidate();
+          }
             doLayout();
         }
 
@@ -1218,10 +1222,11 @@ final public class GridBagCustomizer extends JPanel implements Customizer
         java.util.List<GBComponentProxy> getSelectedProxies() {
             java.util.List<GBComponentProxy> selected = new ArrayList<GBComponentProxy>(gbcProxies.length);
 
-            for (int i = 0; i < gbcProxies.length; i++) {
-                if (gbcProxies[i].isSelected)
-                    selected.add(gbcProxies[i]);
-            }
+          for (GBComponentProxy gbcProxy : gbcProxies)
+          {
+            if (gbcProxy.isSelected)
+              selected.add(gbcProxy);
+          }
 
             return selected;
         }

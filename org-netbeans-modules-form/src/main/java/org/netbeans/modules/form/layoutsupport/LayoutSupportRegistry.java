@@ -233,13 +233,14 @@ public class LayoutSupportRegistry {
     // private methods
 
     private String findSuperClass(Map map, Class subClass) {
-        for (Iterator it=map.entrySet().iterator(); it.hasNext(); ) {
-            Map.Entry en = (Map.Entry) it.next();
-            String className = (String) en.getKey();
-            Class<?> keyClass = loadClass(className);
-            if (keyClass != null && keyClass.isAssignableFrom(subClass))
-                return (String) en.getValue();
-        }
+      for (Object o : map.entrySet())
+      {
+        Map.Entry en = (Map.Entry) o;
+        String className = (String) en.getKey();
+        Class<?> keyClass = loadClass(className);
+        if (keyClass != null && keyClass.isAssignableFrom(subClass))
+          return (String) en.getValue();
+      }
         return null;
     }
 
@@ -271,76 +272,85 @@ public class LayoutSupportRegistry {
         String foundSupportClassName = null;
 
         FileObject[] paletteCategories = paletteFolder.getChildren();
-        for (int i=0; i < paletteCategories.length; i++) {
-            FileObject categoryFolder = paletteCategories[i];
-            if (!categoryFolder.isFolder())
-                continue;
-           
-            if (newPaletteListener)
-                categoryFolder.addFileChangeListener(paletteListener);
+      for (FileObject categoryFolder : paletteCategories)
+      {
+        if (!categoryFolder.isFolder())
+          continue;
 
-            FileObject[] paletteItems = categoryFolder.getChildren();
-            for (int j=0; j < paletteItems.length; j++) {
-                DataObject itemDO = null;
-                try {
-                    itemDO = DataObject.find(paletteItems[j]);
-                }
-                catch (DataObjectNotFoundException ex) {
-                    continue;
-                }
+        if (newPaletteListener)
+          categoryFolder.addFileChangeListener(paletteListener);
 
-                PaletteItem item = itemDO.getCookie(PaletteItem.class);
-                if (item == null || !item.isLayout())
-                    continue;
+        FileObject[] paletteItems = categoryFolder.getChildren();
+        for (FileObject paletteItem : paletteItems)
+        {
+          DataObject itemDO = null;
+          try
+          {
+            itemDO = DataObject.find(paletteItem);
+          }
+          catch (DataObjectNotFoundException ex)
+          {
+            continue;
+          }
 
-                Class itemClass = item.getComponentClass();
-                if (itemClass == null)
-                    continue; // cannot resolve class - ignore
+          PaletteItem item = itemDO.getCookie(PaletteItem.class);
+          if (item == null || !item.isLayout())
+            continue;
 
-                Class delegateClass = null;
-                Class supportedClass = null;
+          Class itemClass = item.getComponentClass();
+          if (itemClass == null)
+            continue; // cannot resolve class - ignore
 
-                if (LayoutSupportDelegate.class.isAssignableFrom(itemClass)) {
-                    // register LayoutSupportDelegate directly
-                    delegateClass = itemClass;
-                    try {
-                        LayoutSupportDelegate delegate =
-                            (LayoutSupportDelegate) delegateClass.newInstance();
-                        supportedClass = delegate.getSupportedClass();
-                    }
-                    catch (Exception ex) {
-                        org.openide.ErrorManager.getDefault().notify(
-                            org.openide.ErrorManager.INFORMATIONAL, ex);
-                        continue; // invalid - ignore
-                    }
-                }
-                else if (LayoutManager.class.isAssignableFrom(itemClass)) {
-                    // register default support for layout
-                    supportedClass = itemClass;
-                }
+          Class delegateClass = null;
+          Class supportedClass = null;
 
-                if (supportedClass != null) {
-                    Map<String,String> map;
-                    if (Container.class.isAssignableFrom(supportedClass))
-                        map = getContainersMap();
-                    else if (LayoutManager.class.isAssignableFrom(supportedClass))
-                        map = getLayoutsMap();
-                    else continue; // invalid - ignore
-
-                    String supportedClassName = supportedClass.getName();
-                    if (map.get(supportedClassName) == null) {
-                        String delegateClassName = delegateClass != null ?
-                                                     delegateClass.getName():
-                                                     DEFAULT_SUPPORT;
-
-                        map.put(supportedClassName, delegateClassName);
-
-                        if (supportedClassName.equals(wantedClassName))
-                            foundSupportClassName = delegateClassName;
-                    }
-                }
+          if (LayoutSupportDelegate.class.isAssignableFrom(itemClass))
+          {
+            // register LayoutSupportDelegate directly
+            delegateClass = itemClass;
+            try
+            {
+              LayoutSupportDelegate delegate =
+                  (LayoutSupportDelegate) delegateClass.newInstance();
+              supportedClass = delegate.getSupportedClass();
             }
+            catch (Exception ex)
+            {
+              ErrorManager.getDefault().notify(
+                  ErrorManager.INFORMATIONAL, ex);
+              continue; // invalid - ignore
+            }
+          }
+          else if (LayoutManager.class.isAssignableFrom(itemClass))
+          {
+            // register default support for layout
+            supportedClass = itemClass;
+          }
+
+          if (supportedClass != null)
+          {
+            Map<String, String> map;
+            if (Container.class.isAssignableFrom(supportedClass))
+              map = getContainersMap();
+            else if (LayoutManager.class.isAssignableFrom(supportedClass))
+              map = getLayoutsMap();
+            else continue; // invalid - ignore
+
+            String supportedClassName = supportedClass.getName();
+            if (map.get(supportedClassName) == null)
+            {
+              String delegateClassName = delegateClass != null ?
+                  delegateClass.getName() :
+                  DEFAULT_SUPPORT;
+
+              map.put(supportedClassName, delegateClassName);
+
+              if (supportedClassName.equals(wantedClassName))
+                foundSupportClassName = delegateClassName;
+            }
+          }
         }
+      }
 
         needPaletteRescan = false;
         return foundSupportClassName;

@@ -51,7 +51,7 @@ package org.netbeans.modules.form;
 //import com.sun.source.tree.ModifiersTree;
 //import com.sun.source.tree.Tree;
 //import com.sun.source.util.SourcePositions;
-import java.awt.EventQueue;
+//import java.awt.EventQueue;
 import java.beans.*;
 import java.io.IOException;
 import java.util.*;
@@ -64,7 +64,7 @@ import org.netbeans.api.project.libraries.Library;
 import org.netbeans.api.project.libraries.LibraryManager;
 //import javax.swing.text.BadLocationException;
 import org.netbeans.api.editor.guards.SimpleSection;
-import org.netbeans.api.java.classpath.ClassPath;
+//import org.netbeans.api.java.classpath.ClassPath;
 //import org.netbeans.api.java.queries.SourceLevelQuery;
 //import org.netbeans.api.java.source.CancellableTask;
 //import org.netbeans.api.java.source.JavaSource;
@@ -108,18 +108,6 @@ public class FormEditor {
      * was closed and no other designer of given form was activated since then. */
     private FormDesigner formDesigner;
 
-    /** The code generator for the form */
-    private CodeGenerator codeGenerator;
-
-    /** The FormJavaSource for the form */
-//    private FormJavaSource formJavaSource; //TODO: stripped
-    
-    /** ResourceSupport instance for the form */
-    private ResourceSupport resourceSupport;
-
-    /** Instance of binding support for the form.*/
-//    private BindingDesignSupport bindingSupport; // TODO: stripped
-
     /** List of exceptions occurred during the last persistence operation */
     private List<Throwable> persistenceErrors;
     
@@ -150,10 +138,6 @@ public class FormEditor {
     /** List of actions that are tried when a component is double-clicked. */
     private List<Action> defaultActions;
 
-    /** Indicates that a task has been posted to ask the user about format
-     * upgrade - not to show the confirmation dialog multiple times.
-     */
-    private boolean upgradeCheckPosted;
 
     // -----
 
@@ -179,35 +163,6 @@ public class FormEditor {
     public final FormDataObject getFormDataObject() {
         return formDataObject;
     }
-
-  // TODO: stripped
-//    private final FormJavaSource getFormJavaSource() {
-//        return formJavaSource;
-//    }
-    
-//    CodeGenerator getCodeGenerator() {
-//        if (!formLoaded)
-//            return null;
-//        if (codeGenerator == null)
-//            codeGenerator = new JavaCodeGenerator();
-//        return codeGenerator;
-//    }
-
-    ResourceSupport getResourceSupport() {
-        if (resourceSupport == null && formModel != null) {
-            resourceSupport = new ResourceSupport(formModel);
-            resourceSupport.init();
-        }
-        return resourceSupport;
-    }
-
-  // TODO: stripped
-//    BindingDesignSupport getBindingSupport() {
-//        if (bindingSupport == null && formModel != null) {
-//            bindingSupport = new BindingDesignSupport(formModel);
-//        }
-//        return bindingSupport;
-//    }
 
     /**
      * To be used just before loading a form to set a persistence manager that
@@ -317,9 +272,6 @@ public class FormEditor {
         formModel = new FormModel();
         formModel.setName(formDataObject.getName());        
         formModel.setReadOnly(formDataObject.isReadOnly());
-      // TODO: stripped
-//        formJavaSource = new FormJavaSource(formDataObject);
-//	formModel.getCodeStructure().setFormJavaSource(formJavaSource);
 	
         openForms.put(formModel, this);
 
@@ -359,14 +311,7 @@ public class FormEditor {
                                 
         // form is successfully loaded...
         formLoaded = true;
-	
-//        getCodeGenerator().initialize(formModel); // TODO: stripped
-        ResourceSupport resupport = getResourceSupport(); // make sure ResourceSupport is created and initialized
-        if (resupport.getDesignLocale() != null) {
-            resupport.updateDesignLocale();
-        }
 
-//        getBindingSupport(); // TODO: stripped
         formModel.fireFormLoaded();
         if (formModel.wasCorrected()) // model repaired or upgraded
             formModel.fireFormChanged(false);
@@ -494,12 +439,13 @@ public class FormEditor {
                 annotateT,
                 FormUtils.getBundleString("MSG_ERR_LoadingErrors") // NOI18N
             );
-            for (int i=0; i < n; i++) {
-                PersistenceException pe = (PersistenceException)
-                                          persistenceErrors.get(i);
-                Throwable t = pe.getOriginalException();
-                ErrorManager.getDefault().annotate(ex, (t != null ? t : pe));
-            }
+          for (Throwable persistenceError : persistenceErrors)
+          {
+            PersistenceException pe = (PersistenceException)
+                persistenceError;
+            Throwable t = pe.getOriginalException();
+            ErrorManager.getDefault().annotate(ex, (t != null ? t : pe));
+          }
             // all the exceptions were attached to the main exception to
             // be thrown, so the log can be cleared
             resetPersistenceErrorLog();
@@ -531,48 +477,56 @@ public class FormEditor {
         boolean anyNonFatalLoadingError = false; // was there a real error?
 
         StringBuilder userErrorMsgs = new StringBuilder();
-        
-        for (Iterator it=persistenceErrors.iterator(); it.hasNext(); ) {
-            Throwable t  = (Throwable) it.next();      
-            if (t instanceof PersistenceException) {
-                Throwable th = ((PersistenceException)t).getOriginalException();
-                if (th != null)
-                    t = th;
-            }     
-            
-            if (checkLoadingErrors && !anyNonFatalLoadingError) {
-                // was there a real loading error (not just warnings) causing
-                // some data not loaded?
-                ErrorManager.Annotation[] annotations = 
-                        errorManager.findAnnotations(t);
-                int severity = 0;
-                if ((annotations != null) && (annotations.length != 0)) {
-                    for (int i=0; i < annotations.length; i++) {
-                        int s = annotations[i].getSeverity();
-                        if (s == ErrorManager.UNKNOWN)
-                            s = ErrorManager.EXCEPTION;
-                        if (s > severity)
-                            severity = s;
-                    }
-                }
-                else severity = ErrorManager.EXCEPTION;
 
-                if (severity > ErrorManager.WARNING)
-                    anyNonFatalLoadingError = true;
-            }
-            errorManager.notify(ErrorManager.INFORMATIONAL, t);
-
-            if (persistenceManager != null) {
-                // form file was recognized, there is instance of persistance managager
-                // creating report about problems while loading components, 
-                // setting props of components, ...
-                userErrorMsgs.append("Here should be some ExceptionAnnotation Gandalf provides. AditoPersistenceManager doesn't do that (yet)."); // TODO? //persistenceManager.getExceptionAnnotation(t));
-                userErrorMsgs.append("\n\n");  // NOI18N
-            } else {
-                // form file was not recognized
-                errorManager.notify(ErrorManager.WARNING, t);
-            }
+      for (Object persistenceError : persistenceErrors)
+      {
+        Throwable t = (Throwable) persistenceError;
+        if (t instanceof PersistenceException)
+        {
+          Throwable th = ((PersistenceException) t).getOriginalException();
+          if (th != null)
+            t = th;
         }
+
+        if (checkLoadingErrors && !anyNonFatalLoadingError)
+        {
+          // was there a real loading error (not just warnings) causing
+          // some data not loaded?
+          ErrorManager.Annotation[] annotations =
+              errorManager.findAnnotations(t);
+          int severity = 0;
+          if ((annotations != null) && (annotations.length != 0))
+          {
+            for (ErrorManager.Annotation annotation : annotations)
+            {
+              int s = annotation.getSeverity();
+              if (s == ErrorManager.UNKNOWN)
+                s = ErrorManager.EXCEPTION;
+              if (s > severity)
+                severity = s;
+            }
+          }
+          else severity = ErrorManager.EXCEPTION;
+
+          if (severity > ErrorManager.WARNING)
+            anyNonFatalLoadingError = true;
+        }
+        errorManager.notify(ErrorManager.INFORMATIONAL, t);
+
+        if (persistenceManager != null)
+        {
+          // form file was recognized, there is instance of persistance managager
+          // creating report about problems while loading components,
+          // setting props of components, ...
+          userErrorMsgs.append("Here should be some ExceptionAnnotation Gandalf provides. AditoPersistenceManager doesn't do that (yet)."); // TODO? //persistenceManager.getExceptionAnnotation(t));
+          userErrorMsgs.append("\n\n");  // NOI18N
+        }
+        else
+        {
+          // form file was not recognized
+          errorManager.notify(ErrorManager.WARNING, t);
+        }
+      }
         
         if (checkLoadingErrors && anyNonFatalLoadingError) {
             // the form was loaded with some non-fatal errors - some data
@@ -689,12 +643,13 @@ public class FormEditor {
             // make sure no upgrade warning is shown
             formModel.setMaxVersionLevel(FormModel.LATEST_VERSION);
             // switch to resources if needed
-            FormLAF.executeWithLookAndFeel(formModel, new Runnable() {
-                @Override
-                public void run() {
-                    getResourceSupport().prepareNewForm();
-                }
-            });
+          // TODO: stripped
+//            FormLAF.executeWithLookAndFeel(formModel, new Runnable() {
+//                @Override
+//                public void run() {
+//                    getResourceSupport().prepareNewForm();
+//                }
+//            });
             // make sure layout code generation type is detected
 //            formModel.getSettings().getLayoutCodeTarget(); // TODO: stripped
             // hack: regenerate code immediately
@@ -794,10 +749,11 @@ public class FormEditor {
             persistenceManager = null;
             persistenceErrors = null;
             formModel = null;
-            codeGenerator = null;
-//	    formJavaSource = null; // TODO: stripped
-            resourceSupport = null;
-//            bindingSupport = null; // TODO: stripped
+          // TODO: stripped
+//            codeGenerator = null;
+//	          formJavaSource = null;
+//            resourceSupport = null;
+//            bindingSupport = null;
         }
     }
     
@@ -819,66 +775,72 @@ public class FormEditor {
                 Set<RADComponent> compsToSelect = null;
                 FormNode nodeToSelect = null;
 
-                for (int i=0; i < events.length; i++) {
-                    FormModelEvent ev = events[i];
+              for (FormModelEvent ev : events)
+              {
+                if (ev.isModifying())
+                  modifying = true;
 
-                    if (ev.isModifying())
-                        modifying = true;
+                int type = ev.getChangeType();
+                if (type == FormModelEvent.CONTAINER_LAYOUT_EXCHANGED
+                    || type == FormModelEvent.CONTAINER_LAYOUT_CHANGED
+                    || type == FormModelEvent.COMPONENT_ADDED
+                    || type == FormModelEvent.COMPONENT_REMOVED
+                    || type == FormModelEvent.COMPONENTS_REORDERED)
+                {
+                  ComponentContainer cont = ev.getContainer();
+                  if (changedContainers == null
+                      || !changedContainers.contains(cont))
+                  {
+                    updateNodeChildren(cont);
+                    if (changedContainers != null)
+                      changedContainers.add(cont);
+                  }
 
-                    int type = ev.getChangeType();
-                    if (type == FormModelEvent.CONTAINER_LAYOUT_EXCHANGED
-                        || type == FormModelEvent.CONTAINER_LAYOUT_CHANGED
-                        || type == FormModelEvent.COMPONENT_ADDED
-                        || type == FormModelEvent.COMPONENT_REMOVED
-                        || type == FormModelEvent.COMPONENTS_REORDERED)
+                  if (type == FormModelEvent.COMPONENT_REMOVED)
+                  {
+                    FormNode select;
+                    if (cont instanceof RADComponent)
                     {
-                        ComponentContainer cont = ev.getContainer();
-                        if (changedContainers == null
-                            || !changedContainers.contains(cont))
-                        {
-                            updateNodeChildren(cont);
-                            if (changedContainers != null)
-                                changedContainers.add(cont);
-                        }
-
-                        if (type == FormModelEvent.COMPONENT_REMOVED) {
-                            FormNode select;
-                            if (cont instanceof RADComponent) {
-                                select = ((RADComponent)cont).getNodeReference();
-                             } else {
-                                select = getOthersContainerNode();
-                             }
-
-                            if (!(nodeToSelect instanceof RADComponentNode)) {
-                                if (nodeToSelect != formRootNode)
-                                    nodeToSelect = select;
-                            }
-                            else if (nodeToSelect != select)
-                                nodeToSelect = formRootNode;
-                        }
-                        else if (type == FormModelEvent.CONTAINER_LAYOUT_EXCHANGED) {
-                            nodeToSelect = ((RADVisualContainer)cont)
-                                                .getLayoutNodeReference();
-                        }
-                        else if (type == FormModelEvent.COMPONENT_ADDED
-                                 && ev.getComponent().isInModel())
-                        {
-                            if (compsToSelect == null)
-                                compsToSelect = new HashSet<RADComponent>();
-
-                            compsToSelect.add(ev.getComponent());
-                            compsToSelect.remove(ev.getContainer());
-                        }
+                      select = ((RADComponent) cont).getNodeReference();
                     }
+                    else
+                    {
+                      select = getOthersContainerNode();
+                    }
+
+                    if (!(nodeToSelect instanceof RADComponentNode))
+                    {
+                      if (nodeToSelect != formRootNode)
+                        nodeToSelect = select;
+                    }
+                    else if (nodeToSelect != select)
+                      nodeToSelect = formRootNode;
+                  }
+                  else if (type == FormModelEvent.CONTAINER_LAYOUT_EXCHANGED)
+                  {
+                    nodeToSelect = ((RADVisualContainer) cont)
+                        .getLayoutNodeReference();
+                  }
+                  else if (type == FormModelEvent.COMPONENT_ADDED
+                      && ev.getComponent().isInModel())
+                  {
+                    if (compsToSelect == null)
+                      compsToSelect = new HashSet<RADComponent>();
+
+                    compsToSelect.add(ev.getComponent());
+                    compsToSelect.remove(ev.getContainer());
+                  }
                 }
+              }
 
                 FormDesigner designer = getFormDesigner();
                 if (designer != null) {
                     if (compsToSelect != null) {
                         designer.clearSelectionImpl();
-                        for (Iterator it=compsToSelect.iterator(); it.hasNext(); ) {
-                            designer.addComponentToSelectionImpl((RADComponent)it.next());
-                        }
+                      for (Object aCompsToSelect : compsToSelect)
+                      {
+                        designer.addComponentToSelectionImpl((RADComponent) aCompsToSelect);
+                      }
                         designer.updateComponentInspector();
 //                        RADComponent[] comps =
 //                            new RADComponent[compsToSelect.size()];
@@ -891,7 +853,7 @@ public class FormEditor {
 
                 if (modifying)  { // mark the form document modified explicitly
                     getFormDataObject().getFormEditorSupport().markFormModified();
-                    checkFormVersionUpgrade();
+//                    checkFormVersionUpgrade(); // TODO: stripped
                 }
             }
         };
@@ -930,65 +892,66 @@ public class FormEditor {
      * user refuses the upgrade, undo is performed (for that all the fired
      * changes must be already processed).
      */
-    private void checkFormVersionUpgrade() {
-        FormModel.FormVersion currentVersion = formModel.getCurrentVersionLevel();
-        FormModel.FormVersion maxVersion = formModel.getMaxVersionLevel();
-        if (currentVersion.ordinal() > maxVersion.ordinal()) {
-            if (EventQueue.isDispatchThread()) {
-                processVersionUpgrade(true);
-            } else { // not a result of a user action, or some forgotten upgrade...
-                confirmVersionUpgrade();
-            }
-        }
-    }
-
-    private void processVersionUpgrade(boolean processingEvents) {
-        if (!processingEvents && formModel.hasPendingEvents()) {
-            processingEvents = true;
-        }
-        if (processingEvents) { // post a task for later, if not already posted
-            if (!upgradeCheckPosted) {
-                upgradeCheckPosted = true;
-                EventQueue.invokeLater(new Runnable() {
-                    @Override
-                    public void run() {
-                        upgradeCheckPosted = false;
-                        if (formModel != null) {
-                            processVersionUpgrade(false);
-                        }
-                    }
-                });
-            }
-        } else { // all events processed
-            String upgradeOption = FormUtils.getBundleString("CTL_UpgradeOption"); // NOI18N
-            String undoOption = FormUtils.getBundleString("CTL_CancelOption"); // NOI18N
-            NotifyDescriptor d = new NotifyDescriptor(
-                    FormUtils.getBundleString("MSG_UpgradeQuestion"), // NOI18N
-                    FormUtils.getBundleString("TITLE_FormatUpgrade"), // NOI18N
-                    NotifyDescriptor.DEFAULT_OPTION,
-                    NotifyDescriptor.QUESTION_MESSAGE,
-                    new String[] { upgradeOption, undoOption},
-                    upgradeOption);
-            if (DialogDisplayer.getDefault().notify(d) == upgradeOption) {
-                confirmVersionUpgrade();
-            } else { // upgrade refused
-                revertVersionUpgrade();
-            }
-        }
-    }
-
-    private void confirmVersionUpgrade() {
-        if (formModel != null) {
-            formModel.setMaxVersionLevel(FormModel.LATEST_VERSION);
-        }
-    }
-
-    private void revertVersionUpgrade() {
-        if (formModel != null) {
-            formModel.getUndoRedoManager().undo();
-            formModel.revertVersionLevel();
-        }
-    }
+    // TODO: stripped
+//    private void checkFormVersionUpgrade() {
+//        FormModel.FormVersion currentVersion = formModel.getCurrentVersionLevel();
+//        FormModel.FormVersion maxVersion = formModel.getMaxVersionLevel();
+//        if (currentVersion.ordinal() > maxVersion.ordinal()) {
+//            if (EventQueue.isDispatchThread()) {
+//                processVersionUpgrade(true);
+//            } else { // not a result of a user action, or some forgotten upgrade...
+//                confirmVersionUpgrade();
+//            }
+//        }
+//    }
+//
+//    private void processVersionUpgrade(boolean processingEvents) {
+//        if (!processingEvents && formModel.hasPendingEvents()) {
+//            processingEvents = true;
+//        }
+//        if (processingEvents) { // post a task for later, if not already posted
+//            if (!upgradeCheckPosted) {
+//                upgradeCheckPosted = true;
+//                EventQueue.invokeLater(new Runnable() {
+//                    @Override
+//                    public void run() {
+//                        upgradeCheckPosted = false;
+//                        if (formModel != null) {
+//                            processVersionUpgrade(false);
+//                        }
+//                    }
+//                });
+//            }
+//        } else { // all events processed
+//            String upgradeOption = FormUtils.getBundleString("CTL_UpgradeOption"); // NOI18N
+//            String undoOption = FormUtils.getBundleString("CTL_CancelOption"); // NOI18N
+//            NotifyDescriptor d = new NotifyDescriptor(
+//                    FormUtils.getBundleString("MSG_UpgradeQuestion"), // NOI18N
+//                    FormUtils.getBundleString("TITLE_FormatUpgrade"), // NOI18N
+//                    NotifyDescriptor.DEFAULT_OPTION,
+//                    NotifyDescriptor.QUESTION_MESSAGE,
+//                    new String[] { upgradeOption, undoOption},
+//                    upgradeOption);
+//            if (DialogDisplayer.getDefault().notify(d) == upgradeOption) {
+//                confirmVersionUpgrade();
+//            } else { // upgrade refused
+//                revertVersionUpgrade();
+//            }
+//        }
+//    }
+//
+//    private void confirmVersionUpgrade() {
+//        if (formModel != null) {
+//            formModel.setMaxVersionLevel(FormModel.LATEST_VERSION);
+//        }
+//    }
+//
+//    private void revertVersionUpgrade() {
+//        if (formModel != null) {
+//            formModel.getUndoRedoManager().undo();
+//            formModel.revertVersionLevel();
+//        }
+//    }
 
     private void attachDataObjectListener() {
         if (dataObjectListener != null)
@@ -1009,11 +972,13 @@ public class FormEditor {
                     if (ComponentInspector.exists()) { // #40224
                         Node[] nodes = ComponentInspector.getInstance()
                                  .getExplorerManager().getSelectedNodes();
-                        for (int i=0; i < nodes.length; i++) {
-                            if (nodes[i] instanceof FormNode) { // Issue 181709
-                                ((FormNode)nodes[i]).updateCookies();
-                            }
+                      for (Node node : nodes)
+                      {
+                        if (node instanceof FormNode)
+                        { // Issue 181709
+                          ((FormNode) node).updateCookies();
                         }
+                      }
                     }
                 }
             }
@@ -1195,10 +1160,11 @@ public class FormEditor {
      * 
      * @param formModel form model.
      * @return ResourceSupport of given form */
-    static ResourceSupport getResourceSupport(FormModel formModel) {
-        FormEditor formEditor = openForms.get(formModel);
-        return formEditor != null ? formEditor.getResourceSupport() : null;
-    }
+  // TODO: stripped
+//    static ResourceSupport getResourceSupport(FormModel formModel) {
+//        FormEditor formEditor = openForms.get(formModel);
+//        return formEditor != null ? formEditor.getResourceSupport() : null;
+//    }
 
     /**
      * Returns <code>BindingDesignSupport</code> for the specified form.

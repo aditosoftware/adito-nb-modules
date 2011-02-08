@@ -65,10 +65,11 @@ public class RADContainer extends RADComponent implements ComponentContainer {
     @Override
     public void initSubComponents(RADComponent[] initComponents) {
         subComponents = new ArrayList<RADComponent>(initComponents.length);
-        for (int i = 0; i < initComponents.length; i++) {
-            subComponents.add(initComponents[i]);
-            initComponents[i].setParentComponent(this);
-        }
+      for (RADComponent initComponent : initComponents)
+      {
+        subComponents.add(initComponent);
+        initComponent.setParentComponent(this);
+      }
     }
 
     @Override

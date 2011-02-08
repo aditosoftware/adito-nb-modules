@@ -2256,13 +2256,15 @@ class LayoutFeeder implements LayoutConstants {
             return null;
 
         boolean compatibleFound = false;
-        for (Iterator it=inclusions.iterator(); it.hasNext(); ) {
-            IncludeDesc iDesc = (IncludeDesc) it.next();
-            if (canAlignWith(aSnappedParallel, iDesc.parent, aEdge)) {
-                compatibleFound = true;
-                break;
-            }
+      for (Object inclusion : inclusions)
+      {
+        IncludeDesc iDesc = (IncludeDesc) inclusion;
+        if (canAlignWith(aSnappedParallel, iDesc.parent, aEdge))
+        {
+          compatibleFound = true;
+          break;
         }
+      }
         if (!compatibleFound) {
             IncludeDesc iDesc = new IncludeDesc();
             iDesc.parent = aSnappedParallel.getParent() != null ?
@@ -2285,35 +2287,43 @@ class LayoutFeeder implements LayoutConstants {
         // 1st step - find representative (best) inclusion
         IncludeDesc best = null;
         boolean bestOriginal = false;
-        for (Iterator it=inclusions.iterator(); it.hasNext(); ) {
-            IncludeDesc iDesc = (IncludeDesc) it.next();
-            if (original == null || !preserveOriginal || canCombine(iDesc, original)) {
-                if (best != null) {
-                    boolean originalCompatible = original != null && !preserveOriginal
-                                                 && iDesc.parent == original.parent;
-                    if (!bestOriginal && originalCompatible) {
-                        best = iDesc;
-                        bestOriginal = true;
-                    }
-                    else if (bestOriginal == originalCompatible) {
-                        LayoutInterval group1 = best.parent.isSequential() ?
-                                                best.parent.getParent() : best.parent;
-                        LayoutInterval group2 = iDesc.parent.isSequential() ?
-                                                iDesc.parent.getParent() : iDesc.parent;
-                        if (group1.isParentOf(group2)) {
-                            best = iDesc; // deeper is better
-                        }
-                        else if (!group2.isParentOf(group1) && iDesc.distance < best.distance) {
-                            best = iDesc;
-                        }
-                    }
-                }
-                else {
-                    best = iDesc;
-                    bestOriginal = original != null && !preserveOriginal && iDesc.parent == original.parent;
-                }
+      for (Object inclusion1 : inclusions)
+      {
+        IncludeDesc iDesc = (IncludeDesc) inclusion1;
+        if (original == null || !preserveOriginal || canCombine(iDesc, original))
+        {
+          if (best != null)
+          {
+            boolean originalCompatible = original != null && !preserveOriginal
+                && iDesc.parent == original.parent;
+            if (!bestOriginal && originalCompatible)
+            {
+              best = iDesc;
+              bestOriginal = true;
             }
+            else if (bestOriginal == originalCompatible)
+            {
+              LayoutInterval group1 = best.parent.isSequential() ?
+                  best.parent.getParent() : best.parent;
+              LayoutInterval group2 = iDesc.parent.isSequential() ?
+                  iDesc.parent.getParent() : iDesc.parent;
+              if (group1.isParentOf(group2))
+              {
+                best = iDesc; // deeper is better
+              }
+              else if (!group2.isParentOf(group1) && iDesc.distance < best.distance)
+              {
+                best = iDesc;
+              }
+            }
+          }
+          else
+          {
+            best = iDesc;
+            bestOriginal = original != null && !preserveOriginal && iDesc.parent == original.parent;
+          }
         }
+      }
 
         if (best == null) { // nothing compatible with original position
             assert preserveOriginal;
@@ -2369,24 +2379,28 @@ class LayoutFeeder implements LayoutConstants {
         List<List> separatedLeading = new LinkedList<List>();
         List<List> separatedTrailing = new LinkedList<List>();
 
-        for (Iterator it=inclusions.iterator(); it.hasNext(); ) {
-            IncludeDesc iDesc = (IncludeDesc) it.next();
-            if (iDesc.parent.isSequential() && iDesc.newSubGroup) {
-                LayoutInterval parSeq = extractParallelSequence(iDesc.parent, addingSpace, false, iDesc.alignment);
-                assert parSeq.isParallel(); // parallel group with part of the original sequence
-                if (subGroup == null) {
-                    subGroup = parSeq;
-                }
-                else {
-                    LayoutInterval sub = layoutModel.removeInterval(parSeq, 0);
-                    layoutModel.addInterval(sub, subGroup, -1);
-                }
-                // extract surroundings of the group in the sequence
-                operations.extract(parSeq, DEFAULT, true, separatedLeading, separatedTrailing);
-                layoutModel.removeInterval(parSeq);
-                layoutModel.removeInterval(iDesc.parent);
-            }
+      for (Object inclusion : inclusions)
+      {
+        IncludeDesc iDesc = (IncludeDesc) inclusion;
+        if (iDesc.parent.isSequential() && iDesc.newSubGroup)
+        {
+          LayoutInterval parSeq = extractParallelSequence(iDesc.parent, addingSpace, false, iDesc.alignment);
+          assert parSeq.isParallel(); // parallel group with part of the original sequence
+          if (subGroup == null)
+          {
+            subGroup = parSeq;
+          }
+          else
+          {
+            LayoutInterval sub = layoutModel.removeInterval(parSeq, 0);
+            layoutModel.addInterval(sub, subGroup, -1);
+          }
+          // extract surroundings of the group in the sequence
+          operations.extract(parSeq, DEFAULT, true, separatedLeading, separatedTrailing);
+          layoutModel.removeInterval(parSeq);
+          layoutModel.removeInterval(iDesc.parent);
         }
+      }
 
         int extractAlign = DEFAULT;
         if (subGroup != null) {

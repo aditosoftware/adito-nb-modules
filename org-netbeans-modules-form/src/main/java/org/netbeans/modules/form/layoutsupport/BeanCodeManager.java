@@ -259,12 +259,12 @@ final class BeanCodeManager
                 CodeStructure.filterStatements(it, statementMethod);
 
             if (removeStatement) {
-                for (int j=0; j < existingStatements.length; j++) {
-                    CodeStatement toRemove = existingStatements[j];
-                    CodeStructure.removeStatement(toRemove);
-                    if (beanCode != null)
-                        beanCode.remove(toRemove);
-                }
+              for (CodeStatement toRemove : existingStatements)
+              {
+                CodeStructure.removeStatement(toRemove);
+                if (beanCode != null)
+                  beanCode.remove(toRemove);
+              }
             }
             else {
                 anyPropertyStatement = true;

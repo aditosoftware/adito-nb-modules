@@ -408,9 +408,10 @@ class LayoutDragger implements LayoutConstants {
             }
         }
         movingSpace = new LayoutRegion();
-        for (int i=0; i<movingBounds.length; i++) {
-            movingSpace.expand(movingBounds[i]);
-        }
+      for (LayoutRegion movingBound1 : movingBounds)
+      {
+        movingSpace.expand(movingBound1);
+      }
         if (canSnapToBaseline) { // awfull, but working
             int baselinePos = movingBounds[0].positions[VERTICAL][BASELINE];
             if (baselinePos > 0) {
@@ -443,11 +444,12 @@ class LayoutDragger implements LayoutConstants {
                     // snap effect
                     if (snapDistance != LayoutRegion.UNKNOWN) {
                         cursorPos[dimension] -= snapDistance;
-                        for (int i=0; i<movingBounds.length; i++) {
-                            movingBounds[i].reshape(dimension,
+                      for (LayoutRegion movingBound : movingBounds)
+                      {
+                        movingBound.reshape(dimension,
                                             movingEdges[dimension],
                                             -snapDistance);
-                        }
+                      }
                         movingSpace.reshape(dimension,
                                             movingEdges[dimension],
                                             -snapDistance);
@@ -1406,15 +1408,17 @@ class LayoutDragger implements LayoutConstants {
 
     private static int smallestDistance(PositionDef[] positions) {
         int bestDst = -1;
-        for (int i=0; i < positions.length; i++) {
-            PositionDef pos = positions[i];
-            if (pos.isSet()) {
-                int dst = Math.abs(pos.distance);
-                if (bestDst < 0 || dst < bestDst) {
-                    bestDst = dst;
-                }
-            }
+      for (PositionDef pos : positions)
+      {
+        if (pos.isSet())
+        {
+          int dst = Math.abs(pos.distance);
+          if (bestDst < 0 || dst < bestDst)
+          {
+            bestDst = dst;
+          }
         }
+      }
         return bestDst;
     }
 
@@ -1500,11 +1504,13 @@ class LayoutDragger implements LayoutConstants {
             return false;
         }
         else {
-            for (int i=0; i < movingComponents.length; i++) {
-                if (movingComponents[i].getLayoutInterval(dimension) == interval) {
-                    return false;
-                }
+          for (LayoutComponent movingComponent : movingComponents)
+          {
+            if (movingComponent.getLayoutInterval(dimension) == interval)
+            {
+              return false;
             }
+          }
             return true;
         }
     }

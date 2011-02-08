@@ -47,6 +47,7 @@ package org.netbeans.modules.form;
 import java.awt.event.*;
 import java.beans.*;
 import java.awt.datatransfer.*;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.text.DefaultEditorKit;
@@ -520,21 +521,22 @@ public class ComponentInspector extends TopComponent
             else if (evt.getSource() == ComponentInspector.this.getExplorerManager())
             {   // the change comes from ComponentInspector => synchronize FormDesigner
                 designer.clearSelectionImpl();
-                for (int i=0; i < selectedNodes.length; i++) {
-                    FormCookie formCookie = selectedNodes[i].getCookie(FormCookie.class);
-                    if (formCookie != null) {
-                        Node node = formCookie.getOriginalNode();
-                        if (node instanceof RADComponentNode)
-                            designer.addComponentToSelectionImpl(
-                                ((RADComponentNode)node).getRADComponent());
-                    }
+              for (Node selectedNode : selectedNodes)
+              {
+                FormCookie formCookie = selectedNode.getCookie(FormCookie.class);
+                if (formCookie != null)
+                {
+                  Node node = formCookie.getOriginalNode();
+                  if (node instanceof RADComponentNode)
+                    designer.addComponentToSelectionImpl(
+                        ((RADComponentNode) node).getRADComponent());
                 }
+              }
                 designer.repaintSelection();
             }
 
             // refresh nodes' lookup with current set of cookies
-            for (int i=0; i < selectedNodes.length; i++)
-                ((FormNode)selectedNodes[i]).updateCookies();
+          for (Node selectedNode : selectedNodes) ((FormNode) selectedNode).updateCookies();
 
             // restart waiting for expensive part of the update
             timer.restart();
@@ -593,9 +595,9 @@ public class ComponentInspector extends TopComponent
             if (selected == null || selected.length == 0)
                 return;
 
-            for (int i=0; i < selected.length; i++)
-                if (!selected[i].canDestroy())
-                    return;
+          for (Node aSelected : selected)
+            if (!aSelected.canDestroy())
+              return;
 
             try { // clear nodes selection first
                 getExplorerManager().setSelectedNodes(new Node[0]);
@@ -617,14 +619,17 @@ public class ComponentInspector extends TopComponent
 
         private void doDelete() {
             if (nodesToDestroy != null) {
-                for (int i=0; i < nodesToDestroy.length; i++) {
-                    try {
-                        nodesToDestroy[i].destroy();
-                    }
-                    catch (java.io.IOException ex) { // should not happen
-                        ex.printStackTrace();
-                    }
+              for (Node aNodesToDestroy : nodesToDestroy)
+              {
+                try
+                {
+                  aNodesToDestroy.destroy();
                 }
+                catch (IOException ex)
+                { // should not happen
+                  ex.printStackTrace();
+                }
+              }
                 nodesToDestroy = null;
             }
         }

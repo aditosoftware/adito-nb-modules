@@ -91,7 +91,7 @@ import javax.swing.event.MouseInputAdapter;
 import javax.swing.plaf.PopupMenuUI;
 import org.netbeans.modules.form.*;
 import org.netbeans.modules.form.actions.PropertyAction;
-import org.netbeans.modules.form.editors.IconEditor.NbImageIcon;
+//import org.netbeans.modules.form.editors.IconEditor.NbImageIcon;
 import org.netbeans.modules.form.palette.PaletteItem;
 import org.netbeans.modules.form.palette.PaletteUtils;
 import org.openide.filesystems.FileObject;
@@ -1308,19 +1308,19 @@ public class MenuEditLayer extends JPanel {
                 if(value instanceof Icon) {
                     icon = (Icon) value;
                 }
-                if(value instanceof NbImageIcon) {
-                    icon = ((NbImageIcon)value).getIcon();
-                }
-                if(value instanceof ResourceValue) {
-                    ResourceValue rv = (ResourceValue) value;
-                    Object designValue = rv.getDesignValue();
-                    if(designValue instanceof Icon) {
-                        icon = (Icon) designValue;
-                    }
-                    if(designValue instanceof NbImageIcon) {
-                        icon = ((NbImageIcon)designValue).getIcon();
-                    }
-                }
+//                if(value instanceof NbImageIcon) {
+//                    icon = ((NbImageIcon)value).getIcon();
+//                }
+//                if(value instanceof ResourceValue) {
+//                    ResourceValue rv = (ResourceValue) value;
+//                    Object designValue = rv.getDesignValue();
+//                    if(designValue instanceof Icon) {
+//                        icon = (Icon) designValue;
+//                    }
+//                    if(designValue instanceof NbImageIcon) {
+//                        icon = ((NbImageIcon)designValue).getIcon();
+//                    }
+//                }
                 // do the actual update
                 if(!(item.getIcon() instanceof WrapperIcon) && !isTopLevelMenu(item)) {
                     item.setIcon(new WrapperIcon(item.getIcon()));

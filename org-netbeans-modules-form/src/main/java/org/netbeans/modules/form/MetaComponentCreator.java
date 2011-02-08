@@ -70,7 +70,7 @@ import org.openide.filesystems.FileObject;
 import org.netbeans.modules.form.layoutsupport.*;
 import org.netbeans.modules.form.layoutdesign.*;
 import org.netbeans.modules.form.layoutdesign.support.SwingLayoutBuilder;
-import org.netbeans.modules.form.editors2.BorderDesignSupport;
+//import org.netbeans.modules.form.editors2.BorderDesignSupport;
 import org.netbeans.modules.form.project.ClassSource;
 import org.netbeans.modules.form.project.ClassPathUtils;
 
@@ -326,7 +326,7 @@ public class MetaComponentCreator {
                 && (target.targetType == TargetType.VISUAL
                     || target.targetType == TargetType.OTHER)) {
                 addVisualComponent2(preMetaComp, target.targetComponent, constraints, true);
-                ResourceSupport.switchComponentToResources(preMetaComp);
+//                ResourceSupport.switchComponentToResources(preMetaComp);
             }
             releasePrecreatedComponent();
             return true;
@@ -408,9 +408,9 @@ public class MetaComponentCreator {
                                         (RADVisualContainer)targetComp);
         }
 
-        if (newMetaComp != null) {
-            ResourceSupport.switchComponentToResources(newMetaComp);
-        }
+//        if (newMetaComp != null) {
+//            ResourceSupport.switchComponentToResources(newMetaComp);
+//        }
 
         return newMetaComp;
     }
@@ -460,7 +460,7 @@ public class MetaComponentCreator {
             if (copiedComp == null) { // copying failed (for a mystic reason)
                 return null;
             }
-            ResourceSupport.switchComponentToResources(copiedComp);
+//            ResourceSupport.switchComponentToResources(copiedComp);
             newlyAdded = true;
         } else {
             newlyAdded = false;
@@ -711,7 +711,14 @@ public class MetaComponentCreator {
         java.util.List<String> namesList = new ArrayList<String>();
 
         Iterator<RADProperty> it = sourceComp.getBeanPropertiesIterator(
-                                   ResourceSupport.COPIED_PROPERTY_FILTER,
+                                   new FormProperty.Filter()
+                                   {
+                                     @Override
+                                     public boolean accept(FormProperty property)
+                                     {
+                                       return property.isChanged();
+                                     }
+                                   },
                                    false);
         while (it.hasNext()) {
             RADProperty prop = it.next();
@@ -737,16 +744,19 @@ public class MetaComponentCreator {
         // 4th - copy aux values
         Map<String,Object> auxValues = sourceComp.getAuxValues();
         if (auxValues != null) {
-            for (Iterator<Map.Entry<String,Object>> it2 = auxValues.entrySet().iterator(); it2.hasNext(); ) {
-                Map.Entry<String,Object> entry = it2.next();
-                String auxName = entry.getKey();
-                Object auxValue = entry.getValue();
-                try {
-                    newComp.setAuxValue(auxName,
-                                        FormUtils.cloneObject(auxValue, formModel));
-                }
-                catch (Exception e) {} // ignore problem with aux value
+          for (Map.Entry<String, Object> entry : auxValues.entrySet())
+          {
+            String auxName = entry.getKey();
+            Object auxValue = entry.getValue();
+            try
+            {
+              newComp.setAuxValue(auxName,
+                                  FormUtils.cloneObject(auxValue, formModel));
             }
+            catch (Exception e)
+            {
+            } // ignore problem with aux value
+          }
 //            JavaCodeGenerator.setupComponentFromAuxValues(newComp);// TODO: stripped
         }
 	
@@ -757,12 +767,12 @@ public class MetaComponentCreator {
             Map<String,LayoutConstraints> constraints = ((RADVisualComponent)sourceComp).getConstraintsMap();
             Map<String,LayoutConstraints> newConstraints = new HashMap<String,LayoutConstraints>();
 
-            for (Iterator<Map.Entry<String,LayoutConstraints>> it3 = constraints.entrySet().iterator(); it3.hasNext(); ) {
-                Map.Entry<String,LayoutConstraints> entry = it3.next();
-                String layoutClassName = entry.getKey();
-                LayoutConstraints clonedConstr = entry.getValue().cloneConstraints();
-                newConstraints.put(layoutClassName, clonedConstr);
-            }
+          for (Map.Entry<String, LayoutConstraints> entry : constraints.entrySet())
+          {
+            String layoutClassName = entry.getKey();
+            LayoutConstraints clonedConstr = entry.getValue().cloneConstraints();
+            newConstraints.put(layoutClassName, clonedConstr);
+          }
             ((RADVisualComponent)newComp).setConstraintsMap(newConstraints);
         }
 
@@ -784,40 +794,47 @@ public class MetaComponentCreator {
 		continue; // [uknown event error - should be reported!]
 
 	    String[] handlers = eventHandlers[targetEventsIdx];
-	    for (int handlersIdx = 0; handlersIdx < handlers.length; handlersIdx++) {		
-		String newHandlerName;
-		String oldHandlerName = handlers[handlersIdx];		
-		String sourceVariableName = sourceComp.getName();
-		String targetVariableName = newComp.getName();
+    for (String handler : handlers)
+    {
+      String newHandlerName;
+      String oldHandlerName = handler;
+      String sourceVariableName = sourceComp.getName();
+      String targetVariableName = newComp.getName();
 
-		int idx = oldHandlerName.indexOf(sourceVariableName);
-		if (idx >= 0) {
-		    newHandlerName = oldHandlerName.substring(0, idx)
-				   + targetVariableName
-				   + oldHandlerName.substring(idx + sourceVariableName.length());
-		} else {
-		    newHandlerName = targetVariableName 
-				   + oldHandlerName;						
-		}
-		newHandlerName = formEvents.findFreeHandlerName(newHandlerName);		
-				
-		String bodyText = null;
-		if(sourceComp.getFormModel() != formModel) {
-		    // copying to different form -> let's copy also the event handler content
-      // TODO: stripped
+      int idx = oldHandlerName.indexOf(sourceVariableName);
+      if (idx >= 0)
+      {
+        newHandlerName = oldHandlerName.substring(0, idx)
+            + targetVariableName
+            + oldHandlerName.substring(idx + sourceVariableName.length());
+      }
+      else
+      {
+        newHandlerName = targetVariableName
+            + oldHandlerName;
+      }
+      newHandlerName = formEvents.findFreeHandlerName(newHandlerName);
+
+      String bodyText = null;
+      if (sourceComp.getFormModel() != formModel)
+      {
+        // copying to different form -> let's copy also the event handler content
+        // TODO: stripped
 //		    JavaCodeGenerator javaCodeGenerator =
 //			    ((JavaCodeGenerator)FormEditor.getCodeGenerator(sourceComp.getFormModel()));
 //		    bodyText = javaCodeGenerator.getEventHandlerText(oldHandlerName);
-		}		
-		
-		try {		    		   
-		    formEvents.attachEvent(targetEvent, newHandlerName, bodyText);
-		}
-		catch (IllegalArgumentException ex) {
-		    // [incompatible handler error - should be reported!]
-		    ex.printStackTrace();
-		}
-	    }
+      }
+
+      try
+      {
+        formEvents.attachEvent(targetEvent, newHandlerName, bodyText);
+      }
+      catch (IllegalArgumentException ex)
+      {
+        // [incompatible handler error - should be reported!]
+        ex.printStackTrace();
+      }
+    }
 	}	
 	
         return newComp;
@@ -1137,27 +1154,28 @@ public class MetaComponentCreator {
     private RADComponent copyAndApplyBorder(RADComponent sourceComp,
                                             RADComponent targetComp)
     {
-        try {
-            Border borderInstance = (Border) sourceComp.createBeanInstance();
-            BorderDesignSupport designBorder =
-                new BorderDesignSupport(borderInstance);
-
-            Node.Property[] sourceProps = sourceComp.getKnownBeanProperties();
-            Node.Property[] targetProps = designBorder.getProperties();
-            int copyMode = FormUtils.CHANGED_ONLY | FormUtils.DISABLE_CHANGE_FIRING;
-            if (formModel == sourceComp.getFormModel())
-                copyMode |= FormUtils.PASS_DESIGN_VALUES;
-
-            FormUtils.copyProperties(sourceProps, targetProps, copyMode);
-
-            setComponentBorderProperty(designBorder, targetComp);
-        }
-        catch (Exception ex) { // ignore
-            ErrorManager.getDefault().notify(ErrorManager.INFORMATIONAL, ex);
-        }
-        catch (LinkageError ex) { // ignore
-            ErrorManager.getDefault().notify(ErrorManager.INFORMATIONAL, ex);
-        }
+      // TODO: stripped
+//        try {
+//            Border borderInstance = (Border) sourceComp.createBeanInstance();
+//            BorderDesignSupport designBorder =
+//                new BorderDesignSupport(borderInstance);
+//
+//            Node.Property[] sourceProps = sourceComp.getKnownBeanProperties();
+//            Node.Property[] targetProps = designBorder.getProperties();
+//            int copyMode = FormUtils.CHANGED_ONLY | FormUtils.DISABLE_CHANGE_FIRING;
+//            if (formModel == sourceComp.getFormModel())
+//                copyMode |= FormUtils.PASS_DESIGN_VALUES;
+//
+//            FormUtils.copyProperties(sourceProps, targetProps, copyMode);
+//
+//            setComponentBorderProperty(designBorder, targetComp);
+//        }
+//        catch (Exception ex) { // ignore
+//            ErrorManager.getDefault().notify(ErrorManager.INFORMATIONAL, ex);
+//        }
+//        catch (LinkageError ex) { // ignore
+//            ErrorManager.getDefault().notify(ErrorManager.INFORMATIONAL, ex);
+//        }
 
         return targetComp;
     }
@@ -1462,23 +1480,23 @@ public class MetaComponentCreator {
 //                }
 //            }
         }
-        else if (comp instanceof JTable) {
-            javax.swing.table.TableModel tm = ((JTable)comp).getModel();
-            if (tm == null
-                || (tm.getClass().equals(javax.swing.table.DefaultTableModel.class)
-                    && tm.getRowCount() == 0 && tm.getColumnCount() == 0))
-            {
-                String prefix = NbBundle.getMessage(MetaComponentCreator.class, "FMT_CreatorTableTitle"); // NOI18N
-                prefix += ' ';
-                Object propValue =
-                    new org.netbeans.modules.form.editors2.TableModelEditor.NbTableModel(
-                        new javax.swing.table.DefaultTableModel(
-                            new String[] {
-                                prefix + 1, prefix + 2, prefix + 3, prefix + 4 },
-                            4));
-                changes.put("model", propValue); // NOI18N
-            }
-        }
+//        else if (comp instanceof JTable) {
+//            javax.swing.table.TableModel tm = ((JTable)comp).getModel();
+//            if (tm == null
+//                || (tm.getClass().equals(javax.swing.table.DefaultTableModel.class)
+//                    && tm.getRowCount() == 0 && tm.getColumnCount() == 0))
+//            {
+//                String prefix = NbBundle.getMessage(MetaComponentCreator.class, "FMT_CreatorTableTitle"); // NOI18N
+//                prefix += ' ';
+//                Object propValue =
+//                    new org.netbeans.modules.form.editors2.TableModelEditor.NbTableModel(
+//                        new javax.swing.table.DefaultTableModel(
+//                            new String[] {
+//                                prefix + 1, prefix + 2, prefix + 3, prefix + 4 },
+//                            4));
+//                changes.put("model", propValue); // NOI18N
+//            }
+//        }
         else if (comp instanceof JToolBar) {
             changes.put("rollover", true); // NOI18N
         }

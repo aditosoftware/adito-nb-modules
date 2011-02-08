@@ -63,8 +63,7 @@ public class AditoPersistenceManager extends PersistenceManager
     //To change body of implemented methods use File | Settings | File Templates.
   }
 
-  private void _loadForm(_Info pInfo)
-      throws PersistenceException
+  private void _loadForm(_Info pInfo) throws PersistenceException
   {
     FormModel formModel = pInfo.getFormModel();
     formModel.setCurrentVersionLevel(FormModel.LATEST_VERSION);
@@ -100,8 +99,8 @@ public class AditoPersistenceManager extends PersistenceManager
             (ComponentContainer) pComponent : null;
     if (container == null)
     { // this component is not a container
-      if (pParentComponent == null) // this is a root component - load resource properties
-        ResourceSupport.loadInjectedResources(pComponent);
+//      if (pParentComponent == null) // this is a root component - load resource properties
+//        ResourceSupport.loadInjectedResources(pComponent);
       return;
     }
 
@@ -307,8 +306,8 @@ public class AditoPersistenceManager extends PersistenceManager
 //      }
 //    }
 
-    if (pParentComponent == null) // this is a root component
-      ResourceSupport.loadInjectedResources(pComponent);
+//    if (pParentComponent == null) // this is a root component
+//      ResourceSupport.loadInjectedResources(pComponent);
   }
 
   // recognizes, creates, initializes and loads a meta component

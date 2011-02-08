@@ -69,9 +69,9 @@ import javax.lang.model.element.TypeElement;
 //import org.netbeans.modules.classfile.Method;
 
 import org.openide.*;
+import org.openide.loaders.*;
 import org.openide.nodes.Node;
 import org.openide.filesystems.*;
-import org.openide.loaders.DataObject;
 
 import org.netbeans.modules.form.project.*;
 import org.openide.util.Exceptions;
@@ -106,32 +106,41 @@ public final class BeanInstaller {
         final List<ClassSource> beans = new LinkedList<ClassSource>();
         final List<String> unableToInstall = new LinkedList<String>();
         final List<String> noBeans = new LinkedList<String>();
-        for (int i=0; i < nodes.length; i++) {            
-            DataObject dobj = nodes[i].getCookie(DataObject.class);
-            if (dobj == null)
-                continue;
+      for (Node node : nodes)
+      {
+        DataObject dobj = node.getCookie(DataObject.class);
+        if (dobj == null)
+          continue;
 
-            final FileObject fo = dobj.getPrimaryFile();            
-            JavaClassHandler handler = new JavaClassHandler() {
-                @Override
-                public void handle(String className, String problem) {
-                    if (problem == null) {
-                        ClassSource classSource = 
-                                ClassPathUtils.getProjectClassSource(fo, className);
-                        if (classSource == null) {
-                            // Issue 47947
-                            unableToInstall.add(className);
-                        } else {
-                            beans.add(classSource);
-                        }
-                    } else {
-                        noBeans.add(className);
-                        noBeans.add(problem);
-                    }
-                } 
-            };            
-            scanFileObject(fo.getParent(), fo, handler);
-        }
+        final FileObject fo = dobj.getPrimaryFile();
+        JavaClassHandler handler = new JavaClassHandler()
+        {
+          @Override
+          public void handle(String className, String problem)
+          {
+            if (problem == null)
+            {
+              ClassSource classSource =
+                  ClassPathUtils.getProjectClassSource(fo, className);
+              if (classSource == null)
+              {
+                // Issue 47947
+                unableToInstall.add(className);
+              }
+              else
+              {
+                beans.add(classSource);
+              }
+            }
+            else
+            {
+              noBeans.add(className);
+              noBeans.add(problem);
+            }
+          }
+        };
+        scanFileObject(fo.getParent(), fo, handler);
+      }
         
         if (unableToInstall.size() > 0) {
             Iterator iter = unableToInstall.iterator();
@@ -301,17 +310,19 @@ public final class BeanInstaller {
             new FileSystem.AtomicAction () {
                 @Override
                 public void run() {
-                    for (int i=0; i < beans.length; i++)
-                        try {
-                            PaletteItemDataObject.createFile(
-                                categoryFolder,
-                                new ClassSource(beans[i].classname,
-                                                beans[i].entry));
-                            // TODO check the class if it can be loaded?
-                        }
-                        catch (java.io.IOException ex) {
-                            ErrorManager.getDefault().notify(ErrorManager.INFORMATIONAL, ex);
-                        }
+                  for (ItemInfo bean : beans)
+                    try
+                    {
+                      PaletteItemDataObject.createFile(
+                          categoryFolder,
+                          new ClassSource(bean.classname,
+                                          bean.entry));
+                      // TODO check the class if it can be loaded?
+                    }
+                    catch (IOException ex)
+                    {
+                      ErrorManager.getDefault().notify(ErrorManager.INFORMATIONAL, ex);
+                    }
                 }
             });
         }
@@ -334,20 +345,24 @@ public final class BeanInstaller {
         };
                     
         FileObject[] files = folder.getChildren();
-        for (int i=0; i < files.length; i++) {
-            FileObject fo = files[i];
-            if (fo.isFolder()) {
-                scanFolderForBeans(fo, beans, root);
-            }
-            else try {
-                if ("class".equals(fo.getExt()) // NOI18N
-                     && (DataObject.find(fo) != null))
-                {                   
-                    scanFileObject(folder, fo, handler);
-                }
-            }
-            catch (org.openide.loaders.DataObjectNotFoundException ex) {} // should not happen
+      for (FileObject fo : files)
+      {
+        if (fo.isFolder())
+        {
+          scanFolderForBeans(fo, beans, root);
         }
+        else try
+        {
+          if ("class".equals(fo.getExt()) // NOI18N
+              && (DataObject.find(fo) != null))
+          {
+            scanFileObject(folder, fo, handler);
+          }
+        }
+        catch (DataObjectNotFoundException ex)
+        {
+        } // should not happen
+      }
     }    
     
     private static void scanFileObject(FileObject folder, final FileObject fileObject, final JavaClassHandler handler) {

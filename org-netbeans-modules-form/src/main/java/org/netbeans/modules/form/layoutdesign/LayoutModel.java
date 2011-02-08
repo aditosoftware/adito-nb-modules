@@ -685,7 +685,7 @@ public class LayoutModel implements LayoutConstants {
             Iterator<Integer> iter = cutSet.iterator();
             while (iter.hasNext()) {
                 Integer cutInt = iter.next();
-                int cut = cutInt.intValue();
+                int cut = cutInt;
                 boolean isCut = true;
                 Map<LayoutComponent, Rectangle> preCompToBounds = new HashMap<LayoutComponent, Rectangle>();
                 Map<LayoutComponent, Rectangle> postCompToBounds = new HashMap<LayoutComponent, Rectangle>();
@@ -880,8 +880,8 @@ public class LayoutModel implements LayoutConstants {
             return false; // the mark is not present in the undo queue
         }
 
-        int start = ((Integer)startMark).intValue();
-        int end = ((Integer)endMark).intValue();
+        int start = (Integer) startMark;
+        int end = (Integer) endMark;
         undoRedoInProgress = true;
 
         while (end > start) {
@@ -903,8 +903,8 @@ public class LayoutModel implements LayoutConstants {
             return false; // the mark is not present in the redo queue
         }
 
-        int start = ((Integer)startMark).intValue();
-        int end = ((Integer)endMark).intValue();
+        int start = (Integer) startMark;
+        int end = (Integer) endMark;
         undoRedoInProgress = true;
 
         while (start < end) {
@@ -921,8 +921,8 @@ public class LayoutModel implements LayoutConstants {
     }
 
     void releaseChanges(Object fromMark, Object toMark) {
-        int m1 = ((Integer)fromMark).intValue();
-        int m2 = ((Integer)toMark).intValue();
+        int m1 = (Integer) fromMark;
+        int m2 = (Integer) toMark;
 
         while (m1 < m2) {
             Integer m = new Integer(m1);

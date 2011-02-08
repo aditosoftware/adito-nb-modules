@@ -51,8 +51,6 @@ import java.util.ArrayList;
 import java.util.List;
 import org.openide.ErrorManager;
 
-import org.netbeans.modules.form.editors.*;
-import org.netbeans.modules.form.editors2.JTableSelectionModelEditor;
 import org.netbeans.modules.form.fakepeer.FakePeerSupport;
 
 /**
@@ -226,30 +224,31 @@ public class RADProperty extends FormProperty {
         PropertyEditor prEd = null;
 
         PropertyDescriptor descriptor = getPropertyDescriptor();
-        if (descriptor.getPropertyType() == Integer.TYPE
-            && ("mnemonic".equals(descriptor.getName()) // NOI18N
-                || "displayedMnemonic".equals(descriptor.getName()))) { // NOI18N
-                prEd = new MnemonicEditor();
-        } else if (descriptor.getPropertyType().isArray()) {
-            String typeName = descriptor.getPropertyType().getSimpleName();
-            
-            if (typeName.equals("boolean[]") || typeName.equals("byte[]")       // NOI18N
-               || typeName.equals("short[]") || typeName.equals("int[]")        // NOI18N
-               || typeName.equals("long[]") || typeName.equals("float[]")       // NOI18N
-               || typeName.equals("double[]") || typeName.equals("char[]")) {   // NOI18N
-               prEd = new PrimitiveTypeArrayEditor();
-            }
-        } else {
-            if ("editor".equals(descriptor.getName()) && (javax.swing.JSpinner.class.isAssignableFrom(component.getBeanClass()))) { // NOI18N
-                prEd = new SpinnerEditorEditor();
-            } else if ("formatterFactory".equals(descriptor.getName()) && (javax.swing.JFormattedTextField.class.isAssignableFrom(component.getBeanClass()))) { // NOI18N
-                prEd = new AbstractFormatterFactoryEditor();
-            } else if ("selectionModel".equals(descriptor.getName()) && (javax.swing.JTable.class.equals(component.getBeanClass()))) { // NOI18N
-                prEd = new JTableSelectionModelEditor();
-            } else {
-                prEd = createEnumEditor(descriptor);
-            }
-        }
+      // TODO: stripped
+//        if (descriptor.getPropertyType() == Integer.TYPE
+//            && ("mnemonic".equals(descriptor.getName()) // NOI18N
+//                || "displayedMnemonic".equals(descriptor.getName()))) { // NOI18N
+//                prEd = new MnemonicEditor();
+//        } else if (descriptor.getPropertyType().isArray()) {
+//            String typeName = descriptor.getPropertyType().getSimpleName();
+//
+//            if (typeName.equals("boolean[]") || typeName.equals("byte[]")       // NOI18N
+//               || typeName.equals("short[]") || typeName.equals("int[]")        // NOI18N
+//               || typeName.equals("long[]") || typeName.equals("float[]")       // NOI18N
+//               || typeName.equals("double[]") || typeName.equals("char[]")) {   // NOI18N
+//               prEd = new PrimitiveTypeArrayEditor();
+//            }
+//        } else {
+//            if ("editor".equals(descriptor.getName()) && (javax.swing.JSpinner.class.isAssignableFrom(component.getBeanClass()))) { // NOI18N
+//                prEd = new SpinnerEditorEditor();
+//            } else if ("formatterFactory".equals(descriptor.getName()) && (javax.swing.JFormattedTextField.class.isAssignableFrom(component.getBeanClass()))) { // NOI18N
+//                prEd = new AbstractFormatterFactoryEditor();
+//            } else if ("selectionModel".equals(descriptor.getName()) && (javax.swing.JTable.class.equals(component.getBeanClass()))) { // NOI18N
+//                prEd = new JTableSelectionModelEditor();
+//            } else {
+//                prEd = createEnumEditor(descriptor);
+//            }
+//        }
 
         if (prEd == null) {
             try {
@@ -260,79 +259,80 @@ public class RADProperty extends FormProperty {
             }
         }
 
-        if ((prEd == null) && (descriptor.getPropertyType().isEnum())) {
-            prEd = createDefaultEnumEditor(descriptor.getPropertyType());
-        }
+      // TODO: stripped
+//        if ((prEd == null) && (descriptor.getPropertyType().isEnum())) {
+//            prEd = createDefaultEnumEditor(descriptor.getPropertyType());
+//        }
 
         return prEd;
     }
 
-    static PropertyEditor createDefaultEnumEditor(Class enumClass) {
-        try {
-            Method method = enumClass.getMethod("values"); // NOI18N
-            Enum[] values = (Enum[]) method.invoke(null);
-            List<Object> list = new ArrayList<Object>(3*values.length);
-            for (Enum value : values) {
-                list.add(value.toString());
-                list.add(value);
-                list.add(enumClass.getName().replace('$', '.') + '.' + value.name());
-            }
-            // null value is always valid
-            list.add(org.openide.util.NbBundle.
-                    getBundle(RADProperty.class).
-                    getString("CTL_NullText") // NOI18N
-                    );
-            list.add(null);
-            list.add("null"); // NOI18N
-
-            return new EnumEditor(list.toArray());
-        } catch (Exception ex) {
-            ErrorManager.getDefault().notify(ErrorManager.INFORMATIONAL, ex);
-        }
-        return null;
-    }
-
-    protected PropertyEditor createEnumEditor(PropertyDescriptor descriptor) {
-        Object[] enumerationValues;
-
-        if (!"debugGraphicsOptions".equals(descriptor.getName()) // NOI18N
-            || !javax.swing.JComponent.class.isAssignableFrom(
-                                              component.getBeanClass()))
-        {   // get the enumeration values by standard means
-            enumerationValues = (Object[])
-                                descriptor.getValue("enumerationValues"); // NOI18N
-        }
-        else { // hack: debugGraphicsOptions is problematic because its
-               // default value (0) does not correspond to any of the
-               // enumerated constants (NONE_OPTION is -1)
-            enumerationValues = new Object[] {
-                "NONE_OPTION", new Integer(-1), "DebugGraphics.NONE_OPTION", // NOI18N
-                "NO_CHANGES", new Integer(0), "0", // NOI18N
-                "LOG_OPTION", new Integer(1), "DebugGraphics.LOG_OPTION", // NOI18N
-                "FLASH_OPTION", new Integer(2), "DebugGraphics.FLASH_OPTION", // NOI18N
-                "BUFFERED_OPTION", new Integer(4), "DebugGraphics.BUFFERED_OPTION" }; // NOI18N
-        }
-
-        if (enumerationValues == null
-            && "defaultCloseOperation".equals(descriptor.getName()) // NOI18N
-            && (javax.swing.JDialog.class.isAssignableFrom(
-                                           component.getBeanClass())
-                || javax.swing.JInternalFrame.class.isAssignableFrom(
-                                           component.getBeanClass())))
-        {   // hack: enumeration definition is missing in standard Swing
-            // for JDialog and JInternalFrame defaultCloseOperation property
-            enumerationValues = new Object[] {
-                "DISPOSE_ON_CLOSE", new Integer(2), // NOI18N
-                        "WindowConstants.DISPOSE_ON_CLOSE", // NOI18N
-                "DO_NOTHING_ON_CLOSE", new Integer(0), // NOI18N
-                        "WindowConstants.DO_NOTHING_ON_CLOSE", // NOI18N
-                "HIDE_ON_CLOSE", new Integer(1), // NOI18N
-                         "WindowConstants.HIDE_ON_CLOSE" }; // NOI18N
-        }
-
-        return enumerationValues != null ?
-                 new EnumEditor(enumerationValues) : null;
-    }
+//    static PropertyEditor createDefaultEnumEditor(Class enumClass) {
+//        try {
+//            Method method = enumClass.getMethod("values"); // NOI18N
+//            Enum[] values = (Enum[]) method.invoke(null);
+//            List<Object> list = new ArrayList<Object>(3*values.length);
+//            for (Enum value : values) {
+//                list.add(value.toString());
+//                list.add(value);
+//                list.add(enumClass.getName().replace('$', '.') + '.' + value.name());
+//            }
+//            // null value is always valid
+//            list.add(org.openide.util.NbBundle.
+//                    getBundle(RADProperty.class).
+//                    getString("CTL_NullText") // NOI18N
+//                    );
+//            list.add(null);
+//            list.add("null"); // NOI18N
+//
+//            return new EnumEditor(list.toArray());
+//        } catch (Exception ex) {
+//            ErrorManager.getDefault().notify(ErrorManager.INFORMATIONAL, ex);
+//        }
+//        return null;
+//    }
+//
+//    protected PropertyEditor createEnumEditor(PropertyDescriptor descriptor) {
+//        Object[] enumerationValues;
+//
+//        if (!"debugGraphicsOptions".equals(descriptor.getName()) // NOI18N
+//            || !javax.swing.JComponent.class.isAssignableFrom(
+//                                              component.getBeanClass()))
+//        {   // get the enumeration values by standard means
+//            enumerationValues = (Object[])
+//                                descriptor.getValue("enumerationValues"); // NOI18N
+//        }
+//        else { // hack: debugGraphicsOptions is problematic because its
+//               // default value (0) does not correspond to any of the
+//               // enumerated constants (NONE_OPTION is -1)
+//            enumerationValues = new Object[] {
+//                "NONE_OPTION", new Integer(-1), "DebugGraphics.NONE_OPTION", // NOI18N
+//                "NO_CHANGES", new Integer(0), "0", // NOI18N
+//                "LOG_OPTION", new Integer(1), "DebugGraphics.LOG_OPTION", // NOI18N
+//                "FLASH_OPTION", new Integer(2), "DebugGraphics.FLASH_OPTION", // NOI18N
+//                "BUFFERED_OPTION", new Integer(4), "DebugGraphics.BUFFERED_OPTION" }; // NOI18N
+//        }
+//
+//        if (enumerationValues == null
+//            && "defaultCloseOperation".equals(descriptor.getName()) // NOI18N
+//            && (javax.swing.JDialog.class.isAssignableFrom(
+//                                           component.getBeanClass())
+//                || javax.swing.JInternalFrame.class.isAssignableFrom(
+//                                           component.getBeanClass())))
+//        {   // hack: enumeration definition is missing in standard Swing
+//            // for JDialog and JInternalFrame defaultCloseOperation property
+//            enumerationValues = new Object[] {
+//                "DISPOSE_ON_CLOSE", new Integer(2), // NOI18N
+//                        "WindowConstants.DISPOSE_ON_CLOSE", // NOI18N
+//                "DO_NOTHING_ON_CLOSE", new Integer(0), // NOI18N
+//                        "WindowConstants.DO_NOTHING_ON_CLOSE", // NOI18N
+//                "HIDE_ON_CLOSE", new Integer(1), // NOI18N
+//                         "WindowConstants.HIDE_ON_CLOSE" }; // NOI18N
+//        }
+//
+//        return enumerationValues != null ?
+//                 new EnumEditor(enumerationValues) : null;
+//    }
 
     @Override
     protected Method getWriteMethod() {	    

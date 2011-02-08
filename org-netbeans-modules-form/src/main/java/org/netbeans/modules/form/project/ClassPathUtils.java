@@ -393,34 +393,42 @@ public class ClassPathUtils {
             return list;
 
         FileObject[] files = folder.getChildren();
-        for (int i=0; i < files.length; i++) {
-            try {
-                BufferedReader r = new BufferedReader(new InputStreamReader(files[i].getInputStream()));
-                String line = r.readLine();
-                while (line != null) {
-                    line = line.trim();
-                    if (!line.equals("")) { // NOI18N
-                        ClassPattern cp;
-                        if (line.endsWith("**")) { // NOI18N
-                            cp = new ClassPattern(line.substring(0, line.length()-2),
-                                                  ClassPattern.PACKAGE_AND_SUBPACKAGES);
-                        }
-                        else if (line.endsWith("*")) { // NOI18N
-                            cp = new ClassPattern(line.substring(0, line.length()-1),
-                                                  ClassPattern.PACKAGE);
-                        }
-                        else {
-                            cp = new ClassPattern(line, ClassPattern.CLASS);
-                        }
-                        list.add(cp);
-                    }
-                    line = r.readLine();
-                }
+      for (FileObject file : files)
+      {
+        try
+        {
+          BufferedReader r = new BufferedReader(new InputStreamReader(file.getInputStream()));
+          String line = r.readLine();
+          while (line != null)
+          {
+            line = line.trim();
+            if (!line.equals(""))
+            { // NOI18N
+              ClassPattern cp;
+              if (line.endsWith("**"))
+              { // NOI18N
+                cp = new ClassPattern(line.substring(0, line.length() - 2),
+                                      ClassPattern.PACKAGE_AND_SUBPACKAGES);
+              }
+              else if (line.endsWith("*"))
+              { // NOI18N
+                cp = new ClassPattern(line.substring(0, line.length() - 1),
+                                      ClassPattern.PACKAGE);
+              }
+              else
+              {
+                cp = new ClassPattern(line, ClassPattern.CLASS);
+              }
+              list.add(cp);
             }
-            catch (IOException ex) {
-                ErrorManager.getDefault().notify(ErrorManager.INFORMATIONAL, ex);
-            }
+            line = r.readLine();
+          }
         }
+        catch (IOException ex)
+        {
+          ErrorManager.getDefault().notify(ErrorManager.INFORMATIONAL, ex);
+        }
+      }
         return list;
     }
 

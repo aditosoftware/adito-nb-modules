@@ -623,11 +623,12 @@ public class JSplitPaneSupport extends AbstractLayoutSupport {
 
         @Override
         public void setAsText(String str) {
-            for (int i = 0; i < values.length; i++)
-                if (str.equals(values[i])) {
-                    setValue(str);
-                    break;
-                }
+          for (String value : values)
+            if (str.equals(value))
+            {
+              setValue(str);
+              break;
+            }
         }
     }
     

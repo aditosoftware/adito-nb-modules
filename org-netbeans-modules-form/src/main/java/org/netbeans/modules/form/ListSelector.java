@@ -335,10 +335,11 @@ public class ListSelector extends javax.swing.JPanel {
         DefaultListModel toModel = (DefaultListModel)toList.getModel();
         if (selected) {
             int[] index = fromList.getSelectedIndices();
-            for (int i=0; i<index.length; i++) {
-                Object item = fromModel.getElementAt(index[i]);
-                toModel.addElement(item);
-            }
+          for (int anIndex : index)
+          {
+            Object item = fromModel.getElementAt(anIndex);
+            toModel.addElement(item);
+          }
             for (int i=index.length-1; i>=0; i--) {
                 fromModel.removeElementAt(index[i]);
             }

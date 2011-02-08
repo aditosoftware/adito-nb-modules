@@ -388,15 +388,18 @@ public final class LayoutComponent implements LayoutConstants {
     void setCurrentInterior(Rectangle bounds) {
         LayoutRegion space = null;
         for (LayoutInterval[] roots : layoutRoots) {
-            for (int i=0; i < roots.length; i++) {
-                if (space == null) {
-                    space = roots[i].getCurrentSpace();
-                    space.set(bounds, LayoutRegion.UNKNOWN);
-                }
-                else {
-                    roots[i].setCurrentSpace(space);
-                }
+          for (LayoutInterval root : roots)
+          {
+            if (space == null)
+            {
+              space = root.getCurrentSpace();
+              space.set(bounds, LayoutRegion.UNKNOWN);
             }
+            else
+            {
+              root.setCurrentSpace(space);
+            }
+          }
         }
     }
 

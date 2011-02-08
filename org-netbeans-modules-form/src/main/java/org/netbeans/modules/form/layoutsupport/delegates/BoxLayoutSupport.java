@@ -348,7 +348,7 @@ public class BoxLayoutSupport extends AbstractLayoutSupport
 
                 @Override
                 public void setTargetValue(Object value) {
-                    int ax = ((Integer)value).intValue();
+                    int ax = (Integer) value;
                     if (ax == BoxLayout.X_AXIS || ax == BoxLayout.Y_AXIS
                             || ax == BoxLayout.LINE_AXIS || ax == BoxLayout.PAGE_AXIS) {
                         axis = ax;

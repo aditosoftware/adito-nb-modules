@@ -126,9 +126,9 @@ public class RADMenuComponent extends RADMenuItemComponent implements ComponentC
         Class[] classes = supportedMenus.get(new Integer(getMenuItemType()));
 
         if (classes != null)
-            for (int i=0; i < classes.length; i++)
-                if (classes[i] == itemType) // or more general isAssignableFrom ??
-                    return true;
+          for (Class aClass : classes)
+            if (aClass == itemType) // or more general isAssignableFrom ??
+              return true;
 
         return false;
     }
@@ -152,13 +152,14 @@ public class RADMenuComponent extends RADMenuItemComponent implements ComponentC
             subComponents.ensureCapacity(initComponents.length);
         }
 
-        for (int i = 0; i < initComponents.length; i++) {
-            RADComponent comp = initComponents[i];
-            if (comp instanceof RADMenuItemComponent) {
-                subComponents.add(comp);
-                comp.setParentComponent(this);
-            }
+      for (RADComponent comp : initComponents)
+      {
+        if (comp instanceof RADMenuItemComponent)
+        {
+          subComponents.add(comp);
+          comp.setParentComponent(this);
         }
+      }
     }
 
     @Override

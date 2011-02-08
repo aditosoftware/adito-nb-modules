@@ -166,11 +166,13 @@ public class CreationDescriptor {
                 for (int j = 0; j < constrParamTypes[i].length; j++) {
                     properties[j] = new CreationFactory.Property2ParametersMapper(constrParamTypes[i][j], constrPropNames[i][j]);
                     if(propertyParameters != null && propertyParameters.length > 0) {
-                        for (int ppi = 0; ppi < propertyParameters.length; ppi++) {
-                            if( propertyParameters[ppi].getPropertyName().equals(constrPropNames[i][j]) ) {
-                                properties[j].setPropertyParameters(propertyParameters[ppi]);      
-                            }
-                        }                        
+                      for (CreationFactory.PropertyParameters propertyParameter : propertyParameters)
+                      {
+                        if (propertyParameter.getPropertyName().equals(constrPropNames[i][j]))
+                        {
+                          properties[j].setPropertyParameters(propertyParameter);
+                        }
+                      }
                     }
                 }               
                 
@@ -265,38 +267,42 @@ public class CreationDescriptor {
     // ----------
 
     // finds first constructor that matches defaultConstrParams
-    private Creator findDefaultCreator() throws NoSuchMethodException {        
-        for (Iterator<Creator> it = creators.iterator(); it.hasNext();) {
-            
-            Creator creator = it.next();
-            Class[] paramTypes = creator.getParameterTypes();
-            
-            if (paramTypes.length == defaultParams.length) {
-                int ii;
-                for (ii=0; ii < paramTypes.length; ii++) {
-                    Class cls = paramTypes[ii];
-                    Object param = defaultParams[ii];
+    private Creator findDefaultCreator() throws NoSuchMethodException {
+      for (Creator creator : creators)
+      {
 
-                    if (cls.isPrimitive()) {
-                        if (param == null
-                            || (param instanceof Integer && cls != Integer.TYPE)
-                            || (param instanceof Boolean && cls != Boolean.TYPE)
-                            || (param instanceof Double && cls != Double.TYPE)
-                            || (param instanceof Long && cls != Long.TYPE)
-                            || (param instanceof Float && cls != Float.TYPE)
-                            || (param instanceof Short && cls != Short.TYPE)
-                            || (param instanceof Byte && cls != Byte.TYPE)
-                            || (param instanceof Character && cls != Character.TYPE))
-                        break;
-                    }
-                    else if (param != null && !cls.isInstance(param))
-                        break;
-                }
-                if (ii == paramTypes.length) {
-                    return creator;                    
-                }
+        Class[] paramTypes = creator.getParameterTypes();
+
+        if (paramTypes.length == defaultParams.length)
+        {
+          int ii;
+          for (ii = 0; ii < paramTypes.length; ii++)
+          {
+            Class cls = paramTypes[ii];
+            Object param = defaultParams[ii];
+
+            if (cls.isPrimitive())
+            {
+              if (param == null
+                  || (param instanceof Integer && cls != Integer.TYPE)
+                  || (param instanceof Boolean && cls != Boolean.TYPE)
+                  || (param instanceof Double && cls != Double.TYPE)
+                  || (param instanceof Long && cls != Long.TYPE)
+                  || (param instanceof Float && cls != Float.TYPE)
+                  || (param instanceof Short && cls != Short.TYPE)
+                  || (param instanceof Byte && cls != Byte.TYPE)
+                  || (param instanceof Character && cls != Character.TYPE))
+                break;
             }
+            else if (param != null && !cls.isInstance(param))
+              break;
+          }
+          if (ii == paramTypes.length)
+          {
+            return creator;
+          }
         }
+      }
         throw new NoSuchMethodException();
     }
 
@@ -466,17 +472,16 @@ public class CreationDescriptor {
                    IllegalArgumentException, InvocationTargetException
         {
                                 
-            List<Object> paramValuesList = new ArrayList<Object>(); 
-            for (int i=0; i < properties.length; i++) {
-                FormProperty prop = CreationFactory.findProperty(properties[i].getPropertyName(), props);
-                if (prop == null)
-                    return null; // should not happen
+            List<Object> paramValuesList = new ArrayList<Object>();
+          for (CreationFactory.Property2ParametersMapper property : properties)
+          {
+            FormProperty prop = CreationFactory.findProperty(property.getPropertyName(), props);
+            if (prop == null)
+              return null; // should not happen
 
-                Object[] propertyParameters = properties[i].getPropertyParametersValues(prop);
-                for (int j = 0; j < propertyParameters.length; j++) {
-                    paramValuesList.add(propertyParameters[j]);
-                }                                        
-            }
+            Object[] propertyParameters = property.getPropertyParametersValues(prop);
+            paramValuesList.addAll(Arrays.asList(propertyParameters));
+          }
             
             Object[] paramValues = paramValuesList.toArray(new Object[paramValuesList.size()]);
             

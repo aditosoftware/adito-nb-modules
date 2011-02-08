@@ -306,7 +306,7 @@ public class FormRefactoringUpdate extends SimpleRefactoringElementImplementatio
             RADComponent metacomp = formEditor.getFormModel().findRADComponent(oldName);
             if (metacomp != null) {
                 saveFormForUndo();
-                saveResourcesForContentChangeUndo();
+//                saveResourcesForContentChangeUndo();
                 metacomp.setName(newName);
                 updateForm(false);
             }
@@ -316,8 +316,8 @@ public class FormRefactoringUpdate extends SimpleRefactoringElementImplementatio
     private void formRename() {
         if (prepareForm(true)) {
             saveFormForUndo();
-            saveResourcesForFormRenameUndo();
-            ResourceSupport.formMoved(formEditor.getFormModel(), null, refInfo.getOldName(changingFile), false);
+//            saveResourcesForFormRenameUndo();
+//            ResourceSupport.formMoved(formEditor.getFormModel(), null, refInfo.getOldName(changingFile), false);
             updateForm(true);
         }
     }
@@ -354,10 +354,10 @@ public class FormRefactoringUpdate extends SimpleRefactoringElementImplementatio
         if (prepareForm(true)) {
             saveFormForUndo();
             FileObject oldFolder = changingFile.getParent();
-            saveResourcesForFormMoveUndo(oldFolder);
+//            saveResourcesForFormMoveUndo(oldFolder);
             String oldFormName = refInfo.getOldName(changingFile);
             oldFormName = oldFormName.substring(oldFormName.lastIndexOf('.')+1); // should be a short name
-            ResourceSupport.formMoved(formEditor.getFormModel(), oldFolder, oldFormName, false);
+//            ResourceSupport.formMoved(formEditor.getFormModel(), oldFolder, oldFormName, false);
             updateForm(true);
         }
     }
@@ -384,11 +384,11 @@ public class FormRefactoringUpdate extends SimpleRefactoringElementImplementatio
             }
             formEditor = null;
             if (prepareForm(true)) {
-                saveResourcesForFormRenameUndo(); // same set of files like if the new form was renamed
+//                saveResourcesForFormRenameUndo(); // same set of files like if the new form was renamed
                 if (oldFolder == targetFolder) {
                     oldFolder = null;
                 }
-                ResourceSupport.formMoved(formEditor.getFormModel(), oldFolder, oldFile.getName(), true);
+//                ResourceSupport.formMoved(formEditor.getFormModel(), oldFolder, oldFile.getName(), true);
                 updateForm(true);
             }
             // set back to original so the operation can be repeated in redo
@@ -646,23 +646,23 @@ public class FormRefactoringUpdate extends SimpleRefactoringElementImplementatio
         // java file is backed up by java refactoring
     }
 
-    private void saveResourcesForContentChangeUndo() {
-        for (URL url : ResourceSupport.getFilesForContentChangeBackup(formEditor.getFormModel())) {
-            saveForUndo(url);
-        }
-    }
-
-    private void saveResourcesForFormRenameUndo() {
-        for (URL url : ResourceSupport.getFilesForFormRenameBackup(formEditor.getFormModel())) {
-            saveForUndo(url);
-        }
-    }
-
-    private void saveResourcesForFormMoveUndo(FileObject oldFolder) {
-        for (URL url : ResourceSupport.getFilesForFormMoveBackup(formEditor.getFormModel(), oldFolder)) {
-            saveForUndo(url);
-        }
-    }
+//    private void saveResourcesForContentChangeUndo() {
+//        for (URL url : ResourceSupport.getFilesForContentChangeBackup(formEditor.getFormModel())) {
+//            saveForUndo(url);
+//        }
+//    }
+//
+//    private void saveResourcesForFormRenameUndo() {
+//        for (URL url : ResourceSupport.getFilesForFormRenameBackup(formEditor.getFormModel())) {
+//            saveForUndo(url);
+//        }
+//    }
+//
+//    private void saveResourcesForFormMoveUndo(FileObject oldFolder) {
+//        for (URL url : ResourceSupport.getFilesForFormMoveBackup(formEditor.getFormModel(), oldFolder)) {
+//            saveForUndo(url);
+//        }
+//    }
 
     private void saveForUndo(final URL url) {
         FileObject file = URLMapper.findFileObject(url);

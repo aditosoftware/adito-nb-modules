@@ -114,8 +114,7 @@ public class LayoutNode extends FormNode
             }
 
             javax.swing.Action[] superActions = super.getActions(context);
-            for (int i=0; i < superActions.length; i++)
-                actions.add(superActions[i]);
+          actions.addAll(Arrays.asList(superActions));
 
             systemActions = new SystemAction[actions.size()];
             actions.toArray(systemActions);
@@ -203,14 +202,15 @@ public class LayoutNode extends FormNode
                                evt.getPropertyName(),
                                evt.getOldValue(), evt.getNewValue());
 
-                    for (int i=0; i < properties.length; i++) {
-                        if (properties[i] instanceof FormProperty)
-                            ((FormProperty)properties[i]).reinstateProperty();
-                        // [there should be something for Node.Property too]
+                  for (Property property : properties)
+                  {
+                    if (property instanceof FormProperty)
+                      ((FormProperty) property).reinstateProperty();
+                    // [there should be something for Node.Property too]
 
-                        if (ev != null)
-                            layoutSupport.containerLayoutChanged(ev);
-                    }
+                    if (ev != null)
+                      layoutSupport.containerLayoutChanged(ev);
+                  }
 
                     if (ev == null) // anonymous property changed
                         layoutSupport.containerLayoutChanged(null);

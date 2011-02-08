@@ -409,18 +409,22 @@ public class SwingLayoutBuilder {
         while (i.hasNext()) {
             List<String> group = links.get(i.next());
             List<Component> components = new ArrayList<Component>();
-            for (int j=0; j < group.size(); j++) {
-                String compId = group.get(j);
-                LayoutComponent lc = layoutModel.getLayoutComponent(compId);
-                if (lc != null) {
-                    Component comp = componentIDMap.get(lc.getId());
-                    if (comp == null) {
-                        return;
-                    } else {
-                        components.add(comp);
-                    }
-                }
+          for (String compId : group)
+          {
+            LayoutComponent lc = layoutModel.getLayoutComponent(compId);
+            if (lc != null)
+            {
+              Component comp = componentIDMap.get(lc.getId());
+              if (comp == null)
+              {
+                return;
+              }
+              else
+              {
+                components.add(comp);
+              }
             }
+          }
             Component[] compArray = components.toArray(new Component[components.size()]);
             if (compArray != null) {
                 if (dimension == LayoutConstants.HORIZONTAL) {

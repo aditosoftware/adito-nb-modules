@@ -367,15 +367,18 @@ public final class PaletteUtils {
             // This is not the node returned by getPaletteNode()!
             Node paletteNode = getPalette().getRoot().lookup(Node.class);
             Node[] categories = getCategoryNodes(paletteNode, true, true, true, true);
-            for( int i=0; i<categories.length; i++ ) {
-                Node[] items = getItemNodes( categories[i], true );
-                for( int j=0; j<items.length; j++ ) {
-                    PaletteItem formItem = items[j].getLookup().lookup( PaletteItem.class );
-                    if( item.equals( formItem ) ) {
-                        getPalette().setSelectedItem( categories[i].getLookup(), items[j].getLookup() );
-                    }
-                }
+          for (Node category : categories)
+          {
+            Node[] items = getItemNodes(category, true);
+            for (int j = 0; j < items.length; j++)
+            {
+              PaletteItem formItem = items[j].getLookup().lookup(PaletteItem.class);
+              if (item.equals(formItem))
+              {
+                getPalette().setSelectedItem(category.getLookup(), items[j].getLookup());
+              }
             }
+          }
         }
     }
     
@@ -405,20 +408,25 @@ public final class PaletteUtils {
         HashSet<PaletteItem> uniqueItems = null;
         // collect valid items from all categories (including invisible)
         Node[] categories = getCategoryNodes(getPaletteNode(), false, true, false, optimalResult);
-        for( int i=0; i<categories.length; i++ ) {
-            Node[] items = getItemNodes(categories[i], true, optimalResult);
-            for( int j=0; j<items.length; j++ ) {
-                PaletteItem formItem = items[j].getLookup().lookup( PaletteItem.class );
-                if( null != formItem ) {
-                    if( null == uniqueItems ) {
-                        uniqueItems = new HashSet<PaletteItem>();
-                    }
-                    if (!PaletteItem.TYPE_CHOOSE_BEAN.equals(formItem.getExplicitComponentType())) {
-                        uniqueItems.add(formItem);
-                    }
-                }
+      for (Node category : categories)
+      {
+        Node[] items = getItemNodes(category, true, optimalResult);
+        for (Node item : items)
+        {
+          PaletteItem formItem = item.getLookup().lookup(PaletteItem.class);
+          if (null != formItem)
+          {
+            if (null == uniqueItems)
+            {
+              uniqueItems = new HashSet<PaletteItem>();
             }
+            if (!PaletteItem.TYPE_CHOOSE_BEAN.equals(formItem.getExplicitComponentType()))
+            {
+              uniqueItems.add(formItem);
+            }
+          }
         }
+      }
         PaletteItem[] res;
         if( null != uniqueItems ) {
             res = uniqueItems.toArray( new PaletteItem[uniqueItems.size()] );
@@ -461,9 +469,7 @@ public final class PaletteUtils {
             }
             else if (validList == null) {
                 validList = new ArrayList<Node>(nodes.length);
-                for (int j=0; j < i; j++) {
-                    validList.add(nodes[j]);
-                }
+              validList.addAll(Arrays.asList(nodes).subList(0, i));
             }
         }
         if (validList != null)
@@ -519,9 +525,7 @@ public final class PaletteUtils {
                 }
             } else if( list == null ) {
                 list = new ArrayList<Node>(nodes.length);
-                for( int j=0; j < i; j++ ) {
-                    list.add(nodes[j]);
-                }
+              list.addAll(Arrays.asList(nodes).subList(0, i));
             }
         }
         if( list != null ) {
@@ -544,7 +548,7 @@ public final class PaletteUtils {
             if (value == null) {
                 value = Boolean.TRUE;
             }
-            return Boolean.valueOf(value.toString()).booleanValue();
+            return Boolean.valueOf(value.toString());
         }
         return false;
     }
@@ -596,11 +600,12 @@ public final class PaletteUtils {
                 return false;
 
             DataObject[] dobjs = folder.getChildren();
-            for (int i=0; i < dobjs.length; i++) {
-                PaletteItem item = dobjs[i].getCookie(PaletteItem.class);
-                if (item == null || isValidItem(item))
-                    return true;
-            }
+          for (DataObject dobj : dobjs)
+          {
+            PaletteItem item = dobj.getCookie(PaletteItem.class);
+            if (item == null || isValidItem(item))
+              return true;
+          }
             return dobjs.length == 0;
         }
 

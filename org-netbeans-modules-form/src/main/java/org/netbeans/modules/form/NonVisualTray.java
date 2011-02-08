@@ -201,11 +201,13 @@ public class NonVisualTray extends JPanel implements ExplorerManager.Provider {
                     Node[] nodes = (Node[])evt.getNewValue();
                     java.util.List<Node> list = new ArrayList<Node>();
                     Node node = ((NonVisualNode)manager.getRootContext()).getOriginal();
-                    for (int i=0; i<nodes.length; i++) {
-                        if (node == nodes[i].getParentNode()) {
-                            list.add(findFilterNode(nodes[i]));
-                        }
+                  for (Node node1 : nodes)
+                  {
+                    if (node == node1.getParentNode())
+                    {
+                      list.add(findFilterNode(node1));
                     }
+                  }
                     try {
                         manager.setSelectedNodes(list.toArray(new Node[list.size()]));
                     } catch (PropertyVetoException pvex) {}
@@ -220,12 +222,14 @@ public class NonVisualTray extends JPanel implements ExplorerManager.Provider {
         private Node findFilterNode(Node original) {
             Node root = manager.getRootContext();
             Node[] nodes = root.getChildren().getNodes(false);
-            for (int i=0; i<nodes.length; i++) {
-                NonVisualNode node = (NonVisualNode)nodes[i];
-                if (node.getOriginal() == original) {
-                    return node;
-                }
+          for (Node node1 : nodes)
+          {
+            NonVisualNode node = (NonVisualNode) node1;
+            if (node.getOriginal() == original)
+            {
+              return node;
             }
+          }
             return null;
         }
         
@@ -317,12 +321,13 @@ public class NonVisualTray extends JPanel implements ExplorerManager.Provider {
             });
             Action[] actions = getOriginal().getActions(context);
             java.util.List<Action> actionList = new ArrayList<Action>(Arrays.asList(actions));
-            for (int i=0; i<actions.length; i++) {
-                Action action = actions[i];
-                if ((action != null) && (forbiddenActions.contains(action.getClass()))) {
-                    actionList.remove(action);
-                }
+          for (Action action : actions)
+          {
+            if ((action != null) && (forbiddenActions.contains(action.getClass())))
+            {
+              actionList.remove(action);
             }
+          }
             return actionList.toArray(new Action[actionList.size()]);
         }
         

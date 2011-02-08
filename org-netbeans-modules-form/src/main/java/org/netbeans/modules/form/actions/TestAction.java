@@ -286,61 +286,79 @@ public class TestAction extends CallableSystemAction implements Runnable {
                 
                 // Swing L&Fs
                 UIManager.LookAndFeelInfo[] lafs = UIManager.getInstalledLookAndFeels();
-                for (int i=0; i<lafs.length; i++) {
-                    String className = lafs[i].getClassName();
-                    if (isSynthLAF) {
-                        try {
-                            Class lafClass = Class.forName(className);
-                            if (!lafName.equals(className) && SynthLookAndFeel.class.isAssignableFrom(lafClass)) {
-                                continue; // 134848, 145807: Cannot use two different SynthLookAndFeels
-                            }
-                        } catch (ClassNotFoundException cnfex) {
-                            // should not happen
-                            ErrorManager.getDefault().notify(ErrorManager.INFORMATIONAL, cnfex);
-                        }
+              for (UIManager.LookAndFeelInfo laf1 : lafs)
+              {
+                String className = laf1.getClassName();
+                if (isSynthLAF)
+                {
+                  try
+                  {
+                    Class lafClass = Class.forName(className);
+                    if (!lafName.equals(className) && SynthLookAndFeel.class.isAssignableFrom(lafClass))
+                    {
+                      continue; // 134848, 145807: Cannot use two different SynthLookAndFeels
                     }
-                    mi = new JMenuItem(lafs[i].getName());
-                    mi.putClientProperty("lafInfo", new LookAndFeelItem(lafs[i].getClassName())); // NOI18N
-                    mi.addActionListener(this);
-                    popup.add(mi);
+                  }
+                  catch (ClassNotFoundException cnfex)
+                  {
+                    // should not happen
+                    ErrorManager.getDefault().notify(ErrorManager.INFORMATIONAL, cnfex);
+                  }
                 }
+                mi = new JMenuItem(laf1.getName());
+                mi.putClientProperty("lafInfo", new LookAndFeelItem(laf1.getClassName())); // NOI18N
+                mi.addActionListener(this);
+                popup.add(mi);
+              }
 
                 // L&Fs from the Palette
                 Node[] cats = PaletteUtils.getCategoryNodes(PaletteUtils.getPaletteNode(), false);
-                for (int i=0; i<cats.length; i++) {
-                    if ("LookAndFeels".equals(cats[i].getName())) { // NOI18N
-                        final Node lafNode = cats[i];
-                        Node[] items = PaletteUtils.getItemNodes(lafNode, true);
-                        if (items.length != 0) {
-                            popup.add(new JSeparator());
+              for (Node cat : cats)
+              {
+                if ("LookAndFeels".equals(cat.getName()))
+                { // NOI18N
+                  final Node lafNode = cat;
+                  Node[] items = PaletteUtils.getItemNodes(lafNode, true);
+                  if (items.length != 0)
+                  {
+                    popup.add(new JSeparator());
+                  }
+                  for (Node item : items)
+                  {
+                    PaletteItem pitem = item.getLookup().lookup(PaletteItem.class);
+                    boolean supported = false;
+                    try
+                    {
+                      Class clazz = pitem.getComponentClass();
+                      if ((clazz != null) && (LookAndFeel.class.isAssignableFrom(clazz)))
+                      {
+                        LookAndFeel laf = (LookAndFeel) clazz.newInstance();
+                        supported = laf.isSupportedLookAndFeel();
+                        if (supported && isSynthLAF && !lafName.equals(pitem.getComponentClassName())
+                            && SynthLookAndFeel.class.isAssignableFrom(clazz))
+                        {
+                          supported = false; // 134848, 145807: Cannot use two different SynthLookAndFeels
                         }
-                        for (int j=0; j<items.length; j++) {
-                            PaletteItem pitem = items[j].getLookup().lookup(PaletteItem.class);
-                            boolean supported = false;
-                            try {
-                                Class clazz = pitem.getComponentClass();
-                                if ((clazz != null) && (LookAndFeel.class.isAssignableFrom(clazz))) {
-                                    LookAndFeel laf = (LookAndFeel)clazz.newInstance();
-                                    supported = laf.isSupportedLookAndFeel();
-                                    if (supported && isSynthLAF && !lafName.equals(pitem.getComponentClassName())
-                                            && SynthLookAndFeel.class.isAssignableFrom(clazz)) {
-                                        supported = false; // 134848, 145807: Cannot use two different SynthLookAndFeels
-                                    }
-                                }
-                            } catch (Exception ex) {
-                                ErrorManager.getDefault().notify(ErrorManager.INFORMATIONAL, ex);
-                            } catch (LinkageError ex) {
-                                ErrorManager.getDefault().notify(ErrorManager.INFORMATIONAL, ex);
-                            }
-                            if (supported) {
-                                mi = new JMenuItem(items[j].getDisplayName());
-                                mi.putClientProperty("lafInfo", new LookAndFeelItem(pitem)); // NOI18N
-                                mi.addActionListener(this);
-                                popup.add(mi);
-                            }
-                        }
+                      }
                     }
+                    catch (Exception ex)
+                    {
+                      ErrorManager.getDefault().notify(ErrorManager.INFORMATIONAL, ex);
+                    }
+                    catch (LinkageError ex)
+                    {
+                      ErrorManager.getDefault().notify(ErrorManager.INFORMATIONAL, ex);
+                    }
+                    if (supported)
+                    {
+                      mi = new JMenuItem(item.getDisplayName());
+                      mi.putClientProperty("lafInfo", new LookAndFeelItem(pitem)); // NOI18N
+                      mi.addActionListener(this);
+                      popup.add(mi);
+                    }
+                  }
                 }
+              }
 
                 initialized = true;
             }

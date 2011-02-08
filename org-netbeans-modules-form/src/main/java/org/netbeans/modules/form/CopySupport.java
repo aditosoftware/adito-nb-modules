@@ -122,11 +122,13 @@ class CopySupport {
 
         @Override
         public boolean isDataFlavorSupported(DataFlavor flavor) {
-            for (int i = 0; i < flavors.length; i++) {
-                if (flavors[i] == flavor) {
-                    return true;
-                }
+          for (DataFlavor flavor1 : flavors)
+          {
+            if (flavor1 == flavor)
+            {
+              return true;
             }
+          }
             return false;
         }
 
@@ -194,58 +196,74 @@ class CopySupport {
         boolean cut = false; // true - cut, false - copy
         List<RADComponent> sourceComponents = null;
 
-        for (int i=0; i < allTrans.length; i++) {
-            Transferable t = allTrans[i];
-            boolean metaCompTransfer;
-            if (t.isDataFlavorSupported(getComponentCopyFlavor())) {
-                assert !cut;
-                metaCompTransfer = true;
-            } else if (t.isDataFlavorSupported(getComponentCutFlavor())) {
-                assert cut || sourceComponents == null;
-                metaCompTransfer = true;
-                cut = true;
-            } else {
-                metaCompTransfer = false;
-            }
-            if (metaCompTransfer) {
-                RADComponent transComp = null;
-                try {
-                    Object data = t.getTransferData(t.getTransferDataFlavors()[0]);
-                    if (data instanceof RADComponent) {
-                        transComp = (RADComponent) data;
-                    }
-                }
-                catch (UnsupportedFlavorException e) {} // should not happen
-                catch (java.io.IOException e) {} // should not happen
-
-                if (transComp != null
-                    // only cut to another container
-                    && (!cut || canPasteCut(transComp, targetForm, targetComponent))
-                    // must be a valid source/target combination
-                    && (MetaComponentCreator.canAddComponent(transComp.getBeanClass(),
-                                                             targetComponent)
-                        || (!cut && MetaComponentCreator.canApplyComponent(transComp.getBeanClass(),
-                                                                           targetComponent)))
-                    // hack needed due to screwed design of menu metacomponents
-                    && (!(targetComponent instanceof RADMenuComponent)
-                          || transComp instanceof RADMenuItemComponent))
-                {   // pasting this meta component is allowed
-                    if (sourceComponents == null) {
-                        sourceComponents = new LinkedList<RADComponent>();
-                    }
-                    sourceComponents.add(getComponentToCopy(transComp, targetComponent, cut));
-                    canPaste = true;
-                }
-            } else { // java node (compiled class) could be copied
-                ClassSource classSource = CopySupport.getCopiedBeanClassSource(t);
-                if (classSource != null) {
-                //                && (MetaComponentCreator.canAddComponent(cls, component)
-                //                   || MetaComponentCreator.canApplyComponent(cls, component)))
-                    s.add(new ClassPaste(t, classSource, targetForm, targetComponent));
-                    canPaste = true;
-                }
-            }
+      for (Transferable t : allTrans)
+      {
+        boolean metaCompTransfer;
+        if (t.isDataFlavorSupported(getComponentCopyFlavor()))
+        {
+          assert !cut;
+          metaCompTransfer = true;
         }
+        else if (t.isDataFlavorSupported(getComponentCutFlavor()))
+        {
+          assert cut || sourceComponents == null;
+          metaCompTransfer = true;
+          cut = true;
+        }
+        else
+        {
+          metaCompTransfer = false;
+        }
+        if (metaCompTransfer)
+        {
+          RADComponent transComp = null;
+          try
+          {
+            Object data = t.getTransferData(t.getTransferDataFlavors()[0]);
+            if (data instanceof RADComponent)
+            {
+              transComp = (RADComponent) data;
+            }
+          }
+          catch (UnsupportedFlavorException e)
+          {
+          } // should not happen
+          catch (IOException e)
+          {
+          } // should not happen
+
+          if (transComp != null
+              // only cut to another container
+              && (!cut || canPasteCut(transComp, targetForm, targetComponent))
+              // must be a valid source/target combination
+              && (MetaComponentCreator.canAddComponent(transComp.getBeanClass(),
+                                                       targetComponent)
+              || (!cut && MetaComponentCreator.canApplyComponent(transComp.getBeanClass(),
+                                                                 targetComponent)))
+              // hack needed due to screwed design of menu metacomponents
+              && (!(targetComponent instanceof RADMenuComponent)
+              || transComp instanceof RADMenuItemComponent))
+          {   // pasting this meta component is allowed
+            if (sourceComponents == null)
+            {
+              sourceComponents = new LinkedList<RADComponent>();
+            }
+            sourceComponents.add(getComponentToCopy(transComp, targetComponent, cut));
+            canPaste = true;
+          }
+        }
+        else
+        { // java node (compiled class) could be copied
+          ClassSource classSource = CopySupport.getCopiedBeanClassSource(t);
+          if (classSource != null)
+          {
+            //                && (MetaComponentCreator.canAddComponent(cls, component)
+            //                   || MetaComponentCreator.canApplyComponent(cls, component)))
+            s.add(new ClassPaste(t, classSource, targetForm, targetComponent));
+            canPaste = true;
+          }
+        }
+      }
 
         if (sourceComponents != null) {
             s.add(new RADPaste(sourceComponents, targetForm, targetComponent, cut));

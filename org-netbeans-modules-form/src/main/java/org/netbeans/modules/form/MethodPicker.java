@@ -75,16 +75,17 @@ public class MethodPicker extends javax.swing.JPanel {
         componentsList.toArray(components);
 
         int selIndex = -1;
-        for (Iterator it = componentsList.iterator(); it.hasNext(); ) {
-            RADComponent radComp = (RADComponent) it.next();
-            if (componentToSelect != null && componentToSelect == radComp)
-                selIndex = componentsCombo.getItemCount();
-            if (radComp == formModel.getTopRADComponent())
-                componentsCombo.addItem(
-                    FormUtils.getBundleString("CTL_FormTopContainerName")); // NOI18N
-            else
-                componentsCombo.addItem(radComp.getName());
-        }
+      for (Object aComponentsList : componentsList)
+      {
+        RADComponent radComp = (RADComponent) aComponentsList;
+        if (componentToSelect != null && componentToSelect == radComp)
+          selIndex = componentsCombo.getItemCount();
+        if (radComp == formModel.getTopRADComponent())
+          componentsCombo.addItem(
+              FormUtils.getBundleString("CTL_FormTopContainerName")); // NOI18N
+        else
+          componentsCombo.addItem(radComp.getName());
+      }
         if (selIndex >= 0)
             componentsCombo.setSelectedIndex(selIndex);
 
@@ -149,14 +150,15 @@ public class MethodPicker extends javax.swing.JPanel {
 	    descs = sel.getBeanInfo().getMethodDescriptors();	
 
 	    Map<String,MethodPickerItem> filtered = new HashMap<String,MethodPickerItem>();
-	    for (int i = 0; i < descs.length; i ++) {
-		if (requiredType.isAssignableFrom(descs[i].getMethod().getReturnType()) &&
-		    (descs[i].getMethod().getParameterTypes().length == 0)) // [FUTURE: - currently we allow only methods without params]
-		{
-		    MethodPickerItem item = createItem(descs[i]);
-		    filtered.put(item.getMethodName(), item);
-		}
-	    }
+          for (MethodDescriptor desc : descs)
+          {
+            if (requiredType.isAssignableFrom(desc.getMethod().getReturnType()) &&
+                (desc.getMethod().getParameterTypes().length == 0)) // [FUTURE: - currently we allow only methods without params]
+            {
+              MethodPickerItem item = createItem(desc);
+              filtered.put(item.getMethodName(), item);
+            }
+          }
 
           // TODO: stripped
 //	    if(sel == sel.getFormModel().getTopRADComponent() ) {

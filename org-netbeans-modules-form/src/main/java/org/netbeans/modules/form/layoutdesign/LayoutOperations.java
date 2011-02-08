@@ -225,33 +225,37 @@ class LayoutOperations implements LayoutConstants {
 ////        group.setGroupAlignment(alignment);
 
         // fill the group
-        for (Iterator it=list.iterator(); it.hasNext(); ) {
-            List subList = (List) it.next();
-            LayoutInterval interval;
-            if (subList.size() == 2) { // there is just one interval - use it directly
-                int alignment = ((Integer)subList.get(0)).intValue();
-                interval = (LayoutInterval) subList.get(1);
-                if (alignment == LEADING || alignment == TRAILING)
-                    layoutModel.setIntervalAlignment(interval, alignment);
-            }
-            else { // there are more intervals - create sequence
-                interval = new LayoutInterval(SEQUENTIAL);
-                int alignment = ((Integer)subList.get(0)).intValue();
-                if (alignment == LEADING || alignment == TRAILING)
-                    interval.setAlignment(alignment);
-                for (int i=1,n=subList.size(); i < n; i++) {
-                    LayoutInterval li = (LayoutInterval) subList.get(i);
-                    if (resizingFillGap && li.isEmptySpace() && !LayoutInterval.canResize(li)
-                        && ((i == 1 && position == TRAILING) || (i == n-1 && position == LEADING)))
-                    {   // make the end gap resizing
-                        layoutModel.setIntervalSize(
-                                li, NOT_EXPLICITLY_DEFINED, li.getPreferredSize(), Short.MAX_VALUE);
-                    }
-                    layoutModel.addInterval(li, interval, -1);
-                }
-            }
-            layoutModel.addInterval(interval, group, -1);
+      for (Object aList : list)
+      {
+        List subList = (List) aList;
+        LayoutInterval interval;
+        if (subList.size() == 2)
+        { // there is just one interval - use it directly
+          int alignment = (Integer) subList.get(0);
+          interval = (LayoutInterval) subList.get(1);
+          if (alignment == LEADING || alignment == TRAILING)
+            layoutModel.setIntervalAlignment(interval, alignment);
         }
+        else
+        { // there are more intervals - create sequence
+          interval = new LayoutInterval(SEQUENTIAL);
+          int alignment = (Integer) subList.get(0);
+          if (alignment == LEADING || alignment == TRAILING)
+            interval.setAlignment(alignment);
+          for (int i = 1, n = subList.size(); i < n; i++)
+          {
+            LayoutInterval li = (LayoutInterval) subList.get(i);
+            if (resizingFillGap && li.isEmptySpace() && !LayoutInterval.canResize(li)
+                && ((i == 1 && position == TRAILING) || (i == n - 1 && position == LEADING)))
+            {   // make the end gap resizing
+              layoutModel.setIntervalSize(
+                  li, NOT_EXPLICITLY_DEFINED, li.getPreferredSize(), Short.MAX_VALUE);
+            }
+            layoutModel.addInterval(li, interval, -1);
+          }
+        }
+        layoutModel.addInterval(interval, group, -1);
+      }
 
         layoutModel.addInterval(group, seq, index);
 

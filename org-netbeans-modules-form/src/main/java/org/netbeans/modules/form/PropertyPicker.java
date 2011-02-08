@@ -79,16 +79,16 @@ public class PropertyPicker extends javax.swing.JPanel {
         componentsList.toArray(components);
 
         int selIndex = -1;
-        for (Iterator<RADComponent> it = componentsList.iterator(); it.hasNext(); ) {
-            RADComponent radComp = it.next();
-            if (componentToSelect != null && componentToSelect == radComp)
-                selIndex = componentsCombo.getItemCount();
-            if (radComp == formModel.getTopRADComponent())
-                componentsCombo.addItem(
-                    FormUtils.getBundleString("CTL_FormTopContainerName")); // NOI18N
-            else
-                componentsCombo.addItem(radComp.getName());
-        }
+      for (RADComponent radComp : componentsList)
+      {
+        if (componentToSelect != null && componentToSelect == radComp)
+          selIndex = componentsCombo.getItemCount();
+        if (radComp == formModel.getTopRADComponent())
+          componentsCombo.addItem(
+              FormUtils.getBundleString("CTL_FormTopContainerName")); // NOI18N
+        else
+          componentsCombo.addItem(radComp.getName());
+      }
         if (selIndex >= 0)
             componentsCombo.setSelectedIndex(selIndex);
 
@@ -153,14 +153,16 @@ public class PropertyPicker extends javax.swing.JPanel {
         } else {
             PropertyDescriptor[] descs = sel.getBeanInfo().getPropertyDescriptors();
             Map<String,PropertyPickerItem> filtered = new HashMap<String,PropertyPickerItem>();
-            for (int i = 0; i < descs.length; i ++) {
-                if ((descs[i].getReadMethod() != null) &&       // filter out non-readable properties
-                    (descs[i].getPropertyType() != null) &&  // indexed properties return null from getPropertyType
-                    requiredType.isAssignableFrom(descs[i].getPropertyType())) {
-		    PropertyPickerItem item = createItem(descs[i]);
-                    filtered.put(item.getPropertyName(), item);
-                }
+          for (PropertyDescriptor desc : descs)
+          {
+            if ((desc.getReadMethod() != null) &&       // filter out non-readable properties
+                (desc.getPropertyType() != null) &&  // indexed properties return null from getPropertyType
+                requiredType.isAssignableFrom(desc.getPropertyType()))
+            {
+              PropertyPickerItem item = createItem(desc);
+              filtered.put(item.getPropertyName(), item);
             }
+          }
 
           // TODO: stripped
 //	    if(sel == sel.getFormModel().getTopRADComponent() ) {

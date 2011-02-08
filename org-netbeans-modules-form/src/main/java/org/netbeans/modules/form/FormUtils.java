@@ -52,10 +52,7 @@ import java.lang.reflect.*;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.swing.DefaultComboBoxModel;
-import javax.swing.DefaultListModel;
-import javax.swing.JComponent;
-import javax.swing.ListModel;
+import javax.swing.*;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.TreeModelListener;
 import javax.swing.plaf.ComponentUI;
@@ -612,29 +609,37 @@ public class FormUtils
 
         // default instance successfully created, now copy properties
         PropertyDescriptor[] pds = bInfo.getPropertyDescriptors();
-        for (int i=0; i < pds.length; i++) {
-            Method getter = pds[i].getReadMethod();
-            Method setter = pds[i].getWriteMethod();
-            if (getter != null && setter != null) {
-                Object propertyValue;
-                try {
-                    propertyValue = getter.invoke(bean, new Object[0]);
-                }
-                catch (Exception e1) { // ignore - do not copy this property
-                    continue;
-                }
-                try {
-                    propertyValue = cloneObject(propertyValue, formModel);
-                }
-                catch (Exception e2) { // ignore - do not clone property value
-                }
-                try {
-                    setter.invoke(clone, new Object[] { propertyValue });
-                }
-                catch (Exception e3) { // ignore - do not copy this property
-                }
-            }
+      for (PropertyDescriptor pd : pds)
+      {
+        Method getter = pd.getReadMethod();
+        Method setter = pd.getWriteMethod();
+        if (getter != null && setter != null)
+        {
+          Object propertyValue;
+          try
+          {
+            propertyValue = getter.invoke(bean, new Object[0]);
+          }
+          catch (Exception e1)
+          { // ignore - do not copy this property
+            continue;
+          }
+          try
+          {
+            propertyValue = cloneObject(propertyValue, formModel);
+          }
+          catch (Exception e2)
+          { // ignore - do not clone property value
+          }
+          try
+          {
+            setter.invoke(clone, new Object[]{propertyValue});
+          }
+          catch (Exception e3)
+          { // ignore - do not copy this property
+          }
         }
+      }
 
         return clone;
     }
@@ -708,7 +713,7 @@ public class FormUtils
                 Field ui_Field = JComponent.class.getDeclaredField("ui"); // NOI18N
                 ui_Field.setAccessible(true);
 
-                byte count = ((Byte)getWriteObjCounter_Method.invoke(null, comp)).byteValue();
+                byte count = (Byte) getWriteObjCounter_Method.invoke(null, comp);
                 if (count > 0) { // counter not 0, serialization has not finished
                     count = 0;
                     setWriteObjCounter_Method.invoke(null, comp, count);
@@ -836,7 +841,7 @@ public class FormUtils
 //                }
 
                 // also copy the resource/i18n attributes set on the property
-                copyPropertyAttrs(snProp, tnProp, ResourceSupport.getPropertyAttrNames());
+//                copyPropertyAttrs(snProp, tnProp, ResourceSupport.getPropertyAttrNames());
             }
             catch (Exception ex) { // ignore
                 ErrorManager.getDefault().notify(ErrorManager.INFORMATIONAL, ex);
@@ -1049,9 +1054,9 @@ public class FormUtils
         if ("javax.swing.JPopupMenu".equals(beanClassName)) { // NOI18N
             return 1;
         }
-        for (int i=0; i < forbiddenContainers.length; i++)
-            if (beanClassName.equals(forbiddenContainers[i]))
-                return 0; // cannot be container
+      for (String forbiddenContainer : forbiddenContainers)
+        if (beanClassName.equals(forbiddenContainer))
+          return 0; // cannot be container
 
         Object isContainerValue = null;
         try {
@@ -1068,7 +1073,7 @@ public class FormUtils
         }
 
         if (isContainerValue instanceof Boolean)
-            return ((Boolean)isContainerValue).booleanValue() ? 1 : 0;
+            return (Boolean) isContainerValue ? 1 : 0;
         return -1; // "isContainer" attribute not specified
     }
 
@@ -1197,7 +1202,7 @@ public class FormUtils
                                  Object[] propsClsf)
     {
         Object access = findPropertyClsf(pd.getName(), propsClsf);
-        return access == null ? 0 : ((Integer)access).intValue();
+        return access == null ? 0 : (Integer) access;
     }
 
     static Object[] getPropertiesParentChildDepsClsf(Class beanClass) {
@@ -1238,25 +1243,25 @@ public class FormUtils
         // Set of names of super classes of the bean and interfaces implemented by the bean.
         Set<String> superClasses = superClasses(beanClass);
 
-        for (int i=0; i < table.length; i++) {
-            Object[] clsf = table[i];
-            String refClass = (String)clsf[0];
-            Object subclasses = clsf[1];
+      for (Object[] clsf : table)
+      {
+        String refClass = (String) clsf[0];
+        Object subclasses = clsf[1];
 
-            if (refClass.equals(beanClass.getName())
-                ||
-                (subclasses == CLASS_AND_SUBCLASSES
-                         && superClasses.contains(refClass))
-                ||
-                (subclasses == CLASS_AND_SWING_SUBCLASSES
-                         && superClasses.contains(refClass)
-                         && beanClass.getName().startsWith("javax.swing."))) { // NOI18N
-                if (list == null)
-                    list = new ArrayList<Object>(8);
-                for (int j=2; j < clsf.length; j++)
-                    list.add(clsf[j]);
-            }
+        if (refClass.equals(beanClass.getName())
+            ||
+            (subclasses == CLASS_AND_SUBCLASSES
+                && superClasses.contains(refClass))
+            ||
+            (subclasses == CLASS_AND_SWING_SUBCLASSES
+                && superClasses.contains(refClass)
+                && beanClass.getName().startsWith("javax.swing.")))
+        { // NOI18N
+          if (list == null)
+            list = new ArrayList<Object>(8);
+          list.addAll(Arrays.asList(clsf).subList(2, clsf.length));
         }
+      }
 
         if (list != null) {
             Object[] array = new Object[list.size()];
@@ -1390,9 +1395,7 @@ public class FormUtils
         if ((firstIndex != -1) && (secondIndex != -1) && (firstIndex > secondIndex)) {
             // Move the first one before the second
             RADProperty first = properties[firstIndex];
-            for (int i=firstIndex; i>secondIndex; i--) {
-                properties[i] = properties[i-1];
-            }
+          System.arraycopy(properties, secondIndex, properties, secondIndex + 1, firstIndex - secondIndex);
             properties[secondIndex] = first;
         }
     }
@@ -1413,16 +1416,15 @@ public class FormUtils
         Set<String> superClasses = superClasses(beanClass);
 
         java.util.List<Object> list = new LinkedList<Object>();
-        for (int i=0; i < table.length; i++) {
-            Object[] order = table[i];
-            String refClass = (String)order[0];
+      for (Object[] order : table)
+      {
+        String refClass = (String) order[0];
 
-            if (superClasses.contains(refClass)) {
-                for (int j=1; j<order.length; j++) {
-                    list.add(order[j]);
-                }
-            }
+        if (superClasses.contains(refClass))
+        {
+          list.addAll(Arrays.asList(order).subList(1, order.length));
         }
+      }
         return list.toArray();
     }
 
@@ -1432,8 +1434,8 @@ public class FormUtils
         if (formModel != null) {
             if (editor instanceof FormAwareEditor) {
                 ((FormAwareEditor)editor).updateFormVersionLevel();
-            } else if (value instanceof ResourceValue) {
-                formModel.raiseVersionLevel(FormModel.FormVersion.NB60, FormModel.FormVersion.NB60);
+//            } else if (value instanceof ResourceValue) {
+//                formModel.raiseVersionLevel(FormModel.FormVersion.NB60, FormModel.FormVersion.NB60);
             }
         }
         // this method is not called for binding properties - see BindingProperty.setValue
@@ -1516,30 +1518,39 @@ public class FormUtils
             return null;
 
         List<RADComponent> components = new ArrayList<RADComponent>();
-        for (int i=0; i<nodes.length; i++) {
-            RADComponentCookie radCookie = nodes[i].getCookie(RADComponentCookie.class);
-            if (radCookie != null) {
-                RADComponent metacomp = radCookie.getRADComponent();
-                if ((metacomp instanceof RADVisualComponent)) {
-                    RADVisualComponent visComp = (RADVisualComponent)metacomp;
-                    RADVisualContainer visCont = visComp.getParentContainer();
-                    if ((visCont != null) && javax.swing.JScrollPane.class.isAssignableFrom(visCont.getBeanInstance().getClass())) {
-                        visComp = visCont;
-                        visCont = visCont.getParentContainer();
-                    }
-
-                    if (isVisualInDesigner(visComp) && (visCont!= null)
-                            && (visCont.getLayoutSupport() == null)
-                            && !visComp.isMenuComponent()) {
-                        components.add(visComp);
-                    } else {
-                        return null;
-                    }
-                } else {
-                    return null;
-                }
+      for (Node node : nodes)
+      {
+        RADComponentCookie radCookie = node.getCookie(RADComponentCookie.class);
+        if (radCookie != null)
+        {
+          RADComponent metacomp = radCookie.getRADComponent();
+          if ((metacomp instanceof RADVisualComponent))
+          {
+            RADVisualComponent visComp = (RADVisualComponent) metacomp;
+            RADVisualContainer visCont = visComp.getParentContainer();
+            if ((visCont != null) && JScrollPane.class.isAssignableFrom(visCont.getBeanInstance().getClass()))
+            {
+              visComp = visCont;
+              visCont = visCont.getParentContainer();
             }
+
+            if (isVisualInDesigner(visComp) && (visCont != null)
+                && (visCont.getLayoutSupport() == null)
+                && !visComp.isMenuComponent())
+            {
+              components.add(visComp);
+            }
+            else
+            {
+              return null;
+            }
+          }
+          else
+          {
+            return null;
+          }
         }
+      }
         return components;
     }
 
@@ -1556,9 +1567,10 @@ public class FormUtils
     private static Set<String> superClasses(Class beanClass) {
         Set<String> superClasses = new HashSet<String>();
         Class[] infaces = beanClass.getInterfaces();
-        for (int i=0; i<infaces.length; i++) {
-            superClasses.add(infaces[i].getName());
-        }
+      for (Class inface : infaces)
+      {
+        superClasses.add(inface.getName());
+      }
         Class superClass = beanClass;
         do {
             superClasses.add(superClass.getName());
@@ -1739,28 +1751,44 @@ public class FormUtils
     public static String escapeCharactersInString(String str) {
         StringBuilder buf = new StringBuilder(str.length() * 6); // x -> \u1234
         char[] chars = str.toCharArray();
-        for (int i = 0; i < chars.length; i++) {
-            char c = chars[i];
-            switch (c) {
-            case '\b': buf.append("\\b"); break; // NOI18N
-            case '\t': buf.append("\\t"); break; // NOI18N
-            case '\n': buf.append("\\n"); break; // NOI18N
-            case '\f': buf.append("\\f"); break; // NOI18N
-            case '\r': buf.append("\\r"); break; // NOI18N
-            case '\"': buf.append("\\\""); break; // NOI18N
-            case '\\': buf.append("\\\\"); break; // NOI18N
-            default:
-                if (c >= 0x0020/* && c <= 0x007f*/)
-                    buf.append(c);
-                else {
-                    buf.append("\\u"); // NOI18N
-                    String hex = Integer.toHexString(c);
-                    for (int j = 0; j < 4 - hex.length(); j++)
-                        buf.append('0');
-                    buf.append(hex);
-                }
+      for (char c : chars)
+      {
+        switch (c)
+        {
+          case '\b':
+            buf.append("\\b");
+            break; // NOI18N
+          case '\t':
+            buf.append("\\t");
+            break; // NOI18N
+          case '\n':
+            buf.append("\\n");
+            break; // NOI18N
+          case '\f':
+            buf.append("\\f");
+            break; // NOI18N
+          case '\r':
+            buf.append("\\r");
+            break; // NOI18N
+          case '\"':
+            buf.append("\\\"");
+            break; // NOI18N
+          case '\\':
+            buf.append("\\\\");
+            break; // NOI18N
+          default:
+            if (c >= 0x0020/* && c <= 0x007f*/)
+              buf.append(c);
+            else
+            {
+              buf.append("\\u"); // NOI18N
+              String hex = Integer.toHexString(c);
+              for (int j = 0; j < 4 - hex.length(); j++)
+                buf.append('0');
+              buf.append(hex);
             }
         }
+      }
         return buf.toString();
     }
  

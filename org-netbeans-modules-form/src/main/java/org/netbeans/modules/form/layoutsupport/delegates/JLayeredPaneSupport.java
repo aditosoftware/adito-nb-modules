@@ -287,7 +287,7 @@ public class JLayeredPaneSupport extends AbsoluteLayoutSupport {
                     }
                     @Override
                     public void setTargetValue(Object value) {
-                        layer = ((Integer)value).intValue();
+                        layer = (Integer) value;
                     }
                     @Override
                     public boolean supportsDefaultValue () {

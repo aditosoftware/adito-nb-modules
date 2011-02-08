@@ -151,78 +151,85 @@ public class EventsAction extends CookieAction {
         JMenu eventSetMenu = null;
         boolean eventSetHasHandlers = false;
 
-        for (int i=0; i < events.length; i++) {
-            Event event = events[i];
-            String[] handlers = event.getEventHandlers();
-            JMenuItem jmi = null;
+      for (Event event : events)
+      {
+        String[] handlers = event.getEventHandlers();
+        JMenuItem jmi = null;
 
-            if (handlers.length == 0) {
-                if (!readOnly)
-                    jmi = new EventMenuItem(
-                        MessageFormat.format(
-                            bundle.getString("FMT_CTL_EventNoHandlers"), // NOI18N
-                            new Object[] { event.getName() }),
-                        event,
-                        null);
-            }
-            else if (handlers.length == 1) {
-                jmi = new EventMenuItem(
-                    MessageFormat.format(
-                        bundle.getString("FMT_CTL_EventOneHandler"), // NOI18N
-                        new Object[] { event.getName(), handlers[0] }),
-                    event,
-                    handlers[0]);
-            }
-            else {
-                jmi = new JMenuPlus(MessageFormat.format(
-                    bundle.getString("FMT_CTL_EventMultipleHandlers"), // NOI18N
-                    new Object[] { event.getName() }));
-
-                for (int j=0; j < handlers.length; j++) {
-                    JMenuItem handlerItem = new EventMenuItem(
-                        MessageFormat.format(
-                            bundle.getString("FMT_CTL_HandlerFromMultiple"), // NOI18N
-                            new Object[] { handlers[j] }),
-                        event,
-                        handlers[j]);
-
-                    handlerItem.addActionListener(getMenuItemListener());
-
-                    HelpCtx.setHelpIDString(handlerItem, EventsAction.class.getName());
-                    setBoldFontForMenuText(handlerItem);
-
-                    ((JMenu)jmi).add(handlerItem);
-                }
-            }
-
-            if (jmi != null) {
-                if (event.getEventSetDescriptor() != lastEventSetDesc) {
-                    if (eventSetHasHandlers)
-                        setBoldFontForMenuText(eventSetMenu);
-
-                    String name = event.getEventSetDescriptor().getName();
-                    eventSetMenu = new JMenuPlus(name.substring(0,1).toUpperCase()
-                                                 + name.substring(1));
-                    HelpCtx.setHelpIDString(eventSetMenu,
-                                            EventsAction.class.getName());
-                    addSortedMenuItem(menu, eventSetMenu);
-                    eventSetHasHandlers = false;
-                    lastEventSetDesc = event.getEventSetDescriptor();
-                }
-
-                if (!(jmi instanceof JMenu))
-                    jmi.addActionListener(getMenuItemListener());
-
-                HelpCtx.setHelpIDString(jmi, EventsAction.class.getName());
-
-                if (handlers.length > 0 && !readOnly) {
-                    eventSetHasHandlers = true;
-                    setBoldFontForMenuText(jmi);
-                }
-
-                addSortedMenuItem(eventSetMenu, jmi);
-            }
+        if (handlers.length == 0)
+        {
+          if (!readOnly)
+            jmi = new EventMenuItem(
+                MessageFormat.format(
+                    bundle.getString("FMT_CTL_EventNoHandlers"), // NOI18N
+                    new Object[]{event.getName()}),
+                event,
+                null);
         }
+        else if (handlers.length == 1)
+        {
+          jmi = new EventMenuItem(
+              MessageFormat.format(
+                  bundle.getString("FMT_CTL_EventOneHandler"), // NOI18N
+                  new Object[]{event.getName(), handlers[0]}),
+              event,
+              handlers[0]);
+        }
+        else
+        {
+          jmi = new JMenuPlus(MessageFormat.format(
+              bundle.getString("FMT_CTL_EventMultipleHandlers"), // NOI18N
+              new Object[]{event.getName()}));
+
+          for (String handler : handlers)
+          {
+            JMenuItem handlerItem = new EventMenuItem(
+                MessageFormat.format(
+                    bundle.getString("FMT_CTL_HandlerFromMultiple"), // NOI18N
+                    new Object[]{handler}),
+                event,
+                handler);
+
+            handlerItem.addActionListener(getMenuItemListener());
+
+            HelpCtx.setHelpIDString(handlerItem, EventsAction.class.getName());
+            setBoldFontForMenuText(handlerItem);
+
+            ((JMenu) jmi).add(handlerItem);
+          }
+        }
+
+        if (jmi != null)
+        {
+          if (event.getEventSetDescriptor() != lastEventSetDesc)
+          {
+            if (eventSetHasHandlers)
+              setBoldFontForMenuText(eventSetMenu);
+
+            String name = event.getEventSetDescriptor().getName();
+            eventSetMenu = new JMenuPlus(name.substring(0, 1).toUpperCase()
+                                             + name.substring(1));
+            HelpCtx.setHelpIDString(eventSetMenu,
+                                    EventsAction.class.getName());
+            addSortedMenuItem(menu, eventSetMenu);
+            eventSetHasHandlers = false;
+            lastEventSetDesc = event.getEventSetDescriptor();
+          }
+
+          if (!(jmi instanceof JMenu))
+            jmi.addActionListener(getMenuItemListener());
+
+          HelpCtx.setHelpIDString(jmi, EventsAction.class.getName());
+
+          if (handlers.length > 0 && !readOnly)
+          {
+            eventSetHasHandlers = true;
+            setBoldFontForMenuText(jmi);
+          }
+
+          addSortedMenuItem(eventSetMenu, jmi);
+        }
+      }
 
         if (eventSetHasHandlers)
             setBoldFontForMenuText(eventSetMenu);

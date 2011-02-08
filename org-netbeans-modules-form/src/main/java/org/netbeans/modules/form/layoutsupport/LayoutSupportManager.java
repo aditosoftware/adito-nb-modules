@@ -433,15 +433,17 @@ public final class LayoutSupportManager implements LayoutSupportContext {
             if (layoutDelegate == null) return new Node.PropertySet[0]; // Issue 63916
             propertySets = layoutDelegate.getPropertySets();
 
-            for (int i=0; i < propertySets.length; i++) {
-                Node.Property[] props = propertySets[i].getProperties();
-                for (int j=0; j < props.length; j++)
-                    if (props[j] instanceof FormProperty) {
-                        FormProperty prop = (FormProperty) props[j];
-                        prop.addVetoableChangeListener(getLayoutListener());
-                        prop.addPropertyChangeListener(getLayoutListener());
-                    }
-            }
+          for (Node.PropertySet propertySet : propertySets)
+          {
+            Node.Property[] props = propertySet.getProperties();
+            for (Node.Property prop1 : props)
+              if (prop1 instanceof FormProperty)
+              {
+                FormProperty prop = (FormProperty) prop1;
+                prop.addVetoableChangeListener(getLayoutListener());
+                prop.addPropertyChangeListener(getLayoutListener());
+              }
+          }
         }
         return propertySets;
     }
@@ -451,11 +453,11 @@ public final class LayoutSupportManager implements LayoutSupportContext {
             return ((AbstractLayoutSupport)layoutDelegate).getAllProperties();
 
         java.util.List<Node.Property> allPropsList = new ArrayList<Node.Property>();
-        for (int i=0; i < propertySets.length; i++) {
-            Node.Property[] props = propertySets[i].getProperties();
-            for (int j=0; j < props.length; j++)
-                allPropsList.add(props[j]);
-        }
+      for (Node.PropertySet propertySet : propertySets)
+      {
+        Node.Property[] props = propertySet.getProperties();
+        allPropsList.addAll(Arrays.asList(props));
+      }
 
         Node.Property[] allProperties = new Node.Property[allPropsList.size()];
         allPropsList.toArray(allProperties);
@@ -467,9 +469,9 @@ public final class LayoutSupportManager implements LayoutSupportContext {
             return ((AbstractLayoutSupport)layoutDelegate).getProperty(name);
 
         Node.Property[] properties = getAllProperties();
-        for (int i=0; i < properties.length; i++)
-            if (name.equals(properties[i].getName()))
-                return properties[i];
+      for (Node.Property property : properties)
+        if (name.equals(property.getName()))
+          return property;
 
         return null;
     }
@@ -532,8 +534,7 @@ public final class LayoutSupportManager implements LayoutSupportContext {
 
         layoutDelegate.addComponents(compExps, constraints, index);
 
-        for (int i=0; i < components.length; i++)
-            components[i].resetConstraintsProperties();
+      for (RADVisualComponent component : components) component.resetConstraintsProperties();
 
         layoutDelegate.addComponentsToContainer(getPrimaryContainer(),
                                                 getPrimaryContainerDelegate(),

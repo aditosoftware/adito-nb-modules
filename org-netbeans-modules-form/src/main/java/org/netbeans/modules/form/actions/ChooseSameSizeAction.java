@@ -228,17 +228,19 @@ public class ChooseSameSizeAction extends NodeAction {
             RADComponent rc = (RADComponent)radComponents.get(0);
             RADVisualContainer visCont = ((RADVisualComponent)rc).getParentContainer();
 
-            for (int i = 0; i < radComponents.size(); i++) {
-                RADComponent rcomp = (RADComponent)radComponents.get(i);
-                if (!((RADVisualComponent)rcomp).getParentContainer().equals(visCont)) {
-                    DialogDisplayer.getDefault().notify(
-                            new NotifyDescriptor.Message(
-                                NbBundle.getMessage(ChooseSameSizeAction.class, "TXT_ComponentsNotInOneContainer") //NOI18N
-                            )
-                    );
-                    return;
-                }
+          for (Object radComponent : radComponents)
+          {
+            RADComponent rcomp = (RADComponent) radComponent;
+            if (!((RADVisualComponent) rcomp).getParentContainer().equals(visCont))
+            {
+              DialogDisplayer.getDefault().notify(
+                  new NotifyDescriptor.Message(
+                      NbBundle.getMessage(ChooseSameSizeAction.class, "TXT_ComponentsNotInOneContainer") //NOI18N
+                  )
+              );
+              return;
             }
+          }
                         
             FormModel formModel = rc.getFormModel();
             LayoutModel layoutModel = formModel.getLayoutModel();

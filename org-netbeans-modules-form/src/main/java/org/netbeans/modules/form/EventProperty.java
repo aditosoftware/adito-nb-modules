@@ -139,21 +139,23 @@ class EventProperty extends PropertySupport.ReadWrite {
                     // empty String => remove current handler
                     change = new Change();
                     change.getRemoved().add(current);
-                    for (int i=0; i < handlers.length; i++)
-                        if (!handlers[i].equals(current)) {
-                            newSelectedHandler = handlers[i];
-                            break;
-                        }
+                  for (String handler : handlers)
+                    if (!handler.equals(current))
+                    {
+                      newSelectedHandler = handler;
+                      break;
+                    }
                 }
                 else { // non-empty String => rename current handler
                     newSelectedHandler = (String) val;
 
                     boolean ignore = false;
-                    for (int i=0; i < handlers.length; i++)
-                        if (handlers[i].equals(val)) { // not a new name
-                            ignore = true;
-                            break;
-                        }
+                  for (String handler : handlers)
+                    if (handler.equals(val))
+                    { // not a new name
+                      ignore = true;
+                      break;
+                    }
 
                     if (!ignore) { // do rename
                         change = new Change();
@@ -182,8 +184,7 @@ class EventProperty extends PropertySupport.ReadWrite {
             FormEvents formEvents = getFormEvents();
 
             if (change.hasRemoved()) // some handlers to remove
-                for (Iterator it=change.getRemoved().iterator(); it.hasNext(); )
-                    formEvents.detachEvent(event, (String) it.next());
+              for (Object o : change.getRemoved()) formEvents.detachEvent(event, (String) o);
 
             if (change.hasRenamed()) // some handlers to rename
                 for (int i=0; i < change.getRenamedOldNames().size(); i++) {
@@ -195,19 +196,23 @@ class EventProperty extends PropertySupport.ReadWrite {
 
                         // hack: update all properties using the renamed handler
                         Event[] events = formEvents.getEventsForHandler(newName);
-                        for (int j=0 ; j < events.length; j++) {
-                            Node.Property prop = events[j].getComponent()
-                                                  .getPropertyByName(getName());
-                            if (prop != null && prop != this) {
-                                try {
-                                    if (oldName.equals(prop.getValue()))
-                                        prop.setValue(newName);
-                                }
-                                catch (Exception ex) { // should not happen
-                                    ex.printStackTrace();
-                                }
-                            }
+                      for (Event event1 : events)
+                      {
+                        Node.Property prop = event1.getComponent()
+                            .getPropertyByName(getName());
+                        if (prop != null && prop != this)
+                        {
+                          try
+                          {
+                            if (oldName.equals(prop.getValue()))
+                              prop.setValue(newName);
+                          }
+                          catch (Exception ex)
+                          { // should not happen
+                            ex.printStackTrace();
+                          }
                         }
+                      }
                     }
                     catch (IllegalArgumentException ex) { // name already used
                         ErrorManager.getDefault().notify(ErrorManager.WARNING, ex);
@@ -216,15 +221,18 @@ class EventProperty extends PropertySupport.ReadWrite {
                 }
 
             if (change.hasAdded()) // some handlers to add
-                for (Iterator it=change.getAdded().iterator(); it.hasNext(); ) {
-                    try {
-                        formEvents.attachEvent(event, (String) it.next(), null);
-                    }
-                    catch (IllegalArgumentException ex) { // name already used
-                        ErrorManager.getDefault().notify(ErrorManager.WARNING, ex);
-                        newSelectedHandler = null;
-                    }
+              for (Object o : change.getAdded())
+              {
+                try
+                {
+                  formEvents.attachEvent(event, (String) o, null);
                 }
+                catch (IllegalArgumentException ex)
+                { // name already used
+                  ErrorManager.getDefault().notify(ErrorManager.WARNING, ex);
+                  newSelectedHandler = null;
+                }
+              }
         }
 
         selectedEventHandler = newSelectedHandler;

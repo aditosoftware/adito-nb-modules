@@ -146,9 +146,10 @@ public class SwingLayoutCodeGenerator {
      * @param infos information about components.
      */
     private void fillMap(ComponentInfo[] infos) {
-        for (int counter = 0; counter < infos.length; counter++) {
-            componentIDMap.put(infos[counter].id, infos[counter]);
-        }
+      for (ComponentInfo info : infos)
+      {
+        componentIDMap.put(info.id, info);
+      }
     }
     
     /**
