@@ -177,7 +177,7 @@ public class RADComponentNode extends FormNode
     public Node.PropertySet[] getPropertySets() {
         return component.getProperties();
     }
-    
+
     /* List new types that can be created in this node.
      * @return new types
      */

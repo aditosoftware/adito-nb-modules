@@ -52,6 +52,7 @@ import javax.swing.event.UndoableEditEvent;
 import javax.swing.undo.*;
 
 import org.openide.awt.UndoRedo;
+import org.openide.loaders.*;
 import org.openide.util.Mutex;
 import org.openide.util.MutexException;
 
@@ -138,7 +139,7 @@ public class FormModel
      * @param formClass form base class.
      * @throws java.lang.Exception if anything goes wrong.
      */
-    public void setFormBaseClass(Class<?> formClass) throws Exception {
+    public void setFormBaseClass(Class<?> formClass, DataFolder pModelDataObject) throws Exception {
         if (formBaseClass != null)
             throw new IllegalStateException("Form type already initialized."); // NOI18N
 
@@ -166,7 +167,7 @@ public class FormModel
         if (topComp != null) {
             topRADComponent = topComp;
             topComp.initialize(this);
-            topComp.initInstance(formClass);
+            topComp.initInstance(formClass, pModelDataObject);
             topComp.setInModel(true);
         }
 

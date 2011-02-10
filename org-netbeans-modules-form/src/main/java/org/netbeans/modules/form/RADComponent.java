@@ -44,21 +44,27 @@
 
 package org.netbeans.modules.form;
 
-import java.awt.EventQueue;
+import java.awt.*;
 import java.beans.*;
-import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.*;
 import java.util.*;
-import java.lang.reflect.Method;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.accessibility.Accessible;
 import javax.accessibility.AccessibleContext;
 import javax.swing.*;
 
+import de.adito.aditoweb.core.util.debug.Debug;
+import de.adito.aditoweb.designer.data.IDataProvider;
+import de.adito.aditoweb.designer.filetype.PropertiesCookie;
+import de.adito.aditoweb.filesystem.datamodelfs.access.mechanics.field.IFieldAccess;
+import de.adito.aditoweb.filesystem.datamodelfs.access.model.FieldConst;
 import org.netbeans.api.java.classpath.ClassPath;
 import org.netbeans.modules.form.RADProperty.FakePropertyDescriptor;
 
 import org.openide.*;
+import org.openide.loaders.*;
 import org.openide.nodes.*;
 import org.openide.util.Lookup;
 import org.openide.util.NbBundle;
@@ -128,6 +134,9 @@ public class RADComponent {
     private String storedName; // component name preserved e.g. for remove undo
 
     private boolean valid = true;
+
+    private DataFolder modelDataObject;
+
     // -----------------------------------------------------------------------------
     // Constructors & Initialization
 
@@ -169,7 +178,7 @@ public class RADComponent {
      * @return initialized instance.
      * @throws java.lang.Exception when the instance cannot be initialized.
      */
-    public Object initInstance(Class<? extends Object> beanClass) throws Exception {
+    public Object initInstance(Class<? extends Object> beanClass, DataFolder pModelDataObject) throws Exception {
         if (beanClass == null)
             throw new NullPointerException();
 
@@ -179,11 +188,30 @@ public class RADComponent {
             clearProperties();
         }
 
+        modelDataObject = pModelDataObject;
         this.beanClass = beanClass;
 
         Object bean = createBeanInstance();
         getBeanInfo(); // force BeanInfo creation here - will be needed, may fail
         setBeanInstance(bean);
+
+      // TODO: Test, um die Größe zu laden. Klappt aber nicht.
+        if (beanInstance instanceof JComponent)
+        {
+          JComponent comp = (JComponent) beanInstance;
+          FileObject modelFile = modelDataObject.getPrimaryFile();
+          IFieldAccess<Integer> fA = FieldConst.X.accessField(modelFile);
+          IFieldAccess<Integer> fB = FieldConst.Y.accessField(modelFile);
+          if (fA != null && fB != null)
+            comp.setLocation(fA.getValue(), fB.getValue());
+          fA = FieldConst.WIDTH.accessField(modelFile);
+          fB = FieldConst.HEIGHT.accessField(modelFile);
+          if (fA != null && fB != null)
+          {
+            comp.setSize(fA.getValue(), fB.getValue());
+            comp.setPreferredSize(new Dimension(fA.getValue(), fB.getValue()));
+          }
+        }
 
         return beanInstance;
     }
@@ -645,14 +673,30 @@ public class RADComponent {
         return NO_NEW_TYPES;
     }
 
-    public Node.PropertySet[] getProperties() {
-        if (propertySets == null) {
-            List<Node.PropertySet> propSets = new ArrayList<Node.PropertySet>(5);
-            createPropertySets(propSets);
-            propertySets = new Node.PropertySet[propSets.size()];
-            propSets.toArray(propertySets);
+    public Node.PropertySet[] getProperties()
+    {
+      if (propertySets == null)
+      {
+        List<Node.PropertySet> propSets = new ArrayList<Node.PropertySet>();
+        if (modelDataObject != null)
+        {
+//          return modelDataObject.getNodeDelegate().getPropertySets(); // klappt nicht weil asynchron!
+          PropertiesCookie propsCookie = modelDataObject.getCookie(PropertiesCookie.class);
+          if (propsCookie != null)
+          {
+            Sheet sheet = new Sheet();
+            propsCookie.applyAditoPropertiesSync(sheet);
+            propertySets = sheet.toArray();
+          }
         }
-        return propertySets;
+        if (propertySets == null)
+        {
+          createPropertySets(propSets);
+          propertySets = new Node.PropertySet[propSets.size()];
+          propSets.toArray(propertySets);
+        }
+      }
+      return propertySets;
     }
 
     public RADProperty[] getAllBeanProperties() {

@@ -44,6 +44,8 @@
 
 package org.netbeans.modules.form;
 
+import org.openide.loaders.*;
+
 import java.awt.*;
 
 /**
@@ -76,9 +78,9 @@ public class RADMenuItemComponent extends RADComponent {
 
 
     @Override
-    public Object initInstance(Class<? extends Object> beanClass) throws Exception {
+    public Object initInstance(Class<? extends Object> beanClass, DataFolder pModelDataObject) throws Exception {
         type = recognizeType(beanClass);
-        return super.initInstance(beanClass);
+        return super.initInstance(beanClass, pModelDataObject);
     }
 
     @Override

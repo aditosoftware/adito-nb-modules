@@ -6,8 +6,10 @@ import org.netbeans.modules.form.codestructure.*;
 import org.netbeans.modules.form.layoutdesign.*;
 import org.netbeans.modules.form.layoutdesign.support.SwingLayoutBuilder;
 import org.netbeans.modules.form.layoutsupport.LayoutSupportManager;
+import org.netbeans.modules.form.layoutsupport.delegates.*;
 import org.openide.ErrorManager;
 import org.openide.filesystems.*;
+import org.openide.loaders.*;
 
 import javax.swing.*;
 import java.lang.reflect.Method;
@@ -71,7 +73,7 @@ public class AditoPersistenceManager extends PersistenceManager
     try
     {
       Class<JPanel> formBaseClass = JPanel.class;
-      formModel.setFormBaseClass(formBaseClass);
+      formModel.setFormBaseClass(formBaseClass, DataFolder.findFolder(pInfo.getModelRoot()));
       // Force creation of the default instance in the correct L&F context
       BeanSupport.getDefaultInstance(formBaseClass);
     }
@@ -86,8 +88,8 @@ public class AditoPersistenceManager extends PersistenceManager
     if (topComp != null) // load the main form component
       _loadComponent(pInfo, pInfo.getModelRoot(), topComp, null);
 
-    FormEditor.updateProjectForNaturalLayout(formModel);
-    formModel.setFreeDesignDefaultLayout(true);
+//    FormEditor.updateProjectForNaturalLayout(formModel);
+//    formModel.setFreeDesignDefaultLayout(true);
   }
 
 
@@ -120,7 +122,7 @@ public class AditoPersistenceManager extends PersistenceManager
 
     // load subcomponents
     RADComponent[] childComponents;
-    FileObject childModels = pInfo.getModelRoot().getFileObject(FieldConst.CHILDDATAMODELS.getName());
+    FileObject childModels = pModelComp.getFileObject(FieldConst.CHILDDATAMODELS.getName());
     if (childModels != null)
     {
       List<RADComponent> list = new ArrayList<RADComponent>();
@@ -170,6 +172,7 @@ public class AditoPersistenceManager extends PersistenceManager
         // initialize layout support from restored code
         try
         {
+//          layoutSupport.setLayoutDelegate(new NullLayoutSupport(), false); // TODO: muss anders sein - nur zum Test
           layoutInitialized = layoutSupport.prepareLayoutDelegate(false, true);
         }
         catch (Exception ex)
@@ -497,7 +500,7 @@ public class AditoPersistenceManager extends PersistenceManager
       }
       newComponent.initialize(pInfo.getFormModel());
       newComponent.setStoredName(compName);
-      newComponent.initInstance(compClass);
+      newComponent.initInstance(compClass, DataFolder.findFolder(pChildModel));
       newComponent.setInModel(true);
     }
     catch (Exception ex)

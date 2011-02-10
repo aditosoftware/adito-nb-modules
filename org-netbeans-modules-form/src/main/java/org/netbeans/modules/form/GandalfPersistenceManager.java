@@ -421,7 +421,7 @@ public class GandalfPersistenceManager extends PersistenceManager {
                     }
                 }
                 if (formBaseClass != null) {
-                    formModel.setFormBaseClass(formBaseClass);
+                    formModel.setFormBaseClass(formBaseClass, null);
                     // Force creation of the default instance in the correct L&F context
                     BeanSupport.getDefaultInstance(formBaseClass);
                 }
@@ -450,7 +450,7 @@ public class GandalfPersistenceManager extends PersistenceManager {
 
             if (substClass != null) { // succeeded, there is a substitute class
                 try {
-                    formModel.setFormBaseClass(substClass);
+                    formModel.setFormBaseClass(substClass, null);
 
                     if (!underTest) { // print a warning about using fallback type (OK for tests)
                         String msg = FormUtils.getFormattedBundleString(
@@ -853,7 +853,7 @@ public class GandalfPersistenceManager extends PersistenceManager {
             }
             newComponent.initialize(formModel);
             newComponent.setStoredName(compName);
-            newComponent.initInstance(compClass);
+            newComponent.initInstance(compClass, null);
             newComponent.setInModel(true);
         }
         catch (Exception ex) {
