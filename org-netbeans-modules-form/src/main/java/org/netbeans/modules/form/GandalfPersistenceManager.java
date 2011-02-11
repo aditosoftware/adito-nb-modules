@@ -2911,28 +2911,28 @@ public class GandalfPersistenceManager extends PersistenceManager {
             eventNames[i] = getEventIdName(eventListener, eventName, paramTypes);
         }
 
-        FormEvents formEvents = formModel.getFormEvents();
-
-        Event[] events = metacomp.getEvents(eventNames);
-        for (int i=0; i < eventNodes.length; i++) {
-            if (eventNames[i] == null)
-                continue;
-
-            Event event = events[i];
-            if (event == null)
-                continue; // [uknown event error - should be reported!]
-
-            String eventHandlers = getAttribute(eventNodes[i], ATTR_EVENT_HANDLER);
-            StringTokenizer tok = new StringTokenizer(eventHandlers, ","); // NOI18N
-            while (tok.hasMoreTokens()) {
-                try {
-                    formEvents.attachEvent(event, tok.nextToken(), null);
-                }
-                catch (IllegalArgumentException ex) {
-                    // [incompatible handler error - should be reported!]
-                }
-            }
-        }
+//        FormEvents formEvents = formModel.getFormEvents();
+//
+//        Event[] events =  new Event[0]; //metacomp.getEvents(eventNames);
+//        for (int i=0; i < eventNodes.length; i++) {
+//            if (eventNames[i] == null)
+//                continue;
+//
+//            Event event = events[i];
+//            if (event == null)
+//                continue; // [uknown event error - should be reported!]
+//
+//            String eventHandlers = getAttribute(eventNodes[i], ATTR_EVENT_HANDLER);
+//            StringTokenizer tok = new StringTokenizer(eventHandlers, ","); // NOI18N
+//            while (tok.hasMoreTokens()) {
+//                try {
+//                    formEvents.attachEvent(event, tok.nextToken(), null);
+//                }
+//                catch (IllegalArgumentException ex) {
+//                    // [incompatible handler error - should be reported!]
+//                }
+//            }
+//        }
     }
 
     private static String getEventIdName(String eventListener,
@@ -3787,7 +3787,7 @@ public class GandalfPersistenceManager extends PersistenceManager {
             saveSyntheticProperties(component, buf, indent);
 
         // 4. Events
-        saveEvents(component.getKnownEvents(), buf, indent);
+//        saveEvents(new Event[0]/*component.getKnownEvents()*/, buf, indent);
 
         // 5. Aux Values
         Map<String,Object> auxValues = component.getAuxValues();
@@ -4408,68 +4408,68 @@ public class GandalfPersistenceManager extends PersistenceManager {
         }
     }
 
-    private void saveEvents(Event[] events, StringBuffer buf, String indent) {
-        boolean anyEvent = false;
-        String indent2 = null;
-        StringBuffer strbuf;
-
-      for (Event event : events)
-      {
-        if (!event.hasEventHandlers())
-          continue;
-
-        if (!anyEvent)
-        {
-          buf.append(indent);
-          addElementOpen(buf, XML_EVENTS);
-          indent2 = indent + ONE_INDENT;
-          anyEvent = true;
-        }
-
-        strbuf = new StringBuffer(50);
-        Class[] params = event.getListenerMethod().getParameterTypes();
-        for (int j = 0; j < params.length; j++)
-        {
-          strbuf.append(params[j].getName());
-          if (j + 1 < params.length)
-            strbuf.append(","); // NOI18N
-        }
-        String paramString = strbuf.toString();
-
-        strbuf = new StringBuffer(50);
-        String[] handlers = event.getEventHandlers();
-        for (int j = 0; j < handlers.length; j++)
-        {
-          strbuf.append(handlers[j]);
-          if (j + 1 < handlers.length)
-            strbuf.append(","); // NOI18N
-        }
-        String handlerString = strbuf.toString();
-
-        buf.append(indent2);
-        addLeafElementOpenAttr(
-            buf,
-            XML_EVENT,
-            new String[]{
-                ATTR_EVENT_NAME,
-                ATTR_EVENT_LISTENER,
-                ATTR_EVENT_PARAMS,
-                ATTR_EVENT_HANDLER
-            },
-            new String[]{
-                event.getListenerMethod().getName(),
-                event.getListenerMethod().getDeclaringClass().getName(),
-                paramString,
-                handlerString
-            }
-        );
-      }
-
-        if (anyEvent) {
-            buf.append(indent);
-            addElementClose(buf, XML_EVENTS);
-        }
-    }
+//    private void saveEvents(Event[] events, StringBuffer buf, String indent) {
+//        boolean anyEvent = false;
+//        String indent2 = null;
+//        StringBuffer strbuf;
+//
+//      for (Event event : events)
+//      {
+//        if (!event.hasEventHandlers())
+//          continue;
+//
+//        if (!anyEvent)
+//        {
+//          buf.append(indent);
+//          addElementOpen(buf, XML_EVENTS);
+//          indent2 = indent + ONE_INDENT;
+//          anyEvent = true;
+//        }
+//
+//        strbuf = new StringBuffer(50);
+//        Class[] params = event.getListenerMethod().getParameterTypes();
+//        for (int j = 0; j < params.length; j++)
+//        {
+//          strbuf.append(params[j].getName());
+//          if (j + 1 < params.length)
+//            strbuf.append(","); // NOI18N
+//        }
+//        String paramString = strbuf.toString();
+//
+//        strbuf = new StringBuffer(50);
+//        String[] handlers = event.getEventHandlers();
+//        for (int j = 0; j < handlers.length; j++)
+//        {
+//          strbuf.append(handlers[j]);
+//          if (j + 1 < handlers.length)
+//            strbuf.append(","); // NOI18N
+//        }
+//        String handlerString = strbuf.toString();
+//
+//        buf.append(indent2);
+//        addLeafElementOpenAttr(
+//            buf,
+//            XML_EVENT,
+//            new String[]{
+//                ATTR_EVENT_NAME,
+//                ATTR_EVENT_LISTENER,
+//                ATTR_EVENT_PARAMS,
+//                ATTR_EVENT_HANDLER
+//            },
+//            new String[]{
+//                event.getListenerMethod().getName(),
+//                event.getListenerMethod().getDeclaringClass().getName(),
+//                paramString,
+//                handlerString
+//            }
+//        );
+//      }
+//
+//        if (anyEvent) {
+//            buf.append(indent);
+//            addElementClose(buf, XML_EVENTS);
+//        }
+//    }
 
     private void saveAuxValues(Map<String,Object> auxValues, StringBuffer buf, String indent) {
       for (Map.Entry<String, Object> entry : auxValues.entrySet())

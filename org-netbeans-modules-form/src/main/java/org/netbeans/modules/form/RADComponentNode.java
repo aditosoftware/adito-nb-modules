@@ -213,16 +213,16 @@ public class RADComponentNode extends FormNode
                     actions.add(SystemAction.get(TestAction.class));
                     actions.add(null);
                 }
-                Event[] events = component.getKnownEvents();
-              for (Event event : events)
-              {
-                if (event.hasEventHandlers())
-                {
-                  actions.add(SystemAction.get(EventsAction.class));
-                  actions.add(null);
-                  break;
-                }
-              }
+//                Event[] events = new Event[0]; //component.getKnownEvents();
+//              for (Event event : events)
+//              {
+//                if (event.hasEventHandlers())
+//                {
+//                  actions.add(SystemAction.get(EventsAction.class));
+//                  actions.add(null);
+//                  break;
+//                }
+//              }
                 
                 actions.add(SystemAction.get(CopyAction.class));
             } else {
@@ -237,8 +237,8 @@ public class RADComponentNode extends FormNode
                 } else {
                     actions.add(SystemAction.get(TestAction.class));
                 }
-                actions.add(SystemAction.get(BindAction.class));
-                actions.add(SystemAction.get(EventsAction.class));
+//                actions.add(SystemAction.get(BindAction.class));
+//                actions.add(SystemAction.get(EventsAction.class));
                 actions.add(null);
                 
                 java.util.List actionProps = component.getActionProperties();
@@ -555,7 +555,7 @@ public class RADComponentNode extends FormNode
     
     /** Cut this node to the clipboard.
      *
-     * @return {@link Transferable} with one flavor, {@link RAD_COMPONENT_COPY_FLAVOR }
+     * @return {@link Transferable} with one flavor, RAD_COMPONENT_COPY_FLAVOR
      * @throws java.io.IOException if it could not cut
      */
     @Override

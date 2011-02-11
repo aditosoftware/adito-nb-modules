@@ -108,14 +108,14 @@ public class RADComponent {
     private RADProperty[] beanProperties1;
     private RADProperty[] beanProperties2;
 //    private BindingProperty[][] bindingProperties; // TODO: stripped
-    private EventProperty[] eventProperties;
+//    private EventProperty[] eventProperties;
     private Map<Object,RADProperty[]> otherProperties;
     private List actionProperties;
     private MetaAccessibleContext accessibilityData;
     private FormProperty[] accessibilityProperties;
 
     private RADProperty[] knownBeanProperties;
-    private Event[] knownEvents; // must be grouped by EventSetDescriptor
+//    private Event[] knownEvents; // must be grouped by EventSetDescriptor
 
     private PropertyChangeListener propertyListener;
 
@@ -196,27 +196,32 @@ public class RADComponent {
         setBeanInstance(bean);
 
       // TODO: Test, um die Größe zu laden. Klappt aber nicht.
-        if (beanInstance instanceof JComponent)
-        {
-          JComponent comp = (JComponent) beanInstance;
-          FileObject modelFile = modelDataObject.getPrimaryFile();
-          IFieldAccess<Integer> fA = FieldConst.X.accessField(modelFile);
-          IFieldAccess<Integer> fB = FieldConst.Y.accessField(modelFile);
-          if (fA != null && fB != null)
-            comp.setLocation(fA.getValue(), fB.getValue());
-          fA = FieldConst.WIDTH.accessField(modelFile);
-          fB = FieldConst.HEIGHT.accessField(modelFile);
-          if (fA != null && fB != null)
-          {
-            comp.setSize(fA.getValue(), fB.getValue());
-            comp.setPreferredSize(new Dimension(fA.getValue(), fB.getValue()));
-          }
-        }
+//        if (beanInstance instanceof JComponent)
+//        {
+//          JComponent comp = (JComponent) beanInstance;
+//          FileObject modelFile = modelDataObject.getPrimaryFile();
+//          IFieldAccess<Integer> fA = FieldConst.X.accessField(modelFile);
+//          IFieldAccess<Integer> fB = FieldConst.Y.accessField(modelFile);
+//          if (fA != null && fB != null)
+//            comp.setLocation(fA.getValue(), fB.getValue());
+//          fA = FieldConst.WIDTH.accessField(modelFile);
+//          fB = FieldConst.HEIGHT.accessField(modelFile);
+//          if (fA != null && fB != null)
+//          {
+//            comp.setSize(fA.getValue(), fB.getValue());
+//            comp.setPreferredSize(new Dimension(fA.getValue(), fB.getValue()));
+//          }
+//        }
 
         return beanInstance;
     }
 
-    /** Sets the bean instance represented by this meta component.
+  protected final DataFolder getModelDataObject()
+  {
+    return modelDataObject;
+  }
+
+  /** Sets the bean instance represented by this meta component.
      * The meta component is fully initialized after this method returns.
      * @param beanInstance the bean to be represented by this meta component
      */
@@ -522,7 +527,7 @@ public class RADComponent {
 
         resourceComponentRename(oldName, name);
 
-        renameDefaultEventHandlers(oldName, name);
+//        renameDefaultEventHandlers(oldName, name);
         // [possibility of renaming default event handlers should be probably
         // configurable in options]
 
@@ -584,44 +589,44 @@ public class RADComponent {
         storedName = name;
     }
 
-    private void renameDefaultEventHandlers(String oldComponentName,
-                                            String newComponentName)
-    {
-        boolean renamed = false; // whether any handler was renamed
-        FormEvents formEvents = null;
-
-        Event[] events = getKnownEvents();
-      for (Event event : events)
-      {
-        String[] handlers = event.getEventHandlers();
-        for (int j = 0; j < handlers.length; j++)
-        {
-          String handlerName = handlers[j];
-          int idx = handlerName.indexOf(oldComponentName);
-          if (idx >= 0)
-          {
-            if (formEvents == null)
-              formEvents = getFormModel().getFormEvents();
-            String newHandlerName = formEvents.findFreeHandlerName(
-                handlerName.substring(0, idx)
-                    + newComponentName
-                    + handlerName.substring(idx + oldComponentName.length())
-            );
-            formEvents.renameEventHandler(handlerName, newHandlerName);
-            EventProperty prop = (EventProperty) event.getComponent().getPropertyByName(event.getId());
-            if (prop != null)
-            {
-              prop.resetSelectedEventHandler(handlerName);
-            }
-            renamed = true;
-          }
-        }
-      }
-
-        if (renamed && getNodeReference() != null) {
-            getNodeReference().fireComponentPropertiesChange();
-        }
-    }
+//    private void renameDefaultEventHandlers(String oldComponentName,
+//                                            String newComponentName)
+//    {
+//        boolean renamed = false; // whether any handler was renamed
+//        FormEvents formEvents = null;
+//
+//        Event[] events = getKnownEvents();
+//      for (Event event : events)
+//      {
+//        String[] handlers = event.getEventHandlers();
+//        for (int j = 0; j < handlers.length; j++)
+//        {
+//          String handlerName = handlers[j];
+//          int idx = handlerName.indexOf(oldComponentName);
+//          if (idx >= 0)
+//          {
+//            if (formEvents == null)
+//              formEvents = getFormModel().getFormEvents();
+//            String newHandlerName = formEvents.findFreeHandlerName(
+//                handlerName.substring(0, idx)
+//                    + newComponentName
+//                    + handlerName.substring(idx + oldComponentName.length())
+//            );
+//            formEvents.renameEventHandler(handlerName, newHandlerName);
+//            EventProperty prop = (EventProperty) event.getComponent().getPropertyByName(event.getId());
+//            if (prop != null)
+//            {
+//              prop.resetSelectedEventHandler(handlerName);
+//            }
+//            renamed = true;
+//          }
+//        }
+//      }
+//
+//        if (renamed && getNodeReference() != null) {
+//            getNodeReference().fireComponentPropertiesChange();
+//        }
+//    }
 
     /** Allows to add an auxiliary <name, value> pair, which is persistent
      * in Gandalf. The current value can be obtained using
@@ -678,17 +683,18 @@ public class RADComponent {
       if (propertySets == null)
       {
         List<Node.PropertySet> propSets = new ArrayList<Node.PropertySet>();
-        if (modelDataObject != null)
-        {
-//          return modelDataObject.getNodeDelegate().getPropertySets(); // klappt nicht weil asynchron!
-          PropertiesCookie propsCookie = modelDataObject.getCookie(PropertiesCookie.class);
-          if (propsCookie != null)
-          {
-            Sheet sheet = new Sheet();
-            propsCookie.applyAditoPropertiesSync(sheet);
-            propertySets = sheet.toArray();
-          }
-        }
+        // TODO: propertySheet     !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+//        if (modelDataObject != null)
+//        {
+////          return modelDataObject.getNodeDelegate().getPropertySets(); // klappt nicht weil asynchron!
+//          PropertiesCookie propsCookie = modelDataObject.getCookie(PropertiesCookie.class);
+//          if (propsCookie != null)
+//          {
+//            Sheet sheet = new Sheet();
+//            propsCookie.applyAditoPropertiesSync(sheet);
+//            propertySets = sheet.toArray();
+//          }
+//        }
         if (propertySets == null)
         {
           createPropertySets(propSets);
@@ -786,11 +792,11 @@ public class RADComponent {
         return beanProperties2;
     }
 
-    EventProperty[] getEventProperties() {
-        if (eventProperties == null)
-            createEventProperties();
-        return eventProperties;
-    }
+//    EventProperty[] getEventProperties() {
+//        if (eventProperties == null)
+//            createEventProperties();
+//        return eventProperties;
+//    }
 
     List getActionProperties() {
         if (actionProperties == null) {
@@ -800,12 +806,24 @@ public class RADComponent {
     }
 
     protected <T> T getPropertyByName(String name, Class<? extends T> propertyType, boolean fromAll) {
+//      if (modelDataObject != null)
+//        for (Node.PropertySet propertySet : getProperties())
+//        {
+//          for (Node.Property property : propertySet.getProperties())
+//          {
+//            Class<?> propType = property.getValueType();
+//            String propName = property.getName();
+//            if (propName!= null && propType != null && propName.equals(name) && propType.equals(propertyType))
+//              return (T)property;
+//          }
+//        }
+
         Node.Property prop = nameToProperty.get(name);
         if (prop == null && fromAll) {
             if (beanProperties1 == null && !name.startsWith("$")) // NOI18N
                 createBeanProperties();
-            if (eventProperties == null && name.startsWith("$")) // NOI18N
-                createEventProperties();
+//            if (eventProperties == null && name.startsWith("$")) // NOI18N
+//                createEventProperties();
             if (accessibilityProperties == null)
                 createAccessibilityProperties();
 
@@ -950,173 +968,173 @@ public class RADComponent {
         return properties;
     }
 
-    public Event getEvent(String name) {
-        Object prop = nameToProperty.get(name);
-        if (prop == null && eventProperties == null) {
-            createEventProperties();
-            prop = nameToProperty.get(name);
-        }
-        return prop instanceof EventProperty ?
-               ((EventProperty)prop).getEvent() : null;
-    }
+//    public Event getEvent(String name) {
+//        Object prop = nameToProperty.get(name);
+//        if (prop == null && eventProperties == null) {
+//            createEventProperties();
+//            prop = nameToProperty.get(name);
+//        }
+//        return prop instanceof EventProperty ?
+//               ((EventProperty)prop).getEvent() : null;
+//    }
 
-    public Event[] getEvents(String[] eventNames) {
-        Event[] events = new Event[eventNames.length];
-        EventSetDescriptor[] eventSets = null;
-
-        boolean empty = knownEvents == null;
-        int validCount = 0;
-        List<Event> newEvents = null;
-
-        int setIndex = 0;
-        int methodIndex = 0;
-
-        for (int i=0; i < eventNames.length; i++) {
-            String name = eventNames[i];
-            if (name == null)
-                continue;
-
-            boolean fullName = name.startsWith("$"); // NOI18N
-
-            Event event;
-            if (!empty) {
-                Object obj = nameToProperty.get(name);
-                event = obj instanceof EventProperty ?
-                        ((EventProperty)obj).getEvent() : null;
-            }
-            else event = null;
-
-            if (event == null) {
-                if (eventSets == null) {
-                    eventSets = getBeanInfo().getEventSetDescriptors();
-                    if (eventSets.length == 0)
-                        break;
-                }
-                int j = setIndex;
-                do {
-                    Method[] methods = eventSets[j].getListenerMethods();
-                    if (methods.length > 0) {
-                        int k = methodIndex;
-                        do {
-                            String eventFullId =
-                                FormEvents.getEventIdName(methods[k]);
-                            String eventId = fullName ?
-                                eventFullId : methods[k].getName();
-                            if (eventId.equals(name)) {
-                                event = createEventProperty(eventFullId,
-                                                            eventSets[j],
-                                                            methods[k])
-                                                .getEvent();
-                                if (!empty) {
-                                    if (newEvents == null)
-                                        newEvents = new ArrayList<Event>();
-                                    newEvents.add(event);
-                                }
-                                methodIndex = k + 1;
-                                break;
-                            }
-                            k++;
-                            if (k == methods.length)
-                                k = 0;
-                        }
-                        while (k != methodIndex);
-                    }
-
-                    if (event != null) {
-                        if (methodIndex == methods.length) {
-                            methodIndex = 0;
-                            setIndex = j + 1; // will continue in new set
-                            if (setIndex == eventSets.length
-                                            && i+1 < eventNames.length)
-                                setIndex = 0; // go again from beginning
-                        }
-                        else setIndex = j; // will continue in the same set
-                        break;
-                    }
-
-                    j++;
-                    if (j == eventSets.length)
-                        j = 0;
-                    methodIndex = 0;
-                }
-                while (j != setIndex);
-            }
-            if (event != null) {
-                events[i] = event;
-                validCount++;
-            }
-        }
-
-        if (empty) {
-            if (validCount == events.length)
-                knownEvents = events;
-            else if (validCount > 0) {
-                knownEvents = new Event[validCount];
-                for (int i=0,j=0; i < events.length; i++)
-                    if (events[i] != null)
-                        knownEvents[j++] = events[i];
-            }
-        }
-        else if (newEvents != null) { // just for consistency, should not occur
-            Event[] known = new Event[knownEvents.length + newEvents.size()];
-            System.arraycopy(knownEvents, 0, known, 0, knownEvents.length);
-            for (int i=0; i < newEvents.size(); i++)
-                known[i + knownEvents.length] = newEvents.get(i);
-
-            knownEvents = known;
-        }
-
-        return events;
-    }
+//    public Event[] getEvents(String[] eventNames) {
+//        Event[] events = new Event[eventNames.length];
+//        EventSetDescriptor[] eventSets = null;
+//
+//        boolean empty = knownEvents == null;
+//        int validCount = 0;
+//        List<Event> newEvents = null;
+//
+//        int setIndex = 0;
+//        int methodIndex = 0;
+//
+//        for (int i=0; i < eventNames.length; i++) {
+//            String name = eventNames[i];
+//            if (name == null)
+//                continue;
+//
+//            boolean fullName = name.startsWith("$"); // NOI18N
+//
+//            Event event;
+//            if (!empty) {
+//                Object obj = nameToProperty.get(name);
+//                event = obj instanceof EventProperty ?
+//                        ((EventProperty)obj).getEvent() : null;
+//            }
+//            else event = null;
+//
+//            if (event == null) {
+//                if (eventSets == null) {
+//                    eventSets = getBeanInfo().getEventSetDescriptors();
+//                    if (eventSets.length == 0)
+//                        break;
+//                }
+//                int j = setIndex;
+//                do {
+//                    Method[] methods = eventSets[j].getListenerMethods();
+//                    if (methods.length > 0) {
+//                        int k = methodIndex;
+//                        do {
+//                            String eventFullId =
+//                                FormEvents.getEventIdName(methods[k]);
+//                            String eventId = fullName ?
+//                                eventFullId : methods[k].getName();
+//                            if (eventId.equals(name)) {
+//                                event = createEventProperty(eventFullId,
+//                                                            eventSets[j],
+//                                                            methods[k])
+//                                                .getEvent();
+//                                if (!empty) {
+//                                    if (newEvents == null)
+//                                        newEvents = new ArrayList<Event>();
+//                                    newEvents.add(event);
+//                                }
+//                                methodIndex = k + 1;
+//                                break;
+//                            }
+//                            k++;
+//                            if (k == methods.length)
+//                                k = 0;
+//                        }
+//                        while (k != methodIndex);
+//                    }
+//
+//                    if (event != null) {
+//                        if (methodIndex == methods.length) {
+//                            methodIndex = 0;
+//                            setIndex = j + 1; // will continue in new set
+//                            if (setIndex == eventSets.length
+//                                            && i+1 < eventNames.length)
+//                                setIndex = 0; // go again from beginning
+//                        }
+//                        else setIndex = j; // will continue in the same set
+//                        break;
+//                    }
+//
+//                    j++;
+//                    if (j == eventSets.length)
+//                        j = 0;
+//                    methodIndex = 0;
+//                }
+//                while (j != setIndex);
+//            }
+//            if (event != null) {
+//                events[i] = event;
+//                validCount++;
+//            }
+//        }
+//
+//        if (empty) {
+//            if (validCount == events.length)
+//                knownEvents = events;
+//            else if (validCount > 0) {
+//                knownEvents = new Event[validCount];
+//                for (int i=0,j=0; i < events.length; i++)
+//                    if (events[i] != null)
+//                        knownEvents[j++] = events[i];
+//            }
+//        }
+//        else if (newEvents != null) { // just for consistency, should not occur
+//            Event[] known = new Event[knownEvents.length + newEvents.size()];
+//            System.arraycopy(knownEvents, 0, known, 0, knownEvents.length);
+//            for (int i=0; i < newEvents.size(); i++)
+//                known[i + knownEvents.length] = newEvents.get(i);
+//
+//            knownEvents = known;
+//        }
+//
+//        return events;
+//    }
 
     /** @return all events of the component grouped by EventSetDescriptor
      */
-    public Event[] getAllEvents() {
-        if (knownEvents == null || eventProperties == null) {
-            if (eventProperties == null)
-                createEventProperties();
-            else {
-                knownEvents = new Event[eventProperties.length];
-                for (int i=0; i < eventProperties.length; i++)
-                    knownEvents[i] = eventProperties[i].getEvent();
-            }
-        }
-
-        return knownEvents;
-    }
+//    public Event[] getAllEvents() {
+//        if (knownEvents == null || eventProperties == null) {
+//            if (eventProperties == null)
+//                createEventProperties();
+//            else {
+//                knownEvents = new Event[eventProperties.length];
+//                for (int i=0; i < eventProperties.length; i++)
+//                    knownEvents[i] = eventProperties[i].getEvent();
+//            }
+//        }
+//
+//        return knownEvents;
+//    }
 
     // Note: events must be grouped by EventSetDescriptor
-    public Event[] getKnownEvents() {
-        return knownEvents != null ? knownEvents : FormEvents.NO_EVENTS;
-    }
+//    public Event[] getKnownEvents() {
+//        return knownEvents != null ? knownEvents : FormEvents.NO_EVENTS;
+//    }
 
     // ---------
     // events
 
-    Event getDefaultEvent() {
-        int eventIndex = getBeanInfo().getDefaultEventIndex();
-        if (eventIndex < getEventProperties().length && eventIndex >= 0) {
-            return eventProperties[eventIndex].getEvent();
-        } else {
-          for (EventProperty eventProperty : eventProperties)
-          {
-            Event e = eventProperty.getEvent();
-            if ("actionPerformed".equals(e.getListenerMethod().getName()) // NOI18N
-                && !(getBeanInstance() instanceof JMenu))
-            {
-              return e;
-            }
-          }
-        }
-        return null;
-    }
+//    Event getDefaultEvent() {
+//        int eventIndex = getBeanInfo().getDefaultEventIndex();
+//        if (eventIndex < getEventProperties().length && eventIndex >= 0) {
+//            return eventProperties[eventIndex].getEvent();
+//        } else {
+//          for (EventProperty eventProperty : eventProperties)
+//          {
+//            Event e = eventProperty.getEvent();
+//            if ("actionPerformed".equals(e.getListenerMethod().getName()) // NOI18N
+//                && !(getBeanInstance() instanceof JMenu))
+//            {
+//              return e;
+//            }
+//          }
+//        }
+//        return null;
+//    }
 
-    void attachDefaultEvent() {
-        Event event = getDefaultEvent();
-        if (event != null) {
-            getFormModel().getFormEvents().attachEvent(event, null, null);
-        }
-    }
+//    void attachDefaultEvent() {
+//        Event event = getDefaultEvent();
+//        if (event != null) {
+//            getFormModel().getFormEvents().attachEvent(event, null, null);
+//        }
+//    }
 
     // -----------------------------------------------------------------------------
     // Properties
@@ -1131,8 +1149,8 @@ public class RADComponent {
         beanProperties1 = null;
         beanProperties2 = null;
         knownBeanProperties = null;
-        eventProperties = null;
-        knownEvents = null;
+//        eventProperties = null;
+//        knownEvents = null;
         accessibilityData = null;
         accessibilityProperties = null;
     }
@@ -1223,19 +1241,19 @@ public class RADComponent {
 //                }
 //            }
 
-            ps = new Node.PropertySet(
-                    "events", // NOI18N
-                    bundle.getString("CTL_EventsTab"), // NOI18N
-                    bundle.getString("CTL_EventsTabHint")) // NOI18N
-            {
-                @Override
-                public Node.Property[] getProperties() {
-                    return getEventProperties();
-                }
-            };
+//            ps = new Node.PropertySet(
+//                    "events", // NOI18N
+//                    bundle.getString("CTL_EventsTab"), // NOI18N
+//                    bundle.getString("CTL_EventsTabHint")) // NOI18N
+//            {
+//                @Override
+//                public Node.Property[] getProperties() {
+//                    return getEventProperties();
+//                }
+//            };
 
-            ps.setValue("tabName", bundle.getString("CTL_EventsTab")); // NOI18N
-            propSets.add(ps);
+//            ps.setValue("tabName", bundle.getString("CTL_EventsTab")); // NOI18N
+//            propSets.add(ps);
 
         }
 
@@ -1455,36 +1473,36 @@ public class RADComponent {
 //        }
 //    }
 
-    private void createEventProperties() {
-        EventSetDescriptor[] eventSets = getBeanInfo().getEventSetDescriptors();
-
-        List<EventProperty> eventPropList = new ArrayList<EventProperty>(eventSets.length * 5);
-
-      for (EventSetDescriptor desc : eventSets)
-      {
-        Method[] methods = desc.getListenerMethods();
-        for (Method method : methods)
-        {
-          String eventId = FormEvents.getEventIdName(method);
-          Object prop = nameToProperty.get(eventId);
-          assert (prop == null) || (prop instanceof EventProperty);
-          EventProperty eventProp = (EventProperty) prop;
-          if (eventProp == null)
-            eventProp = createEventProperty(eventId, desc, method);
-          eventPropList.add(eventProp);
-        }
-      }
-
-        EventProperty[] eventProps = new EventProperty[eventPropList.size()];
-        eventPropList.toArray(eventProps);
-
-        knownEvents = new Event[eventProps.length];
-        for (int i=0; i < eventProps.length; i++)
-            knownEvents[i] = eventProps[i].getEvent();
-
-        FormUtils.sortProperties(eventProps);
-        eventProperties = eventProps;
-    }
+//    private void createEventProperties() {
+//        EventSetDescriptor[] eventSets = getBeanInfo().getEventSetDescriptors();
+//
+//        List<EventProperty> eventPropList = new ArrayList<EventProperty>(eventSets.length * 5);
+//
+//      for (EventSetDescriptor desc : eventSets)
+//      {
+//        Method[] methods = desc.getListenerMethods();
+//        for (Method method : methods)
+//        {
+//          String eventId = FormEvents.getEventIdName(method);
+//          Object prop = nameToProperty.get(eventId);
+//          assert (prop == null) || (prop instanceof EventProperty);
+//          EventProperty eventProp = (EventProperty) prop;
+//          if (eventProp == null)
+//            eventProp = createEventProperty(eventId, desc, method);
+//          eventPropList.add(eventProp);
+//        }
+//      }
+//
+//        EventProperty[] eventProps = new EventProperty[eventPropList.size()];
+//        eventPropList.toArray(eventProps);
+//
+//        knownEvents = new Event[eventProps.length];
+//        for (int i=0; i < eventProps.length; i++)
+//            knownEvents[i] = eventProps[i].getEvent();
+//
+//        FormUtils.sortProperties(eventProps);
+//        eventProperties = eventProps;
+//    }
 
     public FormProperty[] getAccessibilityProperties() {
         if (accessibilityProperties == null)
@@ -1604,17 +1622,17 @@ public class RADComponent {
         return prop;
     }
 
-    private EventProperty createEventProperty(String eventId,
-                                                EventSetDescriptor eventDesc,
-                                                Method eventMethod)
-    {
-        EventProperty prop = new EventProperty(new Event(this,
-                                                         eventDesc,
-                                                         eventMethod),
-                                               eventId);
-        nameToProperty.put(eventId, prop);
-        return prop;
-    }
+//    private EventProperty createEventProperty(String eventId,
+//                                                EventSetDescriptor eventDesc,
+//                                                Method eventMethod)
+//    {
+//        EventProperty prop = new EventProperty(new Event(this,
+//                                                         eventDesc,
+//                                                         eventMethod),
+//                                               eventId);
+//        nameToProperty.put(eventId, prop);
+//        return prop;
+//    }
 
     /** Called to modify original bean properties obtained from BeanInfo.
      * Properties may be added, removed etc. - due to specific needs.

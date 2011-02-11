@@ -223,7 +223,7 @@ public class RADMenuComponent extends RADMenuItemComponent implements ComponentC
         }
 
         /** Create the object.
-         * @exception IOException if something fails
+         * @exception java.io.IOException if something fails
          */
         @Override
         public void create() throws java.io.IOException {

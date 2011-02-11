@@ -110,8 +110,6 @@ public class FormModel
     private CompoundEdit compoundEdit;
     private boolean undoCompoundEdit = false;
 
-    private FormEvents formEvents;
-
     // list of listeners registered on FormModel
     private ArrayList<FormModelListener> listeners;
     private List<FormModelEvent> eventList;
@@ -341,12 +339,6 @@ public class FormModel
         return list;
     }
 
-    public FormEvents getFormEvents() {
-        if (formEvents == null)
-            formEvents = new FormEvents(this);
-        return formEvents;
-    }
-
     private static void collectMetaComponents(ComponentContainer cont,
                                               java.util.List<RADComponent> list) {
         RADComponent[] comps = cont.getSubBeans();
@@ -574,10 +566,6 @@ public class FormModel
     }
 
     void removeComponentImpl(RADComponent metacomp, boolean fromModel) {
-        if (fromModel && formEvents != null) {
-            removeEventHandlersRecursively(metacomp);
-        }
-
         RADComponent parent = metacomp.getParentComponent();
         ComponentContainer parentContainer =
             parent instanceof ComponentContainer ?
@@ -614,20 +602,6 @@ public class FormModel
             idToComponents.put(metacomp.getId(), metacomp);
         else
             idToComponents.remove(metacomp.getId());
-    }
-
-    // removes all event handlers attached to given component and all
-    // its subcomponents
-    private void removeEventHandlersRecursively(RADComponent comp) {
-        if (comp instanceof ComponentContainer) {
-            RADComponent[] subcomps = ((ComponentContainer)comp).getSubBeans();
-          for (RADComponent subcomp : subcomps) removeEventHandlersRecursively(subcomp);
-        }
-
-        Event[] events = comp.getKnownEvents();
-      for (Event event : events)
-        if (event.hasEventHandlers())
-          getFormEvents().detachEvent(event);
     }
 
     static void setInModelRecursively(RADComponent metacomp, boolean inModel) {
@@ -1083,62 +1057,6 @@ public class FormModel
         {
             addUndoableEdit(ev.getUndoableEdit());
         }
-
-        return ev;
-    }
-
-    /** Fires an event informing about attaching a new event to an event handler
-     * (createdNew parameter indicates whether the event handler was created
-     * first). An undoable edit is created and registered automatically.
-     * 
-     * @param event event for which the handler was created.
-     * @param handler name of the event handler.
-     * @param bodyText body of the event handler.
-     * @param createdNew newly created event handler?
-     * @return event that has been fired.
-     */
-    public FormModelEvent fireEventHandlerAdded(Event event,
-                                                String handler,
-                                                String bodyText,
-                                                String annotationText,
-                                                boolean createdNew)
-    {
-        t("event handler added: "+handler); // NOI18N
-
-        FormModelEvent ev =
-            new FormModelEvent(this, FormModelEvent.EVENT_HANDLER_ADDED);
-        ev.setEvent(event, handler, bodyText, annotationText, createdNew);
-        sendEvent(ev);
-
-        if (undoRedoRecording && event != null && handler != null)
-            addUndoableEdit(ev.getUndoableEdit());
-
-        return ev;
-    }
-
-    /** Fires an event informing about detaching an event from event handler
-     * (handlerDeleted parameter indicates whether the handler was deleted as
-     * the last event was detached). An undoable edit is created and registered
-     * automatically.
-     * 
-     * @param event event for which the handler was removed.
-     * @param handler removed event handler.
-     * @param handlerDeleted was deleted?
-     * @return event that has been fired.
-     */
-    public FormModelEvent fireEventHandlerRemoved(Event event,
-                                                  String handler,
-                                                  boolean handlerDeleted)
-    {
-        t("firing event handler removed: "+handler); // NOI18N
-
-        FormModelEvent ev =
-            new FormModelEvent(this, FormModelEvent.EVENT_HANDLER_REMOVED);
-        ev.setEvent(event, handler, null, null, handlerDeleted);
-        sendEvent(ev);
-
-        if (undoRedoRecording && event != null && handler != null)
-            addUndoableEdit(ev.getUndoableEdit());
 
         return ev;
     }

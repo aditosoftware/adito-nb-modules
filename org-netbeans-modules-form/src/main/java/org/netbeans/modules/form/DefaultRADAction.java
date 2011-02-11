@@ -106,7 +106,7 @@ public class DefaultRADAction extends CookieAction {
         if (activatedNodes != null && activatedNodes.length == 1) {
             RADComponentCookie radCookie = activatedNodes[0].getCookie(RADComponentCookie.class);
             if (radCookie != null) {
-                return radCookie.getRADComponent().getDefaultEvent() != null;
+                return false; //radCookie.getRADComponent().getDefaultEvent() != null;
             }
         }
         return false;
@@ -119,11 +119,11 @@ public class DefaultRADAction extends CookieAction {
      */
     @Override
     protected void performAction(Node[] activatedNodes) {
-        if (activatedNodes != null && activatedNodes.length == 1) {
-            RADComponentCookie radCookie = activatedNodes[0].getCookie(RADComponentCookie.class);
-            if (radCookie != null) {
-                radCookie.getRADComponent().attachDefaultEvent();
-            }
-        }
+//        if (activatedNodes != null && activatedNodes.length == 1) {
+//            RADComponentCookie radCookie = activatedNodes[0].getCookie(RADComponentCookie.class);
+//            if (radCookie != null) {
+//                radCookie.getRADComponent().attachDefaultEvent();
+//            }
+//        }
     }
 }
