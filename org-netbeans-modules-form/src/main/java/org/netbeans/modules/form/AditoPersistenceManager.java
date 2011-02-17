@@ -2,6 +2,7 @@ package org.netbeans.modules.form;
 
 import de.adito.aditoweb.filesystem.common.AfsUrlUtil;
 import de.adito.aditoweb.filesystem.datamodelfs.access.model.*;
+import org.netbeans.modules.form.adito.*;
 import org.netbeans.modules.form.codestructure.*;
 import org.netbeans.modules.form.layoutdesign.*;
 import org.netbeans.modules.form.layoutdesign.support.SwingLayoutBuilder;
@@ -73,7 +74,7 @@ public class AditoPersistenceManager extends PersistenceManager
     try
     {
       Class<JPanel> formBaseClass = JPanel.class;
-      formModel.setFormBaseClass(formBaseClass, DataFolder.findFolder(pInfo.getModelRoot()));
+      formModel.setFormBaseClass(formBaseClass, DMHelper.getHandler(pInfo.getModelRoot()));
       // Force creation of the default instance in the correct L&F context
       BeanSupport.getDefaultInstance(formBaseClass);
     }
@@ -325,41 +326,10 @@ public class AditoPersistenceManager extends PersistenceManager
       Integer type = FieldConst.TYPE.accessField(pChildModel).getValue();
       compName = FieldConst.NAME.accessField(pChildModel).getValue();
       compType = EModelAccessType.get(type);
-      switch (compType)
-      {
-        case BUTTON:
-          className = JButton.class.getName();
-          break;
-        case CHECKBOX:
-          className = JCheckBox.class.getName();
-          break;
-        case COMBOBOX:
-          className = JComboBox.class.getName();
-          break;
-        case EDITFIELD:
-          className = JTextField.class.getName();
-          break;
-        case LABEL:
-          className = JLabel.class.getName();
-          break;
-        case LIST:
-          className = JList.class.getName();
-          break;
-        case RADIOBUTTON:
-          className = JRadioButton.class.getName();
-          break;
-        case REGISTER:
-          className = JTabbedPane.class.getName();
-          break;
-        case TABLE:
-          className = JTable.class.getName();
-          break;
-        case TREE:
-          className = JTree.class.getName();
-          break;
-        default:
-          return null;
-      }
+      EModelComponentMapping eModelCompMapping = EModelComponentMapping.get(compType);
+      if (eModelCompMapping == null)
+        return null;
+      className = eModelCompMapping.getSwingClass().getName();
     }
     catch (Exception e)
     {
@@ -500,7 +470,7 @@ public class AditoPersistenceManager extends PersistenceManager
       }
       newComponent.initialize(pInfo.getFormModel());
       newComponent.setStoredName(compName);
-      newComponent.initInstance(compClass, DataFolder.findFolder(pChildModel));
+      newComponent.initInstance(compClass, DMHelper.getHandler(pChildModel));
       newComponent.setInModel(true);
     }
     catch (Exception ex)

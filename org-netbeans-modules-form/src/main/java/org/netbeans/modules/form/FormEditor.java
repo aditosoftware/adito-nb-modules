@@ -52,9 +52,11 @@ package org.netbeans.modules.form;
 //import com.sun.source.tree.Tree;
 //import com.sun.source.util.SourcePositions;
 //import java.awt.EventQueue;
+import java.awt.*;
 import java.beans.*;
 import java.io.IOException;
 import java.util.*;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.prefs.PreferenceChangeEvent;
@@ -734,12 +736,11 @@ public class FormEditor {
             if (floatingWindows != null) {
                 if (floatingWindows.size() > 0) {
                     List<java.awt.Window> tempList = new LinkedList<java.awt.Window>(floatingWindows);
-                    Iterator it = tempList.iterator();
-                    while (it.hasNext()) {
-                        java.awt.Window window = (java.awt.Window) it.next();
-                        if (window.isVisible())
-                            window.setVisible(false);
-                    }
+                  for (Window aTempList : tempList)
+                  {
+                    if (aTempList.isVisible())
+                      aTempList.setVisible(false);
+                  }
                 }
                 floatingWindows = null;
             }
@@ -1001,32 +1002,37 @@ public class FormEditor {
         settingsListener = new PreferenceChangeListener() {
             @Override
             public void preferenceChange(PreferenceChangeEvent evt) {
-                Iterator iter = openForms.keySet().iterator();
-                while (iter.hasNext()) {
-                    FormModel formModel = (FormModel) iter.next();
-                    String propName = evt.getKey();
+              for (FormModel formModel : openForms.keySet())
+              {
+                String propName = evt.getKey();
 
-                    if (FormLoaderSettings.PROP_USE_INDENT_ENGINE.equals(propName)) {
-                        formModel.fireSyntheticPropertyChanged(null, propName,
-                                                               null, evt.getNewValue());
-                    } else if (FormLoaderSettings.PROP_SELECTION_BORDER_SIZE.equals(propName)                    
-                          || FormLoaderSettings.PROP_SELECTION_BORDER_COLOR.equals(propName)
-                          || FormLoaderSettings.PROP_CONNECTION_BORDER_COLOR.equals(propName)
-                          || FormLoaderSettings.PROP_FORMDESIGNER_BACKGROUND_COLOR.equals(propName)
-                          || FormLoaderSettings.PROP_FORMDESIGNER_BORDER_COLOR.equals(propName))
-                    {
-                        FormDesigner designer = getFormDesigner(formModel);
-                        if (designer != null) {
-                            designer.updateVisualSettings();
-                        }
-                    } else if (FormLoaderSettings.PROP_PALETTE_IN_TOOLBAR.equals(propName)) {
-                        FormDesigner designer = getFormDesigner(formModel);
-                        if (designer != null) {
-                            designer.getFormToolBar().showPaletteButton(
-                                FormLoaderSettings.getInstance().isPaletteInToolBar());
-                        }
-                    }
+                if (FormLoaderSettings.PROP_USE_INDENT_ENGINE.equals(propName))
+                {
+                  formModel.fireSyntheticPropertyChanged(null, propName,
+                                                          null, evt.getNewValue());
                 }
+                else if (FormLoaderSettings.PROP_SELECTION_BORDER_SIZE.equals(propName)
+                    || FormLoaderSettings.PROP_SELECTION_BORDER_COLOR.equals(propName)
+                    || FormLoaderSettings.PROP_CONNECTION_BORDER_COLOR.equals(propName)
+                    || FormLoaderSettings.PROP_FORMDESIGNER_BACKGROUND_COLOR.equals(propName)
+                    || FormLoaderSettings.PROP_FORMDESIGNER_BORDER_COLOR.equals(propName))
+                {
+                  FormDesigner designer = getFormDesigner(formModel);
+                  if (designer != null)
+                  {
+                    designer.updateVisualSettings();
+                  }
+                }
+                else if (FormLoaderSettings.PROP_PALETTE_IN_TOOLBAR.equals(propName))
+                {
+                  FormDesigner designer = getFormDesigner(formModel);
+                  if (designer != null)
+                  {
+                    designer.getFormToolBar().showPaletteButton(
+                        FormLoaderSettings.getInstance().isPaletteInToolBar());
+                  }
+                }
+              }
             }
         };
 
@@ -1262,31 +1268,31 @@ public class FormEditor {
         return false;
     }
 
-    /**
-     * Updates project classpath with the beans binding library.
-     * 
-     * @param formModel form model.
-     * @return <code>true</code> if the project was updated.
-     */
-    public static boolean updateProjectForBeansBinding(FormModel formModel) {
-        FormEditor formEditor = getFormEditor(formModel);
-        if (formEditor != null
-                && !ClassPathUtils.isOnClassPath(formEditor.getFormDataObject().getFormFile(), org.jdesktop.beansbinding.Binding.class.getName())) {
-            try {
-                Library lib = LibraryManager.getDefault().getLibrary("beans-binding"); // NOI18N
-                if (lib == null) {
-                    return false;
-                }
-                ClassSource cs = new ClassSource("", // class name is not needed // NOI18N
-                                                 new ClassSource.LibraryEntry(lib));
-                return Boolean.TRUE == ClassPathUtils.updateProject(formEditor.getFormDataObject().getFormFile(), cs);
-            }
-            catch (IOException ex) {
-                ErrorManager.getDefault().notify(ErrorManager.INFORMATIONAL, ex);
-            }
-        }
-        return false;
-    }
+//    /**
+//     * Updates project classpath with the beans binding library.
+//     *
+//     * @param formModel form model.
+//     * @return <code>true</code> if the project was updated.
+//     */
+//    public static boolean updateProjectForBeansBinding(FormModel formModel) {
+//        FormEditor formEditor = getFormEditor(formModel);
+//        if (formEditor != null
+//                && !ClassPathUtils.isOnClassPath(formEditor.getFormDataObject().getFormFile(), org.jdesktop.beansbinding.Binding.class.getName())) {
+//            try {
+//                Library lib = LibraryManager.getDefault().getLibrary("beans-binding"); // NOI18N
+//                if (lib == null) {
+//                    return false;
+//                }
+//                ClassSource cs = new ClassSource("", // class name is not needed // NOI18N
+//                                                 new ClassSource.LibraryEntry(lib));
+//                return Boolean.TRUE == ClassPathUtils.updateProject(formEditor.getFormDataObject().getFormFile(), cs);
+//            }
+//            catch (IOException ex) {
+//                ErrorManager.getDefault().notify(ErrorManager.INFORMATIONAL, ex);
+//            }
+//        }
+//        return false;
+//    }
 
     public static boolean isNonVisualTrayEnabled() {
         return Boolean.getBoolean("netbeans.form.non_visual_tray"); // NOI18N

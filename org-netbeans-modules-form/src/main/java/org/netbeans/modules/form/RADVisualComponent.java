@@ -227,18 +227,22 @@ public class RADVisualComponent extends RADComponent {
             createConstraintsProperties();
 
         if (constraintsProperties != null && constraintsProperties.length > 0)
-            propSets.add(propSets.size() - 1,
-                         new Node.PropertySet("layout", // NOI18N
-                    FormUtils.getBundleString("CTL_LayoutTab"), // NOI18N
-                    FormUtils.getBundleString("CTL_LayoutTabHint")) // NOI18N
+        {
+          Node.PropertySet propertySet = new Node.PropertySet("layout", // NOI18N
+                                                              FormUtils.getBundleString("CTL_LayoutTab"), // NOI18N
+                                                              FormUtils.getBundleString("CTL_LayoutTabHint")) // NOI18N
+          {
+            @Override
+            public Node.Property[] getProperties()
             {
-                @Override
-                public Node.Property[] getProperties() {
-                    Node.Property[] props = getConstraintsProperties();
-                    return (props == null) ? NO_PROPERTIES : props;
-                }
-            });
-
+              Node.Property[] props = getConstraintsProperties();
+              return (props == null) ? NO_PROPERTIES : props;
+            }
+          };
+          propertySet.setValue("tabName", "--Layout");
+          propSets.add(1, propertySet);
+//          propSets.add(propSets.size() - 1, propertySet);
+        }
     }
 
     /** Called to modify original properties obtained from BeanInfo.

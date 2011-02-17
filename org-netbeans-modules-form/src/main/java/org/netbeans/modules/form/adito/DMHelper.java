@@ -3,6 +3,7 @@ package org.netbeans.modules.form.adito;
 import de.adito.aditoweb.filesystem.datamodelfs.access.DataAccessHelper;
 import de.adito.aditoweb.filesystem.datamodelfs.access.mechanics.model.IModelAccess;
 import de.adito.aditoweb.filesystem.datamodelfs.access.model.EModelAccessType;
+import org.openide.filesystems.FileObject;
 import org.openide.loaders.DataFolder;
 
 /**
@@ -11,10 +12,19 @@ import org.openide.loaders.DataFolder;
 public class DMHelper
 {
 
-  public static DataFolder createDataFolder()
+  public static ARADComponentHandler getHandler()
   {
-    return DataFolder.findFolder(DataAccessHelper.<IModelAccess>createModelAccess(EModelAccessType.EDITFIELD)
-                                     .getFileObject());
+    return getHandler(createDataFo());
+  }
+
+  public static ARADComponentHandler getHandler(FileObject pFo)
+  {
+    return new ARADComponentHandler(DataFolder.findFolder(pFo));
+  }
+
+  private static FileObject createDataFo()
+  {
+    return DataAccessHelper.<IModelAccess>createModelAccess(EModelAccessType.EDITFIELD).getFileObject();
   }
 
 }

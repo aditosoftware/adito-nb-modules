@@ -1,0 +1,95 @@
+package org.netbeans.modules.form.adito;
+
+import javax.swing.*;
+import java.awt.*;
+
+/**
+ * @author J. Boesl, 16.02.11
+ */
+public class AButton extends JButton
+{
+
+  private boolean vis = true;
+
+
+  public void setX(int pX)
+  {
+    setLocation(pX, getY());
+  }
+
+  public void setY(int pY)
+  {
+    setLocation(getX(), pY);
+  }
+
+  public void setWidth(int pWidth)
+  {
+    setSize(pWidth, getHeight());
+  }
+
+  public void setHeight(int pHeight)
+  {
+    setSize(getWidth(), pHeight);
+  }
+
+  public Color getFontColor()
+  {
+    return getForeground();
+  }
+
+  public void setFontColor(Color pFontColor)
+  {
+    setForeground(pFontColor);
+  }
+
+  public Color getBgColor()
+  {
+    return getBackground();
+  }
+
+  public void setBgColor(Color pBgColor)
+  {
+    setBackground(pBgColor);
+  }
+
+  public boolean isInvisible()
+  {
+    return vis;
+  }
+
+  public void setInvisible(boolean pInvisible)
+  {
+    vis = pInvisible;
+    repaint();
+  }
+
+  public String getCaption()
+  {
+    return getText();
+  }
+
+  public void setCaption(String pCaption)
+  {
+    setText(pCaption);
+  }
+
+  @Override
+  public void setLabel(String label)
+  {
+
+  }
+
+  @Override
+  public void paint(Graphics g)
+  {
+    super.paint(g);
+    if (!vis)
+    {
+      ((Graphics2D) g).setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+                                        RenderingHints.VALUE_ANTIALIAS_ON);
+      g.setColor(Color.RED);
+      g.drawLine(0, 0, getWidth(), getHeight());
+      g.drawLine(0, getHeight(), getWidth(), 0);
+    }
+  }
+}

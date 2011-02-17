@@ -63,6 +63,7 @@ import de.adito.aditoweb.filesystem.datamodelfs.access.model.FieldConst;
 import org.netbeans.api.java.classpath.ClassPath;
 import org.netbeans.modules.form.RADProperty.FakePropertyDescriptor;
 
+import org.netbeans.modules.form.adito.*;
 import org.openide.*;
 import org.openide.loaders.*;
 import org.openide.nodes.*;
@@ -135,7 +136,7 @@ public class RADComponent {
 
     private boolean valid = true;
 
-    private DataFolder modelDataObject;
+    private ARADComponentHandler aRADComponentHandler;
 
     // -----------------------------------------------------------------------------
     // Constructors & Initialization
@@ -178,7 +179,8 @@ public class RADComponent {
      * @return initialized instance.
      * @throws java.lang.Exception when the instance cannot be initialized.
      */
-    public Object initInstance(Class<? extends Object> beanClass, DataFolder pModelDataObject) throws Exception {
+    public Object initInstance(Class<? extends Object> beanClass, ARADComponentHandler pARADComponentHandler)
+        throws Exception {
         if (beanClass == null)
             throw new NullPointerException();
 
@@ -188,37 +190,22 @@ public class RADComponent {
             clearProperties();
         }
 
-        modelDataObject = pModelDataObject;
+        aRADComponentHandler = pARADComponentHandler;
         this.beanClass = beanClass;
 
         Object bean = createBeanInstance();
         getBeanInfo(); // force BeanInfo creation here - will be needed, may fail
         setBeanInstance(bean);
 
-      // TODO: Test, um die Größe zu laden. Klappt aber nicht.
-//        if (beanInstance instanceof JComponent)
-//        {
-//          JComponent comp = (JComponent) beanInstance;
-//          FileObject modelFile = modelDataObject.getPrimaryFile();
-//          IFieldAccess<Integer> fA = FieldConst.X.accessField(modelFile);
-//          IFieldAccess<Integer> fB = FieldConst.Y.accessField(modelFile);
-//          if (fA != null && fB != null)
-//            comp.setLocation(fA.getValue(), fB.getValue());
-//          fA = FieldConst.WIDTH.accessField(modelFile);
-//          fB = FieldConst.HEIGHT.accessField(modelFile);
-//          if (fA != null && fB != null)
-//          {
-//            comp.setSize(fA.getValue(), fB.getValue());
-//            comp.setPreferredSize(new Dimension(fA.getValue(), fB.getValue()));
-//          }
-//        }
+        if (aRADComponentHandler != null)
+          aRADComponentHandler.initRADComponent(this);
 
         return beanInstance;
     }
 
-  protected final DataFolder getModelDataObject()
+  public final ARADComponentHandler getaRADComponentHandler()
   {
-    return modelDataObject;
+    return aRADComponentHandler;
   }
 
   /** Sets the bean instance represented by this meta component.
@@ -683,24 +670,9 @@ public class RADComponent {
       if (propertySets == null)
       {
         List<Node.PropertySet> propSets = new ArrayList<Node.PropertySet>();
-        // TODO: propertySheet     !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-//        if (modelDataObject != null)
-//        {
-////          return modelDataObject.getNodeDelegate().getPropertySets(); // klappt nicht weil asynchron!
-//          PropertiesCookie propsCookie = modelDataObject.getCookie(PropertiesCookie.class);
-//          if (propsCookie != null)
-//          {
-//            Sheet sheet = new Sheet();
-//            propsCookie.applyAditoPropertiesSync(sheet);
-//            propertySets = sheet.toArray();
-//          }
-//        }
-        if (propertySets == null)
-        {
-          createPropertySets(propSets);
-          propertySets = new Node.PropertySet[propSets.size()];
-          propSets.toArray(propertySets);
-        }
+        createPropertySets(propSets);
+        propertySets = new Node.PropertySet[propSets.size()];
+        propSets.toArray(propertySets);
       }
       return propertySets;
     }
@@ -1161,6 +1133,12 @@ public class RADComponent {
     protected void createPropertySets(List<Node.PropertySet> propSets) {
         if (beanProperties1 == null)
             createBeanProperties();
+
+        if (aRADComponentHandler != null)
+        {
+          aRADComponentHandler.createPropertySets(this, propSets);
+          return;
+        }
 
         ResourceBundle bundle = FormUtils.getBundle();
 

@@ -653,7 +653,7 @@ public class MetaComponentCreator {
             newComp.setStoredName(sourceComp.getName());
 
         try {
-            newComp.initInstance(sourceComp.getBeanClass(), DMHelper.createDataFolder());
+            newComp.initInstance(sourceComp.getBeanClass(), DMHelper.getHandler());
             newComp.setInModel(true); // need code epxression created (issue 68897)
         }
         catch (Exception ex) { // this is rather unlikely to fail
@@ -1361,7 +1361,7 @@ public class MetaComponentCreator {
     {
 
         try {
-            metacomp.initInstance(compClass, DMHelper.createDataFolder());
+            metacomp.initInstance(compClass, DMHelper.getHandler());
         }
         catch (Exception ex) {
             showInstErrorMessage(ex);
@@ -1572,13 +1572,13 @@ public class MetaComponentCreator {
             if (targetComp instanceof JToolBar) {
                 // hack: change JSeparator to JToolBar.Separator
                 try {
-                    metacomp.initInstance(JToolBar.Separator.class, DMHelper.createDataFolder());
+                    metacomp.initInstance(JToolBar.Separator.class, DMHelper.getHandler());
                 } catch (Exception ex) {} // should not fail with JDK class
                 return;
             } else if (targetComp instanceof JMenu || targetComp instanceof JPopupMenu) {
                 // hack: change JSeparator to JPopupMenu.Separator
                 try {
-                    metacomp.initInstance(JPopupMenu.Separator.class, DMHelper.createDataFolder());
+                    metacomp.initInstance(JPopupMenu.Separator.class, DMHelper.getHandler());
                 } catch (Exception ex) {} // should not fail with JDK class
                 return;
 

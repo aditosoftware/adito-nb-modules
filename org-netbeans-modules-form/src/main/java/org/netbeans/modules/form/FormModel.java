@@ -51,6 +51,7 @@ import java.util.logging.Logger;
 import javax.swing.event.UndoableEditEvent;
 import javax.swing.undo.*;
 
+import org.netbeans.modules.form.adito.ARADComponentHandler;
 import org.openide.awt.UndoRedo;
 import org.openide.loaders.*;
 import org.openide.util.Mutex;
@@ -137,7 +138,7 @@ public class FormModel
      * @param formClass form base class.
      * @throws java.lang.Exception if anything goes wrong.
      */
-    public void setFormBaseClass(Class<?> formClass, DataFolder pModelDataObject) throws Exception {
+    public void setFormBaseClass(Class<?> formClass, ARADComponentHandler pComponentHandler) throws Exception {
         if (formBaseClass != null)
             throw new IllegalStateException("Form type already initialized."); // NOI18N
 
@@ -165,7 +166,7 @@ public class FormModel
         if (topComp != null) {
             topRADComponent = topComp;
             topComp.initialize(this);
-            topComp.initInstance(formClass, pModelDataObject);
+            topComp.initInstance(formClass, pComponentHandler);
             topComp.setInModel(true);
         }
 
