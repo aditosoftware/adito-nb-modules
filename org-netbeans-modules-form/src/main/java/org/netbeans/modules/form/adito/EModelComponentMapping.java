@@ -1,6 +1,7 @@
 package org.netbeans.modules.form.adito;
 
 import de.adito.aditoweb.filesystem.datamodelfs.access.model.EModelAccessType;
+import org.netbeans.modules.form.adito.comps.*;
 
 import javax.swing.*;
 
@@ -12,9 +13,9 @@ public enum EModelComponentMapping
 
   BUTTON(EModelAccessType.BUTTON, AButton.class),
   CHECKBOX(EModelAccessType.CHECKBOX, JCheckBox.class),
-  COMBOBOX(EModelAccessType.COMBOBOX, JComboBox.class),
+  COMBOBOX(EModelAccessType.COMBOBOX, AComboBox.class),
   EDITFIELD(EModelAccessType.EDITFIELD, AEditField.class),
-  LABEL(EModelAccessType.LABEL, JLabel.class),
+  LABEL(EModelAccessType.LABEL, ALabel.class),
   LIST(EModelAccessType.LIST, JList.class),
   RADIOBUTTON(EModelAccessType.RADIOBUTTON, JRadioButton.class),
   REGISTER(EModelAccessType.REGISTER, JTabbedPane.class),

@@ -1,36 +1,16 @@
-package org.netbeans.modules.form.adito;
+package org.netbeans.modules.form.adito.comps;
 
 import javax.swing.*;
 import java.awt.*;
 
 /**
- * @author J. Boesl, 16.02.11
+ * @author J. Boesl, 14.02.11
  */
-public class AButton extends JButton
+public class AEditField extends JTextField
 {
 
   private boolean vis = true;
 
-
-  public void setX(int pX)
-  {
-    setLocation(pX, getY());
-  }
-
-  public void setY(int pY)
-  {
-    setLocation(getX(), pY);
-  }
-
-  public void setWidth(int pWidth)
-  {
-    setSize(pWidth, getHeight());
-  }
-
-  public void setHeight(int pHeight)
-  {
-    setSize(getWidth(), pHeight);
-  }
 
   public Color getFontColor()
   {
@@ -63,22 +43,6 @@ public class AButton extends JButton
     repaint();
   }
 
-  public String getCaption()
-  {
-    return getText();
-  }
-
-  public void setCaption(String pCaption)
-  {
-    setText(pCaption);
-  }
-
-  @Override
-  public void setLabel(String label)
-  {
-
-  }
-
   @Override
   public void paint(Graphics g)
   {
@@ -88,8 +52,8 @@ public class AButton extends JButton
       ((Graphics2D) g).setRenderingHint(RenderingHints.KEY_ANTIALIASING,
                                         RenderingHints.VALUE_ANTIALIAS_ON);
       g.setColor(Color.RED);
-      g.drawLine(0, 0, getWidth(), getHeight());
-      g.drawLine(0, getHeight(), getWidth(), 0);
+      g.drawLine(1, 1, getWidth() - 1, getHeight() - 1);
+      g.drawLine(1, getHeight() - 1, getWidth() - 1, 1);
     }
   }
 }

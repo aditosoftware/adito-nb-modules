@@ -1136,7 +1136,7 @@ public class RADComponent {
 
         if (aRADComponentHandler != null)
         {
-          aRADComponentHandler.createPropertySets(this, propSets);
+          aRADComponentHandler.createPropertySets(propSets);
           return;
         }
 

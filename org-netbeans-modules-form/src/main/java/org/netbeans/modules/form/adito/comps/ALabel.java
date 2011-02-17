@@ -1,12 +1,12 @@
-package org.netbeans.modules.form.adito;
+package org.netbeans.modules.form.adito.comps;
 
 import javax.swing.*;
 import java.awt.*;
 
 /**
- * @author J. Boesl, 14.02.11
+ * @author J. Boesl, 17.02.11
  */
-public class AEditField extends JTextField
+public class ALabel extends JLabel
 {
 
   private boolean vis = true;
@@ -52,8 +52,10 @@ public class AEditField extends JTextField
       ((Graphics2D) g).setRenderingHint(RenderingHints.KEY_ANTIALIASING,
                                         RenderingHints.VALUE_ANTIALIAS_ON);
       g.setColor(Color.RED);
-      g.drawLine(0, 0, getWidth(), getHeight());
-      g.drawLine(0, getHeight(), getWidth(), 0);
+      g.drawLine(1, 1, getWidth() - 1, getHeight() - 1);
+      g.drawLine(1, getHeight() - 1, getWidth() - 1, 1);
     }
   }
+
+
 }
