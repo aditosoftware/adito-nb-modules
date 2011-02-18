@@ -114,14 +114,14 @@ public class FormDesigner extends TopComponent implements MultiViewElement
     private HandleLayer handleLayer;
     private NonVisualTray nonVisualTray;
     private FormToolBar formToolBar;
-    
+
     // in-place editing
     private InPlaceEditLayer textEditLayer;
     private FormProperty editedProperty;
     private InPlaceEditLayer.FinishListener finnishListener;
-    
+
     private MenuEditLayer menuEditLayer;
-            
+
     // metadata
     private FormModel formModel;
     private FormModelListener formModelListener;
@@ -136,14 +136,14 @@ public class FormDesigner extends TopComponent implements MultiViewElement
     private LayoutDesigner layoutDesigner;
     private List<Action> designerActions;
     private List<Action> resizabilityActions;
-    
+
     private JToggleButton[] resizabilityButtons;
-            
+
     private int designerMode;
     public static final int MODE_SELECT = 0;
     public static final int MODE_CONNECT = 1;
     public static final int MODE_ADD = 2;
-    
+
     private boolean initialized = false;
 
     private RADComponent connectionSource;
@@ -188,7 +188,7 @@ public class FormDesigner extends TopComponent implements MultiViewElement
         add(loadingPanel, BorderLayout.CENTER);
 
         this.formEditor = formEditor;
-        
+
         if (formEditor != null) { // Issue 67879
             explorerManager = new ExplorerManager();
 
@@ -204,10 +204,10 @@ public class FormDesigner extends TopComponent implements MultiViewElement
 
             formToolBar = new FormToolBar(this);
         }
-        
+
         setMinimumSize(new Dimension(10, 10));
     }
-    
+
     void initialize() {
         initialized = true;
         removeAll();
@@ -224,7 +224,7 @@ public class FormDesigner extends TopComponent implements MultiViewElement
         if (nonVisualTray != null) {
             designPanel.add(nonVisualTray, BorderLayout.SOUTH);
         }
-        
+
         layeredPane = new JLayeredPane() {
             // hack: before each paint make sure the dragged components have
             // bounds set out of visible area (as they physically stay in their
@@ -254,13 +254,13 @@ public class FormDesigner extends TopComponent implements MultiViewElement
 
         JScrollPane scrollPane = new JScrollPane(layeredPane);
         scrollPane.setBorder(null); // disable border, winsys will handle borders itself
-        scrollPane.setViewportBorder(null); // disable also GTK L&F viewport border 
+        scrollPane.setViewportBorder(null); // disable also GTK L&F viewport border
         scrollPane.getVerticalScrollBar().setUnitIncrement(5); // Issue 50054
         scrollPane.getHorizontalScrollBar().setUnitIncrement(5);
         add(scrollPane, BorderLayout.CENTER);
 
         explorerManager.setRootContext(formEditor.getFormRootNode());
-        
+
         if(!hasPropertyChangeListener) {
             addPropertyChangeListener("activatedNodes", new PropertyChangeListener() { // NOI18N
                 @Override
@@ -288,7 +288,7 @@ public class FormDesigner extends TopComponent implements MultiViewElement
                         Logger.getLogger(getClass().getName()).log(Level.INFO, ex.getMessage(), ex);
                     }
                 }
-            });            
+            });
             hasPropertyChangeListener = true;
         }
 
@@ -307,9 +307,9 @@ public class FormDesigner extends TopComponent implements MultiViewElement
             layoutDesigner = new LayoutDesigner(formModel.getLayoutModel(),
                                             new LayoutMapper());
         }
-        
+
         updateWholeDesigner();
-        
+
         // not very nice hack - it's better FormEditorSupport has its
         // listener registered after FormDesigner
         formEditor.reinstallListener();
@@ -318,7 +318,7 @@ public class FormDesigner extends TopComponent implements MultiViewElement
             // 70940: Make sure some form designer is registered
             formEditor.setFormDesigner(this);
         }
-        
+
         //force the menu edit layer to be created
         getMenuEditLayer();
 
@@ -343,7 +343,7 @@ public class FormDesigner extends TopComponent implements MultiViewElement
             menuEditLayer.hideMenuLayer();
             menuEditLayer = null;
         }
-                
+
         if (initialized) {
             clearSelection();
             explorerManager.setRootContext(new AbstractNode(Children.LEAF));
@@ -356,38 +356,39 @@ public class FormDesigner extends TopComponent implements MultiViewElement
 //            preLoadTask = null;
 //            StatusDisplayer.getDefault().setStatusText(""); // NOI18N
 //        }
-      formEditor.setPersistenceManager(PersistenceManager.getManagers().next());
+        if (formEditor != null)
+          formEditor.setPersistenceManager(PersistenceManager.getManagers().next());
 
         removeAll();
-                
+
         componentLayer = null;
         handleLayer = null;
-        nonVisualTray = null;        
-        layeredPane = null;        
-        if(textEditLayer!=null) {            
+        nonVisualTray = null;
+        layeredPane = null;
+        if(textEditLayer!=null) {
             if (textEditLayer.isVisible()){
-                textEditLayer.finishEditing(false);                
+                textEditLayer.finishEditing(false);
             }
             textEditLayer.removeFinishListener(getFinnishListener());
-            textEditLayer=null;               
+            textEditLayer=null;
         }
-        
+
         if (formModel != null) {
             if (formModelListener != null) {
-                formModel.removeFormModelListener(formModelListener);                
-            }                
+                formModel.removeFormModelListener(formModelListener);
+            }
             if (settingsListener != null) {
                 FormLoaderSettings.getPreferences().removePreferenceChangeListener(settingsListener);
             }
             topDesignComponent = null;
             formModel = null;
         }
-        
+
         replicator = null;
         layoutDesigner = null;
-        
+
         connectionSource = null;
-        connectionTarget = null;        
+        connectionTarget = null;
         this.formEditor = formEditor;
     }
 
@@ -441,7 +442,7 @@ public class FormDesigner extends TopComponent implements MultiViewElement
     ComponentLayer getComponentLayer() {
         return componentLayer;
     }
-    
+
     NonVisualTray getNonVisualTray() {
         return nonVisualTray;
     }
@@ -453,11 +454,11 @@ public class FormDesigner extends TopComponent implements MultiViewElement
     public LayoutDesigner getLayoutDesigner() {
         return layoutDesigner;
     }
-    
+
     public FormEditor getFormEditor() {
         return formEditor;
     }
-    
+
     @Override
     public javax.swing.Action[] getActions() {
         Action[] actions = super.getActions();
@@ -486,7 +487,7 @@ public class FormDesigner extends TopComponent implements MultiViewElement
         String id = replicator.getClonedComponentId(comp);
         return id != null ? formModel.getMetaComponent(id) : null;
     }
-    
+
 //    public RADComponent getMetaComponent(String componentId) {
 //        return formModel.getMetaComponent(componentId);
 //    }
@@ -499,19 +500,19 @@ public class FormDesigner extends TopComponent implements MultiViewElement
         RADComponent topMetaComp = formModel.getTopRADComponent();
         return topMetaComp != null && topMetaComp == topDesignComponent;
     }
-    
+
     public void setTopDesignComponent(RADVisualComponent component,
                                       boolean update) {
-        
+
         highlightTopDesignComponentName(false);
         // TODO need to remove bindings of the current cloned view (or clone bound components as well)
         topDesignComponent = component;
-        highlightTopDesignComponentName(!isTopRADComponent());        
-        
+        highlightTopDesignComponentName(!isTopRADComponent());
+
         FormDataObject formDO = formEditor.getFormDataObject();
         if(formDO!=null) {
-            formDO.getFormEditorSupport().updateMVTCDisplayName();            
-        }        
+            formDO.getFormEditorSupport().updateMVTCDisplayName();
+        }
         if (update) {
             setSelectedComponent(topDesignComponent);
             updateWholeDesigner();
@@ -524,9 +525,9 @@ public class FormDesigner extends TopComponent implements MultiViewElement
             if(node!=null) {
                 node.highlightDisplayName(bl);
             }
-        }        
+        }
     }
-    
+
     public void resetTopDesignComponent(boolean update) {
         RADComponent top = formModel.getTopRADComponent();
         setTopDesignComponent(top instanceof RADVisualComponent ? (RADVisualComponent)top : null,
@@ -535,7 +536,7 @@ public class FormDesigner extends TopComponent implements MultiViewElement
 
     /** Tests whether top designed container is some parent of given component
      * (whether the component is in the tree under top designed container).
-     * 
+     *
      * @param metacomp component.
      * @return <code>true</code> if the component is in designer,
      * returns <code>false</code> otherwise.
@@ -628,7 +629,7 @@ public class FormDesigner extends TopComponent implements MultiViewElement
                     return container;
                 }
             }
-        
+
         );
         } finally {
             FormLAF.setUsePreviewDefaults(null, null);
@@ -699,7 +700,7 @@ public class FormDesigner extends TopComponent implements MultiViewElement
         }
         return p;
     }
-    
+
     boolean isCoordinatesRoot(Component comp) {
         return (layeredPane == comp);
     }
@@ -926,7 +927,7 @@ public class FormDesigner extends TopComponent implements MultiViewElement
         }
         return selectedNodes.toArray(new Node[selectedNodes.size()]);
     }
-    
+
     java.util.List<RADComponent> getSelectedLayoutComponents() {
         return selectedLayoutComponents;
     }
@@ -1011,7 +1012,7 @@ public class FormDesigner extends TopComponent implements MultiViewElement
             }
         }
     }
-    
+
     RADVisualComponent componentToLayoutComponent(RADComponent metacomp) {
         if (metacomp instanceof RADVisualComponent) {
             RADVisualComponent visualComp = (RADVisualComponent) metacomp;
@@ -1074,7 +1075,7 @@ public class FormDesigner extends TopComponent implements MultiViewElement
     void setResizabilityButtons(JToggleButton[] buttons) {
         this.resizabilityButtons = buttons;
     }
-    
+
     public JToggleButton[] getResizabilityButtons() {
         return resizabilityButtons;
     }
@@ -1160,7 +1161,7 @@ public class FormDesigner extends TopComponent implements MultiViewElement
                         }
                     } catch (Exception ex) {
                         Logger.getLogger(getClass().getName()).log(Level.INFO, ex.getMessage(), ex);
-                    }        
+                    }
                 } else if ((bean instanceof JPanel) && (getTopDesignComponent() != metacomp) && (Math.random() < 0.2)) {
                     context = "designThisContainer"; // NOI18N
                 } else if ((bean instanceof JComboBox) && (Math.random() < 0.4)) {
@@ -1187,7 +1188,7 @@ public class FormDesigner extends TopComponent implements MultiViewElement
     }
 
     /** Finds out what component follows after currently selected component
-     * when TAB (forward true) or Shift+TAB (forward false) is pressed. 
+     * when TAB (forward true) or Shift+TAB (forward false) is pressed.
      * @return the next or previous component for selection
      */
     RADComponent getNextVisualComponent(boolean forward) {
@@ -1330,7 +1331,7 @@ public class FormDesigner extends TopComponent implements MultiViewElement
             }
         }
     }
-    
+
     /**
      * Returns designer actions (they will be displayed in toolbar).
      *
@@ -1365,7 +1366,7 @@ public class FormDesigner extends TopComponent implements MultiViewElement
         }
         return resizabilityActions;
     }
-    
+
     /**
      * Returns collection of ids of the selected layout components.
      *
@@ -1380,7 +1381,7 @@ public class FormDesigner extends TopComponent implements MultiViewElement
         }
         return selectedIds;
     }
-    
+
     /**
      * Checks whether the given components are in the same containter.
      *
@@ -1550,7 +1551,7 @@ public class FormDesigner extends TopComponent implements MultiViewElement
     // in-place editing
 
     public void startInPlaceEditing(RADComponent metacomp) {
-        
+
         if (formModel.isReadOnly())
             return;
         if (textEditLayer != null && textEditLayer.isVisible())
@@ -1630,19 +1631,19 @@ public class FormDesigner extends TopComponent implements MultiViewElement
         }
         return finnishListener;
     }
-        
-    
-        
+
+
+
     private void finishInPlaceEditing(boolean applyChanges) {
         if (applyChanges) {
-            try {       
+            try {
         Object value = editedProperty.getValue();
         if(value instanceof String) {
-            editedProperty.setValue(textEditLayer.getEditedText());         
-        } else {    
+            editedProperty.setValue(textEditLayer.getEditedText());
+        } else {
             PropertyEditor prEd = editedProperty.findDefaultEditor();
-            editedProperty.setValue(new FormProperty.ValueWithEditor(textEditLayer.getEditedText(), prEd));             
-        }                        
+            editedProperty.setValue(new FormProperty.ValueWithEditor(textEditLayer.getEditedText(), prEd));
+        }
         } catch (Exception ex) { // should not happen
                 Logger.getLogger(getClass().getName()).log(Level.INFO, ex.getMessage(), ex);
             }
@@ -1687,17 +1688,17 @@ public class FormDesigner extends TopComponent implements MultiViewElement
                 NotifyDescriptor.WARNING_MESSAGE));
     }
 
-    
+
     // -----------------
     // menu editing
-    
+
     public void openMenu(RADComponent metacomp) {
         MenuEditLayer menuEditLayer = getMenuEditLayer();
         Component comp = (Component) getComponent(metacomp);
         menuEditLayer.setVisible(true);
         menuEditLayer.openAndShowMenu(metacomp,comp);
     }
-    
+
     // --------
     // methods of TopComponent
 
@@ -1729,14 +1730,14 @@ public class FormDesigner extends TopComponent implements MultiViewElement
 
         ci.attachActions();
         if (textEditLayer == null || !textEditLayer.isVisible())
-            handleLayer.requestFocus();               
+            handleLayer.requestFocus();
     }
 
     @Override
     public void componentDeactivated() {
         if (formModel == null)
             return;
-        
+
         if (textEditLayer != null && textEditLayer.isVisible())
             textEditLayer.finishEditing(false);
 
@@ -1749,7 +1750,7 @@ public class FormDesigner extends TopComponent implements MultiViewElement
         UndoRedo ur = formModel != null ? formModel.getUndoRedoManager() : null;
         return ur != null ? ur : super.getUndoRedo();
     }
-    
+
     @Override
     protected String preferredID() {
         return formEditor.getFormDataObject().getName();
@@ -1971,7 +1972,7 @@ public class FormDesigner extends TopComponent implements MultiViewElement
         }
         return textEditLayer;
     }
-    
+
     MenuEditLayer getMenuEditLayer() {
         if(menuEditLayer == null) {
             menuEditLayer = new MenuEditLayer(this);
@@ -1998,12 +1999,12 @@ public class FormDesigner extends TopComponent implements MultiViewElement
             if (visual != null) {
                 rect = componentBoundsToTop(visual);
             }
-            
+
             if (getLayoutDesigner().logTestCode()) {
                 getLayoutDesigner().testCode.add("  compBounds.put(\"" + componentId + "\", new Rectangle(" +  //NOI18N
                                                             rect.x + ", " + rect.y + ", " + rect.width + ", " + rect.height + "));"); //NOI18N
             }
-            
+
             return rect;
         }
 
@@ -2028,7 +2029,7 @@ public class FormDesigner extends TopComponent implements MultiViewElement
                 getLayoutDesigner().testCode.add("  contInterior.put(\"" + componentId + "\", new Rectangle(" +  //NOI18N
                                                         rect.x + ", " + rect.y + ", " + rect.width + ", " + rect.height + "));"); //NOI18N
         }
-            
+
             return rect;
         }
 
@@ -2042,7 +2043,7 @@ public class FormDesigner extends TopComponent implements MultiViewElement
             if (getLayoutDesigner().logTestCode()) {
                 getLayoutDesigner().testCode.add("  compMinSize.put(\"" + componentId + "\", new Dimension(" +  //NOI18N
                                                             new Double(dim.getWidth()).intValue() + ", " + new Double(dim.getHeight()).intValue() + "));"); //NOI18N
-            }            
+            }
             return dim;
         }
 
@@ -2075,7 +2076,7 @@ public class FormDesigner extends TopComponent implements MultiViewElement
 
         @Override
         public int getBaselinePosition(String componentId, int width, int height) {
-            int baseLinePos = -1;            
+            int baseLinePos = -1;
             JComponent comp = (JComponent) getVisualComponent(componentId, true, true);
             // [hack - vertically resizable components cannot be baseline aligned]
             // [this should be either solved or filtered in LayoutDragger according to vertical resizability of the component]
@@ -2119,7 +2120,7 @@ public class FormDesigner extends TopComponent implements MultiViewElement
         id = comp1Id + "-" + comp2Id + "-" + dimension + "-" + comp2Alignment + "-" // NOI18N
                      + (paddingType != null ? paddingType.ordinal() : 0);
         }
-            
+
             JComponent comp1 = (JComponent) getVisualComponent(comp1Id, true, true);
             JComponent comp2 = (JComponent) getVisualComponent(comp2Id, true, true);
             if (comp1 == null || comp2 == null) { // not JComponents...
@@ -2158,7 +2159,7 @@ public class FormDesigner extends TopComponent implements MultiViewElement
                 getLayoutDesigner().testCode.add("  prefPadding.put(\"" + id + "\", new Integer(" + prefPadding +   //NOI18N
                 ")); // comp1Id-comp2Id-dimension-comp2Alignment-paddingType");             //NOI18N
             }
-            
+
             return prefPadding;
         }
 
@@ -2172,7 +2173,7 @@ public class FormDesigner extends TopComponent implements MultiViewElement
         if (getLayoutDesigner().logTestCode()) {
         id = parentId + "-" + compId + "-" + dimension + "-" + compAlignment; //NOI18N
         }
-            
+
             JComponent comp = null;
             Container parent = (Container)getVisualComponent(parentId, true, false);
             if (parent != null) {
@@ -2188,7 +2189,7 @@ public class FormDesigner extends TopComponent implements MultiViewElement
                 }
                 return 10; // default distance from parent border (for non-JComponents)
             }
-            
+
             assert dimension == HORIZONTAL || dimension == VERTICAL;
             assert compAlignment == LEADING || compAlignment == TRAILING;
 
