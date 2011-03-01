@@ -72,14 +72,7 @@ import org.netbeans.modules.form.FormLoaderSettings;
 
 public class AbsoluteLayoutSupport extends AbstractLayoutSupport {
 
-    /** The icon for AbsoluteLayout. */
-    private static String iconURL =
-        "org/netbeans/modules/form/layoutsupport/resources/AbsoluteLayout.gif"; // NOI18N
-    /** The icon for AbsoluteLayout. */
-    private static String icon32URL =
-        "org/netbeans/modules/form/layoutsupport/resources/AbsoluteLayout32.gif"; // NOI18N
-
-    private static Constructor constrConstructor;
+  private static Constructor constrConstructor;
 
     private static FormLoaderSettings formSettings = FormLoaderSettings.getInstance();
 
@@ -102,9 +95,11 @@ public class AbsoluteLayoutSupport extends AbstractLayoutSupport {
         switch (type) {
             case BeanInfo.ICON_COLOR_16x16:
             case BeanInfo.ICON_MONO_16x16:
-                return ImageUtilities.loadImage(iconURL);
+              String iconURL = "org/netbeans/modules/form/layoutsupport/resources/AbsoluteLayout.gif";
+              return ImageUtilities.loadImage(iconURL);
             default:
-                return ImageUtilities.loadImage(icon32URL);
+              String icon32URL = "org/netbeans/modules/form/layoutsupport/resources/AbsoluteLayout32.gif";
+              return ImageUtilities.loadImage(icon32URL);
         }
     }
 
@@ -202,7 +197,7 @@ public class AbsoluteLayoutSupport extends AbstractLayoutSupport {
             y = computeGridSize(y, formSettings.getGridY());
         }
 
-        assistantParams = new Object[] {Integer.valueOf(x), Integer.valueOf(y)};
+        assistantParams = new Object[] {x, y};
         return createNewConstraints(constr, x, y, w, h);
     }
 
@@ -524,7 +519,7 @@ public class AbsoluteLayoutSupport extends AbstractLayoutSupport {
 
                     @Override
                     public Object getTargetValue() {
-                        return new Integer(x);
+                        return x;
                     }
                     @Override
                     public void setTargetValue(Object value) {
@@ -544,7 +539,7 @@ public class AbsoluteLayoutSupport extends AbstractLayoutSupport {
 
                     @Override
                     public Object getTargetValue() {
-                        return new Integer(y);
+                        return y;
                     }
                     @Override
                     public void setTargetValue(Object value) {
@@ -564,7 +559,7 @@ public class AbsoluteLayoutSupport extends AbstractLayoutSupport {
 
                     @Override
                     public Object getTargetValue() {
-                        return new Integer(w);
+                        return w;
                     }
                     @Override
                     public void setTargetValue(Object value) {
@@ -576,7 +571,7 @@ public class AbsoluteLayoutSupport extends AbstractLayoutSupport {
                     }
                     @Override
                     public Object getDefaultValue() {
-                        return new Integer(-1);
+                        return -1;
                     }
                     @Override
                     public PropertyEditor getExpliciteEditor() {
@@ -609,7 +604,7 @@ public class AbsoluteLayoutSupport extends AbstractLayoutSupport {
 
                     @Override
                     public Object getTargetValue() {
-                        return new Integer(h);
+                        return h;
                     }
                     @Override
                     public void setTargetValue(Object value) {
@@ -621,7 +616,7 @@ public class AbsoluteLayoutSupport extends AbstractLayoutSupport {
                     }
                     @Override
                     public Object getDefaultValue() {
-                        return new Integer(-1);
+                        return -1;
                     }
                     @Override
                     public PropertyEditor getExpliciteEditor() {
@@ -720,7 +715,7 @@ public class AbsoluteLayoutSupport extends AbstractLayoutSupport {
      */
     public static final class SizeEditor extends PropertyEditorSupport {
 
-        final Integer prefValue = new Integer(-1);
+        final Integer prefValue = -1;
         final String prefTag = getBundle().getString("VALUE_preferred"); // NOI18N
 
         @Override

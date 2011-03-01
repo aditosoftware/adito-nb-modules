@@ -180,7 +180,7 @@ public final class PaletteUtils {
 
     public static Lookup getPaletteLookup(FileObject context) {
         ProjectPaletteInfo pInfo = preparePalette(context);
-        return pInfo != null ? pInfo.paletteLookup : Lookups.fixed(new Object[0]);
+        return pInfo != null ? pInfo.paletteLookup : Lookups.fixed();
     }
 
     private static PaletteController getPalette() {
@@ -370,12 +370,12 @@ public final class PaletteUtils {
           for (Node category : categories)
           {
             Node[] items = getItemNodes(category, true);
-            for (int j = 0; j < items.length; j++)
+            for (Node item1 : items)
             {
-              PaletteItem formItem = items[j].getLookup().lookup(PaletteItem.class);
+              PaletteItem formItem = item1.getLookup().lookup(PaletteItem.class);
               if (item.equals(formItem))
               {
-                getPalette().setSelectedItem(category.getLookup(), items[j].getLookup());
+                getPalette().setSelectedItem(category.getLookup(), item1.getLookup());
               }
             }
           }
@@ -693,7 +693,7 @@ public final class PaletteUtils {
         }
 
         void setPalette(PaletteController palette) {
-            content.set(Arrays.asList(new PaletteController[] { palette }), null);
+            content.set(Arrays.asList(palette), null);
         }
     }
 }

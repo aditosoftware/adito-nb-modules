@@ -75,9 +75,8 @@ class ChooseBeansWizardPanel implements WizardDescriptor.Panel<AddToPaletteWizar
     private Class<? extends ClassSource.Entry> sourceType;
 
     private BeanSelector beanSelector;
-    private JLabel noBeansLabel;
 
-    private final ChangeSupport cs = new ChangeSupport(this);
+  private final ChangeSupport cs = new ChangeSupport(this);
 
     // ----------
     // WizardDescriptor.Panel implementation
@@ -95,12 +94,12 @@ class ChooseBeansWizardPanel implements WizardDescriptor.Panel<AddToPaletteWizar
                 messageKey = "MSG_NoBeanInProject"; // NOI18N
             else
                 throw new IllegalArgumentException();
-            noBeansLabel = new JLabel(PaletteUtils.getBundleString(messageKey));
+          JLabel noBeansLabel = new JLabel(PaletteUtils.getBundleString(messageKey));
             noBeansLabel.setPreferredSize(new Dimension(400, 300));
             noBeansLabel.setVerticalAlignment(SwingConstants.TOP);
             noBeansLabel.setName(PaletteUtils.getBundleString("CTL_NoBeans_Caption")); // NOI18N
             noBeansLabel.putClientProperty(WizardDescriptor.PROP_CONTENT_SELECTED_INDEX, // NOI18N
-                new Integer(1));
+                                           1);
             return noBeansLabel;
         } else {
             if (beanSelector == null) { // create the UI component for the wizard step
@@ -109,7 +108,7 @@ class ChooseBeansWizardPanel implements WizardDescriptor.Panel<AddToPaletteWizar
                 // wizard API: set the caption and index of this panel
                 beanSelector.setName(PaletteUtils.getBundleString("CTL_SelectBeans_Caption")); // NOI18N
                 beanSelector.putClientProperty(WizardDescriptor.PROP_CONTENT_SELECTED_INDEX, // NOI18N
-                new Integer(1));
+                                               1);
                 if (markedBeans != null || allBeans != null)
                     beanSelector.setBeans(markedBeans, allBeans);
                 

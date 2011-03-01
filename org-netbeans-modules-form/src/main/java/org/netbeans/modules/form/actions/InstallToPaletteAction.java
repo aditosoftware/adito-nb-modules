@@ -65,11 +65,7 @@ public class InstallToPaletteAction extends NodeAction {
 
     private static String name;
 
-    public InstallToPaletteAction () {
-        putValue("noIconInMenu", Boolean.TRUE); // NOI18N
-    }
-    
-    @Override
+  @Override
     public String getName() {
         if (name == null)
             name = org.openide.util.NbBundle.getBundle(InstallToPaletteAction.class)

@@ -61,7 +61,7 @@ public class LayoutUtils implements LayoutConstants {
 
     public static LayoutInterval getAdjacentEmptySpace(LayoutComponent comp, int dimension, int direction) {
         LayoutInterval interval = comp.getLayoutInterval(dimension);
-        LayoutInterval gap = LayoutInterval.getNeighbor(interval, direction, false, true, false);
+        LayoutInterval gap = LayoutInterval.getNeighbor(interval, direction, false, false);
         if (gap != null && gap.isEmptySpace()) {
             LayoutInterval gapNeighbor = LayoutInterval.getDirectNeighbor(gap, direction^1, true);
             if (gapNeighbor == interval || LayoutInterval.isPlacedAtBorder(interval, gapNeighbor, dimension, direction)) {
@@ -101,7 +101,7 @@ public class LayoutUtils implements LayoutConstants {
     }
 
     public static boolean hasAdjacentComponent(LayoutComponent comp, int dimension, int direction) {
-        return LayoutInterval.getNeighbor(comp.getLayoutInterval(dimension), direction, true, true, false)
+        return LayoutInterval.getNeighbor(comp.getLayoutInterval(dimension), direction, true, false)
                 != null;
     }
 
@@ -281,28 +281,29 @@ public class LayoutUtils implements LayoutConstants {
         } else {
             PaddingType[] paddingTypes = // just one, or all types of gaps
                     gapType != null ? new PaddingType[] { gapType } : PADDINGS;
-            sizes = new int[paddingTypes.length]; 
-            Iterator srcIter = sources.iterator();
-            while (srcIter.hasNext()) {
-                LayoutInterval srcCandidate = (LayoutInterval)srcIter.next();                
-                String srcId = srcCandidate.getComponent().getId();
-                LayoutRegion srcRegion = sizeOfEmptySpaceHelper(srcCandidate, boundsMap);
-                int srcDelta = max - srcRegion.positions[dimension][TRAILING];
-                Iterator targetIter = targets.iterator();
-                while (targetIter.hasNext()) {
-                    LayoutInterval targetCandidate = (LayoutInterval)targetIter.next();
-                    String targetId = targetCandidate.getComponent().getId();
-                    LayoutRegion targetRegion = sizeOfEmptySpaceHelper(targetCandidate, boundsMap);
-                    int targetDelta = targetRegion.positions[dimension][LEADING] - min;
-                    for (int i=0; i < paddingTypes.length; i++) {
-                        PaddingType type = paddingTypes[i];
-                        int padding = visualMapper.getPreferredPadding(srcId,
-                            targetId, dimension, LEADING, type);
-                        if (!positionsNotUpdated) padding -= srcDelta + targetDelta;
-                        sizes[i] = Math.max(sizes[i], padding);
-                    }
-                }
+            sizes = new int[paddingTypes.length];
+          for (Object source : sources)
+          {
+            LayoutInterval srcCandidate = (LayoutInterval) source;
+            String srcId = srcCandidate.getComponent().getId();
+            LayoutRegion srcRegion = sizeOfEmptySpaceHelper(srcCandidate, boundsMap);
+            int srcDelta = max - srcRegion.positions[dimension][TRAILING];
+            for (Object target : targets)
+            {
+              LayoutInterval targetCandidate = (LayoutInterval) target;
+              String targetId = targetCandidate.getComponent().getId();
+              LayoutRegion targetRegion = sizeOfEmptySpaceHelper(targetCandidate, boundsMap);
+              int targetDelta = targetRegion.positions[dimension][LEADING] - min;
+              for (int i = 0; i < paddingTypes.length; i++)
+              {
+                PaddingType type = paddingTypes[i];
+                int padding = visualMapper.getPreferredPadding(srcId,
+                                                               targetId, dimension, LEADING, type);
+                if (!positionsNotUpdated) padding -= srcDelta + targetDelta;
+                sizes[i] = Math.max(sizes[i], padding);
+              }
             }
+          }
         }
         return sizes;
     }
@@ -475,10 +476,10 @@ public class LayoutUtils implements LayoutConstants {
             LayoutInterval otherInterval = comp.getLayoutInterval(otherDim);
             LayoutInterval parent = LayoutInterval.getCommonParent(otherCompInterval, otherInterval);
             if (parent == null || parent.isParallel())
-                return false;
+                return true;
         }
         while (it.hasNext());
-        return true;
+        return false;
     }
 
     static Iterator getComponentIterator(LayoutInterval interval) {

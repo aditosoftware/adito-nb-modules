@@ -147,11 +147,7 @@ public class FormRefactoringUpdate extends SimpleRefactoringElementImplementatio
         return previewElement;
     }
 
-    void setGaurdedCodeChanging(boolean b) {
-        guardedCodeChanging = b;
-    }
-
-    boolean isGuardedCodeChanging() {
+  boolean isGuardedCodeChanging() {
         return guardedCodeChanging;
     }
 
@@ -371,7 +367,7 @@ public class FormRefactoringUpdate extends SimpleRefactoringElementImplementatio
             SingleCopyRefactoring copyRef = (SingleCopyRefactoring)refInfo.getRefactoring();
             String newName = copyRef.getNewName(); // short name without extension
             Lookup target = copyRef.getTarget();
-            FileObject targetFolder = URLMapper.findFileObject((URL)target.lookup(URL.class));
+            FileObject targetFolder = URLMapper.findFileObject(target.lookup(URL.class));
             // will process the new copy - update changingFile and formDataObject fields
             changingFile = targetFolder.getFileObject(newName, "java"); // NOI18N
             try {
@@ -664,34 +660,7 @@ public class FormRefactoringUpdate extends SimpleRefactoringElementImplementatio
 //        }
 //    }
 
-    private void saveForUndo(final URL url) {
-        FileObject file = URLMapper.findFileObject(url);
-        BackupFacility.Handle id;
-        if (file != null) {
-            try {
-                id = BackupFacility.getDefault().backup(file);
-            } catch (IOException ex) {
-                Exceptions.printStackTrace(ex);
-                return;
-            }
-        } else { // file does not exist - will be created; to undo we must delete it
-           id = new BackupFacility.Handle() {
-                @Override
-                public void restore() throws IOException {
-                    FileObject file = URLMapper.findFileObject(url);
-                    if (file != null) {
-                        file.delete();
-                    }
-                }
-           };
-        }
-        if (backups == null) {
-            backups = new ArrayList<BackupFacility.Handle>();
-        }
-        backups.add(id);
-    }
-
-    private void saveForUndo(FileObject file) {
+  private void saveForUndo(FileObject file) {
         try {
             BackupFacility.Handle id = BackupFacility.getDefault().backup(file);
             if (backups == null) {

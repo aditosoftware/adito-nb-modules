@@ -405,36 +405,39 @@ public class SwingLayoutBuilder {
         Map<Integer,List<String>> links = SwingLayoutUtils.createLinkSizeGroups(containerLC, dimension);
         
         Set<Integer> linksSet = links.keySet();
-        Iterator<Integer> i = linksSet.iterator();
-        while (i.hasNext()) {
-            List<String> group = links.get(i.next());
-            List<Component> components = new ArrayList<Component>();
-          for (String compId : group)
+      for (Integer aLinksSet : linksSet)
+      {
+        List<String> group = links.get(aLinksSet);
+        List<Component> components = new ArrayList<Component>();
+        for (String compId : group)
+        {
+          LayoutComponent lc = layoutModel.getLayoutComponent(compId);
+          if (lc != null)
           {
-            LayoutComponent lc = layoutModel.getLayoutComponent(compId);
-            if (lc != null)
+            Component comp = componentIDMap.get(lc.getId());
+            if (comp == null)
             {
-              Component comp = componentIDMap.get(lc.getId());
-              if (comp == null)
-              {
-                return;
-              }
-              else
-              {
-                components.add(comp);
-              }
+              return;
+            }
+            else
+            {
+              components.add(comp);
             }
           }
-            Component[] compArray = components.toArray(new Component[components.size()]);
-            if (compArray != null) {
-                if (dimension == LayoutConstants.HORIZONTAL) {
-                    layout.linkSize(compArray, GroupLayout.HORIZONTAL);
-                }
-                if (dimension == LayoutConstants.VERTICAL) {
-                    layout.linkSize(compArray, GroupLayout.VERTICAL);
-                }
-            }
         }
+        Component[] compArray = components.toArray(new Component[components.size()]);
+        if (compArray != null)
+        {
+          if (dimension == LayoutConstants.HORIZONTAL)
+          {
+            layout.linkSize(compArray, GroupLayout.HORIZONTAL);
+          }
+          if (dimension == LayoutConstants.VERTICAL)
+          {
+            layout.linkSize(compArray, GroupLayout.VERTICAL);
+          }
+        }
+      }
     }
 
 }

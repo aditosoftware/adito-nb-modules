@@ -76,9 +76,8 @@ public class RefactoringInfo {
         CLASS_RENAME, CLASS_MOVE,  // can be a form, or a component class, or both
         CLASS_COPY,  // a form class
         CLASS_DELETE, // a form class (safe delete)
-        PACKAGE_RENAME, FOLDER_RENAME,  // non-recursive folder and folder with subfolders
-        EVENT_HANDLER_RENAME,  // method in a form class
-        OTHER_FORM_CHANGE
+        PACKAGE_RENAME, FOLDER_RENAME  // non-recursive folder and folder with subfolders
+      // method in a form class
     }
 
     private AbstractRefactoring refactoring;

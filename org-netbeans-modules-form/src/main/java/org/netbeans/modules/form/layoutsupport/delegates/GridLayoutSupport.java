@@ -139,7 +139,7 @@ public class GridLayoutSupport extends AbstractLayoutSupport
 
     @Override
     public Object[] getAssistantParams() {
-        return new Object[] {Integer.valueOf(assistantParams+1)};
+        return new Object[] {assistantParams + 1};
     }
 
     /** This method paints a dragging feedback for a component dragged over
@@ -240,7 +240,7 @@ public class GridLayoutSupport extends AbstractLayoutSupport
             {   // number of rows is to be set to 0, we must preset
                 // columns property to something else than 0
                 try {
-                    getProperty("columns").setValue(new Integer(1));
+                    getProperty("columns").setValue(1);
                 }
                 catch (Exception ex) {} // ignore
             }

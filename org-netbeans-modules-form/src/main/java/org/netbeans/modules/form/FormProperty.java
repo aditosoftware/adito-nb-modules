@@ -727,30 +727,7 @@ public abstract class FormProperty extends Node.Property {
         return null;
     }
 
-    /** Gets the java code for setting the property value (without the object
-     * on which the property is set, and without semicolon at the end).
-     * This method is optional. Example: setText("Button 1")
-     */
-    String getPartialSetterCode(String javaInitStr) {
-        if (javaInitStr == null)
-            return null;
-
-        Method writeMethod = getWriteMethod();
-        if (writeMethod == null)
-            return null;
-
-        return writeMethod.getName() + "(" + javaInitStr + ")"; // NOI18N
-    }
-
-    /** Gets the complete java code for setting the property, including the
-     * semicolon at the end of the line. This method is optional.
-     * Example: jButton1.setText("Button 1");
-     */
-    String getWholeSetterCode(String javaInitStr) {
-        return null;
-    }
-
-    /** 
+  /**
      * Gets the write method setting the property. 
      * Used by {@link JavaCodeGenerator}.
      *
@@ -1177,15 +1154,15 @@ public abstract class FormProperty extends Node.Property {
             this.propertyEditor = propertyEditor;
         }
 
-        ValueWithEditor(Object value, PropertyEditor propertyEditor, boolean editorSetByUser) {
+        ValueWithEditor(Object value, PropertyEditor propertyEditor, boolean pEditorSetByUser) {
             this(value, propertyEditor);
-            this.editorSetByUser = editorSetByUser;
+            this.editorSetByUser = pEditorSetByUser;
         }
 
-        ValueWithEditor(Object value, int propertyEditorIndex, boolean editorSetByUser) {
+        ValueWithEditor(Object value, int propertyEditorIndex) {
             this.value = value;
             this.propertyEditorIndex = propertyEditorIndex;
-            this.editorSetByUser = editorSetByUser;
+            this.editorSetByUser = true;
         }
 
         public Object getValue() {
@@ -1196,11 +1173,7 @@ public abstract class FormProperty extends Node.Property {
             return propertyEditor;
         }
 
-        boolean getEditorSetByUser() {
-            return editorSetByUser;
-        }
-
-        PropertyEditor getPropertyEditor(FormProperty property) {
+      PropertyEditor getPropertyEditor(FormProperty property) {
             if (propertyEditor != null)
                 return propertyEditor;
             if (propertyEditorIndex < 0)

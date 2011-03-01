@@ -179,8 +179,7 @@ public class TestAction extends CallableSystemAction implements Runnable {
                 frame.setTitle(java.text.MessageFormat.format(
                     org.openide.util.NbBundle.getBundle(TestAction.class)
                                                .getString("FMT_TestingForm"), // NOI18N
-                    new Object[] { title }
-                ));
+                    title));
             }
 
             // prepare close operation
@@ -400,11 +399,7 @@ public class TestAction extends CallableSystemAction implements Runnable {
             this.className = pitem.getComponentClassName();
         }
 
-        public String getClassName() {
-            return className;
-        }
-
-        public Class getLAFClass() throws ClassNotFoundException {
+      public Class getLAFClass() throws ClassNotFoundException {
             Class clazz;
             if (pitem == null) {
                 if (className == null) {

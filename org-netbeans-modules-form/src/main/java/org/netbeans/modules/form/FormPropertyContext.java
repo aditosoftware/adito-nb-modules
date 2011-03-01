@@ -127,11 +127,7 @@ public interface FormPropertyContext {
     public static class SubProperty implements FormPropertyContext {
         private FormProperty parentProperty;
 
-        public SubProperty(FormProperty parentProp) {
-            this.parentProperty = parentProp;
-        }
-
-        @Override
+      @Override
         public boolean useMultipleEditors() {
             return parentProperty.getPropertyContext().useMultipleEditors();
         }

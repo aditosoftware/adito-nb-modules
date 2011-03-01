@@ -78,8 +78,9 @@ class DragOperation {
     private JComponent dragComponent;
     private boolean started = false;
     private JComponent targetComponent;
-    private enum Op { PICK_AND_PLOP_FROM_PALETTE, INTER_MENU_DRAG, NO_MENUBAR };
-    private Op op = Op.PICK_AND_PLOP_FROM_PALETTE;
+    private enum Op { PICK_AND_PLOP_FROM_PALETTE, INTER_MENU_DRAG, NO_MENUBAR }
+
+  private Op op = Op.PICK_AND_PLOP_FROM_PALETTE;
     private JMenuItem payloadComponent;
     private List<JMenuItem> payloadComponents;
     private PaletteItem currentItem;
@@ -123,7 +124,7 @@ class DragOperation {
             payloadComponents.add(item);
         }
         
-        dragComponent = (JMenuItem) createDragFeedbackComponent(item, null);
+        dragComponent = createDragFeedbackComponent(item, null);
         dragComponent.setSize(dragComponent.getPreferredSize());
         dragComponent.setLocation(pt);
         menuEditLayer.layers.add(dragComponent, JLayeredPane.DRAG_LAYER);
@@ -196,7 +197,7 @@ class DragOperation {
                 dragItem.setText(item.getText());
                 dragItem.setIcon(item.getIcon());
                 if(! (item instanceof JMenu)) {
-                    if(!DropTargetLayer.isMetal()) {
+                    if(DropTargetLayer.isMetal()) {
                         dragItem.setAccelerator(item.getAccelerator());
                     }
                 }
@@ -219,7 +220,7 @@ class DragOperation {
             dragComponent = null;
         }
         
-        if(!menuEditLayer.doesFormContainMenuBar()) {
+        if(menuEditLayer.doesFormContainMenuBar()) {
             //op = Op.NO_MENUBAR;
             menuEditLayer.showMenubarWarning = true;
             FormEditor.getAssistantModel(menuEditLayer.formDesigner.getFormModel()).setContext("missingMenubar"); // NOI18N

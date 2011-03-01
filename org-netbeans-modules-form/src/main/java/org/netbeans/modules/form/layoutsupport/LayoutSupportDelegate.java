@@ -89,7 +89,7 @@ public interface LayoutSupportDelegate {
      *                      layout delegate
      * @param lmInstance LayoutManager instance for initialization (may be null)
      * @param fromCode indicates whether to initialize from code structure
-     * @exception any Exception occurred during initialization
+     * @exception Exception Exception occurred during initialization
      */
     void initialize(LayoutSupportContext layoutContext,
                     LayoutManager lmInstance,
@@ -100,7 +100,7 @@ public interface LayoutSupportDelegate {
      * is returned if the delegate is "dedicated" to some special container
      * rather than to a layout manager used generally for any container.
      * @return the class supported by this delegate
-     * @see isDedicated method
+     * @see #isDedicated method
      */
     Class getSupportedClass();
 
@@ -109,7 +109,7 @@ public interface LayoutSupportDelegate {
      * @return true if the delegates supports just certain container only,
      *         false if the delegates supports a layout manager for use in
      *               any container
-     * @see getSupportedClass method
+     * @see #getSupportedClass method
      */
     boolean isDedicated();
 
@@ -190,13 +190,7 @@ public interface LayoutSupportDelegate {
      */
     CodeGroup getComponentCode(int index);
 
-    /** Gets CodeExpression object representing one component.
-     * @param index index of the component in the layout
-     * @return CodeExpression for a component
-     */
-    CodeExpression getComponentCodeExpression(int index);
-
-    /** Gets number of components in the layout.
+  /** Gets number of components in the layout.
      * @return number of components in the layout
      */
     int getComponentCount();
@@ -213,7 +207,7 @@ public interface LayoutSupportDelegate {
      *        contain nulls
      * @param index position at which the components are to be added (inserted);
      *        -1 means that the components will be added at the end
-     * @exception RunTimeException to refuse components
+     * @exception RuntimeException to refuse components
      */
     void acceptNewComponents(CodeExpression[] compExpressions,
                              LayoutConstraints[] constraints,
@@ -264,19 +258,7 @@ public interface LayoutSupportDelegate {
      */
     void removeAll();
 
-    /** Indicates whether there's some change in the layout in comparison
-     * with the default layout of given container. If there's no change, no
-     * code needs to be delegate (e.g. default FlowLayout in JPanel).
-     * Note this is related to the container layout only, not to components.
-     * @param defaultContainer instance of the default container to compare with
-     * @param defaultContainerDelegate effective container delegate of the
-     *        default container (e.g. like content pane of JFrame)
-     * @return whether the current layout is different from the default one
-     */
-    boolean isLayoutChanged(Container defaultContainer,
-                            Container defaultContainerDelegate);
-
-    /** Gets layout constraints for a component at the given index.
+  /** Gets layout constraints for a component at the given index.
      * @param index index of the component in the layout
      * @return layout constraints of given component
      */
@@ -345,7 +327,7 @@ public interface LayoutSupportDelegate {
      * designer. The layout delegate may do something with the container,
      * e.g. for JTabbedPane it might switch the selected TAB.
      * @param p Point of click in the container
-     * @param real instance of the container when the click occurred
+     * @param container instance of the container when the click occurred
      * @param containerDelegate effective container delegate of the container
      *        (e.g. like content pane of JFrame)
      */
@@ -485,7 +467,7 @@ public interface LayoutSupportDelegate {
 
     /** Cloning method - creates a copy of the layout delegate.
      * @param targetContext LayoutSupportContext for the new layout delegate
-     * @param compExpressions array of CodeExpression objects representing the
+     * @param targetComponents array of CodeExpression objects representing the
      *        components for the new layout delegate (corresponding to the
      *        current ones)
      * @return cloned layout delegate instance

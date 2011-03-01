@@ -238,7 +238,7 @@ public class FormLAF {
 
         java.lang.reflect.Method method = UIManager.class.getDeclaredMethod("getLAFState", new Class[0]); // NOI18N
         method.setAccessible(true);
-        Object lafState = method.invoke(null, new Object[0]);
+        Object lafState = method.invoke(null);
         method = lafState.getClass().getDeclaredMethod("setLookAndFeelDefaults", new Class[] {UIDefaults.class}); // NOI18N
         method.setAccessible(true);
 
@@ -246,7 +246,7 @@ public class FormLAF {
         assert !(ide instanceof DelegatingDefaults);
 
         delDefaults = new DelegatingDefaults(null, original.getDefaults(), ide);
-        method.invoke(lafState, new Object[] {delDefaults});
+        method.invoke(lafState, delDefaults);
 
         // See UIDefaults.getUIClass() method - it stores className-class pairs
         // in its map. When project classpath is updated new versions
@@ -383,7 +383,7 @@ public class FormLAF {
         try {
             java.lang.reflect.Method method = Hashtable.class.getDeclaredMethod("getIterator", new Class[] {int.class}); // NOI18N
             method.setAccessible(true);
-            Object i = method.invoke(what, new Object[] {2/*Hashtable.ENTRIES*/});
+            Object i = method.invoke(what, 2/*Hashtable.ENTRIES*/);
             if (i instanceof Iterator) {
                 Iterator iter = (Iterator)i;
                 while (iter.hasNext()) {
@@ -549,7 +549,7 @@ public class FormLAF {
         try {
             java.lang.reflect.Method method = UIManager.class.getDeclaredMethod("getLAFState", new Class[0]); // NOI18N
             method.setAccessible(true);
-            Object lafState = method.invoke(null, new Object[0]);
+            Object lafState = method.invoke(null);
             Field field = lafState.getClass().getDeclaredField("lookAndFeel"); // NOI18N
             field.setAccessible(true);
             value = field.get(lafState);
@@ -560,11 +560,7 @@ public class FormLAF {
         return value;
     }
 
-    public static boolean getUsePreviewDefaults() {
-        return preview && !delDefaults.isDelegating();
-    }
-    
-    public static boolean inLAFBlock() {
+  public static boolean inLAFBlock() {
         return preview || delDefaults.isDelegating();
     }
 

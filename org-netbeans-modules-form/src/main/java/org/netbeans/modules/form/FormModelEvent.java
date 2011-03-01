@@ -77,8 +77,7 @@ public class FormModelEvent extends EventObject
 //    public static final int BINDING_PROPERTY_CHANGED = 16;
     public static final int SYNTHETIC_PROPERTY_CHANGED = 11;
     public static final int EVENT_HANDLER_ADDED = 12;
-    public static final int EVENT_HANDLER_REMOVED = 13;
-    public static final int EVENT_HANDLER_RENAMED = 14;
+  public static final int EVENT_HANDLER_RENAMED = 14;
     public static final int OTHER_CHANGE = 15;
 
     // data about the change
@@ -91,18 +90,14 @@ public class FormModelEvent extends EventObject
     private int componentIndex = -1;
     private int[] reordering;
     private String propertyName;
-    private String subPropertyName;
-    private Object oldPropertyValue;
+  private Object oldPropertyValue;
     private Object newPropertyValue;
 
     private UndoableEdit undoableEdit;
 
     // -----------
 
-    private FormModelEvent additionalEvent; 
-    private static List<FormModelEvent> interestList; // events interested in additional events
-
-    // -----------
+  // -----------
 
     FormModelEvent(FormModel source, int changeType) {
         super(source);
@@ -116,11 +111,7 @@ public class FormModelEvent extends EventObject
         newPropertyValue = newValue;
     }
 
-    void setSubProperty(String subPropertyName) {
-        this.subPropertyName = subPropertyName;
-    }
-
-    void setComponentAndContainer(RADComponent metacomp,
+  void setComponentAndContainer(RADComponent metacomp,
                                   ComponentContainer metacont)
     {
         component = metacomp;
@@ -187,11 +178,7 @@ public class FormModelEvent extends EventObject
         newPropertyValue = newHandlerName;
     }
 
-    void setChangeType(int changeType) {
-        this.changeType = changeType;
-    }
-
-    private static ComponentContainer deriveContainer(RADComponent comp) {
+  private static ComponentContainer deriveContainer(RADComponent comp) {
         if (comp == null)
             return null;
         if (comp.getParentComponent() instanceof ComponentContainer)
@@ -234,19 +221,11 @@ public class FormModelEvent extends EventObject
         return constraints;
     }
 
-    public final int getComponentIndex() {
-        return componentIndex;
-    }
-
-    public final String getPropertyName() {
+  public final String getPropertyName() {
         return propertyName;
     }
 
-    public final String getSubPropertyName() {
-        return subPropertyName;
-    }
-
-    public final RADProperty getComponentProperty() {
+  public final RADProperty getComponentProperty() {
         return component != null && propertyName != null ?
             component.getBeanProperty(propertyName) : null;
     }
@@ -279,31 +258,10 @@ public class FormModelEvent extends EventObject
     // methods for events interested in additional events occured
     // (used for undo/redo processing of event handlers)
 
-    private static void addToInterestList(FormModelEvent ev) {
-        if (interestList == null) {
-            interestList = new ArrayList<FormModelEvent>();
-        } else {
-            interestList.remove(ev);
-        }
-
-        interestList.add(ev);
+  private static void informInterestedEvents(FormModelEvent newEvent) {
     }
 
-    private static void removeFromInterestList(FormModelEvent ev) {
-        if (interestList != null)
-            interestList.remove(ev);
-    }
-
-    private static void informInterestedEvents(FormModelEvent newEvent) {
-        if (interestList != null)
-          for (Object anInterestList : interestList) ((FormModelEvent) anInterestList).newEventCreated(newEvent);
-    }
-
-    private void newEventCreated(FormModelEvent newEvent) {
-        additionalEvent = newEvent;
-    }
-
-    // ----------
+  // ----------
 
     private class FormUndoableEdit extends AbstractUndoableEdit {
         @Override

@@ -128,7 +128,7 @@ public class FakePeerSupport
         Class proxyClass = Proxy.getProxyClass(compPeer.getClass().getClassLoader(), interfaces);        
         FakePeerInvocationHandler handler = new FakePeerInvocationHandler(compPeer); 
         try {
-           return (FakePeer) proxyClass.getConstructor(new Class[] { InvocationHandler.class }).newInstance(new Object[] { handler });                   
+           return (FakePeer) proxyClass.getConstructor(new Class[] { InvocationHandler.class }).newInstance(handler);
         } catch (Exception e) {
             org.openide.ErrorManager.getDefault().notify(e);
         }
@@ -186,7 +186,7 @@ public class FakePeerSupport
         try {
             Field f = Component.class.getDeclaredField("peer"); // NOI18N
             f.setAccessible(true);
-            Object peer = (ComponentPeer) f.get(comp);
+            Object peer = f.get(comp);
             if (peer instanceof FakePeer) {
                 f.set(comp, null);
                 return (FakePeer) peer;

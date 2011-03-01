@@ -71,14 +71,13 @@ public class SwingLayoutUtils {
     private static Set<String> nonResizableComponents = new HashSet<String>();
     static {
         nonResizableComponents.addAll(
-            Arrays.asList(new String[] {
-                "javax.swing.JLabel", // NOI18N
-                "javax.swing.JButton", // NOI18N
-                "javax.swing.JToggleButton", // NOI18N
-                "javax.swing.JCheckBox", // NOI18N
-                "javax.swing.JRadioButton", // NOI18N
-                "javax.swing.JList", // NOI18N
-            })
+            Arrays.asList("javax.swing.JLabel", // NOI18N
+                          "javax.swing.JButton", // NOI18N
+                          "javax.swing.JToggleButton", // NOI18N
+                          "javax.swing.JCheckBox", // NOI18N
+                          "javax.swing.JRadioButton", // NOI18N
+                          "javax.swing.JList" // NOI18N
+            )
         );
     }
 
@@ -90,46 +89,23 @@ public class SwingLayoutUtils {
     private static Set<String> resizableComponents = new HashSet<String>();
     static {
         resizableComponents.addAll(
-            Arrays.asList(new String[] {
-                "javax.swing.JComboBox", // NOI18N
-                "javax.swing.JTextField", // NOI18N
-                "javax.swing.JTextArea", // NOI18N
-                "javax.swing.JTabbedPane", // NOI18N
-                "javax.swing.JScrollPane", // NOI18N
-                "javax.swing.JSplitPane", // NOI18N
-                "javax.swing.JFormattedTextField", // NOI18N
-                "javax.swing.JPasswordField", // NOI18N
-                "javax.swing.JSpinner", // NOI18N
-                "javax.swing.JSeparator", // NOI18N
-                "javax.swing.JTextPane", // NOI18N
-                "javax.swing.JEditorPane", // NOI18N
-                "javax.swing.JInternalFrame", // NOI18N
-                "javax.swing.JLayeredPane", // NOI18N
-                "javax.swing.JDesktopPane" // NOI18N
-            })
+            Arrays.asList("javax.swing.JComboBox", // NOI18N
+                          "javax.swing.JTextField", // NOI18N
+                          "javax.swing.JTextArea", // NOI18N
+                          "javax.swing.JTabbedPane", // NOI18N
+                          "javax.swing.JScrollPane", // NOI18N
+                          "javax.swing.JSplitPane", // NOI18N
+                          "javax.swing.JFormattedTextField", // NOI18N
+                          "javax.swing.JPasswordField", // NOI18N
+                          "javax.swing.JSpinner", // NOI18N
+                          "javax.swing.JSeparator", // NOI18N
+                          "javax.swing.JTextPane", // NOI18N
+                          "javax.swing.JEditorPane", // NOI18N
+                          "javax.swing.JInternalFrame", // NOI18N
+                          "javax.swing.JLayeredPane", // NOI18N
+                          "javax.swing.JDesktopPane" // NOI18N
+            )
         );
-    }
-
-    /**
-     * Determines whether the given class represents component
-     * that is resizable (by default) or not.
-     *
-     * @param componentClass <code>Class</code> object corresponding
-     * to component we are interested in.
-     * @return <code>STATUS_RESIZABLE</code>, <code>STATUS_NON_RESIZABLE</code>
-     * or <code>STATUS_UNKNOWN</code>.
-     */
-    public static int getResizableStatus(Component component) {
-        int status = getSpecialStatus(component);
-        if (status == STATUS_UNKNOWN) {
-            String className = component.getClass().getName();
-            if (resizableComponents.contains(className)) {
-                status = STATUS_RESIZABLE;
-            } else if (nonResizableComponents.contains(className)) {
-                status = STATUS_NON_RESIZABLE;
-            }
-        }
-        return status;
     }
 
     private static int getSpecialStatus(Component component) {
@@ -155,7 +131,7 @@ public class SwingLayoutUtils {
                 if (lc != null) {
                     if (lc.isLinkSized(dimension)) {
                         String cid = lc.getId();
-                        Integer id = new Integer(lc.getLinkSizeId(dimension));
+                        Integer id = lc.getLinkSizeId(dimension);
                         List<String> l = linkSizeGroup.get(id);
                         if (l == null) {
                             l = new ArrayList<String>();

@@ -58,12 +58,7 @@ import org.openide.util.NbBundle;
  */
 public class InspectorAction extends AbstractAction {
 
-    public InspectorAction() {
-        putValue(NAME, NbBundle.getMessage(InspectorAction.class, "CTL_InspectorAction"));
-        putValue(SMALL_ICON, ImageUtilities.loadImageIcon("org/netbeans/modules/form/resources/inspector.png", false)); // NOI18N
-    }
-
-    /** Opens component inspector (Form structure) component. */
+  /** Opens component inspector (Form structure) component. */
     @Override
     public void actionPerformed(ActionEvent evt) {
         // show ComponentInspector

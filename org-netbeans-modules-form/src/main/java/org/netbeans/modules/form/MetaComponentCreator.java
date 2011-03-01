@@ -132,14 +132,13 @@ public class MetaComponentCreator {
         if (compClass == null)
             return null; // class loading failed
 
-        RADComponent metacomp = createAndAddComponent(compClass, targetComp, constraints, exactTargetMatch);
       // TODO: stripped
         /*String typeParams = classSource.getTypeParameters();
         if (typeParams != null) {
             metacomp.setAuxValue(JavaCodeGenerator.AUX_TYPE_PARAMETERS, typeParams);
             JavaCodeGenerator.setupComponentFromAuxValues(metacomp);
         }*/
-        return metacomp;
+        return createAndAddComponent(compClass, targetComp, constraints, exactTargetMatch);
     }
 
     /** Creates a copy of a metacomponent and adds it to FormModel. The new
@@ -807,7 +806,7 @@ public class MetaComponentCreator {
                 new RADVisualComponent() : newMetaCont;
 
             newMetaComp.initialize(formModel);
-            if (!initComponentInstance(newMetaComp, compClass))
+            if (initComponentInstance(newMetaComp, compClass))
                 return null; // failure (reported)
 
 
@@ -822,7 +821,7 @@ public class MetaComponentCreator {
                 LayoutSupportManager laysup = newMetaCont.getLayoutSupport();
                 knownLayout = laysup.prepareLayoutDelegate(false, false);
 
-                if ((knownLayout && !laysup.isDedicated() && !laysup.isSpecialLayout() && formModel.isFreeDesignDefaultLayout())
+                if ((knownLayout && !laysup.isDedicated() && laysup.isSpecialLayout() && formModel.isFreeDesignDefaultLayout())
                     || (!knownLayout && SwingLayoutBuilder.isRelevantContainer(laysup.getPrimaryContainerDelegate())))
                 {   // general containers should use the new layout support when created
                     newMetaCont.setOldLayoutSupport(false);
@@ -861,7 +860,7 @@ public class MetaComponentCreator {
             }
         }
 
-        newMetaComp.setStoredName(formModel.getCodeStructure().getExternalVariableName(compClass, null, false));
+        newMetaComp.setStoredName(formModel.getCodeStructure().getExternalVariableName(compClass));
 
         // for some components, we initialize their properties with some
         // non-default values e.g. a label on buttons, checkboxes
@@ -916,7 +915,7 @@ public class MetaComponentCreator {
     {
         RADComponent newMetaComp = new RADComponent();
         newMetaComp.initialize(formModel);
-        if (!initComponentInstance(newMetaComp, compClass))
+        if (initComponentInstance(newMetaComp, compClass))
             return null;
 
         addOtherComponent(newMetaComp, targetComp, true);
@@ -1071,27 +1070,7 @@ public class MetaComponentCreator {
         return targetComp;
     }
 
-    private void setComponentBorderProperty(Object borderInstance,
-                                            RADComponent targetComp)
-    {
-        FormProperty prop = getBorderProperty(targetComp);
-        if (prop == null)
-            return;
-
-        try { // set border property
-            prop.setValue(borderInstance);
-        }
-        catch (Exception ex) { // should not happen
-            ex.printStackTrace();
-            return;
-        }
-
-        FormDesigner designer = FormEditor.getFormDesigner(formModel);
-        if (designer != null)
-            designer.setSelectedComponent(targetComp);
-    }
-
-    private RADComponent copyAndApplyBorder(RADComponent sourceComp,
+  private RADComponent copyAndApplyBorder(RADComponent sourceComp,
                                             RADComponent targetComp)
     {
       // TODO: stripped
@@ -1150,7 +1129,7 @@ public class MetaComponentCreator {
         }
 
         newMenuItemComp.initialize(formModel);
-        if (!initComponentInstance(newMenuItemComp, compClass))
+        if (initComponentInstance(newMenuItemComp, compClass))
             return null;
         if (newMenuComp != null)
             newMenuComp.initSubComponents(new RADComponent[0]);
@@ -1270,7 +1249,7 @@ public class MetaComponentCreator {
         String className = classSource.getClassName();
         Class loadedClass = null;
         try {
-            if (!ClassPathUtils.checkUserClass(className, formFile)) {
+            if (ClassPathUtils.checkUserClass(className, formFile)) {
                 if (ClassPathUtils.updateProject(formFile, classSource) == null) {
                     return null;
                 }
@@ -1365,13 +1344,13 @@ public class MetaComponentCreator {
         }
         catch (Exception ex) {
             showInstErrorMessage(ex);
-            return false;
+            return true;
         }
         catch (LinkageError ex) {
             showInstErrorMessage(ex);
-            return false;
+            return true;
         }
-        return true;
+        return false;
     }
 
     private static void showInstErrorMessage(Throwable ex) {
@@ -1487,28 +1466,32 @@ public class MetaComponentCreator {
         } else if (comp instanceof JTextArea) {
             JTextArea textArea = (JTextArea)comp;
             if (textArea.getRows() == 0) {
-                changes.put("rows", new Integer(5)); // NOI18N
+                changes.put("rows", 5); // NOI18N
             }
             if (textArea.getColumns() == 0) {
-                changes.put("columns", new Integer(20)); // NOI18N
+                changes.put("columns", 20); // NOI18N
             }
         }
 
-        Iterator iter = changes.entrySet().iterator();
-        while (iter.hasNext()) {
-            Map.Entry change = (Map.Entry)iter.next();
-            String propName = (String)change.getKey();
-            Object propValue = change.getValue();
-            FormProperty prop = newMetaComp.getBeanProperty(propName);
-            if (prop != null) {
-                try {
-                    prop.setChangeFiring(false);
-                    prop.setValue(propValue);
-                    prop.setChangeFiring(true);
-                }
-                catch (Exception e) {} // never mind, ignore
-            }
+      for (Map.Entry<String, Object> stringObjectEntry : changes.entrySet())
+      {
+        Map.Entry change = (Map.Entry) stringObjectEntry;
+        String propName = (String) change.getKey();
+        Object propValue = change.getValue();
+        FormProperty prop = newMetaComp.getBeanProperty(propName);
+        if (prop != null)
+        {
+          try
+          {
+            prop.setChangeFiring(false);
+            prop.setValue(propValue);
+            prop.setChangeFiring(true);
+          }
+          catch (Exception e)
+          {
+          } // never mind, ignore
         }
+      }
 
         // more initial modifications...
         if (shouldEncloseByScrollPane(newMetaComp.getBeanInstance())) {
@@ -1650,7 +1633,7 @@ public class MetaComponentCreator {
 
         Dimension size = new Dimension(width, height);
         if (comp instanceof JComponent) {
-            ((JComponent)comp).setPreferredSize(size);
+            comp.setPreferredSize(size);
         }
         return size;
     }

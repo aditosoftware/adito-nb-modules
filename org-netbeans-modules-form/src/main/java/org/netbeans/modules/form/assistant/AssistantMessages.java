@@ -96,14 +96,14 @@ public class AssistantMessages {
 
         // Transform sets into arrays
         contextToMessages = new HashMap<String, String[]>();
-        Iterator<Map.Entry<String,Set<String>>> iter = contextToSet.entrySet().iterator();
-        while (iter.hasNext()) {
-            Map.Entry<String,Set<String>> entry = iter.next();
-            String key = entry.getKey();
-            Set<String> value = entry.getValue();
-            String[] messages = value.toArray(new String[value.size()]);
-            contextToMessages.put(key, messages);
-        }
+      for (Map.Entry<String, Set<String>> stringSetEntry : contextToSet.entrySet())
+      {
+        Map.Entry<String, Set<String>> entry = stringSetEntry;
+        String key = entry.getKey();
+        Set<String> value = entry.getValue();
+        String[] messages = value.toArray(new String[value.size()]);
+        contextToMessages.put(key, messages);
+      }
         
         initialized = true;
     }

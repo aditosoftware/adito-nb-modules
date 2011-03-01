@@ -56,14 +56,9 @@ public interface CodeGroup {
     public void addStatement(int index, CodeStatement statement);
 
     public void addGroup(CodeGroup group);
-    public void addGroup(int index, CodeGroup group);
-
-    public CodeStatement getStatement(int index);
-
-    public int indexOf(Object object);
 
     public void remove(Object object);
-    public void remove(int index);
+
     public void removeAll();
 
     public Iterator getStatementsIterator();

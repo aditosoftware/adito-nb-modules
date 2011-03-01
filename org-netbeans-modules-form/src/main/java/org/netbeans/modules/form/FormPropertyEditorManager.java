@@ -93,24 +93,7 @@ final public class FormPropertyEditorManager {
         return list.toArray(new PropertyEditor[list.size()]);
     }
 
-    public static synchronized void registerEditor(Class propertyType, Class editorClass) {
-        List<Class> classList;
-        if (expliciteEditors != null) {
-            classList = expliciteEditors.get(propertyType);
-        } else {
-            classList = null;
-            expliciteEditors = new HashMap<Class, List<Class>>();
-        }
-        if (classList == null) {
-            classList = new LinkedList<Class>();
-            classList.add(editorClass);
-            expliciteEditors.put(propertyType, classList);
-        } else if (!classList.contains(editorClass)) {
-            classList.add(editorClass);
-        }
-    }
-
-    private static List<Class> getRegisteredEditorClasses(Class propertyType) {
+  private static List<Class> getRegisteredEditorClasses(Class propertyType) {
         List<Class> classList = expliciteEditors != null ? expliciteEditors.get(propertyType) : null;
         return classList != null ? classList : Collections.EMPTY_LIST;
     }
@@ -124,7 +107,7 @@ final public class FormPropertyEditorManager {
         if (isEditorInCache(type, 0)) {
             createEditorFromCache(type, 0, editorList);
         } else {
-            PropertyEditor editor = (type != Object.class && !hasWrappingEditor(type))
+            PropertyEditor editor = (type != Object.class && hasWrappingEditor(type))
                 ? PropertyEditorManager.findEditor(type) : null;
             if (editor != null) {
                 editorList.add(editor);
@@ -235,10 +218,10 @@ final public class FormPropertyEditorManager {
      * such an editor. Used for subclasses of ResourceWrapperEditor.
      */
     private static boolean hasWrappingEditor(Class type) {
-        return type == String.class
-               || type == java.awt.Font.class
-               || type == java.awt.Color.class
-               || type == javax.swing.Icon.class;
+        return type != String.class
+            && type != java.awt.Font.class
+            && type != java.awt.Color.class
+            && type != javax.swing.Icon.class;
     }
 
     /**

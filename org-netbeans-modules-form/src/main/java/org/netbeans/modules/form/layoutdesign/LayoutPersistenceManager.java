@@ -261,7 +261,7 @@ class LayoutPersistenceManager implements LayoutConstants {
     /**
      * Saves linkSize group identifier
      *
-     * @param linksizeid
+     * @param linkSizeId
      */
     private void saveLinkSize(int linkSizeId) {
         if (linkSizeId != NOT_EXPLICITLY_DEFINED) {
@@ -272,7 +272,7 @@ class LayoutPersistenceManager implements LayoutConstants {
     /**
      * Saves group/interval alignemnt.
      *
-     * @param alignemnt alignment to save.
+     * @param alignment alignment to save.
      * @param group determines whether it is a group alignment.
      */
     private void saveAlignment(int alignment, boolean group) {

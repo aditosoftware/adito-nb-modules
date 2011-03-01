@@ -121,8 +121,8 @@ public class PaletteMenuView extends org.openide.awt.JMenuPlus {
             if (nodes.length > 0) {
               for (Node node : nodes)
                 add(node.isLeaf() ?
-                        (JMenuItem) new MenuView.MenuItem(node, menuAction) :
-                        (JMenuItem) new PaletteMenuView(node, menuAction, level + 1));
+                        new MenuView.MenuItem(node, menuAction) :
+                        new PaletteMenuView(node, menuAction, level + 1));
             }
             else {
                 JMenuItem empty = new JMenuItem(

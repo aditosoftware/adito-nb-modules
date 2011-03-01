@@ -111,11 +111,11 @@ public class LayoutDesigner implements LayoutConstants {
             imposeSize = optimizeStructure = false;
 
             if (updatedContainers != null) {
-                Iterator<LayoutComponent> it = updatedContainers.iterator();
-                while (it.hasNext()) {
-                    LayoutComponent cont = it.next();
-                    visualMapper.rebuildLayout(cont.getId());
-                }
+              for (LayoutComponent updatedContainer : updatedContainers)
+              {
+                LayoutComponent cont = updatedContainer;
+                visualMapper.rebuildLayout(cont.getId());
+              }
                 updatePositions(null);
             }
         }
@@ -955,8 +955,8 @@ public class LayoutDesigner implements LayoutConstants {
                         // to copy them.
                         temp.add(subCopy);
                         temp.add(copy);
-                        temp.add(new Integer(subCopy.getRawAlignment()));
-                        temp.add(new Integer(copy.getSubIntervalCount() + compCount));
+                        temp.add(subCopy.getRawAlignment());
+                        temp.add(copy.getSubIntervalCount() + compCount);
                         compCount++;
                     } else {
                         layoutModel.addInterval(subCopy, copy, -1);
@@ -1225,8 +1225,8 @@ public class LayoutDesigner implements LayoutConstants {
         if ((component.isLinkSized(HORIZONTAL)) && (component.isLinkSized(VERTICAL))) {
             Map<Integer,List<String>> linkGroupsH = layoutModel.getLinkSizeGroups(HORIZONTAL);            
             Map<Integer,List<String>> linkGroupsV = layoutModel.getLinkSizeGroups(VERTICAL);
-            Integer linkIdH = new Integer(component.getLinkSizeId(HORIZONTAL));
-            Integer linkIdV = new Integer(component.getLinkSizeId(VERTICAL));
+            Integer linkIdH = component.getLinkSizeId(HORIZONTAL);
+            Integer linkIdV = component.getLinkSizeId(VERTICAL);
             
             List<String> lH = linkGroupsH.get(linkIdH);
             List<String> lV = linkGroupsV.get(linkIdV);
@@ -1241,45 +1241,50 @@ public class LayoutDesigner implements LayoutConstants {
             merged.add(aLV);
           }
 
-            Iterator<String> mergedIt = merged.iterator();
-            while (mergedIt.hasNext()) {
-                String id = mergedIt.next();
-                LayoutComponent lc = layoutModel.getLayoutComponent(id);
-                LayoutInterval interval = lc.getLayoutInterval(HORIZONTAL);
-                LayoutRegion region = interval.getCurrentSpace();
-                Image badge = null;
-                if ((lV.contains(id)) && (lH.contains(id))) {
-                    badge = getLinkBadge(BOTH_DIMENSIONS);
-                } else {
-                    if (lH.contains(lc.getId())) {
-                        badge = getLinkBadge(HORIZONTAL);
-                    }
-                    if (lV.contains(lc.getId())) {
-                        badge = getLinkBadge(VERTICAL);
-                    }
-                }
-                int x = region.positions[HORIZONTAL][TRAILING] - region.size(HORIZONTAL) / 4  - (badge.getWidth(null) / 2);
-                int y = region.positions[VERTICAL][LEADING] - (badge.getHeight(null));
-                g.drawImage(badge, x, y, null);
+          for (String aMerged : merged)
+          {
+            String id = aMerged;
+            LayoutComponent lc = layoutModel.getLayoutComponent(id);
+            LayoutInterval interval = lc.getLayoutInterval(HORIZONTAL);
+            LayoutRegion region = interval.getCurrentSpace();
+            Image badge = null;
+            if ((lV.contains(id)) && (lH.contains(id)))
+            {
+              badge = getLinkBadge(BOTH_DIMENSIONS);
             }
+            else
+            {
+              if (lH.contains(lc.getId()))
+              {
+                badge = getLinkBadge(HORIZONTAL);
+              }
+              if (lV.contains(lc.getId()))
+              {
+                badge = getLinkBadge(VERTICAL);
+              }
+            }
+            int x = region.positions[HORIZONTAL][TRAILING] - region.size(HORIZONTAL) / 4 - (badge.getWidth(null) / 2);
+            int y = region.positions[VERTICAL][LEADING] - (badge.getHeight(null));
+            g.drawImage(badge, x, y, null);
+          }
         } else {
             int dimension = (component.isLinkSized(HORIZONTAL)) ? HORIZONTAL : VERTICAL;
             Map map =  layoutModel.getLinkSizeGroups(dimension);
             
-            Integer linkId = new Integer(component.getLinkSizeId(dimension));
+            Integer linkId = component.getLinkSizeId(dimension);
             List l = (List)map.get(linkId);
-            Iterator mergedIt = l.iterator();
-            
-            while (mergedIt.hasNext()) {
-                String id = (String)mergedIt.next();
-                LayoutComponent lc = layoutModel.getLayoutComponent(id);
-                LayoutInterval interval = lc.getLayoutInterval(dimension);
-                LayoutRegion region = interval.getCurrentSpace();
-                Image badge = getLinkBadge(dimension);
-                int x = region.positions[HORIZONTAL][TRAILING] - region.size(HORIZONTAL) / 4 - (badge.getWidth(null) / 2);
-                int y = region.positions[VERTICAL][LEADING] - (badge.getHeight(null));
-                g.drawImage(badge, x, y, null);
-            }
+
+          for (Object aL : l)
+          {
+            String id = (String) aL;
+            LayoutComponent lc = layoutModel.getLayoutComponent(id);
+            LayoutInterval interval = lc.getLayoutInterval(dimension);
+            LayoutRegion region = interval.getCurrentSpace();
+            Image badge = getLinkBadge(dimension);
+            int x = region.positions[HORIZONTAL][TRAILING] - region.size(HORIZONTAL) / 4 - (badge.getWidth(null) / 2);
+            int y = region.positions[VERTICAL][LEADING] - (badge.getHeight(null));
+            g.drawImage(badge, x, y, null);
+          }
         }
     }
     
@@ -2172,7 +2177,7 @@ public class LayoutDesigner implements LayoutConstants {
 
     private static int[] getCopyShift(LayoutComponent[] sourceComponents, LayoutComponent targetContainer, LayoutRegion compSpace, boolean relative) {
         LayoutRegion contSpace = getContainerSpace(targetContainer);
-        if (!compSpace.isSet() || !contSpace.isSet()) {
+        if (compSpace.isSet() || contSpace.isSet()) {
             return null;
         }
         int[] move = new int[DIM_COUNT];
@@ -2221,11 +2226,11 @@ public class LayoutDesigner implements LayoutConstants {
 
     // [move this to LayoutInterval?]
     private static boolean isSnappedNextToInParent(LayoutInterval interval, LayoutInterval parent, int dimension, int alignment) {
-        LayoutInterval gap = LayoutInterval.getNeighbor(interval, alignment, false, true, false);
+        LayoutInterval gap = LayoutInterval.getNeighbor(interval, alignment, false, false);
         if (gap != null && LayoutInterval.isFixedDefaultPadding(gap) && parent.isParentOf(gap)) {
             LayoutInterval back = LayoutInterval.getDirectNeighbor(gap, alignment^1, true);
             if ((back == interval || LayoutInterval.isPlacedAtBorder(interval, back, dimension, alignment))
-                    && LayoutInterval.getNeighbor(gap, alignment, true, true, false) == null
+                    && LayoutInterval.getNeighbor(gap, alignment, true, false) == null
                     && LayoutInterval.isPlacedAtBorder(gap.getParent(), parent, dimension, alignment)) {
                 return true;
             }
@@ -2250,7 +2255,7 @@ public class LayoutDesigner implements LayoutConstants {
         
         @Override
         public void layoutChanged(LayoutEvent ev) {
-            if (!layoutModel.isUndoRedoInProgress()) {
+            if (layoutModel.isUndoRedoInProgress()) {
                 deactivate();
                 LayoutDesigner.this.layoutChanged(ev);
                 activate();
@@ -2517,7 +2522,7 @@ public class LayoutDesigner implements LayoutConstants {
             interval = parent;
             parent = parent.getParent();
         }
-        int adjustable = (leadingAdjustable ? 1 << LEADING : 0) + (trailingAdjustable ? 1 << TRAILING : 0);
+        int adjustable = (leadingAdjustable ? 1 : 0) + (trailingAdjustable ? 1 << TRAILING : 0);
         if (leadingFixed && trailingFixed) {
             // As if top level group wantResize()
             if (LEADING == interval.getGroupAlignment()) {
@@ -2566,7 +2571,7 @@ public class LayoutDesigner implements LayoutConstants {
             LayoutComponent comp = interval.getComponent();
             dimension = (interval == comp.getLayoutInterval(HORIZONTAL)) ? HORIZONTAL : VERTICAL;
             if (comp.isLinkSized(dimension)) {
-                Collection linked = (Collection)layoutModel.getLinkSizeGroups(dimension).get(new Integer(comp.getLinkSizeId(dimension)));
+                Collection linked = layoutModel.getLinkSizeGroups(dimension).get(comp.getLinkSizeId(dimension));
                 Iterator iter = linked.iterator();
                 int prefSize = 0;
                 while (iter.hasNext()) {
@@ -2644,26 +2649,27 @@ public class LayoutDesigner implements LayoutConstants {
         
         // Unset the same-size if we are making the component resizable
         if (resizing && comp.isLinkSized(dimension)) {
-            Collection linked = (Collection)layoutModel.getLinkSizeGroups(dimension).get(new Integer(comp.getLinkSizeId(dimension)));
+            Collection linked = layoutModel.getLinkSizeGroups(dimension).get(comp.getLinkSizeId(dimension));
             Collection toChange;
             if (linked.size() == 2) { // The second component will be unlinked, too.
                 toChange = linked;
             } else {
                 toChange = Collections.singletonList(comp.getId());
             }
-            Iterator iter = toChange.iterator();
-            while (iter.hasNext()) {
-                String compId = (String)iter.next();
-                LayoutComponent component = layoutModel.getLayoutComponent(compId);
-                LayoutInterval intr = component.getLayoutInterval(dimension);
-                Dimension prefDim = visualMapper.getComponentPreferredSize(compId);
-                int prefSize = (dimension == HORIZONTAL) ? prefDim.width : prefDim.height;
-                int currSize = intr.getCurrentSpace().size(dimension);
-                if (currSize == prefSize) {
-                    currSize = NOT_EXPLICITLY_DEFINED;
-                }
-                layoutModel.setIntervalSize(intr, intr.getMinimumSize(), currSize, intr.getMaximumSize());
+          for (Object aToChange : toChange)
+          {
+            String compId = (String) aToChange;
+            LayoutComponent component = layoutModel.getLayoutComponent(compId);
+            LayoutInterval intr = component.getLayoutInterval(dimension);
+            Dimension prefDim = visualMapper.getComponentPreferredSize(compId);
+            int prefSize = (dimension == HORIZONTAL) ? prefDim.width : prefDim.height;
+            int currSize = intr.getCurrentSpace().size(dimension);
+            if (currSize == prefSize)
+            {
+              currSize = NOT_EXPLICITLY_DEFINED;
             }
+            layoutModel.setIntervalSize(intr, intr.getMinimumSize(), currSize, intr.getMaximumSize());
+          }
         }
         
         LayoutInterval parent = interval.getParent();
@@ -2917,12 +2923,12 @@ public class LayoutDesigner implements LayoutConstants {
         }
         LayoutInterval[] intervals = new LayoutInterval[componentIds.size()];
         int counter = 0;
-        Iterator iter = componentIds.iterator();        
-        while (iter.hasNext()) {
-            String id = (String)iter.next();
-            LayoutComponent component = layoutModel.getLayoutComponent(id);
-            intervals[counter++] = component.getLayoutInterval(dimension);            
-        }
+      for (Object componentId : componentIds)
+      {
+        String id = (String) componentId;
+        LayoutComponent component = layoutModel.getLayoutComponent(id);
+        intervals[counter++] = component.getLayoutInterval(dimension);
+      }
         modelListener.deactivate();
         try {
             new LayoutAligner(this, layoutModel, operations).alignIntervals(intervals, closed, dimension, alignment);
@@ -2983,7 +2989,7 @@ public class LayoutDesigner implements LayoutConstants {
         if (parent == null) return;
 
         // Remove empty groups
-        if (LayoutInterval.getCount(group, LayoutRegion.ALL_POINTS, true) == 0) {
+        if (LayoutInterval.getCount(group, LayoutRegion.ALL_POINTS) == 0) {
             takeOutInterval(group, boundary);
             return;
         }
@@ -3036,11 +3042,11 @@ public class LayoutDesigner implements LayoutConstants {
                 layoutModel.addInterval(gap, parent, index);
             }
         }
-        Iterator iter = toRemove.iterator();
-        while (iter.hasNext()) {
-            LayoutInterval remove = (LayoutInterval)iter.next();
-            layoutModel.removeInterval(remove);
-        }
+      for (LayoutInterval aToRemove : toRemove)
+      {
+        LayoutInterval remove = aToRemove;
+        layoutModel.removeInterval(remove);
+      }
         // Consolidate parent
         destroyGroupIfRedundant(parent, boundary);
     }
@@ -3258,7 +3264,7 @@ public class LayoutDesigner implements LayoutConstants {
         if (group.getGroupAlignment() == BASELINE) {
             return -1;
         }
-        int nonEmptyCount = LayoutInterval.getCount(group, LayoutRegion.ALL_POINTS, true);
+        int nonEmptyCount = LayoutInterval.getCount(group, LayoutRegion.ALL_POINTS);
         if (nonEmptyCount <= 1) {
             if (group.getParent() == null) {
                 if (group.getSubIntervalCount() > 1) {

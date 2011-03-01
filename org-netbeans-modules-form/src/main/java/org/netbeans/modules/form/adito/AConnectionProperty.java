@@ -87,8 +87,7 @@ public class AConnectionProperty extends PropertySupport.ReadWrite
 
   public static AConnectionProperty create(Node.Property pAdito, Node.Property pBean)
   {
-    AConnectionProperty property = new AConnectionProperty(pAdito, pBean);
-    return property;
+    return new AConnectionProperty(pAdito, pBean);
   }
 
 }

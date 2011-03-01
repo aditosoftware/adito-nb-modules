@@ -612,7 +612,7 @@ public final class LayoutInterval implements LayoutConstants {
         return parents;
     }
 
-    static int getCount(LayoutInterval group, int alignment, boolean nonEmpty) {
+    static int getCount(LayoutInterval group, int alignment) {
         int n = 0;
         Iterator it = group.getSubIntervals();
         while (it.hasNext()) {
@@ -621,7 +621,7 @@ public final class LayoutInterval implements LayoutConstants {
                  || alignment == LayoutRegion.ALL_POINTS
                  || li.getAlignment() == alignment
                  || wantResize(li))
-                && (!nonEmpty || !li.isEmptySpace()))
+                && (!true || !li.isEmptySpace()))
             {   // count in
                 n++;
             }
@@ -651,15 +651,11 @@ public final class LayoutInterval implements LayoutConstants {
     /**
      * @param alignment direction in which the neighbor is looked for (LEADING or TRAILING)
      * @param nonEmpty true if empty spaces (gaps) should be skipped
-     * @param outOfParent true if can go up (out of the first sequential parent)
-     *                         for an indirect neighbor
      * @param aligned true if the indirect neighbor must be in contact with the
-     *                     given interval
      */
     static LayoutInterval getNeighbor(LayoutInterval interval,
                                       int alignment,
                                       boolean nonEmpty,
-                                      boolean outOfParent,
                                       boolean aligned)
     {
         assert alignment == LEADING || alignment == TRAILING;
@@ -684,7 +680,7 @@ public final class LayoutInterval implements LayoutConstants {
                 neighbor = getDirectNeighbor(interval, alignment, nonEmpty);
             }
         }
-        while (neighbor == null && parent != null && outOfParent);
+        while (neighbor == null && parent != null);
 
         return neighbor;
     }
@@ -882,7 +878,7 @@ public final class LayoutInterval implements LayoutConstants {
     }
 
     static boolean isExplicitlyClosedGroup(LayoutInterval group) {
-        return group.hasAttribute(ATTR_CLOSED_GROUP);
+        return !group.hasAttribute(ATTR_CLOSED_GROUP);
     }
 
     static boolean isDefaultPadding(LayoutInterval interval) {

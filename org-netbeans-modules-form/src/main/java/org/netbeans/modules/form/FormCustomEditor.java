@@ -364,7 +364,7 @@ public class FormCustomEditor extends JPanel implements PropertyChangeListener {
                         value = new FormProperty.ValueWithEditor(value, currentEditor, true);
                     }
                     else { // there are more nodes selected
-                        value = new FormProperty.ValueWithEditor(value, currentIndex, true);
+                        value = new FormProperty.ValueWithEditor(value, currentIndex);
                     }
                 }
             }

@@ -57,16 +57,14 @@ import org.netbeans.modules.form.*;
 
 class MetaLayout extends RADComponent {
 
-    private AbstractLayoutSupport abstLayoutDelegate;
-
-    public MetaLayout(AbstractLayoutSupport layoutDelegate,
+  public MetaLayout(AbstractLayoutSupport layoutDelegate,
                       LayoutManager lmInstance)
     {
         super();
 
-        abstLayoutDelegate = layoutDelegate;
+      AbstractLayoutSupport abstLayoutDelegate = layoutDelegate;
 
-        initialize(((LayoutSupportManager)abstLayoutDelegate.getLayoutContext())
+        initialize(((LayoutSupportManager) abstLayoutDelegate.getLayoutContext())
                          .getMetaContainer().getFormModel());
 
         setBeanInstance(lmInstance);

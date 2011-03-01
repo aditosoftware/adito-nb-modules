@@ -254,14 +254,15 @@ public class ChooseSameSizeAction extends NodeAction {
                 if (mi.isSelected()) {
                     FormDesigner designer = FormEditor.getFormDesigner(formModel);
                     LayoutDesigner lDesigner = designer.getLayoutDesigner();
-                    Iterator iter = compIds.iterator();
-                    while (iter.hasNext()) {
-                        String compId = (String)iter.next();
-                        LayoutComponent lc = layoutModel.getLayoutComponent(compId);
-                        if (lDesigner.isComponentResizing(lc, dimension)) {
-                            lDesigner.setComponentResizing(lc, dimension, false);
-                        }
+                  for (Object compId1 : compIds)
+                  {
+                    String compId = (String) compId1;
+                    LayoutComponent lc = layoutModel.getLayoutComponent(compId);
+                    if (lDesigner.isComponentResizing(lc, dimension))
+                    {
+                      lDesigner.setComponentResizing(lc, dimension, false);
                     }
+                  }
                     layoutModel.setSameSize(compIds, dimension);
                 } else {
                     layoutModel.unsetSameSize(compIds, dimension);
@@ -281,13 +282,14 @@ public class ChooseSameSizeAction extends NodeAction {
     
     private static List<String> getComponentIds(List/*<RADComponent>*/ components) {
         List<String> ids = new ArrayList<String>();
-        Iterator i = components.iterator();
-        while (i.hasNext()) {
-            RADComponent rc = (RADComponent)i.next();
-            if (rc != null) {
-                ids.add(rc.getId());
-            }
+      for (Object component : components)
+      {
+        RADComponent rc = (RADComponent) component;
+        if (rc != null)
+        {
+          ids.add(rc.getId());
         }
+      }
         return ids;
     }
     

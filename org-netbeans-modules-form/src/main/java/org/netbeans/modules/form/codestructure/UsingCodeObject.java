@@ -52,13 +52,8 @@ import java.util.Iterator;
 
 interface UsingCodeObject {
 
-    // notifying about registering this object in used object
-    void usageRegistered(UsedCodeObject usedObject);
+  // notifying about removing the used object from structure
+    void usedObjectRemoved();
 
-    // notifying about removing the used object from structure
-    boolean usedObjectRemoved(UsedCodeObject usedObject);
-
-    UsedCodeObject getDefiningObject();
-
-    Iterator getUsedObjectsIterator();
+  Iterator getUsedObjectsIterator();
 }

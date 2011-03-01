@@ -45,8 +45,6 @@
 package org.netbeans.modules.form;
 
 import java.util.*;
-import javax.swing.UIManager;
-import org.netbeans.modules.form.project.ClassPathUtils;
 
 /**
  * Settings for one form.
@@ -64,19 +62,19 @@ public class FormSettings {
 
         // Variables Modifier
         int variablesModifier = FormLoaderSettings.getInstance().getVariablesModifier();
-        settings.put(FormLoaderSettings.PROP_VARIABLES_MODIFIER, new Integer(variablesModifier));
+        settings.put(FormLoaderSettings.PROP_VARIABLES_MODIFIER, variablesModifier);
         
         // Local Variables
         boolean localVariables = FormLoaderSettings.getInstance().getVariablesLocal();
-        settings.put(FormLoaderSettings.PROP_VARIABLES_LOCAL, Boolean.valueOf(localVariables));
+        settings.put(FormLoaderSettings.PROP_VARIABLES_LOCAL, localVariables);
         
         // Generate Mnemonics Code
         boolean generateMnemonicsCode = FormLoaderSettings.getInstance().getGenerateMnemonicsCode();
-        settings.put(FormLoaderSettings.PROP_GENERATE_MNEMONICS, Boolean.valueOf(generateMnemonicsCode));
+        settings.put(FormLoaderSettings.PROP_GENERATE_MNEMONICS, generateMnemonicsCode);
         
         // Listener Generation Style
         int listenerGenerationStyle = FormLoaderSettings.getInstance().getListenerGenerationStyle();
-        settings.put(FormLoaderSettings.PROP_LISTENER_GENERATION_STYLE, new Integer(listenerGenerationStyle));
+        settings.put(FormLoaderSettings.PROP_LISTENER_GENERATION_STYLE, listenerGenerationStyle);
 
         // Generate FQN
         boolean generateFQN = FormLoaderSettings.getInstance().getGenerateFQN();
@@ -87,38 +85,27 @@ public class FormSettings {
     // code generation
 
     public int getVariablesModifier() {
-        Integer variablesModifier = (Integer)settings.get(FormLoaderSettings.PROP_VARIABLES_MODIFIER);
-        return variablesModifier;
+      return (Integer)settings.get(FormLoaderSettings.PROP_VARIABLES_MODIFIER);
     }
-    
-    public void setVariablesModifier(int value) {
-        settings.put(FormLoaderSettings.PROP_VARIABLES_MODIFIER, new Integer(value));
+
+  public boolean getVariablesLocal() {
+    return (Boolean)settings.get(FormLoaderSettings.PROP_VARIABLES_LOCAL);
     }
-    
-    public boolean getVariablesLocal() {
-        Boolean variablesLocal = (Boolean)settings.get(FormLoaderSettings.PROP_VARIABLES_LOCAL);
-        return variablesLocal;
-    }
-    
-    public void setVariablesLocal(boolean value) {
-        settings.put(FormLoaderSettings.PROP_VARIABLES_LOCAL, Boolean.valueOf(value));
-    }
-    
-    public boolean getAutoSetComponentName() {
+
+  public boolean getAutoSetComponentName() {
         Boolean setting = (Boolean) settings.get(FormLoaderSettings.PROP_AUTO_SET_COMPONENT_NAME);
         boolean autoName;
         if (setting != null) {
             autoName = setting;
         } else { // no setting - detect for newly created form, false otherwise
-            autoName = FormEditor.getFormEditor(formModel).needPostCreationUpdate()
-                    ? getDefaultAutoSetComponentName() : false;
+            autoName = FormEditor.getFormEditor(formModel).needPostCreationUpdate() && getDefaultAutoSetComponentName();
             setAutoSetComponentName(autoName);
         }
         return autoName;
     }
 
     public void setAutoSetComponentName(boolean setName) {
-        settings.put(FormLoaderSettings.PROP_AUTO_SET_COMPONENT_NAME, Boolean.valueOf(setName));
+        settings.put(FormLoaderSettings.PROP_AUTO_SET_COMPONENT_NAME, setName);
     }
 
     boolean getDefaultAutoSetComponentName() {
@@ -133,32 +120,10 @@ public class FormSettings {
         return autoName;
     }
 
-    public boolean getGenerateMnemonicsCode() {
-        Boolean generateMnemonicsCode = (Boolean)settings.get(FormLoaderSettings.PROP_GENERATE_MNEMONICS);
-        return generateMnemonicsCode;
-    }
-    
-    public void setGenerateMnemonicsCode(boolean value) {
-        settings.put(FormLoaderSettings.PROP_GENERATE_MNEMONICS, Boolean.valueOf(value));
-    }
-    
-    public int getListenerGenerationStyle() {
-        Integer listenerGenerationStyle = (Integer)settings.get(FormLoaderSettings.PROP_LISTENER_GENERATION_STYLE);
-        return listenerGenerationStyle;
-    }
-    
-    public void setListenerGenerationStyle(int value) {
-        settings.put(FormLoaderSettings.PROP_LISTENER_GENERATION_STYLE, new Integer(value));
-    }
-
   // TODO: stripped
 //    public int getLayoutCodeTarget() {
 //        return checkLayoutCodeTarget();
 //    }
-
-    public void setLayoutCodeTarget(int value) {
-        settings.put(FormLoaderSettings.PROP_LAYOUT_CODE_TARGET, new Integer(value));
-    }
 
   // TODO: stripped
 //    private int checkLayoutCodeTarget() {
@@ -273,19 +238,9 @@ public class FormSettings {
         }
         settings.put(name, value);
     }
-    
-    public Object get(String name) {
-        Object value;
-        if (settings.containsKey(name)) {
-            value = settings.get(name);
-        } else {
-            value = settings.get(SESSION_PREFIX + name);
-        }
-        return value;
-    }
 
-    boolean isSessionSetting(String name) {
-        return name.startsWith(SESSION_PREFIX);
+  boolean isSessionSetting(String name) {
+        return !name.startsWith(SESSION_PREFIX);
     }
     
     Map<String,Object> allSettings() {

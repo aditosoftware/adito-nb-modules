@@ -396,7 +396,7 @@ class CopySupport {
                     }
                 } else if (sourceContainer != null && sourceContainer.getLayoutSupport() != null
                            && (getComponentBounds(sourceComponents.get(0)) == null
-                               || !isConvertibleLayout(sourceContainer))) {
+                               || isConvertibleLayout(sourceContainer))) {
                     sourceContainer = null; // old layout which is not suitable for conversion
                 }
             }
@@ -543,7 +543,7 @@ class CopySupport {
 
         private static boolean isConvertibleLayout(RADVisualContainer metaCont) {
             LayoutSupportManager ls = metaCont.getLayoutSupport();
-            return !ls.isDedicated() && ls.getSupportedClass() != java.awt.CardLayout.class;
+            return ls.isDedicated() || ls.getSupportedClass() == java.awt.CardLayout.class;
         }
 
         private LayoutDesigner getLayoutDesigner() {

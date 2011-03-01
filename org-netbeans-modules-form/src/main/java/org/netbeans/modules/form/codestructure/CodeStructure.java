@@ -59,42 +59,20 @@ public class CodeStructure {
 
     public static final CodeExpression[] EMPTY_PARAMS = new CodeExpression[0];
 
-    private static final int VARIABLE_CREATE = 1;
-    private static final int VARIABLE_RENAME = 2;
-    private static final int VARIABLE_RELEASE = 3;
-    private static final int VARIABLE_ATTACH = 4;
-    private static final int VARIABLE_DETACH = 5;
-
     private static UsingCodeObject globalUsingObject;
 
-    private Map<String,Variable> namesToVariables = new HashMap<String,Variable>(50);
-    private Map<Object/*?*/,Variable> expressionsToVariables = new HashMap<Object,Variable>(50);
-    private Set<String> externalVariables = null;    
+    private final Map<String,Variable> namesToVariables = new HashMap<String,Variable>(50);
+    private final Map<Object/*?*/,Variable> expressionsToVariables = new HashMap<Object,Variable>(50);
 
     private int defaultVariableType = -1;
 
-    private boolean undoRedoRecording = false;
-    private int undoRedoMark = 0;
-    private int oldestMark = 0;
-    private int lastUndone = -1;
-    private int undoRedoHardLimit = 10000;
-    private Map<Integer,CodeStructureChange> undoMap;
-    private Map<Integer,CodeStructureChange> redoMap;    
-    
-//    private FormJavaSource javaSource; // TODO: stripped
-	    
+
     // --------
     // constructor
 
-    public CodeStructure(boolean startUndoRedoRecording) {
-        if (startUndoRedoRecording)
-            setUndoRedoRecording(true);
+    public CodeStructure() {
     }
 
-//    public void setFormJavaSource(FormJavaSource formJavaSource) {
-//	javaSource = formJavaSource;
-//    }
-    
     // -------
     // expressions
 
@@ -107,29 +85,12 @@ public class CodeStructure {
         return new DefaultCodeExpression(this, origin);
     }
 
-    /** Creates a new expression based on a method. */
-    public CodeExpression createExpression(CodeExpression parent,
-                                           Method method,
-                                           CodeExpression[] params)
-    {
-        CodeExpressionOrigin origin = new CodeSupport.MethodOrigin(
-                                                      parent, method, params);
-        return new DefaultCodeExpression(this, origin);
-    }
-
-    /** Creates a new expression based on a field. */
-    public CodeExpression createExpression(CodeExpression parent, Field field) {
-        CodeExpressionOrigin origin = new CodeSupport.FieldOrigin(parent, field);
-        return new DefaultCodeExpression(this, origin);
-    }
-
-    /** Creates a new expression from based on a value. */
+  /** Creates a new expression from based on a value. */
     public CodeExpression createExpression(Class type,
-                                           Object value,
-                                           String javaInitStr)
+                                           Object value)
     {
         return new DefaultCodeExpression(this, new CodeSupport.ValueOrigin(
-                                                    type, value, javaInitStr));
+                                                    type, value));
     }
 
     /** Creates a new expression of an arbitrary origin. /*/
@@ -140,7 +101,7 @@ public class CodeStructure {
     /** Creates an expression representing null value. */
     public CodeExpression createNullExpression(Class type) {
         return new DefaultCodeExpression(this, new CodeSupport.ValueOrigin(
-                                                    type, null, "null")); // NOI18N
+                                                    type, null)); // NOI18N
     }
 
     /** Creates an expression with no origin. The origin must be set
@@ -158,14 +119,6 @@ public class CodeStructure {
         expression.addUsingObject(globalUsingObject,
                                   UsedCodeObject.USING,
                                   CodeStructure.class);
-    }
-
-    /** Removes an expression from the structure completely. */
-    public static void removeExpression(CodeExpression expression) {
-        unregisterUsedCodeObject(expression);
-        unregisterUsingCodeObject(expression);
-
-        expression.getCodeStructure().removeExpressionFromVariable(expression);
     }
 
     /** Filters out expressions whose origin uses given or equal meta object.
@@ -271,10 +224,9 @@ public class CodeStructure {
 
     /** Creates an expression origin from a value (and provided java string). */
     public static CodeExpressionOrigin createOrigin(Class type,
-                                                    Object value,
-                                                    String javaStr)
+                                                    Object value)
     {
-        return new CodeSupport.ValueOrigin(type, value, javaStr);
+        return new CodeSupport.ValueOrigin(type, value);
     }
 
     // -------
@@ -289,32 +241,17 @@ public class CodeStructure {
                                            CodeExpression.class);
     }
 
-    /** Returns an iterator of exppressions that use given expression as
-     * a parameter in their origin. */
-    public static Iterator getUsingExpressionsIterator(CodeExpression exp) {
-        return exp.getUsingObjectsIterator(UsedCodeObject.USING,
-                                           CodeExpression.class);
-    }
-
     /** Returns an iterator of statements that are defined by given
      * expression. These statements use the given expression as the parent. */
     public static Iterator getDefinedStatementsIterator(CodeExpression exp) {
         return exp.getUsingObjectsIterator(UsedCodeObject.DEFINED,
                                            CodeStatement.class);
     }
-
-    /** Returns an iterator of statements that use given expression as
-     * a parameter. */
-    public static Iterator getUsingStatementsIterator(CodeExpression exp) {
-        return exp.getUsingObjectsIterator(UsedCodeObject.USING,
-                                           CodeStatement.class);
-    }
-
     // -------
     // managing references between code objects
 
     // Registers usage of expressions used by a statement.
-    static void registerUsingCodeObject(CodeStatement statement) {
+    private static void registerUsingCodeObject(CodeStatement statement) {
         CodeExpression parent = statement.getParentExpression();
         if (parent != null)
             parent.addUsingObject(
@@ -369,39 +306,12 @@ public class CodeStructure {
         }
     }
 
-    // This method just notifies all objects using given used object that
-    // the used object is removed from the structure.
-    static void unregisterUsedCodeObject(UsedCodeObject usedObject) {
-        List usingObjects = new ArrayList();
-        Iterator it = usedObject.getUsingObjectsIterator(0, null);
-        while (it.hasNext())
-            usingObjects.add(it.next());
-
-        it = usingObjects.iterator();
-        while (it.hasNext()) {
-            UsingCodeObject usingObject = (UsingCodeObject) it.next();
-            if (!usingObject.usedObjectRemoved(usedObject)) {
-                // usingObject cannot exist without removed usedObject
-                if (usingObject instanceof UsedCodeObject)
-                    unregisterUsedCodeObject((UsedCodeObject)usingObject);
-                unregisterUsingCodeObject(usingObject);
-            }
-        }
-    }
-
     private static class GlobalUsingObject implements UsingCodeObject {
-        @Override
-        public void usageRegistered(UsedCodeObject usedObject) {
-        }
-        @Override
-        public boolean usedObjectRemoved(UsedCodeObject usedObject) {
-            return true;
-        }
-        @Override
-        public UsedCodeObject getDefiningObject() {
-            return null;
-        }
-        @Override
+      @Override
+        public void usedObjectRemoved() {
+      }
+
+      @Override
         public Iterator getUsedObjectsIterator() {
             return null;
         }
@@ -423,9 +333,6 @@ public class CodeStructure {
 
         Variable var = new Variable(type, declaredType, "", name); // NOI18N
         namesToVariables.put(name, var);
-	
-        if (undoRedoRecording)
-            logUndoableChange(new VariableChange(VARIABLE_CREATE, var));
 
         return var;
     }
@@ -442,51 +349,22 @@ public class CodeStructure {
         var.name = newName;
         namesToVariables.put(newName, var);
 
-        if (undoRedoRecording) {
-            VariableChange change = new VariableChange(VARIABLE_RENAME, var);
-            change.oldName = oldName;
-            change.newName = newName;
-            logUndoableChange(change);
-        }
-
         return true;
     }
 
     /** Releases variable of given name. */
-    public CodeVariable releaseVariable(String name) {
-        Variable var = namesToVariables.remove(name);	
-        if (var == null)
-            return null; // there is no such variable
-
-        Map expressionsMap = var.expressionsMap;
-        if (expressionsMap == null)
-            return var;
-
-        Iterator it = expressionsMap.values().iterator();
-        while (it.hasNext())
-            expressionsToVariables.remove(it.next());
-
-        if (undoRedoRecording)
-            logUndoableChange(new VariableChange(VARIABLE_RELEASE, var));
-
-        return var;
+    void releaseVariable(String name) {
+        namesToVariables.remove(name);
     }
 
-    /** Checks whether given name is already used by some variable. */
-    public boolean isVariableNameReserved(String name) {
-        //return namesToVariables.get(name) != null || javaSource.containsField(name, true); // TODO: stripped
-      System.out.println("isVariableNameReserved(String name) called in " + getClass().getSimpleName() + " with name " + name);
-      return false;
-    }
-
-    public CodeVariable createVariableForExpression(CodeExpression expression,
+  public CodeVariable createVariableForExpression(CodeExpression expression,
                                                     int type,
                                                     String name) {
         CodeVariable var = (expression == null) ? null : expression.getVariable();
         String typeParameters = (var == null) ? "" : var.getDeclaredTypeParameters(); // NOI18N
         return createVariableForExpression(expression, type, typeParameters, name);
     }
-    
+
     /** Creates a new variable and attaches given expression to it. If the
      * requested name is already in use, then a free name is found. If null
      * is provided as the name, then expression's short class name is used. */
@@ -513,19 +391,11 @@ public class CodeStructure {
                                     expression.getOrigin().getType(),
                                     typeParameters,
                                     name);
-        CodeStatement statement = createVariableAssignment(var, expression);
+        CodeStatement statement = createVariableAssignment(expression);
         var.addCodeExpression(expression, statement);
 
         namesToVariables.put(name, var);
         expressionsToVariables.put(expression, var);
-
-        if (undoRedoRecording) {
-            logUndoableChange(new VariableChange(VARIABLE_CREATE, var));
-            VariableChange change = new VariableChange(VARIABLE_ATTACH, var);
-            change.expression = expression;
-            change.statement = statement;
-            logUndoableChange(change);
-        }
 
         return var;
     }
@@ -567,30 +437,12 @@ public class CodeStructure {
                 name = baseName + (++n);
             }
 	    while ( namesToVariables.get(name) != null); // || javaSource.containsField(name, false) ); // TODO: stripped
-        }	
-	return name;
-    }        
-    
-    public String getExternalVariableName(Class type, String suggestedName, boolean register) {
-	String name = getFreeVariableName(suggestedName, type);
-        if (register) {
-            createVariable(CodeVariable.LOCAL, type, name);    
-            if(externalVariables == null) {
-                externalVariables = new HashSet<String>();
-            }	
-            externalVariables.add(name);
         }
 	return name;
     }
-    
-    public void clearExternalVariableNames() {
-	if(externalVariables!=null) {
-    for (Object externalVariable : externalVariables)
-    {
-      releaseVariable((String) externalVariable);
-    }
-	    externalVariables.clear();	  	    
-	}
+
+    public String getExternalVariableName(Class type) {
+      return getFreeVariableName(null, type);
     }
 
     /** Attaches an expression to a variable. The variable will be used in the
@@ -622,17 +474,10 @@ public class CodeStructure {
             removeExpressionFromVariable(expression);
 
         Variable var = (Variable) variable;
-        CodeStatement statement = createVariableAssignment(var, expression);
+        CodeStatement statement = createVariableAssignment(expression);
 
         var.addCodeExpression(expression, statement);
         expressionsToVariables.put(expression, var);
-
-        if (undoRedoRecording) {
-            VariableChange change = new VariableChange(VARIABLE_ATTACH, var);
-            change.expression = expression;
-            change.statement = statement;
-            logUndoableChange(change);
-        }
     }
 
     /** Releases an expression from using a variable. */
@@ -644,16 +489,9 @@ public class CodeStructure {
         if (var == null)
             return;
 
-        CodeStatement statement = var.removeCodeExpression(expression);
+        var.removeCodeExpression(expression);
 
-        if (undoRedoRecording) {
-            VariableChange change = new VariableChange(VARIABLE_DETACH, var);
-            change.expression = expression;
-            change.statement = statement;
-            logUndoableChange(change);
-        }
-
-        if (var.expressionsMap.isEmpty() 
+        if (var.expressionsMap.isEmpty()
                 && (var.getType() & CodeVariable.EXPLICIT_RELEASE) == 0)
             // release unused variable
             releaseVariable(var.getName());
@@ -674,11 +512,6 @@ public class CodeStructure {
                                          Class declaredType)
     {
         return new VariablesIterator(namesToVariables.values().iterator(), type, typeMask, declaredType);
-    }
-
-    /** Returns all variables in this CodeStructure. */
-    public Collection getAllVariables() {
-        return Collections.unmodifiableCollection(namesToVariables.values());
     }
 
     // ---------
@@ -708,162 +541,30 @@ public class CodeStructure {
 
     // ---------
 
-    protected Map getNamesToVariablesMap() {
-        return namesToVariables;
-    }
-
-    protected Map getExpressionsToVariables() {
-        return expressionsToVariables;
-    }
-
-    private CodeStatement createVariableAssignment(CodeVariable var,
-                                                   CodeExpression expression)
+    private CodeStatement createVariableAssignment(CodeExpression expression)
     {
-        CodeStatement statement =
-            new CodeSupport.AssignVariableStatement(var, expression);
 
-        // important: assignment statement does not register usage of code
+      // important: assignment statement does not register usage of code
         // expressions (assigned expression, parameters) - so it does not hold
         // the expressions in the structure
 
-        return statement;
+        return new CodeSupport.AssignVariableStatement(expression);
     }
 
     // --------
     // undo/redo processing
 
-    public void setUndoRedoRecording(boolean record) {
-        undoRedoRecording = record;
-        if (record && undoMap == null) {
-            undoMap = new HashMap<Integer,CodeStructureChange>(500);
-            redoMap = new HashMap<Integer,CodeStructureChange>(100);
-        }
-    }
-
-    public boolean isUndoRedoRecording() {
-        return undoRedoRecording;
-    }
-
-    void logUndoableChange(CodeStructureChange change) {
-        redoMap.clear();
-        lastUndone = -1;
-
-        if (undoMap.isEmpty())
-            oldestMark = undoRedoMark;
-
-        t("adding undoable change "+undoRedoMark); // NOI18N
-
-        undoMap.put(new Integer(undoRedoMark++), change);
-
-        if (undoMap.size() > undoRedoHardLimit)
-            t("undo/redo hard limit reached: " // NOI18N
-              +undoMap.size()+" > "+undoRedoHardLimit); // NOI18N
-
-        while (undoMap.size() > undoRedoHardLimit) {
-            Integer mark = new Integer(oldestMark++);
-            undoMap.remove(mark);
-        }
-    }
-
-    public Object markForUndo() {
-        redoMap.clear();
-
-        t("mark for undo: "+undoRedoMark); // NOI18N
-
-        Object newMark = new Integer(undoRedoMark);
-
-        return newMark;
-    }
-
-    public void releaseUndoableChanges(Object fromMark, Object toMark) {
-        int m1 = (Integer) fromMark;
-        int m2 = (Integer) toMark;
-
-        t("release marks from " + m1 + " to " + m2); // NOI18N
-
-        while (m1 < m2) {
-            Integer m = new Integer(m1);
-            undoMap.remove(m);
-            redoMap.remove(m);
-            m1++;
-        }
-    }
-
-    public boolean undoToMark(Object mark) {
-        int lastMark = (Integer) mark;
-        int currentMark = undoRedoMark;
-        if (currentMark <= lastMark)
-            return false; // invalid parameter
-
-        t("undo to mark "+mark); // NOI18N
-
-        if (undoMap.get((Integer)mark) == null) {
-            t("mark already dropped from the queue"); // NOI18N
-            return false;
-        }
-
-        boolean undoRedoOn = undoRedoRecording;
-        undoRedoRecording = false;
-
-        while (currentMark > lastMark) {
-            Integer key = new Integer(--currentMark);
-            CodeStructureChange change = undoMap.remove(key);
-            if (change != null) {
-                change.undo();
-                redoMap.put(key, change);
-                lastUndone = currentMark;
-
-                t("undone: "+key); // NOI18N
-            }
-        }
-
-        if (undoRedoOn)
-            undoRedoRecording = true;
-
-        return true;
-    }
-
-    public boolean redoToMark(Object mark) {
-        if (lastUndone < 0)
-            return false;
-        int toMark = (Integer) mark;
-        if (lastUndone >= toMark || toMark > undoRedoMark)
-            return false; // invalid parameter
-
-        t("redo to mark "+mark); // NOI18N
-
-        boolean undoRedoOn = undoRedoRecording;
-        undoRedoRecording = false;
-
-        while (lastUndone < toMark) {
-            Integer key = new Integer(lastUndone++);
-            CodeStructureChange change = redoMap.remove(key);
-            if (change != null) {
-                change.redo();
-                undoMap.put(key, change);
-
-                t("redone: "+key); // NOI18N
-            }
-        }
-
-        if (undoRedoOn)
-            undoRedoRecording = true;
-
-        return true;
-    }
-
-    // --------
+  // --------
     // inner classes
 
     final class Variable implements CodeVariable {
-        private int type;
-        private Class declaredType;
-        private String declaredTypeParameters;
+        private final int type;
+        private final Class declaredType;
+        private final String declaredTypeParameters;
         private String name;
         private Map<CodeExpression,CodeStatement> expressionsMap;
-        private CodeStatement declarationStatement;
 
-        Variable(int type, Class declaredType, String declaredTypeParameters, String name) {
+      Variable(int type, Class declaredType, String declaredTypeParameters, String name) {
             if ((type & FINAL) != 0)
                 type &= ~EXPLICIT_DECLARATION;
             this.type = type;
@@ -900,15 +601,7 @@ public class CodeStructure {
                      Collections.EMPTY_LIST;
         }
 
-        @Override
-        public CodeStatement getDeclaration() {
-            if (declarationStatement == null)
-                declarationStatement =
-                    new CodeSupport.DeclareVariableStatement(this);
-            return declarationStatement;
-        }
-
-        @Override
+      @Override
         public CodeStatement getAssignment(CodeExpression expression) {
             return expressionsMap != null ? expressionsMap.get(expression) : null;
         }
@@ -923,19 +616,18 @@ public class CodeStructure {
             expressionsMap.put(expression, statement);
         }
 
-        CodeStatement removeCodeExpression(CodeExpression expression) {
+        void removeCodeExpression(CodeExpression expression) {
             if (expressionsMap != null)
-                return expressionsMap.remove(expression);
-            return null;
+                expressionsMap.remove(expression);
         }
     }
 
     private static final class VariablesIterator implements Iterator {
-        private int type;
-        private int typeMask;
-        private Class declaredType;
+        private final int type;
+        private final int typeMask;
+        private final Class declaredType;
 
-        private Iterator subIterator;
+        private final Iterator subIterator;
 
         private CodeVariable currentVar;
 
@@ -985,88 +677,6 @@ public class CodeStructure {
 
     // --------
 
-    private class VariableChange implements CodeStructureChange {
-        private int changeType;
-        private Variable variable;
-        private CodeExpression expression;
-        private CodeStatement statement;
-        private String oldName;
-        private String newName;
+  // ---------------
 
-        VariableChange(int type, Variable var) {
-            changeType = type;
-            variable = var;
-        }
-
-        @Override
-        public void undo() {
-            switch (changeType) {
-                case VARIABLE_CREATE:
-                    namesToVariables.remove(variable.name);
-                    break;
-                case VARIABLE_RENAME:
-                    namesToVariables.remove(newName);
-                    variable.name = oldName;
-                    namesToVariables.put(oldName, variable);
-                    break;
-                case VARIABLE_RELEASE:
-                    Iterator<CodeStatement> it = variable.expressionsMap.values().iterator();
-                    while (it.hasNext())
-                        expressionsToVariables.put(it.next(), variable);
-                    namesToVariables.put(variable.name, variable);
-                    break;
-                case VARIABLE_ATTACH:
-                    expressionsToVariables.remove(expression);
-                    variable.expressionsMap.remove(expression);
-                    break;
-                case VARIABLE_DETACH:
-                    variable.expressionsMap.put(expression, statement);
-                    expressionsToVariables.put(expression, variable);
-                    break;
-            }
-        }
-
-        @Override
-        public void redo() {
-            switch (changeType) {
-                case VARIABLE_CREATE:
-                    namesToVariables.put(variable.name, variable);
-                    break;
-                case VARIABLE_RENAME:
-                    namesToVariables.remove(oldName);
-                    variable.name = newName;
-                    namesToVariables.put(newName, variable);
-                    break;
-                case VARIABLE_RELEASE:
-                    namesToVariables.remove(variable.name);
-                    Iterator it = variable.expressionsMap.values().iterator();
-                    while (it.hasNext())
-                        expressionsToVariables.remove(it.next());
-                    break;
-                case VARIABLE_ATTACH:
-                    variable.expressionsMap.put(expression, statement);
-                    expressionsToVariables.put(expression, variable);
-                    break;
-                case VARIABLE_DETACH:
-                    expressionsToVariables.remove(expression);
-                    variable.expressionsMap.remove(expression);
-                    break;
-            }
-        }
-    }    
-    
-    // ---------------
-
-    /** For debugging purposes only. */
-    static private int traceCount = 0;
-    /** For debugging purposes only. */
-    static private final boolean TRACE = false;
-    /** For debugging purposes only. */
-    static void t(String str) {
-        if (TRACE)
-            if (str != null)
-                System.out.println("CodeStructure "+(++traceCount)+": "+str); // NOI18N
-            else
-                System.out.println(""); // NOI18N
-    }
 }

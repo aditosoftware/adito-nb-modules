@@ -114,14 +114,14 @@ class LayoutOperations implements LayoutConstants {
                 if (idx < startIndex) {
                     if (toRemainL == null) {
                         toRemainL = new LinkedList<Object>();
-                        toRemainL.add(new Integer(LayoutInterval.getEffectiveAlignment(li)));
+                        toRemainL.add(LayoutInterval.getEffectiveAlignment(li));
                     }
                     toRemainL.add(li);
                 }
                 else if (idx > endIndex) {
                     if (toRemainT == null) {
                         toRemainT = new LinkedList<Object>();
-                        toRemainT.add(new Integer(LayoutInterval.getEffectiveAlignment(li)));
+                        toRemainT.add(LayoutInterval.getEffectiveAlignment(li));
                     }
                     toRemainT.add(li);
                 }
@@ -420,7 +420,7 @@ class LayoutOperations implements LayoutConstants {
                     }
                     if (!compatible && (align == LEADING || align == TRAILING)) {
                         LayoutInterval neighbor = LayoutInterval.getNeighbor(
-                                parent, group.getAlignment()^1, false, true, true);
+                                parent, group.getAlignment()^1, false, true);
                         if (neighbor != null && neighbor.isEmptySpace()
                             && neighbor.getPreferredSize() == NOT_EXPLICITLY_DEFINED)
                         {   // default fixed padding means there is no space for
@@ -975,7 +975,7 @@ class LayoutOperations implements LayoutConstants {
                     LayoutInterval gap = li.getSubInterval(0);
                     if (gap.isEmptySpace()) {
                         if (gap.getPreferredSize() == NOT_EXPLICITLY_DEFINED) {
-                            LayoutInterval neighbor = LayoutInterval.getNeighbor(gap, LEADING, false, true, false);
+                            LayoutInterval neighbor = LayoutInterval.getNeighbor(gap, LEADING, false, false);
                             if (neighbor != null && neighbor.isEmptySpace()) {
                                 // preferred gap with a gap neighbor - would not work
                                 layoutModel.removeInterval(gap);
@@ -1006,7 +1006,7 @@ class LayoutOperations implements LayoutConstants {
                     LayoutInterval gap = li.getSubInterval(li.getSubIntervalCount() - 1);
                     if (gap.isEmptySpace()) {
                         if (gap.getPreferredSize() == NOT_EXPLICITLY_DEFINED) {
-                            LayoutInterval neighbor = LayoutInterval.getNeighbor(gap, TRAILING, false, true, false);
+                            LayoutInterval neighbor = LayoutInterval.getNeighbor(gap, TRAILING, false, false);
                             if (neighbor != null && neighbor.isEmptySpace()) {
                                 // preferred gap with a gap neighbor - would not work
                                 layoutModel.removeInterval(gap);
@@ -1138,7 +1138,7 @@ class LayoutOperations implements LayoutConstants {
         else {
             int prefDistance = LayoutUtils.getSizeOfDefaultGap(gap, visualMapper);
             int pos1 = neighbor.getCurrentSpace().positions[dimension][alignment];
-            LayoutInterval outerNeighbor = LayoutInterval.getNeighbor(gap, alignment, true, true, false);
+            LayoutInterval outerNeighbor = LayoutInterval.getNeighbor(gap, alignment, true, false);
             int pos2 = outerNeighbor != null ?
                        outerNeighbor.getCurrentSpace().positions[dimension][alignment^1] :
                        LayoutInterval.getRoot(seq).getCurrentSpace().positions[dimension][alignment];

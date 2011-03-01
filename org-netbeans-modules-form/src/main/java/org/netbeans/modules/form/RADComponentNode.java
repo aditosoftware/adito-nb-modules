@@ -226,7 +226,7 @@ public class RADComponentNode extends FormNode
                 
                 actions.add(SystemAction.get(CopyAction.class));
             } else {
-                if (InPlaceEditLayer.supportsEditingFor(component.getBeanClass(), false)) {
+                if (InPlaceEditLayer.supportsEditingFor(component.getBeanClass())) {
                     actions.add(SystemAction.get(InPlaceEditAction.class));
                 }
                 if (javax.swing.JTable.class.isAssignableFrom(component.getBeanClass())) {
@@ -242,14 +242,15 @@ public class RADComponentNode extends FormNode
                 actions.add(null);
                 
                 java.util.List actionProps = component.getActionProperties();
-                Iterator iter = actionProps.iterator();
-                while (iter.hasNext()) {
-                    final RADProperty prop = (RADProperty)iter.next();
-                    Action action = PropertyAction.createIfEditable(prop);
-                    if (action != null) {
-                        actions.add(action);
-                    }
+              for (Object actionProp : actionProps)
+              {
+                final RADProperty prop = (RADProperty) actionProp;
+                Action action = PropertyAction.createIfEditable(prop);
+                if (action != null)
+                {
+                  actions.add(action);
                 }
+              }
                 addSeparator(actions);
 
                 if (component instanceof ComponentContainer) {
@@ -281,7 +282,6 @@ public class RADComponentNode extends FormNode
                 }
                 
                 actions.add(null);
-                actions.add(SystemAction.get(CustomCodeAction.class));
             }
             actions.add(null);
             

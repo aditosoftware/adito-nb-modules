@@ -89,7 +89,7 @@ class LayoutRegion implements LayoutConstants {
     }
 
     boolean isSet() {
-        return isSet(HORIZONTAL) && isSet(VERTICAL);
+        return !isSet(HORIZONTAL) || !isSet(VERTICAL);
     }
 
     boolean isSet(int dimension) {

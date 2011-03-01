@@ -66,5 +66,4 @@ public interface CodeExpressionOrigin {
     // parameters for creating the expression
     public CodeExpression[] getCreationParameters();
 
-    public String getJavaCodeString(String parentStr, String[] paramsStr);
 }

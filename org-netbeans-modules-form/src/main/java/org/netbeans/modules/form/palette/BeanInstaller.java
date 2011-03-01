@@ -150,7 +150,7 @@ public final class BeanInstaller {
             }
             sb.delete(sb.length()-2, sb.length());
             String messageFormat = PaletteUtils.getBundleString("MSG_cannotInstallBeans"); // NOI18N
-            String message = MessageFormat.format(messageFormat, new Object[] {sb.toString()});
+            String message = MessageFormat.format(messageFormat, sb.toString());
             NotifyDescriptor nd = new NotifyDescriptor.Message(message);
             DialogDisplayer.getDefault().notify(nd);
             if (beans.isEmpty()) return;
@@ -191,17 +191,19 @@ public final class BeanInstaller {
             new FileSystem.AtomicAction () {
                 @Override
                 public void run() {
-                    Iterator it = beans.iterator();
-                    while (it.hasNext()) {
-                        ClassSource classSource = (ClassSource)it.next();
-                        try {
-                            PaletteItemDataObject.createFile(categoryFolder, classSource);
-                            // TODO check the class if it can be loaded?
-                        }
-                        catch (java.io.IOException ex) {
-                            ErrorManager.getDefault().notify(ErrorManager.INFORMATIONAL, ex);
-                        }
+                  for (ClassSource bean : beans)
+                  {
+                    ClassSource classSource = bean;
+                    try
+                    {
+                      PaletteItemDataObject.createFile(categoryFolder, classSource);
+                      // TODO check the class if it can be loaded?
                     }
+                    catch (IOException ex)
+                    {
+                      ErrorManager.getDefault().notify(ErrorManager.INFORMATIONAL, ex);
+                    }
+                  }
                 }
             });
         }

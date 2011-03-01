@@ -149,18 +149,7 @@ public class FormCodeSupport {
             return property;
         }
 
-        @Override
-        public String getJavaCodeString(String parentStr, String[] paramsStr) {
-            try {
-                PropertyEditor pred = property.getPropertyEditor();
-                pred.setValue(property.getValue());
-                return pred.getJavaInitializationString();
-            }
-            catch (Exception ex) {} // should not happen
-            return null;
-        }
-
-        @Override
+      @Override
         public CodeExpression[] getCreationParameters() {
             return CodeStructure.EMPTY_PARAMS;
         }
@@ -199,12 +188,7 @@ public class FormCodeSupport {
             return property;
         }
 
-        @Override
-        public String getJavaCodeString(String parentStr, String[] paramsStr) {
-            return property.getJavaInitializationString();
-        }
-
-        @Override
+      @Override
         public CodeExpression[] getCreationParameters() {
             return CodeStructure.EMPTY_PARAMS;
         }
@@ -239,12 +223,7 @@ public class FormCodeSupport {
             return propertyEditor;
         }
 
-        @Override
-        public String getJavaCodeString(String parentStr, String[] paramsStr) {
-            return propertyEditor.getJavaInitializationString();
-        }
-
-        @Override
+      @Override
         public CodeExpression[] getCreationParameters() {
             return CodeStructure.EMPTY_PARAMS;
         }
@@ -282,18 +261,5 @@ public class FormCodeSupport {
             return CodeStructure.EMPTY_PARAMS;
         }
 
-        @Override
-        public String getJavaCodeString(String parentStr, String[] paramsStr) {
-            if (component == component.getFormModel().getTopRADComponent())
-                return "this"; // NOI18N
-
-            StringBuilder buf = new StringBuilder();
-
-            buf.append("new "); // NOI18N
-            buf.append(component.getBeanClass().getName().replace('&','.')); // NOI18N
-            buf.append("()"); // NOI18N
-
-            return buf.toString();
-        }
     }
 }

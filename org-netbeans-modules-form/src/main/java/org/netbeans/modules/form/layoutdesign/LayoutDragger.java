@@ -282,8 +282,8 @@ class LayoutDragger implements LayoutConstants {
     }
 
     private static boolean isZeroResizingGap(LayoutInterval gap) {
-        return LayoutInterval.getNeighbor(gap, LEADING, false, true, false) == null
-            || LayoutInterval.getNeighbor(gap, TRAILING, false, true, false) == null;
+        return LayoutInterval.getNeighbor(gap, LEADING, false, false) == null
+            || LayoutInterval.getNeighbor(gap, TRAILING, false, false) == null;
     }
 
     void setTargetContainer(LayoutComponent container, LayoutInterval[] roots) {
@@ -689,7 +689,7 @@ class LayoutDragger implements LayoutConstants {
                 boolean preferredNextTo = isPreferredNextTo(bestNextTo, bestAligned);
                 int nextToDst = smallestDistance(findingsNextTo[dimension]);
                 int alignedDst = smallestDistance(findingsAligned[dimension]);
-                if (!relatedPositions(bestNextTo, bestAligned)) {
+                if (relatedPositions(bestNextTo, bestAligned)) {
                     // penalize the aligned position according to distance in the other dimension
                     int alignedOrtDst = Math.abs(LayoutRegion.nonOverlapDistance(
                         bestAligned.interval.getCurrentSpace(), movingSpace, dimension ^ 1));
@@ -798,7 +798,7 @@ class LayoutDragger implements LayoutConstants {
                 continue;
             }
 
-            if (!orthogonalOverlap(interval, idx))
+            if (orthogonalOverlap(interval, idx))
                 continue;
 
             int nextToAlignment = DEFAULT;
@@ -894,19 +894,19 @@ class LayoutDragger implements LayoutConstants {
         LayoutInterval sub = interval.getSubInterval(index);
         LayoutRegion subSpace = sub.getCurrentSpace();
         if (LayoutRegion.overlap(movingSpace, subSpace, dimension^1, 0))
-            return true;
+            return false;
 
         if (dimension == VERTICAL) { // there may be some exceptions in vertical dimension
             if (sub.isSequential()) // sub-sequence to be checked later
-                return true;
+                return false;
 
             // [note: can do this reliably only for root vertical sequence - with
             //        more sequences LayoutFeeder might ignore it anyway]
             if (interval.getParent() != null && interval.getParent().getSubIntervalCount() > 1)
-                return false;
+                return true;
 
             if (!LayoutRegion.overlap(movingSpace, interval.getCurrentSpace(), dimension, 0))
-                return true; // not in parallel with any sibling
+                return false; // not in parallel with any sibling
             if (interval.isSequential()) {
                 // check if it is before first or after last
                 if (LayoutRegion.distance(movingSpace, subSpace, dimension, TRAILING, LEADING) > 0) {
@@ -917,7 +917,7 @@ class LayoutDragger implements LayoutConstants {
                             break;
                     }
                     if (index < 0) // 'sub' is the first interval
-                        return true;
+                        return false;
                 }
                 else if (LayoutRegion.distance(subSpace, movingSpace, dimension, TRAILING, LEADING) > 0) {
                     // moving interval is locate behind 'sub''
@@ -927,12 +927,12 @@ class LayoutDragger implements LayoutConstants {
                             break;
                     }
                     if (index == interval.getSubIntervalCount()) // 'sub' is the last interval
-                        return true;
+                        return false;
                 }
             }
         }
 
-        return false;
+        return true;
     }
 
     private int checkNextToPosition(LayoutInterval sub, int alignment) {
@@ -950,9 +950,9 @@ class LayoutDragger implements LayoutConstants {
             if (snapping) {
                 // if the examined interval already has neighbor default gap,
                 // then use its padding type and don't check other
-                LayoutInterval gap = LayoutInterval.getNeighbor(sub, i^1, false, true, false);
+                LayoutInterval gap = LayoutInterval.getNeighbor(sub, i^1, false, false);
                 if (gap != null && LayoutInterval.isFixedDefaultPadding(gap)) {
-                    LayoutInterval neighbor = LayoutInterval.getNeighbor(gap, i^1, true, true, false);
+                    LayoutInterval neighbor = LayoutInterval.getNeighbor(gap, i^1, true, false);
                     if (neighbor != null && isValidInterval(neighbor)) {
                         paddingType = gap.getPaddingType();
                         if (paddingType == null) {
@@ -1448,12 +1448,12 @@ class LayoutDragger implements LayoutConstants {
 
     private static boolean relatedPositions(PositionDef nextTo, PositionDef aligned) {
         if (nextTo.interval == null || aligned.interval == null)
-            return false;
+            return true;
 
         LayoutInterval neighbor = LayoutInterval.getNeighbor(
-                aligned.interval, nextTo.alignment, true, true, false);
-        return neighbor == nextTo.interval
-               || (neighbor == null && nextTo.interval.getParent() == null);
+                aligned.interval, nextTo.alignment, true, false);
+        return neighbor != nextTo.interval
+            && (neighbor != null || nextTo.interval.getParent() != null);
     }
 
     private PositionDef getAlignedEqualToNextTo(PositionDef bestNextTo) {
@@ -1466,7 +1466,7 @@ class LayoutDragger implements LayoutConstants {
             // choose aligned position if its interval is just next to
             // bestNextTo.interval (both positions would lead to same result)
             LayoutInterval neighbor = LayoutInterval.getNeighbor(
-                             alignedAlternative.interval, alignment, true, true, false);
+                             alignedAlternative.interval, alignment, true, false);
             if (neighbor != null
                     && (neighbor == bestNextTo.interval || neighbor.isParentOf(bestNextTo.interval)))
                 return alignedAlternative;
@@ -1526,14 +1526,14 @@ class LayoutDragger implements LayoutConstants {
         if (interval.isParentOf(resizing)) {
             return interval.getParent() == null && clearWayToParent(resizing, interval, dimension, alignment)
                    && (!toDeepToMerge(resizing, interval, alignment)
-                       || LayoutInterval.getNeighbor(resizing, alignment, true, true, false) == null) ?
+                       || LayoutInterval.getNeighbor(resizing, alignment, true, false) == null) ?
                    1 : 0;
         }
 
         LayoutInterval commonParent = LayoutInterval.getCommonParent(interval, resizing);
         if (commonParent.isSequential()) {
             if (toDeepToMerge(resizing, commonParent, alignment)
-                && LayoutInterval.getNeighbor(resizing, alignment, true, true, false) != interval)
+                && LayoutInterval.getNeighbor(resizing, alignment, true, false) != interval)
                 return -1;
 
             resizing = getClearWayToParent(resizing, commonParent, dimension, alignment);
@@ -1565,7 +1565,7 @@ class LayoutDragger implements LayoutConstants {
                 if (!clearWayToParent(resizing, interval, dimension, alignment))
                     return false;
                 if (toDeepToMerge(resizing, interval, alignment)) {
-                    LayoutInterval neighbor = LayoutInterval.getNeighbor(resizing, alignment, true, true, false);
+                    LayoutInterval neighbor = LayoutInterval.getNeighbor(resizing, alignment, true, false);
                     if (neighbor != null && interval.isParentOf(neighbor))
                         return false;
                 }

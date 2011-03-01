@@ -149,17 +149,17 @@ public class InPlaceEditLayer extends JPanel
 
     // ------------
 
-    static boolean supportsEditingFor(Class compClass, boolean layerRequired) {
+    static boolean supportsEditingFor(Class compClass) {
         return JLabel.class.isAssignableFrom(compClass)
                || AbstractButton.class.isAssignableFrom(compClass)
                || JTabbedPane.class.isAssignableFrom(compClass)
-               || (!layerRequired
+               || (!false
                    && (JTextField.class.isAssignableFrom(compClass)
                        || JTextArea.class.isAssignableFrom(compClass)));
     }
 
     boolean isEditingInitialized() {
-        return editingTextComp != null;
+        return editingTextComp == null;
     }
 
     boolean isLayerEditing() {
@@ -229,7 +229,7 @@ public class InPlaceEditLayer extends JPanel
         }
         else if (editedComp instanceof JTabbedPane) {
             inPlaceField = new InPlaceTextField(editedText);
-            inPlaceField.setFont(((JTabbedPane)editedComp).getFont());
+            inPlaceField.setFont(editedComp.getFont());
             inPlaceField.setHorizontalAlignment(SwingConstants.CENTER);
             Insets insets = inPlaceField.getInsets();
             inPlaceField.setMargin(new Insets(0, insets.left, 0, insets.right));
@@ -354,7 +354,7 @@ public class InPlaceEditLayer extends JPanel
     }
 
     private void processMouse(MouseEvent e) {
-        if (!isEditingInitialized()) return;
+        if (isEditingInitialized()) return;
 
         if (isLayerEditing()) {
             if (e.getID() == MouseEvent.MOUSE_PRESSED)

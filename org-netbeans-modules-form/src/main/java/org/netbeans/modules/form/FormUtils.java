@@ -358,7 +358,7 @@ public class FormUtils
      * properties needs to be restricted to "detached write". */
     private static Object[][] propertiesAccess = {
         { "javax.swing.JFrame", CLASS_AND_SUBCLASSES,
-              "defaultCloseOperation", new Integer(FormProperty.DETACHED_WRITE) }
+              "defaultCloseOperation", FormProperty.DETACHED_WRITE}
     };
 
     /** Table of properties that need the component to be added in the parent,
@@ -540,7 +540,7 @@ public class FormUtils
             for (TreeModelListener listener : listeners) {
                 model.removeTreeModelListener(listener);
             }
-            Object clone = cloneBeanInstance(o, null, formModel);
+            Object clone = cloneBeanInstance(o, formModel);
             for (TreeModelListener listener : listeners) {
                 model.addTreeModelListener(listener);
             }
@@ -549,7 +549,7 @@ public class FormUtils
         // for TableModel we use TableModelEditor.NbTableModel which takes care of its serialization
 
         if (o instanceof Serializable) {
-            return cloneBeanInstance(o, null, formModel);
+            return cloneBeanInstance(o, formModel);
         }
 
         throw new CloneNotSupportedException();
@@ -560,13 +560,13 @@ public class FormUtils
      * If not serializable, then all properties (taken from BeanInfo) are
      * copied (property values cloned recursively).
      * 
+     *
      * @param bean bean to clone.
-     * @param bInfo bean info.
      * @param formModel form model.
      * @return clone of the given bean.
      * @throws java.lang.CloneNotSupportedException when cloning was unsuccessful.
      */
-    public static Object cloneBeanInstance(Object bean, BeanInfo bInfo, FormModel formModel)
+    public static Object cloneBeanInstance(Object bean, FormModel formModel)
         throws CloneNotSupportedException
     {
         if (bean == null)
@@ -592,6 +592,8 @@ public class FormUtils
             }
         }
 
+        BeanInfo bInfo;
+
         // object is not Serializable
         Object clone;
         try {
@@ -599,8 +601,7 @@ public class FormUtils
             if (clone == null)
                 throw new CloneNotSupportedException();
 
-            if (bInfo == null)
-                bInfo = Utilities.getBeanInfo(bean.getClass());
+            bInfo = Utilities.getBeanInfo(bean.getClass());
         }
         catch (Exception ex) {
             LOGGER.log(Level.INFO, "Cannot clone "+bean.getClass().getName(), ex); // NOI18N
@@ -618,7 +619,7 @@ public class FormUtils
           Object propertyValue;
           try
           {
-            propertyValue = getter.invoke(bean, new Object[0]);
+            propertyValue = getter.invoke(bean);
           }
           catch (Exception e1)
           { // ignore - do not copy this property
@@ -633,7 +634,7 @@ public class FormUtils
           }
           try
           {
-            setter.invoke(clone, new Object[]{propertyValue});
+            setter.invoke(clone, propertyValue);
           }
           catch (Exception e3)
           { // ignore - do not copy this property
@@ -903,7 +904,7 @@ public class FormUtils
 
                     newValue = FormUtils.cloneObject(realValue, prop.getPropertyContext().getFormModel());
                 }
-                writeMethod.invoke(targetBean, new Object[] { newValue });
+                writeMethod.invoke(targetBean, newValue);
             }
             catch (CloneNotSupportedException ex) { // ignore, don't report
             }
@@ -1632,12 +1633,7 @@ public class FormUtils
         }
 
         public TypeHelper(String name) {
-            this(name, null);
-        }
-
-        public TypeHelper(String name, Map<String,TypeHelper> actualTypeArgs) {
-            this.name = name;
-            this.actualTypeArgs = actualTypeArgs;
+          this.name = name;
         }
 
         /**

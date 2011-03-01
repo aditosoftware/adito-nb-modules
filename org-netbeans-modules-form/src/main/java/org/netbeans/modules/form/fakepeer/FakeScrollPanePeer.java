@@ -62,20 +62,7 @@ class FakeScrollPanePeer extends FakeContainerPeer
         return new Delegate();
     }
 
-    public int getHScrollbarHeight() {
-        return 16;
-    }
-
-    public int getVScrollbarWidth() {
-        return 16;
-    }
-
-    public void setScrollPosition(int x, int y) {}
-    public void childResized(int w, int h) {}
-    public void setUnitIncrement(Adjustable adj, int u) {}
-    public void setValue(Adjustable adj, int v) {}
-
-    //
+  //
     //
     //
 

@@ -69,12 +69,8 @@ public class CreationFactory {
     interface PropertyParameters {
      
         public String getPropertyName();
-        
-        public String getJavaParametersString(FormProperty prop);
 
-        public Object[] getPropertyParametersValues(FormProperty prop);
-        
-        public Class[] getPropertyParametersTypes();
+      public Class[] getPropertyParametersTypes();
     }
     
     static class Property2ParametersMapper {              
@@ -97,30 +93,9 @@ public class CreationFactory {
                 return parameters.getPropertyParametersTypes();
             }            
             return propertyType;
-        }        
-        
-        public String getJavaParametersString(FormProperty prop) {            
-            if(parameters!=null){
-                return parameters.getJavaParametersString(prop);
-            }
-            return prop.getJavaInitializationString();
         }
 
-        public Object[] getPropertyParametersValues(FormProperty prop) {              
-            if(parameters!=null){
-                return parameters.getPropertyParametersValues(prop);
-            }    
-            try{
-                return new Object[] { prop.getRealValue() };   
-            } catch(InvocationTargetException ite) {
-                ErrorManager.getDefault().notify(ite);
-            } catch(IllegalAccessException iae){
-                ErrorManager.getDefault().notify(iae);
-            }                
-            return new Object[] {};   
-        }
-        
-        public void setPropertyParameters(PropertyParameters parameters) {
+      public void setPropertyParameters(PropertyParameters parameters) {
             this.parameters = parameters;
         }                        
     }    
@@ -147,13 +122,8 @@ public class CreationFactory {
     public static void registerDescriptor(CreationDescriptor desc) {
         getRegistry().put(desc.getDescribedClassName(), desc);
     }
-    
-    public static void unregisterDescriptor(CreationDescriptor desc) {
-        if (registry != null)
-            registry.remove(desc.getDescribedClassName());
-    }
 
-    // -----------
+  // -----------
     // creation methods
 
     public static Object createDefaultInstance(final Class cls)
@@ -186,125 +156,10 @@ public class CreationFactory {
         return instance;
     }
 
-    public static Object createInstance(Class cls,
-                                        FormProperty[] props,
-                                        int style)
-        throws Exception
-    {
-        CreationDescriptor cd = getDescriptor(cls);
-        if (cd == null)
-            return null;
-
-        CreationDescriptor.Creator creator = cd.findBestCreator(props, style);
-        if (creator == null)
-            return null;
-
-        Object instance = creator.createInstance(props);
-        initAfterCreation(instance);
-        return instance;
-    }
-
-    public static String getJavaCreationCode(Class cls,
-                                             FormProperty[] props,
-                                             int style) {
-        CreationDescriptor cd = getDescriptor(cls);
-        if (cd != null) {
-            CreationDescriptor.Creator creator = cd.findBestCreator(props, style);
-            if (creator != null) {
-               creator.getJavaCreationCode(props, null, null);
-            }
-        }
-        return null;
-    }
-
-    // ------------
+  // ------------
     // utility methods
-    
-    public static FormProperty[] getPropertiesForCreator(
-                                           CreationDescriptor.Creator creator,
-                                           FormProperty[] properties) {
 
-        String[] propNames = creator.getPropertyNames();
-        FormProperty[] crProps = new FormProperty[propNames.length];
-
-        for (int i=0; i < propNames.length; i++) {
-            String propName = propNames[i];
-          for (FormProperty property : properties)
-            if (propName.equals(property.getName()))
-            {
-              crProps[i] = property;
-              break;
-            }
-            if (crProps[i] == null)
-                return null; // missing property, should not happen
-        }
-
-        return crProps;
-    }
-
-    public static FormProperty[] getRemainingProperties(
-                                           CreationDescriptor.Creator creator,
-                                           FormProperty[] properties) {
-
-        String[] propNames = creator.getPropertyNames();
-        FormProperty[] remProps = new FormProperty[properties.length - propNames.length];
-        if (remProps.length == 0) return remProps;
-
-        int ii = 0;
-      for (FormProperty property : properties)
-      {
-        String propName = property.getName();
-        for (int j = 0; j < propNames.length; j++)
-        {
-          if (propName.equals(propNames[j])) break;
-          if (j + 1 == propNames.length)
-          {
-            if (ii > remProps.length)
-              return null; // should not happen
-            remProps[ii++] = property;
-          }
-        }
-      }
-
-        return remProps;
-    }
-
-    public static boolean containsProperty(CreationDescriptor desc,
-                                           String propName)
-    {
-        CreationDescriptor.Creator[] creators = desc.getCreators();
-        if (creators == null)
-            return false;
-
-      for (CreationDescriptor.Creator creator : creators)
-      {
-        String[] propNames = creator.getPropertyNames();
-        for (String propName1 : propNames)
-          if (propName1.equals(propName))
-            return true;
-      }
-        return false;
-    }
-
-    public static boolean containsProperty(CreationDescriptor.Creator creator,
-                                           String propName)
-    {
-        String[] propNames = creator.getPropertyNames();
-      for (String propName1 : propNames)
-        if (propName1.equals(propName))
-          return true;
-        return false;
-    }
-
-    public static FormProperty findProperty(String propName,
-                                            FormProperty[] properties) {
-      for (FormProperty property : properties)
-        if (property.getName().equals(propName))
-          return property;
-        return null;
-    }
-
-    public static CreationDescriptor.Creator findCreator(
+  public static CreationDescriptor.Creator findCreator(
                                                  CreationDescriptor desc,
                                                  Class[] paramTypes)
     {
@@ -573,7 +428,7 @@ public class CreationFactory {
             { "borderInsets" }
         };
         
-        defaultConstrParams = new Object[] { new Integer(1), new Integer(1), new Integer(1), new Integer(1) };
+        defaultConstrParams = new Object[] {1, 1, 1, 1};
         methodName = "createEmptyBorder";
         
         registerDescriptor(new CreationDescriptor(
@@ -598,7 +453,7 @@ public class CreationFactory {
             { "border" }
         };
         
-        defaultConstrParams = new Object[] { null, "", new Integer(0), new Integer(0) };
+        defaultConstrParams = new Object[] { null, "", 0, 0};
         methodName = "createTitledBorder";                      
         registerDescriptor(new CreationDescriptor(
                 javax.swing.BorderFactory.class, javax.swing.border.TitledBorder.class, methodName,
@@ -633,7 +488,7 @@ public class CreationFactory {
                            "shadowOuterColor", "shadowInnerColor" }
         };
                       
-        defaultConstrParams = new Object[] { new Integer(javax.swing.border.BevelBorder.RAISED) };
+        defaultConstrParams = new Object[] {javax.swing.border.BevelBorder.RAISED};
         methodName = "createBevelBorder";                     
         registerDescriptor(new CreationDescriptor(
                 javax.swing.BorderFactory.class, javax.swing.border.BevelBorder.class, methodName, 
@@ -675,8 +530,8 @@ public class CreationFactory {
             { "borderInsets", "tileIcon" },
             { "borderInsets", "matteColor" }
         };         
-        defaultConstrParams = new Object[] { 
-            new Integer(1), new Integer(1), new Integer(1), new Integer(1),
+        defaultConstrParams = new Object[] {
+            1, 1, 1, 1,
             java.awt.Color.black
         };        
         methodName = "createMatteBorder";                                
@@ -804,41 +659,12 @@ public class CreationFactory {
         public String getPropertyName() {
             return propertyName;
         }
-        
-        @Override
-        public String getJavaParametersString(FormProperty prop) {     
-            Insets insets = (Insets) getRealValue (prop);                    
-            if(insets != null) {
-                return insets.top + ", " + insets.left + ", " + insets.bottom + ", " + insets.right;
-            } else {
-                return "";
-            }                                                
-        }        
-        @Override
-        public Object[] getPropertyParametersValues(FormProperty prop) {                        
-            Insets insets = (Insets) getRealValue(prop);                            
-            if(insets != null) {
-                return new Object[] { new Integer(insets.top), new Integer(insets.left), new Integer(insets.bottom), new Integer(insets.right)};                
-            } else {
-                return new Object[] { };                
-            }                    
-        }    
-        
-        @Override
+
+      @Override
         public Class[] getPropertyParametersTypes() {
             return parameterTypes;
         }
-        
-        private static Object getRealValue(FormProperty prop){
-            try {
-                return prop.getRealValue();
-            } catch(InvocationTargetException ite) {
-                ErrorManager.getDefault().notify(ite);
-            } catch(IllegalAccessException iae){
-                ErrorManager.getDefault().notify(iae);
-            }                             
-            return null;
-        }           
+
     }
     
     

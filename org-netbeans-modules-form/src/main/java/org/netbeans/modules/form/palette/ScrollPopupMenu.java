@@ -70,13 +70,13 @@ public class ScrollPopupMenu extends JPopupMenu {
             if (getInvoker() != null && !(getInvoker() instanceof JMenu)) {
 		if (getSubElements().length > 0) {
 		    MenuElement me[] = new MenuElement[2];
-		    me[0] = (MenuElement)this;
+		    me[0] = this;
 		    me[1] = getSubElements()[0];
 		    MenuSelectionManager.defaultManager().setSelectedPath(me);
 		}
                 else {
 		    MenuElement me[] = new MenuElement[1];
-		    me[0] = (MenuElement)this;
+		    me[0] = this;
 		    MenuSelectionManager.defaultManager().setSelectedPath(me);
 		}
 	    }

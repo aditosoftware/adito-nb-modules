@@ -59,5 +59,4 @@ public interface CodeStatement extends UsingCodeObject {
 
     public CodeExpression[] getStatementParameters();
 
-    public String getJavaCodeString(String parentStr, String[] paramsStr);
 }

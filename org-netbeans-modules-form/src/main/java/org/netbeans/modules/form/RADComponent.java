@@ -55,24 +55,16 @@ import javax.accessibility.Accessible;
 import javax.accessibility.AccessibleContext;
 import javax.swing.*;
 
-import de.adito.aditoweb.core.util.debug.Debug;
-import de.adito.aditoweb.designer.data.IDataProvider;
-import de.adito.aditoweb.designer.filetype.PropertiesCookie;
-import de.adito.aditoweb.filesystem.datamodelfs.access.mechanics.field.IFieldAccess;
-import de.adito.aditoweb.filesystem.datamodelfs.access.model.FieldConst;
-import org.netbeans.api.java.classpath.ClassPath;
 import org.netbeans.modules.form.RADProperty.FakePropertyDescriptor;
 
 import org.netbeans.modules.form.adito.*;
 import org.openide.*;
-import org.openide.loaders.*;
 import org.openide.nodes.*;
 import org.openide.util.Lookup;
 import org.openide.util.NbBundle;
 import org.openide.util.datatransfer.NewType;
 
 import org.netbeans.modules.form.codestructure.*;
-import org.openide.filesystems.FileObject;
 import org.openide.util.Utilities;
 
 /**
@@ -102,9 +94,8 @@ public class RADComponent {
     private Object beanInstance;
     private BeanInfo beanInfo;
     private BeanInfo fakeBeanInfo;
-    private String missingClassName;
 
-    protected Node.PropertySet[] propertySets;
+  protected Node.PropertySet[] propertySets;
     private Node.Property[] syntheticProperties;
     private RADProperty[] beanProperties1;
     private RADProperty[] beanProperties2;
@@ -179,7 +170,7 @@ public class RADComponent {
      * @return initialized instance.
      * @throws java.lang.Exception when the instance cannot be initialized.
      */
-    public Object initInstance(Class<? extends Object> beanClass, ARADComponentHandler pARADComponentHandler)
+    public Object initInstance(Class<?> beanClass, ARADComponentHandler pARADComponentHandler)
         throws Exception {
         if (beanClass == null)
             throw new NullPointerException();
@@ -349,17 +340,12 @@ public class RADComponent {
     /** Provides access to the Class of the bean represented by this RADComponent
      * @return the Class of the bean represented by this RADComponent
      */
-    public final Class<? extends Object> getBeanClass() {
+    public final Class<?> getBeanClass() {
         return beanClass;
     }
 
-    public final String getMissingClassName() {
-        return missingClassName;
-    }
-
-    public final void setMissingClassName(String className) {
-        missingClassName = className;
-    }
+  public final void setMissingClassName(String className) {
+  }
 
     /** Provides access to the real instance of the bean represented by this RADComponent
      * @return the instance of the bean represented by this RADComponent
@@ -386,38 +372,7 @@ public class RADComponent {
         return false;
     }
 
-    Object createDefaultDeserializedInstance() throws Exception {
-        FileObject formFile = FormEditor.getFormDataObject(getFormModel()).getFormFile();
-      // TODO: stripped
-//        String serFile = (String)getAuxValue(JavaCodeGenerator.AUX_SERIALIZE_TO);
-//        if (serFile == null) {
-//            serFile = formFile.getName() + "_" + getName(); // NOI18N
-//        }
-
-        ClassPath sourcePath = ClassPath.getClassPath(formFile, ClassPath.SOURCE);
-        String serName = sourcePath.getResourceName(formFile.getParent());
-        if (!"".equals(serName)) { // NOI18N
-            serName += "."; // NOI18N
-        }
-//        serName += serFile; // TODO: stripped
-
-        Object instance = null;
-        try {
-            instance = Beans.instantiate(sourcePath.getClassLoader(true), serName);
-        } catch (ClassNotFoundException cnfe) {
-            org.openide.ErrorManager.getDefault().notify(org.openide.ErrorManager.INFORMATIONAL, cnfe);
-            ClassPath executionPath = ClassPath.getClassPath(formFile, ClassPath.EXECUTE);
-            try {
-                instance = Beans.instantiate(executionPath.getClassLoader(true), serName);
-            } catch (ClassNotFoundException cnfex) {
-                org.openide.ErrorManager.getDefault().notify(org.openide.ErrorManager.INFORMATIONAL, cnfex);
-                instance = createBeanInstance();
-            }
-        }
-        return instance;
-    }
-
-    public Object cloneBeanInstance(Collection<RADProperty> relativeProperties) {
+  public Object cloneBeanInstance(Collection<RADProperty> relativeProperties) {
         Object clone;
         try {
           // TODO: stripped
@@ -463,22 +418,7 @@ public class RADComponent {
         }
     }
 
-    /** This method can be used to check whether the bean represented by this
-     * RADComponent has hidden-state.
-     * @return true if the component has hidden state, false otherwise
-     */
-    public boolean hasHiddenState() {
-        String name = beanClass.getName();
-        if (name.startsWith("javax.") // NOI18N
-              || name.startsWith("java.") // NOI18N
-              || name.startsWith("org.openide.")) // NOI18N
-            return false;
-
-        return getBeanInfo().getBeanDescriptor()
-                                .getValue("hidden-state") != null; // NOI18N
-    }
-
-    public CodeExpression getCodeExpression() {
+  public CodeExpression getCodeExpression() {
         return componentCodeExpression;
     }
 
@@ -545,15 +485,16 @@ public class RADComponent {
             throw iae;
         }
 
-        if (formModel.getCodeStructure().isVariableNameReserved(name)) {
-            IllegalArgumentException iae =
-                new IllegalArgumentException("Component name already in use: "+name); // NOI18N
-            ErrorManager.getDefault().annotate(
-                iae, ErrorManager.USER, null,
-                FormUtils.getBundleString("ERR_COMPONENT_NAME_ALREADY_IN_USE"), // NOI18N
-                null, null);
-            throw iae;
-        }
+      // isVariableNameReserved(name) is always false
+//        if (formModel.getCodeStructure().isVariableNameReserved(name)) {
+//            IllegalArgumentException iae =
+//                new IllegalArgumentException("Component name already in use: "+name); // NOI18N
+//            ErrorManager.getDefault().annotate(
+//                iae, ErrorManager.USER, null,
+//                FormUtils.getBundleString("ERR_COMPONENT_NAME_ALREADY_IN_USE"), // NOI18N
+//                null, null);
+//            throw iae;
+//        }
 
         try {
             RADComponentRenameRefactoringSupport.renameComponent(this, name);
@@ -822,15 +763,7 @@ public class RADComponent {
         return getPropertyByName(name, RADProperty.class, true);
     }
 
-    public final Node.Property getSyntheticProperty(String name) {
-        for (Node.Property prop : getSyntheticProperties()) {
-            if (prop.getName().equals(name))
-                return prop;
-        }
-        return null;
-    }
-
-    public RADProperty[] getFakeBeanProperties(String[] propNames, Class[] propertyTypes) {
+  public RADProperty[] getFakeBeanProperties(String[] propNames, Class[] propertyTypes) {
         FakeBeanInfo fbi = (FakeBeanInfo) getBeanInfo();
         fbi.removePropertyDescriptors();
         for (int i = 0; i < propNames.length; i++) {
@@ -1169,22 +1102,25 @@ public class RADComponent {
         }
 
         if(isValid()) {
-            Iterator entries = otherProperties.entrySet().iterator();
-            while (entries.hasNext()) {
-                Map.Entry entry = (Map.Entry)entries.next();
-                final String category = (String)entry.getKey();
-                ps = new Node.PropertySet(category, category, category) {
-                    @Override
-                    public Node.Property[] getProperties() {
-                        if (otherProperties == null) {
-                            createBeanProperties();
-                        }
-                        return (Node.Property[])otherProperties.get(category);
-                    }
-                };
-                //ps.setValue("tabName", category); // NOI18N
-                propSets.add(ps);
-            }
+          for (Map.Entry<Object, RADProperty[]> objectEntry : otherProperties.entrySet())
+          {
+            Map.Entry entry = (Map.Entry) objectEntry;
+            final String category = (String) entry.getKey();
+            ps = new Node.PropertySet(category, category, category)
+            {
+              @Override
+              public Node.Property[] getProperties()
+              {
+                if (otherProperties == null)
+                {
+                  createBeanProperties();
+                }
+                return otherProperties.get(category);
+              }
+            };
+            //ps.setValue("tabName", category); // NOI18N
+            propSets.add(ps);
+          }
 
             if (beanProperties2.length > 0) {
                 propSets.add(new Node.PropertySet(
@@ -1874,14 +1810,7 @@ public class RADComponent {
             return new ButtonGroupPropertyEditor();
         }
 
-        @Override
-        String getWholeSetterCode(String groupName) {
-            return groupName != null ?
-                groupName + ".add(" + getRADComponent().getName() + ");" : // NOI18N
-                null;
-        }
-
-        @Override
+      @Override
         public void restoreDefaultValue() throws IllegalAccessException, InvocationTargetException {
             if (this.getValue() instanceof FormDesignValue) {
                 FormDesignValue formValue = (FormDesignValue) this.getValue();
@@ -2041,11 +1970,7 @@ public class RADComponent {
             }
         }
 
-        void addPropertyDescriptor(PropertyDescriptor pd) {
-            propertyDescriptors.add(pd);
-        }
-
-        void removePropertyDescriptors() {
+      void removePropertyDescriptors() {
             propertyDescriptors.clear();
         }
     }
@@ -2073,7 +1998,7 @@ public class RADComponent {
                         }
                         @Override
                         public void setTargetValue(Object value) {
-                            accName = (String) value;
+                            accName = value;
                         }
                         @Override
                         public boolean supportsDefaultValue () {
@@ -2091,11 +2016,6 @@ public class RADComponent {
                             super.restoreDefaultValue();
                             accName = BeanSupport.NO_VALUE;
                         }
-                        @Override
-                        String getPartialSetterCode(String javaInitStr) {
-                            return "getAccessibleContext().setAccessibleName(" // NOI18N
-                                   + javaInitStr + ")"; // NOI18N
-                        }
                     },
 
                     new FormProperty(
@@ -2111,7 +2031,7 @@ public class RADComponent {
                         }
                         @Override
                         public void setTargetValue(Object value) {
-                            accDescription = (String) value;
+                            accDescription = value;
                         }
                         @Override
                         public boolean supportsDefaultValue () {
@@ -2139,12 +2059,6 @@ public class RADComponent {
                         {
                             super.restoreDefaultValue();
                             accDescription = BeanSupport.NO_VALUE;
-                        }
-                        @Override
-                        String getPartialSetterCode(String javaInitStr) {
-                            return
-                              "getAccessibleContext().setAccessibleDescription(" // NOI18N
-                              + javaInitStr + ")"; // NOI18N
                         }
                     },
 
@@ -2198,12 +2112,6 @@ public class RADComponent {
                         @Override
                         public PropertyEditor getExpliciteEditor() {
                             return new RADVisualComponent.AccessibleParentEditor();
-                        }
-                        @Override
-                        String getPartialSetterCode(String javaInitStr) {
-                            return javaInitStr == null ? null :
-                                "getAccessibleContext().setAccessibleParent(" // NOI18N
-                                + javaInitStr + ")"; // NOI18N
                         }
                     }
                 };

@@ -70,16 +70,12 @@ public class RADMenuItemComponent extends RADComponent {
 
     static final int T_SEPARATOR            = 0x1001B;
 
-    /** Masks for the T_XXX constants */
-    static final int MASK_AWT               = 0x00010;
-//    static final int MASK_SWING             = 0x00020;
+  //    static final int MASK_SWING             = 0x00020;
     static final int MASK_CONTAINER         = 0x00100;
-    static final int MASK_ROOT              = 0x01000;
-    static final int MASK_SEPARATOR         = 0x10000;
 
 
-    @Override
-    public Object initInstance(Class<? extends Object> beanClass,  ARADComponentHandler pARADComponentHandler) throws Exception {
+  @Override
+    public Object initInstance(Class<?> beanClass,  ARADComponentHandler pARADComponentHandler) throws Exception {
         type = recognizeType(beanClass);
         return super.initInstance(beanClass, pARADComponentHandler);
     }

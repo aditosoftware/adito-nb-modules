@@ -89,14 +89,8 @@ import org.netbeans.modules.form.codestructure.*;
 
 public abstract class AbstractLayoutSupport implements LayoutSupportDelegate
 {
-    /** Default icon URL. */
-    private static String iconURL =
-        "org/netbeans/modules/form/layoutsupport/resources/AbstractLayout.gif"; // NOI18N
-    /** Default icon URL. */
-    private static String icon32URL =
-        "org/netbeans/modules/form/layoutsupport/resources/AbstractLayout32.gif"; // NOI18N
 
-    private static Method simpleAddMethod = null;
+  private static Method simpleAddMethod = null;
     private static Method addWithConstraintsMethod = null;
     private static Method setLayoutMethod = null;
 
@@ -129,7 +123,7 @@ public abstract class AbstractLayoutSupport implements LayoutSupportDelegate
      *                      layout delegate
      * @param lmInstance LayoutManager instance for initialization (may be null)
      * @param fromCode indicates whether to initialize from code structure
-     * @exception any Exception occurred during initialization
+     * @exception Exception Exception occurred during initialization
      */
     @Override
     public void initialize(LayoutSupportContext layoutContext,
@@ -270,9 +264,11 @@ public abstract class AbstractLayoutSupport implements LayoutSupportDelegate
         switch (type) {
             case BeanInfo.ICON_COLOR_16x16:
             case BeanInfo.ICON_MONO_16x16:
-                return ImageUtilities.loadImage(iconURL);
+              String iconURL = "org/netbeans/modules/form/layoutsupport/resources/AbstractLayout.gif";
+              return ImageUtilities.loadImage(iconURL);
             default:
-                return ImageUtilities.loadImage(icon32URL);
+              String icon32URL = "org/netbeans/modules/form/layoutsupport/resources/AbstractLayout32.gif";
+              return ImageUtilities.loadImage(icon32URL);
         }
     }
 
@@ -368,16 +364,7 @@ public abstract class AbstractLayoutSupport implements LayoutSupportDelegate
         return componentCodeGroups.get(index);
     }
 
-    /** Gets CodeExpression object representing one component.
-     * @param index index of the component in the layout
-     * @return CodeExpression for a component
-     */
-    @Override
-    public CodeExpression getComponentCodeExpression(int index) {
-        return componentCodeExpressions.get(index);
-    }
-
-    /** Gets number of components in the layout.
+  /** Gets number of components in the layout.
      * @return number of components in the layout
      */
     @Override
@@ -443,9 +430,9 @@ public abstract class AbstractLayoutSupport implements LayoutSupportDelegate
      * level, no real components but their CodeExpression representations
      * are added.
      * The code structures describing the layout is updated immediately.
-     * @param compExpressions array of CodeExpression objects representing the
+     * @param newCompExps array of CodeExpression objects representing the
      *        components to be accepted
-     * @param constraints array of layout constraints of the components, may
+     * @param newConstraints array of layout constraints of the components, may
      *        contain nulls
      * @param index position at which the components should be added (inserted);
      *        if -1, the components should be added at the end
@@ -504,43 +491,7 @@ public abstract class AbstractLayoutSupport implements LayoutSupportDelegate
             componentConstraints.clear();
     }
 
-    /** Indicates whether there's some change in the layout in comparison
-     * with the default layout of given container. If there's no change, no
-     * code needs to be delegate (e.g. default FlowLayout in JPanel).
-     * Note this is related to the container layout only, not to components.
-     * @param defaultContainer instance of the default container to compare with
-     * @param defaultContainerDelegate effective container delegate of the
-     *        default container (e.g. like content pane of JFrame)
-     * @return whether the current layout is different from the default one
-     */
-    @Override
-    public boolean isLayoutChanged(Container defaultContainer,
-                                   Container defaultContainerDelegate)
-    {
-        if (isDedicated())
-            return false;
-
-        Class<?> layoutClass = getSupportedClass();
-        LayoutManager lm = defaultContainerDelegate.getLayout();
-
-        if (layoutClass == null)
-            return lm != null;
-        if (lm == null)
-            return true;
-
-        // 
-        if (!layoutClass.isAssignableFrom(lm.getClass()))
-            return true;
-
-        FormProperty[] props = getAllProperties();
-      for (FormProperty prop : props)
-        if (prop.isChanged())
-          return true;
-
-        return false;
-    }
-
-    /** Gets layout constraints for a component at the given index.
+  /** Gets layout constraints for a component at the given index.
      * @param index index of the component in the layout
      * @return layout constraints of given component
      */
@@ -663,7 +614,7 @@ public abstract class AbstractLayoutSupport implements LayoutSupportDelegate
      * e.g. for JTabbedPane it might switch the selected TAB. The default
      * implementation does nothing.
      * @param p Point of click in the container
-     * @param real instance of the container when the click occurred
+     * @param container instance of the container when the click occurred
      * @param containerDelegate effective container delegate of the container
      *        (e.g. like content pane of JFrame)
      */
@@ -850,7 +801,7 @@ public abstract class AbstractLayoutSupport implements LayoutSupportDelegate
 
     /** Cloning method - creates a copy of the layout delegate.
      * @param targetContext LayoutSupportContext for the new layout delegate
-     * @param compExpressions array of CodeExpression objects representing the
+     * @param targetComponents array of CodeExpression objects representing the
      *        components for the new layout delegate (corresponding to the
      *        current ones)
      * @return cloned layout delegate instance
@@ -928,7 +879,7 @@ public abstract class AbstractLayoutSupport implements LayoutSupportDelegate
      */
     protected AbstractLayoutSupport createLayoutSupportInstance() {
         try {
-            return (AbstractLayoutSupport) getClass().newInstance();
+            return getClass().newInstance();
         }
         catch (Exception ex) { // should not happen for AbstractLayoutSupport subclasses
             return null;
@@ -980,7 +931,7 @@ public abstract class AbstractLayoutSupport implements LayoutSupportDelegate
      * layout manager bean, the method readInitLayoutCode is used.
      * Reading components code is not done here.
      * @param layoutCode CodeGroup to be filled with relevant layout code
-     * @see readInitLayoutCode method
+     * @see #readInitLayoutCode method
      */
     protected void readLayoutCode(CodeGroup layoutCode) {
         if (isDedicated())
@@ -1030,8 +981,8 @@ public abstract class AbstractLayoutSupport implements LayoutSupportDelegate
             getSupportedClass(),
             getAllProperties(),
             CreationDescriptor.PLACE_ALL | CreationDescriptor.CHANGED_ONLY,
-            false, // don't force empty constructor
-            false, // disable changes firing when properties are restored
+            // don't force empty constructor
+            // disable changes firing when properties are restored
             layoutExp,
             initLayoutCode);
     }
@@ -1050,9 +1001,7 @@ public abstract class AbstractLayoutSupport implements LayoutSupportDelegate
             getSupportedClass(),
             getAllProperties(),
             CreationDescriptor.PLACE_ALL | CreationDescriptor.CHANGED_ONLY,
-            false,
             layoutContext.getCodeStructure(),
-            CodeVariable.LOCAL,
             initLayoutCode);
 
         return layoutBeanCode.getCodeExpression();
@@ -1105,7 +1054,7 @@ public abstract class AbstractLayoutSupport implements LayoutSupportDelegate
      * constraints of a component from code.
      * @param constrExp CodeExpression object of the constraints (taken from
      *        add method in the code)
-     * @param constrCode CodeGroup to be filled with the relevant constraints
+     * @param constrCode CodeGroup to be  filled with the relevant constraints
      *        initialization code
      * @param compExp CodeExpression of the component for which the constraints
      *        are read
@@ -1258,19 +1207,7 @@ public abstract class AbstractLayoutSupport implements LayoutSupportDelegate
         layoutContext.updatePrimaryContainer();
     }
 
-    /** This method finds the CodeStatement object representing setLayout
-     * method call on the container.
-     * @return CodeStatement of setLayout method call on the container
-     */
-    protected final CodeStatement getSetLayoutStatement() {
-        Iterator it = CodeStructure.getDefinedStatementsIterator(
-                                        getActiveContainerCodeExpression());
-        CodeStatement[] found = CodeStructure.filterStatements(
-                                                  it, getSetLayoutMethod());
-        return found != null && found.length > 0 ? found[0] : null;
-    }
-
-    // ---------
+  // ---------
     // utility methods
 
     /** Used only internally.

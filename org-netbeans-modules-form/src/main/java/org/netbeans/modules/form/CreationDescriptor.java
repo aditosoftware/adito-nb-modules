@@ -66,22 +66,13 @@ public class CreationDescriptor {
 
         public Class[] getParameterTypes();
 
-        public Class[] getExceptionTypes();
-
         public String[] getPropertyNames();
-
-        public Object createInstance(FormProperty[] props)
-            throws InstantiationException, IllegalAccessException,
-                   IllegalArgumentException, InvocationTargetException;
 
         public Object createInstance(Object[] paramValues)
             throws InstantiationException, IllegalAccessException,
                    IllegalArgumentException, InvocationTargetException;
-        
-        // [this will become useless when we can rely on getCodeOrigin(...)]
-        public String getJavaCreationCode(FormProperty[] props, Class expressionType, String genericTypes);
 
-        public CodeExpressionOrigin getCodeOrigin(CodeExpression[] params);
+      public CodeExpressionOrigin getCodeOrigin(CodeExpression[] params);
     }
 
     private Class describedClass;
@@ -187,13 +178,8 @@ public class CreationDescriptor {
         
         defaultParams = defParams == null ? emptyParams : defParams;
     }
-    
-    public void addCreator(Creator creator, Object[] defaultParams) {
-        creators.add(creator);
-        this.defaultParams = defaultParams;
-    }
 
-    protected void setDescribedClass(Class descClass) throws IllegalArgumentException {
+  protected void setDescribedClass(Class descClass) throws IllegalArgumentException {
         if (describedClass==null) {
             describedClass = descClass;
         }
@@ -309,8 +295,7 @@ public class CreationDescriptor {
     // ----------
 
     static class ConstructorCreator implements Creator {
-        private Class theClass;
-        private Constructor constructor;
+      private Constructor constructor;
 //        private Class[] constructorParamTypes;
         private String[] constructorPropNames;
 
@@ -325,8 +310,7 @@ public class CreationDescriptor {
                 throw new IllegalArgumentException();
 
             constructor = cls.getConstructor(paramTypes);
-            theClass = cls;
-//            constructorParamTypes = paramTypes;
+          //            constructorParamTypes = paramTypes;
             constructorPropNames = propNames;
         }
 
@@ -340,86 +324,29 @@ public class CreationDescriptor {
             return constructor.getParameterTypes(); //constructorParamTypes;
         }
 
-        @Override
-        public final Class[] getExceptionTypes() {
-            return constructor.getExceptionTypes();
-        }
-
-        @Override
+      @Override
         public final String[] getPropertyNames() {
             return constructorPropNames;
         }
 
-        @Override
-        public Object createInstance(FormProperty[] props)
-            throws InstantiationException, IllegalAccessException,
-                   IllegalArgumentException, InvocationTargetException
-        {
-            Object[] paramValues = new Object[constructorPropNames.length];
-
-            for (int i=0; i < constructorPropNames.length; i++) {
-                FormProperty prop = CreationFactory.findProperty(
-                                        constructorPropNames[i], props);
-                if (prop == null)
-                    return null; // should not happen
-
-                try {
-                    paramValues[i] = prop.getRealValue();
-                } catch (Exception ex) { // unlikely to happen
-                    InstantiationException iex = new InstantiationException();
-                    iex.initCause(ex);
-                    throw(iex);
-                }
-            }
-
-            return constructor.newInstance(paramValues);
-        }
-
-        @Override
+      @Override
         public Object createInstance(Object[] paramValues)
             throws InstantiationException, IllegalAccessException,
                    IllegalArgumentException, InvocationTargetException
         {           
             return constructor.newInstance(paramValues);
-        }        
-        
-        @Override
-        public String getJavaCreationCode(FormProperty[] props, Class expressionType, String genericTypes) {
-            StringBuilder buf = new StringBuilder();
-            buf.append("new "); // NOI18N
-            buf.append(theClass.getCanonicalName());
-            if (genericTypes != null) {
-                buf.append(genericTypes);
-            }
-            buf.append("("); // NOI18N
-
-            for (int i=0; i < constructorPropNames.length; i++) {
-                FormProperty prop = CreationFactory.findProperty(
-                                        constructorPropNames[i], props);
-                if (prop == null)
-                    return null; // should not happen
-
-                buf.append(prop.getJavaInitializationString());
-                if (i+1 < constructorPropNames.length)
-                    buf.append(", "); // NOI18N
-            }
-
-            buf.append(")"); // NOI18N
-            return buf.toString();
         }
 
-        @Override
+      @Override
         public CodeExpressionOrigin getCodeOrigin(CodeExpression[] params) {
             return CodeStructure.createOrigin(constructor, params);
         }
     }
     
     static class MethodCreator implements Creator {
-        private Class factoryClass;
-        private Class describedClass;
+      private Class describedClass;
         private Method method;
-        private CreationFactory.Property2ParametersMapper[] properties;
-        private String[] propertyNames;
+      private String[] propertyNames;
         
         MethodCreator(Class factoryClass, Class describedClass, String methodName, CreationFactory.Property2ParametersMapper[] properties)
             throws NoSuchMethodException
@@ -437,12 +364,10 @@ public class CreationDescriptor {
                                     
             Class[] paramTypes = paramTypesList.toArray(new Class[paramTypesList.size()]);
 
-            method = factoryClass.getMethod(methodName, paramTypes);  
-                
-            this.factoryClass = factoryClass;                   
-            this.describedClass = describedClass;
-            this.properties = properties; 
-            
+            method = factoryClass.getMethod(methodName, paramTypes);
+
+          this.describedClass = describedClass;
+
         }
     
             
@@ -456,43 +381,12 @@ public class CreationDescriptor {
             return method.getParameterTypes(); 
         }
 
-        @Override
-        public final Class[] getExceptionTypes() {
-            return method.getExceptionTypes();
-        }
-
-        @Override
+      @Override
         public final String[] getPropertyNames() {
             return propertyNames;
         }
 
-        @Override
-        public Object createInstance(FormProperty[] props)
-            throws InstantiationException, IllegalAccessException,
-                   IllegalArgumentException, InvocationTargetException
-        {
-                                
-            List<Object> paramValuesList = new ArrayList<Object>();
-          for (CreationFactory.Property2ParametersMapper property : properties)
-          {
-            FormProperty prop = CreationFactory.findProperty(property.getPropertyName(), props);
-            if (prop == null)
-              return null; // should not happen
-
-            Object[] propertyParameters = property.getPropertyParametersValues(prop);
-            paramValuesList.addAll(Arrays.asList(propertyParameters));
-          }
-            
-            Object[] paramValues = paramValuesList.toArray(new Object[paramValuesList.size()]);
-            
-            Object ret = method.invoke(null, paramValues);
-            if(ret.getClass() != describedClass) {                
-                throw new IllegalArgumentException();
-            }
-            return ret;
-        }
-
-        @Override
+      @Override
         public Object createInstance(Object[] paramValues)
             throws InstantiationException, IllegalAccessException,
                    IllegalArgumentException, InvocationTargetException
@@ -504,39 +398,8 @@ public class CreationDescriptor {
             }
             return ret;
         }
-        
-        @Override
-        public String getJavaCreationCode(FormProperty[] props, Class expressionType, String genericTypes) {
-            StringBuilder buf = new StringBuilder();
-            if (expressionType == null) expressionType = describedClass;
-            if (!expressionType.isAssignableFrom(method.getReturnType())) { // Issue 71220
-                buf.append('(').append(expressionType.getName()).append(')');
-            }
-            buf.append(factoryClass.getName()); // NOI18N
-            buf.append("."); // NOI18N
-            buf.append(method.getName());
-            buf.append("("); // NOI18N
 
-
-            for (int i=0; i < properties.length; i++) {
-                
-                String name = properties[i].getPropertyName();                
-                FormProperty prop = CreationFactory.findProperty(name, props);
-                
-                if (prop == null)
-                    return null; // should not happen
-                        
-                    buf.append(properties[i].getJavaParametersString(prop));                     
-
-                if (i+1 < properties.length)
-                    buf.append(", "); // NOI18N
-            }
-
-            buf.append(")"); // NOI18N
-            return buf.toString();
-        }
-
-        @Override
+      @Override
         public CodeExpressionOrigin getCodeOrigin(CodeExpression[] params) {
             // nobody cares ...
             return null; 

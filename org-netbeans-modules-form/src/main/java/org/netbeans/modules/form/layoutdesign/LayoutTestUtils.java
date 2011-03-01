@@ -100,10 +100,10 @@ public class LayoutTestUtils implements LayoutConstants {
     
     static void writeCollection(List<String> codeList, String name, Collection c) {
         codeList.add("Collection " + name + " = new ArrayList();"); //NOI18N
-	Iterator i = c.iterator();
-        while (i.hasNext()) {
-            codeList.add(name + ".add(\"" + (String)i.next() + "\");"); // NOI18N
-        }
+      for (Object aC : c)
+      {
+        codeList.add(name + ".add(\"" + aC + "\");"); // NOI18N
+      }
     }
 
     static void writeStringArray(List<String> codeList, String name, String[] compIds) {
@@ -152,11 +152,11 @@ public class LayoutTestUtils implements LayoutConstants {
 
             //Get the code into one string
             final StringBuffer code = new StringBuffer();
-            Iterator i = codeList.iterator();
-            while (i.hasNext()) {
-                String line = (String)i.next();
-                code.append(line).append('\n');
-            }
+          for (Object aCodeList : codeList)
+          {
+            String line = (String) aCodeList;
+            code.append(line).append('\n');
+          }
 
           // TODO: stripped
 //            //Find a name for the test file

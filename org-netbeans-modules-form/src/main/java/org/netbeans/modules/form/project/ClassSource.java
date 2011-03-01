@@ -75,8 +75,7 @@ import org.openide.util.NbBundle;
 public final class ClassSource {
 
     private final String className;
-    private final String typeParameters;
-    private final Collection<? extends Entry> entries;
+  private final Collection<? extends Entry> entries;
 
     /**
      * @param className name of the class, can be null
@@ -90,18 +89,13 @@ public final class ClassSource {
     public ClassSource(String className, Collection<? extends Entry> entries, String typeParameters) {
         this.className = className;
         this.entries = entries;
-        this.typeParameters = typeParameters;
     }
 
     public String getClassName() {
         return className;
     }
 
-    public String getTypeParameters() {
-        return typeParameters;
-    }
-
-    public Collection<? extends Entry> getEntries() {
+  public Collection<? extends Entry> getEntries() {
         return entries;
     }
 
@@ -214,10 +208,8 @@ public final class ClassSource {
             assert jar != null;
             this.jar = jar;
         }
-        public File getJar() {
-            return jar;
-        }
-        @Override
+
+      @Override
         public List<URL> getClasspath() {
             try {
                 return Collections.singletonList(translateURL(jar.toURI().toURL()));
@@ -260,10 +252,8 @@ public final class ClassSource {
             assert lib != null;
             this.lib = lib;
         }
-        public Library getLibrary() {
-            return lib;
-        }
-        @Override
+
+      @Override
         public List<URL> getClasspath() {
             // No need to translate to jar protocol; Library.getContent should have done this already.
             return lib.getContent("classpath"); // NOI18N
@@ -301,10 +291,8 @@ public final class ClassSource {
             assert artifact != null;
             this.artifact = artifact;
         }
-        public AntArtifact getArtifact() {
-            return artifact;
-        }
-        @Override
+
+      @Override
         public List<URL> getClasspath() {
             List<URL> cp = new ArrayList<URL>();
             for (URI loc : artifact.getArtifactLocations()) {

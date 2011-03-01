@@ -87,17 +87,15 @@ final class BeanCodeManager
     public BeanCodeManager(Class beanClass,
                            FormProperty[] beanProperties,
                            int creationStyle,
-                           boolean forceEmptyCtor,
                            CodeStructure codeStructure,
-                           int defaultVariableType,
                            CodeGroup beanCode)
     {
         this.beanClass = beanClass;
         this.properties = beanProperties;
         this.creationStyle = creationStyle | CreationDescriptor.CHANGED_ONLY;
-        this.forceEmptyConstructor = forceEmptyCtor;
+        this.forceEmptyConstructor = false;
         this.codeStructure = codeStructure;
-        this.variableType = defaultVariableType;
+        this.variableType = CodeVariable.LOCAL;
         this.beanCode = beanCode;
 
         isVariableSet = false;
@@ -114,15 +112,13 @@ final class BeanCodeManager
     public BeanCodeManager(Class beanClass,
                            FormProperty[] beanProperties,
                            int creationStyle,
-                           boolean forceEmptyCtor,
-                           boolean allowChangesFiring,
                            CodeExpression beanExpression,
                            CodeGroup beanCode)
     {
         this.beanClass = beanClass;
         this.properties = beanProperties;
         this.creationStyle = creationStyle | CreationDescriptor.CHANGED_ONLY;
-        this.forceEmptyConstructor = forceEmptyCtor;
+        this.forceEmptyConstructor = false;
         this.beanExpression = beanExpression;
         this.codeStructure = beanExpression.getCodeStructure();
         this.beanCode = beanCode;
@@ -157,7 +153,7 @@ final class BeanCodeManager
                             FormCodeSupport.readPropertyExpression(
                                                 creationExpressions[i],
                                                 properties[j],
-                                                allowChangesFiring);
+                                                false);
                             setPropertyExpression(j, creationExpressions[i]);
                             break;
                         }
@@ -184,7 +180,7 @@ final class BeanCodeManager
                         FormCodeSupport.readPropertyExpression(
                                             propExp,
                                             prop,
-                                            allowChangesFiring);
+                                            false);
                         setPropertyExpression(j, propExp);
                         if (beanCode != null)
                             beanCode.addStatement(statement);

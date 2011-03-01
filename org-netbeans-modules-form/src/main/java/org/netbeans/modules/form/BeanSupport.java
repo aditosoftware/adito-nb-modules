@@ -130,33 +130,7 @@ public class BeanSupport
         return getIconForDefault(beanClass);
     }
 
-    /** A utility method that returns a class of event adapter for
-     * specified listener. It works only on known listeners from java.awt.event.
-     * Null is returned for unknown listeners.
-     * 
-     * @param listener class of the listener
-     * @return class of an adapter for specified listener or null if
-     *               unknown/does not exist
-     */
-    public static Class getAdapterForListener(Class listener) {
-        if (java.awt.event.ComponentListener.class.equals(listener))
-            return java.awt.event.ComponentAdapter.class;
-        else if (java.awt.event.ContainerListener.class.equals(listener))
-            return java.awt.event.ContainerAdapter.class;
-        else if (java.awt.event.FocusListener.class.equals(listener))
-            return java.awt.event.FocusAdapter.class;
-        else if (java.awt.event.KeyListener.class.equals(listener))
-            return java.awt.event.KeyAdapter.class;
-        else if (java.awt.event.MouseListener.class.equals(listener))
-            return java.awt.event.MouseAdapter.class;
-        else if (java.awt.event.MouseMotionListener.class.equals(listener))
-            return java.awt.event.MouseMotionAdapter.class;
-        else if (java.awt.event.WindowListener.class.equals(listener))
-            return java.awt.event.WindowAdapter.class;
-        else return null; // not found
-    }
-
-    // -----------------------------------------------------------------------------
+  // -----------------------------------------------------------------------------
     // Private methods
 
     static Reference<Map<String,Object>> imageCache;

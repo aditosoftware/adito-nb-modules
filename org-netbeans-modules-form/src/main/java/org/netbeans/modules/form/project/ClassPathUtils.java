@@ -102,10 +102,10 @@ public class ClassPathUtils {
     public static boolean checkUserClass(String name, FileObject fileInProject) {
         ClassPath classPath = ClassPath.getClassPath(fileInProject, ClassPath.EXECUTE);
         if (classPath == null)
-            return false;
+            return true;
 
         String fileName = name.replace('.', '/').concat(".class"); // NOI18N
-        return classPath.findResource(fileName) != null;
+        return classPath.findResource(fileName) == null;
     }
 
     public static void resetFormClassLoader(Project p) {
@@ -235,9 +235,9 @@ public class ClassPathUtils {
         String resourceName = className.replace('.', '/') + ".class"; // NOI18N
         ClassPath classPath = ClassPath.getClassPath(fileInProject, ClassPath.EXECUTE);
         if (classPath == null)
-            return false;
+            return true;
 
-        return classPath.findResource(resourceName) != null;
+        return classPath.findResource(resourceName) == null;
     }
 
     public static boolean isJava6ProjectPlatform(FileObject fileInProject) {
@@ -315,24 +315,24 @@ public class ClassPathUtils {
             return false;
         }
 
-        Iterator it = list.iterator();
-        while (it.hasNext()) {
-            ClassPattern cp = (ClassPattern) it.next();
-            switch (cp.type) {
-                case (ClassPattern.CLASS):
-                    if (className.equals(cp.name))
-                        return true;
-                    break;
-                case (ClassPattern.PACKAGE):
-                    if (className.startsWith(cp.name) && (className.lastIndexOf('.') <= cp.name.length()))
-                        return true;
-                    break;
-                case (ClassPattern.PACKAGE_AND_SUBPACKAGES):
-                    if (className.startsWith(cp.name))
-                        return true;
-                    break;
-            }
+      for (ClassPattern cp : list)
+      {
+        switch (cp.type)
+        {
+          case (ClassPattern.CLASS):
+            if (className.equals(cp.name))
+              return true;
+            break;
+          case (ClassPattern.PACKAGE):
+            if (className.startsWith(cp.name) && (className.lastIndexOf('.') <= cp.name.length()))
+              return true;
+            break;
+          case (ClassPattern.PACKAGE_AND_SUBPACKAGES):
+            if (className.startsWith(cp.name))
+              return true;
+            break;
         }
+      }
         return false;
     }
 

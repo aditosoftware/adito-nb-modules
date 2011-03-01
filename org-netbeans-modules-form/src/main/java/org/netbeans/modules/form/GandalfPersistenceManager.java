@@ -57,18 +57,7 @@ import org.openide.util.Utilities;
 import org.openide.*;
 import org.openide.xml.XMLUtil;
 
-//import com.sun.source.tree.ClassTree;
-//import com.sun.source.tree.Tree;
-//import com.sun.source.util.TreePath;
-//import java.util.logging.Level;
-//import java.util.logging.Logger;
-//import javax.lang.model.element.Element;
-//import javax.lang.model.element.ElementKind;
-//import javax.lang.model.element.TypeElement;
 import org.apache.xerces.parsers.DOMParser;
-//import org.netbeans.api.java.source.CancellableTask;
-//import org.netbeans.api.java.source.CompilationController;
-//import org.netbeans.api.java.source.JavaSource;
 
 import org.netbeans.modules.form.layoutsupport.*;
 import org.netbeans.modules.form.layoutsupport.delegates.*;
@@ -77,9 +66,6 @@ import org.netbeans.modules.form.layoutdesign.LayoutModel;
 import org.netbeans.modules.form.layoutdesign.LayoutComponent;
 import org.netbeans.modules.form.layoutdesign.support.SwingLayoutBuilder;
 
-//import org.netbeans.modules.form.editors.EnumEditor;
-//import org.openide.nodes.Node.Property;
-//import org.openide.util.TopologicalSortException;
 import org.w3c.dom.NamedNodeMap;
 
 /**
@@ -121,10 +107,6 @@ public class GandalfPersistenceManager extends PersistenceManager {
     static final String XML_VALUE = "Value"; // NOI18N
     static final String XML_SYNTHETIC_PROPERTY = "SyntheticProperty"; // NOI18N
     static final String XML_SYNTHETIC_PROPERTIES = "SyntheticProperties"; // NOI18N
-    static final String XML_BINDING_PROPERTY = "BindingProperty"; // NOI18N
-    static final String XML_SUBBINDING = "Subbinding"; // NOI18N
-    static final String XML_BINDING_PARAMETER = "BindingParameter"; // NOI18N
-    static final String XML_BINDING_PROPERTIES = "BindingProperties"; // NOI18N
     static final String XML_AUX_VALUES = "AuxValues"; // NOI18N
     static final String XML_AUX_VALUE = "AuxValue"; // NOI18N
     static final String XML_A11Y_PROPERTIES = "AccessibilityProperties"; // NOI18N
@@ -156,14 +138,6 @@ public class GandalfPersistenceManager extends PersistenceManager {
     static final String ATTR_PROPERTY_VALUE = "value"; // NOI18N
     static final String ATTR_PROPERTY_PRE_CODE = "preCode"; // NOI18N
     static final String ATTR_PROPERTY_POST_CODE = "postCode"; // NOI18N
-    static final String ATTR_BINDING_SOURCE = "source"; // NOI18N
-    static final String ATTR_BINDING_TARGET = "target"; // NOI18N
-    static final String ATTR_BINDING_SOURCE_PATH = "sourcePath"; // NOI18N
-    static final String ATTR_BINDING_TARGET_PATH = "targetPath"; // NOI18N
-    static final String ATTR_BINDING_UPDATE_STRATEGY = "updateStrategy"; // NOI18N
-    static final String ATTR_BINDING_IMMEDIATELY = "immediately"; // NOI18N
-    static final String ATTR_BINDING_PARAMETER_NAME = "name"; // NOI18N
-    static final String ATTR_BINDING_PARAMETER_VALUE = "value"; // NOI18N
     static final String ATTR_EVENT_NAME = "event"; // NOI18N
     static final String ATTR_EVENT_LISTENER = "listener"; // NOI18N
     static final String ATTR_EVENT_PARAMS = "parameters"; // NOI18N
@@ -357,7 +331,7 @@ public class GandalfPersistenceManager extends PersistenceManager {
 
         // check the form version
         String versionString = mainElement.getAttribute(ATTR_FORM_VERSION);
-        if (!isSupportedFormatVersion(versionString)) {
+        if (isSupportedFormatVersion(versionString)) {
             PersistenceException ex = new PersistenceException(
                                      "Unsupported form version"); // NOI18N
             annotateException(ex,
@@ -580,7 +554,7 @@ public class GandalfPersistenceManager extends PersistenceManager {
             FormEditor.updateProjectForNaturalLayout(formModel);
         }
         if (!Boolean.FALSE.equals(newLayout)) {
-            formModel.setFreeDesignDefaultLayout(true);
+            formModel.setFreeDesignDefaultLayout();
         }
 
         // make sure form max version is properly set after loading
@@ -1267,8 +1241,8 @@ public class GandalfPersistenceManager extends PersistenceManager {
                     new CodeExpression[] { compExp,
                                            codeStructure.createExpression(
                                                            String.class,
-                                                           strValue,
-                                                           strValue) });
+                                                           strValue
+                                           ) });
             }
         }
 
@@ -1313,7 +1287,7 @@ public class GandalfPersistenceManager extends PersistenceManager {
                     CodeStructure.createStatement(
                         constrExp,
                         java.awt.GridBagConstraints.class.getField(gbcFields[i]),
-                        codeStructure.createExpression(valueType, value, strValue));
+                        codeStructure.createExpression(valueType, value));
                 }
             }
 
@@ -1327,8 +1301,8 @@ public class GandalfPersistenceManager extends PersistenceManager {
                 String strValue = node != null ? node.getNodeValue() : "0"; // NOI18N
                 insetsParams[i] = codeStructure.createExpression(
                                                     Integer.TYPE,
-                                                    Integer.valueOf(strValue),
-                                                    strValue);
+                                                    Integer.valueOf(strValue)
+                );
             }
 
             if (insetsConstructor == null)
@@ -1516,8 +1490,8 @@ public class GandalfPersistenceManager extends PersistenceManager {
                     new CodeExpression[] { compExp,
                                            codeStructure.createExpression(
                                                            String.class,
-                                                           strValue,
-                                                           strValue) });
+                                                           strValue
+                                           ) });
             }
         }
 
@@ -1535,8 +1509,8 @@ public class GandalfPersistenceManager extends PersistenceManager {
                                       (i < 2 ? "0" : "-1"); // NOI18N
                 boundsParams[i] = codeStructure.createExpression(
                                                     Integer.TYPE,
-                                                    Integer.valueOf(strValue),
-                                                    strValue);
+                                                    Integer.valueOf(strValue)
+                );
             }
 
             if (setBoundsMethod == null)
@@ -1557,8 +1531,8 @@ public class GandalfPersistenceManager extends PersistenceManager {
                     new CodeExpression[] { compExp,
                                            codeStructure.createExpression(
                                                Integer.TYPE,
-                                               Integer.valueOf(strValue),
-                                               strValue) });
+                                               Integer.valueOf(strValue)
+                                           ) });
             }
         }
 
@@ -1576,8 +1550,8 @@ public class GandalfPersistenceManager extends PersistenceManager {
                                       (i < 2 ? "0" : "-1"); // NOI18N
                 boundsParams[i] = codeStructure.createExpression(
                                                     Integer.TYPE,
-                                                    Integer.valueOf(strValue),
-                                                    strValue);
+                                                    Integer.valueOf(strValue)
+                );
             }
 
             Iterator it = CodeStructure.getDefinedStatementsIterator(contDelCodeExp);
@@ -2002,9 +1976,8 @@ public class GandalfPersistenceManager extends PersistenceManager {
             codeStructure.createExpression(FormCodeSupport.createOrigin(
                                                            type, propEd)) :
             codeStructure.createExpression(type,
-                                           value,
-                                           value != null ?
-                                               value.toString() : "null"); // NOI18N
+                                           value
+            ); // NOI18N
     }
 
     private static int findName(String name, List<String> names) {
@@ -3270,14 +3243,14 @@ public class GandalfPersistenceManager extends PersistenceManager {
     private void addFormSettings(Map<String,Object> auxValues) {
         FormSettings formSettings = formModel.getSettings();
         Map<String,Object> settings = formSettings.allSettings();
-        Iterator<Map.Entry<String,Object>> iter = settings.entrySet().iterator();
-        while (iter.hasNext()) {
-            Map.Entry<String,Object> entry = iter.next();
-            String key = entry.getKey();
-            if (!formSettings.isSessionSetting(key)) {
-                auxValues.put(FORM_SETTINGS_PREFIX + key, entry.getValue());
-            }
+      for (Map.Entry<String, Object> stringObjectEntry : settings.entrySet())
+      {
+        String key = stringObjectEntry.getKey();
+        if (formSettings.isSessionSetting(key))
+        {
+          auxValues.put(FORM_SETTINGS_PREFIX + key, stringObjectEntry.getValue());
         }
+      }
     }
 
     private void saveAnyComponent(RADComponent comp,
@@ -5162,9 +5135,8 @@ public class GandalfPersistenceManager extends PersistenceManager {
                          (PropertyEditor) editorOrValue) :
                      CodeStructure.createOrigin(
                          valueType,
-                         editorOrValue,
-                         editorOrValue != null ?
-                             editorOrValue.toString() : "null"); // NOI18N
+                         editorOrValue
+                     ); // NOI18N
         }
 
         return origin;
@@ -5654,7 +5626,7 @@ public class GandalfPersistenceManager extends PersistenceManager {
         if (Boolean.class.isAssignableFrom(type) || Boolean.TYPE.equals(type))
             return Boolean.valueOf(encoded);
         if (Character.class.isAssignableFrom(type) || Character.TYPE.equals(type))
-            return new Character(encoded.charAt(0));
+            return encoded.charAt(0);
         if (String.class.isAssignableFrom(type))
             return encoded;
 
@@ -6095,14 +6067,14 @@ public class GandalfPersistenceManager extends PersistenceManager {
 //    }
 
     private static boolean isSupportedFormatVersion(String ver) {
-        return NB32_VERSION.equals(ver)
-               || NB33_VERSION.equals(ver)
-               || NB34_VERSION.equals(ver)
-               || NB50_VERSION.equals(ver)
-               || NB60_PRE_VERSION.equals(ver)
-               || NB60_VERSION.equals(ver)
-               || NB61_VERSION.equals(ver)
-               || NB65_VERSION.equals(ver);
+        return !NB32_VERSION.equals(ver)
+            && !NB33_VERSION.equals(ver)
+            && !NB34_VERSION.equals(ver)
+            && !NB50_VERSION.equals(ver)
+            && !NB60_PRE_VERSION.equals(ver)
+            && !NB60_VERSION.equals(ver)
+            && !NB61_VERSION.equals(ver)
+            && !NB65_VERSION.equals(ver);
     }
 
     private static FormModel.FormVersion formVersionForVersionString(String version) {

@@ -120,7 +120,7 @@ public class KeyboardMenuNavigator extends KeyAdapter {
     private void selectNextMenuItem(int offset) {
         //josh: do nothing here until i figure out why tab events aren't being called
         if(currentMenuRAD == null) return;
-        if(!menuEditLayer.isComponentSelected()) {
+        if(menuEditLayer.isComponentSelected()) {
             menuEditLayer.setSelectedRADComponent(currentMenuRAD.getSubComponent(0));
         }
         
@@ -156,7 +156,7 @@ public class KeyboardMenuNavigator extends KeyAdapter {
             menuEditLayer.setSelectedRADComponent(null);//Component((JComponent)null);
             return;
         }
-        if(!menuEditLayer.isComponentSelected()) {
+        if(menuEditLayer.isComponentSelected()) {
             menuEditLayer.setSelectedRADComponent(currentMenuRAD.getSubComponent(0));
             return;
         }

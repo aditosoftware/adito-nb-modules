@@ -504,8 +504,7 @@ public class RADVisualComponent extends RADComponent {
         
         @Override
         public Object getValue() {
-            int size = component.getLayoutInterval(dimension).getPreferredSize(false);
-            return new Integer(size);
+          return component.getLayoutInterval(dimension).getPreferredSize(false);
         }
 
         @Override
@@ -515,7 +514,7 @@ public class RADVisualComponent extends RADComponent {
         
         @Override
         public void restoreDefaultValue() {
-            setValue(new Integer(LayoutConstants.NOT_EXPLICITLY_DEFINED));
+            setValue(LayoutConstants.NOT_EXPLICITLY_DEFINED);
         }
         
         @Override
@@ -624,7 +623,7 @@ public class RADVisualComponent extends RADComponent {
         public Object getValue() {
             int pref = component.getLayoutInterval(dimension).getPreferredSize(false);
             int max = component.getLayoutInterval(dimension).getMaximumSize(false);
-            return Boolean.valueOf((max != pref) && (max != LayoutConstants.USE_PREFERRED_SIZE));
+            return (max != pref) && (max != LayoutConstants.USE_PREFERRED_SIZE);
         }
 
         @Override

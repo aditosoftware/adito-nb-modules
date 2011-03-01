@@ -447,15 +447,16 @@ public class ComponentChooserEditor implements PropertyEditor,
                 && !INVALID_REF.equals(componentName))
             {
                 List compList = getComponents();
-                Iterator it = compList.iterator();
-                while (it.hasNext()) {
-                    RADComponent comp = (RADComponent) it.next();
-                    if (comp.getName().equals(componentName)) {
-                        if (comp.isInModel())
-                            component = comp;
-                        break;
-                    }
+              for (Object aCompList : compList)
+              {
+                RADComponent comp = (RADComponent) aCompList;
+                if (comp.getName().equals(componentName))
+                {
+                  if (comp.isInModel())
+                    component = comp;
+                  break;
                 }
+              }
             }
             else if (component != null) {
                 if (!component.isInModel())

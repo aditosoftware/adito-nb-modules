@@ -185,12 +185,12 @@ class FormToolBar extends JToolBar {
 
     void installDesignerActions() {
         Collection actions = formDesigner.getDesignerActions(true);
-        Iterator iter = actions.iterator();
-        while (iter.hasNext()) {
-            Action action = (Action)iter.next();
-            JButton button = add(action);
-            initButton(button);
-        }
+      for (Object action1 : actions)
+      {
+        Action action = (Action) action1;
+        JButton button = add(action);
+        initButton(button);
+      }
     }
 
     void installResizabilityActions() {

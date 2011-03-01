@@ -70,23 +70,12 @@ abstract class AbstractCodeStatement implements CodeStatement {
     // --------
     // UsingCodeObject implementation
 
-    // notifying about registering this object in used object
+  // notifying about removing the used object from structure
     @Override
-    public void usageRegistered(UsedCodeObject usedObject) {
+    public void usedObjectRemoved() {
     }
 
-    // notifying about removing the used object from structure
-    @Override
-    public boolean usedObjectRemoved(UsedCodeObject usedObject) {
-        return false;
-    }
-
-    @Override
-    public UsedCodeObject getDefiningObject() {
-        return getParentExpression();
-    }
-
-    @Override
+  @Override
     public Iterator getUsedObjectsIterator() {
         return new UsedObjectsIterator();
     }

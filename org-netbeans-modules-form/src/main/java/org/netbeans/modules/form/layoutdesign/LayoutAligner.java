@@ -618,7 +618,7 @@ class LayoutAligner implements LayoutConstants {
                     && (LayoutInterval.getIntervalCurrentSize(gapInterval, dimension) == preGap)) {
                     LayoutInterval gap = cloneGap(gapInterval);
                     newSequenceList.add(gap);
-                    gapSizes.put(gap, new Integer(preGap));
+                    gapSizes.put(gap, preGap);
                     if (alignment == TRAILING) {
                         sequenceResizable = sequenceResizable || LayoutInterval.canResize(gap);
                     }
@@ -659,7 +659,7 @@ class LayoutAligner implements LayoutConstants {
                         gapFound = true;
                         LayoutInterval gap = cloneGap(gapInterval);
                         newSequenceList.add(gap);
-                        gapSizes.put(gap, new Integer(gapSize));
+                        gapSizes.put(gap, gapSize);
                         if (((alignment == TRAILING) && !afterDefiningInterval)
                             || ((alignment == LEADING) && afterDefiningInterval)) {
                             sequenceResizable = sequenceResizable || LayoutInterval.canResize(gap);
@@ -697,7 +697,7 @@ class LayoutAligner implements LayoutConstants {
                     && (LayoutInterval.getIntervalCurrentSize(gapInterval, dimension) == postGap)) {
                     LayoutInterval gap = cloneGap(gapInterval);
                     newSequenceList.add(gap);
-                    gapSizes.put(gap, new Integer(postGap));
+                    gapSizes.put(gap, postGap);
                     if (alignment == LEADING) {
                         sequenceResizable = sequenceResizable || LayoutInterval.canResize(gap);
                     }
@@ -773,39 +773,46 @@ class LayoutAligner implements LayoutConstants {
 
         // The content of all new sequence groups is known.
         // We can update the layout model.
-        Iterator listIter = newSequences.iterator();
-        while (listIter.hasNext()) {
-            List newSequenceList = (List)listIter.next();
-            LayoutInterval newSequence = new LayoutInterval(SEQUENTIAL);
-            if (alignment == CENTER) {
-                newSequence.setAlignment(CENTER);
-            }
-            Iterator iter = newSequenceList.iterator();
-            int sequenceAlignment = DEFAULT;
-            while (iter.hasNext()) {
-                LayoutInterval compInterval = (LayoutInterval)iter.next();
-                if (compInterval.isComponent()) { // e.g. compInterval.getParent() != null
-                    if (sequenceAlignment == DEFAULT) {
-                        sequenceAlignment = LayoutInterval.getEffectiveAlignment(compInterval);
-                    }
-                    designer.takeOutInterval(compInterval, parParent);
-                    layoutModel.setIntervalAlignment(compInterval, DEFAULT);
-                }
-                layoutModel.addInterval(compInterval, newSequence, -1);
-            }
-            if ((alignment != CENTER) && !LayoutInterval.wantResize(newSequence)) {
-                newSequence.setAlignment(sequenceAlignment);
-            }
-            if (newSequenceList.size() == 1) {
-                LayoutInterval compInterval = (LayoutInterval)newSequenceList.get(0);
-                layoutModel.removeInterval(compInterval);
-                if (newSequence.getAlignment() != DEFAULT) {
-                    layoutModel.setIntervalAlignment(compInterval, newSequence.getAlignment());
-                }
-                newSequence = compInterval;
-            }
-            layoutModel.addInterval(newSequence, parParent, -1);
+      for (List<LayoutInterval> newSequence1 : newSequences)
+      {
+        List newSequenceList = (List) newSequence1;
+        LayoutInterval newSequence = new LayoutInterval(SEQUENTIAL);
+        if (alignment == CENTER)
+        {
+          newSequence.setAlignment(CENTER);
         }
+        Iterator iter = newSequenceList.iterator();
+        int sequenceAlignment = DEFAULT;
+        while (iter.hasNext())
+        {
+          LayoutInterval compInterval = (LayoutInterval) iter.next();
+          if (compInterval.isComponent())
+          { // e.g. compInterval.getParent() != null
+            if (sequenceAlignment == DEFAULT)
+            {
+              sequenceAlignment = LayoutInterval.getEffectiveAlignment(compInterval);
+            }
+            designer.takeOutInterval(compInterval, parParent);
+            layoutModel.setIntervalAlignment(compInterval, DEFAULT);
+          }
+          layoutModel.addInterval(compInterval, newSequence, -1);
+        }
+        if ((alignment != CENTER) && !LayoutInterval.wantResize(newSequence))
+        {
+          newSequence.setAlignment(sequenceAlignment);
+        }
+        if (newSequenceList.size() == 1)
+        {
+          LayoutInterval compInterval = (LayoutInterval) newSequenceList.get(0);
+          layoutModel.removeInterval(compInterval);
+          if (newSequence.getAlignment() != DEFAULT)
+          {
+            layoutModel.setIntervalAlignment(compInterval, newSequence.getAlignment());
+          }
+          newSequence = compInterval;
+        }
+        layoutModel.addInterval(newSequence, parParent, -1);
+      }
         if (alignment == CENTER) {
             layoutModel.setGroupAlignment(parParent, alignment);
         }
@@ -813,12 +820,12 @@ class LayoutAligner implements LayoutConstants {
         // Check resizability
         if ((gapsToResize.size() > 0) && !resizable && (alignment != CENTER)) {
             operations.suppressGroupResizing(parParent);
-            Iterator iter = gapsToResize.iterator();
-            while (iter.hasNext()) {
-                LayoutInterval gap = (LayoutInterval)iter.next();
-                layoutModel.changeIntervalAttribute(gap, LayoutInterval.ATTRIBUTE_FORMER_FILL, false);
-                layoutModel.changeIntervalAttribute(gap, LayoutInterval.ATTRIBUTE_FILL, true);
-            }
+          for (LayoutInterval aGapsToResize : gapsToResize)
+          {
+            LayoutInterval gap = aGapsToResize;
+            layoutModel.changeIntervalAttribute(gap, LayoutInterval.ATTRIBUTE_FORMER_FILL, false);
+            layoutModel.changeIntervalAttribute(gap, LayoutInterval.ATTRIBUTE_FILL, true);
+          }
         }
         return gapsToResize;
     }
@@ -841,19 +848,21 @@ class LayoutAligner implements LayoutConstants {
             if (i == index) continue;
             transferCandidates(interval, intervals[i], components);
         }*/
-        Iterator iter = components.iterator();
-        while (iter.hasNext()) {
-            LayoutInterval candidate = (LayoutInterval)iter.next();
-            LayoutInterval oppCandidate = oppositeComponentInterval(candidate);
-            if (alignedIntervals(oppInterval, oppCandidate, BASELINE)
-                || alignedIntervals(oppInterval, oppCandidate, LEADING)
-                || alignedIntervals(oppInterval, oppCandidate, TRAILING)
-                || alignedIntervals(oppInterval, oppCandidate, CENTER)) {
-                if (parParent.isParentOf(candidate)) {
-                    transferedComponents.add(candidate);
-                }
-            }
+      for (LayoutInterval component : components)
+      {
+        LayoutInterval candidate = component;
+        LayoutInterval oppCandidate = oppositeComponentInterval(candidate);
+        if (alignedIntervals(oppInterval, oppCandidate, BASELINE)
+            || alignedIntervals(oppInterval, oppCandidate, LEADING)
+            || alignedIntervals(oppInterval, oppCandidate, TRAILING)
+            || alignedIntervals(oppInterval, oppCandidate, CENTER))
+        {
+          if (parParent.isParentOf(candidate))
+          {
+            transferedComponents.add(candidate);
+          }
         }
+      }
         if (!transferedComponents.contains(interval)) {
             transferedComponents.add(interval);
         }
@@ -1075,7 +1084,7 @@ class LayoutAligner implements LayoutConstants {
         else {
             commonParent = interval1.getParent();
             while (commonParent != null) {
-                if (!hasAlignmentInParent(interval1, alignment)) {
+                if (hasAlignmentInParent(interval1, alignment)) {
                     return false;
                 }
                 if (commonParent.isParentOf(interval2)) {
@@ -1091,7 +1100,7 @@ class LayoutAligner implements LayoutConstants {
         }
 
         do {
-            if (!hasAlignmentInParent(otherInterval, alignment)) {
+            if (hasAlignmentInParent(otherInterval, alignment)) {
                 return false;
             }
             otherInterval = otherInterval.getParent();
@@ -1104,17 +1113,17 @@ class LayoutAligner implements LayoutConstants {
         LayoutInterval parent = interval.getParent();
         if (parent.isSequential()) {
             if (alignment == LEADING) {
-                return parent.getSubInterval(0) == interval;
+                return parent.getSubInterval(0) != interval;
             }
             if (alignment == TRAILING) {
-                return parent.getSubInterval(parent.getSubIntervalCount()-1) == interval;
+                return parent.getSubInterval(parent.getSubIntervalCount()-1) != interval;
             }
-            return false;
+            return true;
         }
         else { // parallel group
             assert interval.getAlignment() != alignment || compatibleGroupAlignment(parent.getGroupAlignment(), alignment);
-            return interval.getAlignment() == alignment
-                   || LayoutInterval.wantResize(interval);
+            return interval.getAlignment() != alignment
+                && !LayoutInterval.wantResize(interval);
         }
     }
 
@@ -1165,56 +1174,63 @@ class LayoutAligner implements LayoutConstants {
 
     private void returnRemovedIntervals(LayoutInterval parParent, List removed, int dimension) {
         LayoutRegion parRegion = parParent.getCurrentSpace();
-        Iterator iter = removed.iterator();
-        while (iter.hasNext()) {
-            LayoutInterval interval = (LayoutInterval)iter.next();
-            LayoutRegion region = interval.getCurrentSpace();
-            int pre = Math.max(0, region.positions[dimension][LEADING] - parRegion.positions[dimension][LEADING]);
-            int post = Math.max(0, parRegion.positions[dimension][TRAILING] - region.positions[dimension][TRAILING]);
-            if (((pre != 0) || (post != 0)) && !interval.isSequential()) {
-                LayoutInterval seq = new LayoutInterval(SEQUENTIAL);
-                if (interval.getAlignment() != BASELINE)
-                    layoutModel.setIntervalAlignment(seq, interval.getAlignment());
-                layoutModel.setIntervalAlignment(interval, DEFAULT);
-                layoutModel.addInterval(interval, seq, -1);
-                interval = seq;
-            }
-            
-            // interval.isSequence() by now - remove boundary empty spaces
-            if (pre != 0) {
-                LayoutInterval first = interval.getSubInterval(0);
-                if (first.isEmptySpace()) {
-                    layoutModel.removeInterval(first);
-                    region = interval.getSubInterval(0).getCurrentSpace();
-                    pre = Math.max(0, region.positions[dimension][LEADING] - parRegion.positions[dimension][LEADING]);
-                }
-            }
-            if (post != 0) {
-                LayoutInterval last = interval.getSubInterval(interval.getSubIntervalCount()-1);
-                if (last.isEmptySpace()) {
-                    layoutModel.removeInterval(last);
-                    region = interval.getSubInterval(interval.getSubIntervalCount()-1).getCurrentSpace();
-                    post = Math.max(0, parRegion.positions[dimension][TRAILING] - region.positions[dimension][TRAILING]);
-                }
-            }
-            
-            // Insert new empty spaces
-            if (pre != 0) {
-                LayoutInterval gap = new LayoutInterval(SINGLE);
-                gap.setSize(pre);
-                if (interval.getAlignment() == TRAILING) designer.setIntervalResizing(gap, true);
-                layoutModel.addInterval(gap, interval, 0);
-            }
-            if (post != 0) {
-                LayoutInterval gap = new LayoutInterval(SINGLE);
-                gap.setSize(post);
-                if (interval.getAlignment() == LEADING) designer.setIntervalResizing(gap, true);
-                layoutModel.addInterval(gap, interval, -1);
-            }
-            
-            // Insert into parParent
-            layoutModel.addInterval(interval, parParent, -1);
+      for (Object aRemoved : removed)
+      {
+        LayoutInterval interval = (LayoutInterval) aRemoved;
+        LayoutRegion region = interval.getCurrentSpace();
+        int pre = Math.max(0, region.positions[dimension][LEADING] - parRegion.positions[dimension][LEADING]);
+        int post = Math.max(0, parRegion.positions[dimension][TRAILING] - region.positions[dimension][TRAILING]);
+        if (((pre != 0) || (post != 0)) && !interval.isSequential())
+        {
+          LayoutInterval seq = new LayoutInterval(SEQUENTIAL);
+          if (interval.getAlignment() != BASELINE)
+            layoutModel.setIntervalAlignment(seq, interval.getAlignment());
+          layoutModel.setIntervalAlignment(interval, DEFAULT);
+          layoutModel.addInterval(interval, seq, -1);
+          interval = seq;
         }
+
+        // interval.isSequence() by now - remove boundary empty spaces
+        if (pre != 0)
+        {
+          LayoutInterval first = interval.getSubInterval(0);
+          if (first.isEmptySpace())
+          {
+            layoutModel.removeInterval(first);
+            region = interval.getSubInterval(0).getCurrentSpace();
+            pre = Math.max(0, region.positions[dimension][LEADING] - parRegion.positions[dimension][LEADING]);
+          }
+        }
+        if (post != 0)
+        {
+          LayoutInterval last = interval.getSubInterval(interval.getSubIntervalCount() - 1);
+          if (last.isEmptySpace())
+          {
+            layoutModel.removeInterval(last);
+            region = interval.getSubInterval(interval.getSubIntervalCount() - 1).getCurrentSpace();
+            post = Math.max(0, parRegion.positions[dimension][TRAILING] - region.positions[dimension][TRAILING]);
+          }
+        }
+
+        // Insert new empty spaces
+        if (pre != 0)
+        {
+          LayoutInterval gap = new LayoutInterval(SINGLE);
+          gap.setSize(pre);
+          if (interval.getAlignment() == TRAILING) designer.setIntervalResizing(gap, true);
+          layoutModel.addInterval(gap, interval, 0);
+        }
+        if (post != 0)
+        {
+          LayoutInterval gap = new LayoutInterval(SINGLE);
+          gap.setSize(post);
+          if (interval.getAlignment() == LEADING) designer.setIntervalResizing(gap, true);
+          layoutModel.addInterval(gap, interval, -1);
+        }
+
+        // Insert into parParent
+        layoutModel.addInterval(interval, parParent, -1);
+      }
     }
 
     private void setAlignmentAccordingEffectiveAlignment(LayoutInterval aligned, LayoutInterval interval) {

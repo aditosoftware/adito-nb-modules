@@ -125,8 +125,9 @@ public class MenuEditLayer extends JPanel {
     /* === private fields === */
     private Map<JMenu, PopupMenuUI> menuPopupUIMap;
     
-    public enum SelectedPortion { Icon, Text, Accelerator, All, None };
-    private SelectedPortion selectedPortion = SelectedPortion.None;
+    public enum SelectedPortion { Icon, Text, Accelerator, All, None }
+
+  private SelectedPortion selectedPortion = SelectedPortion.None;
     
     private KeyboardMenuNavigator keyboardMenuNavigator;
     private Map<RADVisualContainer,FormModelListener> formModelListeners;
@@ -455,7 +456,7 @@ public class MenuEditLayer extends JPanel {
             JPanel view = hackedPopupFactory.containerMap.get(menu);
             view.setVisible(true);
         } else {
-            if(!isConfigured(menu)) {
+            if(isConfigured(menu)) {
                 configureMenu(null, menu);
             }
             final JPopupMenu popup = menu.getPopupMenu();
@@ -487,15 +488,15 @@ public class MenuEditLayer extends JPanel {
     
     public boolean isMenuLayerComponent(RADComponent metacomp) {
         if(metacomp == null) {
-            return false;
+            return true;
         }
         if(metacomp.getBeanClass().equals(JMenuItem.class)) {
-            return true;
+            return false;
         }
         if(metacomp.getBeanClass().equals(JMenu.class)) {
-            return true;
+            return false;
         }
-        return false;
+        return true;
     }
     
     
@@ -575,7 +576,7 @@ public class MenuEditLayer extends JPanel {
     }
     
     private boolean isConfigured(JComponent c) {
-        return menuPopupUIMap.containsKey(c);
+        return !menuPopupUIMap.containsKey(c);
     }
     
     
@@ -764,7 +765,7 @@ public class MenuEditLayer extends JPanel {
     
     
     boolean isComponentSelected() {
-        return !selectedComponents.isEmpty();
+        return selectedComponents.isEmpty();
     }
     
     void setSelectedRADComponent(RADComponent comp) {
@@ -1011,7 +1012,7 @@ public class MenuEditLayer extends JPanel {
             assert targetParentRad != null;
             
             int index2 = targetParentRad.getIndexOf(targetRad) + offset;
-            creator.addPrecreatedComponent(targetParentRad, new Integer(index2));
+            creator.addPrecreatedComponent(targetParentRad, index2);
         } catch (Exception ex) {
             ex.printStackTrace();
         }
@@ -1278,7 +1279,7 @@ public class MenuEditLayer extends JPanel {
             for(RADVisualComponent child : menuRAD.getSubComponents()) {
                 if(child != null) {
                     JComponent jchild = (JComponent) formDesigner.getComponent(child);
-                    if(!isConfigured(jchild)) {
+                    if(isConfigured(jchild)) {
                         if(jchild instanceof JMenu) {
                             configureMenu(menu, (JMenu)jchild);
                         } else {
@@ -1378,10 +1379,10 @@ public class MenuEditLayer extends JPanel {
     public boolean doesFormContainMenuBar() {
         for(RADComponent comp : formDesigner.getFormModel().getAllComponents()) {
             if(JMenuBar.class.isAssignableFrom(comp.getBeanClass())) {
-                return true;
+                return false;
             }
         }
-        return false;
+        return true;
     }
     
     public RADComponent getFormMenuBar() {
@@ -1626,7 +1627,7 @@ public class MenuEditLayer extends JPanel {
                 //return;
             }
             if(dragop.isStarted()) {
-                if(!doesFormContainMenuBar()) {
+                if(doesFormContainMenuBar()) {
                     FormEditor.getAssistantModel(formDesigner.getFormModel()).setContext("missingMenubar"); // NOI18N
                 }
                 dragop.move(e.getPoint());
@@ -1743,7 +1744,7 @@ public class MenuEditLayer extends JPanel {
     
     private boolean dragProxying = false;
     public boolean isDragProxying() {
-        return dragProxying;
+        return !dragProxying;
     }
     
     

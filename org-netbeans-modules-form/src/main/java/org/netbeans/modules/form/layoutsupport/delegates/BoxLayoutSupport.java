@@ -157,7 +157,7 @@ public class BoxLayoutSupport extends AbstractLayoutSupport
 
     @Override
     public Object[] getAssistantParams() {
-        return new Object[] {Integer.valueOf(assistantParams+1)};
+        return new Object[] {assistantParams + 1};
     }
 
 
@@ -343,7 +343,7 @@ public class BoxLayoutSupport extends AbstractLayoutSupport
             {
                 @Override
                 public Object getTargetValue() {
-                    return new Integer(axis);
+                    return axis;
                 }
 
                 @Override
@@ -362,7 +362,7 @@ public class BoxLayoutSupport extends AbstractLayoutSupport
 
                 @Override
                 public Object getDefaultValue() {
-                    return new Integer(BoxLayout.LINE_AXIS);
+                    return BoxLayout.LINE_AXIS;
                 }
 
                 @Override
@@ -415,10 +415,10 @@ public class BoxLayoutSupport extends AbstractLayoutSupport
             getBundle().getString("VALUE_axis_y")  // NOI18N
         };
         private final Integer[] values = {
-            new Integer(BoxLayout.LINE_AXIS),
-            new Integer(BoxLayout.PAGE_AXIS),
-            new Integer(BoxLayout.X_AXIS),
-            new Integer(BoxLayout.Y_AXIS)
+            BoxLayout.LINE_AXIS,
+            BoxLayout.PAGE_AXIS,
+            BoxLayout.X_AXIS,
+            BoxLayout.Y_AXIS
         };
         private final String[] javaInitStrings = {
             "javax.swing.BoxLayout.LINE_AXIS", // NOI18N

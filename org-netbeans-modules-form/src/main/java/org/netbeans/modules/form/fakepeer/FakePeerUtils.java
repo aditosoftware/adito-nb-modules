@@ -82,7 +82,8 @@ class FakePeerUtils
 
         int minWH = w < h ? w : h,
             size; // size of the arrow - from 0 to 4
-        if (minWH >= ABUT_SIZE) size = 4;
+      int ABUT_SIZE = 16;
+      if (minWH >= ABUT_SIZE) size = 4;
         else if (minWH >= 12) size = 3;
         else if (minWH >= 8) size = 2;
         else if (minWH >= 6) size = 1;
@@ -160,13 +161,13 @@ class FakePeerUtils
     }
 
     static void drawScrollbar(Graphics g,
-                              int x,int y,int w,int h,
+                              int x, int y, int w, int h,
                               int orientation,
                               boolean enabled,
-                              boolean border,int relValue,int amount,int range) {
+                              int relValue, int amount, int range) {
         g.fillRect(x, y, w, h); // color (for background) is expected to be set outside
 
-        if (border) { // border (Windows style)
+        if (true) { // border (Windows style)
             g.setColor(SystemColor.controlShadow);
             g.drawRect(x,y,w-1,h-1);
             g.setColor(SystemColor.control);
@@ -215,6 +216,5 @@ class FakePeerUtils
         }
     }
 
-    private static int ABUT_SIZE = 16; // standard arrow button's width & height
-    static final int SCROLL_W = 16, SCROLL_H = 16;
+  static final int SCROLL_W = 16, SCROLL_H = 16;
 }

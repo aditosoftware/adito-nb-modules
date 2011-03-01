@@ -236,7 +236,7 @@ public class VisualReplicator {
             if (menu instanceof Container) {
                 Container cont = (Container) menu;
                 cont.removeAll();
-                for (RADComponent metacomp : ((RADMenuComponent)metacont).getSubBeans()) {
+                for (RADComponent metacomp : metacont.getSubBeans()) {
                     addToMenu(cont, getClonedComponent(metacomp));
                 }
             }
@@ -345,7 +345,7 @@ public class VisualReplicator {
                         updateContainerLayout(visualMetaCont);
                         // layout is built, but we continue to also add e.g. menu bar
                     }
-                    container = visualMetaCont.getContainerDelegate((Container)contClone);
+                    container = visualMetaCont.getContainerDelegate(contClone);
                 }
                 else container = (Container)contClone;
             } else {
@@ -462,8 +462,8 @@ public class VisualReplicator {
                 Container contDelegate = parentCont.getContainerDelegate(cont);
                 LayoutSupportManager laysup = parentCont.getLayoutSupport();
                 if (laysup != null) { // old layout support
-                    if (!laysup.removeComponentFromContainer(
-                                    cont, contDelegate, comp))
+                    if (laysup.removeComponentFromContainer(
+                        cont, contDelegate, comp))
                     {   // layout delegate cannot remove individual components,
                         // we must clear the container and add the components again
                         laysup.clearContainer(cont, contDelegate);
@@ -635,7 +635,7 @@ public class VisualReplicator {
                     ((ButtonGroup)clonedValue).add(button);
                 }
             } else {
-                writeMethod.invoke(targetComp, new Object[] { clonedValue });
+                writeMethod.invoke(targetComp, clonedValue);
             }
 
             if (targetComp instanceof Component) {
@@ -772,7 +772,7 @@ public class VisualReplicator {
             Object menuItem = getClonedComponent(sub);
             if (menuItem == null)
             {
-              menuItem = cloneComponent((RADMenuItemComponent) sub, relativeProperties);
+              menuItem = cloneComponent(sub, relativeProperties);
             }
             addToMenu(compClone, menuItem);
           }
@@ -975,7 +975,7 @@ public class VisualReplicator {
                     Method writeMethod = FormUtils.getPropertyWriteMethod(property, targetComp.getClass());
                     if (writeMethod != null) {
                         writeMethod.invoke(targetComp,
-                                           new Object[] { clonedValue });
+                                           clonedValue);
                     }
                     else if (clonedValue instanceof ButtonGroup
                              && targetComp instanceof AbstractButton)
@@ -1053,7 +1053,7 @@ public class VisualReplicator {
                     ((JRootPane)converted).setContentPane(contentCont);
                 } else if (MenuItem.class.isAssignableFrom(compClass)) { // converted AWT menu
                     ((JMenuItem)converted).setText(((MenuItem)component).getLabel());
-                    ((JMenuItem)converted).setFont(((MenuItem)component).getFont());
+                    converted.setFont(((MenuItem) component).getFont());
                 }
 
                 return new ConvertResult(converted, enclosed);

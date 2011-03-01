@@ -64,31 +64,7 @@ public class PersistenceObjectRegistry
     private PersistenceObjectRegistry() {
     }
 
-    public static void registerPrimaryName(String classname, String name) {
-        _classToPrimaryName.put(classname, name);
-        _nameToClassname.put(name, classname);
-    }
-
-    public static void registerPrimaryName(Class clazz, String name) {
-        _classToPrimaryName.put(clazz.getName(), name);
-        _nameToClassname.put(name, clazz.getName());
-    }
-
-    public static void registerAlias(String classname, String alias) {
-        _nameToClassname.put(alias, classname);
-    }
-
-    public static void registerAlias(Class clazz, String alias) {
-        _nameToClassname.put(alias, clazz.getName());
-    }
-
-    public static Object createInstance(String classname, FileObject form)
-        throws InstantiationException, IllegalAccessException, ClassNotFoundException
-    {
-        return loadClass(classname, form).newInstance();
-    }
-
-    public static Class loadClass(String name, FileObject form)
+  public static Class loadClass(String name, FileObject form)
         throws ClassNotFoundException
     {
         name = Utilities.translate(name);
@@ -98,15 +74,7 @@ public class PersistenceObjectRegistry
         return FormUtils.loadClass(classname, form);
     }
 
-    public static String getPrimaryName(Object instance) {
-        return getPrimaryName(instance.getClass());
-    }
-
-    public static String getPrimaryName(Class clazz) {
-        return getPrimaryName(clazz.getName());
-    }
-
-    static String getPrimaryName(String className) {
+  static String getPrimaryName(String className) {
         String name = _classToPrimaryName.get(className);
         return name != null ? name : className;
     }

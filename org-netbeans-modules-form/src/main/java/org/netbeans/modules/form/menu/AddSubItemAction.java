@@ -144,10 +144,10 @@ public class AddSubItemAction extends NodeAction {
                 }
             }
         }
-    };
-    
-    
-    private void createInsertSubmenu(JMenu menu) {
+    }
+
+
+  private void createInsertSubmenu(JMenu menu) {
         //only create this menu the first time it is called
         if (!(menu.getMenuComponentCount() > 0)) {
             Set<Class> classes = new HashSet<Class>();

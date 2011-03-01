@@ -187,11 +187,11 @@ public class RADVisualContainer extends RADVisualComponent implements ComponentC
             Method m = getContainerDelegateMethod();
             if (m != null) {
                 try {
-                    containerDelegate = (Container) m.invoke(container, new Object[0]);
+                    containerDelegate = (Container) m.invoke(container);
                     if ((containerDelegate == null) && (container instanceof JScrollPane)) {
                         JScrollPane scrollPane = (JScrollPane)container;
                         scrollPane.setViewportView(null); // force recreation of viewport
-                        containerDelegate = (Container) m.invoke(container, new Object[0]);
+                        containerDelegate = (Container) m.invoke(container);
                     }
                 }
                 catch (Exception ex) {
@@ -442,7 +442,7 @@ public class RADVisualContainer extends RADVisualComponent implements ComponentC
             else {
                 getContainerDelegate(getBeanInstance()).remove(index);
             }
-            if (subComponents.remove((RADVisualComponent)comp))
+            if (subComponents.remove(comp))
                 comp.setParentComponent(null);
         }
     }

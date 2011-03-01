@@ -56,11 +56,7 @@ class CodeSupport {
     private CodeSupport() {
     }
 
-    static String getSourceClassName(Class cls) {
-        return cls.getName().replace('$', '.').replace('+', '.').replace('/', '.'); // NOI18N
-    }
-
-    // ----------
+  // ----------
     // implementation classes of CodeStatement interface
 
     static final class MethodStatement extends AbstractCodeStatement {
@@ -85,30 +81,7 @@ class CodeSupport {
         public CodeExpression[] getStatementParameters() {
             return parameters;
         }
-        
-        @Override
-        public String getJavaCodeString(String parentStr, String[] paramsStr) {
-            StringBuilder buf = new StringBuilder();
 
-            if (parentStr != null && !parentStr.equals("")) {
-                buf.append(parentStr);
-                buf.append("."); // NOI18N
-            }
-
-            buf.append(performMethod.getName());
-            buf.append("("); // NOI18N
-
-            for (int i=0; i < paramsStr.length; i++) {
-                buf.append(paramsStr[i]);
-                if (i+1 < parameters.length)
-                    buf.append(", "); // NOI18N
-            }
-
-            buf.append(");"); // NOI18N
-            // we do add ; at the end
-
-            return buf.toString();
-        }
     }
 
     static final class FieldStatement extends AbstractCodeStatement {
@@ -134,32 +107,13 @@ class CodeSupport {
             return parameters;
         }
 
-        @Override
-        public String getJavaCodeString(String parentStr, String[] paramsStr) {
-            StringBuilder buf = new StringBuilder();
-
-            if (parentStr != null && !parentStr.equals("")) {
-                buf.append(parentStr);
-                buf.append("."); // NOI18N
-            }
-
-            buf.append(assignField.getName());
-            buf.append(" = "); // NOI18N
-            buf.append(paramsStr[0]);
-            buf.append(";"); // NOI18N
-            // we do add ; at the end
-
-            return buf.toString();
-        }
     }
 
     static final class AssignVariableStatement extends AbstractCodeStatement {
-        private CodeVariable variable;
 
-        public AssignVariableStatement(CodeVariable var, CodeExpression exp) {
+      public AssignVariableStatement(CodeExpression exp) {
             super(exp);
-            variable = var;
-        }
+      }
 
         @Override
         public Object getMetaObject() {
@@ -171,102 +125,9 @@ class CodeSupport {
             return parentExpression.getOrigin().getCreationParameters();
         }
 
-        @Override
-        public String getJavaCodeString(String parentStr, String[] paramsStr) {
-            StringBuilder buf = new StringBuilder();
-            int varType = variable.getType();
-
-            int declareMask = CodeVariable.SCOPE_MASK
-                              | CodeVariable.DECLARATION_MASK;
-            if ((varType & declareMask) == CodeVariable.LOCAL) {
-                // no explicit local variable declaration, so we make the
-                // declaration together with the assignment
-                if ((varType & CodeVariable.FINAL) == CodeVariable.FINAL)
-                    buf.append("final "); // NOI18N
-
-                buf.append(getSourceClassName(variable.getDeclaredType()));
-                buf.append(" "); // NOI18N
-            }
-
-            buf.append(variable.getName());
-            buf.append(" = "); // NOI18N
-            buf.append(parentExpression.getOrigin().getJavaCodeString(
-                                                     parentStr, paramsStr));
-            buf.append(";"); // NOI18N
-
-            return buf.toString();
-        }
     }
 
-    static final class DeclareVariableStatement extends AbstractCodeStatement {
-        private CodeVariable variable;
-
-        public DeclareVariableStatement(CodeVariable var) {
-            super(null);
-            variable = var;
-        }
-
-        @Override
-        public Object getMetaObject() {
-            return variable;
-        }
-
-        @Override
-        public CodeExpression[] getStatementParameters() {
-            return CodeStructure.EMPTY_PARAMS;
-        }
-
-        @Override
-        public String getJavaCodeString(String parentStr, String[] paramsStr) {
-            StringBuilder buf = new StringBuilder();
-            int type = variable.getType();
-
-            if ((type & CodeVariable.SCOPE_MASK) == CodeVariable.FIELD) {
-                switch (type & CodeVariable.ACCESS_MODIF_MASK) {
-                    case CodeVariable.PUBLIC:
-                        buf.append("public "); // NOI18N
-                        break;
-                    case CodeVariable.PRIVATE:
-                        buf.append("private "); // NOI18N
-                        break;
-                    case CodeVariable.PROTECTED:
-                        buf.append("protected "); // NOI18N
-                        break;
-                }
-
-                if ((type & CodeVariable.STATIC) == CodeVariable.STATIC)
-                    buf.append("static "); // NOI18N
-
-                if ((type & CodeVariable.FINAL) == CodeVariable.FINAL)
-                    buf.append("final "); // NOI18N
-
-                if ((type & CodeVariable.TRANSIENT) == CodeVariable.TRANSIENT)
-                    buf.append("transient "); // NOI18N
-
-                if ((type & CodeVariable.VOLATILE) == CodeVariable.VOLATILE)
-                    buf.append("volatile "); // NOI18N
-            }
-            else { // local variable
-                if ((type & CodeVariable.FINAL) == CodeVariable.FINAL)
-                    buf.append("final "); // NOI18N
-            }
-
-            buf.append(getSourceClassName(variable.getDeclaredType()));
-            
-            String typeParameters = variable.getDeclaredTypeParameters();
-            if ((typeParameters != null) && !"".equals(typeParameters)) { // NOI18N
-                buf.append(typeParameters);
-            }
-
-            buf.append(" "); // NOI18N
-            buf.append(variable.getName());
-            buf.append(";"); // NOI18N
-
-            return buf.toString();
-        }
-    }
-
-    // ------------
+  // ------------
     // implementation classes of CodeExpressionOrigin interface
 
     static final class ConstructorOrigin implements CodeExpressionOrigin {
@@ -319,24 +180,6 @@ class CodeSupport {
             return parameters;
         }
 
-        @Override
-        public String getJavaCodeString(String parentStr, String[] paramsStr) {
-            StringBuilder buf = new StringBuilder();
-
-            buf.append("new "); // NOI18N
-            buf.append(constructor.getName());
-            buf.append("("); // NOI18N
-
-            for (int i=0; i < paramsStr.length; i++) {
-                buf.append(paramsStr[i]);
-                if (i+1 < parameters.length)
-                    buf.append(", "); // NOI18N
-            }
-
-            buf.append(")"); // NOI18N
-
-            return buf.toString();
-        }
     }
 
     static final class MethodOrigin implements CodeExpressionOrigin {
@@ -378,34 +221,6 @@ class CodeSupport {
             return parameters;
         }
 
-        @Override
-        public String getJavaCodeString(String parentStr, String[] paramsStr) {
-            StringBuilder buf = new StringBuilder();
-
-            if (parentExpression != null) {
-                if (parentStr != null && !parentStr.equals("")) {
-                    buf.append(parentStr);
-                    buf.append("."); // NOI18N
-                }
-            }
-            else { // we suppose a static method
-                buf.append(getSourceClassName(creationMethod.getDeclaringClass()));
-                buf.append("."); // NOI18N
-            }
-
-            buf.append(creationMethod.getName());
-            buf.append("("); // NOI18N
-
-            for (int i=0; i < paramsStr.length; i++) {
-                buf.append(paramsStr[i]);
-                if (i+1 < parameters.length)
-                    buf.append(", "); // NOI18N
-            }
-
-            buf.append(")"); // NOI18N
-
-            return buf.toString();
-        }
     }
 
     static final class FieldOrigin implements CodeExpressionOrigin {
@@ -442,37 +257,16 @@ class CodeSupport {
             return CodeStructure.EMPTY_PARAMS;
         }
 
-        @Override
-        public String getJavaCodeString(String parentStr, String[] paramsStr) {
-            StringBuilder buf = new StringBuilder();
-
-            if (parentExpression != null) {
-                if (parentStr != null && !parentStr.equals("")) {
-                    buf.append(parentStr);
-                    buf.append("."); // NOI18N
-                }
-            }
-            else { // we suppose a static field
-                buf.append(getSourceClassName(originField.getDeclaringClass()));
-                buf.append("."); // NOI18N
-            }
-
-            buf.append(originField.getName());
-
-            return buf.toString();
-        }
     }
 
     static final class ValueOrigin implements CodeExpressionOrigin {
         private Class expressionType;
         private Object expressionValue;
-        private String javaString;
 
-        public ValueOrigin(Class type, Object value, String javaStr) {
+      public ValueOrigin(Class type, Object value) {
             expressionType = type;
             expressionValue = value;
-            javaString = javaStr;
-        }
+      }
 
         @Override
         public Class getType() {
@@ -499,10 +293,6 @@ class CodeSupport {
             return CodeStructure.EMPTY_PARAMS;
         }
 
-        @Override
-        public String getJavaCodeString(String parentStr, String[] paramsStr) {
-            return javaString;
-        }
     }
 
     // --------
@@ -528,37 +318,12 @@ class CodeSupport {
             statements.add(group);
         }
 
-        @Override
-        public void addGroup(int index, CodeGroup group) {
-            statements.add(index, group);
-        }
-
-        @Override
-        public CodeStatement getStatement(int index) {
-            Object obj = statements.get(index);
-            if (obj instanceof CodeStatement)
-                return (CodeStatement) obj;
-            if (obj instanceof CodeGroup)
-                return ((CodeGroup)obj).getStatement(0);
-            return null;
-        }
-
-        @Override
-        public int indexOf(Object object) {
-            return statements.indexOf(object);
-        }
-
-        @Override
+      @Override
         public void remove(Object object) {
             statements.remove(object);
         }
 
-        @Override
-        public void remove(int index) {
-            statements.remove(index);
-        }
-
-        @Override
+      @Override
         public void removeAll() {
             statements.clear();
         }
@@ -591,7 +356,7 @@ class CodeSupport {
                         subIter = null;
                     }
                     else if (item instanceof CodeStatement)
-                        return true; 
+                        return true;
                     index++;
                 }
 

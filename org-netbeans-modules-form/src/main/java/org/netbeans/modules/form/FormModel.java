@@ -53,7 +53,6 @@ import javax.swing.undo.*;
 
 import org.netbeans.modules.form.adito.ARADComponentHandler;
 import org.openide.awt.UndoRedo;
-import org.openide.loaders.*;
 import org.openide.util.Mutex;
 import org.openide.util.MutexException;
 
@@ -118,7 +117,7 @@ public class FormModel
 
     private MetaComponentCreator metaCreator;
 
-    private CodeStructure codeStructure = new CodeStructure(false);
+    private CodeStructure codeStructure = new CodeStructure();
     
     private FormSettings settings = new FormSettings(this);
     
@@ -277,12 +276,11 @@ public class FormModel
     }
 
     public RADComponent findRADComponent(String name) {
-        Iterator allComps = idToComponents.values().iterator(); // getMetaComponents().iterator();
-        while (allComps.hasNext()) {
-            RADComponent comp = (RADComponent) allComps.next();
-            if (name.equals(comp.getName()))
-                return comp;
-        }
+      for (RADComponent radComponent : idToComponents.values())
+      {
+        if (name.equals(radComponent.getName()))
+          return radComponent;
+      }
         return null;
     }
 
@@ -1228,8 +1226,8 @@ public class FormModel
         return freeDesignDefaultLayout;
     }
     
-    void setFreeDesignDefaultLayout(boolean freeDesignDefaultLayout) {
-        this.freeDesignDefaultLayout = freeDesignDefaultLayout;
+    void setFreeDesignDefaultLayout() {
+        this.freeDesignDefaultLayout = true;
     }
 
 //    CodeGenerator getCodeGenerator() {

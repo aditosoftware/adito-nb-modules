@@ -76,8 +76,7 @@ public class LayoutModel implements LayoutConstants {
     private boolean undoRedoInProgress;
     private int changeMark;
     private int oldestMark;
-    private int changeCountHardLimit = 10000;
-    private Map<Integer,LayoutEvent> undoMap = new HashMap<Integer,LayoutEvent>(500);
+  private Map<Integer,LayoutEvent> undoMap = new HashMap<Integer,LayoutEvent>(500);
     private Map<Integer,LayoutEvent> redoMap = new HashMap<Integer,LayoutEvent>(100);
     private LayoutUndoableEdit lastUndoableEdit;
 
@@ -423,15 +422,15 @@ public class LayoutModel implements LayoutConstants {
             boolean horizontal = (interval == comp.getLayoutInterval(HORIZONTAL));
             if (oldMin != min) {
                 comp.firePropertyChange(horizontal ? PROP_HORIZONTAL_MIN_SIZE : PROP_VERTICAL_MIN_SIZE,
-                    new Integer(oldMin), new Integer(min));
+                                        oldMin, min);
             }
             if (oldPref != pref) {
                 comp.firePropertyChange(horizontal ? PROP_HORIZONTAL_PREF_SIZE : PROP_VERTICAL_PREF_SIZE,
-                    new Integer(oldPref), new Integer(pref));
+                                        oldPref, pref);
             }
             if (oldMax != max) {
                 comp.firePropertyChange(horizontal ? PROP_HORIZONTAL_MAX_SIZE : PROP_VERTICAL_MAX_SIZE,
-                    new Integer(oldMax), new Integer(max));
+                                        oldMax, max);
             }
         }
 
@@ -636,13 +635,13 @@ public class LayoutModel implements LayoutConstants {
             } while (!compToBounds.isEmpty() && parts.isEmpty());
             dimension = effDim;
             List<RegionInfo> regions = new LinkedList<RegionInfo>();
-            Iterator<Map<LayoutComponent, Rectangle>> iter = parts.iterator();
-            while (iter.hasNext()) {
-                Map<LayoutComponent, Rectangle> part = iter.next();
-                RegionInfo region = new RegionInfo(part, (dimension == HORIZONTAL) ? VERTICAL : HORIZONTAL);
-                region.calculateIntervals();
-                regions.add(region);
-            }
+          for (Map<LayoutComponent, Rectangle> part1 : parts)
+          {
+            Map<LayoutComponent, Rectangle> part = part1;
+            RegionInfo region = new RegionInfo(part, (dimension == HORIZONTAL) ? VERTICAL : HORIZONTAL);
+            region.calculateIntervals();
+            regions.add(region);
+          }
             mergeSubRegions(regions, dimension);
             if (removedCompToBounds != null) {
                 for (int dim = HORIZONTAL; dim <= VERTICAL; dim++) {
@@ -674,43 +673,50 @@ public class LayoutModel implements LayoutConstants {
             for (Rectangle bounds : compToBounds.values()) {
                 // Leading lines are sufficient
                 int leading = (dimension == HORIZONTAL) ? bounds.x : bounds.y;
-                cutSet.add(new Integer(leading));
+                cutSet.add(leading);
             }
-            cutSet.add(new Integer((dimension == HORIZONTAL) ? maxx : maxy));
+            cutSet.add((dimension == HORIZONTAL) ? maxx : maxy);
             return cutSet;
         }
         
         private List<Map<LayoutComponent,Rectangle>> cutIntoParts(Set<Integer> cutSet, int dimension) {
             List<Map<LayoutComponent,Rectangle>> parts = new LinkedList<Map<LayoutComponent,Rectangle>>();
-            Iterator<Integer> iter = cutSet.iterator();
-            while (iter.hasNext()) {
-                Integer cutInt = iter.next();
-                int cut = cutInt;
-                boolean isCut = true;
-                Map<LayoutComponent, Rectangle> preCompToBounds = new HashMap<LayoutComponent, Rectangle>();
-                Map<LayoutComponent, Rectangle> postCompToBounds = new HashMap<LayoutComponent, Rectangle>();
-                Iterator<Map.Entry<LayoutComponent, Rectangle>> it = compToBounds.entrySet().iterator();                
-                while (isCut && it.hasNext()) {
-                    Map.Entry<LayoutComponent, Rectangle> entry = it.next();
-                    LayoutComponent comp = entry.getKey();
-                    Rectangle bounds = entry.getValue();
-                    int leading = (dimension == HORIZONTAL) ? bounds.x : bounds.y;
-                    int trailing = leading + ((dimension == HORIZONTAL) ? bounds.width : bounds.height);
-                    if (leading >= cut) {
-                        postCompToBounds.put(comp, bounds);
-                    } else if (trailing <= cut) {
-                        preCompToBounds.put(comp, bounds);
-                    } else {
-                        isCut = false;
-                    }
-                }
-                if (isCut && !preCompToBounds.isEmpty()
-                    // the last cut candidate (end of the region) cannot be the first cut
-                    && (!parts.isEmpty() || (preCompToBounds.size() != compToBounds.size()))) {
-                    compToBounds.keySet().removeAll(preCompToBounds.keySet());
-                    parts.add(preCompToBounds);
-                }
+          for (Integer aCutSet : cutSet)
+          {
+            Integer cutInt = aCutSet;
+            int cut = cutInt;
+            boolean isCut = true;
+            Map<LayoutComponent, Rectangle> preCompToBounds = new HashMap<LayoutComponent, Rectangle>();
+            Map<LayoutComponent, Rectangle> postCompToBounds = new HashMap<LayoutComponent, Rectangle>();
+            Iterator<Map.Entry<LayoutComponent, Rectangle>> it = compToBounds.entrySet().iterator();
+            while (isCut && it.hasNext())
+            {
+              Map.Entry<LayoutComponent, Rectangle> entry = it.next();
+              LayoutComponent comp = entry.getKey();
+              Rectangle bounds = entry.getValue();
+              int leading = (dimension == HORIZONTAL) ? bounds.x : bounds.y;
+              int trailing = leading + ((dimension == HORIZONTAL) ? bounds.width : bounds.height);
+              if (leading >= cut)
+              {
+                postCompToBounds.put(comp, bounds);
+              }
+              else if (trailing <= cut)
+              {
+                preCompToBounds.put(comp, bounds);
+              }
+              else
+              {
+                isCut = false;
+              }
             }
+            if (isCut && !preCompToBounds.isEmpty()
+                // the last cut candidate (end of the region) cannot be the first cut
+                && (!parts.isEmpty() || (preCompToBounds.size() != compToBounds.size())))
+            {
+              compToBounds.keySet().removeAll(preCompToBounds.keySet());
+              parts.add(preCompToBounds);
+            }
+          }
             return parts;
         }
         
@@ -723,36 +729,40 @@ public class LayoutModel implements LayoutConstants {
             LayoutInterval seqGroup = new LayoutInterval(SEQUENTIAL);
             LayoutInterval parGroup = new LayoutInterval(PARALLEL);
             int lastSeqTrailing = (dimension == HORIZONTAL) ? minx : miny;
-            Iterator iter = regions.iterator();
-            while (iter.hasNext()) {
-                RegionInfo region = (RegionInfo)iter.next();
-                LayoutInterval seqInterval;
-                LayoutInterval parInterval;
-                int seqGap;
-                int parGap;
-                if (dimension == HORIZONTAL) {
-                    seqInterval = region.horizontal;
-                    parInterval = region.vertical;
-                    parGap = region.miny - miny;
-                    seqGap = region.minx - lastSeqTrailing;
-                    lastSeqTrailing = region.maxx;
-                } else {
-                    seqInterval = region.vertical;
-                    parInterval = region.horizontal;
-                    parGap = region.minx - minx;
-                    seqGap = region.miny - lastSeqTrailing;
-                    lastSeqTrailing = region.maxy;
-                }
-                // PENDING optimization of the resulting layout model
-                if (seqGap > 0) {
-                    LayoutInterval gap = new LayoutInterval(SINGLE);
-                    gap.setSize(seqGap);
-                    seqGroup.add(gap, -1);
-                }
-                seqGroup.add(seqInterval, -1);
-                parInterval = prefixByGap(parInterval, parGap);
-                parGroup.add(parInterval, -1);
+          for (Object region1 : regions)
+          {
+            RegionInfo region = (RegionInfo) region1;
+            LayoutInterval seqInterval;
+            LayoutInterval parInterval;
+            int seqGap;
+            int parGap;
+            if (dimension == HORIZONTAL)
+            {
+              seqInterval = region.horizontal;
+              parInterval = region.vertical;
+              parGap = region.miny - miny;
+              seqGap = region.minx - lastSeqTrailing;
+              lastSeqTrailing = region.maxx;
             }
+            else
+            {
+              seqInterval = region.vertical;
+              parInterval = region.horizontal;
+              parGap = region.minx - minx;
+              seqGap = region.miny - lastSeqTrailing;
+              lastSeqTrailing = region.maxy;
+            }
+            // PENDING optimization of the resulting layout model
+            if (seqGap > 0)
+            {
+              LayoutInterval gap = new LayoutInterval(SINGLE);
+              gap.setSize(seqGap);
+              seqGroup.add(gap, -1);
+            }
+            seqGroup.add(seqInterval, -1);
+            parInterval = prefixByGap(parInterval, parGap);
+            parGroup.add(parInterval, -1);
+          }
             if (dimension == HORIZONTAL) {
                 horizontal = seqGroup;
                 vertical = parGroup;
@@ -805,10 +815,10 @@ public class LayoutModel implements LayoutConstants {
 
     private void fireEvent(LayoutEvent event) {
         if (listeners != null && listeners.size() > 0) {
-            Iterator it = ((List)listeners.clone()).iterator();
-            while (it.hasNext()) {
-                ((Listener)it.next()).layoutChanged(event);
-            }
+          for (Object o : ((List) listeners.clone()))
+          {
+            ((Listener) o).layoutChanged(event);
+          }
         }
     }
 
@@ -831,11 +841,11 @@ public class LayoutModel implements LayoutConstants {
     }
 
     boolean isUndoRedoInProgress() {
-        return undoRedoInProgress;
+        return !undoRedoInProgress;
     }
 
     public Object getChangeMark() {
-        return new Integer(changeMark);
+        return changeMark;
     }
     
     public void endUndoableEdit() {
@@ -866,10 +876,11 @@ public class LayoutModel implements LayoutConstants {
             if (undoMap.isEmpty())
                 oldestMark = changeMark;
 
-            undoMap.put(new Integer(changeMark++), change);
+            undoMap.put(changeMark++, change);
 
-            while (undoMap.size() > changeCountHardLimit) {
-                undoMap.remove(new Integer(oldestMark++));
+          int changeCountHardLimit = 10000;
+          while (undoMap.size() > changeCountHardLimit) {
+                undoMap.remove(oldestMark++);
             }
         }
     }
@@ -885,7 +896,7 @@ public class LayoutModel implements LayoutConstants {
         undoRedoInProgress = true;
 
         while (end > start) {
-            Integer key = new Integer(--end);
+            Integer key = --end;
             LayoutEvent change = undoMap.remove(key);
             if (change != null) {
                 change.undo();
@@ -908,7 +919,7 @@ public class LayoutModel implements LayoutConstants {
         undoRedoInProgress = true;
 
         while (start < end) {
-            Integer key = new Integer(start++);
+            Integer key = start++;
             LayoutEvent change = redoMap.remove(key);
             if (change != null) {
                 change.redo();
@@ -925,7 +936,7 @@ public class LayoutModel implements LayoutConstants {
         int m2 = (Integer) toMark;
 
         while (m1 < m2) {
-            Integer m = new Integer(m1);
+            Integer m = m1;
             undoMap.remove(m);
             redoMap.remove(m);
             m1++;
@@ -1026,32 +1037,34 @@ public class LayoutModel implements LayoutConstants {
             }
         });
         LayoutComponent rootComp = contId != null ? getLayoutComponent(contId) : null;
-        Iterator<Map.Entry<String,LayoutComponent>> iter = idToComponents.entrySet().iterator();
-        while (iter.hasNext()) {
-            Map.Entry<String,LayoutComponent> entry = iter.next();
-            LayoutComponent comp = entry.getValue();
-            if (comp.isLayoutContainer()
-                    && (rootComp == null || comp == rootComp
-                        || (subcontainers && rootComp.isParentOf(comp)))) {
-                roots.add(comp);
-            }
+      for (Map.Entry<String, LayoutComponent> stringLayoutComponentEntry : idToComponents.entrySet())
+      {
+        Map.Entry<String, LayoutComponent> entry = stringLayoutComponentEntry;
+        LayoutComponent comp = entry.getValue();
+        if (comp.isLayoutContainer()
+            && (rootComp == null || comp == rootComp
+            || (subcontainers && rootComp.isParentOf(comp))))
+        {
+          roots.add(comp);
         }
+      }
         StringBuilder sb = new StringBuilder();
         sb.append("<LayoutModel>\n"); // NOI18N
-        Iterator rootIter = roots.iterator();
-        while (rootIter.hasNext()) {
-            LayoutComponent root = (LayoutComponent)rootIter.next();
-            String rootId = root.getId();
-            if (idToNameMap != null) {
-                rootId = idToNameMap.get(rootId);
-            }
-            if (rootId != null)
-                sb.append("  <Root id=\"").append(rootId).append("\">\n"); // NOI18N
-            else
-                sb.append("  <Root>\n"); // NOI18N
-            sb.append(saveContainerLayout(root, idToNameMap, 2, true));
-            sb.append("  </Root>\n"); // NOI18N
+      for (LayoutComponent root1 : roots)
+      {
+        LayoutComponent root = root1;
+        String rootId = root.getId();
+        if (idToNameMap != null)
+        {
+          rootId = idToNameMap.get(rootId);
         }
+        if (rootId != null)
+          sb.append("  <Root id=\"").append(rootId).append("\">\n"); // NOI18N
+        else
+          sb.append("  <Root>\n"); // NOI18N
+        sb.append(saveContainerLayout(root, idToNameMap, 2, true));
+        sb.append("  </Root>\n"); // NOI18N
+      }
         sb.append("</LayoutModel>\n"); // NOI18N
         return sb.toString();
     }
@@ -1139,10 +1152,10 @@ public class LayoutModel implements LayoutConstants {
         if (maxLinkGroupId < groupId) {
             maxLinkGroupId=groupId;
         }
-        Integer groupIdInt = new Integer(groupId);
+        Integer groupIdInt = groupId;
         Map<Integer,List<String>> linkSizeGroups = (dimension == HORIZONTAL) ? linkSizeGroupsH : linkSizeGroupsV;
         List<String> l = linkSizeGroups.get(groupIdInt);
-        if ((l != null) && (l.contains(compId) || !sameContainer(compId, l.get(0)))) {
+        if ((l != null) && (l.contains(compId) || sameContainer(compId, l.get(0)))) {
             return;
         }
         addComponentToLinkSizedGroupImpl(groupId, compId, dimension);
@@ -1150,7 +1163,7 @@ public class LayoutModel implements LayoutConstants {
 
     void addComponentToLinkSizedGroupImpl(int groupId, String compId, int dimension) {
         LayoutComponent lc = getLayoutComponent(compId);
-        Integer groupIdInt = new Integer(groupId);
+        Integer groupIdInt = groupId;
         Map<Integer,List<String>> linkSizeGroups = (dimension == HORIZONTAL) ? linkSizeGroupsH : linkSizeGroupsV;
         List<String> l = linkSizeGroups.get(groupIdInt);
         if (l != null) {
@@ -1174,7 +1187,7 @@ public class LayoutModel implements LayoutConstants {
     private boolean sameContainer(String compId1, String compId2) {
         LayoutComponent lc1 = getLayoutComponent(compId1);
         LayoutComponent lc2 = getLayoutComponent(compId2);
-        return lc1.getParent().equals(lc2.getParent());
+        return !lc1.getParent().equals(lc2.getParent());
     }
     
     void removeComponentFromLinkSizedGroup(LayoutComponent comp, int dimension) {
@@ -1185,7 +1198,7 @@ public class LayoutModel implements LayoutConstants {
         if (linkId != NOT_EXPLICITLY_DEFINED) {
 
             Map<Integer,List<String>> map = (dimension == HORIZONTAL) ? linkSizeGroupsH : linkSizeGroupsV;
-            Integer linkIdInt = new Integer(linkId);
+            Integer linkIdInt = linkId;
             
             List<String> l = map.get(linkIdInt);
             l.remove(comp.getId());
@@ -1234,7 +1247,7 @@ public class LayoutModel implements LayoutConstants {
         while (i.hasNext()) {
             String cid = (String)i.next();
             LayoutComponent lc = getLayoutComponent(cid);
-            Integer linkSizeId =  new Integer(lc.getLinkSizeId(dimension));
+            Integer linkSizeId = lc.getLinkSizeId(dimension);
             if (!idsFound.contains(linkSizeId)) {
                 idsFound.add(linkSizeId);
             }
@@ -1266,12 +1279,12 @@ public class LayoutModel implements LayoutConstants {
     }
     
     public void unsetSameSize(List/*<String>*/ components, int dimension) {
-        Iterator i = components.iterator();
-        while (i.hasNext()) {
-            String cid = (String)i.next();
-            LayoutComponent lc = getLayoutComponent(cid);
-            removeComponentFromLinkSizedGroup(lc, dimension);            
-        }
+      for (Object component : components)
+      {
+        String cid = (String) component;
+        LayoutComponent lc = getLayoutComponent(cid);
+        removeComponentFromLinkSizedGroup(lc, dimension);
+      }
     }
     
     public void setSameSize(List/*<String>*/ components, int dimension) {
@@ -1286,14 +1299,15 @@ public class LayoutModel implements LayoutConstants {
     }
     
     private int findGroupId(List/*<String*/ components, int dimension) {
-        Iterator i = components.iterator();
-        while (i.hasNext()) {
-            String cid = (String)i.next();
-            LayoutComponent lc = getLayoutComponent(cid);
-            if (lc.isLinkSized(dimension)) {
-                return lc.getLinkSizeId(dimension);
-            }
+      for (Object component : components)
+      {
+        String cid = (String) component;
+        LayoutComponent lc = getLayoutComponent(cid);
+        if (lc.isLinkSized(dimension))
+        {
+          return lc.getLinkSizeId(dimension);
         }
+      }
         return ++maxLinkGroupId;
     }
 }

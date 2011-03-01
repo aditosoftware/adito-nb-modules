@@ -7,10 +7,8 @@ import org.netbeans.modules.form.codestructure.*;
 import org.netbeans.modules.form.layoutdesign.*;
 import org.netbeans.modules.form.layoutdesign.support.SwingLayoutBuilder;
 import org.netbeans.modules.form.layoutsupport.LayoutSupportManager;
-import org.netbeans.modules.form.layoutsupport.delegates.*;
 import org.openide.ErrorManager;
 import org.openide.filesystems.*;
-import org.openide.loaders.*;
 
 import javax.swing.*;
 import java.lang.reflect.Method;
@@ -97,6 +95,36 @@ public class AditoPersistenceManager extends PersistenceManager
   private void _loadComponent(_Info pInfo, FileObject pModelComp, RADComponent pComponent, RADComponent pParentComponent)
       throws PersistenceException
   {
+
+    // if the loaded component is a visual component in a visual contianer,
+    // then load NB 3.1 layout constraints for it
+//    if (pComponent instanceof RADVisualComponent && pParentComponent instanceof RADVisualContainer)
+//    {
+//      CodeExpression compExp = pComponent.getCodeExpression();
+//      LayoutSupportManager layoutSupport = ((RADVisualContainer) pParentComponent).getLayoutSupport();
+//
+//      if (pModelComp.getFileObject("x") != null && pModelComp.getFileObject("y") != null)
+//      {
+//
+//      }
+//
+//      boolean constraintsLoaded = false;
+//
+//      if (constrNodes != null && constrNodes.length > 0)
+//      {
+//        // NB 3.1 used to save all constraints ever set. We must
+//        // go through all of them, but only those of current layout
+//        // will be loaded.
+//        for (int i = 0; !constraintsLoaded && i < constrNodes.length; i++)
+//          constraintsLoaded = loadConstraints(constrNodes[i],
+//                                              compExp,
+//                                              layoutSupport);
+//      }
+//
+//      if (!constraintsLoaded)
+//        setupDefaultComponentCode(compExp, layoutSupport);
+//    }
+
     ComponentContainer container = // is this component a container?
         pComponent instanceof ComponentContainer ?
             (ComponentContainer) pComponent : null;

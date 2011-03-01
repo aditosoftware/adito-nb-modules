@@ -57,11 +57,7 @@ public class InstallBeanAction extends CallableSystemAction {
 
     private static String name;
 
-    public InstallBeanAction () {
-        putValue("noIconInMenu", Boolean.TRUE); // NOI18N
-    }
-
-    @Override
+  @Override
     protected boolean asynchronous() {
         return false;
     }

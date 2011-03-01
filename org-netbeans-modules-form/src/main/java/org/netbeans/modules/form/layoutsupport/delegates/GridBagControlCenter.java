@@ -59,14 +59,10 @@ public class GridBagControlCenter extends javax.swing.JPanel {
 
     private GridBagCustomizer customizer;
 
-    private ResourceBundle bundle;
-
-    private ActionL actionLsnr;
-
-    static final long serialVersionUID =-3758289034173265028L;
+  static final long serialVersionUID =-3758289034173265028L;
     /** Creates new form GridBagControlCenter */
     public GridBagControlCenter(GridBagCustomizer customizer) {
-        bundle = GridBagLayoutSupport.getBundleHack();
+      ResourceBundle bundle = GridBagLayoutSupport.getBundleHack();
 
         initComponents();
 
@@ -139,7 +135,7 @@ public class GridBagControlCenter extends javax.swing.JPanel {
         setLayout(new java.awt.GridBagLayout());
         java.awt.GridBagConstraints gridBagConstraints1;
 
-        actionLsnr = new ActionL ();
+      ActionL actionLsnr = new ActionL();
 
         anchorPanel = new javax.swing.JPanel();
         anchorPanel.setLayout(new java.awt.GridBagLayout());
@@ -279,7 +275,7 @@ public class GridBagControlCenter extends javax.swing.JPanel {
         ipadPanel.setBorder(new javax.swing.border.TitledBorder(
             new javax.swing.border.EtchedBorder(), "iPaddingPanel")); // NOI18N
 
-        jLabel1 = new javax.swing.JLabel();
+      JLabel jLabel1 = new JLabel();
         jLabel1.setIcon(ImageUtilities.loadImageIcon("org/netbeans/modules/form/layoutsupport/resources/horizontalGr.gif", false)); // NOI18N
 
         gridBagConstraints4 = new java.awt.GridBagConstraints();
@@ -305,7 +301,7 @@ public class GridBagControlCenter extends javax.swing.JPanel {
         gridBagConstraints4.gridwidth = 0;
         ipadPanel.add(ipadHPButton, gridBagConstraints4);
 
-        jLabel2 = new javax.swing.JLabel();
+      JLabel jLabel2 = new JLabel();
         jLabel2.setIcon(ImageUtilities.loadImageIcon("org/netbeans/modules/form/layoutsupport/resources/verticalGr.gif", false)); // NOI18N
 
         gridBagConstraints4 = new java.awt.GridBagConstraints();
@@ -445,7 +441,7 @@ public class GridBagControlCenter extends javax.swing.JPanel {
         gridBagConstraints5.insets = new java.awt.Insets(8, 0, 0, 0);
         insetsPanel.add(bottomPButton, gridBagConstraints5);
 
-        jLabel3 = new javax.swing.JLabel();
+      JLabel jLabel3 = new JLabel();
         jLabel3.setIcon(ImageUtilities.loadImageIcon("org/netbeans/modules/form/layoutsupport/resources/horizontalGr.gif", false)); // NOI18N
 
         gridBagConstraints5 = new java.awt.GridBagConstraints();
@@ -478,7 +474,7 @@ public class GridBagControlCenter extends javax.swing.JPanel {
         gridBagConstraints5.insets = new java.awt.Insets(8, 0, 0, 0);
         insetsPanel.add(HPButton, gridBagConstraints5);
 
-        jLabel4 = new javax.swing.JLabel();
+      JLabel jLabel4 = new JLabel();
         jLabel4.setIcon(ImageUtilities.loadImageIcon("org/netbeans/modules/form/layoutsupport/resources/verticalGr.gif", false)); // NOI18N
 
         gridBagConstraints5 = new java.awt.GridBagConstraints();
@@ -509,7 +505,7 @@ public class GridBagControlCenter extends javax.swing.JPanel {
         gridBagConstraints5.gridy = 3;
         insetsPanel.add(VPButton, gridBagConstraints5);
 
-        jLabel5 = new javax.swing.JLabel();
+      JLabel jLabel5 = new JLabel();
         jLabel5.setIcon(ImageUtilities.loadImageIcon("org/netbeans/modules/form/layoutsupport/resources/bothGr.gif", false)); // NOI18N
 
         gridBagConstraints5 = new java.awt.GridBagConstraints();
@@ -556,7 +552,7 @@ public class GridBagControlCenter extends javax.swing.JPanel {
         gridSizePanel.setBorder(new javax.swing.border.TitledBorder(
             new javax.swing.border.EtchedBorder(), "panelSizePanel")); // NOI18N
 
-        jLabel6 = new javax.swing.JLabel();
+      JLabel jLabel6 = new JLabel();
         jLabel6.setIcon(ImageUtilities.loadImageIcon("org/netbeans/modules/form/layoutsupport/resources/horizontalGr.gif", false)); // NOI18N
 
         gridBagConstraints6 = new java.awt.GridBagConstraints();
@@ -591,7 +587,7 @@ public class GridBagControlCenter extends javax.swing.JPanel {
         gridBagConstraints6.gridwidth = 0;
         gridSizePanel.add(gsRHButton, gridBagConstraints6);
 
-        jLabel8 = new javax.swing.JLabel();
+      JLabel jLabel8 = new JLabel();
         jLabel8.setIcon(ImageUtilities.loadImageIcon("org/netbeans/modules/form/layoutsupport/resources/verticalGr.gif", false)); // NOI18N
 
         gridBagConstraints6 = new java.awt.GridBagConstraints();
@@ -750,11 +746,9 @@ public class GridBagControlCenter extends javax.swing.JPanel {
     private javax.swing.JToggleButton horizontalFillButton;
     private javax.swing.JToggleButton verticalFillButton;
     private javax.swing.JPanel ipadPanel;
-    private javax.swing.JLabel jLabel1;
-    private javax.swing.JButton ipadHMButton;
+  private javax.swing.JButton ipadHMButton;
     private javax.swing.JButton ipadHPButton;
-    private javax.swing.JLabel jLabel2;
-    private javax.swing.JButton ipadVMButton;
+  private javax.swing.JButton ipadVMButton;
     private javax.swing.JButton ipadVPButton;
     private javax.swing.JPanel insetsPanel;
     private javax.swing.JButton topMButton;
@@ -765,22 +759,17 @@ public class GridBagControlCenter extends javax.swing.JPanel {
     private javax.swing.JButton rightMButton;
     private javax.swing.JButton bottomMButton;
     private javax.swing.JButton bottomPButton;
-    private javax.swing.JLabel jLabel3;
-    private javax.swing.JButton HMButton;
+  private javax.swing.JButton HMButton;
     private javax.swing.JButton HPButton;
-    private javax.swing.JLabel jLabel4;
-    private javax.swing.JButton VMButton;
+  private javax.swing.JButton VMButton;
     private javax.swing.JButton VPButton;
-    private javax.swing.JLabel jLabel5;
-    private javax.swing.JButton BMButton;
+  private javax.swing.JButton BMButton;
     private javax.swing.JButton BPButton;
     private javax.swing.JPanel gridSizePanel;
-    private javax.swing.JLabel jLabel6;
-    private javax.swing.JButton gridSizeHMButton;
+  private javax.swing.JButton gridSizeHMButton;
     private javax.swing.JButton gridSizeHPButton;
     private javax.swing.JToggleButton gsRHButton;
-    private javax.swing.JLabel jLabel8;
-    private javax.swing.JButton gridSizeVMButton;
+  private javax.swing.JButton gridSizeVMButton;
     private javax.swing.JButton gridSizeVPButton;
     private javax.swing.JToggleButton gsRVButton;
 

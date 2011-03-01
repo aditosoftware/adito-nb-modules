@@ -515,7 +515,7 @@ public class ComponentInspector extends TopComponent
                                 .getCookie(RADComponentCookie.class);
                     }
                     if (cookie != null)
-                        designer.connectBean(cookie.getRADComponent(), true);
+                        designer.connectBean(cookie.getRADComponent());
                 }
             }
             else if (evt.getSource() == ComponentInspector.this.getExplorerManager())

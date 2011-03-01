@@ -260,7 +260,7 @@ public class JLayeredPaneSupport extends AbsoluteLayoutSupport {
 
         @Override
         public Object getConstraintsObject() {
-            return new Integer(layer);
+            return layer;
         }
 
         @Override
@@ -283,7 +283,7 @@ public class JLayeredPaneSupport extends AbsoluteLayoutSupport {
 
                     @Override
                     public Object getTargetValue() {
-                        return new Integer(layer);
+                        return layer;
                     }
                     @Override
                     public void setTargetValue(Object value) {
@@ -295,7 +295,7 @@ public class JLayeredPaneSupport extends AbsoluteLayoutSupport {
                     }
                     @Override
                     public Object getDefaultValue() {
-                        return new Integer(0);
+                        return 0;
                     }
                     @Override
                     public PropertyEditor getExpliciteEditor() {

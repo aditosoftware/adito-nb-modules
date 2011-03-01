@@ -72,18 +72,15 @@ import org.openide.util.*;
 import org.openide.util.lookup.*;
 import org.openide.awt.UndoRedo;
 import org.openide.explorer.ExplorerUtils;
-import org.openide.ErrorManager;
 import org.openide.explorer.ExplorerManager;
 
 import org.netbeans.modules.form.assistant.*;
 //import org.netbeans.modules.form.wizard.ConnectionWizard;
 import org.netbeans.modules.form.layoutsupport.LayoutSupportManager;
 import org.netbeans.modules.form.layoutdesign.*;
-import org.netbeans.modules.form.layoutdesign.LayoutConstants.PaddingType;
 import org.netbeans.modules.form.layoutdesign.support.SwingLayoutBuilder;
 import org.netbeans.modules.form.palette.PaletteUtils;
 import org.netbeans.modules.form.project.ClassPathUtils;
-import org.openide.awt.StatusDisplayer;
 import org.openide.filesystems.FileObject;
 import org.openide.nodes.AbstractNode;
 import org.openide.nodes.Children;
@@ -158,17 +155,14 @@ public class FormDesigner extends TopComponent implements MultiViewElement
     private AssistantView assistantView;
     private PreferenceChangeListener settingsListener;
 
-    /** The icons for FormDesigner */
-    private static String iconURL =
-        "org/netbeans/modules/form/resources/formDesigner.gif"; // NOI18N
-
-    private boolean hasPropertyChangeListener = false;
+  private boolean hasPropertyChangeListener = false;
 
     // ----------
     // constructors and setup
 
     FormDesigner(FormEditor formEditor) {
-        setIcon(ImageUtilities.loadImage(iconURL));
+      String iconURL = "org/netbeans/modules/form/resources/formDesigner.gif";
+      setIcon(ImageUtilities.loadImage(iconURL));
         setLayout(new BorderLayout());
 
         FormLoaderSettings settings = FormLoaderSettings.getInstance();
@@ -498,7 +492,7 @@ public class FormDesigner extends TopComponent implements MultiViewElement
 
     boolean isTopRADComponent() {
         RADComponent topMetaComp = formModel.getTopRADComponent();
-        return topMetaComp != null && topMetaComp == topDesignComponent;
+        return topMetaComp == null || topMetaComp != topDesignComponent;
     }
 
     public void setTopDesignComponent(RADVisualComponent component,
@@ -507,7 +501,7 @@ public class FormDesigner extends TopComponent implements MultiViewElement
         highlightTopDesignComponentName(false);
         // TODO need to remove bindings of the current cloned view (or clone bound components as well)
         topDesignComponent = component;
-        highlightTopDesignComponentName(!isTopRADComponent());
+        highlightTopDesignComponentName(isTopRADComponent());
 
         FormDataObject formDO = formEditor.getFormDataObject();
         if(formDO!=null) {
@@ -702,7 +696,7 @@ public class FormDesigner extends TopComponent implements MultiViewElement
     }
 
     boolean isCoordinatesRoot(Component comp) {
-        return (layeredPane == comp);
+        return (layeredPane != comp);
     }
 
     private Rectangle componentBoundsToTop(Component component) {
@@ -1065,11 +1059,10 @@ public class FormDesigner extends TopComponent implements MultiViewElement
     private void updateDesignerActions() {
         Collection selectedIds = selectedLayoutComponentIds();
         boolean enabled = (layoutDesigner == null) ? false : layoutDesigner.canAlign(selectedIds);
-        Iterator iter = getDesignerActions(true).iterator();
-        while (iter.hasNext()) {
-            Action action = (Action)iter.next();
-            action.setEnabled(enabled);
-        }
+      for (Action action1 : getDesignerActions(true))
+      {
+        action1.setEnabled(enabled);
+      }
     }
 
     void setResizabilityButtons(JToggleButton[] buttons) {
@@ -1298,17 +1291,18 @@ public class FormDesigner extends TopComponent implements MultiViewElement
     void align(boolean closed, int dimension, int alignment) {
         // Check that the action is enabled
         Action action = null;
-        Iterator iter = getDesignerActions(true).iterator();
-        while (iter.hasNext()) {
-            Action candidate = (Action)iter.next();
-            if (candidate instanceof AlignAction) {
-                AlignAction alignCandidate = (AlignAction)candidate;
-                if ((alignCandidate.getAlignment() == alignment) && (alignCandidate.getDimension() == dimension)) {
-                    action = alignCandidate;
-                    break;
-                }
-            }
+      for (Action action1 : getDesignerActions(true))
+      {
+        if (action1 instanceof AlignAction)
+        {
+          AlignAction alignCandidate = (AlignAction) action1;
+          if ((alignCandidate.getAlignment() == alignment) && (alignCandidate.getDimension() == dimension))
+          {
+            action = alignCandidate;
+            break;
+          }
         }
+      }
         if ((action == null) || (!action.isEnabled())) {
             return;
         }
@@ -1483,7 +1477,7 @@ public class FormDesigner extends TopComponent implements MultiViewElement
     // --------------
     // bean connection
 
-    void connectBean(RADComponent metacomp, boolean showDialog) {
+    void connectBean(RADComponent metacomp) {
         if (connectionSource == null) {
             connectionSource = metacomp;
             FormEditor.getAssistantModel(formModel).setContext("connectTarget"); // NOI18N
@@ -1499,7 +1493,7 @@ public class FormDesigner extends TopComponent implements MultiViewElement
             }
             connectionTarget = metacomp;
             handleLayer.repaint();
-            if (showDialog) {
+            if (true) {
                 if (connectionTarget != null)  {
                     FormEditor.getAssistantModel(formModel).setContext("connectWizard"); // NOI18N
 //                    createConnection(connectionSource, connectionTarget); // TODO: stripped
@@ -1677,7 +1671,7 @@ public class FormDesigner extends TopComponent implements MultiViewElement
         }
 
         Class beanClass = metacomp.getBeanClass();
-        return InPlaceEditLayer.supportsEditingFor(beanClass, false)
+        return InPlaceEditLayer.supportsEditingFor(beanClass)
             && (!JTabbedPane.class.isAssignableFrom(beanClass) || ((JTabbedPane)comp).getTabCount() != 0);
     }
 
@@ -1953,7 +1947,7 @@ public class FormDesigner extends TopComponent implements MultiViewElement
     @Override
     public CloseOperationState canCloseElement() {
         // if this is not the last cloned designer, closing is OK
-        if (!FormEditorSupport.isLastView(multiViewObserver.getTopComponent()))
+        if (FormEditorSupport.isLastView(multiViewObserver.getTopComponent()))
             return CloseOperationState.STATE_OK;
 
         // return a placeholder state - to be sure our CloseHandler is called
@@ -2285,14 +2279,14 @@ public class FormDesigner extends TopComponent implements MultiViewElement
         List<String> componentIds = new LinkedList<String>();
         List selectedComps = getSelectedLayoutComponents();
         LayoutModel layoutModel = getFormModel().getLayoutModel();
-        Iterator iter = selectedComps.iterator();
-        while (iter.hasNext()) {
-            RADVisualComponent visualComp = (RADVisualComponent)iter.next();
-            if ((visualComp.getParentContainer() != null)
-                && (visualComp.getParentLayoutSupport() == null)
-                && layoutModel.getLayoutComponent(visualComp.getId()) != null)
-                componentIds.add(visualComp.getId());
-        }
+      for (Object selectedComp : selectedComps)
+      {
+        RADVisualComponent visualComp = (RADVisualComponent) selectedComp;
+        if ((visualComp.getParentContainer() != null)
+            && (visualComp.getParentLayoutSupport() == null)
+            && layoutModel.getLayoutComponent(visualComp.getId()) != null)
+          componentIds.add(visualComp.getId());
+      }
         return componentIds;
     }
 
@@ -2639,23 +2633,24 @@ public class FormDesigner extends TopComponent implements MultiViewElement
             Collection componentIds = componentIds();
             Set<RADVisualContainer> containers = new HashSet<RADVisualContainer>();
             try {
-                Iterator iter = componentIds.iterator();
-                while (iter.hasNext()) {
-                    String compId = (String)iter.next();
-                    LayoutComponent layoutComp = layoutModel.getLayoutComponent(compId);
-                    boolean resizing = (getResizabilityButtons()[dimension]).isSelected();
-                    if (layoutDesigner.isComponentResizing(layoutComp, dimension) != resizing) {
-                        layoutDesigner.setComponentResizing(layoutComp, dimension, resizing);
-                        RADVisualComponent comp = (RADVisualComponent)formModel.getMetaComponent(compId);
-                        containers.add(comp.getParentContainer());
-                    }
+              for (Object componentId : componentIds)
+              {
+                String compId = (String) componentId;
+                LayoutComponent layoutComp = layoutModel.getLayoutComponent(compId);
+                boolean resizing = (getResizabilityButtons()[dimension]).isSelected();
+                if (layoutDesigner.isComponentResizing(layoutComp, dimension) != resizing)
+                {
+                  layoutDesigner.setComponentResizing(layoutComp, dimension, resizing);
+                  RADVisualComponent comp = (RADVisualComponent) formModel.getMetaComponent(compId);
+                  containers.add(comp.getParentContainer());
                 }
+              }
                 autoUndo = false;
             } finally {
-                Iterator<RADVisualContainer> iter = containers.iterator();
-                while (iter.hasNext()) {
-                    formModel.fireContainerLayoutChanged(iter.next(), null, null, null);
-                }
+              for (RADVisualContainer container : containers)
+              {
+                formModel.fireContainerLayoutChanged(container, null, null, null);
+              }
                 if (!layoutUndoMark.equals(layoutModel.getChangeMark())) {
                     formModel.addUndoableEdit(ue);
                 }

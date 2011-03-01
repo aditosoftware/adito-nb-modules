@@ -184,8 +184,7 @@ public class FormDataObject extends MultiDataObject {
      */
     @Override
     protected Node createNodeDelegate() {
-        FormDataNode node = new FormDataNode(this);
-        return node;
+      return new FormDataNode(this);
     }
 
     //--------------------------------------------------------------------

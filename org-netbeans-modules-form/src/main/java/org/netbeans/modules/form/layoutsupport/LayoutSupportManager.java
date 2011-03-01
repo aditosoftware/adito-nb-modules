@@ -148,9 +148,9 @@ public final class LayoutSupportManager implements LayoutSupportContext {
                     if (delegate == null)
                         if (layoutOrigin.getType() == LayoutManager.class
                             && layoutOrigin.getCreationParameters().length == 0
-                            && layoutOrigin.getParentExpression() == null
+                            && layoutOrigin.getParentExpression() == null/*
                             && "null".equals(layoutOrigin.getJavaCodeString( // NOI18N
-                                                                  null, null)))
+                                                                  null, null))*/)
                         {
                             delegate = new NullLayoutSupport();
                         }
@@ -259,7 +259,7 @@ public final class LayoutSupportManager implements LayoutSupportContext {
     public boolean isSpecialLayout() {
         // Every standard layout manager has its own layout delegate.
         // Hence, the DefaultLayoutSupport is used by special layout managers only.
-        return layoutDelegate instanceof DefaultLayoutSupport;
+        return !(layoutDelegate instanceof DefaultLayoutSupport);
     }
 
     // copy layout delegate from another container
@@ -304,12 +304,7 @@ public final class LayoutSupportManager implements LayoutSupportContext {
         }
     }
 
-    public void clearPrimaryContainer() {
-        layoutDelegate.clearContainer(getPrimaryContainer(),
-                                      getPrimaryContainerDelegate());
-    }
-
-    public RADVisualContainer getMetaContainer() {
+  public RADVisualContainer getMetaContainer() {
         return metaContainer;
     }
 
@@ -493,13 +488,7 @@ public final class LayoutSupportManager implements LayoutSupportContext {
         return layoutDelegate.getComponentCode(index);
     }
 
-    public CodeGroup getComponentCode(RADVisualComponent metacomp) {
-        int index = metaContainer.getIndexOf(metacomp);
-        return index >= 0 && index < layoutDelegate.getComponentCount() ?
-               layoutDelegate.getComponentCode(index) : null;
-    }
-
-    public int getComponentCount() {
+  public int getComponentCount() {
         return layoutDelegate.getComponentCount();
     }
 
@@ -608,17 +597,7 @@ public final class LayoutSupportManager implements LayoutSupportContext {
                                       getPrimaryContainerDelegate());
     }
 
-    public boolean isLayoutChanged() {
-        Container defaultContainer = (Container)
-                BeanSupport.getDefaultInstance(metaContainer.getBeanClass());
-        Container defaultContDelegate =
-                metaContainer.getContainerDelegate(defaultContainer);
-
-        return layoutDelegate.isLayoutChanged(defaultContainer,
-                                              defaultContDelegate);
-    }
-
-    // managing constraints
+  // managing constraints
     public LayoutConstraints getConstraints(int index) {
         return layoutDelegate.getConstraints(index);
     }
@@ -674,7 +653,7 @@ public final class LayoutSupportManager implements LayoutSupportContext {
                                                 Container containerDelegate,
                                                 Component component)
     {
-        return layoutDelegate.removeComponentFromContainer(
+        return !layoutDelegate.removeComponentFromContainer(
                             container, containerDelegate, component);
     }
 

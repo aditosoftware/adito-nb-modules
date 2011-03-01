@@ -110,7 +110,7 @@ public class RADProperty extends FormProperty {
         if (readMethod == null) {
             throw new IllegalAccessException("Not a readable property: "+desc.getName()); // NOI18N
         }
-        return readMethod.invoke(component.getBeanInstance(), new Object[0]);
+        return readMethod.invoke(component.getBeanInstance());
     }
 
     @Override
@@ -138,7 +138,7 @@ public class RADProperty extends FormProperty {
         try {
             // invoke the setter method
             writeMethod.invoke(component.getBeanInstance(),
-                               new Object[] { value });
+                               value);
         }
         catch (InvocationTargetException ex) {
             // annotate exception

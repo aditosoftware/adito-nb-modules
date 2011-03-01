@@ -329,26 +329,8 @@ public class FormEditor {
         attachSettingsListener();
         attachPaletteListener();
     }
-    
-    /** Public method for saving form data to file. Does not save the
-     * source code (document), does not report errors and does not throw
-     * any exceptions.
-     * @return whether there was not any fatal error during saving (true means
-     *         everything was ok); returns true even if nothing was saved
-     *         because form was not loaded or read-only, etc.
-     */
-    public boolean saveForm() {
-        try {
-            saveFormData();
-            return true;
-        }
-        catch (PersistenceException ex) {
-            logPersistenceError(ex, 0);
-            return false;
-        }
-    }
-    
-    void saveFormData() throws PersistenceException {
+
+  void saveFormData() throws PersistenceException {
         if (formLoaded && !formDataObject.formFileReadOnly() && !formModel.isReadOnly()) {
             formModel.fireFormToBeSaved();
 
@@ -618,7 +600,7 @@ public class FormEditor {
         Object libName = fob.getAttribute("requiredLibrary"); // NOI18N
         if (libName != null) {
             Object className = fob.getAttribute("requiredClass"); // NOI18N
-            if ((className == null) || !ClassPathUtils.isOnClassPath(fob, className.toString())) {
+            if ((className == null) || ClassPathUtils.isOnClassPath(fob, className.toString())) {
                 try {
                     Library lib = LibraryManager.getDefault().getLibrary((String)libName);
                     ClassPathUtils.updateProject(fob, new ClassSource(
@@ -1209,22 +1191,7 @@ public class FormEditor {
             floatingWindows.remove(window);
     }
 
-    public void registerDefaultComponentAction(Action action) {
-        if (defaultActions == null) {
-            createDefaultComponentActionsList();
-        } else {
-            defaultActions.remove(action);
-        }
-        defaultActions.add(0, action);
-    }
-
-    public void unregisterDefaultComponentAction(Action action) {
-        if (defaultActions != null) {
-            defaultActions.remove(action);
-        }
-    }
-
-    private void createDefaultComponentActionsList() {
+  private void createDefaultComponentActionsList() {
         defaultActions = new LinkedList<Action>();
         defaultActions.add(SystemAction.get(EditContainerAction.class));
         defaultActions.add(SystemAction.get(EditFormAction.class));
@@ -1248,7 +1215,7 @@ public class FormEditor {
         FormEditor formEditor = getFormEditor(formModel);
         if (formEditor != null
 //                && formModel.getSettings().getLayoutCodeTarget() != JavaCodeGenerator.LAYOUT_CODE_JDK6 // TODO: stripped
-                && !ClassPathUtils.isOnClassPath(formEditor.getFormDataObject().getFormFile(), org.jdesktop.layout.GroupLayout.class.getName())) {
+                && ClassPathUtils.isOnClassPath(formEditor.getFormDataObject().getFormFile(), org.jdesktop.layout.GroupLayout.class.getName())) {
             try {
                 Library lib = LibraryManager.getDefault().getLibrary("swing-layout"); // NOI18N
                 if (lib == null) {

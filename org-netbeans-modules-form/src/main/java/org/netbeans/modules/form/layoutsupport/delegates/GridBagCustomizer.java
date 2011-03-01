@@ -91,13 +91,9 @@ final public class GridBagCustomizer extends JPanel implements Customizer
 
     private FormModel formModel;
     private FormModelListener formListener;
-    private RADVisualContainer radContainer;
-    private RADVisualComponent[] radComponents;
-    private GBComponentProxy[] gbcProxies;
+  private GBComponentProxy[] gbcProxies;
 
-    // Customizer components
-    private JSplitPane splitPane;
-    private JPanel designPanel;
+  private JPanel designPanel;
 
     private GridBagControlCenter controlCenter;
     private GBContainerProxy containerProxy;
@@ -123,11 +119,11 @@ final public class GridBagCustomizer extends JPanel implements Customizer
 
 //        initComponents();
 
-        radContainer = ((LayoutSupportManager)
-                            layoutSupport.getLayoutSupportHack())
-                        .getMetaContainer(); // ugly hack
+      RADVisualContainer radContainer = ((LayoutSupportManager)
+          layoutSupport.getLayoutSupportHack())
+          .getMetaContainer();
         formModel = radContainer.getFormModel();
-        radComponents = radContainer.getSubComponents();
+      RADVisualComponent[] radComponents = radContainer.getSubComponents();
 
         gbcProxies = new GBComponentProxy[radComponents.length];
         for (int i = 0; i < radComponents.length; i++) {
@@ -229,8 +225,8 @@ final public class GridBagCustomizer extends JPanel implements Customizer
         designLayeredPane.setBackground(bgColor);
 
         designScrollPane.setViewportView(designLayeredPane);
-        
-        splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
+
+      JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
         splitPane.setLeftComponent(panel);
         splitPane.setRightComponent(designScrollPane);
         splitPane.setUI(new javax.swing.plaf.basic.BasicSplitPaneUI());
@@ -245,95 +241,94 @@ final public class GridBagCustomizer extends JPanel implements Customizer
 
     void setAnchor(int anchor) {
         java.util.List<GBComponentProxy> selected = containerProxy.getSelectedProxies();
-        Iterator<GBComponentProxy> it = selected.iterator();
-        while (it.hasNext())
-//            setProperty((GBComponentProxy)it.next(), DesignGridBagLayout.PROP_ANCHOR, new Integer(anchor));
-            setProperty(it.next(), "anchor", new Integer(anchor)); // NOI18N
+      for (GBComponentProxy aSelected : selected) setProperty(aSelected, "anchor", anchor); // NOI18N
     }
 
     void setFill(int fill) {
         java.util.List<GBComponentProxy> selected = containerProxy.getSelectedProxies();
-        Iterator<GBComponentProxy> it = selected.iterator();
-        while (it.hasNext())
-//            setProperty((GBComponentProxy)it.next(), DesignGridBagLayout.PROP_FILL, new Integer(fill));
-            setProperty(it.next(), "fill", new Integer(fill)); // NOI18N
-    };
+      for (GBComponentProxy aSelected : selected) setProperty(aSelected, "fill", fill); // NOI18N
+    }
 
 
-
-    void modifyIPad(int action, int what) {
+  void modifyIPad(int action, int what) {
         java.util.List<GBComponentProxy> selected = containerProxy.getSelectedProxies();
-        Iterator<GBComponentProxy> it = selected.iterator();
-        while (it.hasNext()) {
-            GBComponentProxy p = it.next();
-            int value =  what == HORIZONTAL ? p.getRealConstraints().ipadx : p.getRealConstraints().ipady;
-            value += action;
-            if (value < 0)
-                continue;
-            setProperty(p,
+    for (GBComponentProxy aSelected : selected)
+    {
+      GBComponentProxy p = aSelected;
+      int value = what == HORIZONTAL ? p.getRealConstraints().ipadx : p.getRealConstraints().ipady;
+      value += action;
+      if (value < 0)
+        continue;
+      setProperty(p,
 //                        what == HORIZONTAL ? DesignGridBagLayout.PROP_IPADX : DesignGridBagLayout.PROP_IPADY ,
-                        what == HORIZONTAL ? "ipadx" : "ipady" , // NOI18N
-                        new Integer(value));
-        }
+                  what == HORIZONTAL ? "ipadx" : "ipady", // NOI18N
+                  value);
+    }
     }
 
     void modifyInsets(int action, int what) {
         java.util.List<GBComponentProxy> selected = containerProxy.getSelectedProxies();
-        Iterator<GBComponentProxy> it = selected.iterator();
-        while (it.hasNext()) {
-            GBComponentProxy p = it.next();
-            Insets old_insets = p.getRealConstraints().insets;
-            Insets new_insets =(Insets)old_insets.clone();
+      for (GBComponentProxy aSelected : selected)
+      {
+        GBComponentProxy p = aSelected;
+        Insets old_insets = p.getRealConstraints().insets;
+        Insets new_insets = (Insets) old_insets.clone();
 
-            if ((what & TOP) != 0) {
-                new_insets.top += action;
-                if (new_insets.top < 0)
-                    new_insets.top = 0;
-            }
-            if ((what & BOTTOM) != 0) {
-                new_insets.bottom += action;
-                if (new_insets.bottom < 0)
-                    new_insets.bottom = 0;
-            }
-            if ((what & LEFT) != 0) {
-                new_insets.left += action;
-                if (new_insets.left < 0)
-                    new_insets.left = 0;
-            }
-            if ((what & RIGHT) != 0) {
-                new_insets.right += action;
-                if (new_insets.right < 0)
-                    new_insets.right = 0;
-            }
+        if ((what & TOP) != 0)
+        {
+          new_insets.top += action;
+          if (new_insets.top < 0)
+            new_insets.top = 0;
+        }
+        if ((what & BOTTOM) != 0)
+        {
+          new_insets.bottom += action;
+          if (new_insets.bottom < 0)
+            new_insets.bottom = 0;
+        }
+        if ((what & LEFT) != 0)
+        {
+          new_insets.left += action;
+          if (new_insets.left < 0)
+            new_insets.left = 0;
+        }
+        if ((what & RIGHT) != 0)
+        {
+          new_insets.right += action;
+          if (new_insets.right < 0)
+            new_insets.right = 0;
+        }
 
 //            setProperty(p, DesignGridBagLayout.PROP_INSETS,  new_insets);
-            setProperty(p, "insets",  new_insets); // NOI18N
-        }
+        setProperty(p, "insets", new_insets); // NOI18N
+      }
     }
 
 
     void modifyGridSize(int action, int what) {
         java.util.List<GBComponentProxy> selected = containerProxy.getSelectedProxies();
-        Iterator<GBComponentProxy> it = selected.iterator();
 
-        while (it.hasNext()) {
-            GBComponentProxy p = it.next();
-            int value =  what == HORIZONTAL ? p.getRealConstraints().gridwidth : p.getRealConstraints().gridheight;
+      for (GBComponentProxy aSelected : selected)
+      {
+        GBComponentProxy p = aSelected;
+        int value = what == HORIZONTAL ? p.getRealConstraints().gridwidth : p.getRealConstraints().gridheight;
 
-            if (action == 0)
-                value = value == 0 ? 1 : 0;
-            else {
-                value += action;
-                if (value < 1) {
-                    value = 1;
-                }
-            }
-
-            setProperty(p,
-//                        what == HORIZONTAL ? DesignGridBagLayout.PROP_GRIDWIDTH : DesignGridBagLayout.PROP_GRIDHEIGHT ,
-                        what == HORIZONTAL ? "gridwidth" : "gridheight" , // NOI18N
-                        new Integer(value));
+        if (action == 0)
+          value = value == 0 ? 1 : 0;
+        else
+        {
+          value += action;
+          if (value < 1)
+          {
+            value = 1;
+          }
         }
+
+        setProperty(p,
+//                        what == HORIZONTAL ? DesignGridBagLayout.PROP_GRIDWIDTH : DesignGridBagLayout.PROP_GRIDHEIGHT ,
+                    what == HORIZONTAL ? "gridwidth" : "gridheight", // NOI18N
+                    value);
+      }
     }
 
     private void setProperty(GBComponentProxy p, String name, Object value) {
@@ -835,8 +830,8 @@ final public class GridBagCustomizer extends JPanel implements Customizer
                 if (!dragLabel.getLastIndex().equals(dragLabel.getOriginalIndex())) {
 //                    setProperty(this, DesignGridBagLayout.PROP_GRIDX, new Integer(dragLabel.getLastIndex().x));
 //                    setProperty(this, DesignGridBagLayout.PROP_GRIDY, new Integer(dragLabel.getLastIndex().y));
-                    setProperty(this, "gridx", new Integer(dragLabel.getLastIndex().x)); // NOI18N
-                    setProperty(this, "gridy", new Integer(dragLabel.getLastIndex().y)); // NOI18N
+                    setProperty(this, "gridx", dragLabel.getLastIndex().x); // NOI18N
+                    setProperty(this, "gridy", dragLabel.getLastIndex().y); // NOI18N
                 }
 
                 designLayeredPane.remove(dragLabel);
@@ -1266,19 +1261,17 @@ final public class GridBagCustomizer extends JPanel implements Customizer
                     p.setSelected(false);
                 }
                 else {
-                    Iterator<GBComponentProxy> it = selected.iterator();
-                    while (it.hasNext()) {
-                        it.next().setSelected(false);
-                    }
+                  for (GBComponentProxy aSelected : selected)
+                  {
+                    aSelected.setSelected(false);
+                  }
                     p.setSelected(true);
                 }
 
             }
             else {
                 if (!shift) {
-                    Iterator<GBComponentProxy> it = selected.iterator();
-                    while (it.hasNext())
-                        it.next().setSelected(false);
+                  for (GBComponentProxy aSelected : selected) aSelected.setSelected(false);
                 }
                 p.setSelected(true);
             }
