@@ -1,6 +1,8 @@
 package org.netbeans.modules.form;
 
 import de.adito.aditoweb.filesystem.common.AfsUrlUtil;
+import de.adito.aditoweb.filesystem.datamodelfs.access.DataAccessHelper;
+import de.adito.aditoweb.filesystem.datamodelfs.access.mechanics.field.IFieldAccess;
 import de.adito.aditoweb.filesystem.datamodelfs.access.model.*;
 import org.netbeans.modules.form.adito.*;
 import org.netbeans.modules.form.codestructure.*;
@@ -11,7 +13,7 @@ import org.openide.ErrorManager;
 import org.openide.filesystems.*;
 
 import javax.swing.*;
-import java.lang.reflect.Method;
+import java.lang.reflect.*;
 import java.util.*;
 
 /**
@@ -42,7 +44,6 @@ public class AditoPersistenceManager extends PersistenceManager
   private static final int LAYOUT_FROM_CODE = -2;
   private static final int LAYOUT_NATURAL = -3;
 
-  private static Method setLayoutMethod;
 
   @Override
   public boolean canLoadForm(FormDataObject formObject) throws PersistenceException
@@ -98,32 +99,14 @@ public class AditoPersistenceManager extends PersistenceManager
 
     // if the loaded component is a visual component in a visual contianer,
     // then load NB 3.1 layout constraints for it
-//    if (pComponent instanceof RADVisualComponent && pParentComponent instanceof RADVisualContainer)
-//    {
-//      CodeExpression compExp = pComponent.getCodeExpression();
-//      LayoutSupportManager layoutSupport = ((RADVisualContainer) pParentComponent).getLayoutSupport();
-//
-//      if (pModelComp.getFileObject("x") != null && pModelComp.getFileObject("y") != null)
-//      {
-//
-//      }
-//
-//      boolean constraintsLoaded = false;
-//
-//      if (constrNodes != null && constrNodes.length > 0)
-//      {
-//        // NB 3.1 used to save all constraints ever set. We must
-//        // go through all of them, but only those of current layout
-//        // will be loaded.
-//        for (int i = 0; !constraintsLoaded && i < constrNodes.length; i++)
-//          constraintsLoaded = loadConstraints(constrNodes[i],
-//                                              compExp,
-//                                              layoutSupport);
-//      }
-//
-//      if (!constraintsLoaded)
-//        setupDefaultComponentCode(compExp, layoutSupport);
-//    }
+    if (pComponent instanceof RADVisualComponent && pParentComponent instanceof RADVisualContainer)
+    {
+      CodeExpression compExp = pComponent.getCodeExpression();
+      LayoutSupportManager layoutSupport = ((RADVisualContainer) pParentComponent).getLayoutSupport();
+
+      if (pModelComp.getFileObject("x") != null && pModelComp.getFileObject("y") != null)
+        _loadConstraints(pModelComp, compExp, layoutSupport);
+    }
 
     ComponentContainer container = // is this component a container?
         pComponent instanceof ComponentContainer ?
@@ -201,8 +184,7 @@ public class AditoPersistenceManager extends PersistenceManager
         // initialize layout support from restored code
         try
         {
-//          layoutSupport.setLayoutDelegate(new NullLayoutSupport(), false); // TODO: muss anders sein - nur zum Test
-          layoutInitialized = layoutSupport.prepareLayoutDelegate(false, true);
+          layoutInitialized = layoutSupport.prepareLayoutDelegate(true, true);
         }
         catch (Exception ex)
         {
@@ -533,7 +515,7 @@ public class AditoPersistenceManager extends PersistenceManager
           CodeStructure.EMPTY_PARAMS);
       CodeStructure.createStatement(
           layoutSupport.getContainerDelegateCodeExpression(),
-          getSetLayoutMethod(),
+          _getSetLayoutMethod(),
           new CodeExpression[]{layoutExp});
     }
     catch (NoSuchMethodException e)
@@ -543,22 +525,485 @@ public class AditoPersistenceManager extends PersistenceManager
     return LAYOUT_ABSOLUTE;
   }
 
-  private static Method getSetLayoutMethod()
+  private boolean _loadConstraints(FileObject pModelComp, CodeExpression pCompExp, LayoutSupportManager pLayoutSupport)
   {
-    if (setLayoutMethod == null)
-    {
-      try
+//        int convIndex = -1;
+//        String layout31ConstraintName = node != null ?
+//                   getAttribute(node, ATTR_CONSTRAINT_VALUE) : null;
+//        if (layout31ConstraintName != null)
+//            for (int i=0; i < layout31ConstraintsNames.length; i++)
+//                if (layout31ConstraintName.equals(layout31ConstraintsNames[i])) {
+//                    convIndex = i;
+//                    break;
+//                }
+//
+//        // skip constraints saved by NB 3.1 which are not for the current layout
+//        if (convIndex < 0
+//                || (layoutConvIndex >= 0 && convIndex != layoutConvIndex))
+//            return false;
+//
+//        org.w3c.dom.Node constrNode = null;
+//        org.w3c.dom.NamedNodeMap constrAttr = null;
+//
+//        if (/*convIndex >= 0 &&*/reasonable31Constraints[convIndex]) {
+//            org.w3c.dom.NodeList children = node.getChildNodes();
+//            if (children != null)
+//                for (int i=0, n=children.getLength(); i < n; i++) {
+//                    org.w3c.dom.Node cNode = children.item(i);
+//                    if (cNode.getNodeType() == org.w3c.dom.Node.ELEMENT_NODE) {
+//                        constrNode = cNode;
+//                        constrAttr = cNode.getAttributes();
+//                        break;
+//                    }
+//                }
+//        }
+//
+//        if (constrNode == null)
+//            return false;
+
+    try
+    { // obligatory try/catch block for finding methods and constructors
+
+      CodeStructure codeStructure = pLayoutSupport.getCodeStructure();
+      CodeExpression contCodeExp = pLayoutSupport.getContainerCodeExpression();
+      CodeExpression contDelCodeExp = pLayoutSupport.getContainerDelegateCodeExpression();
+
+//      if (convIndex == LAYOUT_BORDER)
+//      {
+//        if (!"BorderConstraints".equals(constrNode.getNodeName())) // NOI18N
+//          return false; // should not happen
+//
+//        node = constrAttr.getNamedItem("direction"); // NOI18N
+//        if (node != null)
+//        {
+//          String strValue = node.getNodeValue();
+//          // create add method statement
+//          CodeStructure.createStatement(
+//              contDelCodeExp,
+//              _getAddWithConstrMethod(),
+//              new CodeExpression[]{pCompExp,
+//                                   codeStructure.createExpression(
+//                                       String.class,
+//                                       strValue
+//                                   )});
+//        }
+//      }
+//
+//      else if (convIndex == LAYOUT_GRIDBAG)
+//      {
+//        if (!"GridBagConstraints".equals(constrNode.getNodeName())) // NOI18N
+//          return false; // should not happen
+//
+//        // create GridBagConstraints constructor expression
+//        if (gridBagConstrConstructor == null)
+//          gridBagConstrConstructor =
+//              java.awt.GridBagConstraints.class.getConstructor(
+//                  new Class[0]);
+//
+//        CodeExpression constrExp = codeStructure.createExpression(
+//            gridBagConstrConstructor, CodeStructure.EMPTY_PARAMS);
+//
+//        // create statements for GridBagConstraints fields
+//        String[] gbcAttrs = new String[]{
+//            "gridX", "gridY", "gridWidth", "gridHeight", // NOI18N
+//            "fill", "ipadX", "ipadY", // NOI18N
+//            "anchor", "weightX", "weightY"}; // NOI18N
+//        String[] gbcFields = new String[]{
+//            "gridx", "gridy", "gridwidth", "gridheight", // NOI18N
+//            "fill", "ipadx", "ipady", // NOI18N
+//            "anchor", "weightx", "weighty"}; // NOI18N
+//
+//        for (int i = 0; i < gbcAttrs.length; i++)
+//        {
+//          node = constrAttr.getNamedItem(gbcAttrs[i]);
+//          if (node != null)
+//          {
+//            Class valueType;
+//            Object value;
+//            String strValue = node.getNodeValue();
+//            if (i < 8)
+//            { // treat as int
+//              valueType = Integer.TYPE;
+//              value = Integer.valueOf(strValue);
+//            }
+//            else
+//            { // treat as double
+//              valueType = Double.TYPE;
+//              value = Double.valueOf(strValue);
+//            }
+//
+//            CodeStructure.createStatement(
+//                constrExp,
+//                java.awt.GridBagConstraints.class.getField(gbcFields[i]),
+//                codeStructure.createExpression(valueType, value));
+//          }
+//        }
+//
+//        // Insets
+//        CodeExpression[] insetsParams = new CodeExpression[4];
+//        String[] insetsAttrs = new String[]{
+//            "insetsTop", "insetsLeft", "insetsBottom", "insetsRight"}; // NOI18N
+//
+//        for (int i = 0; i < insetsAttrs.length; i++)
+//        {
+//          node = constrAttr.getNamedItem(insetsAttrs[i]);
+//          String strValue = node != null ? node.getNodeValue() : "0"; // NOI18N
+//          insetsParams[i] = codeStructure.createExpression(
+//              Integer.TYPE,
+//              Integer.valueOf(strValue)
+//          );
+//        }
+//
+//        if (insetsConstructor == null)
+//          insetsConstructor = java.awt.Insets.class.getConstructor(
+//              new Class[]{Integer.TYPE, Integer.TYPE,
+//                          Integer.TYPE, Integer.TYPE});
+//
+//        CodeStructure.createStatement(
+//            constrExp,
+//            java.awt.GridBagConstraints.class.getField("insets"), // NOI18N
+//            codeStructure.createExpression(insetsConstructor,
+//                                           insetsParams));
+//
+//        // create add method statement
+//        CodeStructure.createStatement(
+//            contDelCodeExp,
+//            _getAddWithConstrMethod(),
+//            new CodeExpression[]{pCompExp, constrExp});
+//      }
+//
+//      else if (convIndex == LAYOUT_JTAB)
+//      {
+//        if (!"JTabbedPaneConstraints".equals(constrNode.getNodeName())) // NOI18N
+//          return false; // should not happen
+//
+//        Object tabName = null;
+//        PropertyEditor tabNamePropEd = null;
+//        Object toolTip = null;
+//        PropertyEditor toolTipPropEd = null;
+//        Object icon = null;
+//        PropertyEditor iconPropEd = null;
+//
+//        org.w3c.dom.Node[] propNodes = findSubNodes(constrNode, XML_PROPERTY);
+//        if (propNodes != null)
+//          for (org.w3c.dom.Node propNode : propNodes)
+//          {
+//            Object editorOrValue = getPropertyEditorOrValue(propNode);
+//            if (editorOrValue == NO_VALUE)
+//              continue;
+//
+//            PropertyEditor prEd = null;
+//            Object value = null;
+//            if (editorOrValue instanceof PropertyEditor)
+//              prEd = (PropertyEditor) editorOrValue;
+//            else
+//              value = editorOrValue;
+//
+//            String name = getAttribute(propNode, ATTR_PROPERTY_NAME);
+//            if ("tabTitle".equals(name))
+//            { // NOI18N
+//              tabName = value;
+//              tabNamePropEd = prEd;
+//            }
+//            else if ("tabToolTip".equals(name))
+//            { // NOI18N
+//              toolTip = value;
+//              toolTipPropEd = prEd;
+//            }
+//            else if ("tabIcon".equals(name))
+//            { // NOI18N
+//              icon = value;
+//              iconPropEd = prEd;
+//            }
+//          }
+//
+//        if (tabName == null
+//            && (node = constrAttr.getNamedItem("tabName")) != null) // NOI18N
+//          tabName = node.getNodeValue();
+//        if (toolTip == null
+//            && (node = constrAttr.getNamedItem("toolTip")) != null) // NOI18N
+//          toolTip = node.getNodeValue();
+//
+//        if (toolTip != null || toolTipPropEd != null)
+//        {
+//          if (addTabMethod1 == null)
+//            addTabMethod1 = javax.swing.JTabbedPane.class.getMethod(
+//                "addTab", // NOI18N
+//                new Class[]{String.class,
+//                            javax.swing.Icon.class,
+//                            java.awt.Component.class,
+//                            String.class});
+//          CodeStructure.createStatement(
+//              contCodeExp,
+//              addTabMethod1,
+//              new CodeExpression[]{
+//                  createExpressionForProperty(
+//                      codeStructure, String.class, tabName, tabNamePropEd),
+//                  createExpressionForProperty(
+//                      codeStructure, javax.swing.Icon.class, icon, iconPropEd),
+//                  pCompExp,
+//                  createExpressionForProperty(
+//                      codeStructure, String.class, toolTip, toolTipPropEd)});
+//        }
+//        else if (icon != null || iconPropEd != null)
+//        {
+//          if (addTabMethod2 == null)
+//            addTabMethod2 = javax.swing.JTabbedPane.class.getMethod(
+//                "addTab", // NOI18N
+//                new Class[]{String.class,
+//                            javax.swing.Icon.class,
+//                            java.awt.Component.class});
+//          CodeStructure.createStatement(
+//              contCodeExp,
+//              addTabMethod2,
+//              new CodeExpression[]{
+//                  createExpressionForProperty(
+//                      codeStructure, String.class, tabName, tabNamePropEd),
+//                  createExpressionForProperty(
+//                      codeStructure, javax.swing.Icon.class, icon, iconPropEd),
+//                  pCompExp});
+//        }
+//        else
+//        {
+//          if (addTabMethod3 == null)
+//            addTabMethod3 = javax.swing.JTabbedPane.class.getMethod(
+//                "addTab", // NOI18N
+//                new Class[]{String.class,
+//                            java.awt.Component.class});
+//          CodeStructure.createStatement(
+//              contCodeExp,
+//              addTabMethod3,
+//              new CodeExpression[]{
+//                  createExpressionForProperty(
+//                      codeStructure, String.class, tabName, tabNamePropEd),
+//                  pCompExp});
+//        }
+//      }
+//
+//      else if (convIndex == LAYOUT_JSPLIT)
+//      {
+//        if (!"JSplitPaneConstraints".equals(constrNode.getNodeName())) // NOI18N
+//          return false;
+//
+//        node = constrAttr.getNamedItem("position"); // NOI18N
+//        if (node != null)
+//        {
+//          String position = node.getNodeValue();
+//          Method addMethod;
+//
+//          if ("top".equals(position))
+//          { // NOI18N
+//            if (setTopComponentMethod == null)
+//              setTopComponentMethod =
+//                  javax.swing.JSplitPane.class.getMethod(
+//                      "setTopComponent", // NOI18N
+//                      new Class[]{java.awt.Component.class});
+//            addMethod = setTopComponentMethod;
+//          }
+//          else if ("bottom".equals(position))
+//          { // NOI18N
+//            if (setBottomComponentMethod == null)
+//              setBottomComponentMethod =
+//                  javax.swing.JSplitPane.class.getMethod(
+//                      "setBottomComponent", // NOI18N
+//                      new Class[]{java.awt.Component.class});
+//            addMethod = setBottomComponentMethod;
+//          }
+//          else if ("left".equals(position))
+//          { // NOI18N
+//            if (setLeftComponentMethod == null)
+//              setLeftComponentMethod =
+//                  javax.swing.JSplitPane.class.getMethod(
+//                      "setLeftComponent", // NOI18N
+//                      new Class[]{java.awt.Component.class});
+//            addMethod = setLeftComponentMethod;
+//          }
+//          else if ("right".equals(position))
+//          { // NOI18N
+//            if (setRightComponentMethod == null)
+//              setRightComponentMethod =
+//                  javax.swing.JSplitPane.class.getMethod(
+//                      "setRightComponent", // NOI18N
+//                      new Class[]{java.awt.Component.class});
+//            addMethod = setRightComponentMethod;
+//          }
+//          else return false;
+//
+//          CodeStructure.createStatement(contCodeExp,
+//                                        addMethod,
+//                                        new CodeExpression[]{pCompExp});
+//        }
+//      }
+//
+//      else if (convIndex == LAYOUT_CARD)
+//      {
+//        if (!"CardConstraints".equals(constrNode.getNodeName())) // NOI18N
+//          return false;
+//
+//        node = constrAttr.getNamedItem("cardName"); // NOI18N
+//        if (node != null)
+//        {
+//          String strValue = node.getNodeValue();
+//          // create add method statement
+//          CodeStructure.createStatement(
+//              contDelCodeExp,
+//              _getAddWithConstrMethod(),
+//              new CodeExpression[]{pCompExp,
+//                                   codeStructure.createExpression(
+//                                       String.class,
+//                                       strValue
+//                                   )});
+//        }
+//      }
+//
+//      else if (convIndex == LAYOUT_JLAYER)
+//      {
+//        if (!"JLayeredPaneConstraints".equals(constrNode.getNodeName())) // NOI18N
+//          return false;
+//
+//        CodeExpression[] boundsParams = new CodeExpression[4];
+//        String[] boundsAttrs = new String[]{"x", "y", "width", "height"}; // NOI18N
+//
+//        for (int i = 0; i < boundsAttrs.length; i++)
+//        {
+//          node = constrAttr.getNamedItem(boundsAttrs[i]);
+//          String strValue = node != null ?
+//              node.getNodeValue() :
+//              (i < 2 ? "0" : "-1"); // NOI18N
+//          boundsParams[i] = codeStructure.createExpression(
+//              Integer.TYPE,
+//              Integer.valueOf(strValue)
+//          );
+//        }
+//
+//        if (setBoundsMethod == null)
+//          setBoundsMethod = java.awt.Component.class.getMethod(
+//              "setBounds", // NOI18N
+//              new Class[]{Integer.TYPE, Integer.TYPE,
+//                          Integer.TYPE, Integer.TYPE});
+//        CodeStructure.createStatement(
+//            pCompExp, setBoundsMethod, boundsParams);
+//
+//        node = constrAttr.getNamedItem("layer"); // NOI18N
+//        if (node != null)
+//        {
+//          String strValue = node.getNodeValue();
+//          // create add method statement
+//          CodeStructure.createStatement(
+//              contDelCodeExp,
+//              _getAddWithConstrMethod(),
+//              new CodeExpression[]{pCompExp,
+//                                   codeStructure.createExpression(
+//                                       Integer.TYPE,
+//                                       Integer.valueOf(strValue)
+//                                   )});
+//        }
+//      }
+//
+//      else
+
+      CodeExpression[] boundsParams = new CodeExpression[4];
+      String[] boundsAttrs = new String[]{"x", "y", "width", "height"}; // NOI18N
+
+      for (int i = 0; i < boundsAttrs.length; i++)
       {
-        setLayoutMethod = java.awt.Container.class.getMethod(
-            "setLayout", // NOI18N
-            new Class[]{java.awt.LayoutManager.class});
+        FileObject attrFile = pModelComp.getFileObject(boundsAttrs[i]);
+        if (attrFile != null)
+        {
+          IFieldAccess<Integer> fieldAccess = DataAccessHelper.accessField(attrFile);
+          Integer value = fieldAccess != null ? fieldAccess.getValue() : (i < 2 ? 0 : -1);
+          boundsParams[i] = codeStructure.createExpression(Integer.TYPE, value);
+        }
       }
-      catch (NoSuchMethodException ex)
-      { // should not happen
-        ex.printStackTrace();
+
+      Iterator it = CodeStructure.getDefinedStatementsIterator(contDelCodeExp);
+      CodeStatement[] statements = CodeStructure.filterStatements(it, _getSetLayoutMethod());
+      boolean nullLayout;
+      if (statements.length > 0)
+      {
+        CodeExpression layoutExp = statements[0].getStatementParameters()[0];
+        nullLayout = layoutExp.getOrigin().getType() != org.netbeans.lib.awtextra.AbsoluteLayout.class;
       }
+      else
+        nullLayout = true;
+
+//      if (nullLayout)
+//      {
+//        if (setBoundsMethod == null)
+//          setBoundsMethod = java.awt.Component.class.getMethod(
+//              "setBounds", // NOI18N
+//              new Class[]{Integer.TYPE, Integer.TYPE,
+//                          Integer.TYPE, Integer.TYPE});
+//        CodeStructure.createStatement(
+//            pCompExp, setBoundsMethod, boundsParams);
+//
+//        // create add method statement
+//        CodeStructure.createStatement(contDelCodeExp,
+//                                      getSimpleAddMethod(),
+//                                      new CodeExpression[]{pCompExp});
+//      }
+//      else
+      {
+        Constructor absoluteConstraintsConstructor = org.netbeans.lib.awtextra.AbsoluteConstraints.class.getConstructor(
+            new Class[]{Integer.TYPE, Integer.TYPE,
+                        Integer.TYPE, Integer.TYPE});
+
+        // create add method statement
+        CodeStructure.createStatement(
+            contDelCodeExp,
+            _getAddWithConstrMethod(),
+            new CodeExpression[]{pCompExp,
+                                 codeStructure.createExpression(
+                                     absoluteConstraintsConstructor,
+                                     boundsParams)});
+      }
+
+      return true;
+
+    }
+    catch (NoSuchMethodException ex)
+    { // should not happen
+      ex.printStackTrace();
+    }
+//    catch (NoSuchFieldException ex)
+//    { // should not happen
+//      ex.printStackTrace();
+//    }
+    return false;
+  }
+
+
+  private static Method _getSetLayoutMethod()
+  {
+    Method setLayoutMethod = null;
+    try
+    {
+      setLayoutMethod = java.awt.Container.class.getMethod(
+          "setLayout", // NOI18N
+          new Class[]{java.awt.LayoutManager.class});
+    }
+    catch (NoSuchMethodException ex)
+    { // should not happen
+      ex.printStackTrace();
     }
     return setLayoutMethod;
+  }
+
+  private static Method _getAddWithConstrMethod()
+  {
+    Method addWithConstrMethod = null;
+    try
+    {
+      addWithConstrMethod = java.awt.Container.class.getMethod(
+          "add", // NOI18N
+          new Class[]{java.awt.Component.class,
+                      Object.class});
+    }
+    catch (NoSuchMethodException ex)
+    { // should not happen
+      ex.printStackTrace();
+    }
+    return addWithConstrMethod;
   }
 
 
