@@ -726,16 +726,6 @@ public abstract class FormProperty extends Node.Property {
         }
         return null;
     }
-
-  /**
-     * Gets the write method setting the property. 
-     * Used by {@link JavaCodeGenerator}.
-     *
-     * @return write method.
-     */
-    protected Method getWriteMethod() {
-	return null;
-    }
     
     /** Gets the code to be generated before the property setter code
      * (on separate line).

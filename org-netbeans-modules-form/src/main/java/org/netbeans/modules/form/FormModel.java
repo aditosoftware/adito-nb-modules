@@ -209,11 +209,7 @@ public class FormModel
         return currentVersionLevel;
     }
 
-    void revertVersionLevel() {
-        currentVersionLevel = lastVersionLevel;
-    }
-
-    void setMaxVersionLevel(FormVersion version) {
+  void setMaxVersionLevel(FormVersion version) {
         maxVersionLevel = version;
     }
 
@@ -436,7 +432,7 @@ public class FormModel
             }
 
             try {
-                layoutSupport.acceptNewComponents(compArray, constrArray, index);
+                layoutSupport.acceptNewComponents(compArray);
             }
             catch (RuntimeException ex) {
                 // LayoutSupportDelegate may not accept the component

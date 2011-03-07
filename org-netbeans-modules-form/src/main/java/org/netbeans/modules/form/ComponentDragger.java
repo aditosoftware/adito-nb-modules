@@ -256,7 +256,7 @@ class ComponentDragger
                 int jj = indices.get(j);
 
                 try {
-                    layoutSupport.acceptNewComponents(newComps, newConstr, jj);
+                    layoutSupport.acceptNewComponents(newComps);
                 }
                 catch (RuntimeException ex) {
                     // layout support does not accept components

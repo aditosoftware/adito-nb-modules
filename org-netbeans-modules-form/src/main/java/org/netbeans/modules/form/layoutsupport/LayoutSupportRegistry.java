@@ -118,34 +118,7 @@ public class LayoutSupportRegistry {
         return className != null ? loadClass(className) : null;
     }
 
-    public String getSupportNameForContainer(String containerClassName) {
-        String className = getContainersMap().get(containerClassName);
-        if (className == null) {
-            Class containerClass = loadClass(containerClassName);
-            if (containerClass != null)
-                className = findSuperClass(getContainersMap(), containerClass);
-//            if (className == null && needPaletteRescan) {
-//                className = scanPalette(containerClassName);
-//                if (className == null) // try container superclass again
-//                    className = findSuperClass(getContainersMap(),
-//                                               containerClass);
-//            }
-        }
-
-        return className;
-    }
-
-    public Class getSupportClassForLayout(Class layoutClass) {
-        String className = getLayoutsMap().get(layoutClass.getName());
-        if (className == null && needPaletteRescan)
-            className = scanPalette(layoutClass.getName());
-        if (className == null)
-            className = findSuperClass(getLayoutsMap(), layoutClass);
-
-        return className != null ? loadClass(className) : null;
-    }
-
-    public String getSupportNameForLayout(String layoutClassName) {
+  public String getSupportNameForLayout(String layoutClassName) {
         String className = getLayoutsMap().get(layoutClassName);
         if (className == null && needPaletteRescan)
             className = scanPalette(layoutClassName);
@@ -161,52 +134,10 @@ public class LayoutSupportRegistry {
     // ------------
     // registering methods
 
-    public static void registerSupportForContainer(
-                           Class containerClass,
-                           Class layoutDelegateClass)
-    {
-        getContainersMap().put(containerClass.getName(),
-                               layoutDelegateClass.getName());
-    }
-
-    public static void registerSupportForContainer(
-                           String containerClassName,
-                           String layoutDelegateClassName)
-    {
-        getContainersMap().put(containerClassName, layoutDelegateClassName);
-    }
-
-    public static void registertSupportForLayout(
-                           Class layoutClass,
-                           Class layoutDelegateClass)
-    {
-        getLayoutsMap().put(layoutClass.getName(),
-                            layoutDelegateClass.getName());
-    }
-
-    public static void registerSupportForLayout(
-                           String layoutClassName,
-                           String layoutDelegateClassName)
-    {
-        getLayoutsMap().put(layoutClassName, layoutDelegateClassName);
-    }
-
-    // ------------
+  // ------------
     // creation methods
 
-    public LayoutSupportDelegate createSupportForContainer(Class containerClass)
-        throws ClassNotFoundException,
-               InstantiationException,
-               IllegalAccessException
-    {
-        Class delegateClass = getSupportClassForContainer(containerClass);
-        if (delegateClass == null)
-            return null;
-
-        return (LayoutSupportDelegate) delegateClass.newInstance();
-    }
-
-    public LayoutSupportDelegate createSupportForLayout(Class layoutClass)
+  public LayoutSupportDelegate createSupportForLayout(Class layoutClass)
         throws ClassNotFoundException,
                InstantiationException,
                IllegalAccessException

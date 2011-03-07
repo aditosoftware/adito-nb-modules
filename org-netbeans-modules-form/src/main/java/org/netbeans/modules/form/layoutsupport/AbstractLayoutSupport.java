@@ -379,17 +379,9 @@ public abstract class AbstractLayoutSupport implements LayoutSupportDelegate
      * (e.g. IllegalArgumentException). It's up to the delagate to display an
      * error or warning message, the exception is not reported outside.
      * The default implementation accepts any components - simply does nothing.
-     * @param compExpressions array of CodeExpression objects representing the
-     *        components to be accepted
-     * @param constraints array of layout constraints of the components, may
-     *        contain nulls
-     * @param index position at which the components are to be added (inserted);
-     *        -1 means that the components will be added at the end
      */
     @Override
-    public void acceptNewComponents(CodeExpression[] compExpressions,
-                                    LayoutConstraints[] constraints,
-                                    int index)
+    public void acceptNewComponents()
     {
     }
 

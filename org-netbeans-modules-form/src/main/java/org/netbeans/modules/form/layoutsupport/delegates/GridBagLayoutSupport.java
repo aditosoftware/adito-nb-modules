@@ -924,11 +924,6 @@ public class GridBagLayoutSupport extends AbstractLayoutSupport
                 return delegate.getFormModel();
             }
 
-            @Override
-            public Object getOwner() {
-                return delegate.getOwner();
-            }
-
         }
 
         /** Property implementation for GridBagLayoutConstraints. Each property

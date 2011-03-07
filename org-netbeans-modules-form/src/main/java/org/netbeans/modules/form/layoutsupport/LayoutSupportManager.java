@@ -381,7 +381,7 @@ public final class LayoutSupportManager implements LayoutSupportContext {
                                           designComps);
 
         if (componentCount > 0) {
-            layoutDelegate.acceptNewComponents(compExps, newConstraints, 0);
+            layoutDelegate.acceptNewComponents();
             layoutDelegate.addComponents(compExps, newConstraints, 0);
 
             for (int i=0; i < componentCount; i++)
@@ -493,15 +493,13 @@ public final class LayoutSupportManager implements LayoutSupportContext {
     }
 
     // data validation
-    public void acceptNewComponents(RADVisualComponent[] components,
-                                    LayoutConstraints[] constraints,
-                                    int index)
+    public void acceptNewComponents(RADVisualComponent[] components)
     {
         CodeExpression[] compExps = new CodeExpression[components.length];
         for (int i=0; i < components.length; i++)
             compExps[i] = components[i].getCodeExpression();
 
-        layoutDelegate.acceptNewComponents(compExps, constraints, index);
+        layoutDelegate.acceptNewComponents();
     }
 
     // components adding/removing

@@ -81,14 +81,7 @@ public interface FormPropertyContext {
      */
     public FormModel getFormModel();
 
-    /**
-     * Returns the property owner (the object it is a property of). Typically
-     * a RADComponent or another property (nested properties).
-     * @return Object the owner object of the property
-     */
-    public Object getOwner();
-
-    /**
+  /**
      * Implementation of FormPropertyContext for component properties.
      */
     public static class Component implements FormPropertyContext {
@@ -114,41 +107,9 @@ public interface FormPropertyContext {
             return component.getFormModel();
         }
 
-        @Override
-        public RADComponent getOwner() {
-            return component;
-        }
-    }
+  }
 
-    /**
-     * Implementation of FormPropertyContext for a property that is a
-     * "sub-property" of another property (e.g. border support properties).
-     */
-    public static class SubProperty implements FormPropertyContext {
-        private FormProperty parentProperty;
-
-      @Override
-        public boolean useMultipleEditors() {
-            return parentProperty.getPropertyContext().useMultipleEditors();
-        }
-
-        @Override
-        public void initPropertyEditor(PropertyEditor prEd, FormProperty property) {
-            parentProperty.getPropertyContext().initPropertyEditor(prEd, property);
-        }
-
-        @Override
-        public FormModel getFormModel() {
-            return parentProperty.getPropertyContext().getFormModel();
-        }
-
-        @Override
-        public Object getOwner() {
-            return parentProperty;
-        }
-    }
-
-    /** "Empty" implementation of FormPropertyContext. */
+  /** "Empty" implementation of FormPropertyContext. */
     public static class EmptyImpl implements FormPropertyContext {
 
         @Override
@@ -168,12 +129,7 @@ public interface FormPropertyContext {
             return null;
         }
 
-        @Override
-        public Object getOwner() {
-            return null;
-        }
-
-        // ------
+    // ------
 
         public static EmptyImpl getInstance() {
             if (theInstance == null)

@@ -57,10 +57,6 @@ import java.net.URL;
 import java.text.MessageFormat;
 //import java.util.logging.Level;
 //import java.util.logging.Logger;
-import javax.lang.model.element.Element;
-import javax.lang.model.element.ElementKind;
-import javax.lang.model.element.ExecutableElement;
-import javax.lang.model.element.TypeElement;
 //import org.netbeans.api.java.source.CancellableTask;
 //import org.netbeans.api.java.source.CompilationController;
 //import org.netbeans.api.java.source.JavaSource;
@@ -115,29 +111,6 @@ public final class BeanInstaller {
         final FileObject fo = dobj.getPrimaryFile();
         JavaClassHandler handler = new JavaClassHandler()
         {
-          @Override
-          public void handle(String className, String problem)
-          {
-            if (problem == null)
-            {
-              ClassSource classSource =
-                  ClassPathUtils.getProjectClassSource(fo, className);
-              if (classSource == null)
-              {
-                // Issue 47947
-                unableToInstall.add(className);
-              }
-              else
-              {
-                beans.add(classSource);
-              }
-            }
-            else
-            {
-              noBeans.add(className);
-              noBeans.add(problem);
-            }
-          }
         };
         scanFileObject(fo.getParent(), fo, handler);
       }
@@ -335,15 +308,6 @@ public final class BeanInstaller {
      * be JavaBeans. */
     private static void scanFolderForBeans(FileObject folder, final Map<String,ItemInfo> beans, final ClassSource.Entry root) {
         JavaClassHandler handler = new JavaClassHandler() {
-            @Override
-            public void handle(String className, String problem) {
-                if (problem == null) {
-                    ItemInfo ii = new ItemInfo();
-                    ii.classname = className;
-                    ii.entry = root;
-                    beans.put(ii.classname, ii);
-                }
-            }
         };
                     
         FileObject[] files = folder.getChildren();
@@ -384,12 +348,6 @@ public final class BeanInstaller {
     public static String findJavaBeanName(FileObject file) {
         final String[] fqn = new String[1];
         scanFileObject(null, file, new JavaClassHandler() {
-            @Override
-            public void handle(String className, String problem) {
-                if (problem == null) {
-                    fqn[0] = className;
-                }
-            }
         });
         return fqn[0];
     }
@@ -454,31 +412,31 @@ public final class BeanInstaller {
 //
 //    }
         
-    public static String isDeclaredAsJavaBean(TypeElement clazz) {
-        if (ElementKind.CLASS != clazz.getKind()) {
-            return PaletteUtils.getBundleString("MSG_notAClass"); // NOI18N
-        }
-
-        Set<javax.lang.model.element.Modifier> mods = clazz.getModifiers();
-        if (mods.contains(javax.lang.model.element.Modifier.ABSTRACT)) {
-            return PaletteUtils.getBundleString("MSG_abstractClass"); // NOI18N
-        }
-
-        if (!mods.contains(javax.lang.model.element.Modifier.PUBLIC)) {
-            return PaletteUtils.getBundleString("MSG_notPublic"); // NOI18N
-        }
-        
-        for (Element member : clazz.getEnclosedElements()) {
-            mods = member.getModifiers();
-            if (ElementKind.CONSTRUCTOR == member.getKind() &&
-                    mods.contains(javax.lang.model.element.Modifier.PUBLIC) &&
-                    ((ExecutableElement) member).getParameters().isEmpty()) {
-                return null;
-            }
-        }
-        
-        return PaletteUtils.getBundleString("MSG_noPublicConstructor"); // NOI18N
-    }
+//    public static String isDeclaredAsJavaBean(TypeElement clazz) {
+//        if (ElementKind.CLASS != clazz.getKind()) {
+//            return PaletteUtils.getBundleString("MSG_notAClass"); // NOI18N
+//        }
+//
+//        Set<javax.lang.model.element.Modifier> mods = clazz.getModifiers();
+//        if (mods.contains(javax.lang.model.element.Modifier.ABSTRACT)) {
+//            return PaletteUtils.getBundleString("MSG_abstractClass"); // NOI18N
+//        }
+//
+//        if (!mods.contains(javax.lang.model.element.Modifier.PUBLIC)) {
+//            return PaletteUtils.getBundleString("MSG_notPublic"); // NOI18N
+//        }
+//
+//        for (Element member : clazz.getEnclosedElements()) {
+//            mods = member.getModifiers();
+//            if (ElementKind.CONSTRUCTOR == member.getKind() &&
+//                    mods.contains(javax.lang.model.element.Modifier.PUBLIC) &&
+//                    ((ExecutableElement) member).getParameters().isEmpty()) {
+//                return null;
+//            }
+//        }
+//
+//        return PaletteUtils.getBundleString("MSG_noPublicConstructor"); // NOI18N
+//    }
 
   // TODO: stripped
 //    public static String isDeclaredAsJavaBean(ClassFile clazz) {
@@ -535,8 +493,7 @@ public final class BeanInstaller {
         }
     }
     
-    private interface JavaClassHandler {        
-        public void handle(String className, String problem);        
+    private interface JavaClassHandler {
     }
     
 }

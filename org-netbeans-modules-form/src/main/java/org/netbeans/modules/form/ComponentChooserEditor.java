@@ -61,8 +61,7 @@ public class ComponentChooserEditor implements PropertyEditor,
                                                XMLPropertyEditor,
                                                NamedPropertyEditor
 {
-    public static final int ALL_COMPONENTS = 0;
-    public static final int NONVISUAL_COMPONENTS = 3;
+  public static final int NONVISUAL_COMPONENTS = 3;
 //    public static final int VISUAL_COMPONENTS = 1;
 //    public static final int OTHER_COMPONENTS = 2;
 
@@ -235,27 +234,15 @@ public class ComponentChooserEditor implements PropertyEditor,
     public void updateFormVersionLevel() {
     }
 
-    public FormModel getFormModel() {
-        return formModel;
-    }
-
-    public void setBeanTypes(Class[] types) {
+  public void setBeanTypes(Class[] types) {
         beanTypes = types;
     }
 
-    public Class[] getBeanTypes() {
-        return beanTypes;
-    }
-
-    public void setComponentCategory(int cat) {
+  public void setComponentCategory(int cat) {
         componentCategory = cat;
     }
 
-    public int getComponentCategory() {
-        return componentCategory;
-    }
-
-    // ----------------
+  // ----------------
     // XMLPropertyEditor implementation
 
     private static final String XML_COMPONENT = "ComponentRef"; // NOI18N

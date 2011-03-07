@@ -48,18 +48,6 @@ import java.awt.*;
 import javax.swing.*;
 import javax.swing.border.Border;
 import java.util.*;
-//import java.io.IOException;
-//import java.util.logging.Level;
-//import java.util.logging.Logger;
-
-//import com.sun.source.tree.ClassTree;
-//import com.sun.source.tree.Tree;
-//import com.sun.source.util.TreePath;
-//import javax.lang.model.element.Element;
-//import javax.lang.model.element.TypeElement;
-//import org.netbeans.api.java.source.CancellableTask;
-//import org.netbeans.api.java.source.CompilationController;
-//import org.netbeans.api.java.source.JavaSource;
 
 import org.netbeans.modules.form.adito.DMHelper;
 import org.openide.*;
@@ -71,7 +59,6 @@ import org.openide.filesystems.FileObject;
 import org.netbeans.modules.form.layoutsupport.*;
 import org.netbeans.modules.form.layoutdesign.*;
 import org.netbeans.modules.form.layoutdesign.support.SwingLayoutBuilder;
-//import org.netbeans.modules.form.editors2.BorderDesignSupport;
 import org.netbeans.modules.form.project.ClassSource;
 import org.netbeans.modules.form.project.ClassPathUtils;
 

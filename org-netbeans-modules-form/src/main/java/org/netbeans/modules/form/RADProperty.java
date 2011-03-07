@@ -333,11 +333,6 @@ public class RADProperty extends FormProperty {
 //        return enumerationValues != null ?
 //                 new EnumEditor(enumerationValues) : null;
 //    }
-
-    @Override
-    protected Method getWriteMethod() {	    
-	return desc.getWriteMethod();	    
-    }
     
     @Override
     public void setPreCode(String value) {
