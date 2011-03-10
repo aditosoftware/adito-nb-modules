@@ -1,9 +1,9 @@
 package org.netbeans.modules.form;
 
 import de.adito.aditoweb.filesystem.common.AfsUrlUtil;
-import de.adito.aditoweb.filesystem.datamodelfs.access.DataAccessHelper;
 import de.adito.aditoweb.filesystem.datamodelfs.access.mechanics.field.IFieldAccess;
 import de.adito.aditoweb.filesystem.datamodelfs.access.model.*;
+import de.adito.aditoweb.swingcommon.layout.aditolayout.*;
 import org.netbeans.modules.form.adito.*;
 import org.netbeans.modules.form.codestructure.*;
 import org.netbeans.modules.form.layoutdesign.*;
@@ -13,8 +13,10 @@ import org.openide.ErrorManager;
 import org.openide.filesystems.*;
 
 import javax.swing.*;
-import java.lang.reflect.*;
+import java.awt.*;
+import java.lang.reflect.Method;
 import java.util.*;
+import java.util.List;
 
 /**
  * @author J. Boesl, 19.01.11
@@ -128,7 +130,7 @@ public class AditoPersistenceManager extends PersistenceManager
     if (visualContainer != null)
     {
       visualContainer.setOldLayoutSupport(true);
-      convIndex = _loadLayout(visualContainer.getLayoutSupport());
+      convIndex = _loadLayout(visualContainer.getLayoutSupport(), pModelComp);
     }
 
 
@@ -258,6 +260,9 @@ public class AditoPersistenceManager extends PersistenceManager
       {
         newLayout = Boolean.FALSE;
       */
+
+      if (layoutEx != null)
+        layoutEx.printStackTrace(); // TODO: error-handling
     }
     else
     { // non-visual container (e.g. AWT menu)
@@ -506,19 +511,19 @@ public class AditoPersistenceManager extends PersistenceManager
   }
 
 
-  private int _loadLayout(LayoutSupportManager layoutSupport)
+  private int _loadLayout(LayoutSupportManager layoutSupport, FileObject pModelFo)
   {
     try
     {
       CodeExpression layoutExp = layoutSupport.getCodeStructure().createExpression(
-          org.netbeans.lib.awtextra.AbsoluteLayout.class.getConstructor(new Class[0]),
+          AditoAnchorLayout.class.getConstructor(new Class[0]),
           CodeStructure.EMPTY_PARAMS);
       CodeStructure.createStatement(
           layoutSupport.getContainerDelegateCodeExpression(),
           _getSetLayoutMethod(),
           new CodeExpression[]{layoutExp});
     }
-    catch (NoSuchMethodException e)
+    catch (Exception e)
     {
       e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
     }
@@ -902,30 +907,12 @@ public class AditoPersistenceManager extends PersistenceManager
 //
 //      else
 
-      CodeExpression[] boundsParams = new CodeExpression[4];
-      String[] boundsAttrs = new String[]{"x", "y", "width", "height"}; // NOI18N
-
-      for (int i = 0; i < boundsAttrs.length; i++)
-      {
-        FileObject attrFile = pModelComp.getFileObject(boundsAttrs[i]);
-        if (attrFile != null)
-        {
-          IFieldAccess<Integer> fieldAccess = DataAccessHelper.accessField(attrFile);
-          Integer value = fieldAccess != null ? fieldAccess.getValue() : (i < 2 ? 0 : -1);
-          boundsParams[i] = codeStructure.createExpression(Integer.TYPE, value);
-        }
-      }
-
-      Iterator it = CodeStructure.getDefinedStatementsIterator(contDelCodeExp);
-      CodeStatement[] statements = CodeStructure.filterStatements(it, _getSetLayoutMethod());
-      boolean nullLayout;
-      if (statements.length > 0)
-      {
-        CodeExpression layoutExp = statements[0].getStatementParameters()[0];
-        nullLayout = layoutExp.getOrigin().getType() != org.netbeans.lib.awtextra.AbsoluteLayout.class;
-      }
-      else
-        nullLayout = true;
+      IFieldAccess<Integer> fieldX = FieldConst.X.accessField(pModelComp);
+      IFieldAccess<Integer> fieldY = FieldConst.Y.accessField(pModelComp);
+      IFieldAccess<Integer> fieldWidth = FieldConst.WIDTH.accessField(pModelComp);
+      IFieldAccess<Integer> fieldHeight = FieldConst.HEIGHT.accessField(pModelComp);
+      AALComponentConstraints alComponentConstraints = new AALComponentConstraints(new Rectangle(
+          fieldX.getValue(), fieldY.getValue(), fieldWidth.getValue(), fieldHeight.getValue()));
 
 //      if (nullLayout)
 //      {
@@ -943,25 +930,19 @@ public class AditoPersistenceManager extends PersistenceManager
 //                                      new CodeExpression[]{pCompExp});
 //      }
 //      else
-      {
-        Constructor absoluteConstraintsConstructor = org.netbeans.lib.awtextra.AbsoluteConstraints.class.getConstructor(
-            new Class[]{Integer.TYPE, Integer.TYPE,
-                        Integer.TYPE, Integer.TYPE});
 
-        // create add method statement
-        CodeStructure.createStatement(
-            contDelCodeExp,
-            _getAddWithConstrMethod(),
-            new CodeExpression[]{pCompExp,
-                                 codeStructure.createExpression(
-                                     absoluteConstraintsConstructor,
-                                     boundsParams)});
-      }
+      // create add method statement
+      CodeStructure.createStatement(
+          contDelCodeExp,
+          _getAddWithConstrMethod(),
+          new CodeExpression[]{
+              pCompExp, codeStructure.createExpression(AALComponentConstraints.class, alComponentConstraints)
+          });
 
       return true;
 
     }
-    catch (NoSuchMethodException ex)
+    catch (Exception ex)
     { // should not happen
       ex.printStackTrace();
     }

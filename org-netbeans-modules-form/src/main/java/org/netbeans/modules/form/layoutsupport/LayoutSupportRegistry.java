@@ -360,6 +360,9 @@ public class LayoutSupportRegistry {
             layoutToLayoutDelegate.put(
                 "org.netbeans.lib.awtextra.AbsoluteLayout", // NOI18N
                 "org.netbeans.modules.form.layoutsupport.delegates.AbsoluteLayoutSupport"); // NOI18N
+          layoutToLayoutDelegate.put(
+                "de.adito.aditoweb.swingcommon.layout.aditolayout.AditoAnchorLayout", // NOI18N
+                "org.netbeans.modules.form.adito.layout.AditoLayoutSupport"); // NOI18N
         }
         return layoutToLayoutDelegate;
     }

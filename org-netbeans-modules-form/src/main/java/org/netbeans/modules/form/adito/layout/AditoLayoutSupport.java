@@ -1,13 +1,14 @@
 package org.netbeans.modules.form.adito.layout;
 
 import de.adito.aditoweb.swingcommon.layout.aditolayout.*;
-import org.netbeans.modules.form.FormProperty;
+import org.netbeans.modules.form.FormLoaderSettings;
 import org.netbeans.modules.form.codestructure.*;
 import org.netbeans.modules.form.layoutsupport.*;
-import org.openide.nodes.Node;
+import org.openide.util.ImageUtilities;
 
 import java.awt.*;
-import java.lang.reflect.InvocationTargetException;
+import java.beans.BeanInfo;
+import java.lang.reflect.Constructor;
 
 /**
  * @author J. Boesl, 07.03.11
@@ -15,9 +16,10 @@ import java.lang.reflect.InvocationTargetException;
 public class AditoLayoutSupport extends AbstractLayoutSupport
 {
 
-  public AditoLayoutSupport()
-  {
-  }
+  private static Constructor constrConstructor;
+
+  private static FormLoaderSettings formSettings = FormLoaderSettings.getInstance();
+
 
   @Override
   public Class getSupportedClass()
@@ -25,14 +27,30 @@ public class AditoLayoutSupport extends AbstractLayoutSupport
     return AditoAnchorLayout.class;
   }
 
+  @Override
+  public Image getIcon(int type)
+  {
+    switch (type)
+    {
+      case BeanInfo.ICON_COLOR_16x16:
+      case BeanInfo.ICON_MONO_16x16:
+        String iconURL = "org/netbeans/modules/form/layoutsupport/resources/AbsoluteLayout.gif";
+        return ImageUtilities.loadImage(iconURL);
+      default:
+        String icon32URL = "org/netbeans/modules/form/layoutsupport/resources/AbsoluteLayout32.gif";
+        return ImageUtilities.loadImage(icon32URL);
+    }
+  }
 
   @Override
-  public LayoutConstraints getNewConstraints(Container container,
-                                             Container containerDelegate,
-                                             Component component,
-                                             int index,
-                                             Point posInCont,
-                                             Point posInComp)
+  public boolean shouldHaveNode()
+  {
+    return false;
+  }
+
+  @Override
+  public LayoutConstraints getNewConstraints(Container container, Container containerDelegate, Component component,
+                                             int index, Point posInCont, Point posInComp)
   {
     int x = posInCont.x;
     int y = posInCont.y;
@@ -60,23 +78,131 @@ public class AditoLayoutSupport extends AbstractLayoutSupport
       Dimension size = component.getSize();
       Dimension prefSize = component.getPreferredSize();
 
-//      w = computeConstraintSize(size.width, currentW, prefSize.width);
-//      h = computeConstraintSize(size.height, currentH, prefSize.height);
+      w = computeConstraintSize(size.width, currentW, prefSize.width);
+      h = computeConstraintSize(size.height, currentH, prefSize.height);
     }
 
-//    if (posInComp != null)
-//    {
-//      x -= posInComp.x;
-//      y -= posInComp.y;
-//    }
-//
-//    if (formSettings.getApplyGridToPosition())
-//    {
-//      x = computeGridSize(x, formSettings.getGridX());
-//      y = computeGridSize(y, formSettings.getGridY());
-//    }
-//
+    if (posInComp != null)
+    {
+      x -= posInComp.x;
+      y -= posInComp.y;
+    }
+
+    if (formSettings.getApplyGridToPosition())
+    {
+      x = computeGridSize(x, formSettings.getGridX());
+      y = computeGridSize(y, formSettings.getGridY());
+    }
+
 //    assistantParams = new Object[]{x, y};
+    return new AditoComponentConstraints(new Rectangle(x, y, w, h));
+  }
+
+  @Override
+  public boolean paintDragFeedback(Container container, Container containerDelegate, Component component,
+                                   LayoutConstraints newConstraints, int newIndex, Graphics g)
+  {
+    Rectangle r = ((AditoComponentConstraints) newConstraints).getConstraintsObject().getBounds();
+    int w = r.width;
+    int h = r.height;
+
+    if (w == -1 || h == -1)
+    {
+      // JInternalFrame.getPreferredSize() behaves suspiciously
+      Dimension pref = component instanceof javax.swing.JInternalFrame ?
+          component.getSize() : component.getPreferredSize();
+      if (w == -1) w = pref.width;
+      if (h == -1) h = pref.height;
+    }
+
+    if (w < 4) w = 4;
+    if (h < 4) h = 4;
+
+    g.drawRect(r.x, r.y, w, h);
+
+    return true;
+  }
+
+  @Override
+  public int getResizableDirections(Container container, Container containerDelegate, Component component, int index)
+  {
+    return RESIZE_UP | RESIZE_DOWN | RESIZE_LEFT | RESIZE_RIGHT;
+  }
+
+  @Override
+  public LayoutConstraints getResizedConstraints(Container container, Container containerDelegate, Component component,
+                                                 int index, Rectangle originalBounds, Insets sizeChanges,
+                                                 Point posInCont)
+  {
+    int x, y, w, h;
+    x = originalBounds.x;
+    y = originalBounds.y;
+    w = originalBounds.width;
+    h = originalBounds.height;
+
+    Dimension prefSize = component.getPreferredSize();
+    int currentW, currentH;
+
+    LayoutConstraints constr = getConstraints(index);
+    if (constr instanceof AALComponentConstraints)
+    {
+      Rectangle r = ((AALComponentConstraints) constr).getBounds();
+      currentW = r.width;
+      currentH = r.height;
+    }
+    else
+    {
+      currentW = computeConstraintSize(w, -1, prefSize.width);
+      currentH = computeConstraintSize(h, -1, prefSize.height);
+    }
+
+    int x2 = x + w;
+    int y2 = y + h;
+
+    if (sizeChanges.left + sizeChanges.right == 0)
+      w = currentW; // no change
+    else
+    { // compute resized width and x coordinate
+      w += sizeChanges.left + sizeChanges.right;
+      w = w <= 0 ? -1 : computeConstraintSize(w, currentW, prefSize.width);
+
+      if (w > 0)
+      {
+        if (formSettings.getApplyGridToSize())
+        {
+          int gridW = computeGridSize(w, formSettings.getGridX());
+          x -= sizeChanges.left +
+              (gridW - w) * sizeChanges.left
+                  / (sizeChanges.left + sizeChanges.right);
+          w = gridW;
+        }
+      }
+      else if (sizeChanges.left != 0)
+        x = x2 - prefSize.width;
+    }
+
+    if (sizeChanges.top + sizeChanges.bottom == 0)
+      h = currentH; // no change
+    else
+    { // compute resized height and y coordinate
+      h += sizeChanges.top + sizeChanges.bottom;
+      h = h <= 0 ? -1 : computeConstraintSize(h, currentH, prefSize.height);
+
+      if (h > 0)
+      {
+        if (formSettings.getApplyGridToSize())
+        {
+          int gridH = computeGridSize(h, formSettings.getGridY());
+          y -= sizeChanges.top +
+              (gridH - h) * sizeChanges.top
+                  / (sizeChanges.top + sizeChanges.bottom);
+          h = gridH;
+        }
+      }
+      else if (sizeChanges.top != 0)
+        y = y2 - prefSize.height;
+    }
+
     return new AditoComponentConstraints(new Rectangle(x, y, w, h));
   }
 
@@ -88,130 +214,64 @@ public class AditoLayoutSupport extends AbstractLayoutSupport
   }
 
   @Override
-  protected CodeExpression createConstraintsCode(CodeGroup constrCode, LayoutConstraints constr, CodeExpression compExp, int index)
+  protected LayoutConstraints readConstraintsCode(CodeExpression constrExp, CodeGroup constrCode,
+                                                  CodeExpression compExp)
   {
-    return super.createConstraintsCode(constrCode, constr, compExp, index);    //To change body of overridden methods use File | Settings | File Templates.
+    AditoComponentConstraints constr = new AditoComponentConstraints();
+
+    CodeExpression[] params = constrExp.getOrigin().getCreationParameters();
+    if (params.length == 4)
+    {
+      // reading is done in AditoComponentConstraints
+      constr.readPropertyExpressions(params, 0);
+    }
+
+    return constr;
   }
 
   @Override
-  protected void createComponentCode(CodeGroup componentCode, CodeExpression compExp, int index)
+  protected CodeExpression createConstraintsCode(CodeGroup constrCode, LayoutConstraints constr, CodeExpression compExp, int index)
   {
-    super.createComponentCode(componentCode, compExp, index);    //To change body of overridden methods use File | Settings | File Templates.
+    if (!(constr instanceof AditoComponentConstraints))
+      return null;
+
+    AditoComponentConstraints adConstr = (AditoComponentConstraints) constr;
+    // code expressions for constructor parameters are created in AditoComponentConstraints
+    CodeExpression[] params = adConstr.createPropertyExpressions(getCodeStructure());
+    return getCodeStructure().createExpression(getConstraintsConstructor(), params);
   }
 
-
-  static class AditoComponentConstraints implements LayoutConstraints
+  private Constructor getConstraintsConstructor()
   {
-    private AALComponentConstraints constraints;
-    private Node.Property[] properties;
-
-    private AditoComponentConstraints()
+    if (constrConstructor == null)
     {
-      this(new Rectangle());
+      try
+      {
+        constrConstructor = AditoComponentConstraints.class.getConstructor(
+            new Class[]{Integer.TYPE, Integer.TYPE,
+                        Integer.TYPE, Integer.TYPE});
+      }
+      catch (NoSuchMethodException ex)
+      { // should not happen
+        ex.printStackTrace();
+      }
     }
+    return constrConstructor;
+  }
 
-    private AditoComponentConstraints(Rectangle pBounds)
-    {
-      this(pBounds, true, false, false, true);
-    }
+  private static int computeConstraintSize(int newSize, int currSize, int prefSize)
+  {
+    return newSize != -1 && (newSize != prefSize
+        || (currSize != -1 && currSize == prefSize)) ?
+        newSize : -1;
+  }
 
-    private AditoComponentConstraints(Rectangle pBounds, boolean pAnchorLeft, boolean pAnchorBottom,
-                                      boolean pAnchorRight, boolean pAnchorTop)
-    {
-      constraints = new AALComponentConstraints(pBounds, pAnchorLeft, pAnchorBottom, pAnchorRight, pAnchorTop, false);
-    }
-
-    private AditoComponentConstraints(Rectangle pBounds, boolean pAnchorLeft, boolean pAnchorBottom,
-                                      boolean pAnchorRight, boolean pAnchorTop, boolean pIsBordered)
-    {
-      constraints = new AALComponentConstraints(pBounds, pAnchorLeft, pAnchorBottom, pAnchorRight, pAnchorTop,
-                                                pIsBordered);
-    }
-
-    @Override
-    public Node.Property[] getProperties()
-    {
-      if (properties != null)
-        properties = _createProperties();
-      return properties;
-    }
-
-    @Override
-    public Object getConstraintsObject()
-    {
-      return constraints;
-    }
-
-    @Override
-    public LayoutConstraints cloneConstraints()
-    {
-      return new AditoComponentConstraints(constraints.getBounds(), constraints.isAnchorLeft(),
-                                           constraints.isAnchorBottom(), constraints.isAnchorRight(),
-                                           constraints.isAnchorTop(), constraints.isBordered());
-    }
-
-    private Node.Property[] _createProperties()
-    {
-      return new Node.Property[]{
-          new FormProperty("x", Integer.class, "x", "the x position")
-          {
-            @Override
-            public Object getTargetValue() throws IllegalAccessException, InvocationTargetException
-            {
-              return constraints.getBounds().x;
-            }
-
-            @Override
-            public void setTargetValue(Object value) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException
-            {
-              constraints.getBounds().x = (Integer) value;
-            }
-          },
-          new FormProperty("y", Integer.class, "y", "the y position")
-          {
-            @Override
-            public Object getTargetValue() throws IllegalAccessException, InvocationTargetException
-            {
-              return constraints.getBounds().y;
-            }
-
-            @Override
-            public void setTargetValue(Object value) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException
-            {
-              constraints.getBounds().y = (Integer) value;
-            }
-          },
-          new FormProperty("width", Integer.class, "width", "the width")
-          {
-            @Override
-            public Object getTargetValue() throws IllegalAccessException, InvocationTargetException
-            {
-              return constraints.getBounds().width;
-            }
-
-            @Override
-            public void setTargetValue(Object value) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException
-            {
-              constraints.getBounds().width = (Integer) value;
-            }
-          },
-          new FormProperty("height", Integer.class, "height", "the height")
-          {
-            @Override
-            public Object getTargetValue() throws IllegalAccessException, InvocationTargetException
-            {
-              return constraints.getBounds().height;
-            }
-
-            @Override
-            public void setTargetValue(Object value) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException
-            {
-              constraints.getBounds().height = (Integer) value;
-            }
-          }
-      };
-    }
-
+  private static int computeGridSize(int size, int step)
+  {
+    if (step <= 0)
+      return size;
+    int mod = size % step;
+    return mod >= step / 2 ? size + step - mod : size - mod;
   }
 
 }
