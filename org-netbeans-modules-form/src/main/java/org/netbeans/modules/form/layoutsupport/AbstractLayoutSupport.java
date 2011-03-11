@@ -90,7 +90,7 @@ import org.netbeans.modules.form.codestructure.*;
 public abstract class AbstractLayoutSupport implements LayoutSupportDelegate
 {
 
-  private static Method simpleAddMethod = null;
+    private static Method simpleAddMethod = null;
     private static Method addWithConstraintsMethod = null;
     private static Method setLayoutMethod = null;
 

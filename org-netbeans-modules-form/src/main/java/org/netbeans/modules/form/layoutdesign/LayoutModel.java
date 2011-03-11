@@ -76,7 +76,7 @@ public class LayoutModel implements LayoutConstants {
     private boolean undoRedoInProgress;
     private int changeMark;
     private int oldestMark;
-  private Map<Integer,LayoutEvent> undoMap = new HashMap<Integer,LayoutEvent>(500);
+    private Map<Integer,LayoutEvent> undoMap = new HashMap<Integer,LayoutEvent>(500);
     private Map<Integer,LayoutEvent> redoMap = new HashMap<Integer,LayoutEvent>(100);
     private LayoutUndoableEdit lastUndoableEdit;
 

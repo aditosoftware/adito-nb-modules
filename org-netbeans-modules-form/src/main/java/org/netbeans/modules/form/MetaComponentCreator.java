@@ -804,7 +804,7 @@ public class MetaComponentCreator {
             boolean knownLayout = false;
             Throwable layoutEx = null;
             try {
-		newMetaCont.setOldLayoutSupport(true);
+		            newMetaCont.setOldLayoutSupport(true);
                 LayoutSupportManager laysup = newMetaCont.getLayoutSupport();
                 knownLayout = laysup.prepareLayoutDelegate(false, false);
 
@@ -948,7 +948,7 @@ public class MetaComponentCreator {
             }
             else if (LayoutSupportDelegate.class.isAssignableFrom(layoutClass)) {
                 // LayoutSupportDelegate -> use it directly
-                layoutDelegate = LayoutSupportRegistry.createSupportInstance(layoutClass);
+              layoutDelegate = (LayoutSupportDelegate) layoutClass.newInstance();
             }
         }
         catch (Exception ex) {

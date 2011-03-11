@@ -70,8 +70,6 @@ public class AditoPersistenceManager extends PersistenceManager
   private void _loadForm(_Info pInfo) throws PersistenceException
   {
     FormModel formModel = pInfo.getFormModel();
-    formModel.setCurrentVersionLevel(FormModel.LATEST_VERSION);
-    formModel.setMaxVersionLevel(FormModel.LATEST_VERSION);
     try
     {
       Class<JPanel> formBaseClass = JPanel.class;

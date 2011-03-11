@@ -217,13 +217,24 @@ public class AditoLayoutSupport extends AbstractLayoutSupport
   protected LayoutConstraints readConstraintsCode(CodeExpression constrExp, CodeGroup constrCode,
                                                   CodeExpression compExp)
   {
-    AditoComponentConstraints constr = new AditoComponentConstraints();
+    AditoComponentConstraints constr = null;
 
-    CodeExpression[] params = constrExp.getOrigin().getCreationParameters();
-    if (params.length == 4)
+    Object constrExpValue = constrExp.getOrigin().getValue();
+
+    if (constrExpValue instanceof AALComponentConstraints)
     {
-      // reading is done in AditoComponentConstraints
-      constr.readPropertyExpressions(params, 0);
+      AALComponentConstraints aalComponentConstraints = (AALComponentConstraints) constrExpValue;
+      constr = new AditoComponentConstraints(aalComponentConstraints.getBounds());
+    }
+    else
+    {
+      CodeExpression[] params = constrExp.getOrigin().getCreationParameters();
+      if (params.length == 4)
+      {
+        constr = new AditoComponentConstraints();
+        // reading is done in AditoComponentConstraints
+        constr.readPropertyExpressions(params, 0);
+      }
     }
 
     return constr;

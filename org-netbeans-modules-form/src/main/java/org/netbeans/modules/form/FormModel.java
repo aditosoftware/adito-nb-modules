@@ -73,19 +73,19 @@ public class FormModel
 
     private boolean readOnly = false;
 
-    public enum FormVersion {
-        BASIC, // form file version up to 1.2
-        NB50, // form file verson 1.3
-        NB60_PRE, // until NB 6.0 beta 1 (incl. 5.5 with 6.0 update), form file version 1.4
-        NB60, // since NB 6.0 beta1, form file version 1.5
-        NB61, // since NB 6.1 milestone 2, form file version 1.6
-        NB65 // since NB 6.5 milestone 1, form file version 1.7
-    }
-    final static FormVersion LATEST_VERSION = FormVersion.NB65;
-
-    private FormVersion currentVersionLevel;
-    private FormVersion lastVersionLevel;
-    private FormVersion maxVersionLevel; // max version to upgrade to without user confirmation
+//    public enum FormVersion {
+//        BASIC, // form file version up to 1.2
+//        NB50, // form file verson 1.3
+//        NB60_PRE, // until NB 6.0 beta 1 (incl. 5.5 with 6.0 update), form file version 1.4
+//        NB60, // since NB 6.0 beta1, form file version 1.5
+//        NB61, // since NB 6.1 milestone 2, form file version 1.6
+//        NB65 // since NB 6.5 milestone 1, form file version 1.7
+//    }
+//    final static FormVersion LATEST_VERSION = FormVersion.NB65;
+//
+//    private FormVersion currentVersionLevel;
+//    private FormVersion lastVersionLevel;
+//    private FormVersion maxVersionLevel; // max version to upgrade to without user confirmation
 
     // the class on which the form is based (which is extended in the java file)
     private Class<?> formBaseClass;
@@ -183,39 +183,39 @@ public class FormModel
         formName = name;
     }
 
-    /**
-     * Requires the form version to be at least 'minVersion'. If the actual
-     * version is lower, it is upgraded to 'upgradeTo'. If the upgrad exceeds
-     * the maximum version level set for this form (roughly corresponding
-     * to the NB version in which the form was created) a confirmation message
-     * is shown to the user later (see FormEditor.checkFormVersionUpgrade).
-     * @param minVersion the minimum version level required
-     * @param upgradeTo version level to upgrade to if the minimum version is not met
-     */
-    public void raiseVersionLevel(FormVersion minVersion, FormVersion upgradeTo) {
-        if (minVersion.ordinal() > currentVersionLevel.ordinal()
-                && (undoRedoRecording || !formLoaded)) {
-            assert upgradeTo.ordinal() >= minVersion.ordinal();
-            setCurrentVersionLevel(upgradeTo);
-        }
-    }
-
-    void setCurrentVersionLevel(FormVersion version) {
-        lastVersionLevel = currentVersionLevel;
-        currentVersionLevel = version;
-    }
-
-    FormVersion getCurrentVersionLevel() {
-        return currentVersionLevel;
-    }
-
-  void setMaxVersionLevel(FormVersion version) {
-        maxVersionLevel = version;
-    }
-
-    FormVersion getMaxVersionLevel() {
-        return maxVersionLevel;
-    }
+//    /**
+//     * Requires the form version to be at least 'minVersion'. If the actual
+//     * version is lower, it is upgraded to 'upgradeTo'. If the upgrad exceeds
+//     * the maximum version level set for this form (roughly corresponding
+//     * to the NB version in which the form was created) a confirmation message
+//     * is shown to the user later (see FormEditor.checkFormVersionUpgrade).
+//     * @param minVersion the minimum version level required
+//     * @param upgradeTo version level to upgrade to if the minimum version is not met
+//     */
+//    public void raiseVersionLevel(FormVersion minVersion, FormVersion upgradeTo) {
+//        if (minVersion.ordinal() > currentVersionLevel.ordinal()
+//                && (undoRedoRecording || !formLoaded)) {
+//            assert upgradeTo.ordinal() >= minVersion.ordinal();
+//            setCurrentVersionLevel(upgradeTo);
+//        }
+//    }
+//
+//    void setCurrentVersionLevel(FormVersion version) {
+//        lastVersionLevel = currentVersionLevel;
+//        currentVersionLevel = version;
+//    }
+//
+//    FormVersion getCurrentVersionLevel() {
+//        return currentVersionLevel;
+//    }
+//
+//  void setMaxVersionLevel(FormVersion version) {
+//        maxVersionLevel = version;
+//    }
+//
+//    FormVersion getMaxVersionLevel() {
+//        return maxVersionLevel;
+//    }
 
     void setReadOnly(boolean readOnly) {
         this.readOnly = readOnly;

@@ -121,7 +121,7 @@ public final class LayoutSupportManager implements LayoutSupportContext {
                                                   metaContainer.getBeanClass());
 
         if (layoutDelegateClass != null) {
-            delegate = LayoutSupportRegistry.createSupportInstance(layoutDelegateClass);
+            delegate = (LayoutSupportDelegate) layoutDelegateClass.newInstance();
             if (!fromCode && !delegate.checkEmptyContainer(getPrimaryContainer())) {
                 RuntimeException ex = new IllegalArgumentException();
                 org.openide.ErrorManager.getDefault().annotate(
@@ -521,7 +521,8 @@ public final class LayoutSupportManager implements LayoutSupportContext {
 
         layoutDelegate.addComponents(compExps, constraints, index);
 
-      for (RADVisualComponent component : components) component.resetConstraintsProperties();
+        for (RADVisualComponent component : components)
+          component.resetConstraintsProperties();
 
         layoutDelegate.addComponentsToContainer(getPrimaryContainer(),
                                                 getPrimaryContainerDelegate(),
@@ -784,7 +785,7 @@ public final class LayoutSupportManager implements LayoutSupportContext {
         return containerDelegateCodeExpression;
     }
     
-    public static CodeExpression containerDelegateCodeExpression(
+    private static CodeExpression containerDelegateCodeExpression(
                                      RADVisualContainer metaContainer,
                                      CodeStructure codeStructure)
     {

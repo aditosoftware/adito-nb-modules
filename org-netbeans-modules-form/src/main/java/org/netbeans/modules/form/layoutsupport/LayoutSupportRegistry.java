@@ -153,14 +153,7 @@ public class LayoutSupportRegistry {
                loadClass(delegateClassName).newInstance();
     }
 
-    public static LayoutSupportDelegate createSupportInstance(
-                                            Class layoutDelegateClass)
-        throws InstantiationException, IllegalAccessException
-    {
-        return (LayoutSupportDelegate) layoutDelegateClass.newInstance();
-    }
-
-    // -----------
+  // -----------
     // private methods
 
     private String findSuperClass(Map map, Class subClass) {

@@ -625,7 +625,7 @@ public class FormEditor {
             && needPostCreationUpdate()) // just created via New wizard
         {   // detect settings, update the form, regenerate code, save
             // make sure no upgrade warning is shown
-            formModel.setMaxVersionLevel(FormModel.LATEST_VERSION);
+//            formModel.setMaxVersionLevel(FormModel.LATEST_VERSION);
             // switch to resources if needed
           // TODO: stripped
 //            FormLAF.executeWithLookAndFeel(formModel, new Runnable() {
