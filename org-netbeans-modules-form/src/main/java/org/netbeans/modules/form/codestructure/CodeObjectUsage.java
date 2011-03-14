@@ -102,9 +102,9 @@ final class CodeObjectUsage {
     // -------
 
     private static class ObjectUse {
-        private UsingCodeObject usingObject;
-        private int type;
-        private Object category;
+        private final UsingCodeObject usingObject;
+        private final int type;
+        private final Object category;
 
         ObjectUse(UsingCodeObject usingObject, int useType, Object useCategory) {
             this.usingObject = usingObject;
@@ -126,10 +126,10 @@ final class CodeObjectUsage {
   // --------
 
     private static class UsageIterator implements Iterator {
-        private int useType;
-        private Object useCategory;
+        private final int useType;
+        private final Object useCategory;
 
-        private Iterator iterator;
+        private final Iterator iterator;
         private Object next;
 
         public UsageIterator(Iterator iterator,

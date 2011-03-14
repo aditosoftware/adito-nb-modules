@@ -50,6 +50,7 @@ import javax.accessibility.*;
 import javax.swing.*;
 import javax.swing.MenuElement;
 
+import de.adito.aditoweb.core.util.debug.Debug;
 import org.openide.nodes.*;
 
 import org.netbeans.modules.form.layoutdesign.*;
@@ -190,6 +191,7 @@ public class RADVisualComponent extends RADComponent {
     public void setLayoutConstraints(Class layoutDelegateClass,
                                      LayoutConstraints constr)
     {
+      Debug.write("setLayoutConstraints", layoutDelegateClass, constr); // DEBUG: remove it!
         if (constr != null) {
             constraints.put(layoutDelegateClass.getName(), constr);
         }
@@ -202,6 +204,7 @@ public class RADVisualComponent extends RADComponent {
      * @return layout constraints for the given layout delegate.
      */
     public LayoutConstraints getLayoutConstraints(Class layoutDelegateClass) {
+      Debug.write("getLayoutConstraints", layoutDelegateClass); // DEBUG: remove it!
         return constraints.get(layoutDelegateClass.getName());
     }
 

@@ -61,13 +61,7 @@ public class FormCodeSupport {
             return new PropertyValueOrigin(property);
     }
 
-    public static CodeExpressionOrigin createOrigin(Class type,
-                                                    PropertyEditor prEd)
-    {
-        return new PropertyEditorOrigin(type, prEd);
-    }
-
-    public static CodeExpressionOrigin createOrigin(RADComponent component) {
+  public static CodeExpressionOrigin createOrigin(RADComponent component) {
         return new RADComponentOrigin(component);
     }
 
@@ -118,7 +112,7 @@ public class FormCodeSupport {
     // --------
 
     static final class PropertyValueOrigin implements CodeExpressionOrigin {
-        private Node.Property property;
+        private final Node.Property property;
 
         public PropertyValueOrigin(Node.Property property) {
             this.property = property;
@@ -156,7 +150,7 @@ public class FormCodeSupport {
     }
 
     static final class FormPropertyValueOrigin implements CodeExpressionOrigin {
-        private FormProperty property;
+        private final FormProperty property;
 
         public FormPropertyValueOrigin(FormProperty property) {
             this.property = property;
@@ -194,43 +188,8 @@ public class FormCodeSupport {
         }
     }
 
-    static final class PropertyEditorOrigin implements CodeExpressionOrigin {
-        private Class type;
-        private PropertyEditor propertyEditor;
-
-        public PropertyEditorOrigin(Class type, PropertyEditor prEd) {
-            this.type = type;
-            this.propertyEditor = prEd;
-        }
-
-        @Override
-        public Class getType() {
-            return type;
-        }
-
-        @Override
-        public CodeExpression getParentExpression() {
-            return null;
-        }
-
-        @Override
-        public Object getValue() {
-            return propertyEditor.getValue();
-        }
-
-        @Override
-        public Object getMetaObject() {
-            return propertyEditor;
-        }
-
-      @Override
-        public CodeExpression[] getCreationParameters() {
-            return CodeStructure.EMPTY_PARAMS;
-        }
-    }
-
-    static final class RADComponentOrigin implements CodeExpressionOrigin {
-        private RADComponent component;
+  static final class RADComponentOrigin implements CodeExpressionOrigin {
+        private final RADComponent component;
 
         public RADComponentOrigin(RADComponent component) {
             this.component = component;

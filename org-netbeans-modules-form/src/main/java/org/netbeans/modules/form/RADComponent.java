@@ -55,6 +55,7 @@ import javax.accessibility.Accessible;
 import javax.accessibility.AccessibleContext;
 import javax.swing.*;
 
+import de.adito.aditoweb.core.util.debug.Debug;
 import org.netbeans.modules.form.RADProperty.FakePropertyDescriptor;
 
 import org.netbeans.modules.form.adito.*;
@@ -95,7 +96,7 @@ public class RADComponent {
     private BeanInfo beanInfo;
     private BeanInfo fakeBeanInfo;
 
-  protected Node.PropertySet[] propertySets;
+    protected Node.PropertySet[] propertySets;
     private Node.Property[] syntheticProperties;
     private RADProperty[] beanProperties1;
     private RADProperty[] beanProperties2;
@@ -496,13 +497,13 @@ public class RADComponent {
 //            throw iae;
 //        }
 
-        try {
-            RADComponentRenameRefactoringSupport.renameComponent(this, name);
-        } finally { // hack for robustness - if refactoring fails for whatever reason
-            if (!getName().equals(name)) {
-                setName(name);
-            }
-        }
+//        try {
+//            RADComponentRenameRefactoringSupport.renameComponent(this, name);
+//        } finally { // hack for robustness - if refactoring fails for whatever reason
+//            if (!getName().equals(name)) {
+//                setName(name);
+//            }
+//        }
     }
 
     private boolean needsVariableRename(String name) {

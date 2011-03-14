@@ -56,9 +56,9 @@ import java.util.Iterator;
 
 abstract class AbstractCodeStatement implements CodeStatement {
 
-    protected CodeExpression parentExpression;
+    CodeExpression parentExpression;
 
-    protected AbstractCodeStatement(CodeExpression parentExpression) {
+    AbstractCodeStatement(CodeExpression parentExpression) {
         this.parentExpression = parentExpression;
     }
 

@@ -54,8 +54,6 @@ public interface CodeVariable {
 
     // variable type constants
 
-    // variable scope type (bits 12, 13)
-    public static final int NO_VARIABLE = 0x0000; // means just name reserved
     public static final int LOCAL = 0x1000;
     public static final int FIELD = 0x2000;
 
@@ -73,21 +71,16 @@ public interface CodeVariable {
     public static final int SCOPE_MASK = 0x3000;
     public static final int ALL_MODIF_MASK = 0x00DF;
     public static final int DECLARATION_MASK = 0x4000;
-    public static final int ALL_MASK = 0xF0DF;
 
-    static final int DEFAULT_TYPE = SCOPE_MASK | ALL_MODIF_MASK; // 0x30DF;
+  static final int DEFAULT_TYPE = SCOPE_MASK | ALL_MODIF_MASK; // 0x30DF;
 
     // ------
 
     public int getType();
 
-    public Class getDeclaredType();
-
     public String getDeclaredTypeParameters();
 
     public String getName();
-
-    public Collection getAttachedExpressions();
 
     public CodeStatement getAssignment(CodeExpression expression);
 }

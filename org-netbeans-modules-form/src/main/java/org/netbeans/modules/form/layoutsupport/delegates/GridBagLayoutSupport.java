@@ -672,7 +672,7 @@ public class GridBagLayoutSupport extends AbstractLayoutSupport
                 CodeStructure.removeStatement(statement);
             }
 
-            setupVariable(isAnyChanged);
+//            setupVariable(isAnyChanged);
         }
 
         /** This method updates the constraints code according to the
@@ -698,7 +698,7 @@ public class GridBagLayoutSupport extends AbstractLayoutSupport
                     isAnyChanged = true;
                 }
 
-            setupVariable(isAnyChanged);
+//            setupVariable(isAnyChanged);
         }
 
         /** This method returns the code statement corresponding to property
@@ -744,60 +744,60 @@ public class GridBagLayoutSupport extends AbstractLayoutSupport
          * there's some statement in which the variable is used). One variable
          * is used for all GridBagConstraints in the form.
          */
-        private void setupVariable(boolean anyChangedProperty) {
-            CodeStructure codeStructure =
-                constraintsExpression.getCodeStructure();
-            CodeVariable var = constraintsExpression.getVariable();
+//        private void setupVariable(boolean anyChangedProperty) {
+//            CodeStructure codeStructure =
+//                constraintsExpression.getCodeStructure();
+//            CodeVariable var = constraintsExpression.getVariable();
+//
+//            if (anyChangedProperty) { // there should be a variable
+//                if (var == null) { // no variable currently used
+//                    var = findVariable(); // find and reuse variable
+//                    if (var == null) { // create a new variable
+//                        var = codeStructure.createVariableForExpression(
+//                                                constraintsExpression,
+//                                                variableType,
+//                                                defaultVariableName);
+//                    }
+////                    else { // attach the constraints expression to the variable
+////                        codeStructure.attachExpressionToVariable(
+////                                          constraintsExpression, var);
+////                    }
+//                }
+//                // add variable assignment code
+//                constraintsCode.addStatement(
+//                                  0, var.getAssignment(constraintsExpression));
+//            }
+//            else { // no variable needed
+//                codeStructure.removeExpressionFromVariable(
+//                                  constraintsExpression);
+//            }
+//        }
 
-            if (anyChangedProperty) { // there should be a variable
-                if (var == null) { // no variable currently used
-                    var = findVariable(); // find and reuse variable
-                    if (var == null) { // create a new variable
-                        var = codeStructure.createVariableForExpression(
-                                                constraintsExpression,
-                                                variableType,
-                                                defaultVariableName);
-                    }
-                    else { // attach the constraints expression to the variable
-                        codeStructure.attachExpressionToVariable(
-                                          constraintsExpression, var);
-                    }
-                }
-                // add variable assignment code
-                constraintsCode.addStatement(
-                                  0, var.getAssignment(constraintsExpression));
-            }
-            else { // no variable needed
-                codeStructure.removeExpressionFromVariable(
-                                  constraintsExpression);
-            }
-        }
-
-        private CodeVariable findVariable() {
-            CodeStructure codeStructure =
-                constraintsExpression.getCodeStructure();
-
-            // first try "gridBagConstraints" name - this succeeds in most
-            // cases (unless the name is used elsewhere or not created yet)
-            CodeVariable var = codeStructure.getVariable(defaultVariableName);
-            if (var != null
-                    && (var.getType() & variableMask) == variableType
-                    && GridBagConstraints.class.equals(var.getDeclaredType()))
-                return var;
-
-            // try to find variable of corresponding type (time expensive)
-            Iterator it = codeStructure.getVariablesIterator(
-                                            variableType,
-                                            variableMask,
-                                            GridBagConstraints.class);
-            while (it.hasNext()) {
-                var = (CodeVariable) it.next();
-                if (var.getName().startsWith(defaultVariableName))
-                    return var;
-            }
-
-            return null;
-        }
+//        private CodeVariable findVariable() {
+//            CodeStructure codeStructure =
+//                constraintsExpression.getCodeStructure();
+//
+//            // first try "gridBagConstraints" name - this succeeds in most
+//            // cases (unless the name is used elsewhere or not created yet)
+//            CodeVariable var = codeStructure.getVariable(defaultVariableName);
+//            if (var != null
+//                    && (var.getType() & variableMask) == variableType
+//                    && GridBagConstraints.class.equals(var.getDeclaredType()))
+//                return var;
+//
+//            // try to find variable of corresponding type (time expensive)
+//            Iterator it = codeStructure.getVariablesIterator(
+//                                            variableType,
+//                                            variableMask,
+//                                            GridBagConstraints.class);
+//            while (it.hasNext()) {
+//                var = (CodeVariable) it.next();
+//                if (var.getName().startsWith(defaultVariableName))
+//                    return var;
+//            }
+//
+//            return null;
+//        }
 
         private void createProperties() {
             properties = new Property[] {

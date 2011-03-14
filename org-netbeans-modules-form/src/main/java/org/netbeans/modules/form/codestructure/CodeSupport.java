@@ -60,8 +60,8 @@ class CodeSupport {
     // implementation classes of CodeStatement interface
 
     static final class MethodStatement extends AbstractCodeStatement {
-        private Method performMethod;
-        private CodeExpression[] parameters;
+        private final Method performMethod;
+        private final CodeExpression[] parameters;
 
         public MethodStatement(CodeExpression exp,
                                Method m,
@@ -85,8 +85,8 @@ class CodeSupport {
     }
 
     static final class FieldStatement extends AbstractCodeStatement {
-        private Field assignField;
-        private CodeExpression[] parameters;
+        private final Field assignField;
+        private final CodeExpression[] parameters;
 
         public FieldStatement(CodeExpression exp,
                               Field f,
@@ -131,8 +131,8 @@ class CodeSupport {
     // implementation classes of CodeExpressionOrigin interface
 
     static final class ConstructorOrigin implements CodeExpressionOrigin {
-        private Constructor constructor;
-        private CodeExpression[] parameters;
+        private final Constructor constructor;
+        private final CodeExpression[] parameters;
 
         public ConstructorOrigin(Constructor ctor, CodeExpression[] params) {
             constructor = ctor;
@@ -183,9 +183,9 @@ class CodeSupport {
     }
 
     static final class MethodOrigin implements CodeExpressionOrigin {
-        private CodeExpression parentExpression;
-        private Method creationMethod;
-        private CodeExpression[] parameters;
+        private final CodeExpression parentExpression;
+        private final Method creationMethod;
+        private final CodeExpression[] parameters;
 
         public MethodOrigin(CodeExpression parent,
                             Method m,
@@ -223,45 +223,9 @@ class CodeSupport {
 
     }
 
-    static final class FieldOrigin implements CodeExpressionOrigin {
-        private CodeExpression parentExpression;
-        private Field originField;
-
-        public FieldOrigin(CodeExpression parent, Field f) {
-            parentExpression = parent;
-            originField = f;
-        }
-
-        @Override
-        public Class getType() {
-            return originField.getType();
-        }
-
-        @Override
-        public CodeExpression getParentExpression() {
-            return parentExpression;
-        }
-
-        @Override
-        public Object getMetaObject() {
-            return originField;
-        }
-
-        @Override
-        public Object getValue() {
-            return null;
-        }
-
-        @Override
-        public CodeExpression[] getCreationParameters() {
-            return CodeStructure.EMPTY_PARAMS;
-        }
-
-    }
-
-    static final class ValueOrigin implements CodeExpressionOrigin {
-        private Class expressionType;
-        private Object expressionValue;
+  static final class ValueOrigin implements CodeExpressionOrigin {
+        private final Class expressionType;
+        private final Object expressionValue;
 
       public ValueOrigin(Class type, Object value) {
             expressionType = type;
@@ -301,7 +265,7 @@ class CodeSupport {
     // temporary reduced implementation
     static final class DefaultCodeGroup implements CodeGroup {
 
-        private List<Object/*CodeStatement or CodeGroup*/> statements = new ArrayList<Object>();
+        private final List<Object/*CodeStatement or CodeGroup*/> statements = new ArrayList<Object>();
 
         @Override
         public void addStatement(CodeStatement statement) {
@@ -329,14 +293,14 @@ class CodeSupport {
         }
 
         @Override
-        public Iterator getStatementsIterator() {
+        public Iterator<CodeStatement> getStatementsIterator() {
             return new StatementsIterator();
         }
 
-        class StatementsIterator implements Iterator {
+        class StatementsIterator implements Iterator<CodeStatement> {
             int index = 0;
-            int count = statements.size();
-            Iterator subIter;
+            final int count = statements.size();
+            Iterator<CodeStatement> subIter;
 
             @Override
             public boolean hasNext() {
@@ -364,12 +328,12 @@ class CodeSupport {
             }
 
             @Override
-            public Object next() {
+            public CodeStatement next() {
                 if (!hasNext())
                     throw new NoSuchElementException();
 
                 return subIter != null ? subIter.next() :
-                                         statements.get(index++);
+                                         (CodeStatement)statements.get(index++);
             }
 
             @Override

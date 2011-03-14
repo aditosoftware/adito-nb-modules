@@ -12,7 +12,7 @@ import java.lang.reflect.InvocationTargetException;
 /**
  * @author J. Boesl, 10.03.11
  */
-class AditoComponentConstraints implements LayoutConstraints
+public class AditoComponentConstraints implements LayoutConstraints
 {
   private AALComponentConstraints constraints;
   private Node.Property[] properties;

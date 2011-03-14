@@ -61,5 +61,5 @@ public interface CodeGroup {
 
     public void removeAll();
 
-    public Iterator getStatementsIterator();
+    public Iterator<CodeStatement> getStatementsIterator();
 }

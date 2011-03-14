@@ -64,7 +64,7 @@ public class CodeStructure {
     private final Map<String,Variable> namesToVariables = new HashMap<String,Variable>(50);
     private final Map<Object/*?*/,Variable> expressionsToVariables = new HashMap<Object,Variable>(50);
 
-    private int defaultVariableType = -1;
+    private final int defaultVariableType = -1;
 
 
     // --------
@@ -215,21 +215,7 @@ public class CodeStructure {
         return new CodeSupport.MethodOrigin(parent, m, params);
     }
 
-    /** Creates an expression origin from a field. */
-    public static CodeExpressionOrigin createOrigin(CodeExpression parent,
-                                                    Field f)
-    {
-        return new CodeSupport.FieldOrigin(parent, f);
-    }
-
-    /** Creates an expression origin from a value (and provided java string). */
-    public static CodeExpressionOrigin createOrigin(Class type,
-                                                    Object value)
-    {
-        return new CodeSupport.ValueOrigin(type, value);
-    }
-
-    // -------
+  // -------
     // getting to expressions and statements dependent on given expression
     // (used as their parent or parameter)
 
@@ -320,24 +306,7 @@ public class CodeStructure {
     // -------
     // variables
 
-    /** Creates a new variable. It is empty - with no expression attached. */
-    public CodeVariable createVariable(int type,
-                                       Class declaredType,
-                                       String name)
-    {
-        if (getVariable(name) != null)
-            return null; // variable already exists, cannot create new one
-
-        if (type < 0 || name == null)
-            throw new IllegalArgumentException();
-
-        Variable var = new Variable(type, declaredType, "", name); // NOI18N
-        namesToVariables.put(name, var);
-
-        return var;
-    }
-
-    /** Renames variable of name oldName to newName. */
+  /** Renames variable of name oldName to newName. */
     public boolean renameVariable(String oldName, String newName) {
         Variable var = namesToVariables.get(oldName);
         if (var == null || newName == null
@@ -388,7 +357,6 @@ public class CodeStructure {
 	name = getFreeVariableName(name, expression.getOrigin().getType());
 
         Variable var = new Variable(type,
-                                    expression.getOrigin().getType(),
                                     typeParameters,
                                     name);
         CodeStatement statement = createVariableAssignment(expression);
@@ -445,42 +413,7 @@ public class CodeStructure {
       return getFreeVariableName(null, type);
     }
 
-    /** Attaches an expression to a variable. The variable will be used in the
-     * code instead of the expression. */
-    public void attachExpressionToVariable(CodeExpression expression,
-                                           CodeVariable variable)
-    {
-        if (expression == null)
-            return;
-        // [should we check also expression type ??]
-
-        if (variable.getAssignment(expression) != null)
-            return; // expression already attached
-
-        // check if this variable can have multiple expressions attached
-        int mask = CodeVariable.LOCAL
-                   | CodeVariable.EXPLICIT_DECLARATION;
-        if ((variable.getType() & mask) == CodeVariable.LOCAL
-             && variable.getAttachedExpressions().size() > 0)
-        {   // local variable without a standalone declaration cannot be used
-            // for multiple expressions
-            throw new IllegalStateException(
-                      "Standalone local variable declaration required for: " // NOI18N
-                      + variable.getName());
-        }
-
-        Variable prevVar = expressionsToVariables.get(expression);
-        if (prevVar != null && prevVar != variable)
-            removeExpressionFromVariable(expression);
-
-        Variable var = (Variable) variable;
-        CodeStatement statement = createVariableAssignment(expression);
-
-        var.addCodeExpression(expression, statement);
-        expressionsToVariables.put(expression, var);
-    }
-
-    /** Releases an expression from using a variable. */
+  /** Releases an expression from using a variable. */
     public void removeExpressionFromVariable(CodeExpression expression) {
         if (expression == null)
             return;
@@ -497,44 +430,14 @@ public class CodeStructure {
             releaseVariable(var.getName());
     }
 
-    /** Returns variable of given name. */
-    public CodeVariable getVariable(String name) {
-        return namesToVariables.get(name);
-    }
-
-    /** Returns variable of an expression. */
+  /** Returns variable of an expression. */
     public CodeVariable getVariable(CodeExpression expression) {
         return expressionsToVariables.get(expression);
     }
 
-    /** Returns an iterator of variables of given criterions. */
-    public Iterator getVariablesIterator(int type, int typeMask,
-                                         Class declaredType)
-    {
-        return new VariablesIterator(namesToVariables.values().iterator(), type, typeMask, declaredType);
-    }
+  // ---------
 
-    // ---------
-
-    /** WARNING: This method will be removed in full two-way editing
-     *           implementation. DO NOT USE! */
-    public void setDefaultVariableType(int type) {
-        if (type < 0) {
-            defaultVariableType = -1; // global default will be used
-        }
-        else {
-            type &= CodeVariable.ALL_MASK;
-            if ((type & CodeVariable.SCOPE_MASK) == CodeVariable.NO_VARIABLE)
-                type |= CodeVariable.FIELD;
-            int fdMask = CodeVariable.EXPLICIT_DECLARATION | CodeVariable.FINAL;
-            if ((type & fdMask) == fdMask)
-                type &= ~CodeVariable.EXPLICIT_DECLARATION;
-
-            defaultVariableType = type;
-        }
-    }
-
-    int getDefaultVariableType() {
+  int getDefaultVariableType() {
         return defaultVariableType > -1 ?
                defaultVariableType : CodeVariable.FIELD | CodeVariable.PRIVATE;
     }
@@ -559,16 +462,14 @@ public class CodeStructure {
 
     final class Variable implements CodeVariable {
         private final int type;
-        private final Class declaredType;
         private final String declaredTypeParameters;
         private String name;
         private Map<CodeExpression,CodeStatement> expressionsMap;
 
-      Variable(int type, Class declaredType, String declaredTypeParameters, String name) {
+        Variable(int type, String declaredTypeParameters, String name) {
             if ((type & FINAL) != 0)
                 type &= ~EXPLICIT_DECLARATION;
             this.type = type;
-            this.declaredType = declaredType;
             this.declaredTypeParameters = declaredTypeParameters;
             this.name = name;
         }
@@ -585,23 +486,11 @@ public class CodeStructure {
         }
 
         @Override
-        public Class getDeclaredType() {
-            return declaredType;
-        }
-
-        @Override
         public String getDeclaredTypeParameters() {
             return declaredTypeParameters;
         }
 
         @Override
-        public Collection getAttachedExpressions() {
-            return expressionsMap != null ?
-                     Collections.unmodifiableCollection(expressionsMap.keySet()) :
-                     Collections.EMPTY_LIST;
-        }
-
-      @Override
         public CodeStatement getAssignment(CodeExpression expression) {
             return expressionsMap != null ? expressionsMap.get(expression) : null;
         }
@@ -619,59 +508,6 @@ public class CodeStructure {
         void removeCodeExpression(CodeExpression expression) {
             if (expressionsMap != null)
                 expressionsMap.remove(expression);
-        }
-    }
-
-    private static final class VariablesIterator implements Iterator {
-        private final int type;
-        private final int typeMask;
-        private final Class declaredType;
-
-        private final Iterator subIterator;
-
-        private CodeVariable currentVar;
-
-        public VariablesIterator(Iterator subIterator, int type, int typeMask, Class declaredType) {
-            this.type = type;
-            this.typeMask = typeMask;
-            this.declaredType = declaredType;
-            this.subIterator = subIterator;
-        }
-
-        @Override
-        public boolean hasNext() {
-            if (currentVar != null)
-                return true;
-
-            while (subIterator.hasNext()) {
-                CodeVariable var = (CodeVariable) subIterator.next();
-                if ((type < 0
-                        || (type & typeMask) == (var.getType() & typeMask))
-                    &&
-                    (declaredType == null
-                        || declaredType.equals(var.getDeclaredType())))
-                {
-                    currentVar = var;
-                    return true;
-                }
-            }
-
-            return false;
-        }
-
-        @Override
-        public Object next() {
-            if (!hasNext())
-                throw new NoSuchElementException();
-
-            CodeVariable var = currentVar;
-            currentVar = null;
-            return var;
-        }
-
-        @Override
-        public void remove() {
-            throw new UnsupportedOperationException();
         }
     }
 

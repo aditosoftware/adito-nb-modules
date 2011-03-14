@@ -57,7 +57,7 @@ import java.util.*;
 
 final class DefaultCodeExpression implements CodeExpression {
 
-    private CodeStructure codeStructure;
+    private final CodeStructure codeStructure;
 
     private CodeExpressionOrigin expressionOrigin;
 
