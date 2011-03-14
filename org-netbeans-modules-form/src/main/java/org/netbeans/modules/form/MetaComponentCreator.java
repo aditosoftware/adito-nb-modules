@@ -847,7 +847,7 @@ public class MetaComponentCreator {
             }
         }
 
-        newMetaComp.setStoredName(formModel.getCodeStructure().getExternalVariableName(compClass));
+//        newMetaComp.setStoredName(formModel.getCodeStructure().getExternalVariableName(compClass));
 
         // for some components, we initialize their properties with some
         // non-default values e.g. a label on buttons, checkboxes
@@ -1125,7 +1125,6 @@ public class MetaComponentCreator {
         if (newMenuItemComp.getBeanInstance() instanceof MenuItem) {
             MenuItem menu = (MenuItem) newMenuItemComp.getBeanInstance();
             if ("".equals(menu.getLabel())) { // NOI18N
-                newMenuItemComp.createCodeExpression();
                 RADProperty prop = newMenuItemComp.getBeanProperty("label"); // NOI18N
                 try {
                     prop.setChangeFiring(false);

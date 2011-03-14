@@ -476,7 +476,6 @@ public class AditoPersistenceManager extends PersistenceManager
       if (compClass == InvalidComponent.class)
       {
         newComponent.setValid(false);
-        newComponent.setMissingClassName(className);
       }
       newComponent.initialize(pInfo.getFormModel());
       newComponent.setStoredName(compName);

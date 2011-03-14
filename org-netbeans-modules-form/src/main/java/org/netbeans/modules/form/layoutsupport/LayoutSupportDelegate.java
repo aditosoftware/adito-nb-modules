@@ -46,8 +46,9 @@ package org.netbeans.modules.form.layoutsupport;
 
 import java.awt.*;
 import java.beans.*;
+
+import org.netbeans.modules.form.RADVisualComponent;
 import org.openide.nodes.*;
-import org.netbeans.modules.form.codestructure.*;
 
 /**
  * Main interface for working with various layouts of visual containers
@@ -177,18 +178,6 @@ public interface LayoutSupportDelegate {
      */
     Component getSupportCustomizer();
 
-    /** Gets the complete code for setting up the layout (including adding
-     * components).
-     * @return whole container's layout code
-     */
-    CodeGroup getLayoutCode();
-
-    /** Gets code for setting up one component's constraints and adding the
-     * component to the layout (container).
-     * @return one component's layout code
-     */
-    CodeGroup getComponentCode(int index);
-
   /** Gets number of components in the layout.
      * @return number of components in the layout
      */
@@ -229,14 +218,14 @@ public interface LayoutSupportDelegate {
 
     /** Adds new components to the layout. (This is intended just at the
      * metadata level, no real components are added in fact.)
-     * @param compExpressions array of CodeExpression objects representing the
+     * @param components array of CodeExpression objects representing the
      *        components to be added
      * @param constraints array of layout constraints of the components, may
      *        contain nulls
      * @param index position at which the components should be added (inserted);
      *        if -1, the components should be added at the end
      */
-    void addComponents(CodeExpression[] compExpressions,
+    void addComponents(RADVisualComponent[] components,
                        LayoutConstraints[] constraints,
                        int index);
 
@@ -458,11 +447,10 @@ public interface LayoutSupportDelegate {
 
     /** Cloning method - creates a copy of the layout delegate.
      * @param targetContext LayoutSupportContext for the new layout delegate
-     * @param targetComponents array of CodeExpression objects representing the
+     * @param components array of RADVisualComponent objects representing the
      *        components for the new layout delegate (corresponding to the
      *        current ones)
      * @return cloned layout delegate instance
      */
-    LayoutSupportDelegate cloneLayoutSupport(LayoutSupportContext targetContext,
-                                             CodeExpression[] targetComponents);
+    LayoutSupportDelegate cloneLayoutSupport(LayoutSupportContext targetContext, RADVisualComponent[] components);
 }

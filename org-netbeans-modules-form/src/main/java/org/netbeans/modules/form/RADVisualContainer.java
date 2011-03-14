@@ -77,7 +77,7 @@ public class RADVisualContainer extends RADVisualComponent implements ComponentC
         super.setBeanInstance(beanInstance);
 
         if (layoutSupport != null) // need new layout support for new container bean
-            layoutSupport = new LayoutSupportManager(this, getFormModel().getCodeStructure());
+            layoutSupport = new LayoutSupportManager(this);
     }
 
     @Override
@@ -131,7 +131,7 @@ public class RADVisualContainer extends RADVisualComponent implements ComponentC
     void setOldLayoutSupport(boolean old) {
         if (old) {
             if (layoutSupport == null) {
-                layoutSupport = new LayoutSupportManager(this, getFormModel().getCodeStructure());
+                layoutSupport = new LayoutSupportManager(this);
             }
         }
         else {

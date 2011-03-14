@@ -2,7 +2,6 @@ package org.netbeans.modules.form.adito.layout;
 
 import de.adito.aditoweb.swingcommon.layout.aditolayout.AALComponentConstraints;
 import org.netbeans.modules.form.FormProperty;
-import org.netbeans.modules.form.codestructure.*;
 import org.netbeans.modules.form.layoutsupport.LayoutConstraints;
 import org.openide.nodes.Node;
 
@@ -20,11 +19,6 @@ public class AditoComponentConstraints implements LayoutConstraints
   public AditoComponentConstraints()
   {
     this(new Rectangle());
-  }
-
-  public AditoComponentConstraints(int pX, int pY, int pWidth, int pHeight)
-  {
-    this(new Rectangle(pX, pY, pWidth, pHeight));
   }
 
   public AditoComponentConstraints(Rectangle pBounds)
@@ -129,48 +123,4 @@ public class AditoComponentConstraints implements LayoutConstraints
     };
   }
 
-//    private void _reinstateProperties()
-//    {
-//      try
-//      {
-//        for (Node.Property property : properties)
-//        {
-//          FormProperty prop = (FormProperty) property;
-//          prop.reinstateProperty();
-//        }
-//      }
-//      catch (IllegalAccessException e1)
-//      {
-//      } // should not happen
-//      catch (java.lang.reflect.InvocationTargetException e2)
-//      {
-//      } // should not happen
-//    }
-
-  protected final CodeExpression[] createPropertyExpressions(CodeStructure codeStructure)
-  {
-    // first make sure properties are created...
-    getProperties();
-    int shift = 0;
-    // ...then create code expressions based on the properties
-    CodeExpression xEl = codeStructure.createExpression(
-        FormCodeSupport.createOrigin(properties[shift++]));
-    CodeExpression yEl = codeStructure.createExpression(
-        FormCodeSupport.createOrigin(properties[shift++]));
-    CodeExpression wEl = codeStructure.createExpression(
-        FormCodeSupport.createOrigin(properties[shift++]));
-    CodeExpression hEl = codeStructure.createExpression(
-        FormCodeSupport.createOrigin(properties[shift]));
-    return new CodeExpression[]{xEl, yEl, wEl, hEl};
-  }
-
-  protected final void readPropertyExpressions(CodeExpression[] exps, int shift)
-  {
-    // first make sure properties are created...
-    getProperties();
-
-    // ...then map the properties to the code expressions
-    for (int i = 0; i < exps.length; i++)
-      FormCodeSupport.readPropertyExpression(exps[i], properties[i + shift], false);
-  }
 }

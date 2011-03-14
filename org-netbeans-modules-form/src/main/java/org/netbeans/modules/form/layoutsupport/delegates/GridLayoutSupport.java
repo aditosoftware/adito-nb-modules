@@ -46,7 +46,6 @@ package org.netbeans.modules.form.layoutsupport.delegates;
 
 import java.awt.*;
 import org.netbeans.modules.form.layoutsupport.*;
-import org.netbeans.modules.form.codestructure.*;
 
 /**
  * Support class for GridLayout.  This is an example of very simple layout
@@ -220,32 +219,4 @@ public class GridLayoutSupport extends AbstractLayoutSupport
 
     // ------------
 
-    /** This method is called from readLayoutCode to read the layout manager
-     * bean code (i.e. code for constructor and properties). This method is
-     * overridden here because "rows" and "columns" properties are mutually
-     * dependent (so not true JavaBean properties).
-     * @param layoutExp CodeExpressin of the layout manager
-     * @param initLayoutCode CodeGroup to be filled with relevant
-     *        initialization code
-     */
-    @Override
-    protected void readInitLayoutCode(CodeExpression layoutExp,
-                                      CodeGroup initLayoutCode)
-    {
-        CodeExpression[] params = layoutExp.getOrigin().getCreationParameters();
-        if (params.length > 0) {
-            Object rowsValue = params[0].getOrigin().getValue();
-            if (rowsValue instanceof Integer
-                && (Integer) rowsValue == 0)
-            {   // number of rows is to be set to 0, we must preset
-                // columns property to something else than 0
-                try {
-                    getProperty("columns").setValue(1);
-                }
-                catch (Exception ex) {} // ignore
-            }
-        }
-
-        super.readInitLayoutCode(layoutExp, initLayoutCode);
-    }
 }

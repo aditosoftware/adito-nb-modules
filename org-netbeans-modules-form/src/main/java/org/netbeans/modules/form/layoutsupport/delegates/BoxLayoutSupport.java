@@ -53,7 +53,6 @@ import java.lang.reflect.Constructor;
 import org.openide.nodes.Node;
 
 import org.netbeans.modules.form.layoutsupport.*;
-import org.netbeans.modules.form.codestructure.*;
 import org.netbeans.modules.form.FormProperty;
 
 /**
@@ -277,26 +276,6 @@ public class BoxLayoutSupport extends AbstractLayoutSupport
                                                 Container containerDelegate)
     {
         return new BoxLayout(containerDelegate, axis);
-    }
-
-    /** This method is to read the layout manager bean code (i.e. code for
-     * constructor and properties). As the BoxLayout is not a bean, this
-     * method must override AbstractLayoutSupport.
-     * @param layoutExp CodeExpressin of the layout manager
-     * @param layoutCode CodeGroup to be filled with relevant initialization
-     *        code; not needed here because BoxLayout is represented only by
-     *        a single constructor code expression and no statements
-     */
-    @Override
-    protected void readInitLayoutCode(CodeExpression layoutExp,
-                                      CodeGroup layoutCode)
-    {
-        CodeExpression[] params = layoutExp.getOrigin().getCreationParameters();
-        if (params.length == 2) {
-            FormCodeSupport.readPropertyExpression(
-                                params[1], getProperties()[0], false);
-            updateLayoutInstance();
-        }
     }
 
   /** Since BoxLayout is not a bean, we must specify its properties

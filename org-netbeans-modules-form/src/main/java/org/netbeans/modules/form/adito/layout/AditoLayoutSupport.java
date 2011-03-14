@@ -2,7 +2,6 @@ package org.netbeans.modules.form.adito.layout;
 
 import de.adito.aditoweb.swingcommon.layout.aditolayout.*;
 import org.netbeans.modules.form.FormLoaderSettings;
-import org.netbeans.modules.form.codestructure.*;
 import org.netbeans.modules.form.layoutsupport.*;
 import org.openide.util.ImageUtilities;
 
@@ -211,18 +210,6 @@ public class AditoLayoutSupport extends AbstractLayoutSupport
   protected LayoutConstraints createDefaultConstraints()
   {
     return new AditoComponentConstraints();
-  }
-
-  @Override
-  protected CodeExpression createConstraintsCode(CodeGroup constrCode, LayoutConstraints constr, CodeExpression compExp, int index)
-  {
-    if (!(constr instanceof AditoComponentConstraints))
-      return null;
-
-    AditoComponentConstraints adConstr = (AditoComponentConstraints) constr;
-    // code expressions for constructor parameters are created in AditoComponentConstraints
-    CodeExpression[] params = adConstr.createPropertyExpressions(getCodeStructure());
-    return getCodeStructure().createExpression(getConstraintsConstructor(), params);
   }
 
   private Constructor getConstraintsConstructor()

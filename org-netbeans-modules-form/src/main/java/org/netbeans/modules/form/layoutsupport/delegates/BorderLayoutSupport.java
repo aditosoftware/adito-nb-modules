@@ -51,7 +51,6 @@ import java.util.*;
 import org.openide.nodes.Node;
 
 import org.netbeans.modules.form.layoutsupport.*;
-import org.netbeans.modules.form.codestructure.*;
 import org.netbeans.modules.form.FormProperty;
 
 /**
@@ -301,36 +300,7 @@ public class BorderLayoutSupport extends AbstractLayoutSupport
 
     // ----------
 
-  /** Called from createComponentCode method, creates code for a component
-     * layout constraints (opposite to readConstraintsCode).
-     *
-     *
-     *
-     *
-     *
-     *
-     * @param constrCode CodeGroup to be filled with constraints code; not
-     *        needed here String (used as the constraints object) is just
-     *        a single code expression
-     * @param constr layout constraints metaobject representing the constraints
-     * @param compExp CodeExpression object representing the component; not
-     *        needed here
-     * @return created CodeExpression representing the layout constraints
-     */
-    @Override
-    protected CodeExpression createConstraintsCode(CodeGroup constrCode,
-                                                   LayoutConstraints constr,
-                                                   CodeExpression compExp,
-                                                   int index)
-    {
-        if (!(constr instanceof BorderConstraints))
-            return null; // should not happen
-
-        return getCodeStructure().createExpression(
-                   FormCodeSupport.createOrigin(constr.getProperties()[0]));
-    }
-
-    /** This method is called to get a default component layout constraints
+  /** This method is called to get a default component layout constraints
      * metaobject in case it is not provided (e.g. in addComponents method).
      * @return the default LayoutConstraints object for the supported layout
      */

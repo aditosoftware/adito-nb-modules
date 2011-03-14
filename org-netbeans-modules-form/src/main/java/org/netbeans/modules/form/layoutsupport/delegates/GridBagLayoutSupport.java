@@ -58,7 +58,6 @@ import org.openide.nodes.Node;
 import org.openide.util.NbBundle;
 
 import org.netbeans.modules.form.layoutsupport.*;
-import org.netbeans.modules.form.codestructure.*;
 import org.netbeans.modules.form.FormProperty;
 import org.netbeans.modules.form.FormPropertyContext;
 import org.netbeans.modules.form.project.ClassPathUtils;
@@ -474,35 +473,7 @@ public class GridBagLayoutSupport extends AbstractLayoutSupport
 
     // --------
 
-  /** Called from createComponentCode method, creates code for a component
-     * layout constraints (opposite to readConstraintsCode).
-     *
-     *
-     *
-     *
-     *
-     *
-     * @param constrCode CodeGroup to be filled with constraints code
-     * @param constr layout constraints metaobject representing the constraints
-     * @param compExp CodeExpression object representing the component; not
-     *        needed here
-     * @return created CodeExpression representing the layout constraints
-     */
-    @Override
-    protected CodeExpression createConstraintsCode(CodeGroup constrCode,
-                                                   LayoutConstraints constr,
-                                                   CodeExpression compExp,
-                                                   int index)
-    {
-        if (!(constr instanceof GridBagLayoutConstraints))
-            return null;
-
-        // the code creation is done in GridBagLayoutConstraints
-        return ((GridBagLayoutConstraints)constr).createCodeExpression(
-                                            getCodeStructure(), constrCode);
-    }
-
-    /** This method is called to get a default component layout constraints
+  /** This method is called to get a default component layout constraints
      * metaobject in case it is not provided (e.g. in addComponents method).
      * @return the default LayoutConstraints object for the supported layout;
      *         null if no component constraints are used
@@ -540,17 +511,6 @@ public class GridBagLayoutSupport extends AbstractLayoutSupport
 
         private Property[] properties;
 
-        private CodeExpression constraintsExpression;
-        private CodeGroup constraintsCode; // set of all relevant statements
-        private CodeStatement[] propertyStatements; // statements for properties
-
-        private static Constructor constrConstructor;
-
-        private static final int variableType = CodeVariable.LOCAL
-                                         | CodeVariable.EXPLICIT_DECLARATION;
-        private static final int variableMask = CodeVariable.SCOPE_MASK
-                                         | CodeVariable.DECLARATION_MASK;
-        private static final String defaultVariableName = "gridBagConstraints"; // NOI18N
 
         public GridBagLayoutConstraints() {
             constraints = new GridBagConstraints();
@@ -581,208 +541,6 @@ public class GridBagLayoutSupport extends AbstractLayoutSupport
         }
 
         // -------
-
-        /** This method creates code expression for the constraints. It's
-         * called from the delegate's createConstraintsCode method.
-         * @param codeStructure CodeStructure in which the expression will be
-         *        created
-         * @param constrCode CodeGroup to be filled with all the initialization
-         *        statements
-         * @return CodeExpression representing the constraints
-         */
-        private CodeExpression createCodeExpression(CodeStructure codeStructure,
-                                                    CodeGroup constrCode)
-        {
-            this.constraintsCode = constrCode;
-            propertyStatements = null;
-
-            // GridBagConstraints is created by a simple constructor...
-            constraintsExpression = codeStructure.createExpression(
-                                        getConstraintsConstructor(),
-                                        CodeStructure.EMPTY_PARAMS);
-            // ...but the additionlly it requires to create the initialization
-            // code statements
-            updateCodeExpression();
-
-            return constraintsExpression;
-        }
-
-        /** This method reads CodeExpression object representing the
-         * constraints and also all its initialization statements which are
-         * mapped to the constraints properties. It's called from the
-         * delegate's readConstraintsCode method.
-         * @param constrExp CodeExpression of the constraints
-         * @param constrCode CodeGroup to be filled with recognize
-         *        initialization statements
-         */
-        private void readCodeExpression(CodeExpression constrExp,
-                                        CodeGroup constrCode)
-        {
-            constraintsExpression = constrExp;
-            constraintsCode = constrCode;
-            propertyStatements = null;
-
-//            constrExp.setOrigin(CodeStructure.createOrigin(
-//                                        getConstraintsConstructor(),
-//                                        CodeStructure.EMPTY_PARAMS));
-
-            getProperties(); // ensure properties are created
-
-            boolean isAnyChanged = false;
-
-            Iterator it = CodeStructure.getDefinedStatementsIterator(constrExp);
-            List<CodeStatement> redundantStatements = new ArrayList<CodeStatement>(15);
-            while (it.hasNext()) {
-                // go through all the statements of constraints code expression
-                CodeStatement statement = (CodeStatement) it.next();
-                for (int j=0; j < properties.length; j++) {
-                    Property prop = properties[j];
-                    if (prop.field.equals(statement.getMetaObject())) {
-                        // this statement represents a GridBagConstraints field
-                        // assignment, we map the corresponding property to it
-                        FormCodeSupport.readPropertyStatement(
-                                            statement, prop, false);
-                        setPropertyStatement(j, statement);
-                        if (prop.isChanged()) { // this is a non-default value
-                            constrCode.addStatement(statement);
-                            isAnyChanged = true;
-                        } else { // remove statement for default value
-                            redundantStatements.add(statement);
-                        }
-                        break;
-                    }
-                }
-            }
-            for (CodeStatement statement : redundantStatements) {
-                CodeStructure.removeStatement(statement);
-            }
-
-//            setupVariable(isAnyChanged);
-        }
-
-        /** This method updates the constraints code according to the
-         * properties. This is called at the beginning - when the constraints
-         * code expression is created - and then after each change of the
-         * constraints properties. This keeps the code consistent with the
-         * properties.
-         */
-        private void updateCodeExpression() {
-            if (constraintsCode == null || constraintsExpression == null)
-                return;
-
-            constraintsCode.removeAll();
-
-            getProperties(); // ensure properties are created
-
-            boolean isAnyChanged = false;
-            for (int i=0; i < properties.length; i++)
-                // for each changed property, add the corresponding statement
-                // to the code (constraintsCode - instance of CodeGroup)
-                if (properties[i].isChanged()) {
-                    constraintsCode.addStatement(getPropertyStatement(i));
-                    isAnyChanged = true;
-                }
-
-//            setupVariable(isAnyChanged);
-        }
-
-        /** This method returns the code statement corresponding to property
-         * of given index. The statement is created if it does not exist yet.
-         * @param index index of required statement
-         */
-        private CodeStatement getPropertyStatement(int index) {
-            if (propertyStatements == null)
-                propertyStatements = new CodeStatement[properties.length];
-
-            CodeStatement propStatement = propertyStatements[index];
-            if (propStatement == null) {
-                CodeExpression propExp =
-                    constraintsExpression.getCodeStructure().createExpression(
-                        FormCodeSupport.createOrigin(properties[index]));
-
-                // statement is field assignment; the property code expression
-                // represents the assigned value
-                propStatement = CodeStructure.createStatement(
-                                    constraintsExpression,
-                                    properties[index].field,
-                                    propExp);
-
-                propertyStatements[index] = propStatement;
-            }
-            return propStatement;
-        }
-
-        /** Sets the code statement read form code for given property index.
-         * @param index index of the corresponding property
-         * @param propStatement CodeStatement to be set
-         */
-        private void setPropertyStatement(int index,
-                                          CodeStatement propStatement)
-        {
-            if (propertyStatements == null)
-                propertyStatements = new CodeStatement[properties.length];
-            propertyStatements[index] = propStatement;
-        }
-
-        /** This method sets up the variable for constraints code expression.
-         * The variable is needed only if there's some property changed (i.e.
-         * there's some statement in which the variable is used). One variable
-         * is used for all GridBagConstraints in the form.
-         */
-//        private void setupVariable(boolean anyChangedProperty) {
-//            CodeStructure codeStructure =
-//                constraintsExpression.getCodeStructure();
-//            CodeVariable var = constraintsExpression.getVariable();
-//
-//            if (anyChangedProperty) { // there should be a variable
-//                if (var == null) { // no variable currently used
-//                    var = findVariable(); // find and reuse variable
-//                    if (var == null) { // create a new variable
-//                        var = codeStructure.createVariableForExpression(
-//                                                constraintsExpression,
-//                                                variableType,
-//                                                defaultVariableName);
-//                    }
-////                    else { // attach the constraints expression to the variable
-////                        codeStructure.attachExpressionToVariable(
-////                                          constraintsExpression, var);
-////                    }
-//                }
-//                // add variable assignment code
-//                constraintsCode.addStatement(
-//                                  0, var.getAssignment(constraintsExpression));
-//            }
-//            else { // no variable needed
-//                codeStructure.removeExpressionFromVariable(
-//                                  constraintsExpression);
-//            }
-//        }
-
-//        private CodeVariable findVariable() {
-//            CodeStructure codeStructure =
-//                constraintsExpression.getCodeStructure();
-//
-//            // first try "gridBagConstraints" name - this succeeds in most
-//            // cases (unless the name is used elsewhere or not created yet)
-//            CodeVariable var = codeStructure.getVariable(defaultVariableName);
-//            if (var != null
-//                    && (var.getType() & variableMask) == variableType
-//                    && GridBagConstraints.class.equals(var.getDeclaredType()))
-//                return var;
-//
-//            // try to find variable of corresponding type (time expensive)
-//            Iterator it = codeStructure.getVariablesIterator(
-//                                            variableType,
-//                                            variableMask,
-//                                            GridBagConstraints.class);
-//            while (it.hasNext()) {
-//                var = (CodeVariable) it.next();
-//                if (var.getName().startsWith(defaultVariableName))
-//                    return var;
-//            }
-//
-//            return null;
-//        }
 
         private void createProperties() {
             properties = new Property[] {
@@ -870,19 +628,6 @@ public class GridBagLayoutSupport extends AbstractLayoutSupport
             }
             catch(IllegalAccessException e1) {} // should not happen
             catch(InvocationTargetException e2) {} // should not happen
-        }
-
-        private static Constructor getConstraintsConstructor() {
-            if (constrConstructor == null) {
-                try {
-                    constrConstructor =
-                        GridBagConstraints.class.getConstructor(new Class[0]);
-                }
-                catch (NoSuchMethodException ex) { // should not happen
-                    ex.printStackTrace();
-                }
-            }
-            return constrConstructor;
         }
 
         // ---------
@@ -1005,9 +750,6 @@ public class GridBagLayoutSupport extends AbstractLayoutSupport
                         return;
                     }
                 }
-
-                if (isChangeFiring())
-                    updateCodeExpression();
                 super.propertyValueChanged(old, current);
             }
 

@@ -49,7 +49,6 @@ import javax.swing.*;
 import java.lang.reflect.Method;
 
 import org.netbeans.modules.form.layoutsupport.*;
-import org.netbeans.modules.form.codestructure.*;
 
 /**
  * Dedicated layout support class for JScrollPane.
@@ -215,40 +214,7 @@ public class JScrollPaneSupport extends AbstractLayoutSupport {
 
     // ------------
 
-    /** This methods returns the code expression to be used for container on
-     * which the layout is set and to which components are added. This can be
-     * either container, or container delegate expression. In fact, it is
-     * container delegate in most cases, but not in case of JScrollPane which
-     * has its viewport as the container delegate, but we work with the
-     * JScrollPane (whole container).
-     * @return code expression representing the effective container
-     */
-    @Override
-    protected CodeExpression getActiveContainerCodeExpression() {
-        return getLayoutContext().getContainerCodeExpression();
-    }
-
-  /** Creates code for a component added to the layout (opposite to
-     * readComponentCode method).
-     * @param componentCode CodeGroup to be filled with complete component code
-     *        (code for initializing the layout constraints and adding the
-     *        component to the layout)
-     * @param componentExpression CodeExpression object representing component
-     * @param index position of the component in the layout
-     */
-    @Override
-    protected void createComponentCode(CodeGroup componentCode,
-                                       CodeExpression componentExpression,
-                                       int index)
-    {
-        CodeStatement addStatement = CodeStructure.createStatement(
-                         getLayoutContext().getContainerCodeExpression(),
-                         getSetViewportViewMethod(),
-                         new CodeExpression[] { componentExpression });
-        componentCode.addStatement(addStatement);
-    }
-
-    private static Method getSetViewportViewMethod() {
+  private static Method getSetViewportViewMethod() {
         if (setViewportViewMethod == null) {
             try {
                 setViewportViewMethod = JScrollPane.class.getMethod(

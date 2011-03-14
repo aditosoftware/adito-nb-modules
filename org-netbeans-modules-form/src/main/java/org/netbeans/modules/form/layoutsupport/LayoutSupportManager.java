@@ -51,7 +51,6 @@ import java.util.*;
 import org.openide.nodes.*;
 
 import org.netbeans.modules.form.*;
-import org.netbeans.modules.form.codestructure.*;
 import org.netbeans.modules.form.layoutsupport.delegates.NullLayoutSupport;
 import org.netbeans.modules.form.fakepeer.FakePeerSupport;
 
@@ -84,29 +83,22 @@ public final class LayoutSupportManager implements LayoutSupportContext {
     private Container primaryContainer; // bean instance from metaContainer
     private Container primaryContainerDelegate; // container delegate for it
 
-    private final CodeStructure codeStructure;
-
-    private CodeExpression containerCodeExpression;
-    private CodeExpression containerDelegateCodeExpression;
-
-    // ----------
+  // ----------
     // initialization
 
     // initialization for a new container, layout delegate is set to null
-    public LayoutSupportManager(RADVisualContainer container,
-                                CodeStructure codeStructure)
+    public LayoutSupportManager(RADVisualContainer container)
     {
         this.metaContainer = container;
-        this.codeStructure = codeStructure;
     }
 
     /**
      * Creation and initialization of a layout delegate for a new container.
+     * @param initialize whether the layout-delegate shall be installed.
      * @return false if suitable layout delegate is not found
-     * @throw IllegalArgumentException if the container instance is not empty
+     * @throw Exception if the container instance is not empty
      */
-    public boolean prepareLayoutDelegate(boolean initialize)
-        throws Exception
+    public boolean prepareLayoutDelegate(boolean initialize) throws Exception
     {
         LayoutSupportDelegate delegate;
         LayoutManager lmInstance = null;
@@ -239,18 +231,15 @@ public final class LayoutSupportManager implements LayoutSupportContext {
         if (layoutDelegate != null)
             removeLayoutDelegate(false);
 
-        CodeExpression[] compExps = new CodeExpression[componentCount];
         Component[] primaryComps = new Component[componentCount];
 
         for (int i=0; i < componentCount; i++) {
             RADVisualComponent metacomp = newMetaComps[i];
-            compExps[i] = metacomp.getCodeExpression();
             primaryComps[i] = (Component) metacomp.getBeanInstance();
             ensureFakePeerAttached(primaryComps[i]);
         }
 
-        LayoutSupportDelegate newDelegate =
-            sourceDelegate.cloneLayoutSupport(this, compExps);
+        LayoutSupportDelegate newDelegate = sourceDelegate.cloneLayoutSupport(this, newMetaComps);
 
         newDelegate.setLayoutToContainer(cont, contDel);
         newDelegate.addComponentsToContainer(cont, contDel, primaryComps, 0);
@@ -275,10 +264,6 @@ public final class LayoutSupportManager implements LayoutSupportContext {
 
     private LayoutConstraints[] removeLayoutDelegate(boolean extractConstraints)
     {
-        CodeGroup code = layoutDelegate.getLayoutCode();
-        if (code != null)
-            CodeStructure.removeStatements(code.getStatementsIterator());
-
         int componentCount = layoutDelegate.getComponentCount();
         LayoutConstraints[] constraints = null;
 
@@ -293,11 +278,7 @@ public final class LayoutSupportManager implements LayoutSupportContext {
                     if (extractConstraints)
                         constraints[i] = constr;
                     if (constr != null)
-                        metacomps[i].setLayoutConstraints(layoutDelegate.getClass(),
-                                                          constr);
-                    code = layoutDelegate.getComponentCode(i);
-                    if (code != null)
-                        CodeStructure.removeStatements(code.getStatementsIterator());
+                        metacomps[i].setLayoutConstraints(layoutDelegate.getClass(), constr);
                 }
             }
         }
@@ -314,7 +295,6 @@ public final class LayoutSupportManager implements LayoutSupportContext {
         RADVisualComponent[] metacomps = metaContainer.getSubComponents();
         int componentCount = metacomps.length;
 
-        CodeExpression[] compExps = new CodeExpression[componentCount];
         Component[] designComps = new Component[componentCount];
         Component[] primaryComps = new Component[componentCount];
         LayoutConstraints[] newConstraints = new LayoutConstraints[componentCount];
@@ -324,7 +304,6 @@ public final class LayoutSupportManager implements LayoutSupportContext {
         for (int i=0; i < componentCount; i++) {
             RADVisualComponent metacomp = metacomps[i];
 
-            compExps[i] = metacomp.getCodeExpression();
             primaryComps[i] = (Component) metacomp.getBeanInstance();
             ensureFakePeerAttached(primaryComps[i]);
             newConstraints[i] = metacomp.getLayoutConstraints(
@@ -342,7 +321,7 @@ public final class LayoutSupportManager implements LayoutSupportContext {
 
         if (componentCount > 0) {
             layoutDelegate.acceptNewComponents();
-            layoutDelegate.addComponents(compExps, newConstraints, 0);
+            layoutDelegate.addComponents(metacomps, newConstraints, 0);
 
             for (int i=0; i < componentCount; i++)
                 metacomps[i].resetConstraintsProperties();
@@ -446,15 +425,11 @@ public final class LayoutSupportManager implements LayoutSupportContext {
     }
 
     // components adding/removing
-    public void addComponents(RADVisualComponent[] components,
-                              LayoutConstraints[] constraints,
-                              int index)
+    public void addComponents(RADVisualComponent[] components, LayoutConstraints[] constraints, int index)
     {
-        CodeExpression[] compExps = new CodeExpression[components.length];
         Component[] comps = new Component[components.length];
 
         for (int i=0; i < components.length; i++) {
-            compExps[i] = components[i].getCodeExpression();
             comps[i] = (Component) components[i].getBeanInstance();
             ensureFakePeerAttached(comps[i]);
         }
@@ -462,7 +437,7 @@ public final class LayoutSupportManager implements LayoutSupportContext {
         if (index < 0)
             index = layoutDelegate.getComponentCount();
 
-        layoutDelegate.addComponents(compExps, constraints, index);
+        layoutDelegate.addComponents(components, constraints, index);
 
         for (RADVisualComponent component : components)
           component.resetConstraintsProperties();
@@ -477,10 +452,6 @@ public final class LayoutSupportManager implements LayoutSupportContext {
         LayoutConstraints constr = layoutDelegate.getConstraints(index);
         if (constr != null)
             metacomp.setLayoutConstraints(layoutDelegate.getClass(), constr);
-
-        // remove code
-        CodeStructure.removeStatements(
-            layoutDelegate.getComponentCode(index).getStatementsIterator());
 
         // remove the component from layout
         layoutDelegate.removeComponent(index);
@@ -525,11 +496,6 @@ public final class LayoutSupportManager implements LayoutSupportContext {
                 components[i].setLayoutConstraints(layoutDelegate.getClass(),
                                                    constr);
         }
-
-        // remove code of all components
-        for (int i=0, n=layoutDelegate.getComponentCount(); i < n; i++)
-            CodeStructure.removeStatements(
-                layoutDelegate.getComponentCode(i).getStatementsIterator());
 
         // remove components from layout
         layoutDelegate.removeAll();
@@ -704,63 +670,7 @@ public final class LayoutSupportManager implements LayoutSupportContext {
     // -----------
     // API for layout delegates (LayoutSupportContext implementation)
 
-    @Override
-    public CodeStructure getCodeStructure() {
-        return codeStructure;
-    }
-
-    @Override
-    public CodeExpression getContainerCodeExpression() {
-        if (containerCodeExpression == null) {
-            containerCodeExpression = metaContainer.getCodeExpression();
-            containerDelegateCodeExpression = null;
-        }
-        return containerCodeExpression;
-    }
-
-    @Override
-    public CodeExpression getContainerDelegateCodeExpression() {
-        if (containerDelegateCodeExpression == null) {
-            containerDelegateCodeExpression =
-                    containerDelegateCodeExpression(metaContainer, codeStructure);
-        }
-
-        return containerDelegateCodeExpression;
-    }
-    
-    private static CodeExpression containerDelegateCodeExpression(
-                                     RADVisualContainer metaContainer,
-                                     CodeStructure codeStructure)
-    {
-        CodeExpression containerCodeExpression = metaContainer.getCodeExpression();
-        CodeExpression containerDelegateCodeExpression;
-        java.lang.reflect.Method delegateGetter =
-            metaContainer.getContainerDelegateMethod();
-
-        if (delegateGetter != null) { // there should be a container delegate
-            Iterator it = CodeStructure.getDefinedExpressionsIterator(
-                                              containerCodeExpression);
-            CodeExpression[] expressions = CodeStructure.filterExpressions(
-                                                        it, delegateGetter);
-            if (expressions.length > 0) {
-                // the expresion for the container delegate already exists
-                containerDelegateCodeExpression = expressions[0];
-            }
-            else { // create a new expresion for the container delegate
-                CodeExpressionOrigin origin = CodeStructure.createOrigin(
-                                                containerCodeExpression,
-                                                delegateGetter,
-                                                null);
-                containerDelegateCodeExpression =
-                    codeStructure.createExpression(origin);
-            }
-        }
-        else // no special container delegate
-            containerDelegateCodeExpression = containerCodeExpression;
-        return containerDelegateCodeExpression;
-    }
-
-    // return container instance of meta container
+  // return container instance of meta container
     @Override
     public Container getPrimaryContainer() {
         return (Container) metaContainer.getBeanInstance();

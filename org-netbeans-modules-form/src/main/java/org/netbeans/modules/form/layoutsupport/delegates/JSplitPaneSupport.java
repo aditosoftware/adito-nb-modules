@@ -46,14 +46,12 @@ package org.netbeans.modules.form.layoutsupport.delegates;
 
 import java.awt.*;
 import java.beans.*;
-import java.lang.reflect.Method;
 import javax.swing.JButton;
 import javax.swing.JSplitPane;
 
 import org.openide.nodes.Node;
 
 import org.netbeans.modules.form.layoutsupport.*;
-import org.netbeans.modules.form.codestructure.*;
 import org.netbeans.modules.form.FormProperty;
 
 /**
@@ -62,11 +60,6 @@ import org.netbeans.modules.form.FormProperty;
  */
 
 public class JSplitPaneSupport extends AbstractLayoutSupport {
-
-    private static Method setLeftComponentMethod;
-    private static Method setRightComponentMethod;
-    private static Method setTopComponentMethod;
-    private static Method setBottomComponentMethod;
 
     private static final String LEFT_TOP_BUTTON = "cp_left_top_button"; // NOI18N
     private static final String RIGHT_BOTTOM_BUTTON = "cp_right_bottom_button"; // NOI18N
@@ -349,30 +342,7 @@ public class JSplitPaneSupport extends AbstractLayoutSupport {
     
     // ------
 
-  /** Creates code for a component added to the layout (opposite to
-     * readComponentCode method).
-     * @param componentCode CodeGroup to be filled with complete component code
-     *        (code for initializing the layout constraints and adding the
-     *        component to the layout)
-     * @param componentExpression CodeExpression object representing component
-     * @param index position of the component in the layout
-     */
-    @Override
-    protected void createComponentCode(CodeGroup componentCode,
-                                       CodeExpression componentExpression,
-                                       int index)
-    {
-        LayoutConstraints constr = getConstraints(index);
-        if (!(constr instanceof SplitConstraints))
-            return; // should not happen
-
-        ((SplitConstraints)constr).createComponentCode(
-                               componentCode,
-                               getLayoutContext().getContainerCodeExpression(),
-                               componentExpression);
-    }
-
-    /** This method is called to get a default component layout constraints
+  /** This method is called to get a default component layout constraints
      * metaobject in case it is not provided (e.g. in addComponents method).
      * @return the default LayoutConstraints object for the supported layout;
      *         null if no component constraints are used
@@ -419,43 +389,6 @@ public class JSplitPaneSupport extends AbstractLayoutSupport {
                 JSplitPane.RIGHT : JSplitPane.BOTTOM;	
     }
 
-    // --------
-
-    private static Method getSetLeftComponentMethod() {
-        if (setLeftComponentMethod == null)
-            setLeftComponentMethod = getAddMethod("setLeftComponent"); // NOI18N
-        return setLeftComponentMethod;
-    }
-
-    private static Method getSetRightComponentMethod() {
-        if (setRightComponentMethod == null)
-            setRightComponentMethod = getAddMethod("setRightComponent"); // NOI18N
-        return setRightComponentMethod;
-    }
-
-    private static Method getSetTopComponentMethod() {
-        if (setTopComponentMethod == null)
-            setTopComponentMethod = getAddMethod("setTopComponent"); // NOI18N
-        return setTopComponentMethod;
-    }
-
-    private static Method getSetBottomComponentMethod() {
-        if (setBottomComponentMethod == null)
-            setBottomComponentMethod = getAddMethod("setBottomComponent"); // NOI18N
-        return setBottomComponentMethod;
-    }
-
-    private static Method getAddMethod(String name) {
-        try {
-            return JSplitPane.class.getMethod(name,
-                                              new Class[] { Component.class });
-        }
-        catch (NoSuchMethodException ex) { // should not happen
-            ex.printStackTrace();
-        }
-        return null;
-    }
-
     // -----------
 
     /** LayoutConstraints implementation holding component position in
@@ -466,9 +399,6 @@ public class JSplitPaneSupport extends AbstractLayoutSupport {
 
         private Node.Property[] properties;
 
-        private CodeExpression containerExpression;
-        private CodeExpression componentExpression;
-        private CodeGroup componentCode;
 
         public SplitConstraints(String position) {
             this.position = position;
@@ -497,13 +427,6 @@ public class JSplitPaneSupport extends AbstractLayoutSupport {
                             return new SplitPositionEditor();
                         }
                         @Override
-                        protected void propertyValueChanged(Object old,
-                                                            Object current) {
-                            if (isChangeFiring())
-                                updateCode();
-                            super.propertyValueChanged(old, current);
-                        }
-                        @Override
                         public void setPropertyContext(
                             org.netbeans.modules.form.FormPropertyContext ctx)
                         { // disabling this method due to limited persistence
@@ -525,43 +448,6 @@ public class JSplitPaneSupport extends AbstractLayoutSupport {
         public LayoutConstraints cloneConstraints() {
             return new SplitConstraints(position);
         }
-
-        private void createComponentCode(CodeGroup compCode,
-                                         CodeExpression contExp,
-                                         CodeExpression compExp)
-        {
-            componentCode = compCode;
-            containerExpression = contExp;
-            componentExpression = compExp;
-            updateCode();
-        }
-
-        private void updateCode() {
-            if (componentCode == null)
-                return;
-
-            CodeStructure.removeStatements(
-                componentCode.getStatementsIterator());
-            componentCode.removeAll();
-
-            Method addMethod;
-            if (JSplitPane.LEFT.equals(position))
-                addMethod = getSetLeftComponentMethod();
-            else if (JSplitPane.RIGHT.equals(position))
-                addMethod = getSetRightComponentMethod();
-            else if (JSplitPane.TOP.equals(position))
-                addMethod = getSetTopComponentMethod();
-            else if (JSplitPane.BOTTOM.equals(position))
-                addMethod = getSetBottomComponentMethod();
-            else return;
-
-            componentCode.addStatement(
-                    CodeStructure.createStatement(
-                           containerExpression,
-                           addMethod,
-                           new CodeExpression[] { componentExpression }));
-        }
-    }
 
     static class SplitPositionEditor extends PropertyEditorSupport {
         private final String[] values = {
@@ -591,5 +477,5 @@ public class JSplitPaneSupport extends AbstractLayoutSupport {
             }
         }
     }
-    
+    }
 }

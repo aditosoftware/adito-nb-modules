@@ -49,8 +49,6 @@ import java.awt.Container;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyVetoException;
 
-import org.netbeans.modules.form.codestructure.*;
-
 /**
  * Interface providing necessary context information for LayoutSupportDelegate
  * implementation. Its purpose is to "connect" the layout delegate with the
@@ -69,24 +67,7 @@ import org.netbeans.modules.form.codestructure.*;
 
 public interface LayoutSupportContext {
 
-    /** Gets the CodeStructure object to be used for reading/creating code of
-     * the container layout configuration.
-     * @return main CodeStructure object holding code data
-     */
-    public CodeStructure getCodeStructure();
-
-    /** Gets the code expression of the primary container (reference container
-     * instance in form metadata structures).
-     * @return CodeExpression of the primary container
-     */
-    public CodeExpression getContainerCodeExpression();
-
-    /** Gets the code expression of the primary container delegate.
-     * #return CodeEpression of primary container delegate.
-     */
-    public CodeExpression getContainerDelegateCodeExpression();
-
-    /** Gets the primary container. This is the reference instance used in form
+  /** Gets the primary container. This is the reference instance used in form
      * metadata structures.
      * @return instance of the primary container
      */

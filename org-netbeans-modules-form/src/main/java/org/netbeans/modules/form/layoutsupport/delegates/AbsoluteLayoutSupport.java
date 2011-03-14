@@ -55,7 +55,6 @@ import org.netbeans.lib.awtextra.AbsoluteLayout;
 import org.netbeans.lib.awtextra.AbsoluteConstraints;
 
 import org.netbeans.modules.form.layoutsupport.*;
-import org.netbeans.modules.form.codestructure.*;
 import org.netbeans.modules.form.FormProperty;
 import org.netbeans.modules.form.FormLoaderSettings;
 
@@ -363,36 +362,7 @@ public class AbsoluteLayoutSupport extends AbstractLayoutSupport {
 
     // -------
 
-    /**
-     * Called from createComponentCode method, creates code for a component
-     * layout constraints (opposite to readConstraintsCode).
-     * @param constrCode CodeGroup to be filled with constraints code; not
-     *        needed here because AbsoluteConstraints object is represented
-     *        only by a single constructor code expression and no statements
-     * @param constr layout constraints metaobject representing the constraints
-     * @param compExp CodeExpression object representing the component; not
-     *        needed here
-     * @return created CodeExpression representing the layout constraints
-     */
-    @Override
-    protected CodeExpression createConstraintsCode(CodeGroup constrCode,
-                                                   LayoutConstraints constr,
-                                                   CodeExpression compExp,
-                                                   int index)
-    {
-        if (!(constr instanceof AbsoluteLayoutConstraints))
-            return null;
-
-        AbsoluteLayoutConstraints absConstr = (AbsoluteLayoutConstraints)constr;
-        // code expressions for constructor parameters are created in
-        // AbsoluteLayoutConstraints
-        CodeExpression[] params = absConstr.createPropertyExpressions(
-                                                 getCodeStructure(), 0);
-        return getCodeStructure().createExpression(getConstraintsConstructor(),
-                                                   params);
-    }
-
-    /** This method is called to get a default component layout constraints
+  /** This method is called to get a default component layout constraints
      * metaobject in case it is not provided (e.g. in addComponents method).
      * @return the default LayoutConstraints object for the supported layout
      */
@@ -422,20 +392,6 @@ public class AbsoluteLayoutSupport extends AbstractLayoutSupport {
         if (step <= 0) return size;
         int mod = size % step;
         return mod >= step/2 ? size + step - mod : size - mod;
-    }
-
-    private static Constructor getConstraintsConstructor() {
-        if (constrConstructor == null) {
-            try {
-                constrConstructor = AbsoluteConstraints.class.getConstructor(
-                                    new Class[] { Integer.TYPE, Integer.TYPE,
-                                                  Integer.TYPE, Integer.TYPE });
-            }
-            catch (NoSuchMethodException ex) { // should not happen
-                ex.printStackTrace();
-            }
-        }
-        return constrConstructor;
     }
 
     // -------------
@@ -626,57 +582,6 @@ public class AbsoluteLayoutSupport extends AbstractLayoutSupport {
             }
             catch(IllegalAccessException e1) {} // should not happen
             catch(java.lang.reflect.InvocationTargetException e2) {} // should not happen
-        }
-
-        /** This method creates CodeExpression objects for properties of
-         * AbsoluteConstraints - this is used by the layout delegate's method
-         * createConstraintsCode which uses the expressions as parameters
-         * in AbsoluteConstraints constructor.
-         * @param codeStructure main CodeStructure object in which the code
-         *        expressions are created
-         * @param shift this parameter is used only by subclasses of
-         *        AbsoluteLayoutConstraints (which may insert another
-         *        constructor parameters before x, y, w and h)
-         * @return array of created code expressions
-         */
-        protected final CodeExpression[] createPropertyExpressions(
-                                             CodeStructure codeStructure,
-                                             int shift)
-        {
-            // first make sure properties are created...
-            getProperties();
-
-            // ...then create code expressions based on the properties
-            CodeExpression xEl = codeStructure.createExpression(
-                           FormCodeSupport.createOrigin(properties[shift++]));
-            CodeExpression yEl = codeStructure.createExpression(
-                           FormCodeSupport.createOrigin(properties[shift++]));
-            CodeExpression wEl = codeStructure.createExpression(
-                           FormCodeSupport.createOrigin(properties[shift++]));
-            CodeExpression hEl = codeStructure.createExpression(
-                           FormCodeSupport.createOrigin(properties[shift]));
-            return new CodeExpression[] { xEl, yEl, wEl, hEl };
-        }
-
-        /** This method reads CodeExpression objects for properties (used as
-         * AbsoluteConstraints constructor parameters). Called by layout
-         * delegate's readConstraintsCode method.
-         * @param exps array of code expressions to read to properties
-         * @param shift this parameter is used only by subclasses of
-         *        AbsoluteLayoutConstraints (which may insert another
-         *        constructor parameters before x, y, w and h)
-         */
-        protected final void readPropertyExpressions(CodeExpression[] exps,
-                                                     int shift)
-        {
-            // first make sure properties are created...
-            getProperties();
-
-            // ...then map the properties to the code expressions
-            for (int i=0; i < exps.length; i++)
-                FormCodeSupport.readPropertyExpression(exps[i],
-                                                       properties[i+shift],
-                                                       false);
         }
     }
 

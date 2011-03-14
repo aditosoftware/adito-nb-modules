@@ -57,7 +57,6 @@ import org.openide.util.Mutex;
 import org.openide.util.MutexException;
 
 import org.netbeans.modules.form.layoutsupport.*;
-import org.netbeans.modules.form.codestructure.CodeStructure;
 import org.netbeans.modules.form.layoutdesign.*;
 
 /**
@@ -116,8 +115,6 @@ public class FormModel
     private boolean firing;
 
     private MetaComponentCreator metaCreator;
-
-    private CodeStructure codeStructure = new CodeStructure();
     
     private FormSettings settings = new FormSettings(this);
     
@@ -1213,10 +1210,6 @@ public class FormModel
     }
 
     // -------------
-
-    public CodeStructure getCodeStructure() {
-        return codeStructure;
-    }
     
     public boolean isFreeDesignDefaultLayout() {
         return freeDesignDefaultLayout;

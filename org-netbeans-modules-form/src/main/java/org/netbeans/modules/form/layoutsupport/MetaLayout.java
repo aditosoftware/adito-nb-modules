@@ -62,17 +62,9 @@ class MetaLayout extends RADComponent {
     {
         super();
 
-      AbstractLayoutSupport abstLayoutDelegate = layoutDelegate;
-
-        initialize(((LayoutSupportManager) abstLayoutDelegate.getLayoutContext())
-                         .getMetaContainer().getFormModel());
+      initialize(((LayoutSupportManager) layoutDelegate.getLayoutContext()).getMetaContainer().getFormModel());
 
         setBeanInstance(lmInstance);
-    }
-
-    @Override
-    protected void createCodeExpression() {
-        // code expression is handled by the layout support class
     }
 
     @Override

@@ -52,7 +52,6 @@ import java.lang.reflect.Method;
 import org.openide.nodes.*;
 
 import org.netbeans.modules.form.layoutsupport.*;
-import org.netbeans.modules.form.codestructure.*;
 import org.netbeans.modules.form.FormProperty;
 
 /**
@@ -131,38 +130,7 @@ public class JLayeredPaneSupport extends AbsoluteLayoutSupport {
 
     // ------
 
-  /** Creates code for a component added to the layout (opposite to
-     * readComponentCode method).
-
-
-     * @param compExp CodeExpression object representing component
-     * @param index position of the component in the layout
-     */
-    @Override
-    protected CodeExpression createConstraintsCode(CodeGroup constrCode,
-                                                   LayoutConstraints constr,
-                                                   CodeExpression compExp,
-                                                   int index)
-    {
-        if (!(constr instanceof LayeredConstraints))
-            return null;
-
-        LayeredConstraints layerConstr = (LayeredConstraints) constr;
-        layerConstr.refComponent = getLayoutContext().getPrimaryComponent(index);
-
-        CodeStructure codeStructure = getCodeStructure();
-
-        CodeStatement boundsStatement = CodeStructure.createStatement(
-                          compExp,
-                          getSetBoundsMethod(),
-                          layerConstr.createPropertyExpressions(codeStructure, 1));
-        constrCode.addStatement(boundsStatement);
-
-        return codeStructure.createExpression(
-                 FormCodeSupport.createOrigin(layerConstr.getProperties()[0]));
-    }
-
-    /** This method is called to get a default component layout constraints
+  /** This method is called to get a default component layout constraints
      * metaobject in case it is not provided (e.g. in addComponents method).
      * @return the default LayoutConstraints object for the supported layout;
      *         null if no component constraints are used

@@ -46,12 +46,10 @@ package org.netbeans.modules.form.layoutsupport.delegates;
 
 import java.awt.*;
 import javax.swing.*;
-import java.lang.reflect.Method;
 
 import org.openide.nodes.Node;
 
 import org.netbeans.modules.form.layoutsupport.*;
-import org.netbeans.modules.form.codestructure.*;
 import org.netbeans.modules.form.*;
 
 /**
@@ -64,11 +62,7 @@ public class JTabbedPaneSupport extends AbstractLayoutSupport {
 
     private int selectedTab = -1;
 
-    private static Method addTabMethod1;
-    private static Method addTabMethod2;
-    private static Method addTabMethod3;
-
-    /** Gets the supported layout manager class - JTabbedPane.
+  /** Gets the supported layout manager class - JTabbedPane.
      * @return the class supported by this delegate
      */
     @Override
@@ -90,7 +84,7 @@ public class JTabbedPaneSupport extends AbstractLayoutSupport {
     /** This method is called when user clicks on the container in form
      * designer. For JTabbedPane, we it switch the selected TAB.
      * @param p Point of click in the container
-     * @param real instance of the container when the click occurred
+     * @param container instance of the container when the click occurred
      * @param containerDelegate effective container delegate of the container
      */
     @Override
@@ -272,31 +266,7 @@ public class JTabbedPaneSupport extends AbstractLayoutSupport {
 
     // ---------
 
-  /** Creates code for a component added to the layout (opposite to
-     * readComponentCode method).
-     * @param componentCode CodeGroup to be filled with complete component code
-     *        (code for initializing the layout constraints and adding the
-     *        component to the layout)
-     * @param compExp CodeExpression object representing component
-     * @param index position of the component in the layout
-     */
-    @Override
-    protected void createComponentCode(CodeGroup componentCode,
-                                       CodeExpression componentExpression,
-                                       int index)
-    {
-        LayoutConstraints constr = getConstraints(index);
-        if (!(constr instanceof TabConstraints))
-            return; // should not happen
-
-        ((TabConstraints)constr).createComponentCode(
-                           componentCode,
-                           getLayoutContext().getContainerCodeExpression(),
-                           componentExpression,
-                           true);
-    }
-
-    /** This method is called to get a default component layout constraints
+  /** This method is called to get a default component layout constraints
      * metaobject in case it is not provided (e.g. in addComponents method).
      * @return the default LayoutConstraints object for the supported layout;
      *         null if no component constraints are used
@@ -308,54 +278,7 @@ public class JTabbedPaneSupport extends AbstractLayoutSupport {
 
     // ----------
 
-    // tab, icon, component, tooltip
-    private static Method getAddTabMethod1() {
-        if (addTabMethod1 == null) {
-            try {
-                addTabMethod1 = JTabbedPane.class.getMethod(
-                                "addTab", // NOI18N
-                                new Class[] { String.class, Icon.class,
-                                      Component.class, String.class });
-            }
-            catch (NoSuchMethodException ex) { // should not happen
-                ex.printStackTrace();
-            }
-        }
-        return addTabMethod1;
-    }
-
-    // tab, icon, component
-    private static Method getAddTabMethod2() {
-        if (addTabMethod2 == null) {
-            try {
-                addTabMethod2 = JTabbedPane.class.getMethod(
-                                "addTab", // NOI18N
-                                new Class[] { String.class, Icon.class,
-                                              Component.class });
-            }
-            catch (NoSuchMethodException ex) { // should not happen
-                ex.printStackTrace();
-            }
-        }
-        return addTabMethod2;
-    }
-
-    // tab, component
-    private static Method getAddTabMethod3() {
-        if (addTabMethod3 == null) {
-            try {
-                addTabMethod3 = JTabbedPane.class.getMethod(
-                                "addTab", // NOI18N
-                                new Class[] { String.class, Component.class });
-            }
-            catch (NoSuchMethodException ex) { // should not happen
-                ex.printStackTrace();
-            }
-        }
-        return addTabMethod3;
-    }
-
-    // ----------
+  // ----------
 
     /** LayoutConstraints implementation for managing JTabbedPane tab
      * parameters.
@@ -367,31 +290,12 @@ public class JTabbedPaneSupport extends AbstractLayoutSupport {
 
         private FormProperty[] properties;
 
-        private CodeExpression containerExpression;
-        private CodeExpression componentExpression;
-        private CodeGroup componentCode;
-        private CodeExpression[] propertyExpressions;
-
-        public TabConstraints(String title) {
+      public TabConstraints(String title) {
             this.title = title;
-        }
-
-        public TabConstraints(String title, Icon icon, String toolTip) {
-            this.title = title;
-            this.icon = icon;
-            this.toolTip = toolTip;
-        }
-
-        public String getTitle() { 
-            return title;
-        }
+      }
 
         public Icon getIcon() {
             return icon;
-        }
-
-        public String getToolTip() {
-            return toolTip;
         }
 
         // -----------
@@ -422,13 +326,6 @@ public class JTabbedPaneSupport extends AbstractLayoutSupport {
                                 realValue = ((FormDesignValue)value).getDescription();
                             return realValue;
                         }
-
-                        @Override
-                        protected void propertyValueChanged(Object old, Object current) {
-                            if (isChangeFiring())
-                                updateCode();
-                            super.propertyValueChanged(old, current);
-                        }
                     },
 
                     new FormProperty("TabConstraints.tabIcon", // NOI18N
@@ -454,13 +351,6 @@ public class JTabbedPaneSupport extends AbstractLayoutSupport {
                         @Override
                         public Object getDefaultValue() {
                             return null;
-                        }
-
-                        @Override
-                        protected void propertyValueChanged(Object old, Object current) {
-                            if (isChangeFiring())
-                                updateCode();
-                            super.propertyValueChanged(old, current);
                         }
                     },
 
@@ -496,13 +386,6 @@ public class JTabbedPaneSupport extends AbstractLayoutSupport {
                         public Object getDefaultValue() {
                             return null;
                         }
-
-                        @Override
-                        protected void propertyValueChanged(Object old, Object current) {
-                            if (isChangeFiring())
-                                updateCode();
-                            super.propertyValueChanged(old, current);
-                        }
                     }
                 };
 
@@ -529,69 +412,5 @@ public class JTabbedPaneSupport extends AbstractLayoutSupport {
 
         // --------
 
-        private void createComponentCode(CodeGroup compCode,
-                                         CodeExpression contExp,
-                                         CodeExpression compExp,
-                                         boolean update)
-        {
-            this.componentCode = compCode;
-            this.containerExpression = contExp;
-            this.componentExpression = compExp;
-            this.propertyExpressions = null;
-            if (update) {
-                updateCode();
-            }
-        }
-
-        private void updateCode() {
-            if (componentCode == null)
-                return;
-
-            CodeStructure.removeStatements(
-                componentCode.getStatementsIterator());
-            componentCode.removeAll();
-
-            getProperties();
-
-            Method addTabMethod;
-            CodeExpression[] params;
-
-            if (properties[2].isChanged()) {
-                addTabMethod = getAddTabMethod1();
-                params = new CodeExpression[] { getPropertyExpression(0), // tab
-                                                getPropertyExpression(1), // icon
-                                                componentExpression,
-                                                getPropertyExpression(2) }; // tooltip
-            }
-            else if (properties[1].isChanged()) {
-                addTabMethod = getAddTabMethod2();
-                params = new CodeExpression[] { getPropertyExpression(0), // tab
-                                                getPropertyExpression(1), // icon
-                                                componentExpression };
-            }
-            else { // tab
-                addTabMethod = getAddTabMethod3();
-                params = new CodeExpression[] { getPropertyExpression(0), // tab
-                                                componentExpression };
-            }
-
-            CodeStatement addTabStatement = CodeStructure.createStatement(
-                                                          containerExpression,
-                                                          addTabMethod,
-                                                          params);
-            componentCode.addStatement(addTabStatement);
-        }
-
-        private CodeExpression getPropertyExpression(int index) {
-            if (propertyExpressions == null) {
-                propertyExpressions = new CodeExpression[properties.length];
-                for (int i=0; i < properties.length; i++) {
-                    propertyExpressions[i] =
-                        componentExpression.getCodeStructure().createExpression(
-                            FormCodeSupport.createOrigin(properties[i]));
-                }
-            }
-            return propertyExpressions[index];
-        }
     }
 }

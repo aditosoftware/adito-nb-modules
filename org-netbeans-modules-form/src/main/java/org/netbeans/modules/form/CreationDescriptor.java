@@ -48,7 +48,6 @@ import java.util.*;
 import java.lang.reflect.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.netbeans.modules.form.codestructure.*;
 
 /**
  * @author Tomas Pavek
@@ -56,11 +55,7 @@ import org.netbeans.modules.form.codestructure.*;
 
 public class CreationDescriptor {
 
-    // style flags - for finding best creator for a set or properties
-    public static final int CHANGED_ONLY = 1;
-    public static final int PLACE_ALL = 2;
-
-    public interface Creator {
+  public interface Creator {
 
         public int getParameterCount();
 
@@ -72,7 +67,6 @@ public class CreationDescriptor {
             throws InstantiationException, IllegalAccessException,
                    IllegalArgumentException, InvocationTargetException;
 
-      public CodeExpressionOrigin getCodeOrigin(CodeExpression[] params);
     }
 
     private Class describedClass;
@@ -223,19 +217,7 @@ public class CreationDescriptor {
         return creators.toArray(new Creator[creators.size()]);
     }
 
-    public Creator findBestCreator(FormProperty[] properties, int style) {
-        if (creators == null)
-            return null;
-
-        Creator[] allCreators = getCreators();
-        int[] evals = CreationFactory.evaluateCreators(
-                        allCreators , properties, (style & CHANGED_ONLY) != 0);
-        int best = CreationFactory.getBestCreator(
-                     allCreators , properties, evals, (style & PLACE_ALL) != 0);
-        return allCreators [best];
-    }
-
-    public Object createDefaultInstance() throws InstantiationException,
+  public Object createDefaultInstance() throws InstantiationException,
                                                  IllegalAccessException,
                                                  IllegalArgumentException,
                                                  InvocationTargetException,
@@ -337,10 +319,6 @@ public class CreationDescriptor {
             return constructor.newInstance(paramValues);
         }
 
-      @Override
-        public CodeExpressionOrigin getCodeOrigin(CodeExpression[] params) {
-            return CodeStructure.createOrigin(constructor, params);
-        }
     }
     
     static class MethodCreator implements Creator {
@@ -399,11 +377,6 @@ public class CreationDescriptor {
             return ret;
         }
 
-      @Override
-        public CodeExpressionOrigin getCodeOrigin(CodeExpression[] params) {
-            // nobody cares ...
-            return null; 
-        }
-    }    
+    }
 
 }

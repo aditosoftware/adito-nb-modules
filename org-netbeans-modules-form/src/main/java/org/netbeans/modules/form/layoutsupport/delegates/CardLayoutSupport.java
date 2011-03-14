@@ -46,11 +46,10 @@ package org.netbeans.modules.form.layoutsupport.delegates;
 
 import java.awt.*;
 
+import org.netbeans.modules.form.*;
 import org.openide.nodes.Node;
 
 import org.netbeans.modules.form.layoutsupport.*;
-import org.netbeans.modules.form.codestructure.*;
-import org.netbeans.modules.form.FormProperty;
 
 /**
  * Support class for CardLayout. This support uses fictive layout constraints
@@ -75,25 +74,25 @@ public class CardLayoutSupport extends AbstractLayoutSupport {
     /** Adds new components to the layout. This is done just at the metadata
      * level, no real components but their CodeExpression representations
      * are added.
-     * @param newCompExpressions array of CodeExpression objects representing the
+     * @param components array of CodeExpression objects representing the
      *        components to be accepted
      * @param newConstraints array of layout constraints of the components
      * @param index position at which the components should be added (inserted);
      *        if -1, the components should be added at the end
      */
     @Override
-    public void addComponents(CodeExpression[] newCompExpressions,
+    public void addComponents(RADVisualComponent[] components,
                               LayoutConstraints[] newConstraints,
                               int index)
     {
         // same functionality as in AbstractLayoutSupport...
-        super.addComponents(newCompExpressions, newConstraints, index);
+        super.addComponents(components, newConstraints, index);
 
         // ...just set the last added component as the active card
         if (index < 0)
             index = getComponentCount() - 1;
         else
-            index += newCompExpressions.length - 1;
+            index += components.length - 1;
 
         if (currentCard == null && index >= 0 && index < getComponentCount())
             currentCard = (CardConstraints) getConstraints(index);
@@ -204,36 +203,7 @@ public class CardLayoutSupport extends AbstractLayoutSupport {
 
     // ---------
 
-  /** Called from createComponentCode method, creates code for a component
-     * layout constraints (opposite to readConstraintsCode).
-     *
-     *
-     *
-     *
-     *
-     *
-     * @param constrCode CodeGroup to be filled with constraints code; not
-     *        needed here String (used as the constraints object) is just
-     *        a single code expression
-     * @param constr layout constraints metaobject representing the constraints
-     * @param compExp CodeExpression object representing the component; not
-     *        needed here
-     * @return created CodeExpression representing the layout constraints
-     */
-    @Override
-    protected CodeExpression createConstraintsCode(CodeGroup constrCode,
-                                                   LayoutConstraints constr,
-                                                   CodeExpression compExp,
-                                                   int index)
-    {
-        if (!(constr instanceof CardConstraints))
-            return null; // should not happen
-
-        return getCodeStructure().createExpression(
-                   FormCodeSupport.createOrigin(constr.getProperties()[0]));
-    }
-
-    /** This method is called to get a default component layout constraints
+  /** This method is called to get a default component layout constraints
      * metaobject in case it is not provided (e.g. in addComponents method).
      * @return the default LayoutConstraints object for the supported layout
      */

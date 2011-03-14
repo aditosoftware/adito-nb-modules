@@ -51,7 +51,6 @@ import java.lang.reflect.Method;
 import org.openide.util.ImageUtilities;
 
 import org.netbeans.modules.form.layoutsupport.*;
-import org.netbeans.modules.form.codestructure.*;
 
 /**
  * Support for null layout manager.
@@ -89,26 +88,6 @@ public class NullLayoutSupport extends AbsoluteLayoutSupport {
               String icon32URL = "org/netbeans/modules/form/layoutsupport/resources/NullLayout32.gif";
               return ImageUtilities.loadImage(icon32URL);
         }
-    }
-
-    /** Gets code for setting up one component's constraints and adding the
-     * component to the layout (container).
-     * @return one component's layout code
-     */
-    @Override
-    public CodeGroup getComponentCode(int index) {
-        // hack: be sure that the constraints object is associated with the
-        // primary component (to be able to get its preferred size)
-        LayoutConstraints constr = getConstraints(index);
-        if (constr instanceof AbsoluteLayoutConstraints) {
-            AbsoluteLayoutConstraints absConstr =
-                (AbsoluteLayoutConstraints) constr;
-            if (absConstr.refComponent == null)
-                absConstr.refComponent =
-                    getLayoutContext().getPrimaryComponent(index);
-        }
-
-        return super.getComponentCode(index);
     }
 
     /** Sets up the layout (without adding components) on a real container,
@@ -163,46 +142,7 @@ public class NullLayoutSupport extends AbsoluteLayoutSupport {
 
     // ---------
 
-  /** Creates code for a component added to the layout (opposite to
-     * readComponentCode method). As well as for readComponentCode - null
-     * layout requires the components to be initailized with setBounds call
-     * instead of using constraints object, so this method must be overridden
-     * (from AbstractLayoutSupport).
-     * @param componentCode CodeGroup to be filled with complete component code
-     *        (code for initializing the layout constraints and adding the
-     *        component to the layout)
-     * @param compExp CodeExpression object representing component
-     * @param index position of the component in the layout
-     */
-    @Override
-    protected void createComponentCode(CodeGroup componentCode,
-                                       CodeExpression compExp,
-                                       int index)
-    {
-        // create code for "add" method
-        componentCode.addStatement(
-                CodeStructure.createStatement(
-                        getActiveContainerCodeExpression(),
-                        getSimpleAddMethod(),
-                        new CodeExpression[] { compExp }));
-
-        // create code for "setBounds" method
-        LayoutConstraints constr = getConstraints(index);
-        if (constr instanceof AbsoluteLayoutConstraints) {
-            AbsoluteLayoutConstraints absConstr =
-                (AbsoluteLayoutConstraints) constr;
-            absConstr.nullMode = true;
-            absConstr.refComponent = getLayoutContext().getPrimaryComponent(index);
-
-            componentCode.addStatement(
-                CodeStructure.createStatement(
-                    compExp,
-                    getSetBoundsMethod(),
-                    absConstr.createPropertyExpressions(getCodeStructure(), 0)));
-        }
-    }
-
-    private static Method getSetBoundsMethod() {
+  private static Method getSetBoundsMethod() {
         if (setBoundsMethod == null) {
             try {
                 setBoundsMethod = Component.class.getMethod(
