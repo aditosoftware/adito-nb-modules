@@ -50,7 +50,7 @@ import java.util.ArrayList;
 import java.lang.reflect.Method;
 import java.util.EnumMap;
 import java.util.Map;
-import org.netbeans.modules.form.RADVisualComponent.MenuType;
+
 import org.netbeans.modules.form.fakepeer.FakePeerSupport;
 
 import org.netbeans.modules.form.layoutsupport.*;
@@ -92,7 +92,7 @@ public class RADVisualContainer extends RADVisualComponent implements ComponentC
             catch (Exception ex) {
                 // [not reported - but very unlikely to happen - only for new container with custom layout]
                 ErrorManager.getDefault().notify(ErrorManager.INFORMATIONAL, ex);
-                layoutSupport.setUnknownLayoutDelegate(false);
+                layoutSupport.setUnknownLayoutDelegate();
             }
         }
     }
@@ -100,7 +100,7 @@ public class RADVisualContainer extends RADVisualComponent implements ComponentC
     public void setLayoutSupportDelegate(LayoutSupportDelegate layoutDelegate)
         throws Exception
     {
-        layoutSupport.setLayoutDelegate(layoutDelegate,false);
+        layoutSupport.setLayoutDelegate(layoutDelegate);
         setLayoutNodeReference(null);
     }
 
@@ -137,7 +137,7 @@ public class RADVisualContainer extends RADVisualComponent implements ComponentC
         else {
             if (layoutSupport != null) { // clean the layout delegate and related code structre objects
                 try {
-                    layoutSupport.setLayoutDelegate(null, false);
+                    layoutSupport.setLayoutDelegate(null);
                 } catch (Exception ex) {
                     ErrorManager.getDefault().notify(ErrorManager.INFORMATIONAL, ex);
                 }

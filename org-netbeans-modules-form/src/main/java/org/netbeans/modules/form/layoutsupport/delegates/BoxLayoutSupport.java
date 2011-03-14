@@ -299,29 +299,7 @@ public class BoxLayoutSupport extends AbstractLayoutSupport
         }
     }
 
-    /** Creates code structures for a new layout manager (opposite to
-     * readInitLayoutCode). As the BoxLayout is not a bean, this method must
-     * override from AbstractLayoutSupport.
-     * @param layoutCode CodeGroup to be filled with relevant
-     *        initialization code; not needed here because BoxLayout is
-     *        represented only by a single constructor code expression and
-     *        no statements
-     * @return new CodeExpression representing the BoxLayout
-     */
-    @Override
-    protected CodeExpression createInitLayoutCode(CodeGroup layoutCode) {
-        CodeStructure codeStructure = getCodeStructure();
-
-        CodeExpression[] params = new CodeExpression[2];
-        params[0] = getLayoutContext().getContainerDelegateCodeExpression();
-        params[1] = codeStructure.createExpression(
-                        FormCodeSupport.createOrigin(getProperties()[0]));
-
-        return codeStructure.createExpression(getBoxLayoutConstructor(),
-                                              params);
-    }
-
-    /** Since BoxLayout is not a bean, we must specify its properties
+  /** Since BoxLayout is not a bean, we must specify its properties
      * explicitly. This method is called from getPropertySets() implementation
      * to obtain the default property set for the layout (assuming there's only
      * one property set). So it woul be also possible to override (more

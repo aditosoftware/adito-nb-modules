@@ -75,9 +75,9 @@ public class CardLayoutSupport extends AbstractLayoutSupport {
     /** Adds new components to the layout. This is done just at the metadata
      * level, no real components but their CodeExpression representations
      * are added.
-     * @param compExpressions array of CodeExpression objects representing the
+     * @param newCompExpressions array of CodeExpression objects representing the
      *        components to be accepted
-     * @param constraints array of layout constraints of the components
+     * @param newConstraints array of layout constraints of the components
      * @param index position at which the components should be added (inserted);
      *        if -1, the components should be added at the end
      */
@@ -204,32 +204,14 @@ public class CardLayoutSupport extends AbstractLayoutSupport {
 
     // ---------
 
-    /** This method is called from readComponentCode method to read layout
-     * constraints of a component from code. It is just a simple String for
-     * CardLayout (the name of the card).
-     * @param constrExp CodeExpression object of the constraints (taken from
-     *        add method in the code)
-     * @param constrCode CodeGroup to be filled with the relevant constraints
-     *        initialization code; not needed here because String is just
-     *        a single code expression
-     * @param compExp CodeExpression of the component for which the constraints
-     *        are read (not needed here)
-     * @return LayoutConstraints based on information read form code
-     */
-    @Override
-    protected LayoutConstraints readConstraintsCode(CodeExpression constrExp,
-                                                    CodeGroup constrCode,
-                                                    CodeExpression compExp)
-    {
-        CardConstraints constr = new CardConstraints("card"); // NOI18N
-        FormCodeSupport.readPropertyExpression(constrExp,
-                                               constr.getProperties()[0],
-                                               false);
-        return constr;
-    }
-
-    /** Called from createComponentCode method, creates code for a component
+  /** Called from createComponentCode method, creates code for a component
      * layout constraints (opposite to readConstraintsCode).
+     *
+     *
+     *
+     *
+     *
+     *
      * @param constrCode CodeGroup to be filled with constraints code; not
      *        needed here String (used as the constraints object) is just
      *        a single code expression

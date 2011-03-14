@@ -71,11 +71,7 @@ final class DefaultCodeExpression implements CodeExpression {
         setOrigin(origin);
     }
 
-    DefaultCodeExpression(CodeStructure codeStructure) {
-        this.codeStructure = codeStructure;
-    }
-
-    // -------
+  // -------
 
     @Override
     public CodeStructure getCodeStructure() {

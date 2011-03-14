@@ -806,7 +806,7 @@ public class MetaComponentCreator {
             try {
 		            newMetaCont.setOldLayoutSupport(true);
                 LayoutSupportManager laysup = newMetaCont.getLayoutSupport();
-                knownLayout = laysup.prepareLayoutDelegate(false, false);
+                knownLayout = laysup.prepareLayoutDelegate(false);
 
                 if ((knownLayout && !laysup.isDedicated() && laysup.isSpecialLayout() && formModel.isFreeDesignDefaultLayout())
                     || (!knownLayout && SwingLayoutBuilder.isRelevantContainer(laysup.getPrimaryContainerDelegate())))
@@ -843,7 +843,7 @@ public class MetaComponentCreator {
                     em.notify(layoutEx);
                 }
 
-                newMetaCont.getLayoutSupport().setUnknownLayoutDelegate(false);
+                newMetaCont.getLayoutSupport().setUnknownLayoutDelegate();
             }
         }
 

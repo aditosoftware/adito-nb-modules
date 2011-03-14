@@ -363,36 +363,8 @@ public class AbsoluteLayoutSupport extends AbstractLayoutSupport {
 
     // -------
 
-    /** This method is called from readComponentCode method to read layout
-     * constraints of a component from code (AbsoluteConstraints in this case).
-     * @param constrExp CodeExpression object of the constraints (taken from
-     *        add method in the code)
-     * @param constrCode CodeGroup to be filled with the relevant constraints
-     *        initialization code; not needed here because AbsoluteConstraints
-     *        object is represented only by a single code expression (based on
-     *        constructor) and no statements
-     * @param compExp CodeExpression of the component for which the constraints
-     *        are read (not needed here)
-     * @return LayoutConstraints based on information read form code
-     */
-    @Override
-    protected LayoutConstraints readConstraintsCode(CodeExpression constrExp,
-                                                    CodeGroup constrCode,
-                                                    CodeExpression compExp)
-    {
-        AbsoluteLayoutConstraints constr =
-            new AbsoluteLayoutConstraints(0, 0, -1, -1);
-
-        CodeExpression[] params = constrExp.getOrigin().getCreationParameters();
-        if (params.length == 4) {
-            // reading is done in AbsoluteLayoutConstraints
-            constr.readPropertyExpressions(params, 0);
-        }
-
-        return constr;
-    }
-
-    /** Called from createComponentCode method, creates code for a component
+    /**
+     * Called from createComponentCode method, creates code for a component
      * layout constraints (opposite to readConstraintsCode).
      * @param constrCode CodeGroup to be filled with constraints code; not
      *        needed here because AbsoluteConstraints object is represented

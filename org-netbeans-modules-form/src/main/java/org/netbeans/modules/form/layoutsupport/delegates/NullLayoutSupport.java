@@ -46,7 +46,6 @@ package org.netbeans.modules.form.layoutsupport.delegates;
 
 import java.awt.*;
 import java.beans.*;
-import java.util.*;
 import java.lang.reflect.Method;
 
 import org.openide.util.ImageUtilities;
@@ -164,63 +163,7 @@ public class NullLayoutSupport extends AbsoluteLayoutSupport {
 
     // ---------
 
-    /** Creates code structures for a new layout manager (opposite to
-     * readInitLayoutCode).
-     * @param initLayoutCode CodeGroup to be filled with relevant
-     *        initialization code
-     * @return created CodeExpression representing the layout manager
-     *         (so representing null value in this case)
-     */
-    @Override
-    protected CodeExpression createInitLayoutCode(CodeGroup layoutCode) {
-        return getCodeStructure().createNullExpression(LayoutManager.class);
-    }
-
-    /** This method is used for scanning code structures and recognizing
-     * components added to containers and their constraints. It's called from
-     * initialize method. When a relevant code statement is found, then the
-     * CodeExpression of component is get and added to component, and also the
-     * layout constraints information is read. The special thing for null
-     * layout is that components are initailized with setBounds call instead of
-     * using constraints object, so we must override the reading process from
-     * AbstractLayoutSupport.
-     * @param statement CodeStatement to be tested if it contains relevant code
-     * @param componentCode CodeGroup to be filled with all component code
-     * @return CodeExpression representing found component; null if the
-     *         statement is not relevant
-     */
-    @Override
-    protected CodeExpression readComponentCode(CodeStatement statement,
-                                               CodeGroup componentCode)
-    {
-        if (getSimpleAddMethod().equals(statement.getMetaObject())) {
-            CodeExpression compExp = statement.getStatementParameters()[0];
-            componentCode.addStatement(statement);
-
-            AbsoluteLayoutConstraints constr =
-                new AbsoluteLayoutConstraints(0, 0, -1, -1);
-            constr.nullMode = true;
-//            constr.refComponent = getLayoutContext().getPrimaryComponent(index);
-
-            // search for setBounds statement on component
-            Iterator it = CodeStructure.getDefinedStatementsIterator(compExp);
-            CodeStatement[] statements = CodeStructure.filterStatements(
-                                                it, getSetBoundsMethod());
-            if (statements.length > 0) {
-                CodeStatement boundsStatement =
-                    statements[statements.length-1];
-                constr.readPropertyExpressions(
-                    boundsStatement.getStatementParameters(), 0);
-                componentCode.addStatement(boundsStatement);
-            }
-            getConstraintsList().add(constr);
-
-            return compExp;
-        }
-        return null;
-    }
-
-    /** Creates code for a component added to the layout (opposite to
+  /** Creates code for a component added to the layout (opposite to
      * readComponentCode method). As well as for readComponentCode - null
      * layout requires the components to be initailized with setBounds call
      * instead of using constraints object, so this method must be overridden

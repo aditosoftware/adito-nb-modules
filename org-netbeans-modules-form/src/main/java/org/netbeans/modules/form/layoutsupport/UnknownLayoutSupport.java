@@ -44,8 +44,6 @@
 
 package org.netbeans.modules.form.layoutsupport;
 
-import org.netbeans.modules.form.codestructure.CodeGroup;
-
 /**
  * This class is used internally to provide basic support for containers
  * with unknown layout. Used when no suitable LayoutSupportDelegate is found.
@@ -60,7 +58,4 @@ class UnknownLayoutSupport extends AbstractLayoutSupport {
         return null;
     }
 
-    @Override
-    protected void readLayoutCode(CodeGroup layoutCode) {
-    }
 }

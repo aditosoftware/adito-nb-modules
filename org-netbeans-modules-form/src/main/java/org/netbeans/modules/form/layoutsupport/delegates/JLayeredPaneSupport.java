@@ -47,7 +47,6 @@ package org.netbeans.modules.form.layoutsupport.delegates;
 import java.awt.*;
 import javax.swing.*;
 import java.beans.*;
-import java.util.Iterator;
 import java.lang.reflect.Method;
 
 import org.openide.nodes.*;
@@ -132,46 +131,10 @@ public class JLayeredPaneSupport extends AbsoluteLayoutSupport {
 
     // ------
 
-    /** This method is called from readComponentCode method to read layout
-     * constraints of a component from code.
-     * @param constrExp CodeExpression object of the constraints (taken from
-     *        add method in the code)
-     * @param constrCode CodeGroup to be filled with the relevant constraints
-     *        initialization code
-     * @param compExp CodeExpression of the component for which the constraints
-     *        are read
-     * @return LayoutConstraints based on information read form code
-     */
-    @Override
-    protected LayoutConstraints readConstraintsCode(CodeExpression constrExp,
-                                                    CodeGroup constrCode,
-                                                    CodeExpression compExp)
-    {
-        LayeredConstraints constr = new LayeredConstraints(0, 0, 0, -1, -1);
-//        constr.refComponent = getLayoutContext().getPrimaryComponent(index);
-
-        Iterator it = CodeStructure.getDefinedStatementsIterator(compExp);
-        CodeStatement[] statements = CodeStructure.filterStatements(
-                                            it, getSetBoundsMethod());
-        if (statements.length > 0) {
-            CodeStatement boundsStatement = statements[statements.length-1];
-            constr.readPropertyExpressions(
-                       boundsStatement.getStatementParameters(), 1);
-            constrCode.addStatement(boundsStatement);
-        }
-
-        FormCodeSupport.readPropertyExpression(constrExp,
-                                               constr.getProperties()[0],
-                                               false);
-
-        return constr;
-    }
-
-    /** Creates code for a component added to the layout (opposite to
+  /** Creates code for a component added to the layout (opposite to
      * readComponentCode method).
-     * @param componentCode CodeGroup to be filled with complete component code
-     *        (code for initializing the layout constraints and adding the
-     *        component to the layout)
+
+
      * @param compExp CodeExpression object representing component
      * @param index position of the component in the layout
      */

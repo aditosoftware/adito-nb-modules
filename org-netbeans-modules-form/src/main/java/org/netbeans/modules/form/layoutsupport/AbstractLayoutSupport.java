@@ -83,7 +83,7 @@ import org.netbeans.modules.form.codestructure.*;
  * example of using simple value constraints, AbsoluteLayoutSupport for complex
  * object constraints (created by constructor), GridBagLayoutSupport for complex
  * constraints with special initialization code.
- * 
+ *
  * @author Tomas Pavek
  */
 
@@ -92,9 +92,8 @@ public abstract class AbstractLayoutSupport implements LayoutSupportDelegate
 
     private static Method simpleAddMethod = null;
     private static Method addWithConstraintsMethod = null;
-    private static Method setLayoutMethod = null;
 
-    // ------
+  // ------
 
     private LayoutSupportContext layoutContext;
 
@@ -102,7 +101,7 @@ public abstract class AbstractLayoutSupport implements LayoutSupportDelegate
     private java.util.List<CodeGroup> componentCodeGroups;
     private java.util.List<LayoutConstraints> componentConstraints;
 
-    private BeanCodeManager layoutBeanCode;
+//    private BeanCodeManager layoutBeanCode;
     private CodeGroup setLayoutCode;
 
     private MetaLayout metaLayout;
@@ -119,26 +118,24 @@ public abstract class AbstractLayoutSupport implements LayoutSupportDelegate
      *    (lmInstance != null, fromCode == false),
      * (3) initialization from persistent code structure,
      *    (lmInstance == null, fromCode == true).
+     *
      * @param layoutContext provides a necessary context information for the
      *                      layout delegate
      * @param lmInstance LayoutManager instance for initialization (may be null)
-     * @param fromCode indicates whether to initialize from code structure
      * @exception Exception Exception occurred during initialization
      */
     @Override
     public void initialize(LayoutSupportContext layoutContext,
-                           LayoutManager lmInstance,
-                           boolean fromCode)
+                           LayoutManager lmInstance)
         throws Exception
     {
         if (this.layoutContext == layoutContext) {
             // already initialized - just reuse the delegate
             if (setLayoutCode != null)
                 setLayoutCode.removeAll();
-            else setLayoutCode =
-                     layoutContext.getCodeStructure().createCodeGroup();
+            else setLayoutCode = layoutContext.getCodeStructure().createCodeGroup();
 
-            readLayoutCode(setLayoutCode); //  reinstate layout code (for sure)
+//            readLayoutCode(setLayoutCode); //  reinstate layout code (for sure)
             return;
         }
 
@@ -161,34 +158,9 @@ public abstract class AbstractLayoutSupport implements LayoutSupportDelegate
         else metaLayout = null;
 
         // read layout code (if there's any)
-        readLayoutCode(setLayoutCode);
-
-        if (fromCode) {
-            // read components from code
-            CodeGroup componentCode = null;
-            Iterator it = CodeStructure.getDefinedStatementsIterator(
-                                          getActiveContainerCodeExpression());
-            while (it.hasNext()) {
-                if (componentCode == null)
-                    componentCode =
-                        layoutContext.getCodeStructure().createCodeGroup();
-
-                CodeStatement statement = (CodeStatement) it.next();
-                CodeExpression compExp = readComponentCode(statement,
-                                                            componentCode);
-                if (compExp != null) {
-                    componentCodeExpressions.add(compExp);
-                    componentCodeGroups.add(componentCode);
-                    componentCode = null;
-
-                    if (componentConstraints.size()
-                            < componentCodeExpressions.size())
-                        componentConstraints.add(null);
-                }
-            }
-        }
+//        readLayoutCode(setLayoutCode);
     }
-    
+
     protected void deriveChangedPropertiesFromInstance(MetaLayout metaLayout) {
     }
 
@@ -399,8 +371,8 @@ public abstract class AbstractLayoutSupport implements LayoutSupportDelegate
     {
         // as this method is called for each change, we update the layout
         // bean code here too
-        if (layoutBeanCode != null)
-            layoutBeanCode.updateCode();
+//        if (layoutBeanCode != null)
+//            layoutBeanCode.updateCode();
     }
 
     /** This method is called after a constraint property of some component
@@ -737,7 +709,7 @@ public abstract class AbstractLayoutSupport implements LayoutSupportDelegate
      *         implemented)
      */
     @Override
-    public boolean paintDragFeedback(Container container, 
+    public boolean paintDragFeedback(Container container,
                                      Container containerDelegate,
                                      Component component,
                                      LayoutConstraints newConstraints,
@@ -805,7 +777,7 @@ public abstract class AbstractLayoutSupport implements LayoutSupportDelegate
     {
         AbstractLayoutSupport clone = createLayoutSupportInstance();
         try {
-            clone.initialize(targetContext, null, false);
+            clone.initialize(targetContext, null);
         }
         catch (Exception ex) { // should not fail (not reading from code)
             ErrorManager.getDefault().notify(ErrorManager.INFORMATIONAL, ex);
@@ -909,55 +881,13 @@ public abstract class AbstractLayoutSupport implements LayoutSupportDelegate
             setLayoutCode.removeAll();
         else setLayoutCode = layoutContext.getCodeStructure().createCodeGroup();
 
-        layoutBeanCode = null;
+//        layoutBeanCode = null;
         metaLayout = null;
 
         allProperties = null;
     }
 
-    /** This method is used for "reading layout from code", called from
-     * initialize method. It recognizes relevant code which sets the layout
-     * manager on the container and reads the layout information from the code.
-     * This includes the code for setting up the layout manager itself and the
-     * code for setting the layout manger to container. For setting up just the
-     * layout manager bean, the method readInitLayoutCode is used.
-     * Reading components code is not done here.
-     * @param layoutCode CodeGroup to be filled with relevant layout code
-     * @see #readInitLayoutCode method
-     */
-    protected void readLayoutCode(CodeGroup layoutCode) {
-        if (isDedicated())
-            return;
-
-        CodeGroup initLayoutCode =
-            getCodeStructure().createCodeGroup();
-        CodeStatement setLayoutStatement = null;
-
-        Iterator it = CodeStructure.getDefinedStatementsIterator(
-                                        getActiveContainerCodeExpression());
-        CodeStatement[] statements = CodeStructure.filterStatements(
-                                                     it, getSetLayoutMethod());
-        if (statements.length > 0) { // read from code
-            setLayoutStatement = statements[0];
-            readInitLayoutCode(setLayoutStatement.getStatementParameters()[0],
-                               initLayoutCode);
-        }
-        else { // create new
-            CodeExpression layoutExp = createInitLayoutCode(initLayoutCode);
-            if (layoutExp != null)
-                setLayoutStatement = CodeStructure.createStatement(
-                         getActiveContainerCodeExpression(),
-                         getSetLayoutMethod(),
-                         new CodeExpression[] { layoutExp });
-        }
-
-        if (setLayoutStatement != null) {
-            layoutCode.addGroup(initLayoutCode);
-            layoutCode.addStatement(setLayoutStatement);
-        }
-    }
-
-    /** This method is called from readLayoutCode to read the layout manager
+  /** This method is called from readLayoutCode to read the layout manager
      * bean code (i.e. code for constructor and properties).
      * @param layoutExp CodeExpressin of the layout manager
      * @param initLayoutCode CodeGroup to be filled with relevant
@@ -969,97 +899,17 @@ public abstract class AbstractLayoutSupport implements LayoutSupportDelegate
         if (metaLayout == null)
             return;
 
-        layoutBeanCode = new BeanCodeManager(
-            getSupportedClass(),
-            getAllProperties(),
-            CreationDescriptor.PLACE_ALL | CreationDescriptor.CHANGED_ONLY,
-            // don't force empty constructor
-            // disable changes firing when properties are restored
-            layoutExp,
-            initLayoutCode);
+//        layoutBeanCode = new BeanCodeManager(
+//            getSupportedClass(),
+//            getAllProperties(),
+//            CreationDescriptor.PLACE_ALL | CreationDescriptor.CHANGED_ONLY,
+//            // don't force empty constructor
+//            // disable changes firing when properties are restored
+//            layoutExp,
+//            initLayoutCode);
     }
 
-    /** Creates code structures for a new layout manager (opposite to
-     * readInitLayoutCode).
-     * @param initLayoutCode CodeGroup to be filled with relevant
-     *        initialization code
-     * @return created CodeExpression representing the layout manager
-     */
-    protected CodeExpression createInitLayoutCode(CodeGroup initLayoutCode) {
-        if (metaLayout == null)
-            return null;
-
-        layoutBeanCode = new BeanCodeManager(
-            getSupportedClass(),
-            getAllProperties(),
-            CreationDescriptor.PLACE_ALL | CreationDescriptor.CHANGED_ONLY,
-            layoutContext.getCodeStructure(),
-            initLayoutCode);
-
-        return layoutBeanCode.getCodeExpression();
-    }
-
-    /** This method is used for scanning code structures and recognizing
-     * components added to containers and their constraints. It's called from
-     * initialize method. When a relevant code statement is found, then the
-     * CodeExpression of component is get and added to component, and also the
-     * layout constraints information is read (using separate
-     * readConstraintsCode method).
-     * @param statement CodeStatement to be tested if it contains relevant code
-     * @param componentCode CodeGroup to be filled with all component code
-     * @return CodeExpression representing found component; null if the
-     *         statement is not relevant
-     */
-    protected CodeExpression readComponentCode(CodeStatement statement,
-                                               CodeGroup componentCode)
-    {
-        CodeExpression compExp;
-        CodeGroup constrCode;
-        LayoutConstraints constr;
-
-        // look for Container.add(Component) or Container.add(Component, Object)
-        if (getSimpleAddMethod().equals(statement.getMetaObject())) {
-            compExp = statement.getStatementParameters()[0];
-            constrCode = null;
-            constr = null;
-        }
-        else if (getAddWithConstraintsMethod().equals(
-                                 statement.getMetaObject()))
-        {
-            CodeExpression[] params = statement.getStatementParameters();
-
-            compExp = params[0];
-            constrCode = getCodeStructure().createCodeGroup();
-            constr = readConstraintsCode(params[1], constrCode, compExp);
-        }
-        else return null;
-
-        componentConstraints.add(constr);
-        if (constrCode != null)
-            componentCode.addGroup(constrCode);
-        componentCode.addStatement(statement);
-
-        return compExp;
-    }
-
-    /** This method is called from readComponentCode method to read layout
-     * constraints of a component from code.
-     * @param constrExp CodeExpression object of the constraints (taken from
-     *        add method in the code)
-     * @param constrCode CodeGroup to be  filled with the relevant constraints
-     *        initialization code
-     * @param compExp CodeExpression of the component for which the constraints
-     *        are read
-     * @return LayoutConstraints based on information read form code
-     */
-    protected LayoutConstraints readConstraintsCode(CodeExpression constrExp,
-                                                    CodeGroup constrCode,
-                                                    CodeExpression compExp)
-    {
-        return null; // no default implementation possible
-    }
-
-    /** Creates code for a component added to the layout (opposite to
+  /** Creates code for a component added to the layout (opposite to
      * readComponentCode method).
      * @param componentCode CodeGroup to be filled with complete component code
      *        (code for initializing the layout constraints and adding the
@@ -1195,7 +1045,7 @@ public abstract class AbstractLayoutSupport implements LayoutSupportDelegate
 
         if (lm != null && metaLayout != null)
             metaLayout.updateInstance(lm);
-    
+
         layoutContext.updatePrimaryContainer();
     }
 
@@ -1248,23 +1098,4 @@ public abstract class AbstractLayoutSupport implements LayoutSupportDelegate
         return addWithConstraintsMethod;
     }
 
-    /** Gets java.lang.reflect.Method object representing
-     * Container.setLayout(LayoutManager) method. This is needed when working
-     * with code structures.
-     * @return java.lang.reflect.Method object representing
-     *         Container.setLayout(LayoutManager) method
-     */
-    protected static Method getSetLayoutMethod() {
-        if (setLayoutMethod == null) {
-            try {
-                setLayoutMethod = Container.class.getMethod(
-                                    "setLayout", // NOI18N
-                                    new Class[] { LayoutManager.class });
-            }
-            catch (NoSuchMethodException ex) { // should not happen
-                ex.printStackTrace();
-            }
-        }
-        return setLayoutMethod;
-    }
 }

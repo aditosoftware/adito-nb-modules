@@ -272,72 +272,7 @@ public class JTabbedPaneSupport extends AbstractLayoutSupport {
 
     // ---------
 
-    /** This method is used for scanning code structures and recognizing
-     * components added to containers and their constraints. It's called from
-     * initialize method. When a relevant code statement is found, then the
-     * CodeExpression of component is get and added to component, and also the
-     * layout constraints information is read.
-     * @param statement CodeStatement to be tested if it contains relevant code
-     * @param componentCode CodeGroup to be filled with all component code
-     * @return CodeExpression representing found component; null if the
-     *         statement is not relevant
-     */
-    @Override
-    protected CodeExpression readComponentCode(CodeStatement statement,
-                                               CodeGroup componentCode)
-    {
-        CodeExpression compExp;
-        int[] constrPropsIndices;
-        CodeExpression[] params = statement.getStatementParameters();
-
-        Object connectingObject = statement.getMetaObject();
-        if (getAddTabMethod1().equals(connectingObject)) {
-            compExp = params[2];
-            constrPropsIndices = new int[] { 0, 1, -1, 2 }; // tab, icon, tooltip
-        }
-        else if (getAddTabMethod2().equals(connectingObject)) {
-            compExp = params[2];
-            constrPropsIndices = new int[] { 0, 1, -1 }; // tab, icon
-        }
-        else if (getAddTabMethod3().equals(connectingObject)) {
-            compExp = params[1];
-            constrPropsIndices = new int[] { 0, -1 }; // tab
-        }
-        else return null;
-
-        TabConstraints constr = new TabConstraints("tab"); // NOI18N
-        Node.Property[] props = constr.getProperties();
-        for (int i=0; i < params.length; i++) {
-            if (params[i] != compExp) {
-                Node.Property prop = props[constrPropsIndices[i]];
-                Object comp = compExp.getOrigin().getMetaObject();
-                if ((prop instanceof FormProperty) && (comp instanceof RADComponent)) {
-                    // Issue 124533
-                    FormProperty fprop = (FormProperty)prop;
-                    RADComponent metacomp = (RADComponent)comp;
-                    fprop.setPropertyContext(new FormPropertyContext.Component(metacomp));
-                }
-                FormCodeSupport.readPropertyExpression(
-                                    params[i],
-                                    prop,
-                                    false);
-            }
-        }
-        getConstraintsList().add(constr);
-
-        componentCode.addStatement(statement);
-        
-        // Issue 129229
-        constr.createComponentCode(
-            componentCode,
-            getLayoutContext().getContainerCodeExpression(),
-            compExp,
-            false);
-
-        return compExp;
-    }
-
-    /** Creates code for a component added to the layout (opposite to
+  /** Creates code for a component added to the layout (opposite to
      * readComponentCode method).
      * @param componentCode CodeGroup to be filled with complete component code
      *        (code for initializing the layout constraints and adding the

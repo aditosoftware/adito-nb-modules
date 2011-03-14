@@ -74,18 +74,17 @@ public final class LayoutSupportManager implements LayoutSupportContext {
     private LayoutSupportDelegate layoutDelegate;
     private boolean needInit;
     private boolean initializeFromInstance;
-    private boolean initializeFromCode;
 
     private Node.PropertySet[] propertySets;
 
     private LayoutListener layoutListener;
 
-    private RADVisualContainer metaContainer;
+    private final RADVisualContainer metaContainer;
 
     private Container primaryContainer; // bean instance from metaContainer
     private Container primaryContainerDelegate; // container delegate for it
 
-    private CodeStructure codeStructure;
+    private final CodeStructure codeStructure;
 
     private CodeExpression containerCodeExpression;
     private CodeExpression containerDelegateCodeExpression;
@@ -106,10 +105,10 @@ public final class LayoutSupportManager implements LayoutSupportContext {
      * @return false if suitable layout delegate is not found
      * @throw IllegalArgumentException if the container instance is not empty
      */
-    public boolean prepareLayoutDelegate(boolean fromCode, boolean initialize)
+    public boolean prepareLayoutDelegate(boolean initialize)
         throws Exception
     {
-        LayoutSupportDelegate delegate = null;
+        LayoutSupportDelegate delegate;
         LayoutManager lmInstance = null;
 
         FormModel formModel = metaContainer.getFormModel();
@@ -122,7 +121,7 @@ public final class LayoutSupportManager implements LayoutSupportContext {
 
         if (layoutDelegateClass != null) {
             delegate = (LayoutSupportDelegate) layoutDelegateClass.newInstance();
-            if (!fromCode && !delegate.checkEmptyContainer(getPrimaryContainer())) {
+            if (!delegate.checkEmptyContainer(getPrimaryContainer())) {
                 RuntimeException ex = new IllegalArgumentException();
                 org.openide.ErrorManager.getDefault().annotate(
                     ex, AbstractLayoutSupport.getBundle().getString(
@@ -131,63 +130,34 @@ public final class LayoutSupportManager implements LayoutSupportContext {
             }
         }
         else {
-            // find a general layout delegate (for LayoutManager of the container)
-            if (fromCode) { // initialization from code
-                Iterator it = CodeStructure.getDefinedStatementsIterator(
-                                      getContainerDelegateCodeExpression());
-                CodeStatement[] statements =
-                    CodeStructure.filterStatements(
-                        it, AbstractLayoutSupport.getSetLayoutMethod());
-
-                if (statements.length > 0) { // setLayout method found
-                    CodeExpressionOrigin layoutOrigin =
-                        statements[0].getStatementParameters()[0].getOrigin();
-                    delegate = layoutRegistry.createSupportForLayout(
-                                                  layoutOrigin.getType());
-                    // handle special case of null layout
-                    if (delegate == null)
-                        if (layoutOrigin.getType() == LayoutManager.class
-                            && layoutOrigin.getCreationParameters().length == 0
-                            && layoutOrigin.getParentExpression() == null/*
-                            && "null".equals(layoutOrigin.getJavaCodeString( // NOI18N
-                                                                  null, null))*/)
-                        {
-                            delegate = new NullLayoutSupport();
-                        }
-                        else return false;
-                }
-            }
-
-            if (delegate == null) { // initialization from LayoutManager instance
-                Container contDel = getPrimaryContainerDelegate();
-                if (contDel.getComponentCount() == 0) {
-                    // we can still handle only empty containers ...
-                    lmInstance = contDel.getLayout();
-                    delegate = lmInstance != null ?
-                        layoutRegistry.createSupportForLayout(lmInstance.getClass()) :
-                        new NullLayoutSupport();
-                }
-                else {
-                    RuntimeException ex = new IllegalArgumentException();
-                    org.openide.ErrorManager.getDefault().annotate(
-                        ex, AbstractLayoutSupport.getBundle().getString(
-                                            "MSG_ERR_NonEmptyContainer")); // NOI18N
-                    throw ex;
-                }
-            }
+          // initialization from LayoutManager instance
+          Container contDel = getPrimaryContainerDelegate();
+          if (contDel.getComponentCount() == 0) {
+              // we can still handle only empty containers ...
+              lmInstance = contDel.getLayout();
+              delegate = lmInstance != null ?
+                  layoutRegistry.createSupportForLayout(lmInstance.getClass()) :
+                  new NullLayoutSupport();
+          }
+          else {
+              RuntimeException ex = new IllegalArgumentException();
+              org.openide.ErrorManager.getDefault().annotate(
+                  ex, AbstractLayoutSupport.getBundle().getString(
+                                      "MSG_ERR_NonEmptyContainer")); // NOI18N
+              throw ex;
+          }
         }
 
         if (delegate == null)
             return false;
 
         if (initialize) {
-            setLayoutDelegate(delegate, fromCode);
+            setLayoutDelegate(delegate);
         }
         else {
             layoutDelegate = delegate;
             needInit = true;
             initializeFromInstance = lmInstance != null;
-            initializeFromCode = fromCode;
         }
 
         return true;
@@ -197,22 +167,19 @@ public final class LayoutSupportManager implements LayoutSupportContext {
         if (layoutDelegate != null && needInit) {
             LayoutManager lmInstance = initializeFromInstance ?
                     getPrimaryContainerDelegate().getLayout() : null;
-            layoutDelegate.initialize(this, lmInstance, initializeFromCode);
+            layoutDelegate.initialize(this, lmInstance);
             fillLayout(null);
             getPropertySets(); // force properties and listeners creation
             needInit = false;
         }
     }
 
-    public void setLayoutDelegate(LayoutSupportDelegate newDelegate,
-                                  boolean fromCode)
-        throws Exception
+    public void setLayoutDelegate(LayoutSupportDelegate newDelegate) throws Exception
     {
         LayoutConstraints[] oldConstraints;
         LayoutSupportDelegate oldDelegate = layoutDelegate;
 
-        if (layoutDelegate != null
-                && (layoutDelegate != newDelegate || !fromCode))
+        if (layoutDelegate != null)
             oldConstraints = removeLayoutDelegate(true);
         else
             oldConstraints = null;
@@ -223,9 +190,8 @@ public final class LayoutSupportManager implements LayoutSupportContext {
 
         if (layoutDelegate != null) {
             try {
-                layoutDelegate.initialize(this, null, fromCode);
-                if (!fromCode)
-                    fillLayout(oldConstraints);
+                layoutDelegate.initialize(this, null);
+                fillLayout(oldConstraints);
                 getPropertySets(); // force properties and listeners creation
             }
             catch (Exception ex) {
@@ -242,21 +208,16 @@ public final class LayoutSupportManager implements LayoutSupportContext {
         return layoutDelegate;
     }
 
-    public void setUnknownLayoutDelegate(boolean fromCode) {
+    public void setUnknownLayoutDelegate() {
         try {
-            setLayoutDelegate(new UnknownLayoutSupport(), fromCode);
+            setLayoutDelegate(new UnknownLayoutSupport());
         }
         catch (Exception ex) { // nothing should happen, ignore
             ex.printStackTrace();
         }
     }
 
-    public boolean isUnknownLayout() {
-        return layoutDelegate == null
-               || layoutDelegate instanceof UnknownLayoutSupport;
-    }
-
-    public boolean isSpecialLayout() {
+  public boolean isSpecialLayout() {
         // Every standard layout manager has its own layout delegate.
         // Hence, the DefaultLayoutSupport is used by special layout managers only.
         return !(layoutDelegate instanceof DefaultLayoutSupport);
@@ -312,8 +273,7 @@ public final class LayoutSupportManager implements LayoutSupportContext {
 //        return layoutDelegate instanceof LayoutSupportArranging;
 //    }
 
-    private LayoutConstraints[] removeLayoutDelegate(
-                                    boolean extractConstraints)
+    private LayoutConstraints[] removeLayoutDelegate(boolean extractConstraints)
     {
         CodeGroup code = layoutDelegate.getLayoutCode();
         if (code != null)
@@ -479,26 +439,9 @@ public final class LayoutSupportManager implements LayoutSupportContext {
         return layoutDelegate.getSupportCustomizer();
     }
 
-    // code meta data
-    public CodeGroup getLayoutCode() {
-        return layoutDelegate.getLayoutCode();
-    }
-
-    public CodeGroup getComponentCode(int index) {
-        return layoutDelegate.getComponentCode(index);
-    }
-
-  public int getComponentCount() {
-        return layoutDelegate.getComponentCount();
-    }
-
-    // data validation
-    public void acceptNewComponents(RADVisualComponent[] components)
+  // data validation
+    public void acceptNewComponents()
     {
-        CodeExpression[] compExps = new CodeExpression[components.length];
-        for (int i=0; i < components.length; i++)
-            compExps[i] = components[i].getCodeExpression();
-
         layoutDelegate.acceptNewComponents();
     }
 

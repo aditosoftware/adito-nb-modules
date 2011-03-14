@@ -48,7 +48,7 @@ import java.awt.Component;
 import java.awt.Container;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import org.netbeans.modules.form.codestructure.CodeGroup;
+
 import org.netbeans.modules.form.layoutsupport.AbstractLayoutSupport;
 
 /**
@@ -72,11 +72,7 @@ public class MenuFakeSupport extends AbstractLayoutSupport {
         return false;
     }
 
-    @Override
-    protected void readLayoutCode(CodeGroup layoutCode) {
-    }
-
-    @Override
+  @Override
     public void addComponentsToContainer(Container container,
                                          Container containerDelegate,
                                          Component[] components,

@@ -349,47 +349,7 @@ public class JSplitPaneSupport extends AbstractLayoutSupport {
     
     // ------
 
-    /** This method is used for scanning code structures and recognizing
-     * components added to containers and their constraints. It's called from
-     * initialize method. When a relevant code statement is found, then the
-     * CodeExpression of component is get and added to component, and also the
-     * layout constraints information is read.
-     * @param statement CodeStatement to be tested if it contains relevant code
-     * @param componentCode CodeGroup to be filled with all component code
-     * @return CodeExpression representing found component; null if the
-     *         statement is not relevant
-     */
-    @Override
-    protected CodeExpression readComponentCode(CodeStatement statement,
-                                               CodeGroup componentCode)
-    {
-        CodeExpression[] params = statement.getStatementParameters();
-        if (params.length != 1)
-            return null;
-
-        String position = null;
-        Object connectingObject = statement.getMetaObject();
-        if (getSimpleAddMethod().equals(connectingObject)) {
-            position = getComponentCount() == 0 ? JSplitPane.LEFT : JSplitPane.RIGHT;
-        } else if (getSetLeftComponentMethod().equals(connectingObject)) {
-            position = JSplitPane.LEFT;
-        } else if (getSetRightComponentMethod().equals(connectingObject)) {
-            position = JSplitPane.RIGHT;
-        } else if (getSetTopComponentMethod().equals(connectingObject)) {
-            position = JSplitPane.TOP;
-        } else if (getSetBottomComponentMethod().equals(connectingObject)) {
-            position = JSplitPane.BOTTOM;
-        }
-
-        SplitConstraints constr = new SplitConstraints(position);
-        getConstraintsList().add(constr);
-
-        componentCode.addStatement(statement);
-
-        return params[0];
-    }
-
-    /** Creates code for a component added to the layout (opposite to
+  /** Creates code for a component added to the layout (opposite to
      * readComponentCode method).
      * @param componentCode CodeGroup to be filled with complete component code
      *        (code for initializing the layout constraints and adding the

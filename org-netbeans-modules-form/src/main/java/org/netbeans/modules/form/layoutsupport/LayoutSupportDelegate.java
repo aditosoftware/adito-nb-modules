@@ -85,15 +85,14 @@ public interface LayoutSupportDelegate {
      *    (lmInstance != null, fromCode == false),
      * (3) initialization from persistent code structure,
      *    (lmInstance == null, fromCode == true).
+     *
      * @param layoutContext provides a necessary context information for the
      *                      layout delegate
      * @param lmInstance LayoutManager instance for initialization (may be null)
-     * @param fromCode indicates whether to initialize from code structure
      * @exception Exception Exception occurred during initialization
      */
     void initialize(LayoutSupportContext layoutContext,
-                    LayoutManager lmInstance,
-                    boolean fromCode)
+                    LayoutManager lmInstance)
         throws Exception;
 
     /** Gets the supported layout manager or container class. Container class

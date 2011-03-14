@@ -180,7 +180,7 @@ public class AditoPersistenceManager extends PersistenceManager
         try
         {
           visualContainer.initSubComponents(childComponents);
-          layoutInitialized = layoutSupport.prepareLayoutDelegate(false, true);
+          layoutInitialized = layoutSupport.prepareLayoutDelegate(true);
         }
         catch (Exception ex)
         {
@@ -248,7 +248,7 @@ public class AditoPersistenceManager extends PersistenceManager
 //      }
 
       if (!layoutInitialized)
-        layoutSupport.setUnknownLayoutDelegate(false);
+        layoutSupport.setUnknownLayoutDelegate();
 
       /*if (layoutSupport != null && newLayout == null)   // TODO ?
       {
@@ -511,7 +511,7 @@ public class AditoPersistenceManager extends PersistenceManager
     try
     {
       LayoutSupportDelegate delegate = new AditoLayoutSupport();
-      layoutSupport.setLayoutDelegate(delegate, false);
+      layoutSupport.setLayoutDelegate(delegate);
 //      CodeExpression layoutExp = layoutSupport.getCodeStructure().createExpression(
 //          AditoAnchorLayout.class.getConstructor(new Class[0]),
 //          CodeStructure.EMPTY_PARAMS);

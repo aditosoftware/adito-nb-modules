@@ -223,41 +223,6 @@ class CodeSupport {
 
     }
 
-  static final class ValueOrigin implements CodeExpressionOrigin {
-        private final Class expressionType;
-        private final Object expressionValue;
-
-      public ValueOrigin(Class type, Object value) {
-            expressionType = type;
-            expressionValue = value;
-      }
-
-        @Override
-        public Class getType() {
-            return expressionType;
-        }
-
-        @Override
-        public CodeExpression getParentExpression() {
-            return null;
-        }
-
-        @Override
-        public Object getMetaObject() {
-            return null;
-        }
-
-        @Override
-        public Object getValue() {
-            return expressionValue;
-        }
-
-        @Override
-        public CodeExpression[] getCreationParameters() {
-            return CodeStructure.EMPTY_PARAMS;
-        }
-
-    }
 
     // --------
     // implementation of CodeGroup interface
@@ -272,19 +237,9 @@ class CodeSupport {
             statements.add(statement);
         }
 
-        @Override
-        public void addStatement(int index, CodeStatement statement) {
-            statements.add(index, statement);
-        }
-
-        @Override
+      @Override
         public void addGroup(CodeGroup group) {
             statements.add(group);
-        }
-
-      @Override
-        public void remove(Object object) {
-            statements.remove(object);
         }
 
       @Override

@@ -78,9 +78,6 @@ public interface CodeVariable {
 
     public int getType();
 
-    public String getDeclaredTypeParameters();
+  public String getName();
 
-    public String getName();
-
-    public CodeStatement getAssignment(CodeExpression expression);
 }

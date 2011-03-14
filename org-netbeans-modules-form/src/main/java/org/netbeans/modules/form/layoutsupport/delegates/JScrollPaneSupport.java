@@ -228,33 +228,7 @@ public class JScrollPaneSupport extends AbstractLayoutSupport {
         return getLayoutContext().getContainerCodeExpression();
     }
 
-    /** This method is used for scanning code structures and recognizing
-     * components added to containers and their constraints. It's called from
-     * initialize method. When a relevant code statement is found, then the
-     * CodeExpression of component is get and added to component, and also the
-     * layout constraints information is read (using separate
-     * readConstraintsCode method).
-     * @param statement CodeStatement to be tested if it contains relevant code
-     * @param componentCode CodeGroup to be filled with all component code
-     * @return CodeExpression representing found component; null if the
-     *         statement is not relevant
-     */
-    @Override
-    protected CodeExpression readComponentCode(CodeStatement statement,
-                                               CodeGroup componentCode)
-    {
-        if (getSetViewportViewMethod().equals(statement.getMetaObject())
-            || getSimpleAddMethod().equals(statement.getMetaObject()))
-        {
-            componentCode.addStatement(statement);
-            getConstraintsList().add(null); // no constraints
-            return statement.getStatementParameters()[0];
-        }
-
-        return null;
-    }
-
-    /** Creates code for a component added to the layout (opposite to
+  /** Creates code for a component added to the layout (opposite to
      * readComponentCode method).
      * @param componentCode CodeGroup to be filled with complete component code
      *        (code for initializing the layout constraints and adding the

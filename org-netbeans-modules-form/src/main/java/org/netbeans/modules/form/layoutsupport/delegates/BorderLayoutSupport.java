@@ -301,32 +301,14 @@ public class BorderLayoutSupport extends AbstractLayoutSupport
 
     // ----------
 
-    /** This method is called from readComponentCode method to read layout
-     * constraints of a component from code. It is just a simple String for
-     * BorderLayout.
-     * @param constrExp CodeExpression object of the constraints (taken from
-     *        add method in the code)
-     * @param constrCode CodeGroup to be filled with the relevant constraints
-     *        initialization code; not needed here because String is just
-     *        a single code expression
-     * @param compExp CodeExpression of the component for which the constraints
-     *        are read (not needed here)
-     * @return LayoutConstraints based on information read form code
-     */
-    @Override
-    protected LayoutConstraints readConstraintsCode(CodeExpression constrExp,
-                                                    CodeGroup constrCode,
-                                                    CodeExpression compExp)
-    {
-        BorderConstraints constr = new BorderConstraints(BorderLayout.CENTER);
-        FormCodeSupport.readPropertyExpression(constrExp,
-                                               constr.getProperties()[0],
-                                               false);
-        return constr;
-    }
-
-    /** Called from createComponentCode method, creates code for a component
+  /** Called from createComponentCode method, creates code for a component
      * layout constraints (opposite to readConstraintsCode).
+     *
+     *
+     *
+     *
+     *
+     *
      * @param constrCode CodeGroup to be filled with constraints code; not
      *        needed here String (used as the constraints object) is just
      *        a single code expression

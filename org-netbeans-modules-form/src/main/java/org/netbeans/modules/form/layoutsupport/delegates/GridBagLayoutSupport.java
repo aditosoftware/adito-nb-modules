@@ -474,29 +474,14 @@ public class GridBagLayoutSupport extends AbstractLayoutSupport
 
     // --------
 
-    /** This method is called from readComponentCode method to read layout
-     * constraints of a component from code (GridBagConstraints in this case).
-     * @param constrExp CodeExpression object of the constraints (taken from
-     *        add method in the code)
-     * @param constrCode CodeGroup to be filled with the relevant constraints
-     *        initialization code
-     * @param compExp CodeExpression of the component for which the constraints
-     *        are read (not needed here)
-     * @return LayoutConstraints based on information read form code
-     */
-    @Override
-    protected LayoutConstraints readConstraintsCode(CodeExpression constrExp,
-                                                    CodeGroup constrCode,
-                                                    CodeExpression compExp)
-    {
-        GridBagLayoutConstraints constr = new GridBagLayoutConstraints();
-        // reading is done in GridBagLayoutConstraints
-        constr.readCodeExpression(constrExp, constrCode);
-        return constr;
-    }
-
-    /** Called from createComponentCode method, creates code for a component
+  /** Called from createComponentCode method, creates code for a component
      * layout constraints (opposite to readConstraintsCode).
+     *
+     *
+     *
+     *
+     *
+     *
      * @param constrCode CodeGroup to be filled with constraints code
      * @param constr layout constraints metaobject representing the constraints
      * @param compExp CodeExpression object representing the component; not

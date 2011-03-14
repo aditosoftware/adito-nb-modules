@@ -64,10 +64,8 @@ public class CodeStructure {
     private final Map<String,Variable> namesToVariables = new HashMap<String,Variable>(50);
     private final Map<Object/*?*/,Variable> expressionsToVariables = new HashMap<Object,Variable>(50);
 
-    private final int defaultVariableType = -1;
 
-
-    // --------
+  // --------
     // constructor
 
     public CodeStructure() {
@@ -85,32 +83,12 @@ public class CodeStructure {
         return new DefaultCodeExpression(this, origin);
     }
 
-  /** Creates a new expression from based on a value. */
-    public CodeExpression createExpression(Class type,
-                                           Object value)
-    {
-        return new DefaultCodeExpression(this, new CodeSupport.ValueOrigin(
-                                                    type, value));
-    }
-
-    /** Creates a new expression of an arbitrary origin. /*/
+  /** Creates a new expression of an arbitrary origin. /*/
     public CodeExpression createExpression(CodeExpressionOrigin origin) {
         return new DefaultCodeExpression(this, origin);
     }
 
-    /** Creates an expression representing null value. */
-    public CodeExpression createNullExpression(Class type) {
-        return new DefaultCodeExpression(this, new CodeSupport.ValueOrigin(
-                                                    type, null)); // NOI18N
-    }
-
-    /** Creates an expression with no origin. The origin must be set
-     * explicitly before the expression is used. */
-    public CodeExpression createDefaultExpression() {
-        return new DefaultCodeExpression(this);
-    }
-
-    /** Prevents an expression from being removed automatically from structure
+  /** Prevents an expression from being removed automatically from structure
      * when no more used (by any UsingCodeObject). */
     public void registerExpression(CodeExpression expression) {
         if (globalUsingObject == null)
@@ -175,21 +153,7 @@ public class CodeStructure {
             unregisterUsingCodeObject((CodeStatement) list.get(i));
     }
 
-    /** Filters out statements using given or equal meta object. Passed
-     * statements are returned in an array. */
-    public static CodeStatement[] filterStatements(Iterator it,
-                                                   Object metaObject)
-    {
-        List<CodeStatement> list = new ArrayList<CodeStatement>();
-        while (it.hasNext()) {
-            CodeStatement statement = (CodeStatement) it.next();
-            if (metaObject.equals(statement.getMetaObject()))
-                list.add(statement);
-        }
-        return list.toArray(new CodeStatement[list.size()]);
-    }
-
-    // --------
+  // --------
     // statements code group
 
     /** Creates a default group of statements. */
@@ -326,15 +290,7 @@ public class CodeStructure {
         namesToVariables.remove(name);
     }
 
-  public CodeVariable createVariableForExpression(CodeExpression expression,
-                                                    int type,
-                                                    String name) {
-        CodeVariable var = (expression == null) ? null : expression.getVariable();
-        String typeParameters = (var == null) ? "" : var.getDeclaredTypeParameters(); // NOI18N
-        return createVariableForExpression(expression, type, typeParameters, name);
-    }
-
-    /** Creates a new variable and attaches given expression to it. If the
+  /** Creates a new variable and attaches given expression to it. If the
      * requested name is already in use, then a free name is found. If null
      * is provided as the name, then expression's short class name is used. */
     public CodeVariable createVariableForExpression(CodeExpression expression,
@@ -357,7 +313,6 @@ public class CodeStructure {
 	name = getFreeVariableName(name, expression.getOrigin().getType());
 
         Variable var = new Variable(type,
-                                    typeParameters,
                                     name);
         CodeStatement statement = createVariableAssignment(expression);
         var.addCodeExpression(expression, statement);
@@ -438,8 +393,7 @@ public class CodeStructure {
   // ---------
 
   int getDefaultVariableType() {
-        return defaultVariableType > -1 ?
-               defaultVariableType : CodeVariable.FIELD | CodeVariable.PRIVATE;
+    return CodeVariable.FIELD | CodeVariable.PRIVATE;
     }
 
     // ---------
@@ -462,16 +416,14 @@ public class CodeStructure {
 
     final class Variable implements CodeVariable {
         private final int type;
-        private final String declaredTypeParameters;
-        private String name;
+      private String name;
         private Map<CodeExpression,CodeStatement> expressionsMap;
 
-        Variable(int type, String declaredTypeParameters, String name) {
+        Variable(int type, String name) {
             if ((type & FINAL) != 0)
                 type &= ~EXPLICIT_DECLARATION;
             this.type = type;
-            this.declaredTypeParameters = declaredTypeParameters;
-            this.name = name;
+          this.name = name;
         }
 
         @Override
@@ -485,17 +437,7 @@ public class CodeStructure {
             return name;
         }
 
-        @Override
-        public String getDeclaredTypeParameters() {
-            return declaredTypeParameters;
-        }
-
-        @Override
-        public CodeStatement getAssignment(CodeExpression expression) {
-            return expressionsMap != null ? expressionsMap.get(expression) : null;
-        }
-
-        // -------
+      // -------
 
         void addCodeExpression(CodeExpression expression,
                                CodeStatement statement)

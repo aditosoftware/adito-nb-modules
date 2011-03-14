@@ -53,13 +53,10 @@ import java.util.Iterator;
 public interface CodeGroup {
 
     public void addStatement(CodeStatement statement);
-    public void addStatement(int index, CodeStatement statement);
 
-    public void addGroup(CodeGroup group);
+  public void addGroup(CodeGroup group);
 
-    public void remove(Object object);
-
-    public void removeAll();
+  public void removeAll();
 
     public Iterator<CodeStatement> getStatementsIterator();
 }
