@@ -1290,7 +1290,7 @@ public class FormModel
     /** For debugging purposes only. */
     static private int traceCount = 0;
     /** For debugging purposes only. */
-    static private final boolean TRACE = false;
+    static private final boolean TRACE = true;
     /** For debugging purposes only. */
     static void t(String str) {
         if (TRACE)

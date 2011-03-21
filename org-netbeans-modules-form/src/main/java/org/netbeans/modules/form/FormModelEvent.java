@@ -77,7 +77,7 @@ public class FormModelEvent extends EventObject
 //    public static final int BINDING_PROPERTY_CHANGED = 16;
     public static final int SYNTHETIC_PROPERTY_CHANGED = 11;
     public static final int EVENT_HANDLER_ADDED = 12;
-  public static final int EVENT_HANDLER_RENAMED = 14;
+    public static final int EVENT_HANDLER_RENAMED = 14;
     public static final int OTHER_CHANGE = 15;
 
     // data about the change
@@ -90,7 +90,7 @@ public class FormModelEvent extends EventObject
     private int componentIndex = -1;
     private int[] reordering;
     private String propertyName;
-  private Object oldPropertyValue;
+    private Object oldPropertyValue;
     private Object newPropertyValue;
 
     private UndoableEdit undoableEdit;

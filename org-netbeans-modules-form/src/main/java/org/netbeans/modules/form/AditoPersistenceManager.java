@@ -3,16 +3,16 @@ package org.netbeans.modules.form;
 import de.adito.aditoweb.filesystem.common.AfsUrlUtil;
 import de.adito.aditoweb.filesystem.datamodelfs.access.mechanics.field.IFieldAccess;
 import de.adito.aditoweb.filesystem.datamodelfs.access.model.*;
-import de.adito.aditoweb.swingcommon.layout.aditolayout.AALComponentConstraints;
+import de.adito.aditoweb.swingcommon.layout.aditolayout.*;
 import org.netbeans.modules.form.adito.*;
 import org.netbeans.modules.form.adito.layout.*;
-import org.netbeans.modules.form.layoutdesign.*;
-import org.netbeans.modules.form.layoutsupport.*;
+import org.netbeans.modules.form.adito.mapping.EModelComponentMapping;
+import org.netbeans.modules.form.layoutdesign.LayoutModel;
+import org.netbeans.modules.form.layoutsupport.LayoutSupportManager;
 import org.openide.filesystems.*;
 
 import javax.swing.*;
 import java.awt.*;
-import java.lang.reflect.Method;
 import java.util.*;
 import java.util.List;
 
@@ -509,15 +509,9 @@ public class AditoPersistenceManager extends PersistenceManager
   {
     try
     {
-      LayoutSupportDelegate delegate = new AditoLayoutSupport();
-      layoutSupport.setLayoutDelegate(delegate);
-//      CodeExpression layoutExp = layoutSupport.getCodeStructure().createExpression(
-//          AditoAnchorLayout.class.getConstructor(new Class[0]),
-//          CodeStructure.EMPTY_PARAMS);
-//      CodeStructure.createStatement(
-//          layoutSupport.getContainerDelegateCodeExpression(),
-//          _getSetLayoutMethod(),
-//          new CodeExpression[]{layoutExp});
+      layoutSupport.getPrimaryContainer().setLayout(new AditoAnchorLayout());
+//      LayoutSupportDelegate delegate = new AditoLayoutSupport();
+//      layoutSupport.setLayoutDelegate(delegate);
     }
     catch (Exception e)
     {
@@ -571,40 +565,6 @@ public class AditoPersistenceManager extends PersistenceManager
 //      ex.printStackTrace();
 //    }
     return false;
-  }
-
-
-  private static Method _getSetLayoutMethod()
-  {
-    Method setLayoutMethod = null;
-    try
-    {
-      setLayoutMethod = java.awt.Container.class.getMethod(
-          "setLayout", // NOI18N
-          new Class[]{java.awt.LayoutManager.class});
-    }
-    catch (NoSuchMethodException ex)
-    { // should not happen
-      ex.printStackTrace();
-    }
-    return setLayoutMethod;
-  }
-
-  private static Method _getAddWithConstrMethod()
-  {
-    Method addWithConstrMethod = null;
-    try
-    {
-      addWithConstrMethod = java.awt.Container.class.getMethod(
-          "add", // NOI18N
-          new Class[]{java.awt.Component.class,
-                      Object.class});
-    }
-    catch (NoSuchMethodException ex)
-    { // should not happen
-      ex.printStackTrace();
-    }
-    return addWithConstrMethod;
   }
 
 

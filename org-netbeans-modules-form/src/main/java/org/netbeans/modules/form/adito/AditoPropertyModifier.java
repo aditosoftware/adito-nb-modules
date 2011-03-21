@@ -53,7 +53,7 @@ public class AditoPropertyModifier implements PropertyModifier
     {
       System.out.print("");
     }
-    ARADComponentHandler aRADComponentHandler = pMetacomp.getaRADComponentHandler();
+    ARADComponentHandler aRADComponentHandler = pMetacomp.getARADComponentHandler();
     if (aRADComponentHandler != null)
     {
       DataFolder modelDataObject = aRADComponentHandler.getModelDataObject();

@@ -1,6 +1,7 @@
 package org.netbeans.modules.form.adito;
 
 import de.adito.aditoweb.core.util.Utility;
+import de.adito.aditoweb.core.util.debug.Debug;
 import de.adito.aditoweb.designer.filetype.PropertiesCookie;
 import de.adito.aditoweb.filesystem.datamodelfs.access.DataAccessHelper;
 import de.adito.aditoweb.filesystem.datamodelfs.access.mechanics.field.IFieldAccess;
@@ -24,6 +25,8 @@ public class ARADComponentHandler
 
   private FileChangeListener fileChangeListener;
 
+  private Sheet sheet;
+
 
   public ARADComponentHandler(DataFolder pModelDataObject)
   {
@@ -45,63 +48,104 @@ public class ARADComponentHandler
                                      + radComponent + ".");
     radComponent = pRADComponent;
 
+    radComponent.getFormModel().addFormModelListener(new FormModelListener()
+    {
+      @Override
+      public void formChanged(FormModelEvent[] events)
+      {
+        for (FormModelEvent event : events)
+        {
+          RADComponent eventComponent = event.getComponent();
+          if (radComponent.equals(eventComponent))
+          {
+            switch (event.getChangeType())
+            {
+              case FormModelEvent.COMPONENT_LAYOUT_CHANGED:
+                Debug.write(eventComponent.getName()); // DEBUG: remove it!
+                if (eventComponent instanceof RADVisualComponent)
+                {
+                  RADVisualComponent radVisualComponent = (RADVisualComponent) eventComponent;
+                  for (Node.Property property : radVisualComponent.getConstraintsProperties())
+                  {
+                    try
+                    {
+                      Debug.write(property.getName(), property.getValue()); // DEBUG: remove it!
+                    }
+                    catch (IllegalAccessException e)
+                    {
+                      e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+                    }
+                    catch (InvocationTargetException e)
+                    {
+                      e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+                    }
+                  }
+                }
+                break;
+              default:
+                break;
+            }
+          }
+        }
+      }
+    });
+
     _copyProperties();
 
     _registerListeners();
   }
 
+  public void layoutPropertiesChanged(Node.Property[] pOldProperties, Node.Property[] pNewProperties)
+  {
+//    Debug.write("old", pOldProperties); // DEBUG: remove it!
+//    Debug.write("new", pNewProperties); // DEBUG: remove it!
+//    if (radComponent instanceof RADVisualComponent)
+//    {
+//      RADVisualComponent radVisualComponent = (RADVisualComponent) radComponent;
+//      RADVisualContainer radVisualContainer = radVisualComponent.getParentContainer();
+//      if (radVisualContainer != null)
+//      {
+//        LayoutSupportManager layoutSupport = radVisualContainer.getLayoutSupport();
+//        if (layoutSupport != null)
+//        {
+//          LayoutSupportDelegate layoutDelegate = layoutSupport.getLayoutDelegate();
+//          if (layoutDelegate != null)
+//            Debug.write("supported class is", layoutDelegate.getSupportedClass()); // DEBUG: remove it!
+//        }
+//      }
+//      Debug.write("the node is", radVisualComponent.getNodeReference()); // DEBUG: remove it!
+//    }
+  }
+
   public void createPropertySets(List<Node.PropertySet> propSets)
   {
-    if (modelDataObject != null)
+    if (sheet == null && modelDataObject != null)
     {
-//          return modelDataObject.getNodeDelegate().getPropertySets(); // klappt nicht weil asynchron!
       PropertiesCookie propsCookie = modelDataObject.getCookie(PropertiesCookie.class);
       if (propsCookie != null)
       {
-        Sheet sheet = new Sheet();
+        sheet = new Sheet();
         propsCookie.applyAditoPropertiesSync(sheet);
-        Node.PropertySet[] sets = sheet.toArray();
-//        for (Node.PropertySet set : sets)
-//        {
-//          Sheet.Set setCopy = new Sheet.Set();
-//          setCopy.setName(set.getName());
-//          setCopy.setDisplayName(set.getDisplayName());
-//          setCopy.setShortDescription(set.getShortDescription());
-//          if (set.getValue("tabName") != null)
-//            setCopy.setValue("tabName", set.getValue("tabName"));
-//          for (Node.Property property : set.getProperties())
-//          {
-//            Node.Property found = pRADComponent.getPropertyByName(property.getName());
-//            if (found != null)
-//            {
-//              setCopy.put(AConnectionProperty.create(property, found));
-//            }
-//            else
-//              setCopy.put(property);
-//          }
-//          propSets.add(setCopy);
-//        }
-        propSets.addAll(Arrays.asList(sets));
       }
+    }
+    if (sheet != null)
+    {
+      Node.PropertySet[] sets = sheet.toArray();
+      propSets.addAll(Arrays.asList(sets));
     }
   }
 
   private void _copyProperties() throws InvocationTargetException, IllegalAccessException
   {
-    PropertiesCookie propsCookie = modelDataObject.getCookie(PropertiesCookie.class);
-    if (propsCookie != null)
+    List<Node.PropertySet> propSets = new ArrayList<Node.PropertySet>();
+    createPropertySets(propSets);
+    for (Node.PropertySet set : propSets)
     {
-      Sheet sheet = new Sheet();
-      propsCookie.applyAditoPropertiesSync(sheet);
-      Node.PropertySet[] sets = sheet.toArray();
-      for (Node.PropertySet set : sets)
+      for (Node.Property prop : set.getProperties())
       {
-        for (Node.Property prop : set.getProperties())
-        {
-          RADProperty beanProperty = radComponent.getBeanProperty(prop.getName());
-          if (beanProperty != null)
-            beanProperty.setValue(prop.getValue());
-        }
+        FormProperty formProperty = _getFormProperty(prop.getName());
+        if (formProperty != null)
+          formProperty.setValue(prop.getValue());
       }
     }
   }
@@ -111,10 +155,10 @@ public class ARADComponentHandler
     for (FileObject fo : modelDataObject.getPrimaryFile().getChildren())
     {
       String propertyName = fo.getNameExt();
-      RADProperty beanProperty = radComponent.getBeanProperty(propertyName);
-      if (beanProperty != null)
+      FormProperty formProperty = _getFormProperty(propertyName);
+      if (formProperty != null)
       {
-        beanProperty.addPropertyChangeListener(_createBeanPropertyChangeListener(propertyName));
+        formProperty.addPropertyChangeListener(_createFormPropertyChangeListener(propertyName));
         fo.addFileChangeListener(_getFileChangeListener());
       }
     }
@@ -144,7 +188,7 @@ public class ARADComponentHandler
     radComponent = null;
   }
 
-  private PropertyChangeListener _createBeanPropertyChangeListener(final String pPropertyName)
+  private PropertyChangeListener _createFormPropertyChangeListener(final String pPropertyName)
   {
     return new PropertyChangeListener()
     {
@@ -156,9 +200,9 @@ public class ARADComponentHandler
         {
           try
           {
-            RADProperty beanProperty = _getBeanProperty(pPropertyName);
+            FormProperty formProperty = _getFormProperty(pPropertyName);
             Object oldValue = fieldAccess.getValue();
-            Object newValue = beanProperty.getValue();
+            Object newValue = formProperty.getValue();
             if (!Utility.isEqual(oldValue, newValue))
               fieldAccess.setValue(newValue);
           }
@@ -191,11 +235,11 @@ public class ARADComponentHandler
           {
             try
             {
-              RADProperty beanProperty = _getBeanProperty(propertyName);
-              Object oldValue = beanProperty.getValue();
+              FormProperty formProperty = _getFormProperty(propertyName);
+              Object oldValue = formProperty.getValue();
               Object newValue = fieldAccess.getValue();
               if (!Utility.isEqual(oldValue, newValue))
-                beanProperty.setValue(newValue);
+                formProperty.setValue(newValue);
             }
             catch (IllegalAccessException e)
             {
@@ -212,10 +256,15 @@ public class ARADComponentHandler
     return fileChangeListener;
   }
 
-  private RADProperty _getBeanProperty(String pPropertyName)
+  private FormProperty _getFormProperty(String pPropertyName)
   {
     if (radComponent != null)
+    {
+      RADComponentNode nodeReference = radComponent.getNodeReference();
+      if (nodeReference != null)
+        return nodeReference.getProperty(pPropertyName);
       return radComponent.getBeanProperty(pPropertyName);
+    }
     return null;
   }
 

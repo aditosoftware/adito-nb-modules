@@ -58,7 +58,6 @@ import javax.swing.*;
 import org.netbeans.modules.form.RADProperty.FakePropertyDescriptor;
 
 import org.netbeans.modules.form.adito.*;
-import org.openide.*;
 import org.openide.nodes.*;
 import org.openide.util.Lookup;
 import org.openide.util.NbBundle;
@@ -76,11 +75,8 @@ public class RADComponent {
     // -----------------------------------------------------------------------------
     // Static variables
 
-    public static final String PROP_NAME = "variableName"; // NOI18N
-
     static final NewType[] NO_NEW_TYPES = {};
     static final RADProperty[] NO_PROPERTIES = {};
-//    static final BindingProperty[] NO_BINDINGS = {}; // TODO: stripped
 
     // -----------------------------------------------------------------------------
     // Private variables
@@ -98,8 +94,6 @@ public class RADComponent {
     private Node.Property[] syntheticProperties;
     private RADProperty[] beanProperties1;
     private RADProperty[] beanProperties2;
-//    private BindingProperty[][] bindingProperties; // TODO: stripped
-//    private EventProperty[] eventProperties;
     private Map<Object,RADProperty[]> otherProperties;
     private List actionProperties;
     private MetaAccessibleContext accessibilityData;
@@ -191,7 +185,7 @@ public class RADComponent {
         return beanInstance;
     }
 
-  public final ARADComponentHandler getaRADComponentHandler()
+  public final ARADComponentHandler getARADComponentHandler()
   {
     return aRADComponentHandler;
   }
@@ -388,13 +382,13 @@ public class RADComponent {
      *
      * @param name new name of the component
      */
-    public void setName(String name) {
-        if (!needsVariableRename(name)) {
-            return;
-        }
-
-        if (getNodeReference() != null)
-            getNodeReference().updateName();
+    public void setName(String name)
+    {
+      if (!needsVariableRename(name))
+        return;
+      setStoredName(name);
+      if (getNodeReference() != null)
+        getNodeReference().updateName();
     }
 
     /**
@@ -403,19 +397,21 @@ public class RADComponent {
      * @param name the new name for the variable
      */
     public void rename(String name) {
-        if (!needsVariableRename(name)) {
-            return;
-        }
+      if (!needsVariableRename(name))
+        return;
+      setStoredName(name);
+      if (getNodeReference() != null)
+        getNodeReference().updateName();
 
-        if (!org.openide.util.Utilities.isJavaIdentifier(name)) {
-            IllegalArgumentException iae =
-                new IllegalArgumentException("Invalid component name"); // NOI18N
-            ErrorManager.getDefault().annotate(
-                iae, ErrorManager.USER, null,
-                FormUtils.getBundleString("ERR_INVALID_COMPONENT_NAME"), // NOI18N
-                null, null);
-            throw iae;
-        }
+//        if (!org.openide.util.Utilities.isJavaIdentifier(name)) {
+//            IllegalArgumentException iae =
+//                new IllegalArgumentException("Invalid component name"); // NOI18N
+//            ErrorManager.getDefault().annotate(
+//                iae, ErrorManager.USER, null,
+//                FormUtils.getBundleString("ERR_INVALID_COMPONENT_NAME"), // NOI18N
+//                null, null);
+//            throw iae;
+//        }
 
       // isVariableNameReserved(name) is always false
 //        if (formModel.getCodeStructure().isVariableNameReserved(name)) {
@@ -438,7 +434,7 @@ public class RADComponent {
     }
 
     private boolean needsVariableRename(String name) {
-        return false;
+        return !(storedName == null || storedName.equals(name));
     }
 
     public void setStoredName(String name) {
@@ -797,8 +793,26 @@ public class RADComponent {
 
     protected void clearProperties() {
         if (nameToProperty != null)
-            nameToProperty.clear();
-        else nameToProperty = new HashMap<String,Node.Property>();
+          nameToProperty.clear();
+        else
+          nameToProperty = new HashMap<String,Node.Property>()
+          {
+            @Override
+            public Node.Property put(String key, Node.Property value)
+            {
+              Node.Property oldProp = get(key);
+              try
+              {
+                assert oldProp == null : getName() + ": The property '" + key + "' is alread defined in 'nameToProperty'.";
+              }
+              catch (AssertionError e)
+              {
+                e.printStackTrace();
+                return null;
+              }
+              return super.put(key, value);
+            }
+          };
 
         propertySets = null;
         syntheticProperties = null;
@@ -826,15 +840,14 @@ public class RADComponent {
 
         ResourceBundle bundle = FormUtils.getBundle();
 
-      propSets.add(new Node.PropertySet("test_name", "test_displayName", "test_shortDescr")
-      {
-        @Override
-        public Node.Property<?>[] getProperties()
+        propSets.add(new Node.PropertySet("test_name", "test_displayName", "test_shortDescr")
         {
-
-          return new Node.Property<?>[0];  //To change body of implemented methods use File | Settings | File Templates.
-        }
-      });
+          @Override
+          public Node.Property<?>[] getProperties()
+          {
+            return new Node.Property<?>[0];  //To change body of implemented methods use File | Settings | File Templates.
+          }
+        });
 
         Node.PropertySet ps;
         propSets.add(new Node.PropertySet(
@@ -1313,7 +1326,6 @@ public class RADComponent {
             try {
                 PropertyDescriptor pd = new PropertyDescriptor("cursor", java.awt.Component.class); // NOI18N
                 RADProperty prop = createBeanProperty(pd, null, null);
-                nameToProperty.put("cursor", prop); // NOI18N
                 normalProps.add(prop);
             } catch (IntrospectionException ex) {
                 Logger.getLogger(getClass().getName()).log(Level.INFO, ex.getMessage(), ex);
@@ -1341,7 +1353,6 @@ public class RADComponent {
             try {
                 PropertyDescriptor pd = new PropertyDescriptor("rowHeight", javax.swing.JTable.class); // NOI18N
                 RADProperty prop = createBeanProperty(pd, null, null);
-                nameToProperty.put("rowHeight", prop); // NOI18N
                 normalProps.add(prop);
             } catch (IntrospectionException ex) {
                 Logger.getLogger(getClass().getName()).log(Level.INFO, ex.getMessage(), ex);

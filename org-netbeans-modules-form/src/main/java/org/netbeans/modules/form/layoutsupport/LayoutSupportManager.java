@@ -325,7 +325,7 @@ public final class LayoutSupportManager implements LayoutSupportContext {
 
             for (int i=0; i < componentCount; i++)
                 metacomps[i].resetConstraintsProperties();
-        }
+            }
 
         // setup primary container
         Container cont = getPrimaryContainer();
@@ -758,9 +758,9 @@ public final class LayoutSupportManager implements LayoutSupportContext {
             if (metacomp.getNodeReference() != null) // propagate the change to node
                 metacomp.getNodeReference().firePropertyChangeHelper(
 //                                                     null, null, null);
-                                              ev.getPropertyName(),
-                                              ev.getOldValue(),
-                                              ev.getNewValue());
+                    ev.getPropertyName(),
+                    ev.getOldValue(),
+                    ev.getNewValue());
         }
         else {
             if (metacomp.getNodeReference() != null) // propagate the change to node

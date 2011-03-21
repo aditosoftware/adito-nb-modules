@@ -7,15 +7,12 @@ import org.openide.util.ImageUtilities;
 
 import java.awt.*;
 import java.beans.BeanInfo;
-import java.lang.reflect.Constructor;
 
 /**
  * @author J. Boesl, 07.03.11
  */
 public class AditoLayoutSupport extends AbstractLayoutSupport
 {
-
-  private static Constructor constrConstructor;
 
   private static FormLoaderSettings formSettings = FormLoaderSettings.getInstance();
 
@@ -63,10 +60,10 @@ public class AditoLayoutSupport extends AbstractLayoutSupport
       int currentW;
       int currentH;
 
-      if (constr instanceof AALComponentConstraints)
+      if (constr instanceof AditoComponentConstraints)
       {
-        currentW = ((AALComponentConstraints) constr).getBounds().width;
-        currentH = ((AALComponentConstraints) constr).getBounds().height;
+        currentW = ((AditoComponentConstraints) constr).getConstraintsObject().getBounds().width;
+        currentH = ((AditoComponentConstraints) constr).getConstraintsObject().getBounds().height;
       }
       else
       {
@@ -93,7 +90,6 @@ public class AditoLayoutSupport extends AbstractLayoutSupport
       y = computeGridSize(y, formSettings.getGridY());
     }
 
-//    assistantParams = new Object[]{x, y};
     return new AditoComponentConstraints(new Rectangle(x, y, w, h));
   }
 
@@ -143,9 +139,9 @@ public class AditoLayoutSupport extends AbstractLayoutSupport
     int currentW, currentH;
 
     LayoutConstraints constr = getConstraints(index);
-    if (constr instanceof AALComponentConstraints)
+    if (constr instanceof AditoComponentConstraints)
     {
-      Rectangle r = ((AALComponentConstraints) constr).getBounds();
+      Rectangle r = ((AditoComponentConstraints) constr).getConstraintsObject().getBounds();
       currentW = r.width;
       currentH = r.height;
     }
@@ -210,24 +206,6 @@ public class AditoLayoutSupport extends AbstractLayoutSupport
   protected LayoutConstraints createDefaultConstraints()
   {
     return new AditoComponentConstraints();
-  }
-
-  private Constructor getConstraintsConstructor()
-  {
-    if (constrConstructor == null)
-    {
-      try
-      {
-        constrConstructor = AditoComponentConstraints.class.getConstructor(
-            new Class[]{Integer.TYPE, Integer.TYPE,
-                        Integer.TYPE, Integer.TYPE});
-      }
-      catch (NoSuchMethodException ex)
-      { // should not happen
-        ex.printStackTrace();
-      }
-    }
-    return constrConstructor;
   }
 
   private static int computeConstraintSize(int newSize, int currSize, int prefSize)

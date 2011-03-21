@@ -64,7 +64,6 @@ import org.openide.explorer.propertysheet.editors.NodeCustomizer;
 
 import org.netbeans.modules.form.actions.*;
 import org.netbeans.modules.form.layoutsupport.*;
-//import org.netbeans.modules.form.editors.TableCustomizer;
 import org.netbeans.modules.form.menu.AddSubItemAction;
 import org.netbeans.modules.form.menu.InsertMenuAction;
 import org.netbeans.modules.form.menu.MenuEditLayer;

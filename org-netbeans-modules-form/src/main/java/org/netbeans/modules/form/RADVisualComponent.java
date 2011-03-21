@@ -71,7 +71,6 @@ public class RADVisualComponent extends RADComponent {
 
     // [??]
     private Map<String,LayoutConstraints> constraints = new HashMap<String,LayoutConstraints>();
-//    transient private RADVisualContainer parent;
 
     private Node.Property[] constraintsProperties;
     private ConstraintsListenerConvertor constraintsListener;
@@ -82,49 +81,25 @@ public class RADVisualComponent extends RADComponent {
     // -----------------------------------------------------------------------------
     // Initialization
 
-//    public void setParentComponent(RADComponent parentComp) {
-//        super.setParentComponent(parentComp);
-//        if (parentComp != null)
-//            getConstraintsProperties();
-//    }
 
-//    void initParent(RADVisualContainer parent) {
-//        this.parent = parent;
-//    }
-
-/*    protected void setBeanInstance(Object beanInstance) {
-        if (beanInstance instanceof java.awt.Component) {
-            boolean attached = FakePeerSupport.attachFakePeer(
-                                            (java.awt.Component)beanInstance);
-            if (attached && beanInstance instanceof java.awt.Container)
-                FakePeerSupport.attachFakePeerRecursively(
-                                            (java.awt.Container)beanInstance);
-        }
-
-        super.setBeanInstance(beanInstance);
-    } */
 
     // -----------------------------------------------------------------------------
     // Public interface
-
-    /** @return The JavaBean visual component represented by this RADVisualComponent */
-//    public java.awt.Component getComponent() { // [is it needed ???]
-//        return (java.awt.Component) getBeanInstance();
-//    }
 
     public final RADVisualContainer getParentContainer() {
         return (RADVisualContainer) getParentComponent();
     }
 
-    /** @return The index of this component within visual components of its parent */
+    /**
+     * @return The index of this component within visual components of its parent
+     */
     public final int getComponentIndex() {
-        RADVisualContainer parent = (RADVisualContainer) getParentComponent();
+        RADVisualContainer parent = getParentContainer();
         return parent != null ? parent.getIndexOf(this) : -1;
-//        return ((ComponentContainer)getParentComponent()).getIndexOf(this);
     }
 
     final LayoutSupportManager getParentLayoutSupport() {
-        RADVisualContainer parent = (RADVisualContainer) getParentComponent();
+        RADVisualContainer parent = getParentContainer();
         return parent != null ? parent.getLayoutSupport() : null;
     }
 
@@ -216,34 +191,34 @@ public class RADVisualComponent extends RADComponent {
     // ---------------
     // Properties
 
-    @Override
-    protected void createPropertySets(List<Node.PropertySet> propSets) {
-        super.createPropertySets(propSets);
-        if (SUPPRESS_PROPERTY_TABS) {
-            return;
-        }
-
-        if (constraintsProperties == null)
-            createConstraintsProperties();
-
-        if (constraintsProperties != null && constraintsProperties.length > 0)
-        {
-          Node.PropertySet propertySet = new Node.PropertySet("layout", // NOI18N
-                                                              FormUtils.getBundleString("CTL_LayoutTab"), // NOI18N
-                                                              FormUtils.getBundleString("CTL_LayoutTabHint")) // NOI18N
-          {
-            @Override
-            public Node.Property[] getProperties()
-            {
-              Node.Property[] props = getConstraintsProperties();
-              return (props == null) ? NO_PROPERTIES : props;
-            }
-          };
-          propertySet.setValue("tabName", "--Layout");
-          propSets.add(1, propertySet);
-//          propSets.add(propSets.size() - 1, propertySet);
-        }
-    }
+//    @Override
+//    protected void createPropertySets(List<Node.PropertySet> propSets) {
+//        super.createPropertySets(propSets);
+//        if (SUPPRESS_PROPERTY_TABS) {
+//            return;
+//        }
+//
+//        if (constraintsProperties == null)
+//            createConstraintsProperties();
+//
+//        if (constraintsProperties != null && constraintsProperties.length > 0)
+//        {
+//          Node.PropertySet propertySet = new Node.PropertySet("layout", // NOI18N
+//                                                              FormUtils.getBundleString("CTL_LayoutTab"), // NOI18N
+//                                                              FormUtils.getBundleString("CTL_LayoutTabHint")) // NOI18N
+//          {
+//            @Override
+//            public Node.Property[] getProperties()
+//            {
+//              Node.Property[] props = getConstraintsProperties();
+//              return (props == null) ? NO_PROPERTIES : props;
+//            }
+//          };
+//          propertySet.setValue("tabName", "--Layout");
+//          propSets.add(1, propertySet);
+////          propSets.add(propSets.size() - 1, propertySet);
+//        }
+//    }
 
     /** Called to modify original properties obtained from BeanInfo.
      * Properties may be added, removed etc. - due to specific needs
@@ -303,18 +278,27 @@ public class RADVisualComponent extends RADComponent {
         return constraintsProperties;
     }
 
-    public void resetConstraintsProperties() {
-        if (constraintsProperties != null) {
-          for (Node.Property constraintsProperty : constraintsProperties)
-            nameToProperty.remove(constraintsProperty.getName());
+    public void resetConstraintsProperties()
+    {
+      if (constraintsProperties != null)
+      {
+        for (Node.Property constraintsProperty : constraintsProperties)
+          nameToProperty.remove(constraintsProperty.getName());
+      }
+      createConstraintsProperties();
 
-            constraintsProperties = null;
-            propertySets = null;
+//        if (constraintsProperties != null) {
+//          for (Node.Property constraintsProperty : constraintsProperties)
+//            nameToProperty.remove(constraintsProperty.getName());
+//
+//            constraintsProperties = null;
+//            propertySets = null;
+//
+//            RADComponentNode node = getNodeReference();
+//            if (node != null)
+//                node.fireComponentPropertySetsChange();
+//        }
 
-            RADComponentNode node = getNodeReference();
-            if (node != null)
-                node.fireComponentPropertySetsChange();
-        }
     }
 
     private void createConstraintsProperties() {

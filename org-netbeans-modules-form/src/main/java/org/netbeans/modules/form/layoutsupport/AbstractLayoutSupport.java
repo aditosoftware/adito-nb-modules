@@ -705,7 +705,7 @@ public abstract class AbstractLayoutSupport implements LayoutSupportDelegate
   /**
    * Returns context for the assistant (context sensitive help bar).
    *
-   * @rerurn context for the assistant.
+   * @return context for the assistant.
    */
   public String getAssistantContext()
   {
@@ -853,8 +853,7 @@ public abstract class AbstractLayoutSupport implements LayoutSupportDelegate
    *
    * @return new (default) instance of supported layout manager
    */
-  protected LayoutManager createDefaultLayoutInstance()
-      throws Exception
+  protected LayoutManager createDefaultLayoutInstance() throws Exception
   {
     return (LayoutManager)
         CreationFactory.createDefaultInstance(getSupportedClass());

@@ -1,4 +1,4 @@
-package org.netbeans.modules.form.adito;
+package org.netbeans.modules.form.adito.mapping;
 
 import de.adito.aditoweb.filesystem.datamodelfs.access.model.EModelAccessType;
 import org.netbeans.modules.form.adito.comps.*;

@@ -64,7 +64,7 @@ public class AditoComponentConstraints implements LayoutConstraints
   private Node.Property[] _createProperties()
   {
     return new Node.Property[]{
-        new FormProperty("x", Integer.class, "x", "the x position")
+        new FormProperty("AALC_x", Integer.class, "x", "the x position")
         {
           @Override
           public Object getTargetValue() throws IllegalAccessException, InvocationTargetException
@@ -78,7 +78,7 @@ public class AditoComponentConstraints implements LayoutConstraints
             constraints.getBounds().x = (Integer) value;
           }
         },
-        new FormProperty("y", Integer.class, "y", "the y position")
+        new FormProperty("AALC_y", Integer.class, "y", "the y position")
         {
           @Override
           public Object getTargetValue() throws IllegalAccessException, InvocationTargetException
@@ -92,7 +92,7 @@ public class AditoComponentConstraints implements LayoutConstraints
             constraints.getBounds().y = (Integer) value;
           }
         },
-        new FormProperty("width", Integer.class, "width", "the width")
+        new FormProperty("AALC_width", Integer.class, "width", "the width")
         {
           @Override
           public Object getTargetValue() throws IllegalAccessException, InvocationTargetException
@@ -106,7 +106,7 @@ public class AditoComponentConstraints implements LayoutConstraints
             constraints.getBounds().width = (Integer) value;
           }
         },
-        new FormProperty("height", Integer.class, "height", "the height")
+        new FormProperty("AALC_height", Integer.class, "height", "the height")
         {
           @Override
           public Object getTargetValue() throws IllegalAccessException, InvocationTargetException

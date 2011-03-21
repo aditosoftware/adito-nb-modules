@@ -64,7 +64,6 @@ import org.openide.filesystems.FileObject;
 import org.openide.filesystems.URLMapper;
 import org.openide.loaders.DataObject;
 import org.openide.loaders.DataObjectNotFoundException;
-import org.openide.nodes.Node;
 import org.openide.text.PositionBounds;
 import org.openide.util.Exceptions;
 import org.openide.util.Lookup;
@@ -110,16 +109,9 @@ public class FormRefactoringUpdate extends SimpleRefactoringElementImplementatio
 
     private boolean loadingFailed;
 
-    /**
-     * Whether a change in guarded code was requested by java refactoring.
-     */
-    private boolean guardedCodeChanging;
-
     private boolean transactionDone;
 
-    private boolean formFileRenameDone;
-
-    private List<BackupFacility.Handle> backups;
+  private List<BackupFacility.Handle> backups;
 
     // -----
 
@@ -145,10 +137,6 @@ public class FormRefactoringUpdate extends SimpleRefactoringElementImplementatio
             previewElement = new PreviewElement(changingFile/*, displayText*/);
         }
         return previewElement;
-    }
-
-  boolean isGuardedCodeChanging() {
-        return guardedCodeChanging;
     }
 
     // -----
@@ -183,16 +171,7 @@ public class FormRefactoringUpdate extends SimpleRefactoringElementImplementatio
                 }
                 break;
             case CLASS_MOVE: // moving a class used in the form (there can be more of them)
-                if (!originalFile.equals(changingFile) && isGuardedCodeChanging()) {
-                    componentChange(refInfo.getOldName(originalFile), refInfo.getNewName(originalFile));
-                    transactionDone = !refInfo.containsOriginalFile(changingFile);
-                    // If a form is moved together with other java classes, it needs
-                    // to be checked here but also processed later in performChange
-                    // method. If it contained some of the moved components, we will
-                    // not be able to load it. But that is not for sure, so will try
-                    // anyway, at worst it won't be processed.
-                }
-                break;
+              break;
             case CLASS_DELETE: // deleting form (more can be deleted, but here we only care about this form)
                 if (originalFile.equals(changingFile)) {
                     saveFormForUndo(); // we only need to backup the form file for undo
@@ -245,7 +224,6 @@ public class FormRefactoringUpdate extends SimpleRefactoringElementImplementatio
             return;
         }
         if (transactionDone) { // could be registered redundantly as file change
-            processCustomCode();
             return;
         }
 
@@ -278,8 +256,6 @@ public class FormRefactoringUpdate extends SimpleRefactoringElementImplementatio
                 break;
             }
         }
-
-        processCustomCode();
     }
 
     // RefactoringElementImplementation (registered via RefactoringElementsBag.addFileChange)
@@ -349,10 +325,10 @@ public class FormRefactoringUpdate extends SimpleRefactoringElementImplementatio
     private void formMove2(/*boolean saveAll*/) {
         if (prepareForm(true)) {
             saveFormForUndo();
-            FileObject oldFolder = changingFile.getParent();
+//            FileObject oldFolder = changingFile.getParent();
 //            saveResourcesForFormMoveUndo(oldFolder);
-            String oldFormName = refInfo.getOldName(changingFile);
-            oldFormName = oldFormName.substring(oldFormName.lastIndexOf('.')+1); // should be a short name
+//            String oldFormName = refInfo.getOldName(changingFile);
+//            oldFormName = oldFormName.substring(oldFormName.lastIndexOf('.')+1); // should be a short name
 //            ResourceSupport.formMoved(formEditor.getFormModel(), oldFolder, oldFormName, false);
             updateForm(true);
         }
@@ -362,7 +338,6 @@ public class FormRefactoringUpdate extends SimpleRefactoringElementImplementatio
         if (refInfo.getRefactoring() instanceof SingleCopyRefactoring) {
             FileObject oldFile = changingFile;
             FormDataObject oldForm = formDataObject;
-            FileObject oldFolder = changingFile.getParent();
 
             SingleCopyRefactoring copyRef = (SingleCopyRefactoring)refInfo.getRefactoring();
             String newName = copyRef.getNewName(); // short name without extension
@@ -381,9 +356,6 @@ public class FormRefactoringUpdate extends SimpleRefactoringElementImplementatio
             formEditor = null;
             if (prepareForm(true)) {
 //                saveResourcesForFormRenameUndo(); // same set of files like if the new form was renamed
-                if (oldFolder == targetFolder) {
-                    oldFolder = null;
-                }
 //                ResourceSupport.formMoved(formEditor.getFormModel(), oldFolder, oldFile.getName(), true);
                 updateForm(true);
             }
@@ -437,8 +409,7 @@ public class FormRefactoringUpdate extends SimpleRefactoringElementImplementatio
         }
         if (replaceClassOrPkgName(new String[] { refInfo.getOldName(originalPkgFile) },
                                   new String[] { refInfo.getNewName() },
-                                  true)
-                && !isGuardedCodeChanging()) {
+                                  true)) {
             // some package references in resource were changed in the form file
             // (not class names since no change in guarded code came from java
             // refactoring) and because no component has changed we can load the
@@ -447,139 +418,7 @@ public class FormRefactoringUpdate extends SimpleRefactoringElementImplementatio
         }
     }
 
-    /**
-     * Tries to update the fragments of custom code in the .form file according
-     * to the refactoring change. The implementation is quite simple and 
-     * super-ugly. It goes through the form file, finds relevant attributes,
-     * and blindly replaces given "old name" with a "new name". Should mostly
-     * work when a component variable or class is renamed. Should be enough
-     * though, since the usage of custom code is quite limited.
-     */
-    private void processCustomCode() {
-        if (isGuardedCodeChanging() && !formFileRenameDone) {
-            boolean replaced = false;
-            List<String> oldList = new LinkedList<String>();
-            List<String> newList = new LinkedList<String>();
-            for (FileObject originalFile : refInfo.getOriginalFiles()) {
-                String oldName = refInfo.getOldName(originalFile);
-                String newName = refInfo.getNewName(originalFile);
-                if (oldName != null && newName != null) {
-                    oldList.add(oldName);
-                    newList.add(newName);
-                }
-            }
-            if (!oldList.isEmpty()) {
-                String[] oldNames = oldList.toArray(new String[oldList.size()]);
-                String[] newNames = newList.toArray(new String[newList.size()]);
-                replaced |= replaceClassOrPkgName(oldNames, newNames, false);
-               // also try to replace short class name
-                switch (refInfo.getChangeType()) {
-                case CLASS_RENAME:
-                case CLASS_MOVE:
-                    replaced |= replaceShortClassName(oldNames, newNames);
-                    break;
-                }
-            }
-            if (replaced) { // regenerate the code
-                // need to reload the form from file
-                final FormEditorSupport fes = formDataObject.getFormEditorSupport();
-                if (fes.isOpened()) {
-                    EventQueue.invokeLater(new Runnable() {
-                        @Override
-                        public void run() {
-                            formEditor = fes.reloadFormEditor();
-                            updateForm(true);
-                        }
-                    });
-                } else {
-                    if  (formEditor != null && formEditor.isFormLoaded()) {
-                        formEditor.closeForm();
-                    }
-                    if (prepareForm(true)) {
-                        updateForm(true);
-                    }
-                }
-            }
-            formFileRenameDone = false; // not to block redo
-        }
-    }
-
-    /**
-     * Rough and simple utility to rename a component variable in custom code
-     * areas. Does the same thing as processCustomCode in this regard, but
-     * directly in the model, while processCustomCode changes the .form file
-     * (so does not require the form to be opened).
-     */
-    static void renameComponentInCustomCode(RADComponent metacomp, String newName) {
-        String oldName = metacomp.getName();
-        for (RADComponent comp : metacomp.getFormModel().getAllComponents()) {
-            renameInCustomCode(comp.getKnownBeanProperties(), oldName, newName);
-            renameInCustomCode(comp.getKnownAccessibilityProperties(), oldName, newName);
-            if (comp instanceof RADVisualComponent) {
-                renameInCustomCode(((RADVisualComponent)comp).getConstraintsProperties(), oldName, newName);
-            }
-            renameInCustomCode(comp.getSyntheticProperties(), oldName, newName);
-        }
-    }
-
-    private static void renameInCustomCode(Node.Property[] properties, String oldName, String newName) {
-        if (properties == null) {
-            return;
-        }
-        for (Node.Property prop : properties) {
-            if (prop instanceof FormProperty) {
-                FormProperty formProp = (FormProperty) prop;
-                String newCode;
-                newCode = replaceCode(formProp.getPreCode(), oldName, newName);
-                if (newCode != null) {
-                    formProp.setPreCode(newCode);
-                }
-                newCode = replaceCode(formProp.getPostCode(), oldName, newName);
-                if (newCode != null) {
-                    formProp.setPostCode(newCode);
-                }
-              // TODO: stripped
-//                if (formProp.isChanged()) {
-//                    try {
-//                        Object value = formProp.getValue();
-//                        if (value instanceof RADConnectionPropertyEditor.RADConnectionDesignValue) {
-//                            RADConnectionPropertyEditor.RADConnectionDesignValue rr
-//                                    = (RADConnectionPropertyEditor.RADConnectionDesignValue) value;
-//                            if (rr.getType() == RADConnectionPropertyEditor.RADConnectionDesignValue.TYPE_CODE) {
-//                                newCode = replaceCode(rr.getCode(), oldName, newName);
-//                                if (newCode != null) {
-//                                    value = new RADConnectionPropertyEditor.RADConnectionDesignValue(newCode);
-//                                    formProp.setValue(value);
-//                                }
-//                            }
-//                        } else if (value instanceof String && formProp instanceof JavaCodeGenerator.CodeProperty) {
-//                            newCode = replaceCode((String)value, oldName, newName);
-//                            if (newCode != null) {
-//                                formProp.setValue(newCode);
-//                            }
-//                        }
-//                    } catch (Exception ex) {
-//                        Exceptions.printStackTrace(ex);
-//                    }
-//                }
-            }
-        }
-    }
-
-    private static String replaceCode(String code, String oldName, String newName) {
-        if (code != null && code.contains(oldName)) {
-            NameReplacer rep = new NameReplacer(new String[] { oldName },
-                    new String[] { newName }, code.length()+10);
-            rep.append(code);
-            String newCode = rep.getResult();
-            if (!code.equals(newCode)) {
-                return newCode;
-            }
-        }
-        return null;
-    }
-
-    // -----
+  // -----
 
     /**
      * Regenerate code and save.
@@ -854,7 +693,7 @@ public class FormRefactoringUpdate extends SimpleRefactoringElementImplementatio
                             int idx = line.indexOf(attr);
                             if (idx > 0) {
                                 // get the value of the attribute - string enclosed in ""
-                                int idx1 = idx1 = idx + attr.length();
+                                int idx1 = idx + attr.length();
                                 if (!attr.endsWith("\"")) { // NOI18N
                                     while (idx1 < line.length() && line.charAt(idx1) != '\"') { // NOI18N
                                         idx1++;
@@ -923,7 +762,6 @@ public class FormRefactoringUpdate extends SimpleRefactoringElementImplementatio
                 lock.releaseLock();
             }
         }
-        formFileRenameDone = true; // we don't need to do processCustomCode
         return true;
     }
 
