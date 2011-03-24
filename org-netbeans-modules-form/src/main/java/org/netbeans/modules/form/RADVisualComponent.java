@@ -192,8 +192,8 @@ public class RADVisualComponent extends RADComponent {
     // Properties
 
 //    @Override
-//    protected void createPropertySets(List<Node.PropertySet> propSets) {
-//        super.createPropertySets(propSets);
+//    protected void getPropertySets(List<Node.PropertySet> propSets) {
+//        super.getPropertySets(propSets);
 //        if (SUPPRESS_PROPERTY_TABS) {
 //            return;
 //        }

@@ -35,6 +35,11 @@
       <version>3.2</version>
     </dependency>
     <dependency>
+      <groupId>de.adito.aditoweb.packages</groupId>
+      <artifactId>lwguava</artifactId>
+      <version>r08</version>
+    </dependency>
+    <dependency>
       <groupId>de.adito.aditoweb.nbm</groupId>
       <artifactId>DesignerEditorTest</artifactId>
       <version>3.2</version>

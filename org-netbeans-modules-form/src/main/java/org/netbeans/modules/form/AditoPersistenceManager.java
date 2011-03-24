@@ -10,9 +10,11 @@ import org.netbeans.modules.form.adito.mapping.EModelComponentMapping;
 import org.netbeans.modules.form.layoutdesign.LayoutModel;
 import org.netbeans.modules.form.layoutsupport.LayoutSupportManager;
 import org.openide.filesystems.*;
+import org.openide.nodes.Node;
 
 import javax.swing.*;
 import java.awt.*;
+import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 import java.util.List;
 
@@ -86,6 +88,25 @@ public class AditoPersistenceManager extends PersistenceManager
     if (topComp != null) // load the main form component
       _loadComponent(pInfo, pInfo.getModelRoot(), topComp, null);
 
+    formModel.addFormModelListener(new FormModelListener()
+    {
+      @Override
+      public void formChanged(FormModelEvent[] events)
+      {
+        for (FormModelEvent event : events)
+        {
+          RADComponent eventComponent = event.getComponent();
+          switch (event.getChangeType())
+          {
+            case FormModelEvent.COMPONENT_LAYOUT_CHANGED:
+              eventComponent.getARADComponentHandler().layoutPropertiesChanged();
+              break;
+            default:
+              break;
+          }
+        }
+      }
+    });
 //    FormEditor.updateProjectForNaturalLayout(formModel);
 //    formModel.setFreeDesignDefaultLayout(true);
   }
@@ -255,6 +276,19 @@ public class AditoPersistenceManager extends PersistenceManager
         newLayout = Boolean.FALSE;
       */
 
+      try
+      {
+        _copyChildValues(visualContainer);
+      }
+      catch (IllegalAccessException e)
+      {
+        e.printStackTrace();  // TODO: error-handling
+      }
+      catch (InvocationTargetException e)
+      {
+        e.printStackTrace();  // TODO: error-handling
+      }
+
       if (layoutEx != null)
         layoutEx.printStackTrace(); // TODO: error-handling
     }
@@ -324,6 +358,28 @@ public class AditoPersistenceManager extends PersistenceManager
   }
 
   // recognizes, creates, initializes and loads a meta component
+
+  private void _copyChildValues(RADVisualContainer pVisualContainer) throws InvocationTargetException, IllegalAccessException
+  {
+    for (RADComponent childComponent : pVisualContainer.getSubComponents())
+    {
+      ARADComponentHandler aRADComponentHandler = childComponent.getARADComponentHandler();
+      if (aRADComponentHandler != null)
+      {
+        List<Node.PropertySet> propSets = new ArrayList<Node.PropertySet>();
+        aRADComponentHandler.getPropertySets(propSets);
+        for (Node.PropertySet set : propSets)
+        {
+          for (Node.Property prop : set.getProperties())
+          {
+            FormProperty formProperty = aRADComponentHandler.getFormPropertyByModelPropertyName(prop.getName());
+            if (formProperty != null)
+              formProperty.setValue(prop.getValue());
+          }
+        }
+      }
+    }
+  }
 
   private RADComponent _restoreComponent(_Info pInfo, FileObject pChildModel, RADComponent pParentComponent)
       throws PersistenceException

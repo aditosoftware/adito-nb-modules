@@ -1,7 +1,6 @@
 package org.netbeans.modules.form.adito.mapping;
 
 import de.adito.aditoweb.filesystem.datamodelfs.access.model.EModelAccessType;
-import org.netbeans.modules.form.adito.comps.*;
 
 import javax.swing.*;
 
@@ -11,33 +10,33 @@ import javax.swing.*;
 public enum EModelComponentMapping
 {
 
-  BUTTON(EModelAccessType.BUTTON, AButton.class),
-  CHECKBOX(EModelAccessType.CHECKBOX, JCheckBox.class),
-  COMBOBOX(EModelAccessType.COMBOBOX, AComboBox.class),
-  EDITFIELD(EModelAccessType.EDITFIELD, AEditField.class),
-  LABEL(EModelAccessType.LABEL, ALabel.class),
-  LIST(EModelAccessType.LIST, JList.class),
-  RADIOBUTTON(EModelAccessType.RADIOBUTTON, JRadioButton.class),
-  REGISTER(EModelAccessType.REGISTER, JTabbedPane.class),
-  TABLE(EModelAccessType.TABLE, JTable.class),
-  TREE(EModelAccessType.TREE, JTree.class);
+  BUTTON(EModelAccessType.BUTTON, new AButtonMapping()),
+  CHECKBOX(EModelAccessType.CHECKBOX, new ACheckBoxMapping()),
+  COMBOBOX(EModelAccessType.COMBOBOX, new AComboBoxMapping()),
+  EDITFIELD(EModelAccessType.EDITFIELD, new AEditFieldMapping()),
+  LABEL(EModelAccessType.LABEL, new ALabelMapping()),
+  LIST(EModelAccessType.LIST, new AListMapping()),
+  RADIOBUTTON(EModelAccessType.RADIOBUTTON, new ARadioButtonMapping()),
+  REGISTER(EModelAccessType.REGISTER, new ARegisterMapping()),
+  TABLE(EModelAccessType.TABLE, new ATableMapping()),
+  TREE(EModelAccessType.TREE, new ATreeMapping());
 
 
   private EModelAccessType modelAccessType;
-  private Class<? extends JComponent> swingClass;
+  private IComponentInfo componentInfo;
 
 
-  EModelComponentMapping(EModelAccessType pType, Class<? extends JComponent> pCls)
+  EModelComponentMapping(EModelAccessType pType, IComponentInfo pInfo)
   {
     modelAccessType = pType;
-    swingClass = pCls;
+    componentInfo = pInfo;
   }
 
   public static EModelComponentMapping get(Class<? extends JComponent> pCls)
   {
     for (EModelComponentMapping eModelComponentMapping : values())
     {
-      if (eModelComponentMapping.swingClass.equals(pCls))
+      if (eModelComponentMapping.componentInfo.getComponentClass().equals(pCls))
         return eModelComponentMapping;
     }
     return null;
@@ -58,8 +57,13 @@ public enum EModelComponentMapping
     return modelAccessType;
   }
 
+  public IComponentInfo getComponentInfo()
+  {
+    return componentInfo;
+  }
+
   public Class<? extends JComponent> getSwingClass()
   {
-    return swingClass;
+    return componentInfo.getComponentClass();
   }
 }
