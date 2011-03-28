@@ -5,6 +5,8 @@ import de.adito.aditoweb.designer.filetype.PropertiesCookie;
 import de.adito.aditoweb.filesystem.datamodelfs.access.DataAccessHelper;
 import de.adito.aditoweb.filesystem.datamodelfs.access.mechanics.field.IFieldAccess;
 import de.adito.aditoweb.filesystem.datamodelfs.access.model.*;
+import de.adito.aditoweb.filesystem.datamodelfs.access.verification.ResultOfVerification;
+import org.jetbrains.annotations.*;
 import org.netbeans.modules.form.*;
 import org.netbeans.modules.form.adito.mapping.EModelComponentMapping;
 import org.netbeans.modules.form.layoutsupport.LayoutSupportDelegate;
@@ -14,7 +16,6 @@ import org.openide.nodes.*;
 
 import java.beans.*;
 import java.lang.reflect.InvocationTargetException;
-import java.util.*;
 
 /**
  * @author J. Boesl, 17.02.11
@@ -23,6 +24,7 @@ public class ARADComponentHandler
 {
 
   private RADComponent radComponent;
+  @NotNull
   private DataFolder modelDataObject;
 
   private FileChangeListener fileChangeListener;
@@ -31,21 +33,19 @@ public class ARADComponentHandler
   private EModelComponentMapping mapping;
 
 
-  public ARADComponentHandler(DataFolder pModelDataObject)
+  public ARADComponentHandler(@NotNull DataFolder pModelDataObject)
   {
     modelDataObject = pModelDataObject;
   }
 
+  @NotNull
   public DataFolder getModelDataObject()
   {
     return modelDataObject;
   }
 
-  public void initRADComponent(RADComponent pRADComponent) throws InvocationTargetException, IllegalAccessException
+  public void initRADComponent(@NotNull RADComponent pRADComponent) throws InvocationTargetException, IllegalAccessException
   {
-    if (modelDataObject == null)
-      return;
-
     if (radComponent != null)
       throw new RuntimeException("Can't init with: " + pRADComponent + ". Another component is already set: "
                                      + radComponent + ".");
@@ -59,31 +59,47 @@ public class ARADComponentHandler
     if (radComponent instanceof RADVisualComponent)
     {
       RADVisualComponent radVisualComponent = (RADVisualComponent) radComponent;
-      for (Node.Property formProperty : radVisualComponent.getConstraintsProperties())
+      try
       {
-        Node.Property modelProperty = getModelPropertyByFormPropertyName(formProperty.getName());
-        if (modelProperty != null)
+        for (Node.Property formProperty : radVisualComponent.getConstraintsProperties())
         {
-          try
+          IFieldAccess fieldAccess = getFieldAccessByFormPropertyName(formProperty.getName());
+          if (fieldAccess != null)
           {
-            Object modelPropertyValue = modelProperty.getValue();
-            if (modelPropertyValue == null || !modelProperty.getValue().equals(formProperty.getValue()))
-              formProperty.setValue(modelPropertyValue);
+            Object fieldValue = fieldAccess.getValue();
+            Object formPropertyValue = formProperty.getValue();
+            if (!Utility.isEqual(fieldValue, formPropertyValue))
+            {
+              @SuppressWarnings({"unchecked"})
+              ResultOfVerification resultOfVerification = fieldAccess.setValue(formPropertyValue);
+              radComponent.getNodeReference().firePropertyChangeHelper(fieldAccess.getName(), null, null);
+              if (resultOfVerification != null && resultOfVerification.getType() != ResultOfVerification.OK)
+                throw resultOfVerification.getException();
+            }
           }
-          catch (IllegalAccessException e)
-          {
-            e.printStackTrace(); // TODO: errorHandling
-          }
-          catch (InvocationTargetException e)
-          {
-            e.printStackTrace(); // TODO: errorHandling
-          }
+//          Node.Property modelProperty = getModelFieldByFormPropertyName(formProperty.getName());
+//          if (modelProperty != null)
+//          {
+//            Object modelPropertyValue = modelProperty.getValue();
+//            Object formPropertyValue = formProperty.getValue();
+//            if (!Utility.isEqual(modelPropertyValue, formPropertyValue))
+//            {
+//              //noinspection unchecked
+//              modelProperty.setValue(formPropertyValue);
+//              radComponent.getNodeReference().firePropertyChangeHelper(modelProperty.getName(), null, null);
+//            }
+//          }
         }
+      }
+      catch (Exception e)
+      {
+        radComponent.getFormModel().forceUndoOfCompoundEdit();
       }
     }
   }
 
-  public EModelComponentMapping getComponentMapping()
+  @Nullable
+  private EModelComponentMapping _getComponentMapping()
   {
     if (mapping == null)
     {
@@ -94,22 +110,23 @@ public class ARADComponentHandler
     return mapping;
   }
 
-  public void getPropertySets(List<Node.PropertySet> propSets)
+  @NotNull
+  public Node.PropertySet[] getPropertySets()
   {
-    if (sheet == null && modelDataObject != null)
+    if (sheet == null)
       sheet = _createPropertySheet();
     if (sheet != null)
-    {
-      Node.PropertySet[] sets = sheet.toArray();
-      propSets.addAll(Arrays.asList(sets));
-    }
+      return sheet.toArray();
+    return new Node.PropertySet[0];
   }
 
-  public FormProperty getFormPropertyByModelPropertyName(String pModelPropertyName)
+  @Nullable
+  public FormProperty getFormPropertyByModelPropertyName(@NotNull String pModelPropertyName)
   {
-    if (getComponentMapping() != null)
+    EModelComponentMapping componentMapping = _getComponentMapping();
+    if (componentMapping != null)
     {
-      String mappedName = getComponentMapping().getComponentInfo().getFormPropertyName(
+      String mappedName = componentMapping.getComponentInfo().getFormPropertyName(
           getLayoutSupportDelegateClass(), pModelPropertyName);
       if (mappedName != null)
       {
@@ -121,19 +138,32 @@ public class ARADComponentHandler
     return null;
   }
 
-  public Node.Property getModelPropertyByFormPropertyName(String pFormPropertyName)
+  @Nullable
+  public IFieldAccess getFieldAccessByFormPropertyName(@NotNull String pFormPropertyName)
   {
-    String mappedName = getComponentMapping().getComponentInfo().getModelPropertyName(
-        getLayoutSupportDelegateClass(), pFormPropertyName);
-    if (mappedName != null)
+    EModelComponentMapping componentMapping = _getComponentMapping();
+    if (componentMapping != null)
     {
-      Node.Property mappedProperty = radComponent.getPropertyByName(mappedName);
-      if (mappedProperty instanceof FormProperty)
-        return mappedProperty;
+      String mappedName = componentMapping.getComponentInfo().getModelPropertyName(
+          getLayoutSupportDelegateClass(), pFormPropertyName);
+      if (mappedName != null)
+      {
+        return DataAccessHelper.accessField(modelDataObject.getPrimaryFile().getFileObject(mappedName));
+//        Node.PropertySet[] propertySets = getPropertySets();
+//        for (Node.PropertySet propertySet : propertySets)
+//        {
+//          for (Node.Property<?> property : propertySet.getProperties())
+//          {
+//            if (property.getName().equals(mappedName))
+//              return property;
+//          }
+//        }
+      }
     }
     return null;
   }
 
+  @Nullable
   public Class<? extends LayoutSupportDelegate> getLayoutSupportDelegateClass()
   {
     Class<? extends LayoutSupportDelegate> layoutSupportClass = null;
@@ -147,6 +177,7 @@ public class ARADComponentHandler
     return layoutSupportClass;
   }
 
+  @Nullable
   private Sheet _createPropertySheet()
   {
     PropertiesCookie propsCookie = modelDataObject.getCookie(PropertiesCookie.class);
@@ -189,11 +220,11 @@ public class ARADComponentHandler
   {
     for (FileObject fileObject : modelDataObject.getPrimaryFile().getChildren())
       fileObject.removeFileChangeListener(fileChangeListener);
-    modelDataObject = null;
     radComponent = null;
   }
 
-  private PropertyChangeListener _createFormPropertyChangeListener(final String pModelPropertyName)
+  @NotNull
+  private PropertyChangeListener _createFormPropertyChangeListener(@NotNull final String pModelPropertyName)
   {
     return new PropertyChangeListener()
     {
@@ -206,10 +237,13 @@ public class ARADComponentHandler
           try
           {
             FormProperty formProperty = getFormPropertyByModelPropertyName(pModelPropertyName);
-            Object oldValue = fieldAccess.getValue();
-            Object newValue = formProperty.getValue();
-            if (!Utility.isEqual(oldValue, newValue))
-              fieldAccess.setValue(newValue);
+            if (formProperty != null)
+            {
+              Object oldValue = fieldAccess.getValue();
+              Object newValue = formProperty.getValue();
+              if (!Utility.isEqual(oldValue, newValue))
+                fieldAccess.setValue(newValue);
+            }
           }
           catch (IllegalAccessException e)
           {
@@ -224,6 +258,7 @@ public class ARADComponentHandler
     };
   }
 
+  @NotNull
   private FileChangeListener _getFileChangeListener()
   {
     if (fileChangeListener == null)
@@ -264,11 +299,10 @@ public class ARADComponentHandler
     return fileChangeListener;
   }
 
-  private IFieldAccess<Object> _getFieldAccess(String pModelPropertyName)
+  @Nullable
+  private IFieldAccess<Object> _getFieldAccess(@NotNull String pModelPropertyName)
   {
-    if (modelDataObject != null)
-      return DataAccessHelper.accessField(modelDataObject.getPrimaryFile().getFileObject(pModelPropertyName));
-    return null;
+    return DataAccessHelper.accessField(modelDataObject.getPrimaryFile().getFileObject(pModelPropertyName));
   }
 
 }

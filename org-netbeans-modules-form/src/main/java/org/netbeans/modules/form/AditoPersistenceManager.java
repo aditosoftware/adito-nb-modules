@@ -366,9 +366,7 @@ public class AditoPersistenceManager extends PersistenceManager
       ARADComponentHandler aRADComponentHandler = childComponent.getARADComponentHandler();
       if (aRADComponentHandler != null)
       {
-        List<Node.PropertySet> propSets = new ArrayList<Node.PropertySet>();
-        aRADComponentHandler.getPropertySets(propSets);
-        for (Node.PropertySet set : propSets)
+        for (Node.PropertySet set : aRADComponentHandler.getPropertySets())
         {
           for (Node.Property prop : set.getProperties())
           {
