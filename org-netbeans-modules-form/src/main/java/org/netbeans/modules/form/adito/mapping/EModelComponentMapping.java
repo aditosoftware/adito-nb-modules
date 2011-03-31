@@ -1,6 +1,7 @@
 package org.netbeans.modules.form.adito.mapping;
 
 import de.adito.aditoweb.filesystem.datamodelfs.access.model.EModelAccessType;
+import org.netbeans.modules.form.RADComponent;
 
 import javax.swing.*;
 
@@ -30,6 +31,15 @@ public enum EModelComponentMapping
   {
     modelAccessType = pType;
     componentInfo = pInfo;
+  }
+
+  public static EModelComponentMapping get(RADComponent pRADComponent)
+  {
+    Class<?> beanClass = pRADComponent.getBeanClass();
+    if (JComponent.class.isAssignableFrom(beanClass))
+      //noinspection unchecked
+      return get((Class<JComponent>) beanClass);
+    return null;
   }
 
   public static EModelComponentMapping get(Class<? extends JComponent> pCls)

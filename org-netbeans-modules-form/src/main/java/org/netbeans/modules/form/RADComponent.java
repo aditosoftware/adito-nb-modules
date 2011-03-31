@@ -161,28 +161,28 @@ public class RADComponent {
      * @return initialized instance.
      * @throws java.lang.Exception when the instance cannot be initialized.
      */
-    public Object initInstance(Class<?> beanClass, ARADComponentHandler pARADComponentHandler)
-        throws Exception {
-        if (beanClass == null)
-            throw new NullPointerException();
+    public Object initInstance(Class<?> beanClass, ARADComponentHandler pARADComponentHandler) throws Exception
+    {
+      if (beanClass == null)
+        throw new NullPointerException();
 
-        if (this.beanClass != beanClass && this.beanClass != null) {
-            beanInfo = null;
-            fakeBeanInfo = null;
-            clearProperties();
-        }
+      if (this.beanClass != beanClass && this.beanClass != null)
+      {
+        beanInfo = null;
+        fakeBeanInfo = null;
+        clearProperties();
+      }
+      this.beanClass = beanClass;
 
-        aRADComponentHandler = pARADComponentHandler;
-        this.beanClass = beanClass;
+      if (pARADComponentHandler != null)
+        pARADComponentHandler.setRadComponent(this);
+      aRADComponentHandler = pARADComponentHandler;
 
-        Object bean = createBeanInstance();
-        getBeanInfo(); // force BeanInfo creation here - will be needed, may fail
-        setBeanInstance(bean);
+      Object bean = createBeanInstance();
+      getBeanInfo(); // force BeanInfo creation here - will be needed, may fail
+      setBeanInstance(bean);
 
-        if (aRADComponentHandler != null)
-          aRADComponentHandler.initRADComponent(this);
-
-        return beanInstance;
+      return beanInstance;
     }
 
   public final ARADComponentHandler getARADComponentHandler()

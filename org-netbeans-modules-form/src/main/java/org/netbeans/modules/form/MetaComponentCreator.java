@@ -847,7 +847,7 @@ public class MetaComponentCreator {
             }
         }
 
-        newMetaComp.setStoredName(newMetaComp.getARADComponentHandler().getModelDataObject().getName());
+        newMetaComp.setStoredName(newMetaComp.getARADComponentHandler().getName());
 
         // for some components, we initialize their properties with some
         // non-default values e.g. a label on buttons, checkboxes

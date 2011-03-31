@@ -444,11 +444,12 @@ public class HandleLayer extends JPanel implements MouseListener, MouseMotionLis
         }
         if (AbstractButton.class.isAssignableFrom(metacomp.getBeanClass())) {
             FormProperty prop = (FormProperty)metacomp.getPropertyByName("buttonGroup"); // NOI18N
-            try {
-                return prop.getRealValue();
-            } catch (Exception ex) {
-                ex.printStackTrace();
-            }
+            if (prop != null)
+              try {
+                  return prop.getRealValue();
+              } catch (Exception ex) {
+                  ex.printStackTrace();
+              }
         }
         return null;
     }

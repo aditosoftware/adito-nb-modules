@@ -101,6 +101,21 @@ public class AditoPersistenceManager extends PersistenceManager
             case FormModelEvent.COMPONENT_LAYOUT_CHANGED:
               eventComponent.getARADComponentHandler().layoutPropertiesChanged();
               break;
+            case FormModelEvent.COMPONENT_REMOVED:
+              eventComponent.getARADComponentHandler().delete();
+              break;
+            case FormModelEvent.COMPONENT_ADDED:
+              eventComponent.getARADComponentHandler().add();
+              break;
+            case FormModelEvent.FORM_TO_BE_CLOSED:
+              Collection<RADComponent> allComponents = event.getFormModel().getAllComponents();
+              for (RADComponent component : allComponents)
+              {
+                ARADComponentHandler aradComponentHandler = component.getARADComponentHandler();
+                if (aradComponentHandler != null)
+                  aradComponentHandler.deinitialize();
+              }
+              event.getFormModel().removeFormModelListener(this);
             default:
               break;
           }
@@ -366,11 +381,12 @@ public class AditoPersistenceManager extends PersistenceManager
       ARADComponentHandler aRADComponentHandler = childComponent.getARADComponentHandler();
       if (aRADComponentHandler != null)
       {
+        IFormDataInfo formDataInfo = aRADComponentHandler.getFormDataInfo();
         for (Node.PropertySet set : aRADComponentHandler.getPropertySets())
         {
           for (Node.Property prop : set.getProperties())
           {
-            FormProperty formProperty = aRADComponentHandler.getFormPropertyByModelPropertyName(prop.getName());
+            FormProperty formProperty = formDataInfo.getFormPropertyByModelPropertyName(prop.getName());
             if (formProperty != null)
               formProperty.setValue(prop.getValue());
           }

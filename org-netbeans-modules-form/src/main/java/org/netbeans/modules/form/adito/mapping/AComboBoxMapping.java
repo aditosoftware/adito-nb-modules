@@ -1,5 +1,6 @@
 package org.netbeans.modules.form.adito.mapping;
 
+import de.adito.aditoweb.swingcommon.components.combobox.standardcombobox.StandardComboBox;
 import org.netbeans.modules.form.adito.comps.AComboBox;
 
 import javax.swing.*;
@@ -14,7 +15,7 @@ public class AComboBoxMapping extends ComponentInfo
   @Override
   public Class<? extends JComponent> getComponentClass()
   {
-    return AComboBox.class;
+    return StandardComboBox.class;
   }
 
   @Override

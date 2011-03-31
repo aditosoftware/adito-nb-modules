@@ -4,7 +4,7 @@ import de.adito.aditoweb.filesystem.datamodelfs.access.DataAccessHelper;
 import de.adito.aditoweb.filesystem.datamodelfs.access.mechanics.model.IModelAccess;
 import de.adito.aditoweb.filesystem.datamodelfs.access.model.EModelAccessType;
 import org.openide.filesystems.FileObject;
-import org.openide.loaders.DataFolder;
+import org.openide.loaders.*;
 
 /**
  * @author J. Boesl, 10.02.11
@@ -14,12 +14,14 @@ public class DMHelper
 
   public static ARADComponentHandler getHandler()
   {
-    return getHandler(createDataFo());
+    return new ARADComponentHandler();
   }
 
   public static ARADComponentHandler getHandler(FileObject pFo)
   {
-    return new ARADComponentHandler(DataFolder.findFolder(pFo));
+    ARADComponentHandler aradComponentHandler = new ARADComponentHandler();
+    aradComponentHandler.setModelDataObject(DataFolder.findFolder(pFo));
+    return aradComponentHandler;
   }
 
   private static FileObject createDataFo()
