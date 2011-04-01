@@ -15,7 +15,6 @@ import org.openide.filesystems.FileObject;
 import org.openide.loaders.DataFolder;
 import org.openide.nodes.*;
 
-import java.io.IOException;
 import java.util.UUID;
 
 /**
@@ -33,6 +32,7 @@ public class ARADComponentHandler
   @Nullable
   private Sheet sheet;
 
+  private FileObject deleted;
 
 //  @Nullable
 //  public RADComponent getRadComponent()
@@ -49,14 +49,32 @@ public class ARADComponentHandler
   public void delete()
   {
     Debug.write("deleted", radComponent); // DEBUG: remove it!
+
+    FileObject modelFile = modelDataObject.getPrimaryFile();
+
     try
     {
-      modelDataObject.delete();
+      IArrayAccess<IModelAccess> arrayAccess = DataAccessHelper.createArrayAccess();
+      arrayAccess.add(DataAccessHelper.<IModelAccess>accessModel(modelFile));
+      deleted = arrayAccess.getFileObject().getFileObject(modelFile.getName());
+//      Debug.write(deleted.getChildren()); // DEBUG: remove it!
+
+
+//      FileSystem memoryFileSystem = FileUtil.createMemoryFileSystem();
+//      FileObject folder = memoryFileSystem.getRoot().createFolder(modelFile.getNameExt());
+//
+//      FieldAccessUtil.setModelValue(memoryFileSystem.getRoot(), DataAccessHelper.<IModelAccess>accessModel(modelFile));
+//      Debug.write(memoryFileSystem.getRoot().getChildren()); // DEBUG: remove it!
     }
-    catch (IOException e)
+    catch (Exception e)
     {
-      e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+      throw new RuntimeException(e); // TODO: errorHandling
     }
+
+    IArrayAccess<IModelAccess> childDataModels = DataAccessHelper.accessArray(modelFile.getParent());
+    ResultOfVerification removeResult = childDataModels.remove(modelFile);
+    if (removeResult.getException() != null)
+      throw new RuntimeException(removeResult.getException()); // TODO: errorHandling
   }
 
   public void add()
@@ -64,9 +82,9 @@ public class ARADComponentHandler
     Debug.write("added", radComponent); // DEBUG: remove it!
 
     //Debug.write("setParentRadComponent", radComponent); // DEBUG: remove it!
-    RADComponent parentRadComponent = radComponent.getParentComponent();
     if (modelDataObject == null)
     {
+      RADComponent parentRadComponent = radComponent.getParentComponent();
       ARADComponentHandler parentRadHandler = parentRadComponent.getARADComponentHandler();
       IFieldAccess<IArrayAccess> childField = FieldConst.CHILDDATAMODELS.accessField(
           parentRadHandler.getModelDataObject().getPrimaryFile());
