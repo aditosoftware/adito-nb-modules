@@ -45,7 +45,6 @@
 
 package org.netbeans.modules.form;
 
-//import org.netbeans.api.java.loaders.JavaDataSupport;
 import org.openide.filesystems.FileObject;
 import org.openide.filesystems.FileUtil;
 import org.openide.loaders.*;

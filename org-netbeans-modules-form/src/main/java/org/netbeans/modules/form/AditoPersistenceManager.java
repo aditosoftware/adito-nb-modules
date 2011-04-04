@@ -1,6 +1,7 @@
 package org.netbeans.modules.form;
 
 import de.adito.aditoweb.filesystem.common.AfsUrlUtil;
+import de.adito.aditoweb.filesystem.datamodelfs.access.DataAccessHelper;
 import de.adito.aditoweb.filesystem.datamodelfs.access.mechanics.field.IFieldAccess;
 import de.adito.aditoweb.filesystem.datamodelfs.access.model.*;
 import de.adito.aditoweb.swingcommon.layout.aditolayout.*;
@@ -658,16 +659,6 @@ public class AditoPersistenceManager extends PersistenceManager
       if (formModel == null)
         formModel = new FormModel();
       nonfatalErrors = pNonfatalErrors;
-
-      try
-      {
-        FileObject aodFile = getFormObject().getPrimaryFile();
-        modelRoot = URLMapper.findFileObject(AfsUrlUtil.createAdmFsUrl(aodFile.getURL()));
-      }
-      catch (Exception e)
-      {
-        throw new RuntimeException(e); // TODO: runtimeEx
-      }
     }
 
     public FormDataObject getFormObject()
@@ -687,6 +678,19 @@ public class AditoPersistenceManager extends PersistenceManager
 
     public FileObject getModelRoot()
     {
+      if (modelRoot == null)
+      {
+        try
+        {
+          FileObject aodFile = formObject.getPrimaryFile();
+          modelRoot = URLMapper.findFileObject(AfsUrlUtil.createAdmFsUrl(aodFile.getURL()));
+          modelRoot = DataAccessHelper.getDataRoot(modelRoot);
+        }
+        catch (Exception e)
+        {
+          throw new RuntimeException(e); // TODO: runtimeEx
+        }
+      }
       return modelRoot;
     }
 
