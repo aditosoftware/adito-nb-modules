@@ -2,7 +2,7 @@ package org.netbeans.modules.form.adito;
 
 import de.adito.aditoweb.filesystem.datamodelfs.access.DataAccessHelper;
 import de.adito.aditoweb.filesystem.datamodelfs.access.mechanics.model.IModelAccess;
-import de.adito.aditoweb.filesystem.datamodelfs.access.model.EModelAccessType;
+import de.adito.aditoweb.filesystem.datamodelfs.resolver.schema.ESchemes;
 import org.openide.filesystems.FileObject;
 import org.openide.loaders.*;
 
@@ -26,7 +26,7 @@ public class DMHelper
 
   private static FileObject createDataFo()
   {
-    return DataAccessHelper.<IModelAccess>createModelAccess(EModelAccessType.EDITFIELD).getFileObject();
+    return DataAccessHelper.<IModelAccess>createModelAccess(ESchemes.EDITFIELD).getFileObject();
   }
 
 }

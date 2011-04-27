@@ -1,6 +1,6 @@
 package org.netbeans.modules.form.adito.mapping;
 
-import de.adito.aditoweb.filesystem.datamodelfs.access.model.EModelAccessType;
+import de.adito.aditoweb.filesystem.datamodelfs.resolver.schema.ESchemes;
 import org.netbeans.modules.form.RADComponent;
 
 import javax.swing.*;
@@ -11,25 +11,25 @@ import javax.swing.*;
 public enum EModelComponentMapping
 {
 
-  BUTTON(EModelAccessType.BUTTON, new AButtonMapping()),
-  CHECKBOX(EModelAccessType.CHECKBOX, new ACheckBoxMapping()),
-  COMBOBOX(EModelAccessType.COMBOBOX, new AComboBoxMapping()),
-  EDITFIELD(EModelAccessType.EDITFIELD, new AEditFieldMapping()),
-  LABEL(EModelAccessType.LABEL, new ALabelMapping()),
-  LIST(EModelAccessType.LIST, new AListMapping()),
-  RADIOBUTTON(EModelAccessType.RADIOBUTTON, new ARadioButtonMapping()),
-  REGISTER(EModelAccessType.REGISTER, new ARegisterMapping()),
-  TABLE(EModelAccessType.TABLE, new ATableMapping()),
-  TREE(EModelAccessType.TREE, new ATreeMapping());
+  BUTTON(ESchemes.BUTTON, new AButtonMapping()),
+  CHECKBOX(ESchemes.CHECKBOX, new ACheckBoxMapping()),
+  COMBOBOX(ESchemes.COMBOBOX, new AComboBoxMapping()),
+  EDITFIELD(ESchemes.EDITFIELD, new AEditFieldMapping()),
+  LABEL(ESchemes.LABEL, new ALabelMapping()),
+  LIST(ESchemes.LIST, new AListMapping()),
+  RADIOBUTTON(ESchemes.RADIOBUTTON, new ARadioButtonMapping()),
+  REGISTER(ESchemes.REGISTER, new ARegisterMapping()),
+  TABLE(ESchemes.TABLE, new ATableMapping()),
+  TREE(ESchemes.TREE, new ATreeMapping());
 
 
-  private EModelAccessType modelAccessType;
+  private ESchemes scheme;
   private IComponentInfo componentInfo;
 
 
-  EModelComponentMapping(EModelAccessType pType, IComponentInfo pInfo)
+  EModelComponentMapping(ESchemes pScheme, IComponentInfo pInfo)
   {
-    modelAccessType = pType;
+    scheme = pScheme;
     componentInfo = pInfo;
   }
 
@@ -52,19 +52,19 @@ public enum EModelComponentMapping
     return null;
   }
 
-  public static EModelComponentMapping get(EModelAccessType pType)
+  public static EModelComponentMapping get(ESchemes pScheme)
   {
     for (EModelComponentMapping eModelComponentMapping : values())
     {
-      if (eModelComponentMapping.modelAccessType.equals(pType))
+      if (eModelComponentMapping.scheme.equals(pScheme))
         return eModelComponentMapping;
     }
     return null;
   }
 
-  public EModelAccessType getModelAccessType()
+  public ESchemes getScheme()
   {
-    return modelAccessType;
+    return scheme;
   }
 
   public IComponentInfo getComponentInfo()

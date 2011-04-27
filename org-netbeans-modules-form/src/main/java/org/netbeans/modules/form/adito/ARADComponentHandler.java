@@ -5,7 +5,7 @@ import de.adito.aditoweb.designer.filetype.PropertiesCookie;
 import de.adito.aditoweb.filesystem.datamodelfs.access.DataAccessHelper;
 import de.adito.aditoweb.filesystem.datamodelfs.access.mechanics.array.IArrayAccess;
 import de.adito.aditoweb.filesystem.datamodelfs.access.mechanics.field.IFieldAccess;
-import de.adito.aditoweb.filesystem.datamodelfs.access.mechanics.model.IModelAccess;
+import de.adito.aditoweb.filesystem.datamodelfs.access.mechanics.model.*;
 import de.adito.aditoweb.filesystem.datamodelfs.access.model.FieldConst;
 import de.adito.aditoweb.filesystem.datamodelfs.access.verification.ResultOfVerification;
 import org.jetbrains.annotations.*;
@@ -54,9 +54,9 @@ public class ARADComponentHandler
 
     try
     {
-      IArrayAccess<IModelAccess> arrayAccess = DataAccessHelper.createArrayAccess();
-      arrayAccess.add(DataAccessHelper.<IModelAccess>accessModel(modelFile));
-      deleted = arrayAccess.getFileObject().getFileObject(modelFile.getName());
+//      IArrayAccess<IModelAccess> arrayAccess = DataAccessHelper.createArrayAccess();
+//      arrayAccess.add(DataAccessHelper.<IModelAccess>accessModel(modelFile));
+//      deleted = arrayAccess.getFileObject().getFileObject(modelFile.getName());
 //      Debug.write(deleted.getChildren()); // DEBUG: remove it!
 
 
@@ -70,9 +70,8 @@ public class ARADComponentHandler
     {
       throw new RuntimeException(e); // TODO: errorHandling
     }
-
-    IArrayAccess<IModelAccess> childDataModels = DataAccessHelper.accessArray(modelFile.getParent());
-    ResultOfVerification removeResult = childDataModels.remove(modelFile);
+    ArrayModelAccess arrayModelAccess = DataAccessHelper.accessModel(modelFile.getParent());
+    ResultOfVerification removeResult = arrayModelAccess.remove(DataAccessHelper.<IModelAccess>accessModel(modelFile));
     if (removeResult.getException() != null)
       throw new RuntimeException(removeResult.getException()); // TODO: errorHandling
   }
@@ -90,7 +89,7 @@ public class ARADComponentHandler
           parentRadHandler.getModelDataObject().getPrimaryFile());
 
       EModelComponentMapping modelComponentMapping = EModelComponentMapping.get(radComponent);
-      IModelAccess modelAccess = DataAccessHelper.createModelAccess(modelComponentMapping.getModelAccessType());
+      IModelAccess modelAccess = DataAccessHelper.createModelAccess(modelComponentMapping.getScheme());
 
       ResultOfVerification addResult = childField.getValue().add(modelAccess);
       if (addResult.getException() != null)

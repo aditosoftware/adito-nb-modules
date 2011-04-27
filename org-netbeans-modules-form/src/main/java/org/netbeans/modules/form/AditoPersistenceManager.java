@@ -3,7 +3,9 @@ package org.netbeans.modules.form;
 import de.adito.aditoweb.filesystem.common.AfsUrlUtil;
 import de.adito.aditoweb.filesystem.datamodelfs.access.DataAccessHelper;
 import de.adito.aditoweb.filesystem.datamodelfs.access.mechanics.field.IFieldAccess;
+import de.adito.aditoweb.filesystem.datamodelfs.access.mechanics.model.IModelAccess;
 import de.adito.aditoweb.filesystem.datamodelfs.access.model.*;
+import de.adito.aditoweb.filesystem.datamodelfs.resolver.schema.ESchemes;
 import de.adito.aditoweb.swingcommon.layout.aditolayout.*;
 import org.netbeans.modules.form.adito.*;
 import org.netbeans.modules.form.adito.layout.*;
@@ -399,15 +401,15 @@ public class AditoPersistenceManager extends PersistenceManager
   private RADComponent _restoreComponent(_Info pInfo, FileObject pChildModel, RADComponent pParentComponent)
       throws PersistenceException
   {
-    EModelAccessType compType;
+    ESchemes scheme;
     String compName;
     String className;
     try
     {
-      Integer type = FieldConst.TYPE.accessField(pChildModel).getValue();
-      compName = FieldConst.NAME.accessField(pChildModel).getValue();
-      compType = EModelAccessType.get(type);
-      EModelComponentMapping eModelCompMapping = EModelComponentMapping.get(compType);
+      IModelAccess modelAccess = DataAccessHelper.accessModel(pChildModel);
+      scheme = ESchemes.resolveScheme(modelAccess.getModelScheme());
+      compName = modelAccess.getName();
+      EModelComponentMapping eModelCompMapping = EModelComponentMapping.get(scheme);
       if (eModelCompMapping == null)
         return null;
       className = eModelCompMapping.getSwingClass().getName();
@@ -445,7 +447,7 @@ public class AditoPersistenceManager extends PersistenceManager
     // create a new metacomponent
     RADComponent newComponent;
 
-    switch (compType)
+    switch (scheme)
     {
       case BUTTON:
       case CHECKBOX:
