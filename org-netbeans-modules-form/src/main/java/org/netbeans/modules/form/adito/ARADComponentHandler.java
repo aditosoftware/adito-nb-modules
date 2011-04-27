@@ -3,7 +3,6 @@ package org.netbeans.modules.form.adito;
 import de.adito.aditoweb.core.util.debug.Debug;
 import de.adito.aditoweb.designer.filetype.PropertiesCookie;
 import de.adito.aditoweb.filesystem.datamodelfs.access.DataAccessHelper;
-import de.adito.aditoweb.filesystem.datamodelfs.access.mechanics.array.IArrayAccess;
 import de.adito.aditoweb.filesystem.datamodelfs.access.mechanics.field.IFieldAccess;
 import de.adito.aditoweb.filesystem.datamodelfs.access.mechanics.model.*;
 import de.adito.aditoweb.filesystem.datamodelfs.access.model.FieldConst;
@@ -71,7 +70,7 @@ public class ARADComponentHandler
       throw new RuntimeException(e); // TODO: errorHandling
     }
     ArrayModelAccess arrayModelAccess = DataAccessHelper.accessModel(modelFile.getParent());
-    ResultOfVerification removeResult = arrayModelAccess.remove(DataAccessHelper.<IModelAccess>accessModel(modelFile));
+    ResultOfVerification removeResult = arrayModelAccess.remove(modelFile.getNameExt());
     if (removeResult.getException() != null)
       throw new RuntimeException(removeResult.getException()); // TODO: errorHandling
   }
@@ -85,7 +84,7 @@ public class ARADComponentHandler
     {
       RADComponent parentRadComponent = radComponent.getParentComponent();
       ARADComponentHandler parentRadHandler = parentRadComponent.getARADComponentHandler();
-      IFieldAccess<IArrayAccess> childField = FieldConst.CHILDDATAMODELS.accessField(
+      IFieldAccess<ArrayModelAccess> childField = FieldConst.CHILDDATAMODELS.accessField(
           parentRadHandler.getModelDataObject().getPrimaryFile());
 
       EModelComponentMapping modelComponentMapping = EModelComponentMapping.get(radComponent);
