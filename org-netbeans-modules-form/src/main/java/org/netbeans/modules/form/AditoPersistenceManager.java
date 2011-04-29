@@ -4,8 +4,8 @@ import de.adito.aditoweb.filesystem.common.AfsUrlUtil;
 import de.adito.aditoweb.filesystem.datamodelfs.access.DataAccessHelper;
 import de.adito.aditoweb.filesystem.datamodelfs.access.mechanics.field.IFieldAccess;
 import de.adito.aditoweb.filesystem.datamodelfs.access.mechanics.model.IModelAccess;
-import de.adito.aditoweb.filesystem.datamodelfs.access.model.*;
-import de.adito.aditoweb.filesystem.datamodelfs.resolver.schema.ESchemes;
+import de.adito.aditoweb.filesystem.datamodelfs.access.model.FieldConst;
+import de.adito.aditoweb.filesystem.datamodelfs.resolver.schema.EScheme;
 import de.adito.aditoweb.swingcommon.layout.aditolayout.*;
 import org.netbeans.modules.form.adito.*;
 import org.netbeans.modules.form.adito.layout.*;
@@ -401,13 +401,13 @@ public class AditoPersistenceManager extends PersistenceManager
   private RADComponent _restoreComponent(_Info pInfo, FileObject pChildModel, RADComponent pParentComponent)
       throws PersistenceException
   {
-    ESchemes scheme;
+    EScheme scheme;
     String compName;
     String className;
     try
     {
       IModelAccess modelAccess = DataAccessHelper.accessModel(pChildModel);
-      scheme = ESchemes.resolveScheme(modelAccess.getModelScheme());
+      scheme = EScheme.resolveScheme(modelAccess.getModelScheme());
       compName = modelAccess.getName();
       EModelComponentMapping eModelCompMapping = EModelComponentMapping.get(scheme);
       if (eModelCompMapping == null)
@@ -644,7 +644,7 @@ public class AditoPersistenceManager extends PersistenceManager
   /**
    * Klasse mit Daten über den aktuellen Vorgang.
    */
-  private class _Info
+  private static class _Info
   {
     private FormDataObject formObject;
     private FormModel formModel;

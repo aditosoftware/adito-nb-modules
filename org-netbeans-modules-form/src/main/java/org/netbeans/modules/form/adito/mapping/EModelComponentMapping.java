@@ -1,6 +1,6 @@
 package org.netbeans.modules.form.adito.mapping;
 
-import de.adito.aditoweb.filesystem.datamodelfs.resolver.schema.ESchemes;
+import de.adito.aditoweb.filesystem.datamodelfs.resolver.schema.EScheme;
 import org.netbeans.modules.form.RADComponent;
 
 import javax.swing.*;
@@ -11,23 +11,23 @@ import javax.swing.*;
 public enum EModelComponentMapping
 {
 
-  BUTTON(ESchemes.BUTTON, new AButtonMapping()),
-  CHECKBOX(ESchemes.CHECKBOX, new ACheckBoxMapping()),
-  COMBOBOX(ESchemes.COMBOBOX, new AComboBoxMapping()),
-  EDITFIELD(ESchemes.EDITFIELD, new AEditFieldMapping()),
-  LABEL(ESchemes.LABEL, new ALabelMapping()),
-  LIST(ESchemes.LIST, new AListMapping()),
-  RADIOBUTTON(ESchemes.RADIOBUTTON, new ARadioButtonMapping()),
-  REGISTER(ESchemes.REGISTER, new ARegisterMapping()),
-  TABLE(ESchemes.TABLE, new ATableMapping()),
-  TREE(ESchemes.TREE, new ATreeMapping());
+  BUTTON(EScheme.BUTTON, new AButtonMapping()),
+  CHECKBOX(EScheme.CHECKBOX, new ACheckBoxMapping()),
+  COMBOBOX(EScheme.COMBOBOX, new AComboBoxMapping()),
+  EDITFIELD(EScheme.EDITFIELD, new AEditFieldMapping()),
+  LABEL(EScheme.LABEL, new ALabelMapping()),
+  LIST(EScheme.LIST, new AListMapping()),
+  RADIOBUTTON(EScheme.RADIOBUTTON, new ARadioButtonMapping()),
+  REGISTER(EScheme.REGISTER, new ARegisterMapping()),
+  TABLE(EScheme.TABLE, new ATableMapping()),
+  TREE(EScheme.TREE, new ATreeMapping());
 
 
-  private ESchemes scheme;
+  private EScheme scheme;
   private IComponentInfo componentInfo;
 
 
-  EModelComponentMapping(ESchemes pScheme, IComponentInfo pInfo)
+  EModelComponentMapping(EScheme pScheme, IComponentInfo pInfo)
   {
     scheme = pScheme;
     componentInfo = pInfo;
@@ -52,7 +52,7 @@ public enum EModelComponentMapping
     return null;
   }
 
-  public static EModelComponentMapping get(ESchemes pScheme)
+  public static EModelComponentMapping get(EScheme pScheme)
   {
     for (EModelComponentMapping eModelComponentMapping : values())
     {
@@ -62,7 +62,7 @@ public enum EModelComponentMapping
     return null;
   }
 
-  public ESchemes getScheme()
+  public EScheme getScheme()
   {
     return scheme;
   }
