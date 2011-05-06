@@ -91,6 +91,7 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
 import org.xml.sax.helpers.DefaultHandler;
+import sun.misc.Launcher;
 
 /** Manages persistent data of window system, currently stored in XML format.
  * Default setting of layers is that reading is done through default file system
@@ -1111,9 +1112,12 @@ public final class PersistenceManager implements PropertyChangeListener {
         synchronized (LOCK_IDS) {
             usedTcIds.clear();
         }
-        
-        copySettingsFiles();
-        
+
+        synchronized  (Launcher.getLauncher().getClassLoader())
+        {
+          copySettingsFiles();
+        }
+
         WindowManagerParser wmParser = getWindowManagerParser();
         WindowManagerConfig wmc = wmParser.load();
         
