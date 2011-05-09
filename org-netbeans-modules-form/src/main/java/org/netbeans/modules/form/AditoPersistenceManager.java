@@ -2,8 +2,8 @@ package org.netbeans.modules.form;
 
 import de.adito.aditoweb.filesystem.common.AfsUrlUtil;
 import de.adito.aditoweb.filesystem.datamodelfs.access.DataAccessHelper;
-import de.adito.aditoweb.filesystem.datamodelfs.access.mechanics.field.IFieldAccess;
-import de.adito.aditoweb.filesystem.datamodelfs.access.mechanics.model.IModelAccess;
+import de.adito.aditoweb.filesystem.datamodelfs.access.mechanics.*;
+import de.adito.aditoweb.filesystem.datamodelfs.access.mechanics.IFieldAccess;
 import de.adito.aditoweb.filesystem.datamodelfs.access.model.FieldConst;
 import de.adito.aditoweb.filesystem.datamodelfs.resolver.schema.EScheme;
 import de.adito.aditoweb.swingcommon.layout.aditolayout.*;

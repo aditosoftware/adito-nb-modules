@@ -2,7 +2,7 @@ package org.netbeans.modules.form.adito;
 
 import de.adito.aditoweb.core.util.Utility;
 import de.adito.aditoweb.filesystem.datamodelfs.access.DataAccessHelper;
-import de.adito.aditoweb.filesystem.datamodelfs.access.mechanics.field.IFieldAccess;
+import de.adito.aditoweb.filesystem.datamodelfs.access.mechanics.IFieldAccess;
 import de.adito.aditoweb.filesystem.datamodelfs.access.verification.ResultOfVerification;
 import org.jetbrains.annotations.*;
 import org.netbeans.modules.form.*;

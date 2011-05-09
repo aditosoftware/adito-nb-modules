@@ -1,7 +1,7 @@
 package org.netbeans.modules.form.adito;
 
 import de.adito.aditoweb.filesystem.datamodelfs.access.DataAccessHelper;
-import de.adito.aditoweb.filesystem.datamodelfs.access.mechanics.model.IModelAccess;
+import de.adito.aditoweb.filesystem.datamodelfs.access.mechanics.IModelAccess;
 import de.adito.aditoweb.filesystem.datamodelfs.resolver.schema.EScheme;
 import org.openide.filesystems.FileObject;
 import org.openide.loaders.DataFolder;
