@@ -4,7 +4,6 @@ import de.adito.aditoweb.core.util.debug.Debug;
 import de.adito.aditoweb.designer.filetype.PropertiesCookie;
 import de.adito.aditoweb.filesystem.datamodelfs.access.DataAccessHelper;
 import de.adito.aditoweb.filesystem.datamodelfs.access.mechanics.*;
-import de.adito.aditoweb.filesystem.datamodelfs.access.mechanics.IFieldAccess;
 import de.adito.aditoweb.filesystem.datamodelfs.access.model.FieldConst;
 import de.adito.aditoweb.filesystem.datamodelfs.access.verification.ResultOfVerification;
 import org.jetbrains.annotations.*;
@@ -77,7 +76,7 @@ public class ARADComponentHandler
 
   public void add()
   {
-    Debug.write("added", radComponent); // DEBUG: remove it!
+    //Debug.write("added", radComponent); // DEBUG: remove it!
 
     //Debug.write("setParentRadComponent", radComponent); // DEBUG: remove it!
     if (modelDataObject == null)

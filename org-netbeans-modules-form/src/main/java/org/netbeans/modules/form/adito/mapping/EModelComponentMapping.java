@@ -46,7 +46,7 @@ public enum EModelComponentMapping
   {
     for (EModelComponentMapping eModelComponentMapping : values())
     {
-      if (eModelComponentMapping.componentInfo.getComponentClass().equals(pCls))
+      if (eModelComponentMapping.getComponentInfo().getComponentClass().equals(pCls))
         return eModelComponentMapping;
     }
     return null;
