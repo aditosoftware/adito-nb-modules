@@ -1,17 +1,18 @@
 package org.netbeans.modules.form.adito;
 
-import de.adito.aditoweb.core.util.debug.Debug;
 import de.adito.aditoweb.designer.filetype.PropertiesCookie;
 import de.adito.aditoweb.filesystem.datamodelfs.access.DataAccessHelper;
 import de.adito.aditoweb.filesystem.datamodelfs.access.mechanics.*;
 import de.adito.aditoweb.filesystem.datamodelfs.access.model.FieldConst;
 import de.adito.aditoweb.filesystem.datamodelfs.access.verification.ResultOfVerification;
+import de.adito.aditoweb.filesystem.datamodelfs.resolver.schema.EScheme;
 import org.jetbrains.annotations.*;
 import org.netbeans.modules.form.RADComponent;
 import org.netbeans.modules.form.adito.mapping.EModelComponentMapping;
-import org.openide.filesystems.FileObject;
-import org.openide.loaders.DataFolder;
+import org.openide.filesystems.*;
+import org.openide.loaders.*;
 import org.openide.nodes.*;
+import org.openide.windows.CloneableOpenSupport;
 
 import java.util.UUID;
 
@@ -29,7 +30,7 @@ public class ARADComponentHandler
   private FormDataBridge formDataBridge;
   @Nullable
   private Sheet sheet;
-
+  @Nullable
   private FileObject deleted;
 
 //  @Nullable
@@ -46,39 +47,49 @@ public class ARADComponentHandler
 
   public void delete()
   {
-    Debug.write("deleted", radComponent); // DEBUG: remove it!
-
     FileObject modelFile = modelDataObject.getPrimaryFile();
+
+    for (DataObject dataObject : DataObject.getRegistry().getModifiedSet())
+    {
+      if (FileUtil.isParentOf(modelFile, dataObject.getPrimaryFile()))
+      {
+        CloneableOpenSupport openSupport = dataObject.getLookup().lookup(CloneableOpenSupport.class);
+        if (!openSupport.close())
+          throw new RuntimeException("user canceled");
+      }
+    }
+
 
     try
     {
-//      IArrayAccess<IModelAccess> arrayAccess = DataAccessHelper.createArrayAccess();
-//      arrayAccess.add(DataAccessHelper.<IModelAccess>accessModel(modelFile));
-//      deleted = arrayAccess.getFileObject().getFileObject(modelFile.getName());
-//      Debug.write(deleted.getChildren()); // DEBUG: remove it!
+      IModelAccess modelAccess = DataAccessHelper.accessModel(modelDataObject.getPrimaryFile());
 
+      IModelAccess copy = DataAccessHelper.createModelAccess(EScheme.resolveScheme(modelAccess), modelAccess.getName());
+      IFieldAccess<Object> copyField = copy.getParentAccess().getFieldAccess(copy.getName());
+      ResultOfVerification resultOfVerification = copyField.setValue(modelAccess);
 
-//      FileSystem memoryFileSystem = FileUtil.createMemoryFileSystem();
-//      FileObject folder = memoryFileSystem.getRoot().createFolder(modelFile.getNameExt());
-//
-//      FieldAccessUtil.setModelValue(memoryFileSystem.getRoot(), DataAccessHelper.<IModelAccess>accessModel(modelFile));
-//      Debug.write(memoryFileSystem.getRoot().getChildren()); // DEBUG: remove it!
+      if (resultOfVerification.isError())
+      {
+        throw new RuntimeException(resultOfVerification.getException());
+        //NotifyUtil.simpleError(resultOfVerification.getException());
+        //return;
+      }
+      deleted = copy.getFileObject();
+
+      ArrayModelAccess arrayModelAccess = DataAccessHelper.accessModel(modelFile.getParent());
+      ResultOfVerification removeResult = arrayModelAccess.remove(modelFile.getNameExt());
+      if (resultOfVerification.isError())
+        throw new RuntimeException(removeResult.getException()); // TODO: errorHandling
+      _deinitialize(true);
     }
     catch (Exception e)
     {
       throw new RuntimeException(e); // TODO: errorHandling
     }
-    ArrayModelAccess arrayModelAccess = DataAccessHelper.accessModel(modelFile.getParent());
-    ResultOfVerification removeResult = arrayModelAccess.remove(modelFile.getNameExt());
-    if (removeResult.getException() != null)
-      throw new RuntimeException(removeResult.getException()); // TODO: errorHandling
   }
 
   public void add()
   {
-    //Debug.write("added", radComponent); // DEBUG: remove it!
-
-    //Debug.write("setParentRadComponent", radComponent); // DEBUG: remove it!
     if (modelDataObject == null)
     {
       RADComponent parentRadComponent = radComponent.getParentComponent();
@@ -86,16 +97,32 @@ public class ARADComponentHandler
       IFieldAccess<ArrayModelAccess> childField = FieldConst.CHILDDATAMODELS.accessField(
           parentRadHandler.getModelDataObject().getPrimaryFile());
 
-      EModelComponentMapping modelComponentMapping = EModelComponentMapping.get(radComponent);
-      IModelAccess modelAccess = DataAccessHelper.createModelAccess(modelComponentMapping.getScheme());
-
-      ResultOfVerification addResult = childField.getValue().add(modelAccess);
-      if (addResult.getException() != null)
-        throw new RuntimeException(addResult.getException()); // TODO: errorHandling
+      if (deleted != null)
+      {
+        IModelAccess modelAccess = DataAccessHelper.accessModel(deleted);
+        ResultOfVerification addResult = childField.getValue().add(modelAccess);
+        if (addResult.isError())
+          throw new RuntimeException(addResult.getException()); // TODO: errorHandling
+        else
+        {
+          FileObject addedFo = childField.getValue().getFileObject().getFileObject(modelAccess.getName());
+          setModelDataObject(DataFolder.findFolder(addedFo));
+          deleted = null;
+        }
+      }
       else
       {
-        FileObject addedFo = childField.getValue().getFileObject().getFileObject(modelAccess.getName());
-        setModelDataObject(DataFolder.findFolder(addedFo));
+        EModelComponentMapping modelComponentMapping = EModelComponentMapping.get(radComponent);
+        IModelAccess modelAccess = DataAccessHelper.createModelAccess(modelComponentMapping.getScheme());
+
+        ResultOfVerification addResult = childField.getValue().add(modelAccess);
+        if (addResult.isError())
+          throw new RuntimeException(addResult.getException()); // TODO: errorHandling
+        else
+        {
+          FileObject addedFo = childField.getValue().getFileObject().getFileObject(modelAccess.getName());
+          setModelDataObject(DataFolder.findFolder(addedFo));
+        }
       }
     }
   }
@@ -133,11 +160,18 @@ public class ARADComponentHandler
 
   public void deinitialize()
   {
+    _deinitialize(false);
+  }
+
+  private void _deinitialize(boolean pPartly)
+  {
     if (formDataBridge != null)
       formDataBridge.unregisterAll();
-    radComponent = null;
+    if (!pPartly)
+      radComponent = null;
     modelDataObject = null;
     formDataBridge = null;
+    sheet = null;
   }
 
   private void tryInit()

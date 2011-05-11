@@ -3,7 +3,6 @@ package org.netbeans.modules.form;
 import de.adito.aditoweb.filesystem.common.AfsUrlUtil;
 import de.adito.aditoweb.filesystem.datamodelfs.access.DataAccessHelper;
 import de.adito.aditoweb.filesystem.datamodelfs.access.mechanics.*;
-import de.adito.aditoweb.filesystem.datamodelfs.access.mechanics.IFieldAccess;
 import de.adito.aditoweb.filesystem.datamodelfs.access.model.FieldConst;
 import de.adito.aditoweb.filesystem.datamodelfs.resolver.schema.EScheme;
 import de.adito.aditoweb.swingcommon.layout.aditolayout.*;
@@ -106,6 +105,7 @@ public class AditoPersistenceManager extends PersistenceManager
               break;
             case FormModelEvent.COMPONENT_REMOVED:
               eventComponent.getARADComponentHandler().delete();
+              eventComponent.clearProperties();
               break;
             case FormModelEvent.COMPONENT_ADDED:
               eventComponent.getARADComponentHandler().add();

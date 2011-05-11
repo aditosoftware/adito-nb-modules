@@ -65,7 +65,7 @@ public class FormDataBridge
               @SuppressWarnings({"unchecked"})
               ResultOfVerification resultOfVerification = fieldAccess.setValue(formPropertyValue);
               radComponent.getNodeReference().firePropertyChangeHelper(fieldAccess.getName(), null, null);
-              if (resultOfVerification != null && resultOfVerification.getType() != ResultOfVerification.OK)
+              if (resultOfVerification != null && resultOfVerification.isError())
                 throw resultOfVerification.getException();
             }
           }
