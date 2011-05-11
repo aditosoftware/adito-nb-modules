@@ -1,5 +1,6 @@
 package org.netbeans.modules.form;
 
+import de.adito.aditoweb.core.util.debug.Debug;
 import de.adito.aditoweb.filesystem.common.AfsUrlUtil;
 import de.adito.aditoweb.filesystem.datamodelfs.access.DataAccessHelper;
 import de.adito.aditoweb.filesystem.datamodelfs.access.mechanics.*;
@@ -11,11 +12,14 @@ import org.netbeans.modules.form.adito.layout.*;
 import org.netbeans.modules.form.adito.mapping.EModelComponentMapping;
 import org.netbeans.modules.form.layoutdesign.LayoutModel;
 import org.netbeans.modules.form.layoutsupport.LayoutSupportManager;
+import org.openide.awt.StatusDisplayer;
 import org.openide.filesystems.*;
 import org.openide.nodes.Node;
+import org.openide.windows.*;
 
 import javax.swing.*;
 import java.awt.*;
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 import java.util.List;
@@ -98,29 +102,67 @@ public class AditoPersistenceManager extends PersistenceManager
         for (FormModelEvent event : events)
         {
           RADComponent eventComponent = event.getComponent();
-          switch (event.getChangeType())
+          try
           {
-            case FormModelEvent.COMPONENT_LAYOUT_CHANGED:
-              eventComponent.getARADComponentHandler().layoutPropertiesChanged();
-              break;
-            case FormModelEvent.COMPONENT_REMOVED:
-              eventComponent.getARADComponentHandler().delete();
-              eventComponent.clearProperties();
-              break;
-            case FormModelEvent.COMPONENT_ADDED:
-              eventComponent.getARADComponentHandler().add();
-              break;
-            case FormModelEvent.FORM_TO_BE_CLOSED:
-              Collection<RADComponent> allComponents = event.getFormModel().getAllComponents();
-              for (RADComponent component : allComponents)
+            switch (event.getChangeType())
+            {
+              case FormModelEvent.COMPONENT_LAYOUT_CHANGED:
+                eventComponent.getARADComponentHandler().layoutPropertiesChanged();
+                break;
+              case FormModelEvent.COMPONENT_REMOVED:
+                eventComponent.getARADComponentHandler().delete();
+                eventComponent.clearProperties();
+                break;
+              case FormModelEvent.COMPONENT_ADDED:
+                eventComponent.getARADComponentHandler().add();
+                break;
+              case FormModelEvent.FORM_TO_BE_CLOSED:
+                Collection<RADComponent> allComponents = event.getFormModel().getAllComponents();
+                for (RADComponent component : allComponents)
+                {
+                  ARADComponentHandler aradComponentHandler = component.getARADComponentHandler();
+                  if (aradComponentHandler != null)
+                    aradComponentHandler.deinitialize();
+                }
+                event.getFormModel().removeFormModelListener(this);
+              default:
+                break;
+            }
+          }
+          catch (Exception e)  // TODO: nur temporär ... testing
+          {
+            if (event.isModifying())
+              eventComponent.getFormModel().forceUndoOfCompoundEdit();
+            InputOutput io = IOProvider.getDefault().getIO("My Window", false);
+            io.select();
+            OutputWriter w = io.getOut();
+            OutputListener listener = new OutputListener()
+            {
+              public void outputLineAction(OutputEvent ev)
               {
-                ARADComponentHandler aradComponentHandler = component.getARADComponentHandler();
-                if (aradComponentHandler != null)
-                  aradComponentHandler.deinitialize();
+                StatusDisplayer.getDefault().setStatusText("Hyperlink clicked!");
               }
-              event.getFormModel().removeFormModelListener(this);
-            default:
-              break;
+
+              public void outputLineSelected(OutputEvent ev)
+              {
+                // Let's not do anything special.
+              }
+
+              public void outputLineCleared(OutputEvent ev)
+              {
+                // Leave it blank, no state to remove.
+              }
+            };
+            try
+            {
+              IOColorPrint.print(io, "Exception: " + e.getMessage(), Color.RED);
+              IOColorPrint.print(io, " - just for test - ", Color.GREEN);
+              w.println("Line of hyperlinked text.", listener, true);
+            }
+            catch (IOException e1)
+            {
+              throw new RuntimeException(e1);
+            }
           }
         }
       }
@@ -411,7 +453,10 @@ public class AditoPersistenceManager extends PersistenceManager
       compName = modelAccess.getName();
       EModelComponentMapping eModelCompMapping = EModelComponentMapping.get(scheme);
       if (eModelCompMapping == null)
+      {
+        Debug.write("didn't load", pChildModel.toString()); // DEBUG: remove it!
         return null;
+      }
       className = eModelCompMapping.getSwingClass().getName();
     }
     catch (Exception e)
@@ -464,6 +509,8 @@ public class AditoPersistenceManager extends PersistenceManager
         else
           newComponent = new RADComponent();
         break;
+      //case REGISTERTAB:
+
       default:
         PersistenceException ex = new PersistenceException("Unknown component element: " + pChildModel.toString()); // NOI18N
         pInfo.getNonfatalErrors().add(ex);

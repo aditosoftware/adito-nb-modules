@@ -1,6 +1,6 @@
 package org.netbeans.modules.form.adito.layout;
 
-import de.adito.aditoweb.swingcommon.layout.aditolayout.AALComponentConstraints;
+import de.adito.aditoweb.nbm.nbide.nbaditointerface.*;
 import org.netbeans.modules.form.FormProperty;
 import org.netbeans.modules.form.layoutsupport.LayoutConstraints;
 import org.openide.nodes.Node;
@@ -13,7 +13,7 @@ import java.lang.reflect.InvocationTargetException;
  */
 public class AditoComponentConstraints implements LayoutConstraints
 {
-  private AALComponentConstraints constraints;
+  private IAditoAnchorLayoutComponentConstaints constraints;
   private Node.Property[] properties;
 
   public AditoComponentConstraints()
@@ -29,14 +29,15 @@ public class AditoComponentConstraints implements LayoutConstraints
   public AditoComponentConstraints(Rectangle pBounds, boolean pAnchorLeft, boolean pAnchorBottom,
                                    boolean pAnchorRight, boolean pAnchorTop)
   {
-    constraints = new AALComponentConstraints(pBounds, pAnchorLeft, pAnchorBottom, pAnchorRight, pAnchorTop, false);
+    constraints = NetbeansAditoInterfaceProvider.getDefault().createAditoAnchoLayoutComponentConstraints(
+        pBounds, pAnchorLeft, pAnchorBottom, pAnchorRight, pAnchorTop, false);
   }
 
   public AditoComponentConstraints(Rectangle pBounds, boolean pAnchorLeft, boolean pAnchorBottom,
                                    boolean pAnchorRight, boolean pAnchorTop, boolean pIsBordered)
   {
-    constraints = new AALComponentConstraints(pBounds, pAnchorLeft, pAnchorBottom, pAnchorRight, pAnchorTop,
-                                              pIsBordered);
+    constraints = NetbeansAditoInterfaceProvider.getDefault().createAditoAnchoLayoutComponentConstraints(
+        pBounds, pAnchorLeft, pAnchorBottom, pAnchorRight, pAnchorTop, pIsBordered);
   }
 
   @Override
@@ -48,7 +49,7 @@ public class AditoComponentConstraints implements LayoutConstraints
   }
 
   @Override
-  public AALComponentConstraints getConstraintsObject()
+  public IAditoAnchorLayoutComponentConstaints getConstraintsObject()
   {
     return constraints;
   }

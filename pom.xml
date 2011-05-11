@@ -19,6 +19,7 @@
 
 
   <modules>
+    <module>nb-adito-interface</module>
     <module>org-netbeans-core-windows</module>
     <module>org-netbeans-modules-db-dataview</module>
     <module>org-netbeans-modules-form</module>

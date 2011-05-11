@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>de.adito.aditoweb.modules</groupId>
+    <artifactId>nb-ide</artifactId>
+    <version>3.2</version>
+  </parent>
+
+  <groupId>de.adito.aditoweb.modules.nb-ide</groupId>
+  <artifactId>nb-adito-interface</artifactId>
+  <packaging>nbm</packaging>
+  <name>Netbeans IDE module interface: nb-adito-interface</name>
+
+
+  <dependencies>
+    <dependency>
+      <groupId>org.netbeans.api</groupId>
+      <artifactId>org-openide-util-lookup</artifactId>
+      <version>RELEASE691</version>
+    </dependency>
+  </dependencies>
+
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>nbm-maven-plugin</artifactId>
+        <configuration>
+          <publicPackages>
+            <publicPackage>de.adito.aditoweb.nbm.nbide.nbaditointerface.*</publicPackage>
+          </publicPackages>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+
+
+</project>
