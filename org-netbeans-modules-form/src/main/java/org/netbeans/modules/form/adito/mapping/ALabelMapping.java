@@ -1,7 +1,5 @@
 package org.netbeans.modules.form.adito.mapping;
 
-import org.netbeans.modules.form.adito.comps.ALabel;
-
 import javax.swing.*;
 import java.util.Map;
 
@@ -14,7 +12,7 @@ public class ALabelMapping extends ComponentInfo
   @Override
   public Class<? extends JComponent> getComponentClass()
   {
-    return ALabel.class;
+    return null; // ALabel.class;
   }
 
   @Override

@@ -11,8 +11,6 @@ import java.util.List;
 public interface IComponentInfo
 {
 
-  public final static String NO_MAPPING = "-nomapping";
-
   public Class<? extends JComponent> getComponentClass();
 
   public List<? extends Class<? extends LayoutSupportDelegate>> getSupportedLayouts();

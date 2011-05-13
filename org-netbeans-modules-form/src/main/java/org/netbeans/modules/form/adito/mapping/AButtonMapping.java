@@ -1,7 +1,5 @@
 package org.netbeans.modules.form.adito.mapping;
 
-import org.netbeans.modules.form.adito.comps.AButton;
-
 import javax.swing.*;
 import java.util.Map;
 
@@ -14,7 +12,7 @@ public class AButtonMapping extends ComponentInfo
   @Override
   public Class<? extends JComponent> getComponentClass()
   {
-    return AButton.class;
+    return null; // AButton.class;
   }
 
   @Override

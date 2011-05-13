@@ -1,7 +1,5 @@
 package org.netbeans.modules.form.adito.mapping;
 
-import org.netbeans.modules.form.adito.comps.AEditField;
-
 import javax.swing.*;
 import java.util.Map;
 
@@ -14,7 +12,7 @@ public class AEditFieldMapping extends ComponentInfo
   @Override
   public Class<? extends JComponent> getComponentClass()
   {
-    return AEditField.class;
+    return null; // AEditField.class;
   }
 
   @Override
