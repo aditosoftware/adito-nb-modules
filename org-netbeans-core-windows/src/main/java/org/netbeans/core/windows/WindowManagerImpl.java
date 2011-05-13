@@ -44,7 +44,7 @@
 
 package org.netbeans.core.windows;
 
-import de.adito.aditoweb.nbm.aditonetbeansutil.services.IAlwaysOpenTopComponentRegistry;
+import de.adito.aditoweb.nbm.nbide.nbaditointerface.windowsystem.IAlwaysOpenTopComponentRegistry;
 import org.netbeans.core.windows.actions.ActionUtils;
 import org.netbeans.core.windows.persistence.PersistenceManager;
 import org.openide.nodes.Node;

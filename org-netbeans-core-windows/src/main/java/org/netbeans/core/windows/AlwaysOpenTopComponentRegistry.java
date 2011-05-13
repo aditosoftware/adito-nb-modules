@@ -1,6 +1,6 @@
 package org.netbeans.core.windows;
 
-import de.adito.aditoweb.nbm.aditonetbeansutil.services.IAlwaysOpenTopComponentRegistry;
+import de.adito.aditoweb.nbm.nbide.nbaditointerface.windowsystem.IAlwaysOpenTopComponentRegistry;
 import org.openide.util.lookup.ServiceProvider;
 import org.openide.windows.*;
 

@@ -17,13 +17,14 @@
 
   <dependencies>
 
-    <!-- ADITO -->
+    <!-- ADITO provider interface -->
     <dependency>
-      <groupId>de.adito.aditoweb.nbm</groupId>
-      <artifactId>AditoNetBeansUtil</artifactId>
+      <groupId>de.adito.aditoweb.modules.nb-ide</groupId>
+      <artifactId>nb-adito-interface</artifactId>
       <version>3.2</version>
     </dependency>
 
+    <!-- default windowsystem dependencies -->
     <dependency>
       <groupId>org.netbeans.modules</groupId>
       <artifactId>org-netbeans-core</artifactId>
