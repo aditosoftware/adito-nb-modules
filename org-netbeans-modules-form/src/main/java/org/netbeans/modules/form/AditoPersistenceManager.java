@@ -1,19 +1,14 @@
 package org.netbeans.modules.form;
 
-import de.adito.aditoweb.core.util.debug.Debug;
-import de.adito.aditoweb.filesystem.common.AfsUrlUtil;
-import de.adito.aditoweb.filesystem.datamodelfs.access.DataAccessHelper;
-import de.adito.aditoweb.filesystem.datamodelfs.access.mechanics.*;
-import de.adito.aditoweb.filesystem.datamodelfs.access.model.FieldConst;
-import de.adito.aditoweb.filesystem.datamodelfs.resolver.schema.EScheme;
-import de.adito.aditoweb.swingcommon.layout.aditolayout.*;
+import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.NetbeansAditoInterfaceProvider;
+import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.model.IAditoModelProvider;
+import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.sync.*;
 import org.netbeans.modules.form.adito.*;
 import org.netbeans.modules.form.adito.layout.*;
-import org.netbeans.modules.form.adito.mapping.EModelComponentMapping;
 import org.netbeans.modules.form.layoutdesign.LayoutModel;
 import org.netbeans.modules.form.layoutsupport.LayoutSupportManager;
 import org.openide.awt.StatusDisplayer;
-import org.openide.filesystems.*;
+import org.openide.filesystems.FileObject;
 import org.openide.nodes.Node;
 import org.openide.windows.*;
 
@@ -204,13 +199,13 @@ public class AditoPersistenceManager extends PersistenceManager
     if (visualContainer != null)
     {
       visualContainer.setOldLayoutSupport(true);
-      convIndex = _loadLayout(visualContainer.getLayoutSupport(), pModelComp);
+      convIndex = _loadLayout(visualContainer.getLayoutSupport());
     }
 
 
     // load subcomponents
     RADComponent[] childComponents;
-    FileObject childModels = pModelComp.getFileObject(FieldConst.CHILDDATAMODELS.getName());
+    FileObject childModels = pModelComp.getFileObject(IAditoModelProvider.CHILDDATAMODELS);
     if (childModels != null)
     {
       List<RADComponent> list = new ArrayList<RADComponent>();
@@ -426,14 +421,13 @@ public class AditoPersistenceManager extends PersistenceManager
       ARADComponentHandler aRADComponentHandler = childComponent.getARADComponentHandler();
       if (aRADComponentHandler != null)
       {
-        IFormDataInfo formDataInfo = aRADComponentHandler.getFormDataInfo();
         for (Node.PropertySet set : aRADComponentHandler.getPropertySets())
         {
           for (Node.Property prop : set.getProperties())
           {
-            FormProperty formProperty = formDataInfo.getFormPropertyByModelPropertyName(prop.getName());
-            if (formProperty != null)
-              formProperty.setValue(prop.getValue());
+            Node.Property radProperty = childComponent.getPropertyByName(prop.getName());
+            if (radProperty != null)
+              radProperty.setValue(prop.getValue());
           }
         }
       }
@@ -443,21 +437,19 @@ public class AditoPersistenceManager extends PersistenceManager
   private RADComponent _restoreComponent(_Info pInfo, FileObject pChildModel, RADComponent pParentComponent)
       throws PersistenceException
   {
-    EScheme scheme;
+    IAditoPropertyInfo aditoPropertyInfo = NetbeansAditoInterfaceProvider.getDefault().getAditoPropertyInfo();
+    IAditoComponentDetailProvider mapper = aditoPropertyInfo.getMapper(pChildModel);
     String compName;
     String className;
     try
     {
-      IModelAccess modelAccess = DataAccessHelper.accessModel(pChildModel);
-      scheme = EScheme.resolveScheme(modelAccess.getModelScheme());
-      compName = modelAccess.getName();
-      EModelComponentMapping eModelCompMapping = EModelComponentMapping.get(scheme);
-      if (eModelCompMapping == null)
+      if (mapper == null)
       {
-        Debug.write("didn't load", pChildModel.toString()); // DEBUG: remove it!
+        System.out.println("didn't load," + pChildModel.toString()); // DEBUG: remove it!
         return null;
       }
-      className = eModelCompMapping.getSwingClass().getName();
+      compName = pChildModel.getNameExt(); // entspricht Namen des DatenModels.
+      className = mapper.getComponentClass().getName();
     }
     catch (Exception e)
     {
@@ -492,29 +484,14 @@ public class AditoPersistenceManager extends PersistenceManager
     // create a new metacomponent
     RADComponent newComponent;
 
-    switch (scheme)
+    if (FormUtils.isVisualizableClass(compClass))
+      newComponent = new RADVisualComponent();
+    else
     {
-      case BUTTON:
-      case CHECKBOX:
-      case COMBOBOX:
-      case EDITFIELD:
-      case LABEL:
-      case LIST:
-      case RADIOBUTTON:
-      case REGISTER:
-      case TABLE:
-      case TREE:
-        if (FormUtils.isVisualizableClass(compClass))
-          newComponent = new RADVisualComponent();
-        else
-          newComponent = new RADComponent();
-        break;
-      //case REGISTERTAB:
-
-      default:
-        PersistenceException ex = new PersistenceException("Unknown component element: " + pChildModel.toString()); // NOI18N
-        pInfo.getNonfatalErrors().add(ex);
-        return null;
+      //newComponent = new RADComponent();
+      PersistenceException ex = new PersistenceException("Unknown component element: " + pChildModel.toString()); // NOI18N
+      pInfo.getNonfatalErrors().add(ex);
+      return null;
     }
 
 //    if (XML_COMPONENT.equals(nodeName))
@@ -625,13 +602,12 @@ public class AditoPersistenceManager extends PersistenceManager
   }
 
 
-  private int _loadLayout(LayoutSupportManager layoutSupport, FileObject pModelFo)
+  private int _loadLayout(LayoutSupportManager layoutSupport)
   {
     try
     {
-      layoutSupport.getPrimaryContainer().setLayout(new AditoAnchorLayout());
-//      LayoutSupportDelegate delegate = new AditoLayoutSupport();
-//      layoutSupport.setLayoutDelegate(delegate);
+      LayoutManager aditoAnchorLayout = NetbeansAditoInterfaceProvider.getDefault().getAditoLayoutInfo().createAditoAnchorLayout();
+      layoutSupport.getPrimaryContainer().setLayout(aditoAnchorLayout);
     }
     catch (Exception e)
     {
@@ -643,25 +619,20 @@ public class AditoPersistenceManager extends PersistenceManager
   private boolean _loadConstraints(FileObject pModelComp, RADComponent pComponent, RADVisualContainer pParentComponent)
   {
     try
-    { // obligatory try/catch block for finding methods and constructors
-
-//      CodeExpression codeExpression = pComponent.getCodeExpression();
-//      LayoutSupportManager layoutSupport = pParentComponent.getLayoutSupport();
-
-//      CodeStructure codeStructure = layoutSupport.getCodeStructure();
-//      CodeExpression contCodeExp = layoutSupport.getContainerCodeExpression();
-//      CodeExpression contDelCodeExp = layoutSupport.getContainerDelegateCodeExpression();
-
-      IFieldAccess<Integer> fieldX = FieldConst.X.accessField(pModelComp);
-      IFieldAccess<Integer> fieldY = FieldConst.Y.accessField(pModelComp);
-      IFieldAccess<Integer> fieldWidth = FieldConst.WIDTH.accessField(pModelComp);
-      IFieldAccess<Integer> fieldHeight = FieldConst.HEIGHT.accessField(pModelComp);
-      AALComponentConstraints alComponentConstraints = new AALComponentConstraints(new Rectangle(
-          fieldX.getValue(), fieldY.getValue(), fieldWidth.getValue(), fieldHeight.getValue()));
-
+    {
       if (pComponent instanceof RADVisualComponent)
       {
-        AditoComponentConstraints constraints = new AditoComponentConstraints(alComponentConstraints.getBounds());
+        IAditoPropertyProvider aditoModelPropProvider =
+            NetbeansAditoInterfaceProvider.getDefault().getAditoPropertyInfo().createAditoModelPropProvider(pModelComp);
+
+        Node.Property<Integer> x = aditoModelPropProvider.getProperty(IAditoModelProvider.X);
+        Node.Property<Integer> y = aditoModelPropProvider.getProperty(IAditoModelProvider.Y);
+        Node.Property<Integer> width = aditoModelPropProvider.getProperty(IAditoModelProvider.WIDTH);
+        Node.Property<Integer> height = aditoModelPropProvider.getProperty(IAditoModelProvider.HEIGHT);
+
+        AditoComponentConstraints constraints = new AditoComponentConstraints(new Rectangle(
+            x.getValue(), y.getValue(), width.getValue(), height.getValue()
+        ));
         ((RADVisualComponent) pComponent).setLayoutConstraints(AditoLayoutSupport.class, constraints);
       }
 
@@ -729,16 +700,8 @@ public class AditoPersistenceManager extends PersistenceManager
     {
       if (modelRoot == null)
       {
-        try
-        {
-          FileObject aodFile = formObject.getPrimaryFile();
-          modelRoot = URLMapper.findFileObject(AfsUrlUtil.createAdmFsUrl(aodFile.getURL()));
-          modelRoot = DataAccessHelper.getDataRoot(modelRoot);
-        }
-        catch (Exception e)
-        {
-          throw new RuntimeException(e); // TODO: runtimeEx
-        }
+        IAditoModelProvider aditoModelProvider = NetbeansAditoInterfaceProvider.getDefault().getAditoModelProvider();
+        modelRoot = aditoModelProvider.loadModel(formObject.getPrimaryFile());
       }
       return modelRoot;
     }

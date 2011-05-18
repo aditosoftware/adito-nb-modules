@@ -47,7 +47,6 @@ package org.netbeans.modules.form;
 
 import java.io.IOException;
 
-import de.adito.aditoweb.core.util.debug.Debug;
 import org.openide.cookies.EditCookie;
 import org.openide.cookies.OpenCookie;
 import org.openide.filesystems.FileObject;
@@ -132,7 +131,6 @@ public class FormDataObject extends MultiDataObject {
         @Override
         public void open() {
             // open form editor with form designer selected
-          Debug.write("openframeeditor called"); // DEBUG: remove it!
             getFormEditorSupport().openFormEditor(true);
         }
         @Override

@@ -1,11 +1,11 @@
-package de.adito.aditoweb.nbm.nbide.nbaditointerface;
+package de.adito.aditoweb.nbm.nbide.nbaditointerface.form.layout;
 
 import java.awt.*;
 
 /**
- * @author J. Boesl, 11.05.11
+ * @author J. Boesl, 16.05.11
  */
-public interface INetbeansAditoInterface
+public interface IAditoLayoutInfo
 {
 
   IAditoAnchorLayoutComponentConstaints createAditoAnchoLayoutComponentConstraints(
@@ -13,5 +13,7 @@ public interface INetbeansAditoInterface
       boolean pIsBordered);
 
   Class getAditoAnchoLayoutClass();
+
+  LayoutManager createAditoAnchorLayout();
 
 }

@@ -19,12 +19,27 @@
 
     <dependency>
       <groupId>org.netbeans.api</groupId>
+      <artifactId>org-openide-filesystems</artifactId>
+      <version>${netbeans.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.netbeans.api</groupId>
       <artifactId>org-openide-util-lookup</artifactId>
       <version>${netbeans.version}</version>
     </dependency>
     <dependency>
       <groupId>org.netbeans.api</groupId>
       <artifactId>org-openide-windows</artifactId>
+      <version>${netbeans.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.netbeans.api</groupId>
+      <artifactId>org-openide-nodes</artifactId>
+      <version>${netbeans.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.netbeans.api</groupId>
+      <artifactId>org-openide-loaders</artifactId>
       <version>${netbeans.version}</version>
     </dependency>
 
@@ -38,7 +53,7 @@
         <artifactId>nbm-maven-plugin</artifactId>
         <configuration>
           <publicPackages>
-            <publicPackage>de.adito.aditoweb.nbm.nbide.nbaditointerface.*</publicPackage>
+            <publicPackage>de.adito.aditoweb.nbm.nbide.nbaditointerface.form.*</publicPackage>
             <publicPackage>de.adito.aditoweb.nbm.nbide.nbaditointerface.windowsystem.*</publicPackage>
           </publicPackages>
         </configuration>

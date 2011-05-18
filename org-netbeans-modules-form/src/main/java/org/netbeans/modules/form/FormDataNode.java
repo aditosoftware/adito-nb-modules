@@ -45,72 +45,82 @@
 
 package org.netbeans.modules.form;
 
-import javax.swing.Action;
-//import org.netbeans.api.java.loaders.JavaDataSupport;
-import de.adito.aditoweb.designer.filetype.DataModelDataNode;
+import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.NetbeansAditoInterfaceProvider;
 import org.openide.filesystems.FileObject;
 import org.openide.loaders.*;
-import org.openide.nodes.AbstractNode;
-import org.openide.nodes.FilterNode;
-import org.openide.nodes.Node;
-
+import org.openide.nodes.*;
 import org.openide.util.actions.SystemAction;
 
-/** The DataNode for Forms.
+import javax.swing.*;
+
+//import org.netbeans.api.java.loaders.JavaDataSupport;
+
+/**
+ * The DataNode for Forms.
  *
  * @author Ian Formanek
  */
-public class FormDataNode extends FilterNode {
-    /** generated Serialized Version UID */
-    //  static final long serialVersionUID = 1795549004166402392L;
+public class FormDataNode extends FilterNode
+{
+  /** generated Serialized Version UID */
+  //  static final long serialVersionUID = 1795549004166402392L;
 
-    /** Icon base for form data objects. */
-    private static final String FORM_ICON_BASE = "org/netbeans/modules/form/resources/form.gif"; // NOI18N
+  /**
+   * Icon base for form data objects.
+   */
+  private static final String FORM_ICON_BASE = "org/netbeans/modules/form/resources/form.gif"; // NOI18N
 
-    /** Constructs a new FormDataObject for specified primary file
-     * 
-     * @param fdo form data object
-     */
-    public FormDataNode(FormDataObject fdo) {
+  /**
+   * Constructs a new FormDataObject for specified primary file
+   *
+   * @param fdo form data object
+   */
+  public FormDataNode(FormDataObject fdo)
+  {
 //        this(JavaDataSupport.createJavaNode(fdo.getPrimaryFile())); // TODO: stripped
-      this(createNode(fdo.getPrimaryFile()));
-    }
-    
-    private FormDataNode(Node orig) {
-        super(orig);
-        ((AbstractNode) orig).setIconBaseWithExtension(FORM_ICON_BASE);
-    }
-    
-    @Override
-    public Action getPreferredAction() {
-        // issue 56351
-        return new javax.swing.AbstractAction() {
-            @Override
-            public void actionPerformed(java.awt.event.ActionEvent e) {
-                FormEditorSupport supp = getCookie(FormEditorSupport.class);
-                supp.openFormEditor(false);
-            }
-        };
-    }
-    
-    @Override
-    public Action[] getActions(boolean context) {
-        Action[] javaActions = super.getActions(context);
-        Action[] formActions = new Action[javaActions.length+2];
-        formActions[0] = SystemAction.get(org.openide.actions.OpenAction.class);
-        formActions[1] = SystemAction.get(org.openide.actions.EditAction.class);
-        formActions[2] = null;
-        // Skipping the first (e.g. Open) action
-        System.arraycopy(javaActions, 1, formActions, 3, javaActions.length-1);
-        return formActions;
-    }
+    this(_getNode(fdo.getPrimaryFile()));
+  }
 
-  public static Node createNode(FileObject pBaseDataobject)
+  private FormDataNode(Node orig)
+  {
+    super(orig);
+    ((AbstractNode) orig).setIconBaseWithExtension(FORM_ICON_BASE);
+  }
+
+  @Override
+  public Action getPreferredAction()
+  {
+    // issue 56351
+    return new javax.swing.AbstractAction()
+    {
+      @Override
+      public void actionPerformed(java.awt.event.ActionEvent e)
+      {
+        FormEditorSupport supp = getCookie(FormEditorSupport.class);
+        supp.openFormEditor(false);
+      }
+    };
+  }
+
+  @Override
+  public Action[] getActions(boolean context)
+  {
+    Action[] javaActions = super.getActions(context);
+    Action[] formActions = new Action[javaActions.length + 2];
+    formActions[0] = SystemAction.get(org.openide.actions.OpenAction.class);
+    formActions[1] = SystemAction.get(org.openide.actions.EditAction.class);
+    formActions[2] = null;
+    // Skipping the first (e.g. Open) action
+    System.arraycopy(javaActions, 1, formActions, 3, javaActions.length - 1);
+    return formActions;
+  }
+
+  private static Node _getNode(FileObject pBaseDataobject)
   {
     try
     {
       DataObject bdo = DataObject.find(pBaseDataobject);
-      return new DataModelDataNode(bdo);
+      return NetbeansAditoInterfaceProvider.getDefault().getAditoModelProvider().getBaseNode(bdo);
     }
     catch (DataObjectNotFoundException ex)
     {

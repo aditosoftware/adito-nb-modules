@@ -1,8 +1,9 @@
-package de.adito.aditoweb.nbm.nbide.nbaditointerface;
+package de.adito.aditoweb.nbm.nbide.nbaditointerface.form;
 
+import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.layout.IAditoLayoutInfo;
+import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.model.IAditoModelProvider;
+import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.sync.IAditoPropertyInfo;
 import org.openide.util.Lookup;
-
-import java.awt.*;
 
 /**
  * @author J. Boesl, 11.05.11
@@ -28,13 +29,19 @@ public abstract class NetbeansAditoInterfaceProvider
   private static class _NetbeansAditoInterfaceProvider implements INetbeansAditoInterface
   {
     @Override
-    public IAditoAnchorLayoutComponentConstaints createAditoAnchoLayoutComponentConstraints(Rectangle pBounds, boolean pAnchorLeft, boolean pAnchorBottom, boolean pAnchorRight, boolean pAnchorTop, boolean pIsBordered)
+    public IAditoLayoutInfo getAditoLayoutInfo()
     {
       return null;
     }
 
     @Override
-    public Class getAditoAnchoLayoutClass()
+    public IAditoPropertyInfo getAditoPropertyInfo()
+    {
+      return null;
+    }
+
+    @Override
+    public IAditoModelProvider getAditoModelProvider()
     {
       return null;
     }

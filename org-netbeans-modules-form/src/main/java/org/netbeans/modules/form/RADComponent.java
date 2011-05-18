@@ -57,7 +57,7 @@ import javax.swing.*;
 
 import org.netbeans.modules.form.RADProperty.FakePropertyDescriptor;
 
-import org.netbeans.modules.form.adito.*;
+import org.netbeans.modules.form.adito.ARADComponentHandler;
 import org.openide.nodes.*;
 import org.openide.util.Lookup;
 import org.openide.util.NbBundle;

@@ -45,13 +45,9 @@
 package org.netbeans.modules.form;
 
 import java.awt.*;
-import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 import javax.swing.*;
 import javax.swing.border.Border;
-
-import de.adito.aditoweb.swingcommon.layout.aditolayout.*;
-import org.openide.ErrorManager;
 
 import org.netbeans.modules.form.fakepeer.FakePeerSupport;
 

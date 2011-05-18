@@ -1,15 +1,10 @@
 package org.netbeans.modules.form.adito;
 
-import de.adito.aditoweb.core.util.Utility;
-import de.adito.aditoweb.filesystem.datamodelfs.access.DataAccessHelper;
-import de.adito.aditoweb.filesystem.datamodelfs.access.mechanics.IFieldAccess;
-import de.adito.aditoweb.filesystem.datamodelfs.access.verification.ResultOfVerification;
-import org.jetbrains.annotations.*;
+import com.google.common.base.Objects;
+import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.NetbeansAditoInterfaceProvider;
+import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.sync.*;
+import org.jetbrains.annotations.NotNull;
 import org.netbeans.modules.form.*;
-import org.netbeans.modules.form.adito.mapping.EModelComponentMapping;
-import org.netbeans.modules.form.layoutsupport.LayoutSupportDelegate;
-import org.openide.filesystems.*;
-import org.openide.loaders.DataFolder;
 import org.openide.nodes.Node;
 
 import java.beans.*;
@@ -21,29 +16,23 @@ import java.lang.reflect.InvocationTargetException;
 public class FormDataBridge
 {
 
-  @NotNull
-  private RADComponent radComponent;
-  @NotNull
-  private DataFolder modelDataObject;
-  @Nullable
-  private IFormDataInfo fdInfo;
-  @Nullable
-  private FileChangeListener fileChangeListener;
+  private final RADComponent radComponent;
+  private final IAditoPropertyProvider aditoModelPropProvider;
+  private IAditoComponentDetailProvider mapper;
+
+  private PropertyChangeListener propertyChangeListener;
 
 
-  public FormDataBridge(@NotNull RADComponent pRadComponent, @NotNull DataFolder pModelDataObject)
+  public FormDataBridge(@NotNull RADComponent pRadComponent, @NotNull IAditoPropertyProvider pAditoModelPropProvider)
   {
     radComponent = pRadComponent;
-    modelDataObject = pModelDataObject;
-
+    aditoModelPropProvider = pAditoModelPropProvider;
+    mapper = NetbeansAditoInterfaceProvider.getDefault().getAditoPropertyInfo().getMapper(radComponent.getBeanClass());
   }
 
-  @NotNull
-  IFormDataInfo getFormDataInfo()
+  IAditoPropertyProvider getAditoModelPropProvider()
   {
-    if (fdInfo == null)
-      fdInfo = new _FormDataInfo();
-    return fdInfo;
+    return aditoModelPropProvider;
   }
 
   void layoutPropertiesChanged()
@@ -55,192 +44,118 @@ public class FormDataBridge
       {
         for (Node.Property formProperty : radVisualComponent.getConstraintsProperties())
         {
-          IFieldAccess fieldAccess = getFormDataInfo().getFieldAccessByFormPropertyName(formProperty.getName());
-          if (fieldAccess != null)
+          String aditoPropName = mapper.getAditoPropName(formProperty.getName());
+          Node.Property aditoProperty = aditoModelPropProvider.getProperty(aditoPropName);
+          if (aditoProperty != null)
           {
-            Object fieldValue = fieldAccess.getValue();
+            Object fieldValue = aditoProperty.getValue();
             Object formPropertyValue = formProperty.getValue();
-            if (!Utility.isEqual(fieldValue, formPropertyValue))
+            if (fieldValue == null || !fieldValue.equals(formPropertyValue))
             {
-              @SuppressWarnings({"unchecked"})
-              ResultOfVerification resultOfVerification = fieldAccess.setValue(formPropertyValue);
-              radComponent.getNodeReference().firePropertyChangeHelper(fieldAccess.getName(), null, null);
-              if (resultOfVerification != null && resultOfVerification.isError())
-                throw resultOfVerification.getException();
+              aditoProperty.setValue(formPropertyValue);
+              radComponent.getNodeReference().firePropertyChangeHelper(formProperty.getName(), null, null);
             }
           }
         }
       }
-      catch (Exception e)
+      catch (InvocationTargetException e)
       {
-        radComponent.getFormModel().forceUndoOfCompoundEdit();
+        radComponent.getFormModel().forceUndoOfCompoundEdit(); // TODO: Fehler dem User mitteilen (output)
+      }
+      catch (IllegalAccessException e)
+      {
+        throw new RuntimeException(e); // TODO: runtimeEx
       }
     }
   }
 
   void registerListeners()
   {
-    if (fileChangeListener == null)
+    if (propertyChangeListener == null)
     {
-      fileChangeListener = createFileChangeListener();
-      for (FileObject fo : modelDataObject.getPrimaryFile().getChildren())
-      {
-        String modelPropertyName = fo.getNameExt();
-        fo.addFileChangeListener(fileChangeListener);
-        FormProperty formProperty = getFormDataInfo().getFormPropertyByModelPropertyName(modelPropertyName);
-        if (formProperty != null)
-          formProperty.addPropertyChangeListener(_createFormPropertyChangeListener(modelPropertyName));
-      }
+      propertyChangeListener = _createAditoPropertyChangeListener();
+      //for (String aditoPropName : aditoModelPropProvider.getPropertyNames())
+      //{
+      //  String radPropName = mapper.getRadPropName(aditoPropName);
+      //  _getFormProperty(radPropName).addPropertyChangeListener(_createFormPropertyChangeListener(radPropName, aditoPropName));
+      //}
     }
   }
 
   void unregisterAll()
   {
-    for (FileObject fileObject : modelDataObject.getPrimaryFile().getChildren())
-      fileObject.removeFileChangeListener(fileChangeListener);
+    aditoModelPropProvider.removePropertyListener(propertyChangeListener);
+    propertyChangeListener = null;
+    //for (FileObject fileObject : modelDataObject.getPrimaryFile().getChildren())
+    //fileObject.removeFileChangeListener(propertyChangeListener);
   }
 
-  @NotNull
-  private PropertyChangeListener _createFormPropertyChangeListener(@NotNull final String pModelPropertyName)
+  //private PropertyChangeListener _createFormPropertyChangeListener(final String pRadPropName, final String pAditoPropName)
+  //{
+  //  return new PropertyChangeListener()
+  //  {
+  //    @Override
+  //    public void propertyChange(PropertyChangeEvent evt)
+  //    {
+  //      Node.Property aditoProperty = aditoModelPropProvider.getProperty(pAditoPropName);
+  //      if (aditoProperty != null)
+  //      {
+  //        try
+  //        {
+  //          FormProperty formProperty = getFormDataInfo().getFormPropertyByModelPropertyName(pAditoPropName);
+  //          if (formProperty != null)
+  //          {
+  //            Object oldValue = fieldAccess.getValue();
+  //            Object newValue = formProperty.getValue();
+  //            if (!Objects.equal(oldValue, newValue))
+  //              fieldAccess.setValue(newValue);
+  //          }
+  //        }
+  //        catch (IllegalAccessException e)
+  //        {
+  //          e.printStackTrace(); // TODO: errorHandling
+  //        }
+  //        catch (InvocationTargetException e)
+  //        {
+  //          e.printStackTrace(); // TODO: errorHandling
+  //        }
+  //      }
+  //    }
+  //  };
+  //}
+
+  private PropertyChangeListener _createAditoPropertyChangeListener()
   {
     return new PropertyChangeListener()
     {
       @Override
       public void propertyChange(PropertyChangeEvent evt)
       {
-        IFieldAccess<Object> fieldAccess = getFormDataInfo().getFieldAccess(pModelPropertyName);
-        if (fieldAccess != null)
+        try
         {
-          try
-          {
-            FormProperty formProperty = getFormDataInfo().getFormPropertyByModelPropertyName(pModelPropertyName);
-            if (formProperty != null)
-            {
-              Object oldValue = fieldAccess.getValue();
-              Object newValue = formProperty.getValue();
-              if (!Utility.isEqual(oldValue, newValue))
-                fieldAccess.setValue(newValue);
-            }
-          }
-          catch (IllegalAccessException e)
-          {
-            e.printStackTrace(); // TODO: errorHandling
-          }
-          catch (InvocationTargetException e)
-          {
-            e.printStackTrace(); // TODO: errorHandling
-          }
+          String aditoPropName = evt.getPropertyName();
+          Node.Property aditoProperty = aditoModelPropProvider.getProperty(aditoPropName);
+          FormProperty formProperty = _getFormProperty(mapper.getRadPropName(aditoPropName));
+          Object newValue = aditoProperty.getValue();
+          if (!Objects.equal(newValue, aditoProperty.getValue()))
+            formProperty.setValue(newValue);
+        }
+        catch (IllegalAccessException e)
+        {
+          throw new RuntimeException(e); // TODO: runtimeEx
+        }
+        catch (InvocationTargetException e)
+        {
+          throw new RuntimeException(e); // TODO: runtimeEx
         }
       }
     };
   }
 
-  @NotNull
-  private FileChangeListener createFileChangeListener()
+  private FormProperty _getFormProperty(String pRadPropName)
   {
-    return new FileChangeAdapter()
-    {
-      @Override
-      public void fileChanged(FileEvent fe)
-      {
-        FileObject fo = fe.getFile();
-        String modelPropertyName = fo.getNameExt();
-        IFieldAccess<Object> fieldAccess = getFormDataInfo().getFieldAccess(modelPropertyName);
-        if (fieldAccess != null)
-        {
-          try
-          {
-            FormProperty formProperty = getFormDataInfo().getFormPropertyByModelPropertyName(modelPropertyName);
-            if (formProperty != null)
-            {
-              Object oldValue = formProperty.getValue();
-              Object newValue = fieldAccess.getValue();
-              if (!Utility.isEqual(oldValue, newValue))
-                formProperty.setValue(newValue);
-            }
-          }
-          catch (IllegalAccessException e)
-          {
-            e.printStackTrace(); // TODO: errorHandling
-          }
-          catch (InvocationTargetException e)
-          {
-            e.printStackTrace(); // TODO: errorHandling
-          }
-        }
-
-      }
-    };
-  }
-
-
-  /**
-   * IFormDataInfo
-   */
-  private class _FormDataInfo implements IFormDataInfo
-  {
-    private EModelComponentMapping mapping;
-
-
-    @Override
-    public IFieldAccess getFieldAccessByFormPropertyName(@NotNull String pFormPropertyName)
-    {
-      EModelComponentMapping componentMapping = _getComponentMapping();
-      if (componentMapping != null)
-      {
-        String mappedName = componentMapping.getComponentInfo().getModelPropertyName(
-            _getLayoutSupportDelegateClass(), pFormPropertyName);
-        if (mappedName != null)
-          return getFieldAccess(mappedName);
-      }
-      return null;
-    }
-
-    @Override
-    public IFieldAccess<Object> getFieldAccess(@NotNull String pModelPropertyName)
-    {
-      return DataAccessHelper.accessField(modelDataObject.getPrimaryFile().getFileObject(pModelPropertyName));
-    }
-
-    @Override
-    public FormProperty getFormPropertyByModelPropertyName(@NotNull String pModelPropertyName)
-    {
-      EModelComponentMapping componentMapping = _getComponentMapping();
-      if (componentMapping != null)
-      {
-        String mappedName = componentMapping.getComponentInfo().getFormPropertyName(
-            _getLayoutSupportDelegateClass(), pModelPropertyName);
-        if (mappedName != null)
-        {
-          Node.Property mappedProperty = radComponent.getPropertyByName(mappedName);
-          if (mappedProperty instanceof FormProperty)
-            return (FormProperty) mappedProperty;
-        }
-      }
-      return null;
-    }
-
-    @Nullable
-    private EModelComponentMapping _getComponentMapping()
-    {
-      if (mapping == null)
-        mapping = EModelComponentMapping.get(radComponent);
-      return mapping;
-    }
-
-    @Nullable
-    private Class<? extends LayoutSupportDelegate> _getLayoutSupportDelegateClass()
-    {
-      Class<? extends LayoutSupportDelegate> layoutSupportClass = null;
-      if (radComponent.getParentComponent() instanceof RADVisualContainer)
-      {
-        RADVisualContainer container = (RADVisualContainer) radComponent.getParentComponent();
-        LayoutSupportDelegate layoutDelegate = container.getLayoutSupport().getLayoutDelegate();
-        if (layoutDelegate != null)
-          layoutSupportClass = layoutDelegate.getClass();
-      }
-      return layoutSupportClass;
-    }
+    Node.Property prop = radComponent.getPropertyByName(pRadPropName);
+    return prop instanceof FormProperty ? (FormProperty) prop : null;
   }
 
 }

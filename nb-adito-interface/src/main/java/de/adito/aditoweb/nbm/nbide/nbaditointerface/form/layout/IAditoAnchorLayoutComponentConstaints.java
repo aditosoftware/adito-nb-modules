@@ -1,4 +1,4 @@
-package de.adito.aditoweb.nbm.nbide.nbaditointerface;
+package de.adito.aditoweb.nbm.nbide.nbaditointerface.form.layout;
 
 import java.awt.*;
 

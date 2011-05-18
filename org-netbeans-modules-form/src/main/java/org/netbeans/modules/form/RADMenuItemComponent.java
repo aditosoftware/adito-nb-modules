@@ -45,7 +45,6 @@
 package org.netbeans.modules.form;
 
 import org.netbeans.modules.form.adito.ARADComponentHandler;
-import org.openide.loaders.*;
 
 import java.awt.*;
 
