@@ -5,9 +5,11 @@ import org.openide.loaders.DataObject;
 import org.openide.nodes.Node;
 
 /**
+ * Stellt Daten über Modelle zur Verfügung.
+ *
  * @author J. Boesl, 16.05.11
  */
-public interface IAditoModelProvider
+public interface IAditoModelDataProvider
 {
 
   static final String CHILDDATAMODELS = "childDataModels";

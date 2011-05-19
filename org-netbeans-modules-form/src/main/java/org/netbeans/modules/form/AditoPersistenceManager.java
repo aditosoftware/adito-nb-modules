@@ -1,20 +1,17 @@
 package org.netbeans.modules.form;
 
 import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.NetbeansAditoInterfaceProvider;
-import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.model.IAditoModelProvider;
+import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.model.IAditoModelDataProvider;
 import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.sync.*;
 import org.netbeans.modules.form.adito.*;
 import org.netbeans.modules.form.adito.layout.*;
 import org.netbeans.modules.form.layoutdesign.LayoutModel;
 import org.netbeans.modules.form.layoutsupport.LayoutSupportManager;
-import org.openide.awt.StatusDisplayer;
 import org.openide.filesystems.FileObject;
 import org.openide.nodes.Node;
-import org.openide.windows.*;
 
 import javax.swing.*;
 import java.awt.*;
-import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 import java.util.List;
@@ -89,79 +86,7 @@ public class AditoPersistenceManager extends PersistenceManager
     if (topComp != null) // load the main form component
       _loadComponent(pInfo, pInfo.getModelRoot(), topComp, null);
 
-    formModel.addFormModelListener(new FormModelListener()
-    {
-      @Override
-      public void formChanged(FormModelEvent[] events)
-      {
-        for (FormModelEvent event : events)
-        {
-          RADComponent eventComponent = event.getComponent();
-          try
-          {
-            switch (event.getChangeType())
-            {
-              case FormModelEvent.COMPONENT_LAYOUT_CHANGED:
-                eventComponent.getARADComponentHandler().layoutPropertiesChanged();
-                break;
-              case FormModelEvent.COMPONENT_REMOVED:
-                eventComponent.getARADComponentHandler().delete();
-                eventComponent.clearProperties();
-                break;
-              case FormModelEvent.COMPONENT_ADDED:
-                eventComponent.getARADComponentHandler().add();
-                break;
-              case FormModelEvent.FORM_TO_BE_CLOSED:
-                Collection<RADComponent> allComponents = event.getFormModel().getAllComponents();
-                for (RADComponent component : allComponents)
-                {
-                  ARADComponentHandler aradComponentHandler = component.getARADComponentHandler();
-                  if (aradComponentHandler != null)
-                    aradComponentHandler.deinitialize();
-                }
-                event.getFormModel().removeFormModelListener(this);
-              default:
-                break;
-            }
-          }
-          catch (Exception e)  // TODO: nur temporär ... testing
-          {
-            if (event.isModifying())
-              eventComponent.getFormModel().forceUndoOfCompoundEdit();
-            InputOutput io = IOProvider.getDefault().getIO("My Window", false);
-            io.select();
-            OutputWriter w = io.getOut();
-            OutputListener listener = new OutputListener()
-            {
-              public void outputLineAction(OutputEvent ev)
-              {
-                StatusDisplayer.getDefault().setStatusText("Hyperlink clicked!");
-              }
-
-              public void outputLineSelected(OutputEvent ev)
-              {
-                // Let's not do anything special.
-              }
-
-              public void outputLineCleared(OutputEvent ev)
-              {
-                // Leave it blank, no state to remove.
-              }
-            };
-            try
-            {
-              IOColorPrint.print(io, "Exception: " + e.getMessage(), Color.RED);
-              IOColorPrint.print(io, " - just for test - ", Color.GREEN);
-              w.println("Line of hyperlinked text.", listener, true);
-            }
-            catch (IOException e1)
-            {
-              throw new RuntimeException(e1);
-            }
-          }
-        }
-      }
-    });
+    formModel.addFormModelListener(new AFormModelListener());
 //    FormEditor.updateProjectForNaturalLayout(formModel);
 //    formModel.setFreeDesignDefaultLayout(true);
   }
@@ -175,7 +100,8 @@ public class AditoPersistenceManager extends PersistenceManager
     // then load NB 3.1 layout constraints for it
     if (pComponent instanceof RADVisualComponent && pParentComponent instanceof RADVisualContainer)
     {
-      if (pModelComp.getFileObject("x") != null && pModelComp.getFileObject("y") != null)
+      if (pModelComp.getFileObject("x") != null && pModelComp.getFileObject("y") != null &&
+          pModelComp.getFileObject("width") != null && pModelComp.getFileObject("height") != null)
         _loadConstraints(pModelComp, pComponent, (RADVisualContainer) pParentComponent);
     }
 
@@ -199,13 +125,13 @@ public class AditoPersistenceManager extends PersistenceManager
     if (visualContainer != null)
     {
       visualContainer.setOldLayoutSupport(true);
-      convIndex = _loadLayout(visualContainer.getLayoutSupport());
+      convIndex = _loadLayout(pModelComp, visualContainer.getLayoutSupport());
     }
 
 
     // load subcomponents
     RADComponent[] childComponents;
-    FileObject childModels = pModelComp.getFileObject(IAditoModelProvider.CHILDDATAMODELS);
+    FileObject childModels = pModelComp.getFileObject(IAditoModelDataProvider.CHILDDATAMODELS);
     if (childModels != null)
     {
       List<RADComponent> list = new ArrayList<RADComponent>();
@@ -437,19 +363,18 @@ public class AditoPersistenceManager extends PersistenceManager
   private RADComponent _restoreComponent(_Info pInfo, FileObject pChildModel, RADComponent pParentComponent)
       throws PersistenceException
   {
-    IAditoPropertyInfo aditoPropertyInfo = NetbeansAditoInterfaceProvider.getDefault().getAditoPropertyInfo();
-    IAditoComponentDetailProvider mapper = aditoPropertyInfo.getMapper(pChildModel);
+    IAditoPropertyProvider modelPropProvider = getPropertyInfo().createModelPropProvider(pChildModel);
+    IAditoComponentDetailProvider componentDetailProvider = modelPropProvider.getComponentDetailProvider();
     String compName;
     String className;
     try
     {
-      if (mapper == null)
+      if (componentDetailProvider == null)
       {
-        System.out.println("didn't load," + pChildModel.toString()); // DEBUG: remove it!
         return null;
       }
       compName = pChildModel.getNameExt(); // entspricht Namen des DatenModels.
-      className = mapper.getComponentClass().getName();
+      className = componentDetailProvider.getComponentClass().getName();
     }
     catch (Exception e)
     {
@@ -484,7 +409,9 @@ public class AditoPersistenceManager extends PersistenceManager
     // create a new metacomponent
     RADComponent newComponent;
 
-    if (FormUtils.isVisualizableClass(compClass))
+    if (modelPropProvider.isContainer())
+      newComponent = new RADVisualContainer();
+    else if (FormUtils.isVisualizableClass(compClass))
       newComponent = new RADVisualComponent();
     else
     {
@@ -602,17 +529,10 @@ public class AditoPersistenceManager extends PersistenceManager
   }
 
 
-  private int _loadLayout(LayoutSupportManager layoutSupport)
+  private int _loadLayout(FileObject pModelComp, LayoutSupportManager layoutSupport)
   {
-    try
-    {
-      LayoutManager aditoAnchorLayout = NetbeansAditoInterfaceProvider.getDefault().getAditoLayoutInfo().createAditoAnchorLayout();
-      layoutSupport.getPrimaryContainer().setLayout(aditoAnchorLayout);
-    }
-    catch (Exception e)
-    {
-      e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
-    }
+    LayoutManager layout = getPropertyInfo().createModelPropProvider(pModelComp).createLayout();
+    layoutSupport.getPrimaryContainer().setLayout(layout);
     return LAYOUT_ABSOLUTE;
   }
 
@@ -622,18 +542,24 @@ public class AditoPersistenceManager extends PersistenceManager
     {
       if (pComponent instanceof RADVisualComponent)
       {
-        IAditoPropertyProvider aditoModelPropProvider =
-            NetbeansAditoInterfaceProvider.getDefault().getAditoPropertyInfo().createAditoModelPropProvider(pModelComp);
+        IAditoPropertyProvider aditoModelPropProvider = getPropertyInfo().createModelPropProvider(pModelComp);
 
-        Node.Property<Integer> x = aditoModelPropProvider.getProperty(IAditoModelProvider.X);
-        Node.Property<Integer> y = aditoModelPropProvider.getProperty(IAditoModelProvider.Y);
-        Node.Property<Integer> width = aditoModelPropProvider.getProperty(IAditoModelProvider.WIDTH);
-        Node.Property<Integer> height = aditoModelPropProvider.getProperty(IAditoModelProvider.HEIGHT);
+        Object realConstraints = aditoModelPropProvider.createConstraints();
+        if (realConstraints instanceof Integer)
+        {
+          //((RADVisualComponent) pComponent).setLayoutConstraints(FlowLayoutSupport.class, null);
+        }
+        else
+        {
+          Node.Property<Integer> x = aditoModelPropProvider.getProperty(IAditoModelDataProvider.X);
+          Node.Property<Integer> y = aditoModelPropProvider.getProperty(IAditoModelDataProvider.Y);
+          Node.Property<Integer> width = aditoModelPropProvider.getProperty(IAditoModelDataProvider.WIDTH);
+          Node.Property<Integer> height = aditoModelPropProvider.getProperty(IAditoModelDataProvider.HEIGHT);
 
-        AditoComponentConstraints constraints = new AditoComponentConstraints(new Rectangle(
-            x.getValue(), y.getValue(), width.getValue(), height.getValue()
-        ));
-        ((RADVisualComponent) pComponent).setLayoutConstraints(AditoLayoutSupport.class, constraints);
+          AditoComponentConstraints constraints = new AditoComponentConstraints(new Rectangle(
+              x.getValue(), y.getValue(), width.getValue(), height.getValue()));
+          ((RADVisualComponent) pComponent).setLayoutConstraints(AditoLayoutSupport.class, constraints);
+        }
       }
 
 //      // create add method statement
@@ -656,6 +582,11 @@ public class AditoPersistenceManager extends PersistenceManager
 //      ex.printStackTrace();
 //    }
     return false;
+  }
+
+  private IAditoComponentInfoProvider getPropertyInfo()
+  {
+    return NetbeansAditoInterfaceProvider.lookup(IAditoComponentInfoProvider.class);
   }
 
 
@@ -700,8 +631,8 @@ public class AditoPersistenceManager extends PersistenceManager
     {
       if (modelRoot == null)
       {
-        IAditoModelProvider aditoModelProvider = NetbeansAditoInterfaceProvider.getDefault().getAditoModelProvider();
-        modelRoot = aditoModelProvider.loadModel(formObject.getPrimaryFile());
+        IAditoModelDataProvider aditoModelDataProvider = NetbeansAditoInterfaceProvider.lookup(IAditoModelDataProvider.class);
+        modelRoot = aditoModelDataProvider.loadModel(formObject.getPrimaryFile());
       }
       return modelRoot;
     }

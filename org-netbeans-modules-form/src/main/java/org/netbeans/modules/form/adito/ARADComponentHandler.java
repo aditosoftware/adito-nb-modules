@@ -169,9 +169,8 @@ public class ARADComponentHandler
     {
       try
       {
-        IAditoPropertyInfo aditoPropertyInfo = NetbeansAditoInterfaceProvider.getDefault().getAditoPropertyInfo();
         IAditoPropertyProvider aditoModelPropProvider =
-            aditoPropertyInfo.createAditoModelPropProvider(modelDataObject.getPrimaryFile());
+            getPropertyInfo().createModelPropProvider(modelDataObject.getPrimaryFile());
         formDataBridge = new FormDataBridge(radComponent, aditoModelPropProvider);
         formDataBridge.registerListeners();
       }
@@ -206,6 +205,11 @@ public class ARADComponentHandler
     if (sheet != null)
       return sheet.toArray();
     return new Node.PropertySet[0];
+  }
+
+  private IAditoComponentInfoProvider getPropertyInfo()
+  {
+    return NetbeansAditoInterfaceProvider.lookup(IAditoComponentInfoProvider.class);
   }
 
 }

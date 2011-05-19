@@ -18,7 +18,7 @@ public class FormDataBridge
 
   private final RADComponent radComponent;
   private final IAditoPropertyProvider aditoModelPropProvider;
-  private IAditoComponentDetailProvider mapper;
+  private IAditoComponentDetailProvider componentDetailProvider;
 
   private PropertyChangeListener propertyChangeListener;
 
@@ -27,7 +27,7 @@ public class FormDataBridge
   {
     radComponent = pRadComponent;
     aditoModelPropProvider = pAditoModelPropProvider;
-    mapper = NetbeansAditoInterfaceProvider.getDefault().getAditoPropertyInfo().getMapper(radComponent.getBeanClass());
+    componentDetailProvider = getPropertyInfo().getComponentDetailProvider(radComponent.getBeanClass());
   }
 
   IAditoPropertyProvider getAditoModelPropProvider()
@@ -44,7 +44,7 @@ public class FormDataBridge
       {
         for (Node.Property formProperty : radVisualComponent.getConstraintsProperties())
         {
-          String aditoPropName = mapper.getAditoPropName(formProperty.getName());
+          String aditoPropName = componentDetailProvider.getAditoPropName(formProperty.getName());
           Node.Property aditoProperty = aditoModelPropProvider.getProperty(aditoPropName);
           if (aditoProperty != null)
           {
@@ -135,7 +135,7 @@ public class FormDataBridge
         {
           String aditoPropName = evt.getPropertyName();
           Node.Property aditoProperty = aditoModelPropProvider.getProperty(aditoPropName);
-          FormProperty formProperty = _getFormProperty(mapper.getRadPropName(aditoPropName));
+          FormProperty formProperty = _getFormProperty(componentDetailProvider.getRadPropName(aditoPropName));
           Object newValue = aditoProperty.getValue();
           if (!Objects.equal(newValue, aditoProperty.getValue()))
             formProperty.setValue(newValue);
@@ -156,6 +156,11 @@ public class FormDataBridge
   {
     Node.Property prop = radComponent.getPropertyByName(pRadPropName);
     return prop instanceof FormProperty ? (FormProperty) prop : null;
+  }
+
+  private IAditoComponentInfoProvider getPropertyInfo()
+  {
+    return NetbeansAditoInterfaceProvider.lookup(IAditoComponentInfoProvider.class);
   }
 
 }

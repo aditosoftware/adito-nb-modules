@@ -1,7 +1,7 @@
 package org.netbeans.modules.form.adito.layout;
 
 import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.NetbeansAditoInterfaceProvider;
-import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.layout.IAditoAnchorLayoutComponentConstaints;
+import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.layout.*;
 import org.netbeans.modules.form.FormProperty;
 import org.netbeans.modules.form.layoutsupport.LayoutConstraints;
 import org.openide.nodes.Node;
@@ -30,14 +30,14 @@ public class AditoComponentConstraints implements LayoutConstraints
   public AditoComponentConstraints(Rectangle pBounds, boolean pAnchorLeft, boolean pAnchorBottom,
                                    boolean pAnchorRight, boolean pAnchorTop)
   {
-    constraints = NetbeansAditoInterfaceProvider.getDefault().getAditoLayoutInfo()
+    constraints = NetbeansAditoInterfaceProvider.lookup(IAditoLayoutProvider.class)
         .createAditoAnchoLayoutComponentConstraints(pBounds, pAnchorLeft, pAnchorBottom, pAnchorRight, pAnchorTop, false);
   }
 
   public AditoComponentConstraints(Rectangle pBounds, boolean pAnchorLeft, boolean pAnchorBottom,
                                    boolean pAnchorRight, boolean pAnchorTop, boolean pIsBordered)
   {
-    constraints = NetbeansAditoInterfaceProvider.getDefault().getAditoLayoutInfo().
+    constraints = NetbeansAditoInterfaceProvider.lookup(IAditoLayoutProvider.class).
         createAditoAnchoLayoutComponentConstraints(pBounds, pAnchorLeft, pAnchorBottom, pAnchorRight, pAnchorTop, pIsBordered);
   }
 

@@ -1,6 +1,7 @@
 package org.netbeans.modules.form.adito.layout;
 
 import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.NetbeansAditoInterfaceProvider;
+import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.layout.IAditoLayoutProvider;
 import org.netbeans.modules.form.FormLoaderSettings;
 import org.netbeans.modules.form.layoutsupport.*;
 import org.openide.util.ImageUtilities;
@@ -20,7 +21,7 @@ public class AditoLayoutSupport extends AbstractLayoutSupport
   @Override
   public Class getSupportedClass()
   {
-    return NetbeansAditoInterfaceProvider.getDefault().getAditoLayoutInfo().getAditoAnchoLayoutClass();
+    return NetbeansAditoInterfaceProvider.lookup(IAditoLayoutProvider.class).getAditoAnchoLayoutClass();
   }
 
   @Override
