@@ -21,7 +21,7 @@ public class AditoLayoutSupport extends AbstractLayoutSupport
   @Override
   public Class getSupportedClass()
   {
-    return NetbeansAditoInterfaceProvider.lookup(IAditoLayoutProvider.class).getAditoAnchoLayoutClass();
+    return NetbeansAditoInterfaceProvider.lookup(IAditoLayoutProvider.class).getAditoAnchorLayoutClass();
   }
 
   @Override
@@ -202,6 +202,11 @@ public class AditoLayoutSupport extends AbstractLayoutSupport
     return new AditoComponentConstraints(new Rectangle(x, y, w, h));
   }
 
+  @Override
+  public void addComponentsToContainer(Container container, Container containerDelegate, Component[] components, int index)
+  {
+    super.addComponentsToContainer(container, containerDelegate, components, index);
+  }
 
   @Override
   protected LayoutConstraints createDefaultConstraints()

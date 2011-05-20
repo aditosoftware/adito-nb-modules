@@ -279,7 +279,7 @@ public class FormEditorSupport extends DataEditorSupport implements EditorCookie
 
     @Override
     protected boolean asynchronousOpen() {
-        return false;
+        return true;
     }
 
     /** Overriden from JavaEditor - opens editor and ensures it is selected

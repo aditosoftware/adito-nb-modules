@@ -14,8 +14,6 @@ public interface IAditoLayoutProvider
       Rectangle pBounds, boolean pAnchorLeft, boolean pAnchorBottom, boolean pAnchorRight, boolean pAnchorTop,
       boolean pIsBordered);
 
-  Class getAditoAnchoLayoutClass();
-
-  LayoutManager createAditoAnchorLayout();
+  Class getAditoAnchorLayoutClass();
 
 }
