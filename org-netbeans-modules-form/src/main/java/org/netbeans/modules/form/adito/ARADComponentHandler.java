@@ -1,6 +1,6 @@
 package org.netbeans.modules.form.adito;
 
-import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.NetbeansAditoInterfaceProvider;
+import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.NbAditoInterface;
 import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.sync.*;
 import org.jetbrains.annotations.*;
 import org.netbeans.modules.form.RADComponent;
@@ -209,7 +209,7 @@ public class ARADComponentHandler
 
   private IAditoComponentInfoProvider getPropertyInfo()
   {
-    return NetbeansAditoInterfaceProvider.lookup(IAditoComponentInfoProvider.class);
+    return NbAditoInterface.lookup(IAditoComponentInfoProvider.class);
   }
 
 }

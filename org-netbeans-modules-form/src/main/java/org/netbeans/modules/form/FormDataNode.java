@@ -45,7 +45,7 @@
 
 package org.netbeans.modules.form;
 
-import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.NetbeansAditoInterfaceProvider;
+import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.NbAditoInterface;
 import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.model.IAditoModelDataProvider;
 import org.openide.filesystems.FileObject;
 import org.openide.loaders.*;
@@ -121,7 +121,7 @@ public class FormDataNode extends FilterNode
     try
     {
       DataObject bdo = DataObject.find(pBaseDataobject);
-      return NetbeansAditoInterfaceProvider.lookup(IAditoModelDataProvider.class).getBaseNode(bdo);
+      return NbAditoInterface.lookup(IAditoModelDataProvider.class).getBaseNode(bdo);
     }
     catch (DataObjectNotFoundException ex)
     {

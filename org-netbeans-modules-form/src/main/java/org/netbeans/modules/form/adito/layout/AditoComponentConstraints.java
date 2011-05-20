@@ -1,44 +1,44 @@
 package org.netbeans.modules.form.adito.layout;
 
-import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.NetbeansAditoInterfaceProvider;
+import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.NbAditoInterface;
 import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.layout.*;
-import org.netbeans.modules.form.FormProperty;
 import org.netbeans.modules.form.layoutsupport.LayoutConstraints;
 import org.openide.nodes.Node;
 
 import java.awt.*;
-import java.lang.reflect.InvocationTargetException;
+import java.util.*;
 
 /**
  * @author J. Boesl, 10.03.11
  */
 public class AditoComponentConstraints implements LayoutConstraints
 {
-  private IAditoAnchorLayoutComponentConstaints constraints;
+  private IAditoLayoutConstraints<IAnchorLayoutPropertyTypes> constraints;
   private Node.Property[] properties;
 
   public AditoComponentConstraints()
   {
-    this(new Rectangle());
+    constraints = NbAditoInterface.lookup(IAditoLayoutProvider.class).createLayoutConstraints();
   }
 
-  public AditoComponentConstraints(Rectangle pBounds)
+  public AditoComponentConstraints(Rectangle pRectangle)
   {
-    this(pBounds, true, false, false, true);
+    constraints = NbAditoInterface.lookup(IAditoLayoutProvider.class).createLayoutConstraints();
+    constraints.setValue(type().x(), pRectangle.x);
+    constraints.setValue(type().y(), pRectangle.y);
+    constraints.setValue(type().width(), pRectangle.width);
+    constraints.setValue(type().height(), pRectangle.height);
   }
 
-  public AditoComponentConstraints(Rectangle pBounds, boolean pAnchorLeft, boolean pAnchorBottom,
-                                   boolean pAnchorRight, boolean pAnchorTop)
+  public AditoComponentConstraints(IAditoLayoutConstraints<IAnchorLayoutPropertyTypes> pConstraints)
   {
-    constraints = NetbeansAditoInterfaceProvider.lookup(IAditoLayoutProvider.class)
-        .createAditoAnchoLayoutComponentConstraints(pBounds, pAnchorLeft, pAnchorBottom, pAnchorRight, pAnchorTop, false);
+    constraints = pConstraints;
   }
 
-  public AditoComponentConstraints(Rectangle pBounds, boolean pAnchorLeft, boolean pAnchorBottom,
-                                   boolean pAnchorRight, boolean pAnchorTop, boolean pIsBordered)
+  public Rectangle getBounds()
   {
-    constraints = NetbeansAditoInterfaceProvider.lookup(IAditoLayoutProvider.class).
-        createAditoAnchoLayoutComponentConstraints(pBounds, pAnchorLeft, pAnchorBottom, pAnchorRight, pAnchorTop, pIsBordered);
+    return new Rectangle(constraints.getValue(type().x()), constraints.getValue(type().y()),
+                         constraints.getValue(type().width()), constraints.getValue(type().height()));
   }
 
   @Override
@@ -50,7 +50,7 @@ public class AditoComponentConstraints implements LayoutConstraints
   }
 
   @Override
-  public IAditoAnchorLayoutComponentConstaints getConstraintsObject()
+  public IAditoLayoutConstraints<IAnchorLayoutPropertyTypes> getConstraintsObject()
   {
     return constraints;
   }
@@ -58,71 +58,21 @@ public class AditoComponentConstraints implements LayoutConstraints
   @Override
   public LayoutConstraints cloneConstraints()
   {
-    return new AditoComponentConstraints(constraints.getBounds(), constraints.isAnchorLeft(),
-                                         constraints.isAnchorBottom(), constraints.isAnchorRight(),
-                                         constraints.isAnchorTop(), constraints.isBordered());
+    return new AditoComponentConstraints(constraints.cloneConstraints());
   }
 
   private Node.Property[] _createProperties()
   {
-    return new Node.Property[]{
-        new FormProperty("xADITO_LAYOUT", Integer.class, "x", "the x position")
-        {
-          @Override
-          public Object getTargetValue() throws IllegalAccessException, InvocationTargetException
-          {
-            return constraints.getBounds().x;
-          }
+    Collection<Node.Property> constraintProps = constraints.getProperties();
+    java.util.List<Node.Property> newProps = new ArrayList<Node.Property>(constraintProps.size());
+    for (Node.Property property : constraintProps)
+      newProps.add(new SimpleFormProperty(property));
+    return newProps.toArray(new Node.Property[constraintProps.size()]);
+  }
 
-          @Override
-          public void setTargetValue(Object value) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException
-          {
-            constraints.getBounds().x = (Integer) value;
-          }
-        },
-        new FormProperty("yADITO_LAYOUT", Integer.class, "y", "the y position")
-        {
-          @Override
-          public Object getTargetValue() throws IllegalAccessException, InvocationTargetException
-          {
-            return constraints.getBounds().y;
-          }
-
-          @Override
-          public void setTargetValue(Object value) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException
-          {
-            constraints.getBounds().y = (Integer) value;
-          }
-        },
-        new FormProperty("widthADITO_LAYOUT", Integer.class, "width", "the width")
-        {
-          @Override
-          public Object getTargetValue() throws IllegalAccessException, InvocationTargetException
-          {
-            return constraints.getBounds().width;
-          }
-
-          @Override
-          public void setTargetValue(Object value) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException
-          {
-            constraints.getBounds().width = (Integer) value;
-          }
-        },
-        new FormProperty("heightADITO_LAYOUT", Integer.class, "height", "the height")
-        {
-          @Override
-          public Object getTargetValue() throws IllegalAccessException, InvocationTargetException
-          {
-            return constraints.getBounds().height;
-          }
-
-          @Override
-          public void setTargetValue(Object value) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException
-          {
-            constraints.getBounds().height = (Integer) value;
-          }
-        }
-    };
+  private IAnchorLayoutPropertyTypes type()
+  {
+    return constraints.getTypeInfo();
   }
 
 }

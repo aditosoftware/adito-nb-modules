@@ -12,15 +12,10 @@ import org.openide.nodes.Node;
 public interface IAditoModelDataProvider
 {
 
-  static final String CHILDDATAMODELS = "childDataModels";
-  static final String X = "x";
-  static final String Y = "y";
-  static final String WIDTH = "width";
-  static final String HEIGHT = "height";
-
-
   Node getBaseNode(DataObject pFormDataObject);
 
   FileObject loadModel(FileObject pAodFile);
+
+  FileObject getChildDataModels(FileObject pFileObject);
 
 }

@@ -1,7 +1,5 @@
 package de.adito.aditoweb.nbm.nbide.nbaditointerface.form.layout;
 
-import java.awt.*;
-
 /**
  * LayoutProvider mit Informationen über verfügbare Layouts.
  *
@@ -10,10 +8,8 @@ import java.awt.*;
 public interface IAditoLayoutProvider
 {
 
-  IAditoAnchorLayoutComponentConstaints createAditoAnchoLayoutComponentConstraints(
-      Rectangle pBounds, boolean pAnchorLeft, boolean pAnchorBottom, boolean pAnchorRight, boolean pAnchorTop,
-      boolean pIsBordered);
+  IAditoLayoutConstraints<IAnchorLayoutPropertyTypes> createLayoutConstraints();
 
-  Class getAditoAnchorLayoutClass();
+  Class getLayoutClass();
 
 }

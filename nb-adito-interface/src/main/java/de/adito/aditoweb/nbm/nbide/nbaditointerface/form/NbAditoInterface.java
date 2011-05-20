@@ -5,12 +5,12 @@ import org.openide.util.Lookup;
 /**
  * @author J. Boesl, 11.05.11
  */
-public class NetbeansAditoInterfaceProvider
+public class NbAditoInterface
 {
 
   private static INetbeansAditoInterface provider;
 
-  private NetbeansAditoInterfaceProvider()
+  private NbAditoInterface()
   {
   }
 

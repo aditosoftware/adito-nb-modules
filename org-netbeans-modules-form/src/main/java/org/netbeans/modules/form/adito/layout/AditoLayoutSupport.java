@@ -1,6 +1,6 @@
 package org.netbeans.modules.form.adito.layout;
 
-import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.NetbeansAditoInterfaceProvider;
+import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.NbAditoInterface;
 import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.layout.IAditoLayoutProvider;
 import org.netbeans.modules.form.FormLoaderSettings;
 import org.netbeans.modules.form.layoutsupport.*;
@@ -21,7 +21,7 @@ public class AditoLayoutSupport extends AbstractLayoutSupport
   @Override
   public Class getSupportedClass()
   {
-    return NetbeansAditoInterfaceProvider.lookup(IAditoLayoutProvider.class).getAditoAnchorLayoutClass();
+    return NbAditoInterface.lookup(IAditoLayoutProvider.class).getLayoutClass();
   }
 
   @Override
@@ -63,8 +63,8 @@ public class AditoLayoutSupport extends AbstractLayoutSupport
 
       if (constr instanceof AditoComponentConstraints)
       {
-        currentW = ((AditoComponentConstraints) constr).getConstraintsObject().getBounds().width;
-        currentH = ((AditoComponentConstraints) constr).getConstraintsObject().getBounds().height;
+        currentW = ((AditoComponentConstraints) constr).getBounds().width;
+        currentH = ((AditoComponentConstraints) constr).getBounds().height;
       }
       else
       {
@@ -98,7 +98,7 @@ public class AditoLayoutSupport extends AbstractLayoutSupport
   public boolean paintDragFeedback(Container container, Container containerDelegate, Component component,
                                    LayoutConstraints newConstraints, int newIndex, Graphics g)
   {
-    Rectangle r = ((AditoComponentConstraints) newConstraints).getConstraintsObject().getBounds();
+    Rectangle r = ((AditoComponentConstraints) newConstraints).getBounds();
     int w = r.width;
     int h = r.height;
 
@@ -142,7 +142,7 @@ public class AditoLayoutSupport extends AbstractLayoutSupport
     LayoutConstraints constr = getConstraints(index);
     if (constr instanceof AditoComponentConstraints)
     {
-      Rectangle r = ((AditoComponentConstraints) constr).getConstraintsObject().getBounds();
+      Rectangle r = ((AditoComponentConstraints) constr).getBounds();
       currentW = r.width;
       currentH = r.height;
     }

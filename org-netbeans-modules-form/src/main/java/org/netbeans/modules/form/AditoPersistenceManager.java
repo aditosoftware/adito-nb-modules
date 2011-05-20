@@ -1,6 +1,7 @@
 package org.netbeans.modules.form;
 
-import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.NetbeansAditoInterfaceProvider;
+import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.NbAditoInterface;
+import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.layout.IAditoLayoutConstraints;
 import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.model.IAditoModelDataProvider;
 import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.sync.*;
 import org.netbeans.modules.form.adito.*;
@@ -131,7 +132,8 @@ public class AditoPersistenceManager extends PersistenceManager
 
     // load subcomponents
     RADComponent[] childComponents;
-    FileObject childModels = pModelComp.getFileObject(IAditoModelDataProvider.CHILDDATAMODELS);
+
+    FileObject childModels = NbAditoInterface.lookup(IAditoModelDataProvider.class).getChildDataModels(pModelComp);
     if (childModels != null)
     {
       List<RADComponent> list = new ArrayList<RADComponent>();
@@ -544,49 +546,29 @@ public class AditoPersistenceManager extends PersistenceManager
       {
         IAditoPropertyProvider aditoModelPropProvider = getPropertyInfo().createModelPropProvider(pModelComp);
 
+        Class<? extends LayoutManager> layoutMgrCls = aditoModelPropProvider.getParentLayoutClass();
         Object realConstraints = aditoModelPropProvider.createConstraints();
-        if (realConstraints instanceof Integer)
+        //Class<? extends LayoutSupportDelegate> supportDelegateCls =
+        //    LayoutSupportRegistry.getRegistry(pComponent.getFormModel()).createSupportForLayout(layoutMgrCls).getClass();
+        if (realConstraints instanceof IAditoLayoutConstraints)
         {
-          //((RADVisualComponent) pComponent).setLayoutConstraints(FlowLayoutSupport.class, null);
-        }
-        else
-        {
-          Node.Property<Integer> x = aditoModelPropProvider.getProperty(IAditoModelDataProvider.X);
-          Node.Property<Integer> y = aditoModelPropProvider.getProperty(IAditoModelDataProvider.Y);
-          Node.Property<Integer> width = aditoModelPropProvider.getProperty(IAditoModelDataProvider.WIDTH);
-          Node.Property<Integer> height = aditoModelPropProvider.getProperty(IAditoModelDataProvider.HEIGHT);
-
-          AditoComponentConstraints constraints = new AditoComponentConstraints(new Rectangle(
-              x.getValue(), y.getValue(), width.getValue(), height.getValue()));
-          ((RADVisualComponent) pComponent).setLayoutConstraints(AditoLayoutSupport.class, constraints);
+          ((RADVisualComponent) pComponent).setLayoutConstraints(
+              AditoLayoutSupport.class, new AditoComponentConstraints((IAditoLayoutConstraints) realConstraints));
         }
       }
 
-//      // create add method statement
-//      CodeStructure.createStatement(
-//          contDelCodeExp,
-//          _getAddWithConstrMethod(),
-//          new CodeExpression[]{
-//              codeExpression, codeStructure.createExpression(AALComponentConstraints.class, alComponentConstraints)
-//          });
-
       return true;
-
     }
     catch (Exception ex)
     { // should not happen
       ex.printStackTrace();
     }
-//    catch (NoSuchFieldException ex)
-//    { // should not happen
-//      ex.printStackTrace();
-//    }
     return false;
   }
 
   private IAditoComponentInfoProvider getPropertyInfo()
   {
-    return NetbeansAditoInterfaceProvider.lookup(IAditoComponentInfoProvider.class);
+    return NbAditoInterface.lookup(IAditoComponentInfoProvider.class);
   }
 
 
@@ -631,7 +613,7 @@ public class AditoPersistenceManager extends PersistenceManager
     {
       if (modelRoot == null)
       {
-        IAditoModelDataProvider aditoModelDataProvider = NetbeansAditoInterfaceProvider.lookup(IAditoModelDataProvider.class);
+        IAditoModelDataProvider aditoModelDataProvider = NbAditoInterface.lookup(IAditoModelDataProvider.class);
         modelRoot = aditoModelDataProvider.loadModel(formObject.getPrimaryFile());
       }
       return modelRoot;

@@ -17,6 +17,8 @@ public interface IAditoPropertyProvider
 
   boolean isContainer();
 
+  Class<? extends LayoutManager> getParentLayoutClass();
+
   Class<? extends LayoutManager> getLayoutClass();
 
   LayoutManager createLayout();

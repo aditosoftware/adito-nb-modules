@@ -1,7 +1,7 @@
 package org.netbeans.modules.form.adito;
 
 import com.google.common.base.Objects;
-import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.NetbeansAditoInterfaceProvider;
+import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.NbAditoInterface;
 import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.sync.*;
 import org.jetbrains.annotations.NotNull;
 import org.netbeans.modules.form.*;
@@ -160,7 +160,7 @@ public class FormDataBridge
 
   private IAditoComponentInfoProvider getPropertyInfo()
   {
-    return NetbeansAditoInterfaceProvider.lookup(IAditoComponentInfoProvider.class);
+    return NbAditoInterface.lookup(IAditoComponentInfoProvider.class);
   }
 
 }
