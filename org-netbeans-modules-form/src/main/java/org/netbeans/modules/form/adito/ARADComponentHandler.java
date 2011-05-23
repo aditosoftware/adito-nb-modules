@@ -144,7 +144,8 @@ public class ARADComponentHandler
 
   public void layoutPropertiesChanged()
   {
-    formDataBridge.layoutPropertiesChanged();
+    if (formDataBridge != null)
+      formDataBridge.layoutPropertiesChanged();
   }
 
   public void deinitialize()
@@ -171,8 +172,13 @@ public class ARADComponentHandler
       {
         IAditoPropertyProvider aditoModelPropProvider =
             getPropertyInfo().createModelPropProvider(modelDataObject.getPrimaryFile());
-        formDataBridge = new FormDataBridge(radComponent, aditoModelPropProvider);
-        formDataBridge.registerListeners();
+        IAditoComponentDetailProvider componentDetailProvider =
+            getPropertyInfo().getComponentDetailProvider(radComponent.getBeanClass());
+        if (aditoModelPropProvider != null && componentDetailProvider != null)
+        {
+          formDataBridge = new FormDataBridge(radComponent, aditoModelPropProvider, componentDetailProvider);
+          formDataBridge.registerListeners();
+        }
       }
       catch (Exception e)
       {
@@ -200,7 +206,8 @@ public class ARADComponentHandler
   @NotNull
   public Node.PropertySet[] getPropertySets()
   {
-    if (sheet == null)
+    tryInit();
+    if (sheet == null && formDataBridge != null)
       sheet = formDataBridge.getAditoModelPropProvider().createSheet();
     if (sheet != null)
       return sheet.toArray();

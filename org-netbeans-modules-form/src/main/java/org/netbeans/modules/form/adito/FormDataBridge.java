@@ -18,16 +18,17 @@ public class FormDataBridge
 
   private final RADComponent radComponent;
   private final IAditoPropertyProvider aditoModelPropProvider;
-  private IAditoComponentDetailProvider componentDetailProvider;
+  private final IAditoComponentDetailProvider componentDetailProvider;
 
   private PropertyChangeListener propertyChangeListener;
 
 
-  public FormDataBridge(@NotNull RADComponent pRadComponent, @NotNull IAditoPropertyProvider pAditoModelPropProvider)
+  public FormDataBridge(@NotNull RADComponent pRadComponent, @NotNull IAditoPropertyProvider pAditoModelPropProvider,
+                        @NotNull IAditoComponentDetailProvider pComponentDetailProvider)
   {
     radComponent = pRadComponent;
     aditoModelPropProvider = pAditoModelPropProvider;
-    componentDetailProvider = getPropertyInfo().getComponentDetailProvider(radComponent.getBeanClass());
+    componentDetailProvider = pComponentDetailProvider;
   }
 
   IAditoPropertyProvider getAditoModelPropProvider()
@@ -74,11 +75,17 @@ public class FormDataBridge
     if (propertyChangeListener == null)
     {
       propertyChangeListener = _createAditoPropertyChangeListener();
-      //for (String aditoPropName : aditoModelPropProvider.getPropertyNames())
-      //{
-      //  String radPropName = mapper.getRadPropName(aditoPropName);
-      //  _getFormProperty(radPropName).addPropertyChangeListener(_createFormPropertyChangeListener(radPropName, aditoPropName));
-      //}
+      aditoModelPropProvider.addPropertyListener(propertyChangeListener);
+      for (String aditoPropName : aditoModelPropProvider.getPropertyNames())
+      {
+        String radPropName = componentDetailProvider.getRadPropName(aditoPropName);
+        if (radPropName != null && !radPropName.isEmpty())
+        {
+          FormProperty formProperty = _getFormProperty(radPropName);
+          if (formProperty != null)
+            formProperty.addPropertyChangeListener(_createFormPropertyChangeListener(radPropName, aditoPropName));
+        }
+      }
     }
   }
 
@@ -90,39 +97,39 @@ public class FormDataBridge
     //fileObject.removeFileChangeListener(propertyChangeListener);
   }
 
-  //private PropertyChangeListener _createFormPropertyChangeListener(final String pRadPropName, final String pAditoPropName)
-  //{
-  //  return new PropertyChangeListener()
-  //  {
-  //    @Override
-  //    public void propertyChange(PropertyChangeEvent evt)
-  //    {
-  //      Node.Property aditoProperty = aditoModelPropProvider.getProperty(pAditoPropName);
-  //      if (aditoProperty != null)
-  //      {
-  //        try
-  //        {
-  //          FormProperty formProperty = getFormDataInfo().getFormPropertyByModelPropertyName(pAditoPropName);
-  //          if (formProperty != null)
-  //          {
-  //            Object oldValue = fieldAccess.getValue();
-  //            Object newValue = formProperty.getValue();
-  //            if (!Objects.equal(oldValue, newValue))
-  //              fieldAccess.setValue(newValue);
-  //          }
-  //        }
-  //        catch (IllegalAccessException e)
-  //        {
-  //          e.printStackTrace(); // TODO: errorHandling
-  //        }
-  //        catch (InvocationTargetException e)
-  //        {
-  //          e.printStackTrace(); // TODO: errorHandling
-  //        }
-  //      }
-  //    }
-  //  };
-  //}
+  private PropertyChangeListener _createFormPropertyChangeListener(final String pRadPropName, final String pAditoPropName)
+  {
+    return new PropertyChangeListener()
+    {
+      @Override
+      public void propertyChange(PropertyChangeEvent evt)
+      {
+        Node.Property aditoProperty = aditoModelPropProvider.getProperty(pAditoPropName);
+        if (aditoProperty != null)
+        {
+          try
+          {
+            FormProperty formProperty = _getFormProperty(pRadPropName);
+            if (formProperty != null)
+            {
+              Object oldValue = aditoProperty.getValue();
+              Object newValue = formProperty.getValue();
+              if (!Objects.equal(oldValue, newValue))
+                aditoProperty.setValue(newValue);
+            }
+          }
+          catch (IllegalAccessException e)
+          {
+            e.printStackTrace(); // TODO: errorHandling
+          }
+          catch (InvocationTargetException e)
+          {
+            e.printStackTrace(); // TODO: errorHandling
+          }
+        }
+      }
+    };
+  }
 
   private PropertyChangeListener _createAditoPropertyChangeListener()
   {
@@ -137,7 +144,7 @@ public class FormDataBridge
           Node.Property aditoProperty = aditoModelPropProvider.getProperty(aditoPropName);
           FormProperty formProperty = _getFormProperty(componentDetailProvider.getRadPropName(aditoPropName));
           Object newValue = aditoProperty.getValue();
-          if (!Objects.equal(newValue, aditoProperty.getValue()))
+          if (!Objects.equal(newValue, formProperty.getValue()))
             formProperty.setValue(newValue);
         }
         catch (IllegalAccessException e)
@@ -145,6 +152,10 @@ public class FormDataBridge
           throw new RuntimeException(e); // TODO: runtimeEx
         }
         catch (InvocationTargetException e)
+        {
+          throw new RuntimeException(e); // TODO: runtimeEx
+        }
+        catch (NullPointerException e)
         {
           throw new RuntimeException(e); // TODO: runtimeEx
         }

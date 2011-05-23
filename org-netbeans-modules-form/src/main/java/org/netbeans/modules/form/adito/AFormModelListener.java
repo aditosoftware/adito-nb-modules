@@ -49,6 +49,7 @@ public class AFormModelListener implements FormModelListener
       }
       catch (Exception e)  // TODO: nur temporär ... testing
       {
+        e.printStackTrace(); // TODO: stacktrace
         if (event.isModifying())
           eventComponent.getFormModel().forceUndoOfCompoundEdit();
         InputOutput io = IOProvider.getDefault().getIO("My Window", false);

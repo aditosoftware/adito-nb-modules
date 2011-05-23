@@ -21,15 +21,6 @@ public class AditoComponentConstraints implements LayoutConstraints
     constraints = NbAditoInterface.lookup(IAditoLayoutProvider.class).createLayoutConstraints();
   }
 
-  public AditoComponentConstraints(Rectangle pRectangle)
-  {
-    constraints = NbAditoInterface.lookup(IAditoLayoutProvider.class).createLayoutConstraints();
-    constraints.setValue(type().x(), pRectangle.x);
-    constraints.setValue(type().y(), pRectangle.y);
-    constraints.setValue(type().width(), pRectangle.width);
-    constraints.setValue(type().height(), pRectangle.height);
-  }
-
   public AditoComponentConstraints(IAditoLayoutConstraints<IAnchorLayoutPropertyTypes> pConstraints)
   {
     constraints = pConstraints;
@@ -39,6 +30,14 @@ public class AditoComponentConstraints implements LayoutConstraints
   {
     return new Rectangle(constraints.getValue(type().x()), constraints.getValue(type().y()),
                          constraints.getValue(type().width()), constraints.getValue(type().height()));
+  }
+
+  public void setBounds(Rectangle pBounds)
+  {
+    constraints.setValue(type().x(), pBounds.x);
+    constraints.setValue(type().y(), pBounds.y);
+    constraints.setValue(type().width(), pBounds.width);
+    constraints.setValue(type().height(), pBounds.height);
   }
 
   @Override
