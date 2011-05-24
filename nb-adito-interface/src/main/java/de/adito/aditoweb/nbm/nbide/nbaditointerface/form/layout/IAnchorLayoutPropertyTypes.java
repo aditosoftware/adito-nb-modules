@@ -3,6 +3,8 @@ package de.adito.aditoweb.nbm.nbide.nbaditointerface.form.layout;
 import java.awt.*;
 
 /**
+ * Beschreibung der Properties für das AnchorLayout.
+ *
  * @author J. Boesl, 11.05.11
  */
 public interface IAnchorLayoutPropertyTypes
