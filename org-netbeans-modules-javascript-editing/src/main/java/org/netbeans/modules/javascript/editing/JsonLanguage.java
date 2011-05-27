@@ -84,7 +84,7 @@ public class JsonLanguage extends DefaultLanguageConfig {
 
     @Override
     public Language getLexerLanguage() {
-        return JsTokenId.language();
+        return JsTokenId.jsonLanguage();
     }
 
     @Override
@@ -97,7 +97,7 @@ public class JsonLanguage extends DefaultLanguageConfig {
         return "json"; // NOI18N
     }
 
-  @Override
+    @Override
   public Set<String> getSourcePathIds()
   {
     return Collections.singleton(JsClassPathProvider.SOURCE_CP);

@@ -61,6 +61,10 @@ public class ParseTreeWalker {
      * The endpoints can be visited inclusively or exclusively.
      *
      * @param visitor The visitor to be called for each node
+     * @param startNode Null, or a node in the tree where visitation will begin
+     * @param includeBegin True if the startNode should be visited, otherwise visiting starts after the start node
+     * @param endNode Null, or a node in the tree where visition will terminate
+     * @param includeEnd True if the endNode should be visited before terminating
      */
     public ParseTreeWalker(ParseTreeVisitor visitor) {
         this.visitor = visitor;

@@ -297,8 +297,8 @@ public class JsIndexer extends EmbeddingIndexer {
                     int compatIdx = line.indexOf("COMPAT="); // NOI18N
                     if (compatIdx != -1) {
                         compatIdx += "COMPAT=".length(); // NOI18N
-//                        EnumSet<BrowserVersion> es = BrowserVersion.fromFlags(line.substring(compatIdx));
-//                        compatibility = BrowserVersion.toCompactFlags(es);
+                        //EnumSet<BrowserVersion> es = BrowserVersion.fromFlags(line.substring(compatIdx));
+                        //compatibility = BrowserVersion.toCompactFlags(es);
                     }
                 } catch (BadLocationException ex) {
                     Exceptions.printStackTrace(ex);

@@ -43,6 +43,8 @@
  */
 package org.netbeans.modules.javascript.editing;
 
+import java.util.Collections;
+import java.util.Set;
 import javax.swing.SwingUtilities;
 import org.netbeans.api.java.classpath.ClassPath;
 import org.netbeans.api.java.classpath.GlobalPathRegistry;
@@ -129,6 +131,11 @@ public class JsLanguage extends DefaultLanguageConfig {
     @Override
     public String getPreferredExtension() {
         return "js"; // NOI18N
+    }
+
+    @Override
+    public Set<String> getLibraryPathIds() {
+        return Collections.singleton(JsClassPathProvider.BOOT_CP);
     }
 
     // Service Registrations

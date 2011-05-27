@@ -87,7 +87,7 @@ public abstract class IndexedElement extends JsElement {
     protected Document document;
     protected int flags;
     protected String attributes;
-//    protected EnumSet<BrowserVersion> compatibility;
+    //protected EnumSet<BrowserVersion> compatibility;
     protected String signature;
     protected boolean smart;
     protected boolean inherited = true;
@@ -357,24 +357,24 @@ public abstract class IndexedElement extends JsElement {
         return null;
     }
     
-//    public EnumSet<BrowserVersion> getCompatibility() {
-//        if (compatibility == null) {
-//            int flagIndex = getAttributeSection(BROWSER_INDEX);
-//            if (flagIndex != -1) {
-//                int endIndex = attributes.indexOf(';', flagIndex);
-//                assert endIndex != -1;
-//                if (endIndex == flagIndex) {
-//                    return BrowserVersion.ALL;
-//                }
-//                String compat = attributes.substring(flagIndex, endIndex);
-//                compatibility = BrowserVersion.fromCompactFlags(compat);
-//            } else {
-//                compatibility = BrowserVersion.ALL;
-//            }
-//        }
-//
-//        return compatibility;
-//    }
+    //public EnumSet<BrowserVersion> getCompatibility() {
+    //    if (compatibility == null) {
+    //        int flagIndex = getAttributeSection(BROWSER_INDEX);
+    //        if (flagIndex != -1) {
+    //            int endIndex = attributes.indexOf(';', flagIndex);
+    //            assert endIndex != -1;
+    //            if (endIndex == flagIndex) {
+    //                return BrowserVersion.ALL;
+    //            }
+    //            String compat = attributes.substring(flagIndex, endIndex);
+    //            compatibility = BrowserVersion.fromCompactFlags(compat);
+    //        } else {
+    //            compatibility = BrowserVersion.ALL;
+    //        }
+    //    }
+    //
+    //    return compatibility;
+    //}
 
     public String getType() {
         if (kind == ElementKind.CLASS || kind == ElementKind.PACKAGE) {
@@ -626,7 +626,10 @@ public abstract class IndexedElement extends JsElement {
         }
         return sb.toString();
     }
-    
+
+    private FileObject getSourceFile() {
+        return indexResult != null ? indexResult.getFile() : null;
+    }
 
     @Override
     public boolean equals(Object obj) {
@@ -646,6 +649,13 @@ public abstract class IndexedElement extends JsElement {
         if (!getKind().equals(other.getKind())) {
             return false;
         }
+
+        //marek: I'm not sure whether the indexResult or the File may be null,
+        //so better doing it more robust
+        if(getSourceFile() != null && !getSourceFile().equals(other.getSourceFile())) {
+            return false;
+        }
+        
         return true;
     }
 
@@ -655,6 +665,7 @@ public abstract class IndexedElement extends JsElement {
         hash = 53 * hash + getSignature().hashCode();
 //        hash = 53 * hash + flags;
         hash = 53 * hash + getKind().hashCode();
+        hash = 53 * hash + (getSourceFile() != null ? getSourceFile().hashCode() : 0);
         return hash;
     }
     

@@ -241,40 +241,40 @@ public final class ElementUtilities {
             }
         }
         sb.append("</td>\n"); // NOI18N
-//        if (indexedElement != null) {
-//            sb.append("<td width=\"125\">"); // NOI18N
-//            EnumSet<BrowserVersion> es = indexedElement.getCompatibility();
-//            try {
-//                if (es.contains(BrowserVersion.FF3)) {
-//                    appendImage(sb, "firefox20.png"); // NOI18N
-//                } else {
-//                    appendImage(sb, "firefox20-disabled.png"); // NOI18N
-//                }
-//                if (es.contains(BrowserVersion.IE7)) {
-//                    appendImage(sb, "ie20.png"); // NOI18N
-//                } else {
-//                    appendImage(sb, "ie20-disabled.png"); // NOI18N
-//                }
-//                if (es.contains(BrowserVersion.SAFARI3)) {
-//                    appendImage(sb, "safari20.png"); // NOI18N
-//                } else {
-//                    appendImage(sb, "safari20-disabled.png"); // NOI18N
-//                }
-//                if (es.contains(BrowserVersion.OPERA)) {
-//                    appendImage(sb, "opera20.png"); // NOI18N
-//                } else {
-//                    appendImage(sb, "opera20-disabled.png"); // NOI18N
-//                }
-//                if (es.contains(BrowserVersion.SAFARI3)) { // Doesn't have its own flags yet
-//                    appendImage(sb, "chrome20.png"); // NOI18N
-//                } else {
-//                    appendImage(sb, "chrome20-disabled.png"); // NOI18N
-//                }
-//            } catch (Exception ex) {
-//                Exceptions.printStackTrace(ex);
-//            }
-//            sb.append("</td>"); // NOI18N
-//        }
+        //if (indexedElement != null) {
+        //    sb.append("<td width=\"125\">"); // NOI18N
+        //    EnumSet<BrowserVersion> es = indexedElement.getCompatibility();
+        //    try {
+        //        if (es.contains(BrowserVersion.FF3)) {
+        //            appendImage(sb, "firefox20.png"); // NOI18N
+        //        } else {
+        //            appendImage(sb, "firefox20-disabled.png"); // NOI18N
+        //        }
+        //        if (es.contains(BrowserVersion.IE7)) {
+        //            appendImage(sb, "ie20.png"); // NOI18N
+        //        } else {
+        //            appendImage(sb, "ie20-disabled.png"); // NOI18N
+        //        }
+        //        if (es.contains(BrowserVersion.SAFARI3)) {
+        //            appendImage(sb, "safari20.png"); // NOI18N
+        //        } else {
+        //            appendImage(sb, "safari20-disabled.png"); // NOI18N
+        //        }
+        //        if (es.contains(BrowserVersion.OPERA)) {
+        //            appendImage(sb, "opera20.png"); // NOI18N
+        //        } else {
+        //            appendImage(sb, "opera20-disabled.png"); // NOI18N
+        //        }
+        //        if (es.contains(BrowserVersion.SAFARI3)) { // Doesn't have its own flags yet
+        //            appendImage(sb, "chrome20.png"); // NOI18N
+        //        } else {
+        //            appendImage(sb, "chrome20-disabled.png"); // NOI18N
+        //        }
+        //    } catch (Exception ex) {
+        //        Exceptions.printStackTrace(ex);
+        //    }
+        //    sb.append("</td>"); // NOI18N
+        //}
         sb.append("</tr></table>"); // NOI18N
 
         if (indexedElement != null && indexedElement.getFilenameUrl() != null && indexedElement.getFilenameUrl().indexOf("jsstubs") == -1) {
@@ -290,34 +290,34 @@ public final class ElementUtilities {
         }
         
         // Generate compatibility notes
-//        if (indexedElement != null && !SupportedBrowsers.getInstance().isSupported(indexedElement.getCompatibility())) {
-//            sb.append("<hr>"); // NOI18N
-//            sb.append("<p style=\"background:#ffcccc\">"); // NOI18N
-//            sb.append(NbBundle.getMessage(JsCodeCompletion.class, "NotSupportedBr"));
-//            sb.append("\n"); // NOI18N
-//            sb.append("<ul>"); // NOI18N
-//            for (BrowserVersion v : BrowserVersion.ALL) {
-//                if (SupportedBrowsers.getInstance().isSupported(v) &&
-//                        !indexedElement.getCompatibility().contains(v)) {
-//                    sb.append("<li>"); // NOI18N
-//                    sb.append(v.getDisplayName());
-//
-//                    // Chrome isn't in our version list yet
-//                    if (v == BrowserVersion.SAFARI3) {
-//                        sb.append("<li>Chrome");
-//                    }
-//                }
-//            }
-//            sb.append("</ul>\n"); // NOI18N
-//            //sb.append("Click <a href=\"netbeans:choosebrowsers\">here</a> to choose targeted browsers.\n");
-//            if (org.openide.util.Utilities.isMac()) {
-//                sb.append(NbBundle.getMessage(JsCodeCompletion.class, "EditTargetedBrOsx"));
-//            } else {
-//                sb.append(NbBundle.getMessage(JsCodeCompletion.class, "EditTargetedBr"));
-//            }
-//            sb.append("\n"); // NOI18N
-//            sb.append("</p>"); // NOI18N
-//        }
+        //if (indexedElement != null && !SupportedBrowsers.getInstance().isSupported(indexedElement.getCompatibility())) {
+        //    sb.append("<hr>"); // NOI18N
+        //    sb.append("<p style=\"background:#ffcccc\">"); // NOI18N
+        //    sb.append(NbBundle.getMessage(JsCodeCompletion.class, "NotSupportedBr"));
+        //    sb.append("\n"); // NOI18N
+        //    sb.append("<ul>"); // NOI18N
+        //    for (BrowserVersion v : BrowserVersion.ALL) {
+        //        if (SupportedBrowsers.getInstance().isSupported(v) &&
+        //                !indexedElement.getCompatibility().contains(v)) {
+        //            sb.append("<li>"); // NOI18N
+        //            sb.append(v.getDisplayName());
+        //
+        //            // Chrome isn't in our version list yet
+        //            if (v == BrowserVersion.SAFARI3) {
+        //                sb.append("<li>Chrome");
+        //            }
+        //        }
+        //    }
+        //    sb.append("</ul>\n"); // NOI18N
+        //    //sb.append("Click <a href=\"netbeans:choosebrowsers\">here</a> to choose targeted browsers.\n");
+        //    if (org.openide.util.Utilities.isMac()) {
+        //        sb.append(NbBundle.getMessage(JsCodeCompletion.class, "EditTargetedBrOsx"));
+        //    } else {
+        //        sb.append(NbBundle.getMessage(JsCodeCompletion.class, "EditTargetedBr"));
+        //    }
+        //    sb.append("\n"); // NOI18N
+        //    sb.append("</p>"); // NOI18N
+        //}
 
         return sb.toString();
     }

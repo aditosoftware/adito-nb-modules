@@ -45,7 +45,7 @@ package org.netbeans.modules.javascript.editing.options;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.util.Collection;
-//import java.util.EnumSet;
+import java.util.EnumSet;
 import java.util.LinkedList;
 import java.util.List;
 import javax.swing.BoxLayout;
@@ -64,7 +64,10 @@ import org.openide.util.Lookup;
  * @author Petr Hejl
  */
 @OptionsPanelController.SubRegistration(
-    displayName="JsOptions.displayName"
+    id="JavaScript",
+    displayName="#JsOptions.displayName",
+    keywords="#KW_JavaScriptOptions",
+    keywordsCategory="Advanced/JavaScript"
 //    toolTip="#JsOptions.tooltip"
 )
 public class JsOptionsController extends OptionsPanelController {
@@ -150,29 +153,29 @@ public class JsOptionsController extends OptionsPanelController {
         return panel;
     }
 
-//    /**
-//     * The accessor pattern class.
-//     */
-//    public abstract static class Accessor {
-//
-//        /** The default accessor. */
-//        public static Accessor DEFAULT;
-//
-//        static {
-//            // invokes static initializer of ReaderManager.class
-//            // that will assign value to the DEFAULT field above
-//            Class c = SupportedBrowsers.class;
-//            try {
-//                Class.forName(c.getName(), true, c.getClassLoader());
-//            } catch (ClassNotFoundException ex) {
-//                assert false : ex;
-//            }
-//        }
-//
-//        public abstract void setSupported(SupportedBrowsers supported, EnumSet<BrowserVersion> versions);
-//
-//        public abstract void setLanguageVersion(SupportedBrowsers supported, int version);
-//    }
+    ///**
+    // * The accessor pattern class.
+    // */
+    //public abstract static class Accessor {
+    //
+    //    /** The default accessor. */
+    //    public static Accessor DEFAULT;
+    //
+    //    static {
+    //        // invokes static initializer of ReaderManager.class
+    //        // that will assign value to the DEFAULT field above
+    //        Class c = SupportedBrowsers.class;
+    //        try {
+    //            Class.forName(c.getName(), true, c.getClassLoader());
+    //        } catch (ClassNotFoundException ex) {
+    //            assert false : ex;
+    //        }
+    //    }
+    //
+    //    public abstract void setSupported(SupportedBrowsers supported, EnumSet<BrowserVersion> versions);
+    //
+    //    public abstract void setLanguageVersion(SupportedBrowsers supported, int version);
+    //}
     
         /**
      * Moved this out of Page.java so that WebFolderListener also has an opportunity  to
