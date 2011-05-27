@@ -30,12 +30,12 @@
  */
 package org.netbeans.modules.javascript.hints;
 
-//import java.awt.Dialog;
-//import java.util.ArrayList;
+import java.awt.Dialog;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-//import java.util.EnumSet;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -43,36 +43,36 @@ import java.util.Map;
 import java.util.Set;
 import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
-//import javax.swing.JButton;
+import javax.swing.JButton;
 import javax.swing.JComponent;
-//import javax.swing.JLabel;
-//import javax.swing.border.EmptyBorder;
+import javax.swing.JLabel;
+import javax.swing.border.EmptyBorder;
 import org.mozilla.nb.javascript.Node;
 import org.mozilla.nb.javascript.Token;
 import org.netbeans.api.options.OptionsDisplayer;
 import org.netbeans.modules.csl.api.ElementKind;
-//import org.netbeans.modules.csl.api.OffsetRange;
+import org.netbeans.modules.csl.api.OffsetRange;
 import org.netbeans.modules.csl.api.Hint;
 import org.netbeans.modules.csl.api.HintFix;
 import org.netbeans.modules.csl.api.HintSeverity;
 import org.netbeans.modules.csl.api.RuleContext;
 import org.netbeans.modules.javascript.editing.AstUtilities;
 //import org.netbeans.modules.javascript.editing.BrowserVersion;
-//import org.netbeans.modules.javascript.editing.ElementUtilities;
+import org.netbeans.modules.javascript.editing.ElementUtilities;
 import org.netbeans.modules.javascript.editing.IndexedElement;
 import org.netbeans.modules.javascript.editing.JsClassPathProvider;
 import org.netbeans.modules.javascript.editing.JsIndex;
 import org.netbeans.modules.javascript.editing.JsParseResult;
 import org.netbeans.modules.javascript.editing.JsTypeAnalyzer;
 //import org.netbeans.modules.javascript.editing.SupportedBrowsers;
-//import org.netbeans.modules.javascript.editing.lexer.LexUtilities;
+import org.netbeans.modules.javascript.editing.lexer.LexUtilities;
 import org.netbeans.modules.javascript.hints.infrastructure.JsAstRule;
 import org.netbeans.modules.javascript.hints.infrastructure.JsRuleContext;
 import org.netbeans.modules.parsing.spi.indexing.support.QuerySupport;
-//import org.openide.DialogDescriptor;
-//import org.openide.DialogDisplayer;
+import org.openide.DialogDescriptor;
+import org.openide.DialogDisplayer;
 import org.openide.util.Exceptions;
-//import org.openide.util.HelpCtx;
+import org.openide.util.HelpCtx;
 import org.openide.util.NbBundle;
 import org.openide.util.NbPreferences;
 
@@ -148,7 +148,7 @@ public class UnsupportedCalls extends JsAstRule {
         Boolean skipFqnCheck = MUST_CHECK_FQN.get(name);
         if (skipFqnCheck == null) {
             // Check index to see if 
-            JsIndex index = JsIndex.get(QuerySupport.findRoots(info.getSnapshot().getSource().getFileObject(), Collections.singleton(JsClassPathProvider.SOURCE_CP), Collections.singleton(JsClassPathProvider.BOOT_CP), Collections.<String>emptySet()));
+            JsIndex index = JsIndex.get(QuerySupport.findRoots(info.getSnapshot().getSource().getFileObject(), null, Collections.singleton(JsClassPathProvider.BOOT_CP), Collections.<String>emptySet()));
             Set<IndexedElement> elements = index.getAllNames(name, QuerySupport.Kind.EXACT, info);
             if (elements.size() <= 1) {
                 // Exactly one match, or no such known element - don't bother looking
@@ -184,9 +184,9 @@ public class UnsupportedCalls extends JsAstRule {
             if (fqn == null) {
                 return;
             }
-//            if (!COMPAT_MAP.containsKey(fqn)) {
-//                return;
-//            }
+            //if (!COMPAT_MAP.containsKey(fqn)) {
+            //    return;
+            //}
         } else {
             fqn = NAME_TO_FQN.get(name);
             if (fqn == null) {
@@ -199,23 +199,23 @@ public class UnsupportedCalls extends JsAstRule {
         }
         // Yessirree
         // TODO - figure out the real type
-//        EnumSet<BrowserVersion> compat = COMPAT_MAP.get(fqn);
-//        if (!SupportedBrowsers.getInstance().isSupported(compat)) {
-//            // Quickfix!
-//            OffsetRange astRange = AstUtilities.getRange(node);
-//            OffsetRange lexRange = LexUtilities.getLexerOffsets(info, astRange);
-//            if (lexRange == OffsetRange.NONE) {
-//                return;
-//            }
-//
-//            List<HintFix> fixList = new ArrayList<HintFix>(3);
-//            fixList.add(new ShowDetails(info, fqn, compat));
-//            fixList.add(new SkipFunction(context, fqn));
-//            fixList.add(new ChangeTargetFix());
-//            String displayName = NbBundle.getMessage(UnsupportedCalls.class, "UnsupportedCallFqn", fqn);
-//            Hint desc = new Hint(this, displayName, info.getSnapshot().getSource().getFileObject(), lexRange, fixList, 1450);
-//            result.add(desc);
-//        }
+        //EnumSet<BrowserVersion> compat = COMPAT_MAP.get(fqn);
+        //if (!SupportedBrowsers.getInstance().isSupported(compat)) {
+        //    // Quickfix!
+        //    OffsetRange astRange = AstUtilities.getRange(node);
+        //    OffsetRange lexRange = LexUtilities.getLexerOffsets(info, astRange);
+        //    if (lexRange == OffsetRange.NONE) {
+        //        return;
+        //    }
+        //
+        //    List<HintFix> fixList = new ArrayList<HintFix>(3);
+        //    fixList.add(new ShowDetails(info, fqn, compat));
+        //    fixList.add(new SkipFunction(context, fqn));
+        //    fixList.add(new ChangeTargetFix());
+        //    String displayName = NbBundle.getMessage(UnsupportedCalls.class, "UnsupportedCallFqn", fqn);
+        //    Hint desc = new Hint(this, displayName, info.getSnapshot().getSource().getFileObject(), lexRange, fixList, 1450);
+        //    result.add(desc);
+        //}
     }
     
     private Collection<String> skip = null;

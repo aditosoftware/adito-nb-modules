@@ -61,10 +61,8 @@ import org.netbeans.modules.csl.api.OffsetRange;
 import org.netbeans.modules.csl.api.RuleContext;
 import org.netbeans.modules.javascript.editing.AstUtilities;
 import org.netbeans.modules.javascript.editing.JsParseResult;
-//import org.netbeans.modules.javascript.editing.SupportedBrowsers;
 import org.netbeans.modules.javascript.editing.lexer.LexUtilities;
 import org.netbeans.modules.javascript.hints.infrastructure.JsErrorRule;
-import org.netbeans.modules.javascript.hints.infrastructure.JsRuleContext;
 import org.netbeans.spi.lexer.MutableTextInput;
 import org.openide.util.Exceptions;
 import org.openide.util.NbBundle;
@@ -88,7 +86,7 @@ public class OldLanguageRule extends JsErrorRule {
     }
 
     @Override
-    public void run(JsRuleContext context, Error error, List<Hint> result) {
+    public void run(RuleContext context, Error error, List<Hint> result) {
         int astOffset = error.getStartPosition();
         JsParseResult info = AstUtilities.getParseResult(context.parserResult);
         int offset = LexUtilities.getLexerOffset(info, astOffset);
@@ -168,9 +166,9 @@ public class OldLanguageRule extends JsErrorRule {
 
     private static class ChangeLanguageFix implements HintFix {
 
-        private JsRuleContext context;
+        private RuleContext context;
 
-        public ChangeLanguageFix(JsRuleContext context) {
+        public ChangeLanguageFix(RuleContext context) {
             this.context = context;
         }
 
