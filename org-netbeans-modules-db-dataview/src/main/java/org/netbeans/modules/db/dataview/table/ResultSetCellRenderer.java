@@ -51,8 +51,11 @@ import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JTable;
 import javax.swing.table.TableCellRenderer;
-
-import org.jdesktop.swingx.renderer.*;
+import org.jdesktop.swingx.renderer.ComponentProvider;
+import org.jdesktop.swingx.renderer.DefaultTableRenderer;
+import org.jdesktop.swingx.renderer.FormatStringValue;
+import org.jdesktop.swingx.renderer.JRendererCheckBox;
+import org.jdesktop.swingx.renderer.StringValue;
 import org.netbeans.modules.db.dataview.util.DataViewUtils;
 import org.netbeans.modules.db.dataview.util.TimeType;
 import org.netbeans.modules.db.dataview.util.TimestampType;
@@ -88,9 +91,14 @@ public class ResultSetCellRenderer extends DefaultTableRenderer {
     private final TableCellRenderer BOOLEAN_RENDERER = new BooleanCellRenderer();
     private final TableCellRenderer CELL_FOCUS_RENDERER = new CellFocusCustomRenderer();
 
-    @SuppressWarnings("deprecation")
     public ResultSetCellRenderer() {
-        super(StringValues.TO_STRING);
+        super(new StringValue() {
+
+            @Override
+            public String getString(Object o) {
+                return o == null ? "null" : o.toString(); // NOI18N
+            }
+        });
     }
 
     public ResultSetCellRenderer(ComponentProvider componentProvider) {

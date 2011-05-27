@@ -44,12 +44,11 @@ package org.netbeans.modules.db.dataview.table;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Rectangle;
-import javax.swing.*;
+import javax.swing.ListSelectionModel;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableModel;
 import org.jdesktop.swingx.JXTable;
-import org.jdesktop.swingx.sort.TableSortController;
 
 /**
  *
@@ -83,8 +82,6 @@ public class JXTableDecorator extends JXTable {
         super.paint(g);
         paintEmptyRows(g);
     }
-
-
 
     /**
      * Paints the backgrounds of the implied empty rows when the

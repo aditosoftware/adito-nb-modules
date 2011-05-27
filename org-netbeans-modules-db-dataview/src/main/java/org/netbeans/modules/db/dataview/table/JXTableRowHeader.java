@@ -51,7 +51,10 @@ import java.awt.Polygon;
 import java.awt.Rectangle;
 import java.awt.event.MouseEvent;
 
-import javax.swing.*;
+import javax.swing.Icon;
+import javax.swing.JComponent;
+import javax.swing.JTable;
+import javax.swing.UIManager;
 import javax.swing.border.Border;
 import javax.swing.border.CompoundBorder;
 import javax.swing.event.*;
@@ -170,7 +173,7 @@ public class JXTableRowHeader extends JComponent {
                 new InternalTableColumnModel(), table.getSelectionModel()) {
 
             @Override
-            public Object getValueAt( int rowIndex, int columnIndex ) {
+            public Object getValueAt(int rowIndex, int columnIndex) {
                 return getRowName(rowIndex);
             }
         };
@@ -201,15 +204,15 @@ public class JXTableRowHeader extends JComponent {
         this.headerTable.setHighlighters(HighlighterFactory.createAlternateStriping(Color.WHITE, ResultSetJXTable.ALTERNATE_ROW_COLOR));
 
         JXTable jxTable = (JXTable) table;
-      jxTable.getRowSorter().addRowSorterListener(new RowSorterListener()
-      {
-        @Override
-        public void sorterChanged(RowSorterEvent e)
+        jxTable.getRowSorter().addRowSorterListener(new RowSorterListener()
         {
-          headerTable.getRowSorter().setSortKeys(e.getSource().getSortKeys());
-          headerTable.getTableHeader().repaint();
-        }
-      });
+          @Override
+          public void sorterChanged(RowSorterEvent e)
+          {
+            headerTable.getRowSorter().setSortKeys(e.getSource().getSortKeys());
+            headerTable.getTableHeader().repaint();
+          }
+        });
         /*jxTable.getFilters().addPipelineListener(new PipelineListener() {
 
             public void contentsChanged(PipelineEvent e) {
