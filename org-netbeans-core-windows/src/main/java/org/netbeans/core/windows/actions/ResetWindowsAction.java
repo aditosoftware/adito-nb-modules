@@ -46,10 +46,10 @@ package org.netbeans.core.windows.actions;
 
 import java.awt.Frame;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.swing.AbstractAction;
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
 import org.netbeans.core.WindowSystem;
@@ -60,10 +60,12 @@ import org.netbeans.core.windows.WindowManagerImpl;
 import org.netbeans.core.windows.persistence.PersistenceManager;
 import org.netbeans.core.windows.view.ui.MainWindow;
 import org.openide.ErrorManager;
+import org.openide.awt.ActionID;
+import org.openide.awt.ActionReference;
+import org.openide.awt.ActionRegistration;
 import org.openide.filesystems.FileObject;
 import org.openide.filesystems.FileUtil;
 import org.openide.util.Lookup;
-import org.openide.util.NbBundle;
 import org.openide.windows.TopComponent;
 import org.openide.windows.TopComponentGroup;
 
@@ -72,13 +74,25 @@ import org.openide.windows.TopComponentGroup;
  *
  * @author S. Aubrecht
  */
-public class ResetWindowsAction extends AbstractAction {
-    
-    /** Creates a new instance of ResetWindowsAction */
-    public ResetWindowsAction() {
-        putValue(NAME, NbBundle.getMessage(CloneDocumentAction.class, "CTL_ResetWindows" ) ); // NOI18N
+public class ResetWindowsAction implements ActionListener {
+    @ActionID(id = "org.netbeans.core.windows.actions.ResetWindowsAction", category = "Window")
+    @ActionRegistration(displayName = "#CTL_ResetWindows")
+    @ActionReference(position = 3000, path = "Menu/Window")
+    public static ActionListener reset() {
+        return new ResetWindowsAction(true);
     }
-
+    
+    @ActionID(id = "org.netbeans.core.windows.actions.ReloadWindowsAction", category = "Window")
+    @ActionRegistration(displayName = "#CTL_ReloadWindows")
+    public static ActionListener reload() {
+        return new ResetWindowsAction(false);
+    }
+    private final boolean reset;
+    public ResetWindowsAction(boolean reset) {
+        this.reset = reset;
+    }
+    
+    @Override
     public void actionPerformed(ActionEvent e) {
         final WindowSystem ws = Lookup.getDefault().lookup( WindowSystem.class );
         if( null == ws ) {
@@ -90,10 +104,8 @@ public class ResetWindowsAction extends AbstractAction {
         
         final WindowManagerImpl wm = WindowManagerImpl.getInstance();
         
-        if( wm.getMainWindow() instanceof MainWindow ) {
-            //cancel full-screen mode
-            ((MainWindow) wm.getMainWindow()).setFullScreenMode( false );
-        }
+        //cancel full-screen mode
+        MainWindow.getInstance().setFullScreenMode(false);
         
         wm.getMainWindow().setExtendedState( JFrame.NORMAL );
 
@@ -116,10 +128,11 @@ public class ResetWindowsAction extends AbstractAction {
         wm.deselectEditorTopComponents();
         
         SwingUtilities.invokeLater( new Runnable() {
+            @Override
             public void run() {
                 //find the local folder that must be deleted
                 FileObject rootFolder = FileUtil.getConfigFile( PersistenceManager.ROOT_LOCAL_FOLDER );
-                if( null != rootFolder ) {
+                if (reset && null != rootFolder) {
                     try {
                         for( FileObject fo : rootFolder.getChildren() ) {
                             if( PersistenceManager.COMPS_FOLDER.equals( fo.getName() ) )
@@ -150,6 +163,7 @@ public class ResetWindowsAction extends AbstractAction {
                     editorMode.addOpenedTopComponentNoNotify(editors[i]);
                 }
                 SwingUtilities.invokeLater( new Runnable() {
+                    @Override
                     public void run() {
                         Frame mainWindow = wm.getMainWindow();
                         mainWindow.invalidate();
@@ -159,6 +173,7 @@ public class ResetWindowsAction extends AbstractAction {
                 //activate some editor window
                 if( null != activeEditor ) {
                     SwingUtilities.invokeLater( new Runnable() {
+                        @Override
                         public void run() {
                             activeEditor.requestActive();
                         }

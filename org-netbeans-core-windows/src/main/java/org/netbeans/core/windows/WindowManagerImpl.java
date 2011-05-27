@@ -61,7 +61,7 @@ import java.util.logging.*;
 
 /**
  * This class extends WindowManager to provide all window system functionality.
- * <p/>
+ *
  * This class is final only for performance reasons. Can be freely
  * unfinaled if desired.
  *
@@ -137,6 +137,10 @@ public final class WindowManagerImpl extends WindowManager implements Workspace
    * flag that prevents calling Exclusive.run on each main window repaint
    */
   private boolean exclusivesCompleted = false;
+  /**
+   * possibly stacktrace of creator
+   */
+  private Throwable createdBy;
 
   /**
    * Default constructor. Don't use directly, use getDefault()
@@ -149,7 +153,18 @@ public final class WindowManagerImpl extends WindowManager implements Workspace
       // a static object to synchronize on
       if (defaultInstance != null)
       {
-        throw new IllegalStateException("Instance already exists"); // NOI18N
+        IllegalStateException ex = new IllegalStateException("Instance already exists"); // NOI18N
+        if (createdBy != null)
+        {
+          ex.initCause(createdBy);
+        }
+        throw ex;
+      }
+      boolean on = false;
+      assert on = true;
+      if (on)
+      {
+        createdBy = new Exception("createdBy");
       }
       defaultInstance = this;
     }
@@ -307,7 +322,7 @@ public final class WindowManagerImpl extends WindowManager implements Workspace
   {
     assertEventDispatchThread();
 
-    for (Iterator it = getTopComponentGroups().iterator(); it.hasNext();)
+    for (Iterator it = getTopComponentGroups().iterator(); it.hasNext(); )
     {
       TopComponentGroupImpl group = (TopComponentGroupImpl) it.next();
       if (group.getName().equals(name))
@@ -572,7 +587,7 @@ public final class WindowManagerImpl extends WindowManager implements Workspace
       return null;
     }
 
-    for (Iterator it = getModes().iterator(); it.hasNext();)
+    for (Iterator it = getModes().iterator(); it.hasNext(); )
     {
       ModeImpl mode = (ModeImpl) it.next();
 
@@ -787,7 +802,7 @@ public final class WindowManagerImpl extends WindowManager implements Workspace
       return null;
     }
 
-    for (Iterator it = getModes().iterator(); it.hasNext();)
+    for (Iterator it = getModes().iterator(); it.hasNext(); )
     {
       ModeImpl mode = (ModeImpl) it.next();
       if (name.equals(mode.getName()))
@@ -1297,6 +1312,7 @@ public final class WindowManagerImpl extends WindowManager implements Workspace
 
   public void notifyTopComponentClosed(TopComponent tc)
   {
+
     if (!Lookup.getDefault().lookup(IAlwaysOpenTopComponentRegistry.class).contains(tc))
     {
       // Inform component instance.
@@ -1310,6 +1326,7 @@ public final class WindowManagerImpl extends WindowManager implements Workspace
 
   /////////////////////////////
   // Registry notifications
+
   static void notifyRegistryTopComponentActivated(final TopComponent tc)
   {
     ((RegistryImpl) getDefault().getRegistry()).topComponentActivated(tc);
@@ -1663,7 +1680,7 @@ public final class WindowManagerImpl extends WindowManager implements Workspace
 
   public final void mainWindowPainted()
   {
-    if (!exclusivesCompleted)
+    if (!exclusivesCompleted && WindowManagerImpl.getInstance().isVisible())
     {
       exclusivesCompleted = true;
       paintedTimer.stop();
@@ -2003,7 +2020,7 @@ public final class WindowManagerImpl extends WindowManager implements Workspace
   public TopComponent getArbitrarySelectedEditorTopComponent()
   {
     Set modes = getModes();
-    for (Iterator i = modes.iterator(); i.hasNext();)
+    for (Iterator i = modes.iterator(); i.hasNext(); )
     {
       Mode mode = (Mode) i.next();
       ModeImpl modeImpl = findModeImpl(mode.getName());
@@ -2044,7 +2061,7 @@ public final class WindowManagerImpl extends WindowManager implements Workspace
       if (null != modeImpl && modeImpl.getKind() != Constants.MODE_KIND_EDITOR)
       {
         java.util.List tcs = modeImpl.getOpenedTopComponents();
-        for (Iterator j = tcs.iterator(); j.hasNext();)
+        for (Iterator j = tcs.iterator(); j.hasNext(); )
         {
           TopComponent tc = (TopComponent) j.next();
           tc.close();

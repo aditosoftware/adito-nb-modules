@@ -1,6 +1,5 @@
 OpenIDE-Module-Public-Packages: org.netbeans.core.windows.nativeaccess
- .*, org.netbeans.core.windows.view.ui.tabcontrol.*, org.netbeans.core
- .windows.resources.*, org.netbeans.core.windows.actions.*
+ .*, org.netbeans.core.windows.view.ui.tabcontrol.*
 OpenIDE-Module-Friends: org.netbeans.core.nativeaccess, org.netbeans.m
  odules.visualweb.gravy
 OpenIDE-Module-Module-Dependencies: org.netbeans.core/2 > 3.18, org.ne
@@ -12,7 +11,7 @@ OpenIDE-Module-Module-Dependencies: org.netbeans.core/2 > 3.18, org.ne
  odes > 6.2, org.openide.util > 8.0, org.openide.util.lookup > 8.0, or
  g.openide.windows > 6.15, de.adito.aditoweb.modules.nbide.nbaditointerface > 3.2
 OpenIDE-Module-Java-Dependencies: Java > 1.6
-OpenIDE-Module-Implementation-Version: 201007151553
+OpenIDE-Module-Implementation-Version: 201104080000
 AutoUpdate-Show-In-Client: false
 OpenIDE-Module: org.netbeans.core.windows/2
 OpenIDE-Module-Localizing-Bundle: org/netbeans/core/windows/resources/
@@ -24,6 +23,6 @@ OpenIDE-Module-Provides: org.netbeans.core.WindowSystem, org.openide.w
 OpenIDE-Module-Recommends: org.netbeans.core.windows.nativeaccess.Nati
  veWindowSystem
 AutoUpdate-Essential-Module: true
-OpenIDE-Module-Specification-Version: 2.21.1
+OpenIDE-Module-Specification-Version: 2.27.1
 OpenIDE-Module-Requires: org.openide.modules.ModuleFormat1
 

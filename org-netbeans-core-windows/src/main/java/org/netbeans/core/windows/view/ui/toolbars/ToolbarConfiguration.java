@@ -118,7 +118,8 @@ public final class ToolbarConfiguration implements ToolbarPool.Configuration {
         // asociate name and configuration instance
         name2config.put(name, this);
         toolbarPanel = new JPanel( new GridLayout(0,1) );
-//        toolbarPanel.setOpaque(false);
+        if( UIManager.getBoolean( "NbMainWindow.showCustomBackground" ) ) //NOI18N
+            toolbarPanel.setOpaque(false);
 
         this.rows = new ArrayList<ToolbarRow>(rows);
     }
@@ -151,8 +152,7 @@ public final class ToolbarConfiguration implements ToolbarPool.Configuration {
     }
 
     private void fillToolbarsMenu (JComponent menu, boolean isContextMenu) {
-        Frame frame = WindowManager.getDefault().getMainWindow();
-        boolean fullScreen = (frame instanceof MainWindow) && ((MainWindow)frame).isFullScreenMode();
+        boolean fullScreen = MainWindow.getInstance().isFullScreenMode();
 
         Map<String, ToolbarConstraints> name2constr = collectAllConstraints();
         // generate list of available toolbars

@@ -91,7 +91,6 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
 import org.xml.sax.helpers.DefaultHandler;
-import sun.misc.Launcher;
 
 /** Manages persistent data of window system, currently stored in XML format.
  * Default setting of layers is that reading is done through default file system
@@ -530,6 +529,18 @@ public final class PersistenceManager implements PropertyChangeListener {
             }
             if (dob != null) {
                 InstanceCookie ic = dob.getCookie(InstanceCookie.class);
+                if( ic == null ) {
+                    dob = findTopComponentDataObject(getComponentsModuleFolder(), stringId);
+                    if( null != dob ) {
+                        ic = dob.getCookie(InstanceCookie.class);
+                        if( ic != null ) {
+                            LOG.log(warningLevelForDeserTC(stringId),
+                                "[PersistenceManager.getTopComponentForID]" // NOI18N
+                                + " Problem when deserializing TopComponent for tcID:'" + stringId  // NOI18N
+                                + "'. Reason: Broken .settings file in Windows2Local folder, falling back to module's original file."); // NOI18N
+                        }
+                    }
+                }
                 if (ic != null) {
                     TopComponent tc = (TopComponent)ic.instanceCreate();
                     synchronized(LOCK_IDS) {
@@ -1112,12 +1123,9 @@ public final class PersistenceManager implements PropertyChangeListener {
         synchronized (LOCK_IDS) {
             usedTcIds.clear();
         }
-
-        synchronized  (Launcher.getLauncher().getClassLoader())
-        {
-          copySettingsFiles();
-        }
-
+        
+        copySettingsFiles();
+        
         WindowManagerParser wmParser = getWindowManagerParser();
         WindowManagerConfig wmc = wmParser.load();
         

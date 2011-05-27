@@ -107,7 +107,7 @@ public final class RecentViewListAction extends AbstractAction
                 } else if((InputEvent.ALT_MASK & modifiers) != 0) {
                     releaseKey = KeyEvent.VK_ALT;
                 } else if((InputEvent.META_MASK & modifiers) != 0) {
-                    releaseKey = InputEvent.META_MASK;
+                    releaseKey = KeyEvent.VK_META;
                 }
                 
                 if(releaseKey != 0) {
@@ -186,7 +186,7 @@ public final class RecentViewListAction extends AbstractAction
      * not pointing to anything by returning null
      */
     public static String getStringRep4Unixes() {
-        if (Utilities.isUnix()) {
+        if (Utilities.isUnix() && !Utilities.isMac()) {
             return "Actions/Window/org-netbeans-core-windows-actions-RecentViewListAction.instance"; //NOI18N
         }
         return null;
