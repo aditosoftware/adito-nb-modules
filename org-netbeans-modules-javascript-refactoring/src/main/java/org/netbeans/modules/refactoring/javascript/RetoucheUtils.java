@@ -376,7 +376,7 @@ public class RetoucheUtils {
     public static Set<FileObject> getJsFilesInProject(FileObject fileInProject, boolean excludeReadOnlySourceRoots) {
         Set<FileObject> files = new HashSet<FileObject>(100);
         Collection<FileObject> sourceRoots = QuerySupport.findRoots(fileInProject,
-                null,
+                Collections.singleton(JsClassPathProvider.SOURCE_CP),
                 Collections.singleton(JsClassPathProvider.BOOT_CP),
                 Collections.<String>emptySet());
         for (FileObject root : sourceRoots) {

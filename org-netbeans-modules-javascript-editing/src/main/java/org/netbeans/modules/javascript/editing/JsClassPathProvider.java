@@ -78,7 +78,8 @@ public final class JsClassPathProvider implements ClassPathProvider {
         {
           Project prj = FileOwnerQuery.getOwner(file);
           if (prj == null)
-            throw new UnsupportedOperationException("can't proceed: " + file + " doesn't belong to a project.");
+            return null;
+            //throw new UnsupportedOperationException("can't proceed: " + file + " doesn't belong to a project.");
           return prj.getLookup().lookup(ClassPathProvider.class).findClassPath(prj.getProjectDirectory(), type);
         }
         return null;
