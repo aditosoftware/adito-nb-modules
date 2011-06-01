@@ -199,7 +199,7 @@ public abstract class JsRefactoringPlugin extends ProgressProviderAdapter implem
             if (RetoucheUtils.isJsFile(file)) {
                 // RetoucheUtils.isJsFile includes HTML files, PHP files, etc.
                 // where as JsUtils.isJsFile includes ONLY pure JavaScript files
-                if ((!JsUtils.isJsFile(file)) && file.getSize() >= 1024*1024) {
+                if ((!JsUtils.isJsFile(file) && file.getSize() >= 1024*1024) || file.getSize() == 0) {
                     // Skip really large HTML files
                     continue;
                 }
@@ -208,9 +208,10 @@ public abstract class JsRefactoringPlugin extends ProgressProviderAdapter implem
         }
 
         try {
-            for(Source s : sources) {
-                ParserManager.parse(Collections.singletonList(s), task);
-            }
+            ParserManager.parse(sources, task);
+            //for(Source s : sources) {
+            //    ParserManager.parse(Collections.singletonList(s), task);
+            //}
             return task.results;
         } catch (ParseException e) {
             throw new RuntimeException(e);
