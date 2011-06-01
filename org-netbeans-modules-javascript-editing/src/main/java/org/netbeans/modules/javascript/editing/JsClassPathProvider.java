@@ -61,7 +61,7 @@ import org.openide.util.lookup.ServiceProvider;
 public final class JsClassPathProvider implements ClassPathProvider {
 
     public static final String BOOT_CP = "JavascriptBootClassPath"; //NOI18N
-    public static final String SOURCE_CP = "adito/classpath/source"; //NOI18N
+    public static final String SOURCE_CP = ClassPath.SOURCE; //NOI18N
 
     private static FileObject jsStubsFO;
     private static ClassPath bootClassPath;

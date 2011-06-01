@@ -139,7 +139,7 @@ public class JsLanguage extends DefaultLanguageConfig {
         return Collections.singleton(JsClassPathProvider.SOURCE_CP);
     }
 
-  @Override
+    @Override
     public Set<String> getLibraryPathIds() {
         return Collections.singleton(JsClassPathProvider.BOOT_CP);
     }
