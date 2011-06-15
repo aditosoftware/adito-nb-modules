@@ -49,8 +49,9 @@ public class ARADComponentHandler
     IAditoModelDataProvider dataProvider = NbAditoInterface.lookup(IAditoModelDataProvider.class);
     FileObject createdOrRestored = dataProvider.createOrRestoreDataModel(parentRadHandler.getModelDataObject(),
                                                                          radComponent.getBeanClass(),
-                                                                         UUID.randomUUID().toString(), deleted);
+                                                                         radComponent.getName(), deleted);
     setModelDataObject(DataFolder.findFolder(createdOrRestored));
+    radComponent.setName(modelDataObject.getName());
     if (deleted != null)
       deleted = null;
   }
@@ -75,11 +76,28 @@ public class ARADComponentHandler
   }
 
   @NotNull
-  public String getName()
+  public String getName(Class pBeanClass)
   {
     DataFolder mdo = getModelDataObject();
     if (mdo != null)
       return mdo.getName();
+    FileObject configFile = FileUtil.getConfigFile("FormDesignerPalette/Adito/" + pBeanClass.getSimpleName()
+        .toLowerCase() + ".palette_item");
+    if (configFile != null)
+    {
+      DataObject dataObject;
+      try
+      {
+        dataObject = DataObject.find(configFile);
+      }
+      catch (DataObjectNotFoundException e)
+      {
+        dataObject = null;
+      }
+      Object displayName = dataObject == null ? null : dataObject.getNodeDelegate().getDisplayName();
+      if (displayName != null)
+        return displayName.toString();
+    }
     return UUID.randomUUID().toString();
   }
 
