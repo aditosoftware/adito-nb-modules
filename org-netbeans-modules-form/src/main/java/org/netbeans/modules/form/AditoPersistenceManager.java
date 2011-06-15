@@ -23,26 +23,8 @@ import java.util.List;
 public class AditoPersistenceManager extends PersistenceManager
 {
 
-  // --------
-  // NB 3.1 compatibility - layout persistence conversion tables
-
-  private static final int LAYOUT_BORDER = 0;
-  private static final int LAYOUT_FLOW = 1;
-  private static final int LAYOUT_BOX = 2;
-  private static final int LAYOUT_GRIDBAG = 3;
-  private static final int LAYOUT_GRID = 4;
-  private static final int LAYOUT_CARD = 5;
   private static final int LAYOUT_ABSOLUTE = 6;
-  private static final int LAYOUT_NULL = 7;
-  private static final int LAYOUT_JSCROLL = 8;
-  private static final int LAYOUT_SCROLL = 9;
-  private static final int LAYOUT_JSPLIT = 10;
-  private static final int LAYOUT_JTAB = 11;
-  private static final int LAYOUT_JLAYER = 12;
-  private static final int LAYOUT_TOOLBAR = 13;
-
   private static final int LAYOUT_UNKNOWN = -1;
-  private static final int LAYOUT_FROM_CODE = -2;
   private static final int LAYOUT_NATURAL = -3;
 
 
@@ -63,7 +45,7 @@ public class AditoPersistenceManager extends PersistenceManager
   public void saveForm(FormDataObject pFormObject, FormModel pFormModel, List<Throwable> pNonfatalErrors)
       throws PersistenceException
   {
-    //To change body of implemented methods use File | Settings | File Templates.
+    // Save gibts hier nicht. Das Model wird sowieso synchronisiert.
   }
 
   private void _loadForm(_Info pInfo) throws PersistenceException
@@ -87,7 +69,14 @@ public class AditoPersistenceManager extends PersistenceManager
     if (topComp != null) // load the main form component
       _loadComponent(pInfo, pInfo.getModelRoot(), topComp, null);
 
-    formModel.addFormModelListener(new AFormModelListener());
+    formModel.addFormModelListener(new AFormModelListener(new AFormModelListener.FormModelListenerCallback()
+    {
+      @Override
+      public void clearProperties(RADComponent pRADComponent)
+      {
+        pRADComponent.clearProperties();
+      }
+    }));
 //    FormEditor.updateProjectForNaturalLayout(formModel);
 //    formModel.setFreeDesignDefaultLayout(true);
   }
@@ -99,12 +88,10 @@ public class AditoPersistenceManager extends PersistenceManager
 
     // if the loaded component is a visual component in a visual contianer,
     // then load NB 3.1 layout constraints for it
-    if (pComponent instanceof RADVisualComponent && pParentComponent instanceof RADVisualContainer)
-    {
-      if (pModelComp.getFileObject("x") != null && pModelComp.getFileObject("y") != null &&
-          pModelComp.getFileObject("width") != null && pModelComp.getFileObject("height") != null)
-        _loadConstraints(pModelComp, pComponent, (RADVisualContainer) pParentComponent);
-    }
+    if (pComponent instanceof RADVisualComponent && pParentComponent instanceof RADVisualContainer &&
+        pModelComp.getFileObject("x") != null && pModelComp.getFileObject("y") != null &&
+        pModelComp.getFileObject("width") != null && pModelComp.getFileObject("height") != null)
+      _loadConstraints(pModelComp, pComponent, (RADVisualContainer) pParentComponent);
 
     ComponentContainer container = // is this component a container?
         pComponent instanceof ComponentContainer ?

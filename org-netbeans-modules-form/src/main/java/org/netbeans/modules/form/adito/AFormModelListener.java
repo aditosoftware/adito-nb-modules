@@ -14,6 +14,13 @@ import java.util.Collection;
 public class AFormModelListener implements FormModelListener
 {
 
+  private FormModelListenerCallback callback;
+
+  public AFormModelListener(FormModelListenerCallback pCallback)
+  {
+    callback = pCallback;
+  }
+
   @Override
   public void formChanged(FormModelEvent[] events)
   {
@@ -29,7 +36,7 @@ public class AFormModelListener implements FormModelListener
             break;
           case FormModelEvent.COMPONENT_REMOVED:
             eventComponent.getARADComponentHandler().delete();
-            //eventComponent.clearProperties();
+            callback.clearProperties(eventComponent);
             break;
           case FormModelEvent.COMPONENT_ADDED:
             eventComponent.getARADComponentHandler().add();
@@ -84,6 +91,14 @@ public class AFormModelListener implements FormModelListener
         }
       }
     }
+  }
+
+  /**
+   * Callback damit Packageprotected-Methoden erreicht werden.
+   */
+  public interface FormModelListenerCallback
+  {
+    void clearProperties(RADComponent pRADComponent);
   }
 
 }

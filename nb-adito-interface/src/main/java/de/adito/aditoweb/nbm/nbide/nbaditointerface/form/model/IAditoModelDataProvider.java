@@ -21,4 +21,6 @@ public interface IAditoModelDataProvider
   FileObject createOrRestoreDataModel(DataFolder pParentData, Class<?> pComponentClass, String pCreatedName,
                                       FileObject pDeleted);
 
+  FileObject removeDataModel(DataObject pModelDataObject);
+
 }

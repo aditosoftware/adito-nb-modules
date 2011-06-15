@@ -53,8 +53,17 @@ public class FormDataBridge
             Object formPropertyValue = formProperty.getValue();
             if (fieldValue == null || !fieldValue.equals(formPropertyValue))
             {
-              aditoProperty.setValue(formPropertyValue);
-              radComponent.getNodeReference().firePropertyChangeHelper(formProperty.getName(), null, null);
+              try
+              {
+                aditoProperty.setValue(formPropertyValue);
+                radComponent.getNodeReference().firePropertyChangeHelper(formProperty.getName(), null, null);
+              }
+              catch (InvocationTargetException e)
+              {
+                // TODO TODO TODO TODO TODO
+                // wenn die Property im Sheet noch nicht initialisiert ist schmeiﬂts ihn wenn primitive Daten
+                // abgeglichen werden sollen.
+              }
             }
           }
         }
@@ -167,11 +176,6 @@ public class FormDataBridge
   {
     Node.Property prop = radComponent.getPropertyByName(pRadPropName);
     return prop instanceof FormProperty ? (FormProperty) prop : null;
-  }
-
-  private IAditoComponentInfoProvider getPropertyInfo()
-  {
-    return NbAditoInterface.lookup(IAditoComponentInfoProvider.class);
   }
 
 }

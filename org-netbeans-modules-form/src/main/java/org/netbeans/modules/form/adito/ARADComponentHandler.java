@@ -5,9 +5,10 @@ import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.model.IAditoModelDataPr
 import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.sync.*;
 import org.jetbrains.annotations.*;
 import org.netbeans.modules.form.RADComponent;
-import org.openide.filesystems.FileObject;
-import org.openide.loaders.DataFolder;
+import org.openide.filesystems.*;
+import org.openide.loaders.*;
 import org.openide.nodes.*;
+import org.openide.windows.CloneableOpenSupport;
 
 import java.util.UUID;
 
@@ -40,49 +41,6 @@ public class ARADComponentHandler
     tryInit();
   }
 
-  public void delete()
-  {
-    //FileObject modelFile = modelDataObject.getPrimaryFile();
-    //
-    //for (DataObject dataObject : DataObject.getRegistry().getModifiedSet())
-    //{
-    //  if (FileUtil.isParentOf(modelFile, dataObject.getPrimaryFile()))
-    //  {
-    //    CloneableOpenSupport openSupport = dataObject.getLookup().lookup(CloneableOpenSupport.class);
-    //    if (!openSupport.close())
-    //      throw new RuntimeException("user canceled");
-    //  }
-    //}
-    //
-    //
-    //try
-    //{
-    //  IModelAccess modelAccess = DataAccessHelper.accessModel(modelDataObject.getPrimaryFile());
-    //
-    //  IModelAccess copy = DataAccessHelper.createModelAccess(EScheme.resolveScheme(modelAccess), modelAccess.getName());
-    //  IFieldAccess<Object> copyField = copy.getParentAccess().getFieldAccess(copy.getName());
-    //  ResultOfVerification resultOfVerification = copyField.setValue(modelAccess);
-    //
-    //  if (resultOfVerification.isError())
-    //  {
-    //    throw new RuntimeException(resultOfVerification.getException());
-    //    //NotifyUtil.simpleError(resultOfVerification.getException());
-    //    //return;
-    //  }
-    //  deleted = copy.getFileObject();
-    //
-    //  ArrayModelAccess arrayModelAccess = DataAccessHelper.accessModel(modelFile.getParent());
-    //  ResultOfVerification removeResult = arrayModelAccess.remove(modelFile.getNameExt());
-    //  if (resultOfVerification.isError())
-    //    throw new RuntimeException(removeResult.getException()); // TODO: errorHandling
-    //  _deinitialize(true);
-    //}
-    //catch (Exception e)
-    //{
-    //  throw new RuntimeException(e); // TODO: errorHandling
-    //}
-  }
-
   public void add()
   {
     RADComponent parentRadComponent = radComponent.getParentComponent();
@@ -95,6 +53,25 @@ public class ARADComponentHandler
     setModelDataObject(DataFolder.findFolder(createdOrRestored));
     if (deleted != null)
       deleted = null;
+  }
+
+  public void delete()
+  {
+    FileObject modelFile = modelDataObject.getPrimaryFile();
+
+    for (DataObject dataObject : DataObject.getRegistry().getModifiedSet())
+    {
+      if (FileUtil.isParentOf(modelFile, dataObject.getPrimaryFile()))
+      {
+        CloneableOpenSupport openSupport = dataObject.getLookup().lookup(CloneableOpenSupport.class);
+        if (!openSupport.close())
+          throw new RuntimeException("user canceled");
+      }
+    }
+
+    IAditoModelDataProvider dataProvider = NbAditoInterface.lookup(IAditoModelDataProvider.class);
+    deleted = dataProvider.removeDataModel(getModelDataObject());
+    _deinitialize(true);
   }
 
   @NotNull
@@ -146,8 +123,7 @@ public class ARADComponentHandler
     {
       try
       {
-        IAditoPropertyProvider aditoModelPropProvider =
-            getPropertyInfo().createModelPropProvider(modelDataObject.getPrimaryFile());
+        IAditoPropertyProvider aditoModelPropProvider = getPropertyInfo().createModelPropProvider(modelDataObject);
         IAditoComponentDetailProvider componentDetailProvider =
             getPropertyInfo().getComponentDetailProvider(radComponent.getBeanClass());
         if (aditoModelPropProvider != null && componentDetailProvider != null)
@@ -162,22 +138,6 @@ public class ARADComponentHandler
       }
     }
   }
-
-  //@Nullable
-  //public DataFolder getModelDataObject()
-  //{
-  //  return modelDataObject;
-  //}
-  //
-  //public void initRADComponent(@NotNull RADComponent pRADComponent) throws InvocationTargetException, IllegalAccessException
-  //{
-  //  if (radComponent != null)
-  //    throw new RuntimeException("Can't init with: " + pRADComponent + ". Another component is already set: "
-  //                                   + radComponent + ".");
-  //  radComponent = pRADComponent;
-  //
-  //  _registerListeners();
-  //}
 
   @NotNull
   public Node.PropertySet[] getPropertySets()
