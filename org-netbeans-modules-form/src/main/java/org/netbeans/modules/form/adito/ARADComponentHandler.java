@@ -1,6 +1,7 @@
 package org.netbeans.modules.form.adito;
 
 import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.NbAditoInterface;
+import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.model.IAditoModelDataProvider;
 import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.sync.*;
 import org.jetbrains.annotations.*;
 import org.netbeans.modules.form.RADComponent;
@@ -84,41 +85,16 @@ public class ARADComponentHandler
 
   public void add()
   {
-    //if (modelDataObject == null)
-    //{
-    //  RADComponent parentRadComponent = radComponent.getParentComponent();
-    //  ARADComponentHandler parentRadHandler = parentRadComponent.getARADComponentHandler();
-    //  IFieldAccess<ArrayModelAccess> childField = FieldConst.CHILDDATAMODELS.accessField(
-    //      parentRadHandler.getModelDataObject().getPrimaryFile());
-    //
-    //  if (deleted != null)
-    //  {
-    //    IModelAccess modelAccess = DataAccessHelper.accessModel(deleted);
-    //    ResultOfVerification addResult = childField.getValue().add(modelAccess);
-    //    if (addResult.isError())
-    //      throw new RuntimeException(addResult.getException()); // TODO: errorHandling
-    //    else
-    //    {
-    //      FileObject addedFo = childField.getValue().getFileObject().getFileObject(modelAccess.getName());
-    //      setModelDataObject(DataFolder.findFolder(addedFo));
-    //      deleted = null;
-    //    }
-    //  }
-    //  else
-    //  {
-    //    EModelComponentMapping modelComponentMapping = EModelComponentMapping.get(radComponent);
-    //    IModelAccess modelAccess = DataAccessHelper.createModelAccess(modelComponentMapping.getScheme());
-    //
-    //    ResultOfVerification addResult = childField.getValue().add(modelAccess);
-    //    if (addResult.isError())
-    //      throw new RuntimeException(addResult.getException()); // TODO: errorHandling
-    //    else
-    //    {
-    //      FileObject addedFo = childField.getValue().getFileObject().getFileObject(modelAccess.getName());
-    //      setModelDataObject(DataFolder.findFolder(addedFo));
-    //    }
-    //  }
-    //}
+    RADComponent parentRadComponent = radComponent.getParentComponent();
+    ARADComponentHandler parentRadHandler = parentRadComponent.getARADComponentHandler();
+
+    IAditoModelDataProvider dataProvider = NbAditoInterface.lookup(IAditoModelDataProvider.class);
+    FileObject createdOrRestored = dataProvider.createOrRestoreDataModel(parentRadHandler.getModelDataObject(),
+                                                                         radComponent.getBeanClass(),
+                                                                         UUID.randomUUID().toString(), deleted);
+    setModelDataObject(DataFolder.findFolder(createdOrRestored));
+    if (deleted != null)
+      deleted = null;
   }
 
   @NotNull
@@ -182,7 +158,7 @@ public class ARADComponentHandler
       }
       catch (Exception e)
       {
-        System.out.println("couldn't init. " + modelDataObject);
+        System.out.println("couldn't init. " + modelDataObject); // TODO: sout
       }
     }
   }

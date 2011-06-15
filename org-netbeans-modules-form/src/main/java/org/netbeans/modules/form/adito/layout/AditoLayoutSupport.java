@@ -49,11 +49,7 @@ public class AditoLayoutSupport extends AbstractLayoutSupport
   public LayoutConstraints getNewConstraints(Container container, Container containerDelegate, Component component,
                                              int index, Point posInCont, Point posInComp)
   {
-    AditoComponentConstraints constr;
-    if (getConstraints(index) instanceof AditoComponentConstraints)
-      constr = (AditoComponentConstraints) getConstraints(index).cloneConstraints();
-    else
-      return null;
+    LayoutConstraints constr = getConstraints(index);
 
     int x = posInCont.x;
     int y = posInCont.y;
@@ -62,11 +58,13 @@ public class AditoLayoutSupport extends AbstractLayoutSupport
 
     if (component != null)
     {
-      int currentW;
-      int currentH;
-
-      currentW = constr.getBounds().width;
-      currentH = constr.getBounds().height;
+      int currentW = -1;
+      int currentH = -1;
+      if (constr instanceof AditoComponentConstraints)
+      {
+        currentW = ((AditoComponentConstraints) constr).getBounds().width;
+        currentH = ((AditoComponentConstraints) constr).getBounds().height;
+      }
 
       Dimension size = component.getSize();
       Dimension prefSize = component.getPreferredSize();
@@ -87,14 +85,25 @@ public class AditoLayoutSupport extends AbstractLayoutSupport
       y = computeGridSize(y, formSettings.getGridY());
     }
 
-    constr.setBounds(new Rectangle(x, y, w, h));
-    return constr;
+    AditoComponentConstraints adConstr;
+    if (constr instanceof AditoComponentConstraints)
+      adConstr = (AditoComponentConstraints) constr.cloneConstraints();
+    else
+    {
+      adConstr = new AditoComponentConstraints();
+    }
+    adConstr.setBounds(new Rectangle(x, y, w, h));
+    return adConstr;
   }
 
   @Override
   public boolean paintDragFeedback(Container container, Container containerDelegate, Component component,
                                    LayoutConstraints newConstraints, int newIndex, Graphics g)
   {
+    if (newConstraints == null)
+    {
+      System.out.print(""); // TODO: sout
+    }
     Rectangle r = ((AditoComponentConstraints) newConstraints).getBounds();
     int w = r.width;
     int h = r.height;
@@ -127,12 +136,6 @@ public class AditoLayoutSupport extends AbstractLayoutSupport
                                                  int index, Rectangle originalBounds, Insets sizeChanges,
                                                  Point posInCont)
   {
-    AditoComponentConstraints constr;
-    if (getConstraints(index) instanceof AditoComponentConstraints)
-      constr = (AditoComponentConstraints) getConstraints(index).cloneConstraints();
-    else
-      return null;
-
     int x, y, w, h;
     x = originalBounds.x;
     y = originalBounds.y;
@@ -142,9 +145,18 @@ public class AditoLayoutSupport extends AbstractLayoutSupport
     Dimension prefSize = component.getPreferredSize();
     int currentW, currentH;
 
-    Rectangle r = constr.getBounds();
-    currentW = r.width;
-    currentH = r.height;
+    LayoutConstraints constr = getConstraints(index);
+    if (constr instanceof AditoComponentConstraints)
+    {
+      Rectangle r = ((AditoComponentConstraints) constr).getBounds();
+      currentW = r.width;
+      currentH = r.height;
+    }
+    else
+    {
+      currentW = computeConstraintSize(w, -1, prefSize.width);
+      currentH = computeConstraintSize(h, -1, prefSize.height);
+    }
 
     int x2 = x + w;
     int y2 = y + h;
@@ -193,8 +205,15 @@ public class AditoLayoutSupport extends AbstractLayoutSupport
         y = y2 - prefSize.height;
     }
 
-    constr.setBounds(new Rectangle(x, y, w, h));
-    return constr;
+    AditoComponentConstraints adConstr;
+    if (constr instanceof AditoComponentConstraints)
+      adConstr = (AditoComponentConstraints) constr.cloneConstraints();
+    else
+    {
+      adConstr = new AditoComponentConstraints();
+    }
+    adConstr.setBounds(new Rectangle(x, y, w, h));
+    return adConstr;
   }
 
   @Override

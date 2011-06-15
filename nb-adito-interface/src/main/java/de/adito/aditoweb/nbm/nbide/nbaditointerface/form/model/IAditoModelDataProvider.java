@@ -1,7 +1,7 @@
 package de.adito.aditoweb.nbm.nbide.nbaditointerface.form.model;
 
 import org.openide.filesystems.FileObject;
-import org.openide.loaders.DataObject;
+import org.openide.loaders.*;
 import org.openide.nodes.Node;
 
 /**
@@ -17,5 +17,8 @@ public interface IAditoModelDataProvider
   FileObject loadModel(FileObject pAodFile);
 
   FileObject getChildDataModels(FileObject pFileObject);
+
+  FileObject createOrRestoreDataModel(DataFolder pParentData, Class<?> pComponentClass, String pCreatedName,
+                                      FileObject pDeleted);
 
 }
