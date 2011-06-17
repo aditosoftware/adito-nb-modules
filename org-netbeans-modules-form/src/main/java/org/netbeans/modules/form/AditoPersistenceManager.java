@@ -69,14 +69,14 @@ public class AditoPersistenceManager extends PersistenceManager
     if (topComp != null) // load the main form component
       _loadComponent(pInfo, pInfo.getModelRoot(), topComp, null);
 
-    formModel.addFormModelListener(new AFormModelListener(new AFormModelListener.FormModelListenerCallback()
+    formModel.addFormModelListener(new AFormModelListener()
     {
       @Override
-      public void clearProperties(RADComponent pRADComponent)
+      protected void clearProperties(RADComponent pRADComponent)
       {
         pRADComponent.clearProperties();
       }
-    }));
+    });
 //    FormEditor.updateProjectForNaturalLayout(formModel);
 //    formModel.setFreeDesignDefaultLayout(true);
   }
