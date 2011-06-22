@@ -8,8 +8,8 @@ package de.adito.aditoweb.nbm.nbide.nbaditointerface.form.layout;
 public interface IAditoLayoutProvider
 {
 
-  IAditoLayoutConstraints<IAnchorLayoutPropertyTypes> createLayoutConstraints();
+  IAditoLayout<IAnchorLayoutPropertyTypes> getAnchorLayout();
 
-  Class getLayoutClass();
+  IAditoLayout<IRegisterLayoutPropertyTypes> getRegisterLayout();
 
 }

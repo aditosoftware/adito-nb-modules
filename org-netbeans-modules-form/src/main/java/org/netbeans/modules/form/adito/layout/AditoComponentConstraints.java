@@ -18,7 +18,8 @@ public class AditoComponentConstraints implements LayoutConstraints
 
   public AditoComponentConstraints()
   {
-    constraints = NbAditoInterface.lookup(IAditoLayoutProvider.class).createLayoutConstraints();
+    IAditoLayoutProvider layoutProvider = NbAditoInterface.lookup(IAditoLayoutProvider.class);
+    constraints = layoutProvider.getAnchorLayout().createLayoutConstraints();
   }
 
   public AditoComponentConstraints(IAditoLayoutConstraints<IAnchorLayoutPropertyTypes> pConstraints)

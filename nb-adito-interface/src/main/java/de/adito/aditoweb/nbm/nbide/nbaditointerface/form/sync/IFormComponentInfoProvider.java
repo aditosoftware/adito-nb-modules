@@ -9,25 +9,25 @@ import org.openide.loaders.DataFolder;
  *
  * @author J. Boesl, 16.05.11
  */
-public interface IAditoComponentInfoProvider
+public interface IFormComponentInfoProvider
 {
 
   /**
    * @param pBeanClass die Klasse der Komponente.
    * @return statische Informationen über die Komponente.
    */
-  IAditoComponentDetailProvider getComponentDetailProvider(Class<?> pBeanClass);
+  IFormComponentPropertyMapping getFormPropertyMapping(Class<?> pBeanClass);
 
   /**
    * @param pModelDataObject DataFolder der das Model repräsentiert.
    * @return Informationen über die durch den DataFolder identifizierte Komponente.
    */
-  IAditoPropertyProvider createModelPropProvider(DataFolder pModelDataObject);
+  IFormComponentInfo createModelPropProvider(DataFolder pModelDataObject);
 
   /**
    * @param pModelFileObject FilObject das das Model repräsentiert.
-   * @return Informationen über die durch das FilObject identifizierte Komponente.
+   * @return Informationen über die durch das FileObject identifizierte Komponente.
    */
-  IAditoPropertyProvider createModelPropProvider(FileObject pModelFileObject);
+  IFormComponentInfo createModelPropProvider(FileObject pModelFileObject);
 
 }

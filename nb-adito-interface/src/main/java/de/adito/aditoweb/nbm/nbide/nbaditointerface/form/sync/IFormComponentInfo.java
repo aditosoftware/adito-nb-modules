@@ -10,7 +10,7 @@ import java.util.List;
 /**
  * @author J. Boesl, 16.05.11
  */
-public interface IAditoPropertyProvider
+public interface IFormComponentInfo
 {
 
   Sheet createSheet();
@@ -28,7 +28,7 @@ public interface IAditoPropertyProvider
   /**
    * @return statische Informationen über die durch das FileObject identifizierte Komponente.
    */
-  IAditoComponentDetailProvider getComponentDetailProvider();
+  IFormComponentPropertyMapping getFormPropertyMapping();
 
   List<String> getPropertyNames();
 

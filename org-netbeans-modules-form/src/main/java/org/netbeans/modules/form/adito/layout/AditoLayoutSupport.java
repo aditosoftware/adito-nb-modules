@@ -21,7 +21,8 @@ public class AditoLayoutSupport extends AbstractLayoutSupport
   @Override
   public Class getSupportedClass()
   {
-    return NbAditoInterface.lookup(IAditoLayoutProvider.class).getLayoutClass();
+    IAditoLayoutProvider layoutProvider = NbAditoInterface.lookup(IAditoLayoutProvider.class);
+    return layoutProvider.getAnchorLayout().getLayoutClass();
   }
 
   @Override

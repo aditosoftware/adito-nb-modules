@@ -352,18 +352,18 @@ public class AditoPersistenceManager extends PersistenceManager
   private RADComponent _restoreComponent(_Info pInfo, FileObject pChildModel, RADComponent pParentComponent)
       throws PersistenceException
   {
-    IAditoPropertyProvider modelPropProvider = getPropertyInfo().createModelPropProvider(pChildModel);
-    IAditoComponentDetailProvider componentDetailProvider = modelPropProvider.getComponentDetailProvider();
+    IFormComponentInfo modelPropProvider = getPropertyInfo().createModelPropProvider(pChildModel);
+    IFormComponentPropertyMapping componentPropertyMapping = modelPropProvider.getFormPropertyMapping();
     String compName;
     String className;
     try
     {
-      if (componentDetailProvider == null)
+      if (componentPropertyMapping == null)
       {
         return null;
       }
       compName = pChildModel.getNameExt(); // entspricht Namen des DatenModels.
-      className = componentDetailProvider.getComponentClass().getName();
+      className = componentPropertyMapping.getComponentClass().getName();
     }
     catch (Exception e)
     {
@@ -531,10 +531,10 @@ public class AditoPersistenceManager extends PersistenceManager
     {
       if (pComponent instanceof RADVisualComponent)
       {
-        IAditoPropertyProvider aditoModelPropProvider = getPropertyInfo().createModelPropProvider(pModelComp);
+        IFormComponentInfo formModelPropProvider = getPropertyInfo().createModelPropProvider(pModelComp);
 
-        Class<? extends LayoutManager> layoutMgrCls = aditoModelPropProvider.getParentLayoutClass();
-        Object realConstraints = aditoModelPropProvider.createConstraints();
+        //Class<? extends LayoutManager> layoutMgrCls = aditoModelPropProvider.getParentLayoutClass();
+        Object realConstraints = formModelPropProvider.createConstraints();
         //Class<? extends LayoutSupportDelegate> supportDelegateCls =
         //    LayoutSupportRegistry.getRegistry(pComponent.getFormModel()).createSupportForLayout(layoutMgrCls).getClass();
         if (realConstraints instanceof IAditoLayoutConstraints)
@@ -553,9 +553,9 @@ public class AditoPersistenceManager extends PersistenceManager
     return false;
   }
 
-  private IAditoComponentInfoProvider getPropertyInfo()
+  private IFormComponentInfoProvider getPropertyInfo()
   {
-    return NbAditoInterface.lookup(IAditoComponentInfoProvider.class);
+    return NbAditoInterface.lookup(IFormComponentInfoProvider.class);
   }
 
 

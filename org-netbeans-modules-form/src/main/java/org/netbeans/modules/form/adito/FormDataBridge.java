@@ -1,7 +1,6 @@
 package org.netbeans.modules.form.adito;
 
 import com.google.common.base.Objects;
-import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.NbAditoInterface;
 import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.sync.*;
 import org.jetbrains.annotations.NotNull;
 import org.netbeans.modules.form.*;
@@ -17,23 +16,23 @@ public class FormDataBridge
 {
 
   private final RADComponent radComponent;
-  private final IAditoPropertyProvider aditoModelPropProvider;
-  private final IAditoComponentDetailProvider componentDetailProvider;
+  private final IFormComponentInfo componentInfo;
+  private final IFormComponentPropertyMapping componentPropertyMapping;
 
   private PropertyChangeListener propertyChangeListener;
 
 
-  public FormDataBridge(@NotNull RADComponent pRadComponent, @NotNull IAditoPropertyProvider pAditoModelPropProvider,
-                        @NotNull IAditoComponentDetailProvider pComponentDetailProvider)
+  public FormDataBridge(@NotNull RADComponent pRadComponent, @NotNull IFormComponentInfo pComponentInfo,
+                        @NotNull IFormComponentPropertyMapping pComponentPropertyMapping)
   {
     radComponent = pRadComponent;
-    aditoModelPropProvider = pAditoModelPropProvider;
-    componentDetailProvider = pComponentDetailProvider;
+    componentInfo = pComponentInfo;
+    componentPropertyMapping = pComponentPropertyMapping;
   }
 
-  IAditoPropertyProvider getAditoModelPropProvider()
+  IFormComponentInfo getComponentInfo()
   {
-    return aditoModelPropProvider;
+    return componentInfo;
   }
 
   void layoutPropertiesChanged()
@@ -45,8 +44,8 @@ public class FormDataBridge
       {
         for (Node.Property formProperty : radVisualComponent.getConstraintsProperties())
         {
-          String aditoPropName = componentDetailProvider.getAditoPropName(formProperty.getName());
-          Node.Property aditoProperty = aditoModelPropProvider.getProperty(aditoPropName);
+          String aditoPropName = componentPropertyMapping.getAditoPropName(formProperty.getName());
+          Node.Property aditoProperty = componentInfo.getProperty(aditoPropName);
           if (aditoProperty != null)
           {
             Object fieldValue = aditoProperty.getValue();
@@ -84,10 +83,10 @@ public class FormDataBridge
     if (propertyChangeListener == null)
     {
       propertyChangeListener = _createAditoPropertyChangeListener();
-      aditoModelPropProvider.addPropertyListener(propertyChangeListener);
-      for (String aditoPropName : aditoModelPropProvider.getPropertyNames())
+      componentInfo.addPropertyListener(propertyChangeListener);
+      for (String aditoPropName : componentInfo.getPropertyNames())
       {
-        String radPropName = componentDetailProvider.getRadPropName(aditoPropName);
+        String radPropName = componentPropertyMapping.getRadPropName(aditoPropName);
         if (radPropName != null && !radPropName.isEmpty())
         {
           FormProperty formProperty = _getFormProperty(radPropName);
@@ -100,7 +99,7 @@ public class FormDataBridge
 
   void unregisterAll()
   {
-    aditoModelPropProvider.removePropertyListener(propertyChangeListener);
+    componentInfo.removePropertyListener(propertyChangeListener);
     propertyChangeListener = null;
     //for (FileObject fileObject : modelDataObject.getPrimaryFile().getChildren())
     //fileObject.removeFileChangeListener(propertyChangeListener);
@@ -113,7 +112,7 @@ public class FormDataBridge
       @Override
       public void propertyChange(PropertyChangeEvent evt)
       {
-        Node.Property aditoProperty = aditoModelPropProvider.getProperty(pAditoPropName);
+        Node.Property aditoProperty = componentInfo.getProperty(pAditoPropName);
         if (aditoProperty != null)
         {
           try
@@ -150,8 +149,8 @@ public class FormDataBridge
         try
         {
           String aditoPropName = evt.getPropertyName();
-          Node.Property aditoProperty = aditoModelPropProvider.getProperty(aditoPropName);
-          FormProperty formProperty = _getFormProperty(componentDetailProvider.getRadPropName(aditoPropName));
+          Node.Property aditoProperty = componentInfo.getProperty(aditoPropName);
+          FormProperty formProperty = _getFormProperty(componentPropertyMapping.getRadPropName(aditoPropName));
           Object newValue = aditoProperty.getValue();
           if (!Objects.equal(newValue, formProperty.getValue()))
             formProperty.setValue(newValue);

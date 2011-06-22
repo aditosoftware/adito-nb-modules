@@ -29,11 +29,6 @@ public class ARADComponentHandler
   @Nullable
   private FileObject deleted;
 
-//  @Nullable
-//  public RADComponent getRadComponent()
-//  {
-//    return radComponent;
-//  }
 
   public void setRadComponent(@NotNull RADComponent pRadComponent)
   {
@@ -141,18 +136,19 @@ public class ARADComponentHandler
     {
       try
       {
-        IAditoPropertyProvider aditoModelPropProvider = getPropertyInfo().createModelPropProvider(modelDataObject);
-        IAditoComponentDetailProvider componentDetailProvider =
-            getPropertyInfo().getComponentDetailProvider(radComponent.getBeanClass());
-        if (aditoModelPropProvider != null && componentDetailProvider != null)
+        IFormComponentInfoProvider compInfoProvider = NbAditoInterface.lookup(IFormComponentInfoProvider.class);
+        IFormComponentInfo componentInfo = compInfoProvider.createModelPropProvider(modelDataObject);
+        IFormComponentPropertyMapping propertyMapping = compInfoProvider.getFormPropertyMapping(
+            radComponent.getBeanClass());
+        if (componentInfo != null && propertyMapping != null)
         {
-          formDataBridge = new FormDataBridge(radComponent, aditoModelPropProvider, componentDetailProvider);
+          formDataBridge = new FormDataBridge(radComponent, componentInfo, propertyMapping);
           formDataBridge.registerListeners();
         }
       }
       catch (Exception e)
       {
-        System.out.println("couldn't init. " + modelDataObject); // TODO: sout
+        throw new RuntimeException("couldn't init. " + modelDataObject, e);
       }
     }
   }
@@ -162,15 +158,10 @@ public class ARADComponentHandler
   {
     tryInit();
     if (sheet == null && formDataBridge != null)
-      sheet = formDataBridge.getAditoModelPropProvider().createSheet();
+      sheet = formDataBridge.getComponentInfo().createSheet();
     if (sheet != null)
       return sheet.toArray();
     return new Node.PropertySet[0];
-  }
-
-  private IAditoComponentInfoProvider getPropertyInfo()
-  {
-    return NbAditoInterface.lookup(IAditoComponentInfoProvider.class);
   }
 
 }
