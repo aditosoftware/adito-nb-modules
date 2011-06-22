@@ -355,7 +355,9 @@ public abstract class AbstractLayoutSupport implements LayoutSupportDelegate
    * The default implementation accepts any components - simply does nothing.
    */
   @Override
-  public void acceptNewComponents()
+  public void acceptNewComponents(RADVisualComponent[] components,
+                                  LayoutConstraints[] constraints,
+                                  int index)
   {
   }
 

@@ -429,7 +429,7 @@ public class FormModel
             }
 
             try {
-                layoutSupport.acceptNewComponents();
+                layoutSupport.acceptNewComponents(compArray, constrArray, index);
             }
             catch (RuntimeException ex) {
                 // LayoutSupportDelegate may not accept the component

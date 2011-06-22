@@ -189,9 +189,17 @@ public interface LayoutSupportDelegate {
      * (e.g. IllegalArgumentException). It's up to the delagate to display an
      * error or warning message, the exception is not reported outside.
      * To accept any components simply do nothing here.
+     * @param components array of CodeExpression objects representing the
+     *        components to be added
+     * @param constraints array of layout constraints of the components, may
+     *        contain nulls
+     * @param index position at which the components should be added (inserted);
+     *        if -1, the components should be added at the end
      * @exception RuntimeException to refuse components
      */
-    void acceptNewComponents();
+    void acceptNewComponents(RADVisualComponent[] components,
+                             LayoutConstraints[] constraints,
+                             int index);
 
     /** This method is called after a property of the layout is changed by
      * the user. The delagate implementation may check whether the layout is
