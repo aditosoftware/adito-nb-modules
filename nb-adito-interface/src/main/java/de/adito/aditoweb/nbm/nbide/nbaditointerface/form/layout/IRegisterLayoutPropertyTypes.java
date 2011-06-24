@@ -1,6 +1,5 @@
 package de.adito.aditoweb.nbm.nbide.nbaditointerface.form.layout;
 
-import javax.swing.*;
 import java.awt.*;
 
 /**
@@ -9,20 +8,20 @@ import java.awt.*;
 public interface IRegisterLayoutPropertyTypes
 {
 
-  IAditoLayoutPropertyType<Boolean> visible();
-
-  IAditoLayoutPropertyType<Boolean> enabled();
-
-  IAditoLayoutPropertyType<String> caption();
-
-  IAditoLayoutPropertyType<String> tooltipText();
-
-  IAditoLayoutPropertyType<Color> fgColor();
-
-  IAditoLayoutPropertyType<Color> bgColor();
-
-  IAditoLayoutPropertyType<Font> font();
-
-  IAditoLayoutPropertyType<Icon> icon();
+  //IAditoLayoutPropertyType<Boolean> visible();
+  //
+  //IAditoLayoutPropertyType<Boolean> enabled();
+  //
+  //IAditoLayoutPropertyType<String> caption();
+  //
+  //IAditoLayoutPropertyType<String> tooltipText();
+  //
+  //IAditoLayoutPropertyType<Color> fgColor();
+  //
+  //IAditoLayoutPropertyType<Color> bgColor();
+  //
+  //IAditoLayoutPropertyType<Font> font();
+  //
+  //IAditoLayoutPropertyType<String> icon();
 
 }

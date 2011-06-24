@@ -1,7 +1,7 @@
 package org.netbeans.modules.form;
 
 import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.NbAditoInterface;
-import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.layout.IAditoLayoutConstraints;
+import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.layout.*;
 import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.model.IAditoModelDataProvider;
 import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.sync.*;
 import org.netbeans.modules.form.adito.*;
@@ -88,9 +88,9 @@ public class AditoPersistenceManager extends PersistenceManager
 
     // if the loaded component is a visual component in a visual contianer,
     // then load NB 3.1 layout constraints for it
-    if (pComponent instanceof RADVisualComponent && pParentComponent instanceof RADVisualContainer &&
+    if (pComponent instanceof RADVisualComponent && pParentComponent instanceof RADVisualContainer /*&&
         pModelComp.getFileObject("x") != null && pModelComp.getFileObject("y") != null &&
-        pModelComp.getFileObject("width") != null && pModelComp.getFileObject("height") != null)
+        pModelComp.getFileObject("width") != null && pModelComp.getFileObject("height") != null*/)
       _loadConstraints(pModelComp, pComponent, (RADVisualContainer) pParentComponent);
 
     ComponentContainer container = // is this component a container?
@@ -520,8 +520,17 @@ public class AditoPersistenceManager extends PersistenceManager
 
   private int _loadLayout(FileObject pModelComp, LayoutSupportManager layoutSupport)
   {
-    LayoutManager layout = getPropertyInfo().createModelPropProvider(pModelComp).createLayout();
-    layoutSupport.getPrimaryContainer().setLayout(layout);
+
+    try
+    {
+      LayoutManager layout = getPropertyInfo().createModelPropProvider(pModelComp).createLayout();
+      layoutSupport.getPrimaryContainer().setLayout(layout);
+    }
+    catch (Exception e)
+    {
+      e.printStackTrace();
+      // mach ma nix ...
+    }
     return LAYOUT_ABSOLUTE;
   }
 
@@ -539,8 +548,13 @@ public class AditoPersistenceManager extends PersistenceManager
         //    LayoutSupportRegistry.getRegistry(pComponent.getFormModel()).createSupportForLayout(layoutMgrCls).getClass();
         if (realConstraints instanceof IAditoLayoutConstraints)
         {
-          ((RADVisualComponent) pComponent).setLayoutConstraints(
-              AditoLayoutSupport.class, new AditoComponentConstraints((IAditoLayoutConstraints) realConstraints));
+          Object typeInfo = ((IAditoLayoutConstraints) realConstraints).getTypeInfo();
+          if (typeInfo instanceof IAnchorLayoutPropertyTypes)
+            ((RADVisualComponent) pComponent).setLayoutConstraints(
+                AditoLayoutSupport.class, new AditoComponentConstraints((IAditoLayoutConstraints) realConstraints));
+          else if (typeInfo instanceof IRegisterLayoutPropertyTypes)
+            ((RADVisualComponent) pComponent).setLayoutConstraints(
+                AditoRegisterLayoutSupport.class, new AditoComponentConstraints((IAditoLayoutConstraints) realConstraints));
         }
       }
 

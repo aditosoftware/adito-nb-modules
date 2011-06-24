@@ -3,76 +3,52 @@ package org.netbeans.modules.form.adito.layout;
 import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.NbAditoInterface;
 import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.layout.*;
 import org.netbeans.modules.form.layoutsupport.LayoutConstraints;
-import org.openide.nodes.Node;
 
 import java.awt.*;
-import java.util.*;
 
 /**
  * @author J. Boesl, 10.03.11
  */
-public class AditoComponentConstraints implements LayoutConstraints
+public class AditoComponentConstraints extends AbstractComponentConstraints<IAnchorLayoutPropertyTypes>
 {
-  private IAditoLayoutConstraints<IAnchorLayoutPropertyTypes> constraints;
-  private Node.Property[] properties;
 
   public AditoComponentConstraints()
   {
-    IAditoLayoutProvider layoutProvider = NbAditoInterface.lookup(IAditoLayoutProvider.class);
-    constraints = layoutProvider.getAnchorLayout().createLayoutConstraints();
   }
 
   public AditoComponentConstraints(IAditoLayoutConstraints<IAnchorLayoutPropertyTypes> pConstraints)
   {
-    constraints = pConstraints;
+    super(pConstraints);
+  }
+
+  @Override
+  protected IAditoLayoutConstraints<IAnchorLayoutPropertyTypes> createConstraints()
+  {
+    IAditoLayoutProvider layoutProvider = NbAditoInterface.lookup(IAditoLayoutProvider.class);
+    return layoutProvider.getAnchorLayout().createLayoutConstraints();
   }
 
   public Rectangle getBounds()
   {
+    IAditoLayoutConstraints<IAnchorLayoutPropertyTypes> constraints = getConstraintsObject();
     return new Rectangle(constraints.getValue(type().x()), constraints.getValue(type().y()),
                          constraints.getValue(type().width()), constraints.getValue(type().height()));
   }
 
   public void setBounds(Rectangle pBounds)
   {
+    IAditoLayoutConstraints<IAnchorLayoutPropertyTypes> constraints = getConstraintsObject();
     constraints.setValue(type().x(), pBounds.x);
     constraints.setValue(type().y(), pBounds.y);
     constraints.setValue(type().width(), pBounds.width);
     constraints.setValue(type().height(), pBounds.height);
   }
 
-  @Override
-  public Node.Property[] getProperties()
-  {
-    if (properties == null)
-      properties = _createProperties();
-    return properties;
-  }
-
-  @Override
-  public IAditoLayoutConstraints<IAnchorLayoutPropertyTypes> getConstraintsObject()
-  {
-    return constraints;
-  }
 
   @Override
   public LayoutConstraints cloneConstraints()
   {
-    return new AditoComponentConstraints(constraints.cloneConstraints());
-  }
-
-  private Node.Property[] _createProperties()
-  {
-    Collection<Node.Property> constraintProps = constraints.getProperties();
-    java.util.List<Node.Property> newProps = new ArrayList<Node.Property>(constraintProps.size());
-    for (Node.Property property : constraintProps)
-      newProps.add(new SimpleFormProperty(property));
-    return newProps.toArray(new Node.Property[constraintProps.size()]);
-  }
-
-  private IAnchorLayoutPropertyTypes type()
-  {
-    return constraints.getTypeInfo();
+    return new AditoComponentConstraints(getConstraintsObject().cloneConstraints());
   }
 
 }

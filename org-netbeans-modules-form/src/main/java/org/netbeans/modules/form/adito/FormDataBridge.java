@@ -1,6 +1,6 @@
 package org.netbeans.modules.form.adito;
 
-import com.google.common.base.Objects;
+import com.google.common.base.*;
 import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.sync.*;
 import org.jetbrains.annotations.NotNull;
 import org.netbeans.modules.form.*;
@@ -8,6 +8,7 @@ import org.openide.nodes.Node;
 
 import java.beans.*;
 import java.lang.reflect.InvocationTargetException;
+import java.util.logging.*;
 
 /**
  * @author J. Boesl, 31.03.11
@@ -19,7 +20,8 @@ public class FormDataBridge
   private final IFormComponentInfo componentInfo;
   private final IFormComponentPropertyMapping componentPropertyMapping;
 
-  private PropertyChangeListener propertyChangeListener;
+  private PropertyChangeListener aditoPropertyChangeListener;
+  private PropertyChangeListener formPropertyChangeListener;
 
 
   public FormDataBridge(@NotNull RADComponent pRadComponent, @NotNull IFormComponentInfo pComponentInfo,
@@ -40,58 +42,78 @@ public class FormDataBridge
     if (radComponent instanceof RADVisualComponent)
     {
       RADVisualComponent radVisualComponent = (RADVisualComponent) radComponent;
-      try
+      _radPropertiesChanged(radVisualComponent.getConstraintsProperties());
+    }
+  }
+
+  private void _radPropertiesChanged(Node.Property... pProperties)
+  {
+    try
+    {
+      for (Node.Property formProperty : pProperties)
+        _alignFormToAditoProp(formProperty);
+    }
+    catch (InvocationTargetException e)
+    {
+      radComponent.getFormModel().forceUndoOfCompoundEdit(); // TODO: Fehler dem User mitteilen (output)
+    }
+  }
+
+  private void _alignFormToAditoProp(Node.Property pFormProperty) throws InvocationTargetException
+  {
+    try
+    {
+      String formPropName = pFormProperty.getName();
+      String aditoPropName = componentPropertyMapping.getAditoPropName(formPropName);
+      if (Strings.isNullOrEmpty(aditoPropName))
+        return;
+      Node.Property aditoProperty = componentInfo.getProperty(aditoPropName);
+      if (aditoProperty == null)
       {
-        for (Node.Property formProperty : radVisualComponent.getConstraintsProperties())
+        _logInvalidMapping(aditoPropName, formPropName, false);
+        return;
+      }
+      Object fieldValue = aditoProperty.getValue();
+      Object formPropertyValue = pFormProperty.getValue();
+      if (!Objects.equal(fieldValue, formPropertyValue))
+      {
+        try
         {
-          String aditoPropName = componentPropertyMapping.getAditoPropName(formProperty.getName());
-          Node.Property aditoProperty = componentInfo.getProperty(aditoPropName);
-          if (aditoProperty != null)
-          {
-            Object fieldValue = aditoProperty.getValue();
-            Object formPropertyValue = formProperty.getValue();
-            if (fieldValue == null || !fieldValue.equals(formPropertyValue))
-            {
-              try
-              {
-                aditoProperty.setValue(formPropertyValue);
-                radComponent.getNodeReference().firePropertyChangeHelper(formProperty.getName(), null, null);
-              }
-              catch (InvocationTargetException e)
-              {
-                // TODO TODO TODO TODO TODO
-                // wenn die Property im Sheet noch nicht initialisiert ist schmeiﬂts ihn wenn primitive Daten
-                // abgeglichen werden sollen.
-              }
-            }
-          }
+          aditoProperty.setValue(formPropertyValue);
+          // TODO: es kann sein, dass andere Properties sich auch ‰ndern.
+          RADComponentNode nodeReference = radComponent.getNodeReference();
+          if (nodeReference != null)
+            nodeReference.firePropertyChangeHelper(formPropName, null, null);
+        }
+        catch (InvocationTargetException e)
+        {
+          // TODO TODO TODO TODO TODO
+          // wenn die Property im Sheet noch nicht initialisiert ist schmeiﬂts ihn wenn primitive Daten
+          // abgeglichen werden sollen.
         }
       }
-      catch (InvocationTargetException e)
-      {
-        radComponent.getFormModel().forceUndoOfCompoundEdit(); // TODO: Fehler dem User mitteilen (output)
-      }
-      catch (IllegalAccessException e)
-      {
-        throw new RuntimeException(e); // TODO: runtimeEx
-      }
+    }
+    catch (IllegalAccessException e)
+    {
+      throw new RuntimeException(e); // TODO: runtimeEx
     }
   }
 
   void registerListeners()
   {
-    if (propertyChangeListener == null)
+    if (aditoPropertyChangeListener == null)
     {
-      propertyChangeListener = _createAditoPropertyChangeListener();
-      componentInfo.addPropertyListener(propertyChangeListener);
+      aditoPropertyChangeListener = _createAditoPropertyChangeListener();
+      formPropertyChangeListener = _createFormPropertyChangeListener();
+      componentInfo.addPropertyListener(aditoPropertyChangeListener);
       for (String aditoPropName : componentInfo.getPropertyNames())
       {
         String radPropName = componentPropertyMapping.getRadPropName(aditoPropName);
-        if (radPropName != null && !radPropName.isEmpty())
+        if (!Strings.isNullOrEmpty(radPropName))
         {
           FormProperty formProperty = _getFormProperty(radPropName);
           if (formProperty != null)
-            formProperty.addPropertyChangeListener(_createFormPropertyChangeListener(radPropName, aditoPropName));
+            formProperty.addPropertyChangeListener(formPropertyChangeListener);
         }
       }
     }
@@ -99,42 +121,47 @@ public class FormDataBridge
 
   void unregisterAll()
   {
-    componentInfo.removePropertyListener(propertyChangeListener);
-    propertyChangeListener = null;
+    componentInfo.removePropertyListener(aditoPropertyChangeListener);
+    aditoPropertyChangeListener = null;
+    formPropertyChangeListener = null;
     //for (FileObject fileObject : modelDataObject.getPrimaryFile().getChildren())
     //fileObject.removeFileChangeListener(propertyChangeListener);
   }
 
-  private PropertyChangeListener _createFormPropertyChangeListener(final String pRadPropName, final String pAditoPropName)
+  private PropertyChangeListener _createFormPropertyChangeListener(/*final String pRadPropName,
+                                                                   final String pAditoPropName*/)
   {
     return new PropertyChangeListener()
     {
       @Override
       public void propertyChange(PropertyChangeEvent evt)
       {
-        Node.Property aditoProperty = componentInfo.getProperty(pAditoPropName);
-        if (aditoProperty != null)
-        {
-          try
-          {
-            FormProperty formProperty = _getFormProperty(pRadPropName);
-            if (formProperty != null)
-            {
-              Object oldValue = aditoProperty.getValue();
-              Object newValue = formProperty.getValue();
-              if (!Objects.equal(oldValue, newValue))
-                aditoProperty.setValue(newValue);
-            }
-          }
-          catch (IllegalAccessException e)
-          {
-            e.printStackTrace(); // TODO: errorHandling
-          }
-          catch (InvocationTargetException e)
-          {
-            e.printStackTrace(); // TODO: errorHandling
-          }
-        }
+        Node.Property property = (Node.Property) evt.getSource();
+        _radPropertiesChanged(property);
+        //System.out.println(((RADProperty)).getName());
+        //Node.Property aditoProperty = componentInfo.getProperty(pAditoPropName);
+        //if (aditoProperty != null)
+        //{
+        //  try
+        //  {
+        //    FormProperty formProperty = _getFormProperty(pRadPropName);
+        //    if (formProperty != null)
+        //    {
+        //      Object oldValue = aditoProperty.getValue();
+        //      Object newValue = formProperty.getValue();
+        //      if (!Objects.equal(oldValue, newValue))
+        //        aditoProperty.setValue(newValue);
+        //    }
+        //  }
+        //  catch (IllegalAccessException e)
+        //  {
+        //    e.printStackTrace(); // TODO: errorHandling
+        //  }
+        //  catch (InvocationTargetException e)
+        //  {
+        //    e.printStackTrace(); // TODO: errorHandling
+        //  }
+        //}
       }
     };
   }
@@ -150,7 +177,13 @@ public class FormDataBridge
         {
           String aditoPropName = evt.getPropertyName();
           Node.Property aditoProperty = componentInfo.getProperty(aditoPropName);
-          FormProperty formProperty = _getFormProperty(componentPropertyMapping.getRadPropName(aditoPropName));
+          String mappedName = componentPropertyMapping.getRadPropName(aditoPropName);
+          FormProperty formProperty = _getFormProperty(mappedName);
+          if (formProperty == null)
+          {
+            _logInvalidMapping(aditoPropName, mappedName, true);
+            return;
+          }
           Object newValue = aditoProperty.getValue();
           if (!Objects.equal(newValue, formProperty.getValue()))
             formProperty.setValue(newValue);
@@ -175,6 +208,20 @@ public class FormDataBridge
   {
     Node.Property prop = radComponent.getPropertyByName(pRadPropName);
     return prop instanceof FormProperty ? (FormProperty) prop : null;
+  }
+
+  private void _logInvalidMapping(String pAditoProp, String pFormProp, boolean pAditoToForm)
+  {
+    String aditoProp = "AditoProperty: " + pAditoProp;
+    String formProp = "FormProperty: " + pFormProp;
+    String prop1 = pAditoToForm ? aditoProp : formProp;
+    String prop2 = pAditoToForm ? formProp : aditoProp;
+    String compDetail = "component " + radComponent.getBeanClass().getSimpleName();
+    String pathDetail = "path" + radComponent.getARADComponentHandler().getModelDataObject().getPrimaryFile().getPath();
+    String detail = pAditoToForm ? compDetail + " with " + pathDetail : pathDetail + " with " + compDetail;
+    Logger.getLogger(FormDataBridge.class.getSimpleName()).log(
+        Level.WARNING,
+        prop1 + " is mapped to " + prop2 + " but doesn't exist at " + detail);
   }
 
 }

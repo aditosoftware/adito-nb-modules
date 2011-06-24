@@ -12,11 +12,12 @@ import java.lang.reflect.InvocationTargetException;
 public class SimpleFormProperty extends FormProperty
 {
 
+  private static final String ADITO_LAYOUT = "ADITO_LAYOUT";
   private Node.Property<Object> property;
 
   public SimpleFormProperty(Node.Property<Object> pProperty)
   {
-    super(pProperty.getName() + "ADITO_LAYOUT", pProperty.getValueType(), pProperty.getDisplayName(),
+    super(pProperty.getName() + ADITO_LAYOUT, pProperty.getValueType(), pProperty.getDisplayName(),
           pProperty.getShortDescription());
     property = pProperty;
   }
@@ -33,4 +34,11 @@ public class SimpleFormProperty extends FormProperty
     property.setValue(value);
   }
 
+  @Override
+  public String toString()
+  {
+    return "SimpleFormProperty{" +
+        "property=" + property +
+        "} " + super.hashCode();
+  }
 }

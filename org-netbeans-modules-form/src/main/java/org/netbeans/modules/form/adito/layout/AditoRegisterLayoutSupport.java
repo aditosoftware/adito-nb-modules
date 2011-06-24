@@ -1,8 +1,9 @@
 package org.netbeans.modules.form.adito.layout;
 
-import org.netbeans.modules.form.*;
+import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.NbAditoInterface;
+import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.layout.IAditoLayoutProvider;
+import org.netbeans.modules.form.RADVisualComponent;
 import org.netbeans.modules.form.layoutsupport.*;
-import org.openide.nodes.Node;
 
 import javax.swing.*;
 import java.awt.*;
@@ -25,7 +26,8 @@ public class AditoRegisterLayoutSupport extends AbstractLayoutSupport
   @Override
   public Class getSupportedClass()
   {
-    return JTabbedPane.class;
+    IAditoLayoutProvider layoutProvider = NbAditoInterface.lookup(IAditoLayoutProvider.class);
+    return layoutProvider.getRegisterLayout().getLayoutClass();
   }
 
   /**
@@ -55,10 +57,10 @@ public class AditoRegisterLayoutSupport extends AbstractLayoutSupport
                                 Container container,
                                 Container containerDelegate)
   {
-    if (!(container instanceof JTabbedPane))
+    JTabbedPane tabbedPane = _getTabbedPane(container);
+    if (tabbedPane == null)
       return;
 
-    JTabbedPane tabbedPane = (JTabbedPane) container;
     int n = tabbedPane.getTabCount();
     for (int i = 0; i < n; i++)
     {
@@ -96,10 +98,10 @@ public class AditoRegisterLayoutSupport extends AbstractLayoutSupport
   public void arrangeContainer(Container container,
                                Container containerDelegate)
   {
-    if (!(container instanceof JTabbedPane))
+    JTabbedPane tabbedPane = _getTabbedPane(container);
+    if (tabbedPane == null)
       return;
 
-    JTabbedPane tabbedPane = (JTabbedPane) container;
     if (selectedTab >= 0)
     {
       if (tabbedPane.getTabCount() > selectedTab)
@@ -145,9 +147,11 @@ public class AditoRegisterLayoutSupport extends AbstractLayoutSupport
                          Point posInCont,
                          Point posInComp)
   {
-    if (!(container instanceof JTabbedPane))
+    JTabbedPane tabbedPane = _getTabbedPane(container);
+    if (tabbedPane == null)
       return -1;
-    return ((JTabbedPane) container).getTabCount();
+
+    return tabbedPane.getTabCount();
   }
 
   @Override
@@ -179,10 +183,10 @@ public class AditoRegisterLayoutSupport extends AbstractLayoutSupport
                                    int newIndex,
                                    Graphics g)
   {
-    if (!(container instanceof JTabbedPane) || !isAllowedComponent(component))
+    JTabbedPane tabbedPane = _getTabbedPane(container);
+    if (tabbedPane == null || !_isAllowedComponent(component))
       return false;
 
-    JTabbedPane tabbedPane = (JTabbedPane) container;
     if ((tabbedPane.getTabCount() == 0) || (component == tabbedPane.getComponentAt(0)))
     {
       Dimension sz = container.getSize();
@@ -199,22 +203,12 @@ public class AditoRegisterLayoutSupport extends AbstractLayoutSupport
     return true;
   }
 
-  public static boolean isAllowedComponent(Component pComponent)
-  {
-    return pComponent != null && isAllowed(pComponent.getClass());
-  }
-
-  public static boolean isAllowed(Class pBeanClass)
-  {
-    return pBeanClass.getSimpleName().equals(ALLOWED_SUB_NAME);
-  }
-
   @Override
   public void acceptNewComponents(RADVisualComponent[] components, LayoutConstraints[] constraints, int index)
   {
     for (RADVisualComponent component : components)
     {
-      if (!isAllowed(component.getBeanClass()))
+      if (!_isAllowed(component.getBeanClass()))
         throw new IllegalArgumentException("Only registertabs can be added to a register component.");
     }
   }
@@ -234,43 +228,43 @@ public class AditoRegisterLayoutSupport extends AbstractLayoutSupport
                                        Component[] components,
                                        int index)
   {
-    if (!(container instanceof JTabbedPane))
+    JTabbedPane tabbedPane = _getTabbedPane(container);
+    if (tabbedPane == null)
       return;
+
 
     for (int i = 0; i < components.length; i++)
     {
-      LayoutConstraints constraints = getConstraints(i + index);
-      if (constraints instanceof TabConstraints)
-      {
-        JTabbedPane tabbedPane = (JTabbedPane) container;
-        try
-        {
-          Object title =
-              ((FormProperty) constraints.getProperties()[0])
-                  .getRealValue();
-          Object icon =
-              ((FormProperty) constraints.getProperties()[1])
-                  .getRealValue();
-          Object tooltip =
-              ((FormProperty) constraints.getProperties()[2])
-                  .getRealValue();
-
-          tabbedPane.insertTab(
-              title instanceof String ? (String) title : null,
-              icon instanceof Icon ? (Icon) icon : null,
-              components[i],
-              tooltip instanceof String ? (String) tooltip : null,
-              index + i);
-        }
-        catch (Exception ex)
-        {
-          org.openide.ErrorManager.getDefault().notify(org.openide.ErrorManager.INFORMATIONAL, ex);
-        }
-      }
+      container.add(components[i]);
+      //LayoutConstraints constraints = getConstraints(i + index);
+      //if (constraints instanceof AditoRegisterConstraints)
+      //{
+      //  try
+      //  {
+      //    Object title =
+      //        ((FormProperty) constraints.getProperties()[0])
+      //            .getRealValue();
+      //    Object icon =
+      //        ((FormProperty) constraints.getProperties()[1])
+      //            .getRealValue();
+      //    Object tooltip =
+      //        ((FormProperty) constraints.getProperties()[2])
+      //            .getRealValue();
+      //    tabbedPane.insertTab(
+      //        title instanceof String ? (String) title : null,
+      //        icon instanceof Icon ? (Icon) icon : null,
+      //        components[i],
+      //        tooltip instanceof String ? (String) tooltip : null,
+      //        index + i);
+      //  }
+      //  catch (Exception ex)
+      //  {
+      //    org.openide.ErrorManager.getDefault().notify(org.openide.ErrorManager.INFORMATIONAL, ex);
+      //  }
+      //}
     }
   }
 
-  // ---------
 
   /**
    * This method is called to get a default component layout constraints
@@ -282,167 +276,28 @@ public class AditoRegisterLayoutSupport extends AbstractLayoutSupport
   @Override
   protected LayoutConstraints createDefaultConstraints()
   {
-    return new TabConstraints("tab" + (getComponentCount())); // NOI18N
+    return new AditoRegisterConstraints(); // NOI18N
   }
 
-  // ----------
-
-  // ----------
-
-  /**
-   * LayoutConstraints implementation for managing JTabbedPane tab
-   * parameters.
-   */
-  public static class TabConstraints implements LayoutConstraints
+  private JTabbedPane _getTabbedPane(Container pContainer)
   {
-    private String title;
-    private Icon icon;
-    private String toolTip;
-
-    private FormProperty[] properties;
-
-    public TabConstraints(String title)
+    if (pContainer != null)
     {
-      this.title = title;
+      Component component = pContainer.getComponent(0);
+      if (component instanceof JTabbedPane)
+        return (JTabbedPane) component;
     }
-
-    public Icon getIcon()
-    {
-      return icon;
-    }
-
-    // -----------
-
-    @Override
-    public Node.Property[] getProperties()
-    {
-      if (properties == null)
-      {
-        properties = new FormProperty[]{
-            new FormProperty("TabConstraints.tabTitle", // NOI18N
-                             String.class,
-                             getBundle().getString("PROP_tabTitle"), // NOI18N
-                             getBundle().getString("HINT_tabTitle"))
-            { // NOI18N
-
-              @Override
-              public Object getTargetValue()
-              {
-                return title;
-              }
-
-              @Override
-              public void setTargetValue(Object value)
-              {
-                title = (String) value;
-              }
-
-              @Override
-              protected Object getRealValue(Object value)
-              {
-                Object realValue = super.getRealValue(value);
-                if (realValue == FormDesignValue.IGNORED_VALUE)
-                  realValue = ((FormDesignValue) value).getDescription();
-                return realValue;
-              }
-            },
-
-            new FormProperty("TabConstraints.tabIcon", // NOI18N
-                             Icon.class,
-                             getBundle().getString("PROP_tabIcon"), // NOI18N
-                             getBundle().getString("HINT_tabIcon"))
-            { // NOI18N
-
-              @Override
-              public Object getTargetValue()
-              {
-                return icon;
-              }
-
-              @Override
-              public void setTargetValue(Object value)
-              {
-                icon = (Icon) value;
-              }
-
-              @Override
-              public boolean supportsDefaultValue()
-              {
-                return true;
-              }
-
-              @Override
-              public Object getDefaultValue()
-              {
-                return null;
-              }
-            },
-
-            new FormProperty("TabConstraints.tabToolTip", // NOI18N
-                             String.class,
-                             getBundle().getString("PROP_tabToolTip"), // NOI18N
-                             getBundle().getString("HINT_tabToolTip"))
-            { // NOI18N
-
-              @Override
-              public Object getTargetValue()
-              {
-                return toolTip;
-              }
-
-              @Override
-              public void setTargetValue(Object value)
-              {
-                toolTip = (String) value;
-              }
-
-              @Override
-              protected Object getRealValue(Object value)
-              {
-                Object realValue = super.getRealValue(value);
-                if (realValue == FormDesignValue.IGNORED_VALUE)
-                  realValue = ((FormDesignValue) value).getDescription();
-                return realValue;
-              }
-
-              @Override
-              public boolean supportsDefaultValue()
-              {
-                return true;
-              }
-
-              @Override
-              public Object getDefaultValue()
-              {
-                return null;
-              }
-            }
-        };
-
-        properties[0].setChanged(true);
-      }
-
-      return properties;
-    }
-
-    @Override
-    public Object getConstraintsObject()
-    {
-      return title;
-    }
-
-    @Override
-    public LayoutConstraints cloneConstraints()
-    {
-      LayoutConstraints constr = new TabConstraints(title);
-      org.netbeans.modules.form.FormUtils.copyProperties(
-          getProperties(),
-          constr.getProperties(),
-          FormUtils.CHANGED_ONLY | FormUtils.DISABLE_CHANGE_FIRING);
-      return constr;
-    }
-
-    // --------
-
+    return null;
   }
+
+  private static boolean _isAllowedComponent(Component pComponent)
+  {
+    return pComponent != null && _isAllowed(pComponent.getClass());
+  }
+
+  private static boolean _isAllowed(Class pBeanClass)
+  {
+    return pBeanClass.getSimpleName().equals(ALLOWED_SUB_NAME);
+  }
+
 }
