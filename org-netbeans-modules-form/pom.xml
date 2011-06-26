@@ -32,11 +32,11 @@
 
     <!-- Netbeans dependencies -->
 
-    <dependency>
-      <groupId>org.netbeans.api</groupId>
-      <artifactId>org-jdesktop-beansbinding</artifactId>
-      <version>RELEASE70</version>
-    </dependency>
+    <!--<dependency>-->
+    <!--<groupId>org.netbeans.api</groupId>-->
+    <!--<artifactId>org-jdesktop-beansbinding</artifactId>-->
+    <!--<version>RELEASE70</version>-->
+    <!--</dependency>-->
     <dependency>
       <groupId>org.netbeans.api</groupId>
       <artifactId>org-jdesktop-layout</artifactId>
@@ -67,11 +67,11 @@
     <!--<artifactId>org-netbeans-libs-javacapi</artifactId>-->
     <!--<version>RELEASE70</version>-->
     <!--</dependency>-->
-    <dependency>
-      <groupId>org.netbeans.api</groupId>
-      <artifactId>org-netbeans-libs-xerces</artifactId>
-      <version>RELEASE70</version>
-    </dependency>
+    <!--<dependency>-->
+    <!--<groupId>org.netbeans.api</groupId>-->
+    <!--<artifactId>org-netbeans-libs-xerces</artifactId>-->
+    <!--<version>RELEASE70</version>-->
+    <!--</dependency>-->
     <!--<dependency>-->
     <!--<groupId>org.netbeans.api</groupId>-->
     <!--<artifactId>org-netbeans-modules-classfile</artifactId>-->
@@ -102,12 +102,12 @@
     <!--<artifactId>org-netbeans-modules-java-project</artifactId>-->
     <!--<version>RELEASE70</version>-->
     <!--</dependency>-->
-    <dependency>
-      <groupId>org.netbeans.api</groupId>
-      <artifactId>org-netbeans-modules-java-source</artifactId>
-      <version>RELEASE70</version>
-      <scope>test</scope>
-    </dependency>
+    <!--<dependency>-->
+    <!--<groupId>org.netbeans.api</groupId>-->
+    <!--<artifactId>org-netbeans-modules-java-source</artifactId>-->
+    <!--<version>RELEASE70</version>-->
+    <!--<scope>test</scope>-->
+    <!--</dependency>-->
     <!--<dependency>-->
     <!--<groupId>org.netbeans.api</groupId>-->
     <!--<artifactId>org-netbeans-modules-javahelp</artifactId>-->
