@@ -462,7 +462,7 @@ public class VisualReplicator {
                 Container contDelegate = parentCont.getContainerDelegate(cont);
                 LayoutSupportManager laysup = parentCont.getLayoutSupport();
                 if (laysup != null) { // old layout support
-                    if (laysup.removeComponentFromContainer(
+                    if (!laysup.removeComponentFromContainer(
                         cont, contDelegate, comp))
                     {   // layout delegate cannot remove individual components,
                         // we must clear the container and add the components again

@@ -217,7 +217,7 @@ public class FormDataBridge
     String prop1 = pAditoToForm ? aditoProp : formProp;
     String prop2 = pAditoToForm ? formProp : aditoProp;
     String compDetail = "component " + radComponent.getBeanClass().getSimpleName();
-    String pathDetail = "path" + radComponent.getARADComponentHandler().getModelDataObject().getPrimaryFile().getPath();
+    String pathDetail = "path " + radComponent.getARADComponentHandler().getModelDataObject().getPrimaryFile().getPath();
     String detail = pAditoToForm ? compDetail + " with " + pathDetail : pathDetail + " with " + compDetail;
     Logger.getLogger(FormDataBridge.class.getSimpleName()).log(
         Level.WARNING,

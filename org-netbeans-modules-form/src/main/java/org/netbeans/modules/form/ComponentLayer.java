@@ -70,6 +70,8 @@ import org.openide.util.NbBundle;
 
 class ComponentLayer extends JPanel
 {
+    public static final Dimension DEFAULT_SIZE = new Dimension(800, 600);
+
     private static final int HORIZONTAL_MARGIN = 12;
     private static final int VERTICAL_MARGIN = 12;
 
@@ -83,7 +85,7 @@ class ComponentLayer extends JPanel
     ComponentLayer(FormModel formModel) {
         componentContainer = new FakePeerContainer();
         componentContainer.setLayout(new BorderLayout());
-        componentContainer.setBackground(Color.white);
+        componentContainer.setBackground(FormLoaderSettings.getInstance().getFormDesignerBackgroundColor());
         componentContainer.setFont(FakePeerSupport.getDefaultAWTFont());
 
         designerPanel = new DesignerPanel(formModel);
@@ -152,7 +154,7 @@ class ComponentLayer extends JPanel
     private static class DesignerPanel extends JPanel {
         private static int BORDER_THICKNESS = 4; // [could be changeable]
 
-        private Dimension designerSize = new Dimension(400, 300);
+        private Dimension designerSize = DEFAULT_SIZE;
         private FormModel formModel;
 
         DesignerPanel(FormModel formModel) {

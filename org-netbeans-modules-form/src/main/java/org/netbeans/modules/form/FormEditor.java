@@ -252,16 +252,16 @@ public class FormEditor {
             return; // form already loaded
 
         // Issue 151166 - hack
-        Project p = FileOwnerQuery.getOwner(formDataObject.getFormFile());
-        // FileOwnerQuery.getOwner() on form opened using Template editor returns null
-        if (p != null) {
-            FileObject projectDirectory = p.getProjectDirectory();
-            FileObject nbprojectFolder = projectDirectory.getFileObject("nbproject", null); // NOI18N
-            if ((nbprojectFolder == null) && (projectDirectory.getFileObject("pom", "xml") != null)) { // NOI18N
-                // Maven project
-                ClassPathUtils.resetFormClassLoader(p);
-            }
-        }
+        //Project p = FileOwnerQuery.getOwner(formDataObject.getFormFile());
+        //// FileOwnerQuery.getOwner() on form opened using Template editor returns null
+        //if (p != null) {
+        //    FileObject projectDirectory = p.getProjectDirectory();
+        //    FileObject nbprojectFolder = projectDirectory.getFileObject("nbproject", null); // NOI18N
+        //    if ((nbprojectFolder == null) && (projectDirectory.getFileObject("pom", "xml") != null)) { // NOI18N
+        //        // Maven project
+        //        ClassPathUtils.resetFormClassLoader(p);
+        //    }
+        //}
  
         resetPersistenceErrorLog(); // clear log of errors
 
@@ -425,8 +425,7 @@ public class FormEditor {
             );
           for (Throwable persistenceError : persistenceErrors)
           {
-            PersistenceException pe = (PersistenceException)
-                persistenceError;
+            PersistenceException pe = (PersistenceException) persistenceError;
             Throwable t = pe.getOriginalException();
             ErrorManager.getDefault().annotate(ex, (t != null ? t : pe));
           }
@@ -600,7 +599,7 @@ public class FormEditor {
         Object libName = fob.getAttribute("requiredLibrary"); // NOI18N
         if (libName != null) {
             Object className = fob.getAttribute("requiredClass"); // NOI18N
-            if ((className == null) || ClassPathUtils.isOnClassPath(fob, className.toString())) {
+            if ((className == null) || !ClassPathUtils.isOnClassPath(fob, className.toString())) {
                 try {
                     Library lib = LibraryManager.getDefault().getLibrary((String)libName);
                     ClassPathUtils.updateProject(fob, new ClassSource(
@@ -1215,7 +1214,7 @@ public class FormEditor {
         FormEditor formEditor = getFormEditor(formModel);
         if (formEditor != null
 //                && formModel.getSettings().getLayoutCodeTarget() != JavaCodeGenerator.LAYOUT_CODE_JDK6 // TODO: stripped
-                && ClassPathUtils.isOnClassPath(formEditor.getFormDataObject().getFormFile(), org.jdesktop.layout.GroupLayout.class.getName())) {
+                && !ClassPathUtils.isOnClassPath(formEditor.getFormDataObject().getFormFile(), org.jdesktop.layout.GroupLayout.class.getName())) {
             try {
                 Library lib = LibraryManager.getDefault().getLibrary("swing-layout"); // NOI18N
                 if (lib == null) {

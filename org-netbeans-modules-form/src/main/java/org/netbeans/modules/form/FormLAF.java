@@ -560,7 +560,7 @@ public class FormLAF {
         return value;
     }
 
-  public static boolean inLAFBlock() {
+    public static boolean inLAFBlock() {
         return preview || delDefaults.isDelegating();
     }
 

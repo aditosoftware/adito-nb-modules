@@ -49,6 +49,8 @@ import java.util.prefs.Preferences;
 import org.openide.util.HelpCtx;
 import org.openide.util.NbPreferences;
 
+import javax.swing.*;
+
 /**
  * Settings for the form editor.
  */
@@ -274,7 +276,8 @@ public class FormLoaderSettings implements HelpCtx.Provider   {
      * @return background color of the designer.
      */
     public java.awt.Color getFormDesignerBackgroundColor() {
-        int rgb = getPreferences().getInt(PROP_FORMDESIGNER_BACKGROUND_COLOR , Color.white.getRGB());
+        Color c = new JPanel().getBackground();
+        int rgb = getPreferences().getInt(PROP_FORMDESIGNER_BACKGROUND_COLOR , c.getRGB());
         return new Color(rgb);        
         
     }
@@ -285,7 +288,8 @@ public class FormLoaderSettings implements HelpCtx.Provider   {
      * @return color of the border of the designer.
      */
     public java.awt.Color getFormDesignerBorderColor() {
-        int rgb = getPreferences().getInt(PROP_FORMDESIGNER_BORDER_COLOR , new Color(224, 224, 255).getRGB());
+        Color c = new Color(181, 186, 189);
+        int rgb = getPreferences().getInt(PROP_FORMDESIGNER_BORDER_COLOR , c.getRGB());
         return new Color(rgb);        
         
     }

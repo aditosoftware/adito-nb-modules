@@ -65,12 +65,12 @@ import org.netbeans.modules.form.palette.PaletteItem;
 import org.openide.DialogDisplayer;
 import org.openide.NotifyDescriptor;
 import org.openide.actions.FileSystemAction;
+import org.openide.awt.*;
 import org.openide.util.actions.SystemAction;
 import org.openide.windows.TopComponent;
 import org.openide.nodes.Node;
 import org.openide.util.*;
 import org.openide.util.lookup.*;
-import org.openide.awt.UndoRedo;
 import org.openide.explorer.ExplorerUtils;
 import org.openide.explorer.ExplorerManager;
 
@@ -344,14 +344,11 @@ public class FormDesigner extends TopComponent implements MultiViewElement
         }
         initialized = false;
 
-      // TODO: stripped
-//        if (formEditor == null && preLoadTask != null) {
-//            // designer closed before form loading started
-//            preLoadTask = null;
-//            StatusDisplayer.getDefault().setStatusText(""); // NOI18N
-//        }
-        if (formEditor != null)
-          formEditor.setPersistenceManager(PersistenceManager.getManagers().next());
+        if (formEditor == null && preLoadTask != null) {
+            // designer closed before form loading started
+            preLoadTask = null;
+            StatusDisplayer.getDefault().setStatusText(""); // NOI18N
+        }
 
         removeAll();
 
@@ -492,7 +489,7 @@ public class FormDesigner extends TopComponent implements MultiViewElement
 
     boolean isTopRADComponent() {
         RADComponent topMetaComp = formModel.getTopRADComponent();
-        return topMetaComp == null || topMetaComp != topDesignComponent;
+        return topMetaComp != null && topMetaComp == topDesignComponent;
     }
 
     public void setTopDesignComponent(RADVisualComponent component,
@@ -501,7 +498,7 @@ public class FormDesigner extends TopComponent implements MultiViewElement
         highlightTopDesignComponentName(false);
         // TODO need to remove bindings of the current cloned view (or clone bound components as well)
         topDesignComponent = component;
-        highlightTopDesignComponentName(isTopRADComponent());
+        highlightTopDesignComponentName(!isTopRADComponent());
 
         FormDataObject formDO = formEditor.getFormDataObject();
         if(formDO!=null) {
@@ -696,7 +693,7 @@ public class FormDesigner extends TopComponent implements MultiViewElement
     }
 
     boolean isCoordinatesRoot(Component comp) {
-        return (layeredPane != comp);
+        return (layeredPane == comp);
     }
 
     private Rectangle componentBoundsToTop(Component component) {
@@ -844,7 +841,7 @@ public class FormDesigner extends TopComponent implements MultiViewElement
                      || topDesignComponent == formModel.getTopRADComponent()))
             {   // use default size if no stored size is available and
                 // old layout form or top design comp is root in the form (but not a container)
-                size = new Dimension(400, 300);
+                size = ComponentLayer.DEFAULT_SIZE;
             }
         }
 
@@ -1810,89 +1807,80 @@ public class FormDesigner extends TopComponent implements MultiViewElement
     @Override
     public void componentShowing() {
         super.componentShowing();
-      // TODO: stripped
-//        if (!formEditor.isFormLoaded()) {
-//            // Let the TC showing finish, just invoke a task out of EDT to find
-//            // out form's superclass, then continue form loading in EDT again.
-//            if (preLoadTask == null) {
-//                preLoadTask = new PreLoadTask(formEditor.getFormDataObject());
-//                FormUtils.getRequestProcessor().post(preLoadTask);
-//
-//                EventQueue.invokeLater(new Runnable() {
-//                    @Override
-//                    public void run() {
-//                        if (formEditor != null) {
-//                            StatusDisplayer.getDefault().setStatusText(
-//                                FormUtils.getFormattedBundleString(
-//                                    "FMT_PreparingForm", // NOI18N
-//                                    new Object[] { formEditor.getFormDataObject().getName() }));
-//                        }
-//                    }
-//                });
-//            }
-//        } else {
+        if (!formEditor.isFormLoaded()) {
+            // Let the TC showing finish, just invoke a task out of EDT to find
+            // out form's superclass, then continue form loading in EDT again.
+            if (preLoadTask == null) {
+                preLoadTask = new PreLoadTask(formEditor.getFormDataObject());
+                FormUtils.getRequestProcessor().post(preLoadTask);
+
+                EventQueue.invokeLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (formEditor != null) {
+                            StatusDisplayer.getDefault().setStatusText(
+                                FormUtils.getFormattedBundleString(
+                                    "FMT_PreparingForm", // NOI18N
+                                    new Object[] { formEditor.getFormDataObject().getName() }));
+                        }
+                    }
+                });
+            }
+        } else {
             finishComponentShowing();
-//        }
+        }
     }
-  // TODO: stripped
-//    private PreLoadTask preLoadTask;
-//
-//    private class PreLoadTask implements Runnable {
-//        private FormDataObject formDataObject;
-//
-//        PreLoadTask(FormDataObject fdo) {
-//            formDataObject = fdo;
-//        }
-//
-//        @Override
-//        public void run() {
-//            long ms = System.currentTimeMillis();
-//            final GandalfPersistenceManager persistenceManager = getPersistenceManager();
-//            final String superClassName = (persistenceManager != null) ? computeSuperClass() : null;
-//            Logger.getLogger(FormEditor.class.getName()).log(Level.FINER, "Opening form time 2: {0}ms", (System.currentTimeMillis()-ms)); // NOI18N
-//
-//            EventQueue.invokeLater(new Runnable() {
-//                @Override
-//                public void run() {
-//                    if (formEditor != null) {
-//                        try {
-//                            if (persistenceManager != null) {
-//                                // Persistence manager will load the form in the same
-//                                // EDT round (can't be used for other forms during that time).
-//                                persistenceManager.setPrefetchedSuperclassName(superClassName);
-//                                formEditor.setPersistenceManager(persistenceManager);
-//                            }
-//                            preLoadTask = null; // set back to null in EDT
-//                            finishComponentShowing();
-//                        } finally {
-//                            if (persistenceManager != null) { // cleanup just for sure
-//                                persistenceManager.setPrefetchedSuperclassName(null);
-//                            }
-//                        }
-//                    }
-//                }
-//            });
-//        }
-//
-//        private GandalfPersistenceManager getPersistenceManager() {
-//            try {
-//                GandalfPersistenceManager gandalf = (GandalfPersistenceManager) PersistenceManager.getManagers().next();
-//                if (gandalf.canLoadForm(formDataObject)) {
-//                    return gandalf;
-//                }
-//            } catch (Exception ex) { // failure not interesting here
-//            }
-//            return null;
-//        }
-//
-//        private String computeSuperClass() {
-//            try {
-//                return GandalfPersistenceManager.determineSuperClassName(formDataObject.getPrimaryFile());
-//            } catch (Exception ex) { // failure not interesting here
-//            }
-//            return null;
-//        }
-//    }
+
+    private PreLoadTask preLoadTask;
+
+    private class PreLoadTask implements Runnable {
+        private FormDataObject formDataObject;
+
+        PreLoadTask(FormDataObject fdo) {
+            formDataObject = fdo;
+        }
+
+        @Override
+        public void run() {
+            long ms = System.currentTimeMillis();
+            final AditoPersistenceManager persistenceManager = getPersistenceManager();
+            //final String superClassName = (persistenceManager != null) ? computeSuperClass() : null;
+            Logger.getLogger(FormEditor.class.getName()).log(Level.FINER, "Opening form time 2: {0}ms", (System.currentTimeMillis()-ms)); // NOI18N
+
+            EventQueue.invokeLater(new Runnable() {
+                @Override
+                public void run() {
+                    if (formEditor != null) {
+                        try {
+                            if (persistenceManager != null) {
+                                // Persistence manager will load the form in the same
+                                // EDT round (can't be used for other forms during that time).
+                                //persistenceManager.setPrefetchedSuperclassName(superClassName);
+                                formEditor.setPersistenceManager(persistenceManager);
+                            }
+                            preLoadTask = null; // set back to null in EDT
+                            finishComponentShowing();
+                        } finally {
+                            if (persistenceManager != null) { // cleanup just for sure
+                                //persistenceManager.setPrefetchedSuperclassName(null);
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        private AditoPersistenceManager getPersistenceManager() {
+            try {
+                AditoPersistenceManager gandalf = (AditoPersistenceManager) PersistenceManager.getManagers().next();
+                if (gandalf.canLoadForm(formDataObject)) {
+                    return gandalf;
+                }
+            } catch (Exception ex) { // failure not interesting here
+            }
+            return null;
+        }
+    }
 
     private void finishComponentShowing() {
         long ms = System.currentTimeMillis();
@@ -1947,7 +1935,7 @@ public class FormDesigner extends TopComponent implements MultiViewElement
     @Override
     public CloseOperationState canCloseElement() {
         // if this is not the last cloned designer, closing is OK
-        if (FormEditorSupport.isLastView(multiViewObserver.getTopComponent()))
+        if (!FormEditorSupport.isLastView(multiViewObserver.getTopComponent()))
             return CloseOperationState.STATE_OK;
 
         // return a placeholder state - to be sure our CloseHandler is called

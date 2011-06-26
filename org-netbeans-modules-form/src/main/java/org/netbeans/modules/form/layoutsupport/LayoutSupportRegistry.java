@@ -87,7 +87,7 @@ public class LayoutSupportRegistry {
     public static LayoutSupportRegistry getRegistry(FormModel formModel) {
         LayoutSupportRegistry reg;
         if (instanceMap == null) {
-            instanceMap = new WeakHashMap<FormModel,LayoutSupportRegistry>(); 
+            instanceMap = new WeakHashMap<FormModel,LayoutSupportRegistry>();
             reg = null;
         }
         else reg = instanceMap.get(formModel);
@@ -324,6 +324,10 @@ public class LayoutSupportRegistry {
             containerToLayoutDelegate.put(
                 "javax.swing.JPopupMenu", // NOI18N
                 "org.netbeans.modules.form.layoutsupport.delegates.MenuFakeSupport"); // NOI18N
+            // Adito-Entries
+            containerToLayoutDelegate.put(
+                "de.adito.aditoweb.nbm.nbaditointerfaceimpl.form.components.AFrame", // NOI18N
+                "org.netbeans.modules.form.adito.layout.AditoLayoutSupport"); // NOI18N
             containerToLayoutDelegate.put(
                 "de.adito.aditoweb.nbm.nbaditointerfaceimpl.form.components.ARegister", // NOI18N
                 "org.netbeans.modules.form.adito.layout.AditoRegisterLayoutSupport"); // NOI18N
@@ -359,6 +363,7 @@ public class LayoutSupportRegistry {
             layoutToLayoutDelegate.put(
                 "org.netbeans.lib.awtextra.AbsoluteLayout", // NOI18N
                 "org.netbeans.modules.form.layoutsupport.delegates.AbsoluteLayoutSupport"); // NOI18N
+          // Adito-Entries
           layoutToLayoutDelegate.put(
                 "de.adito.aditoweb.swingcommon.layout.aditolayout.AditoAnchorLayout", // NOI18N
                 "org.netbeans.modules.form.adito.layout.AditoLayoutSupport"); // NOI18N

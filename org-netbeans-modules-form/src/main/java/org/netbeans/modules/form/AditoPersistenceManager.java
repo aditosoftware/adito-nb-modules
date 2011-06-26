@@ -6,12 +6,12 @@ import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.model.IAditoModelDataPr
 import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.sync.*;
 import org.netbeans.modules.form.adito.*;
 import org.netbeans.modules.form.adito.layout.*;
+import org.netbeans.modules.form.adito.perstistencemanager.*;
 import org.netbeans.modules.form.layoutdesign.LayoutModel;
 import org.netbeans.modules.form.layoutsupport.LayoutSupportManager;
 import org.openide.filesystems.FileObject;
 import org.openide.nodes.Node;
 
-import javax.swing.*;
 import java.awt.*;
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
@@ -38,7 +38,7 @@ public class AditoPersistenceManager extends PersistenceManager
   public synchronized void loadForm(FormDataObject formObject, FormModel formModel, List<Throwable> nonfatalErrors)
       throws PersistenceException
   {
-    _loadForm(new _Info(formObject, formModel, nonfatalErrors));
+    _loadForm(new APersistenceManagerInfo(formObject, formModel == null ? new FormModel() : formModel, nonfatalErrors));
   }
 
   @Override
@@ -48,26 +48,27 @@ public class AditoPersistenceManager extends PersistenceManager
     // Save gibts hier nicht. Das Model wird sowieso synchronisiert.
   }
 
-  private void _loadForm(_Info pInfo) throws PersistenceException
+  private void _loadForm(APersistenceManagerInfo pInfo) throws PersistenceException
   {
     FormModel formModel = pInfo.getFormModel();
+    FileObject modelRoot = pInfo.getModelRoot();
     try
     {
-      Class<JPanel> formBaseClass = JPanel.class;
-      formModel.setFormBaseClass(formBaseClass, DMHelper.getHandler(pInfo.getModelRoot()));
+      AComponentInfo componentInfo = AComponentInfo.create(modelRoot, pInfo);
+      Class<?> formBaseClass = componentInfo.getComponentClass();
+      formModel.setFormBaseClass(formBaseClass, DMHelper.getHandler(modelRoot));
+      formModel.setName(componentInfo.getComponentName());
       // Force creation of the default instance in the correct L&F context
       BeanSupport.getDefaultInstance(formBaseClass);
+
+      RADComponent topComp = formModel.getTopRADComponent();
+      _loadComponent(pInfo, modelRoot, topComp, null);
+      _copyValues(topComp);
     }
     catch (Exception e)
     {
       e.printStackTrace();
     }
-
-    formModel.setName(pInfo.getFormObject().getPrimaryFile().getName());
-
-    RADComponent topComp = formModel.getTopRADComponent();
-    if (topComp != null) // load the main form component
-      _loadComponent(pInfo, pInfo.getModelRoot(), topComp, null);
 
     formModel.addFormModelListener(new AFormModelListener()
     {
@@ -82,7 +83,7 @@ public class AditoPersistenceManager extends PersistenceManager
   }
 
 
-  private void _loadComponent(_Info pInfo, FileObject pModelComp, RADComponent pComponent, RADComponent pParentComponent)
+  private void _loadComponent(APersistenceManagerInfo pInfo, FileObject pModelComp, RADComponent pComponent, RADComponent pParentComponent)
       throws PersistenceException
   {
 
@@ -94,8 +95,7 @@ public class AditoPersistenceManager extends PersistenceManager
       _loadConstraints(pModelComp, pComponent, (RADVisualContainer) pParentComponent);
 
     ComponentContainer container = // is this component a container?
-        pComponent instanceof ComponentContainer ?
-            (ComponentContainer) pComponent : null;
+        pComponent instanceof ComponentContainer ? (ComponentContainer) pComponent : null;
     if (container == null)
     { // this component is not a container
 //      if (pParentComponent == null) // this is a root component - load resource properties
@@ -332,75 +332,39 @@ public class AditoPersistenceManager extends PersistenceManager
   private void _copyChildValues(RADVisualContainer pVisualContainer) throws InvocationTargetException, IllegalAccessException
   {
     for (RADComponent childComponent : pVisualContainer.getSubComponents())
+      _copyValues(childComponent);
+  }
+
+  private void _copyValues(RADComponent pComponent) throws InvocationTargetException, IllegalAccessException
+  {
+    ARADComponentHandler aRADComponentHandler = pComponent.getARADComponentHandler();
+    if (aRADComponentHandler != null)
     {
-      ARADComponentHandler aRADComponentHandler = childComponent.getARADComponentHandler();
-      if (aRADComponentHandler != null)
+      for (Node.PropertySet set : aRADComponentHandler.getPropertySets())
       {
-        for (Node.PropertySet set : aRADComponentHandler.getPropertySets())
+        for (Node.Property prop : set.getProperties())
         {
-          for (Node.Property prop : set.getProperties())
-          {
-            Node.Property radProperty = childComponent.getPropertyByName(prop.getName());
-            if (radProperty != null)
-              radProperty.setValue(prop.getValue());
-          }
+          Node.Property radProperty = pComponent.getPropertyByName(prop.getName());
+          if (radProperty != null)
+            radProperty.setValue(prop.getValue());
         }
       }
     }
   }
 
-  private RADComponent _restoreComponent(_Info pInfo, FileObject pChildModel, RADComponent pParentComponent)
+  private RADComponent _restoreComponent(APersistenceManagerInfo pInfo, FileObject pChildModel, RADComponent pParentComponent)
       throws PersistenceException
   {
-    IFormComponentInfo modelPropProvider = getPropertyInfo().createModelPropProvider(pChildModel);
-    IFormComponentPropertyMapping componentPropertyMapping = modelPropProvider.getFormPropertyMapping();
-    String compName;
-    String className;
-    try
-    {
-      if (componentPropertyMapping == null)
-      {
-        return null;
-      }
-      compName = pChildModel.getNameExt(); // entspricht Namen des DatenModels.
-      className = componentPropertyMapping.getComponentClass().getName();
-    }
-    catch (Exception e)
-    {
-      return null; // kein Fehler, aber auch keine Komponente.
-    }
+    AComponentInfo componentInfo = AComponentInfo.create(pChildModel, pInfo);
+    if (componentInfo == null)
+      return null;
 
-    // first load the component class
-    Class<?> compClass = null;
-    Throwable compEx = null;
-    try
-    {
-      compClass = FormUtils.loadSystemClass(className);
-      // Force creation of the default instance in the correct L&F context
-      BeanSupport.getDefaultInstance(compClass);
-    }
-    catch (Exception ex)
-    {
-      compClass = InvalidComponent.class;
-      compEx = ex;
-    }
-    catch (LinkageError ex)
-    {
-      compClass = InvalidComponent.class;
-      compEx = ex;
-    }
-    if (compEx != null)
-    { // loading the component class failed
-      pInfo.getNonfatalErrors().add(compEx);
-    }
-
-    compEx = null;
     // create a new metacomponent
     RADComponent newComponent;
 
-    if (modelPropProvider.isContainer())
+    if (componentInfo.getModelPropProvider().isContainer())
       newComponent = new RADVisualContainer();
-    else if (FormUtils.isVisualizableClass(compClass))
+    else if (FormUtils.isVisualizableClass(componentInfo.getComponentClass()))
       newComponent = new RADVisualComponent();
     else
     {
@@ -484,15 +448,16 @@ public class AditoPersistenceManager extends PersistenceManager
 //    }
 
     // initialize the metacomponent
+    Throwable compEx = null;
     try
     {
-      if (compClass == InvalidComponent.class)
+      if (componentInfo.getComponentClass() == InvalidComponent.class)
       {
         newComponent.setValid(false);
       }
       newComponent.initialize(pInfo.getFormModel());
-      newComponent.setStoredName(compName);
-      newComponent.initInstance(compClass, DMHelper.getHandler(pChildModel));
+      newComponent.setStoredName(componentInfo.getComponentName());
+      newComponent.initInstance(componentInfo.getComponentClass(), DMHelper.getHandler(pChildModel));
       newComponent.setInModel(true);
     }
     catch (Exception ex)
@@ -509,7 +474,7 @@ public class AditoPersistenceManager extends PersistenceManager
       return null;
     }
 
-    pInfo.getComponentsMap().put(compName, newComponent);
+    pInfo.getComponentsMap().put(componentInfo.getComponentName(), newComponent);
 
     // load the metacomponent (properties, events, layout, etc)
     _loadComponent(pInfo, pChildModel, newComponent, pParentComponent);
@@ -523,7 +488,7 @@ public class AditoPersistenceManager extends PersistenceManager
 
     try
     {
-      LayoutManager layout = getPropertyInfo().createModelPropProvider(pModelComp).createLayout();
+      LayoutManager layout = _getPropertyInfo().createModelPropProvider(pModelComp).createLayout();
       layoutSupport.getPrimaryContainer().setLayout(layout);
     }
     catch (Exception e)
@@ -540,12 +505,13 @@ public class AditoPersistenceManager extends PersistenceManager
     {
       if (pComponent instanceof RADVisualComponent)
       {
-        IFormComponentInfo formModelPropProvider = getPropertyInfo().createModelPropProvider(pModelComp);
+        IFormComponentInfo formModelPropProvider = _getPropertyInfo().createModelPropProvider(pModelComp);
 
-        //Class<? extends LayoutManager> layoutMgrCls = aditoModelPropProvider.getParentLayoutClass();
+        //Class<?> layoutMgrCls = formModelPropProvider.getParentLayoutClass();
+        //LayoutSupportRegistry registry = LayoutSupportRegistry.getRegistry(pComponent.getFormModel());
+        //registry.createSupportForLayout(layoutMgrCls);
+
         Object realConstraints = formModelPropProvider.createConstraints();
-        //Class<? extends LayoutSupportDelegate> supportDelegateCls =
-        //    LayoutSupportRegistry.getRegistry(pComponent.getFormModel()).createSupportForLayout(layoutMgrCls).getClass();
         if (realConstraints instanceof IAditoLayoutConstraints)
         {
           Object typeInfo = ((IAditoLayoutConstraints) realConstraints).getTypeInfo();
@@ -567,65 +533,9 @@ public class AditoPersistenceManager extends PersistenceManager
     return false;
   }
 
-  private IFormComponentInfoProvider getPropertyInfo()
+  private IFormComponentInfoProvider _getPropertyInfo()
   {
     return NbAditoInterface.lookup(IFormComponentInfoProvider.class);
-  }
-
-
-  /**
-   * Klasse mit Daten über den aktuellen Vorgang.
-   */
-  private static class _Info
-  {
-    private FormDataObject formObject;
-    private FormModel formModel;
-    private List<Throwable> nonfatalErrors;
-    private FileObject modelRoot;
-
-    private Map<String, RADComponent> loadedComponents;
-
-
-    private _Info(FormDataObject pFormObject, FormModel pFormModel, List<Throwable> pNonfatalErrors)
-    {
-      formObject = pFormObject;
-      formModel = pFormModel;
-      if (formModel == null)
-        formModel = new FormModel();
-      nonfatalErrors = pNonfatalErrors;
-    }
-
-    public FormDataObject getFormObject()
-    {
-      return formObject;
-    }
-
-    public FormModel getFormModel()
-    {
-      return formModel;
-    }
-
-    public List<Throwable> getNonfatalErrors()
-    {
-      return nonfatalErrors;
-    }
-
-    public FileObject getModelRoot()
-    {
-      if (modelRoot == null)
-      {
-        IAditoModelDataProvider aditoModelDataProvider = NbAditoInterface.lookup(IAditoModelDataProvider.class);
-        modelRoot = aditoModelDataProvider.loadModel(formObject.getPrimaryFile());
-      }
-      return modelRoot;
-    }
-
-    public Map<String, RADComponent> getComponentsMap()
-    {
-      if (loadedComponents == null)
-        loadedComponents = new HashMap<String, RADComponent>(50);
-      return loadedComponents;
-    }
   }
 
 }

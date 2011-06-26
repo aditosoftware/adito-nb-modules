@@ -133,7 +133,8 @@ public class RADVisualFormContainer extends RADVisualContainer implements FormCo
             designerSize = new Dimension(value.width - diffDim.width,
                                          value.height - diffDim.height);
         }
-        else designerSize = value;
+        else
+          designerSize = value;
         setDesignerSizeImpl(designerSize, false);
 
         getFormModel().fireSyntheticPropertyChanged(this, PROP_FORM_SIZE, old, value);

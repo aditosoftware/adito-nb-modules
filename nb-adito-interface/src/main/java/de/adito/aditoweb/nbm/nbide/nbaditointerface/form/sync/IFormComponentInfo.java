@@ -17,6 +17,10 @@ public interface IFormComponentInfo
 
   boolean isContainer();
 
+  public Class<?> getParentLayoutClass();
+
+  public Class<?> getLayoutClass();
+
   LayoutManager createLayout();
 
   Object createConstraints();
