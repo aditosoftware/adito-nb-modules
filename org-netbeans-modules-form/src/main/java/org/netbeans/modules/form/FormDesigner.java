@@ -60,6 +60,7 @@ import org.jdesktop.layout.Baseline;
 import org.jdesktop.layout.LayoutStyle;
 
 import org.netbeans.core.spi.multiview.*;
+import org.netbeans.modules.form.adito.AditoFormUtils;
 import org.netbeans.modules.form.menu.MenuEditLayer;
 import org.netbeans.modules.form.palette.PaletteItem;
 import org.openide.DialogDisplayer;
@@ -1882,7 +1883,19 @@ public class FormDesigner extends TopComponent implements MultiViewElement
         }
     }
 
-    private void finishComponentShowing() {
+    private void finishComponentShowing()
+    {
+      AditoFormUtils.invokeLater(new Runnable()
+      {
+        @Override
+        public void run()
+        {
+          _finishComponentShowing();
+        }
+      }, 100); // verzögert, damit der Rest der Gui Zeit hat sich aufzubauen.
+    }
+
+    private void _finishComponentShowing() {
         long ms = System.currentTimeMillis();
 
         if (!formEditor.isFormLoaded()) {
