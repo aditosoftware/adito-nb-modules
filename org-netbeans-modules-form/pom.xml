@@ -214,12 +214,12 @@
       <version>RELEASE70</version>
     </dependency>
 
-    <dependency>
-      <groupId>org.netbeans.external</groupId>
-      <artifactId>AbsoluteLayout</artifactId>
-      <version>RELEASE70</version>
-      <scope>provided</scope>
-    </dependency>
+    <!--<dependency>-->
+    <!--<groupId>org.netbeans.external</groupId>-->
+    <!--<artifactId>AbsoluteLayout</artifactId>-->
+    <!--<version>RELEASE70</version>-->
+    <!--<scope>provided</scope>-->
+    <!--</dependency>-->
 
   </dependencies>
 

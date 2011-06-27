@@ -1355,36 +1355,36 @@ public class MetaComponentCreator {
         // Map of propertyNames -> propertyValues
         Map<String,Object> changes = new HashMap<String,Object>();
 
-        if (comp instanceof JLabel) {
-            if ("".equals(((JLabel)comp).getText())) { // NOI18N
-                changes.put("text", varName); // NOI18N
-            }
-        } else if (comp instanceof JTextField) {
-            if ("".equals(((JTextField)comp).getText())) { // NOI18N
-                changes.put("text", varName); // NOI18N
-            }
-        } else if (comp instanceof JMenuItem) {
-            if ("".equals(((JMenuItem)comp).getText())) { // NOI18N
-                changes.put("text", varName); // NOI18N
-            }
-            if(comp instanceof JCheckBoxMenuItem) {
-                changes.put("selected", Boolean.TRUE); // NOI18N
-            }
-            if(comp instanceof JRadioButtonMenuItem) {
-                changes.put("selected", Boolean.TRUE); // NOI18N
-            }
-        } else if (comp instanceof AbstractButton) { // JButton, JToggleButton, JCheckBox, JRadioButton
-            String txt = ((AbstractButton)comp).getText();
-            if ((txt == null) || "".equals(txt)) { // NOI18N
-                changes.put("text", varName); // NOI18N
-            }
+//        if (comp instanceof JLabel) {
+//            if ("".equals(((JLabel)comp).getText())) { // NOI18N
+//                changes.put("text", varName); // NOI18N
+//            }
+//        } else if (comp instanceof JTextField) {
+//            if ("".equals(((JTextField)comp).getText())) { // NOI18N
+//                changes.put("text", varName); // NOI18N
+//            }
+//        } else if (comp instanceof JMenuItem) {
+//            if ("".equals(((JMenuItem)comp).getText())) { // NOI18N
+//                changes.put("text", varName); // NOI18N
+//            }
+//            if(comp instanceof JCheckBoxMenuItem) {
+//                changes.put("selected", Boolean.TRUE); // NOI18N
+//            }
+//            if(comp instanceof JRadioButtonMenuItem) {
+//                changes.put("selected", Boolean.TRUE); // NOI18N
+//            }
+//        } else if (comp instanceof AbstractButton) { // JButton, JToggleButton, JCheckBox, JRadioButton
+//            String txt = ((AbstractButton)comp).getText();
+//            if ((txt == null) || "".equals(txt)) { // NOI18N
+//                changes.put("text", varName); // NOI18N
+//            }
 //            if (comp instanceof JCheckBox || comp instanceof JRadioButton) {
 //                if (((JToggleButton)comp).getBorder() instanceof javax.swing.plaf.UIResource) {
 //                    changes.put("border", BorderFactory.createEmptyBorder()); // NOI18N
 //                    changes.put("margin", new Insets(0, 0, 0, 0)); // NOI18N
 //                }
 //            }
-        }
+//        }
 //        else if (comp instanceof JTable) {
 //            javax.swing.table.TableModel tm = ((JTable)comp).getModel();
 //            if (tm == null
@@ -1402,62 +1402,62 @@ public class MetaComponentCreator {
 //                changes.put("model", propValue); // NOI18N
 //            }
 //        }
-        else if (comp instanceof JToolBar) {
-            changes.put("rollover", true); // NOI18N
-        }
-        else if (comp instanceof JInternalFrame) {
-            changes.put("visible", true); // NOI18N
-        }
-        else if (comp instanceof Button) {
-            if ("".equals(((Button)comp).getLabel())) { // NOI18N
-                changes.put("label", varName); // NOI18N
-            }
-        }
-        else if (comp instanceof Checkbox) {
-            if ("".equals(((Checkbox)comp).getLabel())) { // NOI18N
-                changes.put("label", varName); // NOI18N
-            }
-        }
-        else if (comp instanceof Label) {
-            if ("".equals(((Label)comp).getText())) { // NOI18N
-                changes.put("text", varName); // NOI18N
-            }
-        }
-        else if (comp instanceof TextField) {
-            if ("".equals(((TextField)comp).getText())) { // NOI18N
-                changes.put("text", varName); // NOI18N
-            }
-        } else if (comp instanceof JComboBox) {
-            ComboBoxModel model = ((JComboBox)comp).getModel();
-            if ((model == null) || (model.getSize() == 0)) {
-                String prefix = NbBundle.getMessage(MetaComponentCreator.class, "FMT_CreatorComboBoxItem"); // NOI18N
-                prefix += ' ';
-                Object propValue = new DefaultComboBoxModel(new String[] {
-                    prefix + 1, prefix + 2, prefix + 3, prefix + 4
-                });
-                changes.put("model", propValue); // NOI18N
-            }
-
-        } else if (comp instanceof JList) {
-            ListModel model = ((JList)comp).getModel();
-            if ((model == null) || (model.getSize() == 0)) {
-                String prefix = NbBundle.getMessage(MetaComponentCreator.class, "FMT_CreatorListItem"); // NOI18N
-                prefix += ' ';
-                DefaultListModel defaultModel = new DefaultListModel();
-                for (int i=1; i<6; i++) {
-                    defaultModel.addElement(prefix + i); // NOI18N
-                }
-                changes.put("model", defaultModel); // NOI18N
-            }
-        } else if (comp instanceof JTextArea) {
-            JTextArea textArea = (JTextArea)comp;
-            if (textArea.getRows() == 0) {
-                changes.put("rows", 5); // NOI18N
-            }
-            if (textArea.getColumns() == 0) {
-                changes.put("columns", 20); // NOI18N
-            }
-        }
+//        else if (comp instanceof JToolBar) {
+//            changes.put("rollover", true); // NOI18N
+//        }
+//        else if (comp instanceof JInternalFrame) {
+//            changes.put("visible", true); // NOI18N
+//        }
+//        else if (comp instanceof Button) {
+//            if ("".equals(((Button)comp).getLabel())) { // NOI18N
+//                changes.put("label", varName); // NOI18N
+//            }
+//        }
+//        else if (comp instanceof Checkbox) {
+//            if ("".equals(((Checkbox)comp).getLabel())) { // NOI18N
+//                changes.put("label", varName); // NOI18N
+//            }
+//        }
+//        else if (comp instanceof Label) {
+//            if ("".equals(((Label)comp).getText())) { // NOI18N
+//                changes.put("text", varName); // NOI18N
+//            }
+//        }
+//        else if (comp instanceof TextField) {
+//            if ("".equals(((TextField)comp).getText())) { // NOI18N
+//                changes.put("text", varName); // NOI18N
+//            }
+//        } else if (comp instanceof JComboBox) {
+//            ComboBoxModel model = ((JComboBox)comp).getModel();
+//            if ((model == null) || (model.getSize() == 0)) {
+//                String prefix = NbBundle.getMessage(MetaComponentCreator.class, "FMT_CreatorComboBoxItem"); // NOI18N
+//                prefix += ' ';
+//                Object propValue = new DefaultComboBoxModel(new String[] {
+//                    prefix + 1, prefix + 2, prefix + 3, prefix + 4
+//                });
+//                changes.put("model", propValue); // NOI18N
+//            }
+//
+//        } else if (comp instanceof JList) {
+//            ListModel model = ((JList)comp).getModel();
+//            if ((model == null) || (model.getSize() == 0)) {
+//                String prefix = NbBundle.getMessage(MetaComponentCreator.class, "FMT_CreatorListItem"); // NOI18N
+//                prefix += ' ';
+//                DefaultListModel defaultModel = new DefaultListModel();
+//                for (int i=1; i<6; i++) {
+//                    defaultModel.addElement(prefix + i); // NOI18N
+//                }
+//                changes.put("model", defaultModel); // NOI18N
+//            }
+//        } else if (comp instanceof JTextArea) {
+//            JTextArea textArea = (JTextArea)comp;
+//            if (textArea.getRows() == 0) {
+//                changes.put("rows", 5); // NOI18N
+//            }
+//            if (textArea.getColumns() == 0) {
+//                changes.put("columns", 20); // NOI18N
+//            }
+//        }
 
       for (Map.Entry<String, Object> stringObjectEntry : changes.entrySet())
       {
@@ -1524,9 +1524,10 @@ public class MetaComponentCreator {
     }
 
     private static boolean shouldEncloseByScrollPane(Object bean) {
-        return (bean instanceof JList) || (bean instanceof JTable)
-            || (bean instanceof JTree) || (bean instanceof JTextArea)
-            || (bean instanceof JTextPane) || (bean instanceof JEditorPane);
+      return false; // JB: AditoKomponenten werden 'as-is' hinzugefügt.
+        //return (bean instanceof JList) || (bean instanceof JTable)
+        //    || (bean instanceof JTree) || (bean instanceof JTextArea)
+        //    || (bean instanceof JTextPane) || (bean instanceof JEditorPane);
     }
 
     /**
