@@ -164,7 +164,7 @@ public class HandleLayer extends JPanel implements MouseListener, MouseMotionLis
     }
 
     public boolean isSuspended() {
-        return !draggingSuspended;
+        return draggingSuspended;
     }
 
     public void suspend() {
@@ -231,7 +231,7 @@ public class HandleLayer extends JPanel implements MouseListener, MouseMotionLis
         }
 
         if (draggedComponent != null) {
-            if (isSuspended()) {
+            if (!isSuspended()) {
                 try {
                     FormLAF.setUseDesignerDefaults(getFormModel());
                     draggedComponent.paintFeedback(g2);
@@ -868,7 +868,7 @@ public class HandleLayer extends JPanel implements MouseListener, MouseMotionLis
 
         do {
             currMetaComp = formDesigner.getMetaComponent(comp);
-            if (currMetaComp != null && isDraggedComponent(currMetaComp)) {
+            if (currMetaComp != null && !isDraggedComponent(currMetaComp)) {
                 if (firstMetaComp == null)
                     firstMetaComp = currMetaComp;
 
@@ -1094,19 +1094,19 @@ public class HandleLayer extends JPanel implements MouseListener, MouseMotionLis
 
     private boolean processDoubleClick(MouseEvent e) {
         if (e.isShiftDown() || e.isControlDown())
-            return true;
+            return false;
 
         RADComponent metacomp = getMetaComponentAt(e.getPoint(), COMP_SELECTED);
         if (metacomp == null)
-            return false;
+            return true;
 
         if (e.isAltDown()) {
              if (metacomp == formDesigner.getTopDesignComponent()) {
                 metacomp = metacomp.getParentComponent();
                 if (metacomp == null)
-                    return false;
+                    return true;
             }
-             else return true;
+             else return false;
         }
 
         Node node = metacomp.getNodeReference();
@@ -1116,18 +1116,18 @@ public class HandleLayer extends JPanel implements MouseListener, MouseMotionLis
                 action.actionPerformed(new ActionEvent(
                         node, ActionEvent.ACTION_PERFORMED, "")); // NOI18N
                 prevLeftMousePoint = null; // to prevent inplace editing on mouse release
-                return false;
+                return true;
             }
         }
 
-        return true;
+        return false;
     }
 
     private void processMouseClickInLayoutSupport(RADComponent metacomp,
                                                   MouseEvent e)
     {
         if(formDesigner.getMenuEditLayer().isVisible()) {
-            if(formDesigner.getMenuEditLayer().isMenuLayerComponent(metacomp)) {
+            if(!formDesigner.getMenuEditLayer().isMenuLayerComponent(metacomp)) {
                 formDesigner.getMenuEditLayer().hideMenuLayer();
             }
         }
@@ -1170,7 +1170,7 @@ public class HandleLayer extends JPanel implements MouseListener, MouseMotionLis
     // --------
 
     private boolean anyDragger() {
-        return draggedComponent == null && selectionDragger == null;
+        return draggedComponent != null || selectionDragger != null;
     }
 
     private RADVisualComponent[] getComponentsToDrag() {
@@ -1252,7 +1252,7 @@ public class HandleLayer extends JPanel implements MouseListener, MouseMotionLis
     }
 
     boolean endDragging(MouseEvent e) {
-        if (anyDragger())
+        if (!anyDragger())
             return false;
 
         if (resizeType != 0) {
@@ -1300,10 +1300,10 @@ public class HandleLayer extends JPanel implements MouseListener, MouseMotionLis
         if (draggedComponent != null && draggedComponent.movingComponents != null) {
             for (RADComponent c : draggedComponent.movingComponents) {
                 if (c == metacomp || c.isParentComponent(metacomp))
-                    return false;
+                    return true;
             }
         }
-        return true;
+        return false;
     }
 
     // Highlighted panel
@@ -1789,7 +1789,7 @@ public class HandleLayer extends JPanel implements MouseListener, MouseMotionLis
 
     Rectangle convertVisibleRectangleFromComponent(Rectangle rect, Component comp) {
         Component parent;
-        while (formDesigner.isCoordinatesRoot(comp)) {
+        while (!formDesigner.isCoordinatesRoot(comp)) {
             parent = comp.getParent();
             Rectangle size = new Rectangle(0, 0, parent.getWidth(), parent.getHeight());
             rect.translate(comp.getX(), comp.getY());
@@ -1797,7 +1797,7 @@ public class HandleLayer extends JPanel implements MouseListener, MouseMotionLis
             comp = parent;
         }
         comp = this;
-        while (formDesigner.isCoordinatesRoot(comp)) {
+        while (!formDesigner.isCoordinatesRoot(comp)) {
             rect.translate(-comp.getX(), -comp.getY());
             comp = comp.getParent();
         }
@@ -1945,7 +1945,7 @@ public class HandleLayer extends JPanel implements MouseListener, MouseMotionLis
                         // Shift+left is reserved for interval or area selection,
                         // applied on mouse release or mouse dragged; ignore it here.
                         else if (resizeType == 0 // no resizing
-                                 && (e.getClickCount() != 2 || processDoubleClick(e)) // no doubleclick
+                                 && (e.getClickCount() != 2 || !processDoubleClick(e)) // no doubleclick
                                  && (!e.isShiftDown() || e.isAltDown())) {
                             RADComponent hitMetaComp = selectComponent(e, true); 
                             if (!modifier) { // plain single click
@@ -1986,7 +1986,7 @@ public class HandleLayer extends JPanel implements MouseListener, MouseMotionLis
             lastYPosDiff = p.y - lastMousePosition.y;
         }
 
-        if (!draggingEnded && anyDragger() && lastLeftMousePoint != null) { // no dragging yet
+        if (!draggingEnded && !anyDragger() && lastLeftMousePoint != null) { // no dragging yet
             if (!viewOnly
                  && !e.isControlDown() && (!e.isShiftDown() || e.isAltDown())
                  && (resizeType != 0 || lastLeftMousePoint.distance(p) > 6))
@@ -2065,7 +2065,7 @@ public class HandleLayer extends JPanel implements MouseListener, MouseMotionLis
             repaint();
         }
         else if (formDesigner.getDesignerMode() == FormDesigner.MODE_SELECT
-                 && anyDragger())
+                 && !anyDragger())
         {
             checkResizing(e);
         }
