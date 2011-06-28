@@ -15,7 +15,7 @@ public interface IFormComponentInfo
 
   Sheet createSheet();
 
-  boolean isContainer();
+  EContainerType getContainerType();
 
   public Class<?> getParentLayoutClass();
 

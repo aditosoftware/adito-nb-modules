@@ -153,13 +153,12 @@ public class InPlaceEditLayer extends JPanel
         return JLabel.class.isAssignableFrom(compClass)
                || AbstractButton.class.isAssignableFrom(compClass)
                || JTabbedPane.class.isAssignableFrom(compClass)
-               || (!false
-                   && (JTextField.class.isAssignableFrom(compClass)
-                       || JTextArea.class.isAssignableFrom(compClass)));
+               || JTextField.class.isAssignableFrom(compClass)
+               || JTextArea.class.isAssignableFrom(compClass);
     }
 
     boolean isEditingInitialized() {
-        return editingTextComp == null;
+        return editingTextComp != null;
     }
 
     boolean isLayerEditing() {
@@ -354,7 +353,7 @@ public class InPlaceEditLayer extends JPanel
     }
 
     private void processMouse(MouseEvent e) {
-        if (isEditingInitialized()) return;
+        if (!isEditingInitialized()) return;
 
         if (isLayerEditing()) {
             if (e.getID() == MouseEvent.MOUSE_PRESSED)

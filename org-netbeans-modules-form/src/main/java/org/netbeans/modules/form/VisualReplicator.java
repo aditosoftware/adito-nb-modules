@@ -550,24 +550,23 @@ public class VisualReplicator {
             return;
 
         // Mnemonics support - start -
-        if ("text".equals(property.getName()) // NOI18N
-            && (targetComp instanceof AbstractButton
-                || targetComp instanceof JLabel)
-//            && JavaCodeGenerator.isUsingMnemonics(property.getRADComponent()) // TODO: stripped
-            )
-        {
-            try {
-                String str = (String) property.getRealValue();
-                if (targetComp instanceof JLabel)
-                    org.openide.awt.Mnemonics.setLocalizedText(
-                                                (JLabel)targetComp, str);
-                else
-                    org.openide.awt.Mnemonics.setLocalizedText(
-                                                (AbstractButton)targetComp, str);
-                return;
-            }
-            catch (Exception ex) {} // ignore and continue
-        }
+        //if ("text".equals(property.getName()) // NOI18N
+        //    && (targetComp instanceof AbstractButton
+        //        || targetComp instanceof JLabel)
+        //    && JavaCodeGenerator.isUsingMnemonics(property.getRADComponent()))
+        //{
+        //    try {
+        //        String str = (String) property.getRealValue();
+        //        if (targetComp instanceof JLabel)
+        //            org.openide.awt.Mnemonics.setLocalizedText(
+        //                                        (JLabel)targetComp, str);
+        //        else
+        //            org.openide.awt.Mnemonics.setLocalizedText(
+        //                                        (AbstractButton)targetComp, str);
+        //        return;
+        //    }
+        //    catch (Exception ex) {} // ignore and continue
+        //}
         // Mnemonics support - end -
 
         boolean buttonGroup = ("buttonGroup".equals(property.getName()) && (targetComp instanceof AbstractButton)); // NOI18N
@@ -799,24 +798,23 @@ public class VisualReplicator {
         }
 
         // Mnemonics support - start -
-        if ((clone instanceof AbstractButton || clone instanceof JLabel)
-//            && JavaCodeGenerator.isUsingMnemonics(metacomp) // TODO: stripped
-            )
-        {
-            FormProperty prop = metacomp.getBeanProperty("text"); // NOI18N
-            if (prop != null && prop.isChanged()) {
-                try {
-                    String str = (String) prop.getRealValue();
-                    if (clone instanceof JLabel)
-                        org.openide.awt.Mnemonics.setLocalizedText(
-                                                    (JLabel)clone, str);
-                    else
-                        org.openide.awt.Mnemonics.setLocalizedText(
-                                                    (AbstractButton)clone, str);
-                }
-                catch (Exception ex) {} // ignore
-            }
-        }
+        //if ((clone instanceof AbstractButton || clone instanceof JLabel)
+        //    && JavaCodeGenerator.isUsingMnemonics(metacomp))
+        //{
+        //    FormProperty prop = metacomp.getBeanProperty("text"); // NOI18N
+        //    if (prop != null && prop.isChanged()) {
+        //        try {
+        //            String str = (String) prop.getRealValue();
+        //            if (clone instanceof JLabel)
+        //                org.openide.awt.Mnemonics.setLocalizedText(
+        //                                            (JLabel)clone, str);
+        //            else
+        //                org.openide.awt.Mnemonics.setLocalizedText(
+        //                                            (AbstractButton)clone, str);
+        //        }
+        //        catch (Exception ex) {} // ignore
+        //    }
+        //}
         // Mnemonics support - end -
 
         return clone;
@@ -997,7 +995,8 @@ public class VisualReplicator {
         if (metacomp instanceof ComponentContainer) {
             layoutBuilders.remove(metacomp.getId());
             RADComponent[] subcomps = ((ComponentContainer)metacomp).getSubBeans();
-          for (RADComponent subcomp : subcomps) removeMapping(subcomp);
+          for (RADComponent subcomp : subcomps)
+            removeMapping(subcomp);
         }
     }
 

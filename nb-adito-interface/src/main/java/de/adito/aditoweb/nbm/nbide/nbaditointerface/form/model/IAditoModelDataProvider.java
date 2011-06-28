@@ -16,7 +16,7 @@ public interface IAditoModelDataProvider
 
   FileObject loadModel(FileObject pAodFile);
 
-  FileObject getChildDataModels(FileObject pFileObject);
+  FileObject getSubModels(FileObject pFileObject);
 
   FileObject createOrRestoreDataModel(DataFolder pParentData, Class<?> pComponentClass, String pCreatedName,
                                       FileObject pDeleted);

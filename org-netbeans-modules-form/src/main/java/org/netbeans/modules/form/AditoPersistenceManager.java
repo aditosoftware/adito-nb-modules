@@ -83,8 +83,8 @@ public class AditoPersistenceManager extends PersistenceManager
   }
 
 
-  private void _loadComponent(APersistenceManagerInfo pInfo, FileObject pModelComp, RADComponent pComponent, RADComponent pParentComponent)
-      throws PersistenceException
+  private void _loadComponent(APersistenceManagerInfo pInfo, FileObject pModelComp, RADComponent pComponent,
+                              RADComponent pParentComponent) throws PersistenceException
   {
 
     // if the loaded component is a visual component in a visual contianer,
@@ -120,7 +120,7 @@ public class AditoPersistenceManager extends PersistenceManager
     // load subcomponents
     RADComponent[] childComponents;
 
-    FileObject childModels = NbAditoInterface.lookup(IAditoModelDataProvider.class).getChildDataModels(pModelComp);
+    FileObject childModels = NbAditoInterface.lookup(IAditoModelDataProvider.class).getSubModels(pModelComp);
     if (childModels != null)
     {
       List<RADComponent> list = new ArrayList<RADComponent>();
@@ -357,22 +357,33 @@ public class AditoPersistenceManager extends PersistenceManager
   {
     AComponentInfo componentInfo = AComponentInfo.create(pChildModel, pInfo);
     if (componentInfo == null)
+    {
+      System.out.println("null for: " + pChildModel.getPath());
       return null;
+    }
 
     // create a new metacomponent
     RADComponent newComponent;
-
-    if (componentInfo.getModelPropProvider().isContainer())
-      newComponent = new RADVisualContainer();
-    else if (FormUtils.isVisualizableClass(componentInfo.getComponentClass()))
-      newComponent = new RADVisualComponent();
-    else
+    switch (componentInfo.getModelPropProvider().getContainerType())
     {
-      //newComponent = new RADComponent();
-      PersistenceException ex = new PersistenceException("Unknown component element: " + pChildModel.toString()); // NOI18N
-      pInfo.getNonfatalErrors().add(ex);
-      return null;
+      case NONE:
+        if (FormUtils.isVisualizableClass(componentInfo.getComponentClass()))
+          newComponent = new RADVisualComponent();
+        else
+          newComponent = new RADComponent();
+        break;
+      case VISUAL:
+        newComponent = new RADVisualContainer();
+        break;
+      case NONVISUAL:
+        newComponent = new RADNonVisualContainerVisualComponent();
+        break;
+      default:
+        PersistenceException ex = new PersistenceException("Unknown component element: " + pChildModel.toString()); // NOI18N
+        pInfo.getNonfatalErrors().add(ex);
+        return null;
     }
+
 
 //    if (XML_COMPONENT.equals(nodeName))
 //    {
@@ -452,9 +463,8 @@ public class AditoPersistenceManager extends PersistenceManager
     try
     {
       if (componentInfo.getComponentClass() == InvalidComponent.class)
-      {
         newComponent.setValid(false);
-      }
+
       newComponent.initialize(pInfo.getFormModel());
       newComponent.setStoredName(componentInfo.getComponentName());
       newComponent.initInstance(componentInfo.getComponentClass(), DMHelper.getHandler(pChildModel));
