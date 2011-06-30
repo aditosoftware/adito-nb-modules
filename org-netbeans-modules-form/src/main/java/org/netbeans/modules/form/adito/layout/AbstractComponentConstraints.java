@@ -1,6 +1,6 @@
 package org.netbeans.modules.form.adito.layout;
 
-import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.layout.IAditoLayoutConstraints;
+import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.layout.common.IAditoLayoutConstraints;
 import org.netbeans.modules.form.layoutsupport.LayoutConstraints;
 import org.openide.nodes.Node;
 
@@ -44,15 +44,17 @@ public abstract class AbstractComponentConstraints<T> implements LayoutConstrain
   private Node.Property[] _createProperties()
   {
     Collection<Node.Property> constraintProps = constraints.getProperties();
-    java.util.List<Node.Property> newProps = new ArrayList<Node.Property>(constraintProps.size());
-    for (Node.Property property : constraintProps)
-      newProps.add(new SimpleFormProperty(property));
-    return newProps.toArray(new Node.Property[constraintProps.size()]);
+    int size = constraintProps == null ? 0 : constraintProps.size();
+    java.util.List<Node.Property> newProps = new ArrayList<Node.Property>(size);
+    if (size != 0)
+      for (Node.Property property : constraintProps)
+        newProps.add(new SimpleFormProperty(property));
+    return newProps.toArray(new Node.Property[size]);
   }
 
   protected T type()
   {
-    return constraints.getTypeInfo();
+    return constraints == null ? null : constraints.getTypeInfo();
   }
 
 }

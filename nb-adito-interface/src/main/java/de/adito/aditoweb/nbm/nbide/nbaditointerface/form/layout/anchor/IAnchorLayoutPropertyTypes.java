@@ -1,4 +1,6 @@
-package de.adito.aditoweb.nbm.nbide.nbaditointerface.form.layout;
+package de.adito.aditoweb.nbm.nbide.nbaditointerface.form.layout.anchor;
+
+import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.layout.common.IAditoLayoutPropertyType;
 
 import java.awt.*;
 

@@ -232,37 +232,8 @@ public class AditoRegisterLayoutSupport extends AbstractLayoutSupport
     if (tabbedPane == null)
       return;
 
-
-    for (int i = 0; i < components.length; i++)
-    {
-      container.add(components[i]);
-      //LayoutConstraints constraints = getConstraints(i + index);
-      //if (constraints instanceof AditoRegisterConstraints)
-      //{
-      //  try
-      //  {
-      //    Object title =
-      //        ((FormProperty) constraints.getProperties()[0])
-      //            .getRealValue();
-      //    Object icon =
-      //        ((FormProperty) constraints.getProperties()[1])
-      //            .getRealValue();
-      //    Object tooltip =
-      //        ((FormProperty) constraints.getProperties()[2])
-      //            .getRealValue();
-      //    tabbedPane.insertTab(
-      //        title instanceof String ? (String) title : null,
-      //        icon instanceof Icon ? (Icon) icon : null,
-      //        components[i],
-      //        tooltip instanceof String ? (String) tooltip : null,
-      //        index + i);
-      //  }
-      //  catch (Exception ex)
-      //  {
-      //    org.openide.ErrorManager.getDefault().notify(org.openide.ErrorManager.INFORMATIONAL, ex);
-      //  }
-      //}
-    }
+    for (Component component : components)
+      container.add(component);
   }
 
 

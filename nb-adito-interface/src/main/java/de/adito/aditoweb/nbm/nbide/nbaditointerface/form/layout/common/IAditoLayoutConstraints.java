@@ -1,4 +1,4 @@
-package de.adito.aditoweb.nbm.nbide.nbaditointerface.form.layout;
+package de.adito.aditoweb.nbm.nbide.nbaditointerface.form.layout.common;
 
 import org.openide.nodes.Node;
 

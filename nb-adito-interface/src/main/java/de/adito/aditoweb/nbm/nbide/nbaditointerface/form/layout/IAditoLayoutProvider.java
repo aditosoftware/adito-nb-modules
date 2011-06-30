@@ -1,5 +1,8 @@
 package de.adito.aditoweb.nbm.nbide.nbaditointerface.form.layout;
 
+import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.layout.anchor.IAnchorLayoutPropertyTypes;
+import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.layout.common.IAditoLayout;
+
 /**
  * LayoutProvider mit Informationen über verfügbare Layouts.
  *
@@ -10,6 +13,6 @@ public interface IAditoLayoutProvider
 
   IAditoLayout<IAnchorLayoutPropertyTypes> getAnchorLayout();
 
-  IAditoLayout<IRegisterLayoutPropertyTypes> getRegisterLayout();
+  IAditoLayout getRegisterLayout();
 
 }

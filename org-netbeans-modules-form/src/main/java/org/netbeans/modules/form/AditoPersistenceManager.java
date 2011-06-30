@@ -1,7 +1,9 @@
 package org.netbeans.modules.form;
 
 import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.NbAditoInterface;
-import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.layout.*;
+import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.layout.anchor.IAnchorLayoutPropertyTypes;
+import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.layout.common.IAditoLayoutConstraints;
+import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.layout.register.IRegisterLayoutPropertyTypes;
 import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.model.IAditoModelDataProvider;
 import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.sync.*;
 import org.netbeans.modules.form.adito.*;

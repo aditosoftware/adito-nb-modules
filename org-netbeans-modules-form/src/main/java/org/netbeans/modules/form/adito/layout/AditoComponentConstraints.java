@@ -1,7 +1,9 @@
 package org.netbeans.modules.form.adito.layout;
 
 import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.NbAditoInterface;
-import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.layout.*;
+import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.layout.IAditoLayoutProvider;
+import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.layout.anchor.*;
+import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.layout.common.IAditoLayoutConstraints;
 import org.netbeans.modules.form.layoutsupport.LayoutConstraints;
 
 import java.awt.*;
