@@ -183,8 +183,9 @@ public class RADComponentNode extends FormNode
     }
 
     @Override
-    public Node.PropertySet[] getPropertySets() {
-        return component.getProperties();
+    protected Sheet createSheet()
+    {
+      return AditoNodeConnect.getSheet(component);
     }
 
     /* List new types that can be created in this node.

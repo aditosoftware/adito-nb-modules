@@ -1,8 +1,10 @@
 package org.netbeans.modules.form.adito.components;
 
+import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.NbAditoInterface;
+import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.sync.*;
 import org.netbeans.modules.form.RADComponent;
 import org.openide.loaders.*;
-import org.openide.nodes.*;
+import org.openide.nodes.Sheet;
 
 import java.awt.*;
 
@@ -47,8 +49,9 @@ public final class AditoNodeConnect
       @Override
       public Sheet resolve(DataObject pDataObject)
       {
-        return null;
-        //return pDataObject.getNodeDelegate().getPropertySets();
+        IFormComponentInfoProvider compInfoProvider = NbAditoInterface.lookup(IFormComponentInfoProvider.class);
+        IFormComponentInfo componentInfo = compInfoProvider.createModelPropProvider(pDataObject);
+        return componentInfo.createSheet();
       }
     });
   }

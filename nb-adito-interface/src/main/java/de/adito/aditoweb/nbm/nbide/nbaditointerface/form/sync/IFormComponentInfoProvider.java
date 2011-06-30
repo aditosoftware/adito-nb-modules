@@ -1,7 +1,7 @@
 package de.adito.aditoweb.nbm.nbide.nbaditointerface.form.sync;
 
 import org.openide.filesystems.FileObject;
-import org.openide.loaders.DataFolder;
+import org.openide.loaders.DataObject;
 
 /**
  * Zugriff auf Model-Properties und in dem Kontext relevante Daten.
@@ -19,10 +19,10 @@ public interface IFormComponentInfoProvider
   IFormComponentPropertyMapping getFormPropertyMapping(Class<?> pBeanClass);
 
   /**
-   * @param pModelDataObject DataFolder der das Model repräsentiert.
-   * @return Informationen über die durch den DataFolder identifizierte Komponente.
+   * @param pModelDataObject DataObject das das Model repräsentiert.
+   * @return Informationen über die durch das DataObject identifizierte Komponente.
    */
-  IFormComponentInfo createModelPropProvider(DataFolder pModelDataObject);
+  IFormComponentInfo createModelPropProvider(DataObject pModelDataObject);
 
   /**
    * @param pModelFileObject FilObject das das Model repräsentiert.
