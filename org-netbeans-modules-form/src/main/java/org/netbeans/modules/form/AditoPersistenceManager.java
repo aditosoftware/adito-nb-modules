@@ -246,25 +246,25 @@ public class AditoPersistenceManager extends PersistenceManager
         newLayout = Boolean.FALSE;
       */
 
-      try
-      {
-        _copyChildValues(visualContainer);
-      }
-      catch (IllegalAccessException e)
-      {
-        e.printStackTrace();  // TODO: error-handling
-      }
-      catch (InvocationTargetException e)
-      {
-        e.printStackTrace();  // TODO: error-handling
-      }
-
       if (layoutEx != null)
         layoutEx.printStackTrace(); // TODO: error-handling
     }
     else
     { // non-visual container (e.g. AWT menu)
       container.initSubComponents(childComponents);
+    }
+
+    try
+    {
+      _copyChildValues(container);
+    }
+    catch (IllegalAccessException e)
+    {
+      e.printStackTrace();  // TODO: error-handling
+    }
+    catch (InvocationTargetException e)
+    {
+      e.printStackTrace();  // TODO: error-handling
     }
 
 
@@ -329,9 +329,9 @@ public class AditoPersistenceManager extends PersistenceManager
 
   // recognizes, creates, initializes and loads a meta component
 
-  private void _copyChildValues(RADVisualContainer pVisualContainer) throws InvocationTargetException, IllegalAccessException
+  private void _copyChildValues(ComponentContainer pContainer) throws InvocationTargetException, IllegalAccessException
   {
-    for (RADComponent childComponent : pVisualContainer.getSubComponents())
+    for (RADComponent childComponent : pContainer.getSubBeans())
       _copyValues(childComponent);
   }
 

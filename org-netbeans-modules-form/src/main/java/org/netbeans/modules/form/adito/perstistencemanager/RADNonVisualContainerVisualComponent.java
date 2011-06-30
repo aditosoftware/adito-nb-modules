@@ -1,17 +1,32 @@
 package org.netbeans.modules.form.adito.perstistencemanager;
 
 
+import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.layout.INonVisualLayoutComponent;
 import org.netbeans.modules.form.*;
 
 import java.util.*;
 
 /**
+ * Container der nicht-sichtbare Komponenten enthält.
+ *
  * @author J. Boesl, 28.06.11
  */
 public class RADNonVisualContainerVisualComponent extends RADVisualComponent implements ComponentContainer
 {
 
   private Set<RADComponent> subComponents;
+  private INonVisualLayoutComponent beanInstance;
+
+
+  @Override
+  protected void setBeanInstance(Object pBeanInstance)
+  {
+    if (!(pBeanInstance instanceof INonVisualLayoutComponent))
+      throw new IllegalArgumentException("invalid bean component for " + getClass().getSimpleName() + ": " + pBeanInstance);
+    super.setBeanInstance(pBeanInstance);
+    beanInstance = (INonVisualLayoutComponent) pBeanInstance;
+  }
+
 
   @Override
   public RADComponent[] getSubBeans()
@@ -26,10 +41,7 @@ public class RADNonVisualContainerVisualComponent extends RADVisualComponent imp
   {
     subComponents = new LinkedHashSet<RADComponent>(initComponents.length);
     for (RADComponent initComponent : initComponents)
-    {
-      subComponents.add(initComponent);
-      initComponent.setParentComponent(this);
-    }
+      _add(initComponent);
   }
 
   @Override
@@ -47,13 +59,13 @@ public class RADNonVisualContainerVisualComponent extends RADVisualComponent imp
   @Override
   public void add(RADComponent comp)
   {
-    subComponents.add(comp);
-    comp.setParentComponent(this);
+    _add(comp);
   }
 
   @Override
   public void remove(RADComponent comp)
   {
+    beanInstance.removeNonVisComp(comp.getBeanInstance());
     if (subComponents.remove(comp))
       comp.setParentComponent(null);
   }
@@ -66,6 +78,13 @@ public class RADNonVisualContainerVisualComponent extends RADVisualComponent imp
       if (subs[i].equals(comp))
         return i;
     return -1;
+  }
+
+  private void _add(RADComponent comp)
+  {
+    beanInstance.addNonVisComp(comp.getBeanInstance());
+    subComponents.add(comp);
+    comp.setParentComponent(this);
   }
 
 }

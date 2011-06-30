@@ -50,6 +50,7 @@ import javax.swing.border.Border;
 import java.util.*;
 
 import org.netbeans.modules.form.adito.DMHelper;
+import org.netbeans.modules.form.adito.perstistencemanager.RADNonVisualContainerVisualComponent;
 import org.openide.*;
 import org.openide.nodes.Node;
 import org.openide.util.Mutex;
@@ -624,6 +625,8 @@ public class MetaComponentCreator {
 
         if (sourceComp instanceof RADVisualContainer) {
             newComp = new RADVisualContainer();
+        } else if (sourceComp instanceof RADNonVisualContainerVisualComponent) {
+            newComp = new RADNonVisualContainerVisualComponent();
         } else if (sourceComp instanceof RADVisualComponent) {
             newComp = new RADVisualComponent();
         } else if (sourceComp instanceof RADMenuComponent) {
