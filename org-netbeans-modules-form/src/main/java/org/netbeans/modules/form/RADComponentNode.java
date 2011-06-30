@@ -54,6 +54,7 @@ import java.beans.*;
 import java.security.*;
 import javax.swing.Action;
 
+import org.netbeans.modules.form.adito.components.AditoNodeConnect;
 import org.openide.ErrorManager;
 import org.openide.actions.*;
 import org.openide.nodes.*;
@@ -78,7 +79,7 @@ public class RADComponentNode extends FormNode
     private final static MessageFormat nodeNoNameFormat =
             new MessageFormat(
             FormUtils.getBundleString("FMT_UnnamedComponentNodeName")); // NOI18N
-    
+
     private RADComponent component;
     private boolean highlightDisplayName;
     private Map<Integer,Image> img = new HashMap<Integer,Image>();
@@ -100,6 +101,12 @@ public class RADComponentNode extends FormNode
     }
     
     void updateName() {
+        String displayName = AditoNodeConnect.getDisplayName(component);
+        if (displayName != null)
+        {
+          setDisplayName(displayName);
+          return;
+        }
         String compClassName = Utilities.getShortClassName(
                 component.getBeanClass());
         if (component == component.getFormModel().getTopRADComponent())
@@ -119,12 +126,15 @@ public class RADComponentNode extends FormNode
     }
 
     private static boolean iconsInitialized;
-    
+
     @Override
     public Image getIcon(final int iconType) {
-        Image icon = img.get(iconType);
+        Image icon = AditoNodeConnect.getIcon(component, iconType);
+        if (icon != null)
+          return icon;
+        icon = img.get(iconType);
         if (icon != null) return icon;
-        
+
         // try to get a special icon
         icon = BeanSupport.getBeanIcon(component.getBeanClass(), iconType);
         if (icon == null) {
