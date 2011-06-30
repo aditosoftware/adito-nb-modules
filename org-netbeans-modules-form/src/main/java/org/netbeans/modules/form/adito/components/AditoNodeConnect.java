@@ -7,6 +7,7 @@ import org.openide.loaders.*;
 import org.openide.nodes.Sheet;
 
 import java.awt.*;
+import java.beans.PropertyChangeListener;
 
 /**
  * @author J. Boesl, 30.06.11
@@ -56,6 +57,19 @@ public final class AditoNodeConnect
     });
   }
 
+  public static void addPropertyChangeListener(RADComponent pComponent, final PropertyChangeListener pListener)
+  {
+    _resolve(pComponent, new _C<Object>()
+    {
+      @Override
+      public Object resolve(DataObject pDataObject)
+      {
+        pDataObject.getNodeDelegate().addPropertyChangeListener(pListener);
+        return null;
+      }
+    });
+  }
+
   private static <T> T _resolve(RADComponent pComp, _C<T> pC)
   {
     DataFolder modelDataObject = pComp.getARADComponentHandler().getModelDataObject();
@@ -64,6 +78,9 @@ public final class AditoNodeConnect
     return pC.resolve(modelDataObject);
   }
 
+  /**
+   * Ausführungsinterface
+   */
   private interface _C<T>
   {
     T resolve(DataObject pDataObject);

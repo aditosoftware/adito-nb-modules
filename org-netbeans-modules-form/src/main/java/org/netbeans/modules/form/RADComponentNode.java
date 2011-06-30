@@ -83,23 +83,33 @@ public class RADComponentNode extends FormNode
     private RADComponent component;
     private boolean highlightDisplayName;
     private Map<Integer,Image> img = new HashMap<Integer,Image>();
-    
+
     public RADComponentNode(RADComponent component) {
         this(component instanceof ComponentContainer ?
             new RADChildren((ComponentContainer)component) : Children.LEAF,
             component);
     }
-    
+
     public RADComponentNode(Children children, RADComponent component) {
         super(children, component.getFormModel());
         this.component = component;
         component.setNodeReference(this);
-        //        getCookieSet().add(this);
+        // getCookieSet().add(this);
         if (component instanceof ComponentContainer)
             getCookieSet().add(new ComponentsIndex());
         updateName();
+
+        // wenn sich die Properties ändern soll das Sheet aktualisiert werden.
+        AditoNodeConnect.addPropertyChangeListener(component, new PropertyChangeListener()
+        {
+          @Override
+          public void propertyChange(PropertyChangeEvent evt)
+          {
+            firePropertyChange(evt.getPropertyName(), null, null);
+          }
+        });
     }
-    
+
     void updateName() {
         String displayName = AditoNodeConnect.getDisplayName(component);
         if (displayName != null)
@@ -116,11 +126,11 @@ public class RADComponentNode extends FormNode
             setDisplayName(nodeNameFormat.format(
                     new Object[] { getName(), compClassName }));
     }
-    
+
     public void fireComponentPropertiesChange() {
         firePropertyChange(null, null, null);
     }
-    
+
     public void fireComponentPropertySetsChange() {
         firePropertySetsChange(null, null);
     }
@@ -217,7 +227,7 @@ public class RADComponentNode extends FormNode
         if (actions == null) {
             List<Action> actions = new ArrayList<Action>(20);
             RADComponent topComp = component.getFormModel().getTopRADComponent();
-            
+
             if (component.isReadOnly()) {
                 if (component == topComp) {
                     actions.add(SystemAction.get(TestAction.class));
@@ -233,7 +243,7 @@ public class RADComponentNode extends FormNode
 //                  break;
 //                }
 //              }
-                
+
                 actions.add(SystemAction.get(CopyAction.class));
             } else {
                 if (InPlaceEditLayer.supportsEditingFor(component.getBeanClass())) {
@@ -250,7 +260,7 @@ public class RADComponentNode extends FormNode
 //                actions.add(SystemAction.get(BindAction.class));
 //                actions.add(SystemAction.get(EventsAction.class));
                 actions.add(null);
-                
+
                 java.util.List actionProps = component.getActionProperties();
               for (Object actionProp : actionProps)
               {
@@ -278,7 +288,7 @@ public class RADComponentNode extends FormNode
                     actions.add(SystemAction.get(ReorderAction.class));
                 }
                 addSeparator(actions);
-                
+
                 if (component != topComp) {
                     actions.add(SystemAction.get(CutAction.class));
                 }
@@ -290,21 +300,21 @@ public class RADComponentNode extends FormNode
                     actions.add(SystemAction.get(DuplicateAction.class));
                     actions.add(SystemAction.get(DeleteAction.class));
                 }
-                
+
                 actions.add(null);
             }
             actions.add(null);
-            
+
             javax.swing.Action[] superActions = super.getActions(context);
           actions.addAll(Arrays.asList(superActions));
-            
+
             this.actions = new Action[actions.size()];
             actions.toArray(this.actions);
         }
-        
+
         return actions;
     }
-    
+
     private void addLayoutActions(List<Action> actions) {
         if (component.getParentComponent() instanceof RADVisualContainer) {
             actions.add(SystemAction.get(AlignAction.class));
@@ -360,7 +370,7 @@ public class RADComponentNode extends FormNode
     public String getName() {
         return component.getName();
     }
-    
+
     /** Set the system name. Fires a property change event.
      * Also may change the display name according to {@link #displayFormat}.
      *
@@ -370,7 +380,7 @@ public class RADComponentNode extends FormNode
     public void setName(String s) {
         component.rename(s);
     }
-    
+
     /** Can this node be renamed?
      * @return <code>false</code>
      */
@@ -379,7 +389,7 @@ public class RADComponentNode extends FormNode
         return !component.isReadOnly()
                 && component != component.getFormModel().getTopRADComponent();
     }
-    
+
     /** Can this node be destroyed?
      * @return <CODE>false</CODE>
      */
@@ -388,7 +398,7 @@ public class RADComponentNode extends FormNode
         return !component.isReadOnly()
                 && component != component.getFormModel().getTopRADComponent();
     }
-    
+
     /** Remove the node from its parent and deletes it.
      * The default
      * implementation obtains write access to
@@ -419,7 +429,7 @@ public class RADComponentNode extends FormNode
         } // otherwise the component was likely already removed with a parent component
         super.destroy();
     }
-    
+
     /** Test whether there is a customizer for this node. If true,
      * the customizer can be obtained via {@link #getCustomizer}.
      *
@@ -430,7 +440,7 @@ public class RADComponentNode extends FormNode
         return !component.isReadOnly()
                 && ((component.getBeanInfo().getBeanDescriptor().getCustomizerClass() != null));
     }
-    
+
     /** Creates the customizer component for the node.
      * @return the component, or null if there is no customizer
      */
@@ -444,7 +454,7 @@ public class RADComponentNode extends FormNode
                 return null;
 //            }
         }
-        
+
         Object customizerObject;
         try {
             customizerObject = customizerClass.newInstance();
@@ -457,17 +467,17 @@ public class RADComponentNode extends FormNode
             ErrorManager.getDefault().notify(ErrorManager.WARNING, e);
             return null;
         }
-        
+
         if (!(customizerObject instanceof Component)
                 || !(customizerObject instanceof Customizer))
             return null;
-        
+
         if (customizerObject instanceof NodeCustomizer)
             ((NodeCustomizer)customizerObject)
                     .attach(component.getNodeReference());
-        
+
         Customizer customizer = (Customizer) customizerObject;
-        
+
         customizer.setObject(component.getBeanInstance());
 
         if (customizerObject instanceof FormAwareEditor) {
@@ -495,10 +505,10 @@ public class RADComponentNode extends FormNode
             }
         });
         // [undo/redo for customizer probably does not work...]
-        
+
         return (Component) customizerObject;
     }
-    
+
     private void updatePropertiesFromCustomizer(
             final FormProperty[] properties,
             final PropertyChangeEvent evt)
@@ -528,10 +538,10 @@ public class RADComponentNode extends FormNode
             }
         });
     }
-    
+
     // -----------------------------------------------------------------------------------------
     // Clipboard operations
-    
+
     /** Test whether this node can be copied.
      * The default implementation returns <code>true</code>.
      * @return <code>true</code> if it can
@@ -540,7 +550,7 @@ public class RADComponentNode extends FormNode
     public boolean canCopy() {
         return true;
     }
-    
+
     /** Test whether this node can be cut.
      * The default implementation assumes it can if this node is writeable.
      * @return <code>true</code> if it can
@@ -550,7 +560,7 @@ public class RADComponentNode extends FormNode
         return !component.isReadOnly()
                 && component != component.getFormModel().getTopRADComponent();
     }
-    
+
     /** Copy this node to the clipboard.
      *
      * @return The transferable for RACComponentNode
@@ -562,7 +572,7 @@ public class RADComponentNode extends FormNode
                 CopySupport.getComponentCopyFlavor(),
                 component);
     }
-    
+
     /** Cut this node to the clipboard.
      *
      * @return {@link Transferable} with one flavor, RAD_COMPONENT_COPY_FLAVOR
@@ -574,7 +584,7 @@ public class RADComponentNode extends FormNode
                 CopySupport.getComponentCutFlavor(),
                 component);
     }
-    
+
     /** Accumulate the paste types that this node can handle
      * for a given transferable.
      * @param t a transferable containing clipboard data
@@ -588,48 +598,48 @@ public class RADComponentNode extends FormNode
 
     // -----------------------------------------------------------------------------
     // RADComponentCookie implementation
-    
+
     @Override
     public RADComponent getRADComponent() {
         return component;
     }
-    
+
     // -----------------------------------
     // FormPropertyCookie implementation
-    
+
     @Override
     public FormProperty getProperty(String name) {
         return component.getPropertyByName(name, FormProperty.class, true);
         //        Node.Property prop = component.getPropertyByName(name, true);
         //        return (FormProperty) (prop instanceof FormProperty ? prop : null);
     }
-    
+
     // -----------------------------------------------------------------------------
     // Innerclasses
-    
+
     public static class RADChildren extends FormNodeChildren {
         private ComponentContainer container;
         private Object keyLayout;
-        
+
         public RADChildren(ComponentContainer container) {
             super();
             this.container = container;
             updateKeys();
         }
-        
+
         // FormNodeChildren implementation
         @Override
         protected void updateKeys() {
             RADComponent[] subComps = container.getSubBeans();
             List<Object> keys = new ArrayList<Object>(subComps.length + 2);
-            
+
             if (container instanceof RADVisualContainer) {
                 RADVisualContainer visualCont = (RADVisualContainer) container;
-                
+
                 RADComponent menuComp = visualCont.getContainerMenu();
                 if (menuComp != null)
                     keys.add(menuComp);
-                
+
                 if (visualCont.shouldHaveLayoutNode()) {
                     keyLayout = visualCont.getLayoutSupport().getLayoutDelegate(); //new Object(); // [need not be recreated every time]
                     keys.add(keyLayout);
@@ -642,10 +652,10 @@ public class RADComponentNode extends FormNode
             else {
               keys.addAll(Arrays.asList(subComps));
             }
-            
+
             setKeys(keys);
         }
-        
+
         @Override
         protected Node[] createNodes(Object key) {
             Node node;
@@ -658,9 +668,9 @@ public class RADComponentNode extends FormNode
             return new Node[] { node };
         }
     }
-    
+
     private final class ComponentsIndex extends org.openide.nodes.Index.Support {
-        
+
         @Override
         public Node[] getNodes() {
             RADComponent[] comps;
@@ -670,19 +680,19 @@ public class RADComponentNode extends FormNode
                 comps = ((ComponentContainer)component).getSubBeans();
             else
                 comps = null;
-            
+
             Node[] nodes = new Node[comps != null ? comps.length : 0];
             for (int i = 0; i < nodes.length; i++)
                 nodes[i] = comps[i].getNodeReference();
-            
+
             return nodes;
         }
-        
+
         @Override
         public int getNodesCount() {
             return getNodes().length;
         }
-        
+
         @Override
         public void reorder(int[] perm) {
             if (component instanceof ComponentContainer) {
@@ -692,7 +702,7 @@ public class RADComponentNode extends FormNode
             }
         }
     }
-    
+
     private static final class ChangeVariableNameAction extends RenameAction {
         @Override
         public String getName() {
@@ -708,7 +718,7 @@ public class RADComponentNode extends FormNode
             return "<html>" + getDisplayName() + "</html>"; // NOI18N
         }
     }
-    
+
     void highlightDisplayName(boolean highlight) {
         if(highlight != highlightDisplayName) {
             highlightDisplayName = highlight;
@@ -721,7 +731,7 @@ public class RADComponentNode extends FormNode
             public String getName() {
                 return FormUtils.getBundleString("NAME_CustomizeTableAction"); // NOI18N
             }
-            
+
             @Override
             protected boolean enable(Node[] activatedNodes) {
                 return true;

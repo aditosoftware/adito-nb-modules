@@ -80,10 +80,6 @@ public class FormDataBridge
         try
         {
           aditoProperty.setValue(formPropertyValue);
-          // TODO: es kann sein, dass andere Properties sich auch ändern.
-          RADComponentNode nodeReference = radComponent.getNodeReference();
-          if (nodeReference != null)
-            nodeReference.firePropertyChangeHelper(formPropName, null, null);
         }
         catch (InvocationTargetException e)
         {
@@ -124,12 +120,9 @@ public class FormDataBridge
     componentInfo.removePropertyListener(aditoPropertyChangeListener);
     aditoPropertyChangeListener = null;
     formPropertyChangeListener = null;
-    //for (FileObject fileObject : modelDataObject.getPrimaryFile().getChildren())
-    //fileObject.removeFileChangeListener(propertyChangeListener);
   }
 
-  private PropertyChangeListener _createFormPropertyChangeListener(/*final String pRadPropName,
-                                                                   final String pAditoPropName*/)
+  private PropertyChangeListener _createFormPropertyChangeListener()
   {
     return new PropertyChangeListener()
     {
@@ -138,30 +131,6 @@ public class FormDataBridge
       {
         Node.Property property = (Node.Property) evt.getSource();
         _radPropertiesChanged(property);
-        //System.out.println(((RADProperty)).getName());
-        //Node.Property aditoProperty = componentInfo.getProperty(pAditoPropName);
-        //if (aditoProperty != null)
-        //{
-        //  try
-        //  {
-        //    FormProperty formProperty = _getFormProperty(pRadPropName);
-        //    if (formProperty != null)
-        //    {
-        //      Object oldValue = aditoProperty.getValue();
-        //      Object newValue = formProperty.getValue();
-        //      if (!Objects.equal(oldValue, newValue))
-        //        aditoProperty.setValue(newValue);
-        //    }
-        //  }
-        //  catch (IllegalAccessException e)
-        //  {
-        //    e.printStackTrace(); // TODO: errorHandling
-        //  }
-        //  catch (InvocationTargetException e)
-        //  {
-        //    e.printStackTrace(); // TODO: errorHandling
-        //  }
-        //}
       }
     };
   }
@@ -193,10 +162,6 @@ public class FormDataBridge
           throw new RuntimeException(e); // TODO: runtimeEx
         }
         catch (InvocationTargetException e)
-        {
-          throw new RuntimeException(e); // TODO: runtimeEx
-        }
-        catch (NullPointerException e)
         {
           throw new RuntimeException(e); // TODO: runtimeEx
         }

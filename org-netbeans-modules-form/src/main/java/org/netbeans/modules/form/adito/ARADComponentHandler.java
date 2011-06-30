@@ -7,7 +7,6 @@ import org.jetbrains.annotations.*;
 import org.netbeans.modules.form.RADComponent;
 import org.openide.filesystems.*;
 import org.openide.loaders.*;
-import org.openide.nodes.*;
 import org.openide.windows.CloneableOpenSupport;
 
 import java.util.UUID;
@@ -24,8 +23,6 @@ public class ARADComponentHandler
   private DataFolder modelDataObject;
   @Nullable
   private FormDataBridge formDataBridge;
-  @Nullable
-  private Sheet sheet;
   @Nullable
   private FileObject deleted;
 
@@ -61,7 +58,7 @@ public class ARADComponentHandler
       {
         CloneableOpenSupport openSupport = dataObject.getLookup().lookup(CloneableOpenSupport.class);
         if (!openSupport.close())
-          throw new RuntimeException("user canceled");
+          throw new RuntimeException("user canceled"); // TODO
       }
     }
 
@@ -127,7 +124,6 @@ public class ARADComponentHandler
       radComponent = null;
     modelDataObject = null;
     formDataBridge = null;
-    sheet = null;
   }
 
   private void tryInit()
@@ -151,17 +147,6 @@ public class ARADComponentHandler
         throw new RuntimeException("couldn't init. " + modelDataObject, e);
       }
     }
-  }
-
-  @NotNull
-  public Node.PropertySet[] getPropertySets()
-  {
-    tryInit();
-    if (sheet == null && formDataBridge != null)
-      sheet = formDataBridge.getComponentInfo().createSheet();
-    if (sheet != null)
-      return sheet.toArray();
-    return new Node.PropertySet[0];
   }
 
 }

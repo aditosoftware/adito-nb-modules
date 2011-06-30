@@ -643,18 +643,6 @@ public class RADComponent {
     }
 
     protected <T> T getPropertyByName(String name, Class<? extends T> propertyType, boolean fromAll) {
-//      if (modelDataObject != null)
-//        for (Node.PropertySet propertySet : getProperties())
-//        {
-//          for (Node.Property property : propertySet.getProperties())
-//          {
-//            Class<?> propType = property.getValueType();
-//            String propName = property.getName();
-//            if (propName!= null && propType != null && propName.equals(name) && propType.equals(propertyType))
-//              return (T)property;
-//          }
-//        }
-
         Node.Property prop = nameToProperty.get(name);
         if (prop == null && fromAll) {
             if (beanProperties1 == null && !name.startsWith("$")) // NOI18N
@@ -832,22 +820,7 @@ public class RADComponent {
         if (beanProperties1 == null)
             createBeanProperties();
 
-        if (aRADComponentHandler != null)
-        {
-          propSets.addAll(Arrays.asList(aRADComponentHandler.getPropertySets()));
-          return;
-        }
-
         ResourceBundle bundle = FormUtils.getBundle();
-
-        propSets.add(new Node.PropertySet("test_name", "test_displayName", "test_shortDescr")
-        {
-          @Override
-          public Node.Property<?>[] getProperties()
-          {
-            return new Node.Property<?>[0];  //To change body of implemented methods use File | Settings | File Templates.
-          }
-        });
 
         Node.PropertySet ps;
         propSets.add(new Node.PropertySet(

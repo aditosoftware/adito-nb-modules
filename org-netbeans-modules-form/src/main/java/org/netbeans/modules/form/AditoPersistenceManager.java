@@ -12,6 +12,7 @@ import org.netbeans.modules.form.adito.perstistencemanager.*;
 import org.netbeans.modules.form.layoutdesign.LayoutModel;
 import org.netbeans.modules.form.layoutsupport.LayoutSupportManager;
 import org.openide.filesystems.FileObject;
+import org.openide.loaders.DataFolder;
 import org.openide.nodes.Node;
 
 import java.awt.*;
@@ -339,18 +340,17 @@ public class AditoPersistenceManager extends PersistenceManager
 
   private void _copyValues(RADComponent pComponent) throws InvocationTargetException, IllegalAccessException
   {
-    ARADComponentHandler aRADComponentHandler = pComponent.getARADComponentHandler();
-    if (aRADComponentHandler != null)
+    DataFolder modelDataObject = pComponent.getARADComponentHandler().getModelDataObject();
+    if (modelDataObject == null)
+      throw new IllegalStateException(pComponent.toString());
+
+    IFormComponentInfoProvider compInfoProvider = NbAditoInterface.lookup(IFormComponentInfoProvider.class);
+    IFormComponentInfo componentInfo = compInfoProvider.createModelPropProvider(modelDataObject);
+    for (Map.Entry<String, Object> entry : componentInfo.getInitialValues().entrySet())
     {
-      for (Node.PropertySet set : aRADComponentHandler.getPropertySets())
-      {
-        for (Node.Property prop : set.getProperties())
-        {
-          Node.Property radProperty = pComponent.getPropertyByName(prop.getName());
-          if (radProperty != null)
-            radProperty.setValue(prop.getValue());
-        }
-      }
+      Node.Property radProperty = pComponent.getPropertyByName(entry.getKey());
+      if (radProperty != null)
+        radProperty.setValue(entry.getValue());
     }
   }
 

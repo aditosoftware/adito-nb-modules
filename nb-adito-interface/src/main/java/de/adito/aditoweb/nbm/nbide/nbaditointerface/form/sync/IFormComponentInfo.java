@@ -5,6 +5,7 @@ import org.openide.nodes.*;
 
 import java.awt.*;
 import java.beans.PropertyChangeListener;
+import java.util.*;
 import java.util.List;
 
 /**
@@ -15,11 +16,13 @@ public interface IFormComponentInfo
 
   Sheet createSheet();
 
+  Map<String, Object> getInitialValues();
+
   EContainerType getContainerType();
 
-  public Class<?> getParentLayoutClass();
+  Class<?> getParentLayoutClass();
 
-  public Class<?> getLayoutClass();
+  Class<?> getLayoutClass();
 
   LayoutManager createLayout();
 
