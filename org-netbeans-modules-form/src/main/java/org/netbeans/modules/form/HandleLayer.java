@@ -55,6 +55,7 @@ import java.util.*;
 import java.text.MessageFormat;
 import javax.swing.undo.UndoableEdit;
 import org.netbeans.modules.form.actions.DuplicateAction;
+import org.netbeans.modules.form.adito.components.AditoHandleLayer;
 import org.netbeans.modules.form.assistant.AssistantModel;
 import org.netbeans.spi.palette.PaletteController;
 
@@ -248,10 +249,15 @@ public class HandleLayer extends JPanel implements MouseListener, MouseMotionLis
               for (RADComponent radComponent : formDesigner.getSelectedComponents())
               {
                 RADComponent metacomp = radComponent;
-                RADVisualComponent layoutMetacomp = formDesigner.componentToLayoutComponent(metacomp);
-                if (layoutMetacomp != null)
-                  metacomp = layoutMetacomp;
-                paintSelection(g2, metacomp, inLayout);
+                if (AditoHandleLayer.canHandle(metacomp))
+                  AditoHandleLayer.layerPaint(g2, formDesigner, metacomp);
+                else
+                {
+                  RADVisualComponent layoutMetacomp = formDesigner.componentToLayoutComponent(metacomp);
+                  if (layoutMetacomp != null)
+                    metacomp = layoutMetacomp;
+                  paintSelection(g2, metacomp, inLayout);
+                }
               }
                 paintButtonGroups(g2);
                 painted = true;

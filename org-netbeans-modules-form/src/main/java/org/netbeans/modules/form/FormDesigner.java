@@ -61,6 +61,7 @@ import org.jdesktop.layout.LayoutStyle;
 
 import org.netbeans.core.spi.multiview.*;
 import org.netbeans.modules.form.adito.AditoFormUtils;
+import org.netbeans.modules.form.adito.perstistencemanager.RADNonVisualContainerVisualComponent;
 import org.netbeans.modules.form.menu.MenuEditLayer;
 import org.netbeans.modules.form.palette.PaletteItem;
 import org.openide.DialogDisplayer;
@@ -1001,8 +1002,10 @@ public class FormDesigner extends TopComponent implements MultiViewElement
             if (layoutComponent != null) {
                 selectedLayoutComponents.add(layoutComponent);
                 ensureComponentIsShown((RADVisualComponent)metacomp);
-                selectionChanged();
             }
+            else if (metacomp.getParentComponent() instanceof RADNonVisualContainerVisualComponent)
+              ensureComponentIsShown(componentToLayoutComponent(metacomp.getParentComponent()));
+            selectionChanged();
         }
     }
 

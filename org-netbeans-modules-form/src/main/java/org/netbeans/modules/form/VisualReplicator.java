@@ -727,8 +727,14 @@ public class VisualReplicator {
         {
           RADNonVisualContainerVisualComponent metacont = (RADNonVisualContainerVisualComponent) metacomp;
           INonVisualLayoutComponent nonVisLayoutCompClone = (INonVisualLayoutComponent) compClone;
-          for (RADComponent radComponent : metacont.getSubBeans())
-            nonVisLayoutCompClone.addNonVisComp(radComponent.getBeanInstance());
+          for (RADComponent sub : metacont.getSubBeans())
+          {
+            Object subClone = getClonedComponent(sub);
+            if (subClone == null) {
+                subClone = cloneComponent(sub, relativeProperties);
+            }
+            nonVisLayoutCompClone.addNonVisComp(subClone);
+          }
         }
 
         else if (metacomp instanceof RADVisualContainer) {
