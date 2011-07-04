@@ -45,8 +45,9 @@
 
 package org.netbeans.modules.form;
 
+import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.NbAditoInterface;
+import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.model.IAditoModelDataProvider;
 import org.openide.filesystems.FileObject;
-import org.openide.filesystems.FileUtil;
 import org.openide.loaders.*;
 
 /** Loader for Forms. Recognizes file with extension .form and .java and with extension class if
@@ -54,19 +55,20 @@ import org.openide.loaders.*;
  *
  * @author Ian Formanek
  */
-public class FormDataLoader extends MultiFileLoader {
+public class FormDataLoader extends UniFileLoader {
     /** The standard extensions of the recognized files */
-    public static final String FORM_EXTENSION = "form"; // NOI18N
+    //public static final String FORM_EXTENSION = "form"; // NOI18N
     /** The standard extension for Java source files. */
     public static final String ADITO_EXTENSION = "aod"; // NOI18N
 
     static final long serialVersionUID =7259146057404524013L;
+
     /** Constructs a new FormDataLoader */
     public FormDataLoader() {
         super("org.netbeans.modules.form.FormDataObject"); // NOI18N
     }
 
-    
+
     /** Gets default display name. Overides superclass method. */
     @Override
     protected String defaultDisplayName() {
@@ -87,16 +89,14 @@ public class FormDataLoader extends MultiFileLoader {
      */
     @Override
     protected FileObject findPrimaryFile(FileObject fo) {
-	// never recognize folders.
-        if (fo.isFolder()) return null;
+	  // never recognize folders.
+        if (fo.isFolder())
+          return null;
         String ext = fo.getExt();
-        if (ext.equals(FORM_EXTENSION))
-            return FileUtil.findBrother(fo, ADITO_EXTENSION);
 
-        FileObject javaFile = findJavaPrimaryFile(fo);
-        return javaFile != null
-                    && FileUtil.findBrother(javaFile, FORM_EXTENSION) != null ?
-            javaFile : null;
+        if (ADITO_EXTENSION.equals(ext) && NbAditoInterface.lookup(IAditoModelDataProvider.class).isFrameModel(fo))
+          return fo;
+        return null;
     }
 
     /** Creates the right data object for given primary file.
@@ -111,23 +111,7 @@ public class FormDataLoader extends MultiFileLoader {
     protected MultiDataObject createMultiObject(FileObject primaryFile)
         throws DataObjectExistsException
     {
-        return new FormDataObject(FileUtil.findBrother(primaryFile, FORM_EXTENSION),
-                                  primaryFile,
-                                  this);
-    }
-
-    // from JavaDataLoader
-    // [?] Probably needed in case FormDataObject is deserialized, then the
-    // secondary entry is created additionally.
-    @Override
-    protected MultiDataObject.Entry createSecondaryEntry(MultiDataObject obj,
-                                                         FileObject secondaryFile)
-    {
-        assert FORM_EXTENSION.equals(secondaryFile.getExt());
-        
-        FileEntry formEntry = new FileEntry(obj, secondaryFile);
-        ((FormDataObject)obj).formEntry = formEntry;
-        return formEntry;
+        return new FormDataObject(primaryFile, this);
     }
 
     @Override
@@ -137,9 +121,4 @@ public class FormDataLoader extends MultiFileLoader {
       return new FileEntry(obj, primaryFile);
     }
 
-    private FileObject findJavaPrimaryFile(FileObject fo) {
-        if (fo.getExt().equals(ADITO_EXTENSION))
-            return fo;
-        return null;
-    }
 }

@@ -70,7 +70,8 @@ class FormRootNode extends FormNode {
     public FormRootNode(FormModel formModel) {
         super(new RootChildren(formModel), formModel);
         setName("Form Root Node"); // NOI18N
-        setIconBaseWithExtension("org/netbeans/modules/form/resources/formDesigner.gif"); // NOI18N
+        //setIconBaseWithExtension("org/netbeans/modules/form/resources/formDesigner.gif"); // NOI18N
+        setIconBaseWithExtension("org/netbeans/modules/form/resources/form.gif"); // NOI18N
         updateName(formModel.getName());
     }
 

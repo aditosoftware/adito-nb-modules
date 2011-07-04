@@ -51,8 +51,6 @@ import java.beans.PropertyChangeListener;
 import java.io.CharConversionException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.ObjectInput;
-import java.io.ObjectOutput;
 import java.io.OutputStream;
 import java.io.Reader;
 import java.io.Serializable;
@@ -68,14 +66,14 @@ import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.swing.JComponent;
-import javax.swing.JEditorPane;
+//import javax.swing.JComponent;
+//import javax.swing.JEditorPane;
 import javax.swing.JFrame;
-import javax.swing.JPanel;
+//import javax.swing.JPanel;
 import javax.swing.text.BadLocationException;
-import javax.swing.text.Document;
+//import javax.swing.text.Document;
 import javax.swing.text.EditorKit;
-import javax.swing.text.Position;
+//import javax.swing.text.Position;
 import javax.swing.text.StyledDocument;
 import org.netbeans.api.editor.guards.GuardedSectionManager;
 import org.netbeans.api.editor.guards.SimpleSection;
@@ -86,9 +84,9 @@ import org.netbeans.core.spi.multiview.CloseOperationHandler;
 import org.netbeans.core.spi.multiview.CloseOperationState;
 import org.netbeans.core.spi.multiview.MultiViewDescription;
 import org.netbeans.core.spi.multiview.MultiViewElement;
-import org.netbeans.core.spi.multiview.MultiViewElementCallback;
+//import org.netbeans.core.spi.multiview.MultiViewElementCallback;
 import org.netbeans.core.spi.multiview.MultiViewFactory;
-import org.netbeans.core.spi.multiview.SourceViewMarker;
+//import org.netbeans.core.spi.multiview.SourceViewMarker;
 import org.netbeans.spi.editor.guards.GuardedEditorSupport;
 import org.netbeans.spi.editor.guards.GuardedSectionsFactory;
 import org.netbeans.spi.editor.guards.GuardedSectionsProvider;
@@ -109,14 +107,14 @@ import org.openide.filesystems.FileStatusEvent;
 import org.openide.filesystems.FileStatusListener;
 import org.openide.filesystems.FileSystem;
 import org.openide.loaders.DataObject;
-import org.openide.loaders.MultiDataObject;
+//import org.openide.loaders.MultiDataObject;
 import org.openide.nodes.CookieSet;
 import org.openide.nodes.Node;
-import org.openide.text.CloneableEditor;
+//import org.openide.text.CloneableEditor;
 import org.openide.text.CloneableEditorSupport;
 import org.openide.text.DataEditorSupport;
-import org.openide.text.NbDocument;
-import org.openide.text.PositionRef;
+//import org.openide.text.NbDocument;
+//import org.openide.text.PositionRef;
 import org.openide.util.ImageUtilities;
 import org.openide.util.UserQuestionException;
 import org.openide.windows.CloneableOpenSupport;
@@ -135,16 +133,16 @@ import org.openide.xml.XMLUtil;
 public class FormEditorSupport extends DataEditorSupport implements EditorCookie.Observable, CloseCookie, PrintCookie {
     
     /** ID of the form designer (in the multiview) */
-    private static final String MV_FORM_ID = "form"; //NOI18N
+    private static final String MV_FORM_ID = "aod"; //NOI18N
     /** ID of the java editor (in the multiview) */
-    private static final String MV_JAVA_ID = "aod"; // NOI18N
+    //private static final String MV_JAVA_ID = "aod"; // NOI18N
     
-    private static final int JAVA_ELEMENT_INDEX = 0;
-    private static final int FORM_ELEMENT_INDEX = 1;
+    //private static final int JAVA_ELEMENT_INDEX = 0;
+    private static final int FORM_ELEMENT_INDEX = 0;
     private int elementToOpen; // default element index when multiview TC is created
     
     private static final String SECTION_INIT_COMPONENTS = "initComponents"; // NOI18N
-    private static final String SECTION_VARIABLES = "variables"; // NOI18N
+    //private static final String SECTION_VARIABLES = "variables"; // NOI18N
     
     /** Icon for the form editor multiview window */
     private static final String iconURL =
@@ -172,9 +170,8 @@ public class FormEditorSupport extends DataEditorSupport implements EditorCookie
     // --------------
     // constructor
     
-    public FormEditorSupport(MultiDataObject.Entry javaEntry,
-            FormDataObject formDataObject,
-            CookieSet cookies) {
+    public FormEditorSupport(FormDataObject formDataObject, CookieSet cookies)
+    {
         super(formDataObject, new Environment(formDataObject));
         setMIMEType("text/aod"); // NOI18N
         this.formDataObject = formDataObject;
@@ -270,12 +267,12 @@ public class FormEditorSupport extends DataEditorSupport implements EditorCookie
         fsToStatusListener.clear();
     }
     
-    void selectJavaEditor(){
-        MultiViewHandler handler = MultiViews.findMultiViewHandler(multiviewTC);
-        if (handler != null) {
-            handler.requestActive(handler.getPerspectives()[JAVA_ELEMENT_INDEX]);
-        }
-    }
+    //void selectJavaEditor(){
+    //    MultiViewHandler handler = MultiViews.findMultiViewHandler(multiviewTC);
+    //    if (handler != null) {
+    //        handler.requestActive(handler.getPerspectives()[JAVA_ELEMENT_INDEX]);
+    //    }
+    //}
 
     @Override
     protected boolean asynchronousOpen() {
@@ -309,16 +306,16 @@ public class FormEditorSupport extends DataEditorSupport implements EditorCookie
             DialogDisplayer.getDefault().notify(new NotifyDescriptor.Message(message));
             return;
         }
-        elementToOpen = JAVA_ELEMENT_INDEX;
+        //elementToOpen = JAVA_ELEMENT_INDEX;
         super.open();
         
         // This method must be executed in AWT thread because
         // otherwise multiview is opened in AWT using invokeLater
         // and we don't have multiviewTC correctly set
-        MultiViewHandler handler = MultiViews.findMultiViewHandler(multiviewTC);
-        if (handler != null) {
-            handler.requestActive(handler.getPerspectives()[JAVA_ELEMENT_INDEX]);
-        }
+        //MultiViewHandler handler = MultiViews.findMultiViewHandler(multiviewTC);
+        //if (handler != null) {
+        //    handler.requestActive(handler.getPerspectives()[JAVA_ELEMENT_INDEX]);
+        //}
     }
     
     /** Overriden from JavaEditor - opens editor at given position and ensures
@@ -326,15 +323,15 @@ public class FormEditorSupport extends DataEditorSupport implements EditorCookie
      * 
      * @param pos position
      */
-    public void openAt(PositionRef pos) {
-        elementToOpen = JAVA_ELEMENT_INDEX;
-        openCloneableTopComponent();
-        
-        MultiViewHandler handler = MultiViews.findMultiViewHandler(multiviewTC);
-        handler.requestActive(handler.getPerspectives()[JAVA_ELEMENT_INDEX]);
-        
-        openAt(pos, -1).getComponent().requestActive();
-    }
+    //public void openAt(PositionRef pos) {
+    //    elementToOpen = JAVA_ELEMENT_INDEX;
+    //    openCloneableTopComponent();
+    //
+    //    MultiViewHandler handler = MultiViews.findMultiViewHandler(multiviewTC);
+    //    handler.requestActive(handler.getPerspectives()[JAVA_ELEMENT_INDEX]);
+    //
+    //    openAt(pos, -1).getComponent().requestActive();
+    //}
 
   /** Public method for loading form data from file. Does not open the
      * source editor and designer, does not report errors and does not throw
@@ -534,7 +531,7 @@ public class FormEditorSupport extends DataEditorSupport implements EditorCookie
                     if (formDesigner != null) {
                         formDesigner.reset(formEditor); // might be reused
                     }
-                    selectJavaEditor();
+                    //selectJavaEditor();
                 }
             };
             if (EventQueue.isDispatchThread()) {
@@ -565,7 +562,7 @@ public class FormEditorSupport extends DataEditorSupport implements EditorCookie
         multiviewTC = null;
         guardedProvider = null;
         guardedEditor = null;
-        elementToOpen = JAVA_ELEMENT_INDEX;
+        //elementToOpen = JAVA_ELEMENT_INDEX;
     }
     
     private void multiViewClosed(CloneableTopComponent mvtc) {
@@ -735,7 +732,7 @@ public class FormEditorSupport extends DataEditorSupport implements EditorCookie
             return super.createPane(); // Issue 110249
         } 
         MultiViewDescription[] descs = new MultiViewDescription[] {
-            new JavaDesc(formDataObject), new FormDesc(formDataObject) };
+            new FormDesc(formDataObject) };
         
         CloneableTopComponent mvtc =
                 MultiViewFactory.createCloneableMultiView(
@@ -938,8 +935,8 @@ public class FormEditorSupport extends DataEditorSupport implements EditorCookie
             MultiViewHandler handler = MultiViews.findMultiViewHandler(tc);
             if (handler != null) {
                 String prefId = handler.getSelectedPerspective().preferredID();
-                if (MV_JAVA_ID.equals(prefId))
-                    return JAVA_ELEMENT_INDEX; // 0
+                //if (MV_JAVA_ID.equals(prefId))
+                //    return JAVA_ELEMENT_INDEX; // 0
                 if (MV_FORM_ID.equals(prefId))
                     return FORM_ELEMENT_INDEX; // 1
             }
@@ -1079,250 +1076,250 @@ public class FormEditorSupport extends DataEditorSupport implements EditorCookie
     // -------
     
     /** A descriptor for the java editor as an element in multiview. */
-    private static class JavaDesc implements MultiViewDescription, SourceViewMarker, Serializable {
-        
-        private static final long serialVersionUID =-3126744316624172415L;
-        
-        private DataObject dataObject;
-        
-        private JavaDesc() {
-        }
-        
-        public JavaDesc(DataObject formDO) {
-            dataObject = formDO;
-        }
-        
-        private FormEditorSupport getJavaEditor() {
-            return dataObject != null && dataObject instanceof FormDataObject ?
-                ((FormDataObject)dataObject).getFormEditorSupport() : null;
-        }
-        
-        @Override
-        public MultiViewElement createElement() {
-            FormEditorSupport javaEditor = getJavaEditor();
-            if (javaEditor != null) {
-                javaEditor.prepareDocument();
-                JavaEditorTopComponent editor = new JavaEditorTopComponent(dataObject.getCookie(FormEditorSupport.class));
-                Node[] nodes = editor.getActivatedNodes();
-                if ((nodes == null) || (nodes.length == 0)) {
-                    editor.setActivatedNodes(new Node[] {dataObject.getNodeDelegate()});
-                }
-                return editor;
-            }
-            return MultiViewFactory.BLANK_ELEMENT;
-        }
-        
-        @Override
-        public String getDisplayName() {
-            return FormUtils.getBundleString("CTL_SourceTabCaption"); // NOI18N
-        }
-        
-        @Override
-        public org.openide.util.HelpCtx getHelpCtx() {
-            return org.openide.util.HelpCtx.DEFAULT_HELP;
-        }
-        
-        @Override
-        public java.awt.Image getIcon() {
-            return ImageUtilities.loadImage(iconURL);
-        }
-        
-        @Override
-        public int getPersistenceType() {
-            return TopComponent.PERSISTENCE_ONLY_OPENED;
-        }
-        
-        @Override
-        public String preferredID() {
-            return MV_JAVA_ID;
-        }
-        
-        public void writeExternal(ObjectOutput out) throws IOException {
-            out.writeObject(dataObject);
-        }
-        
-        public void readExternal(ObjectInput in)
-                throws IOException, ClassNotFoundException
-        {
-            Object firstObject = in.readObject();
-            if (firstObject instanceof FormDataObject)
-                dataObject = (DataObject) firstObject;
-        }
-    }
+    //private static class JavaDesc implements MultiViewDescription, SourceViewMarker, Serializable {
+    //
+    //    private static final long serialVersionUID =-3126744316624172415L;
+    //
+    //    private DataObject dataObject;
+    //
+    //    private JavaDesc() {
+    //    }
+    //
+    //    public JavaDesc(DataObject formDO) {
+    //        dataObject = formDO;
+    //    }
+    //
+    //    private FormEditorSupport getJavaEditor() {
+    //        return dataObject != null && dataObject instanceof FormDataObject ?
+    //            ((FormDataObject)dataObject).getFormEditorSupport() : null;
+    //    }
+    //
+    //    @Override
+    //    public MultiViewElement createElement() {
+    //        FormEditorSupport javaEditor = getJavaEditor();
+    //        if (javaEditor != null) {
+    //            javaEditor.prepareDocument();
+    //            JavaEditorTopComponent editor = new JavaEditorTopComponent(dataObject.getCookie(FormEditorSupport.class));
+    //            Node[] nodes = editor.getActivatedNodes();
+    //            if ((nodes == null) || (nodes.length == 0)) {
+    //                editor.setActivatedNodes(new Node[] {dataObject.getNodeDelegate()});
+    //            }
+    //            return editor;
+    //        }
+    //        return MultiViewFactory.BLANK_ELEMENT;
+    //    }
+    //
+    //    @Override
+    //    public String getDisplayName() {
+    //        return FormUtils.getBundleString("CTL_SourceTabCaption"); // NOI18N
+    //    }
+    //
+    //    @Override
+    //    public org.openide.util.HelpCtx getHelpCtx() {
+    //        return org.openide.util.HelpCtx.DEFAULT_HELP;
+    //    }
+    //
+    //    @Override
+    //    public java.awt.Image getIcon() {
+    //        return ImageUtilities.loadImage(iconURL);
+    //    }
+    //
+    //    @Override
+    //    public int getPersistenceType() {
+    //        return TopComponent.PERSISTENCE_ONLY_OPENED;
+    //    }
+    //
+    //    @Override
+    //    public String preferredID() {
+    //        return MV_JAVA_ID;
+    //    }
+    //
+    //    public void writeExternal(ObjectOutput out) throws IOException {
+    //        out.writeObject(dataObject);
+    //    }
+    //
+    //    public void readExternal(ObjectInput in)
+    //            throws IOException, ClassNotFoundException
+    //    {
+    //        Object firstObject = in.readObject();
+    //        if (firstObject instanceof FormDataObject)
+    //            dataObject = (DataObject) firstObject;
+    //    }
+    //}
     
     // --------
     
-    private static class JavaEditorTopComponent
-                     extends CloneableEditor
-                     implements MultiViewElement
-    {
-        private static final long serialVersionUID =-3126744316624172415L;
-        
-        private transient JComponent toolbar;
-        
-        private transient MultiViewElementCallback multiViewObserver;
-        
-        JavaEditorTopComponent() {
-            super();
-        }
-        
-        JavaEditorTopComponent(DataEditorSupport s) {
-            super(s);
-        }
-        
-        @Override
-        public JComponent getToolbarRepresentation() {
-            if (toolbar == null) {
-                JEditorPane pane = getEditorPane();
-                if (pane != null) {
-                    Document doc = pane.getDocument();
-                    if (doc instanceof NbDocument.CustomToolbar) {
-                        toolbar = ((NbDocument.CustomToolbar)doc).createToolbar(pane);
-                    }
-                }
-                if (toolbar == null) {
-                    // attempt to create own toolbar??
-                    toolbar = new JPanel();
-                }
-            }
-            return toolbar;
-        }
-        
-        @Override
-        public JComponent getVisualRepresentation() {
-            return this;
-        }
-        
-        @Override
-        public void componentDeactivated() {
-            super.componentDeactivated();
-        }
-        
-        @Override
-        public void componentActivated() {
-            super.componentActivated();
-        }
-        
-        @Override
-        public void setMultiViewCallback(MultiViewElementCallback callback) {
-            multiViewObserver = callback;
-            
-            // needed for deserialization...
-            if (((DataEditorSupport) cloneableEditorSupport ()).getDataObject() instanceof FormDataObject) { // [obj is from EditorSupport.Editor]
-                // this is used (or misused?) to obtain the deserialized
-                // multiview topcomponent and set it to FormEditorSupport
-                ((FormDataObject)((DataEditorSupport) cloneableEditorSupport ()).getDataObject()).getFormEditorSupport().setTopComponent(
-                        callback.getTopComponent());
-            }
-        }
-        
-        @Override
-        public void requestVisible() {
-            if (multiViewObserver != null)
-                multiViewObserver.requestVisible();
-            else
-                super.requestVisible();
-        }
-        
-        @Override
-        public void requestActive() {
-            if (multiViewObserver != null)
-                multiViewObserver.requestActive();
-            else
-                super.requestActive();
-        }
-        
-        @Override
-        public void componentClosed() {
-            // Issue 52286 & 55818
-            super.canClose(null, true);
-            super.componentClosed();
-        }
-        
-        @Override
-        public void componentShowing() {
-            super.componentShowing();
-          // TODO: stripped
-//            DataObject dob = ((DataEditorSupport)cloneableEditorSupport()).getDataObject();
-//            FormDataObject formDO = (FormDataObject)dob;
-//            FormModel model = null;
-//            if (formDO != null) {
-//                FormEditorSupport fe = formDO.getFormEditor();
-//                if (fe != null) {
-//                    model = fe.getFormModel();
-//                    if (model != null) {
-//                        JavaCodeGenerator codeGen = (JavaCodeGenerator)FormEditor.getCodeGenerator(model);
-//                        if (codeGen != null) {
-//                            codeGen.regenerateCode();
-//                        }
+//    private static class JavaEditorTopComponent
+//                     extends CloneableEditor
+//                     implements MultiViewElement
+//    {
+//        private static final long serialVersionUID =-3126744316624172415L;
+//
+//        private transient JComponent toolbar;
+//
+//        private transient MultiViewElementCallback multiViewObserver;
+//
+//        JavaEditorTopComponent() {
+//            super();
+//        }
+//
+//        JavaEditorTopComponent(DataEditorSupport s) {
+//            super(s);
+//        }
+//
+//        @Override
+//        public JComponent getToolbarRepresentation() {
+//            if (toolbar == null) {
+//                JEditorPane pane = getEditorPane();
+//                if (pane != null) {
+//                    Document doc = pane.getDocument();
+//                    if (doc instanceof NbDocument.CustomToolbar) {
+//                        toolbar = ((NbDocument.CustomToolbar)doc).createToolbar(pane);
 //                    }
 //                }
+//                if (toolbar == null) {
+//                    // attempt to create own toolbar??
+//                    toolbar = new JPanel();
+//                }
 //            }
-            
-        }
-        
-        @Override
-        public void componentHidden() {
-            super.componentHidden();
-        }
-        
-        @Override
-        public void componentOpened() {
-            super.componentOpened();
-            DataObject dob = ((DataEditorSupport)cloneableEditorSupport()).getDataObject();
-            if ((multiViewObserver != null) && !(dob instanceof FormDataObject)) {
-                multiViewObserver.getTopComponent().close(); // Issue 67879
-                EditorCookie ec = dob.getCookie(EditorCookie.class);
-                ec.open();
-            }
-        }
-        
-        @Override
-        public void updateName() {
-            super.updateName();
-            if (multiViewObserver != null) {
-                FormDataObject formDataObject = (FormDataObject)((DataEditorSupport) cloneableEditorSupport ()).getDataObject();
-                String[] titles = getMVTCDisplayName(formDataObject);
-                setDisplayName(titles[0]);
-                setHtmlDisplayName(titles[1]);
-            }
-        }
-        
-        @Override
-        protected boolean closeLast() {
-            return true;
-        }
-        
-        @Override
-        public CloseOperationState canCloseElement() {
-            // if this is not the last cloned java editor component, closing is OK
-            if (FormEditorSupport.isLastView(multiViewObserver.getTopComponent()))
-                return CloseOperationState.STATE_OK;
-            
-            // return a placeholder state - to be sure our CloseHandler is called
-            return MultiViewFactory.createUnsafeCloseState(
-                    "ID_JAVA_CLOSING", // dummy ID // NOI18N
-                    MultiViewFactory.NOOP_CLOSE_ACTION,
-                    MultiViewFactory.NOOP_CLOSE_ACTION);
-        }
-        
-        protected boolean isActiveTC() {
-            TopComponent selected = getRegistry().getActivated();
-            
-            if (selected == null)
-                return false;
-            if (selected == this)
-                return true;
-            
-            MultiViewHandler handler = MultiViews.findMultiViewHandler(selected);
-            if (handler != null
-                    && MV_JAVA_ID.equals(handler.getSelectedPerspective()
-                    .preferredID()))
-                return true;
-            
-            return false;
-        }
-    }
+//            return toolbar;
+//        }
+//
+//        @Override
+//        public JComponent getVisualRepresentation() {
+//            return this;
+//        }
+//
+//        @Override
+//        public void componentDeactivated() {
+//            super.componentDeactivated();
+//        }
+//
+//        @Override
+//        public void componentActivated() {
+//            super.componentActivated();
+//        }
+//
+//        @Override
+//        public void setMultiViewCallback(MultiViewElementCallback callback) {
+//            multiViewObserver = callback;
+//
+//            // needed for deserialization...
+//            if (((DataEditorSupport) cloneableEditorSupport ()).getDataObject() instanceof FormDataObject) { // [obj is from EditorSupport.Editor]
+//                // this is used (or misused?) to obtain the deserialized
+//                // multiview topcomponent and set it to FormEditorSupport
+//                ((FormDataObject)((DataEditorSupport) cloneableEditorSupport ()).getDataObject()).getFormEditorSupport().setTopComponent(
+//                        callback.getTopComponent());
+//            }
+//        }
+//
+//        @Override
+//        public void requestVisible() {
+//            if (multiViewObserver != null)
+//                multiViewObserver.requestVisible();
+//            else
+//                super.requestVisible();
+//        }
+//
+//        @Override
+//        public void requestActive() {
+//            if (multiViewObserver != null)
+//                multiViewObserver.requestActive();
+//            else
+//                super.requestActive();
+//        }
+//
+//        @Override
+//        public void componentClosed() {
+//            // Issue 52286 & 55818
+//            super.canClose(null, true);
+//            super.componentClosed();
+//        }
+//
+//        @Override
+//        public void componentShowing() {
+//            super.componentShowing();
+//          // TODO: stripped
+////            DataObject dob = ((DataEditorSupport)cloneableEditorSupport()).getDataObject();
+////            FormDataObject formDO = (FormDataObject)dob;
+////            FormModel model = null;
+////            if (formDO != null) {
+////                FormEditorSupport fe = formDO.getFormEditor();
+////                if (fe != null) {
+////                    model = fe.getFormModel();
+////                    if (model != null) {
+////                        JavaCodeGenerator codeGen = (JavaCodeGenerator)FormEditor.getCodeGenerator(model);
+////                        if (codeGen != null) {
+////                            codeGen.regenerateCode();
+////                        }
+////                    }
+////                }
+////            }
+//
+//        }
+//
+//        @Override
+//        public void componentHidden() {
+//            super.componentHidden();
+//        }
+//
+//        @Override
+//        public void componentOpened() {
+//            super.componentOpened();
+//            DataObject dob = ((DataEditorSupport)cloneableEditorSupport()).getDataObject();
+//            if ((multiViewObserver != null) && !(dob instanceof FormDataObject)) {
+//                multiViewObserver.getTopComponent().close(); // Issue 67879
+//                EditorCookie ec = dob.getCookie(EditorCookie.class);
+//                ec.open();
+//            }
+//        }
+//
+//        @Override
+//        public void updateName() {
+//            super.updateName();
+//            if (multiViewObserver != null) {
+//                FormDataObject formDataObject = (FormDataObject)((DataEditorSupport) cloneableEditorSupport ()).getDataObject();
+//                String[] titles = getMVTCDisplayName(formDataObject);
+//                setDisplayName(titles[0]);
+//                setHtmlDisplayName(titles[1]);
+//            }
+//        }
+//
+//        @Override
+//        protected boolean closeLast() {
+//            return true;
+//        }
+//
+//        @Override
+//        public CloseOperationState canCloseElement() {
+//            // if this is not the last cloned java editor component, closing is OK
+//            if (FormEditorSupport.isLastView(multiViewObserver.getTopComponent()))
+//                return CloseOperationState.STATE_OK;
+//
+//            // return a placeholder state - to be sure our CloseHandler is called
+//            return MultiViewFactory.createUnsafeCloseState(
+//                    "ID_JAVA_CLOSING", // dummy ID // NOI18N
+//                    MultiViewFactory.NOOP_CLOSE_ACTION,
+//                    MultiViewFactory.NOOP_CLOSE_ACTION);
+//        }
+//
+//        //protected boolean isActiveTC() {
+//        //    TopComponent selected = getRegistry().getActivated();
+//        //
+//        //    if (selected == null)
+//        //        return false;
+//        //    if (selected == this)
+//        //        return true;
+//        //
+//        //    MultiViewHandler handler = MultiViews.findMultiViewHandler(selected);
+//        //    if (handler != null
+//        //            && MV_JAVA_ID.equals(handler.getSelectedPerspective()
+//        //            .preferredID()))
+//        //        return true;
+//        //
+//        //    return false;
+//        //}
+//    }
     
     // ------
     

@@ -191,14 +191,14 @@ public class FormEditor {
         }
         catch (PersistenceException ex) { // a fatal loading error happened
             logPersistenceError(ex, 0);
-            if (!formLoaded) { // loading failed - don't keep empty designer opened
-                java.awt.EventQueue.invokeLater(new Runnable() {
-                    @Override
-                    public void run() {
-                        getFormDataObject().getFormEditorSupport().selectJavaEditor();
-                    }
-                });
-            }
+            //if (!formLoaded) { // loading failed - don't keep empty designer opened
+            //    java.awt.EventQueue.invokeLater(new Runnable() {
+            //        @Override
+            //        public void run() {
+            //            getFormDataObject().getFormEditorSupport().selectJavaEditor();
+            //        }
+            //    });
+            //}
         }
 
         getFormDataObject().getFormEditorSupport().hideOpeningStatus();
@@ -321,8 +321,7 @@ public class FormEditor {
         // create form nodes hierarchy and add it to SourceChildren
         formRootNode = new FormRootNode(formModel);
         formRootNode.getChildren().getNodes();
-        formDataObject.getNodeDelegate().getChildren()
-                                          .add(new Node[] { formRootNode });
+        formDataObject.getNodeDelegate().getChildren().add(new Node[] { formRootNode });
         
         attachFormListener();
         attachDataObjectListener();
@@ -544,7 +543,7 @@ public class FormEditor {
                     } else { // close form, switch to source editor
                         getFormDesigner().reset(FormEditor.this); // might be reused
                         closeForm();
-                        getFormDataObject().getFormEditorSupport().selectJavaEditor();
+                        //getFormDataObject().getFormEditorSupport().selectJavaEditor();
                     }                                                      
                 }
             });

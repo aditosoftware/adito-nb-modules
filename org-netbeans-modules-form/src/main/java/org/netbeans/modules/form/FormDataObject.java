@@ -46,16 +46,14 @@
 package org.netbeans.modules.form;
 
 import java.io.IOException;
+import java.util.List;
 
+import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.NbAditoInterface;
+import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.model.*;
 import org.openide.cookies.EditCookie;
 import org.openide.cookies.OpenCookie;
 import org.openide.filesystems.FileObject;
-import org.openide.loaders.DataFolder;
-import org.openide.loaders.DataObject;
-import org.openide.loaders.DataObjectExistsException;
-import org.openide.loaders.FileEntry;
-import org.openide.loaders.MultiDataObject;
-import org.openide.loaders.SaveAsCapable;
+import org.openide.loaders.*;
 import org.openide.nodes.Node;
 import org.openide.nodes.Node.Cookie;
 import org.openide.util.Lookup;
@@ -66,7 +64,7 @@ import org.openide.util.Lookup;
  */
 public class FormDataObject extends MultiDataObject {
     /** generated Serialized Version UID */
-    //  static final long serialVersionUID = 7952143476761137063L;
+    static final long serialVersionUID = -975322003627854168L;
 
     //--------------------------------------------------------------------
     // Private variables
@@ -82,25 +80,22 @@ public class FormDataObject extends MultiDataObject {
 
     transient private OpenEdit openEdit;
 
-    /** The entry for the .form file */
-    FileEntry formEntry;
-
     //--------------------------------------------------------------------
     // Constructors
 
-    static final long serialVersionUID =-975322003627854168L;
-
-    public FormDataObject(FileObject ffo, FileObject jfo, FormDataLoader loader)
+    public FormDataObject(FileObject pFo, FormDataLoader pLoader)
         throws DataObjectExistsException
     {
-        super(jfo, loader);
-        formEntry = (FileEntry)registerEntry(ffo);
+        super(pFo, pLoader);
         getCookieSet().assign( SaveAsCapable.class, new SaveAsCapable() {
             @Override
             public void saveAs(FileObject folder, String fileName) throws IOException {
                 getFormEditorSupport().saveAs( folder, fileName );
             }
         });
+      List<Cookie> cookies = NbAditoInterface.lookup(IAditoModelDataProvider.class).getCookies(this);
+      for (Cookie cookie : cookies)
+        getCookieSet().add(cookie);
     }
 
     //--------------------------------------------------------------------
@@ -141,22 +136,20 @@ public class FormDataObject extends MultiDataObject {
     }
 
     public FileObject getFormFile() {
-        return formEntry.getFile();
+        return getPrimaryEntry().getFile();
     }
 
     public boolean isReadOnly() {
-        FileObject javaFO = getPrimaryFile();
-        FileObject formFO = formEntry.getFile();
-        return !javaFO.canWrite() || !formFO.canWrite();
+        return !getPrimaryFile().canWrite();
     }
 
     public boolean formFileReadOnly() {
-        return !formEntry.getFile().canWrite();
+        return isReadOnly();
     }
 
     public synchronized FormEditorSupport getFormEditorSupport() {
         if (formEditor == null) {
-            formEditor = new FormEditorSupport(getPrimaryEntry(), this, getCookieSet());
+            formEditor = new FormEditorSupport(this, getCookieSet());
         }
         return formEditor;
     }
@@ -166,10 +159,6 @@ public class FormDataObject extends MultiDataObject {
         return getFormEditorSupport();
     }
     // END of PENDING
-
-    FileEntry getFormEntry() {
-        return formEntry;
-    }
 
     /** Provides node that should represent this data object. When a node for
      * representation in a parent is requested by a call to getNode(parent) it

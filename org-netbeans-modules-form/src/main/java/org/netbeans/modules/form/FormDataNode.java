@@ -78,7 +78,6 @@ public class FormDataNode extends FilterNode
    */
   public FormDataNode(FormDataObject fdo)
   {
-//        this(JavaDataSupport.createJavaNode(fdo.getPrimaryFile())); // TODO: stripped
     this(_getNode(fdo.getPrimaryFile()));
   }
 

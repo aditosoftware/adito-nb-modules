@@ -4,6 +4,8 @@ import org.openide.filesystems.FileObject;
 import org.openide.loaders.*;
 import org.openide.nodes.Node;
 
+import java.util.List;
+
 /**
  * Stellt Daten über Modelle zur Verfügung.
  *
@@ -14,6 +16,8 @@ public interface IAditoModelDataProvider
 
   Node getBaseNode(DataObject pFormDataObject);
 
+  boolean isFrameModel(FileObject pAodFile);
+
   FileObject loadModel(FileObject pAodFile);
 
   FileObject getSubModels(FileObject pFileObject);
@@ -22,5 +26,7 @@ public interface IAditoModelDataProvider
                                       FileObject pDeleted);
 
   FileObject removeDataModel(DataObject pModelDataObject);
+
+  List<Node.Cookie> getCookies(DataObject pDataObject);
 
 }
