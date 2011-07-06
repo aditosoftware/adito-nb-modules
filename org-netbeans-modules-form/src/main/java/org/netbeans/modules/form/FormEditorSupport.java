@@ -131,7 +131,9 @@ import org.openide.xml.XMLUtil;
  */
 
 public class FormEditorSupport extends DataEditorSupport implements EditorCookie.Observable, CloseCookie, PrintCookie {
-    
+
+    private static final String DATAOBJECT_CLIENT_PROPERTY = "aditoDataObject";
+
     /** ID of the form designer (in the multiview) */
     private static final String MV_FORM_ID = "aod"; //NOI18N
     /** ID of the java editor (in the multiview) */
@@ -170,12 +172,12 @@ public class FormEditorSupport extends DataEditorSupport implements EditorCookie
     // --------------
     // constructor
     
-    public FormEditorSupport(FormDataObject formDataObject, CookieSet cookies)
+    public FormEditorSupport(FormDataObject pFormDataObject, CookieSet pCOokies)
     {
-        super(formDataObject, new Environment(formDataObject));
+        super(pFormDataObject, new Environment(pFormDataObject));
         setMIMEType("text/aod"); // NOI18N
-        this.formDataObject = formDataObject;
-        this.cookies = cookies;
+        formDataObject = pFormDataObject;
+        cookies = pCOokies;
     }
     
     // ----------
@@ -276,7 +278,7 @@ public class FormEditorSupport extends DataEditorSupport implements EditorCookie
 
     @Override
     protected boolean asynchronousOpen() {
-        return true;
+        return false;
     }
 
     /** Overriden from JavaEditor - opens editor and ensures it is selected
@@ -739,7 +741,7 @@ public class FormEditorSupport extends DataEditorSupport implements EditorCookie
                 descs,
                 descs[elementToOpen],
                 new CloseHandler(formDataObject));
-        
+
         // #45665 - dock into editor mode if possible..
         Mode editorMode = WindowManager.getDefault().findMode(CloneableEditorSupport.EDITOR_MODE);
         if (editorMode != null) {
@@ -863,6 +865,10 @@ public class FormEditorSupport extends DataEditorSupport implements EditorCookie
      */
     void setTopComponent(TopComponent topComp) {
         multiviewTC = (CloneableTopComponent)topComp;
+
+        // Hack damit das dataObject von der TopComponent bezogen werden kann.
+        multiviewTC.putClientProperty(DATAOBJECT_CLIENT_PROPERTY, formDataObject);
+
         String[] titles = getMVTCDisplayName(formDataObject);
         multiviewTC.setDisplayName(titles[0]);
         multiviewTC.setHtmlDisplayName(titles[1]);
@@ -893,15 +899,15 @@ public class FormEditorSupport extends DataEditorSupport implements EditorCookie
             return; // group not found (should not happen)
         
         boolean designerSelected = false;
-      for (Mode mode1 : wm.getModes())
-      {
-        TopComponent selected = mode1.getSelectedTopComponent();
-        if (getSelectedElementType(selected) == FORM_ELEMENT_INDEX)
+        for (Mode mode1 : wm.getModes())
         {
-          designerSelected = true;
-          break;
+          TopComponent selected = mode1.getSelectedTopComponent();
+          if (getSelectedElementType(selected) == FORM_ELEMENT_INDEX)
+          {
+            designerSelected = true;
+            break;
+          }
         }
-      }
 
         if (designerSelected && !Boolean.TRUE.equals(groupVisible)) {
             // Bug 116008: calling group.open() first time may cause hiding the
