@@ -68,6 +68,7 @@ public class JXTableDecorator extends JXTable {
         //super(model, columnModel, selectionModel);
       // EDIT ADITO
       super(model);
+      setAutoCreateColumnsFromModel(false);
       setAutoCreateRowSorter(false);
       setRowSorter(null);
       setSelectionModel(selectionModel);
