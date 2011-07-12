@@ -2,7 +2,7 @@ package org.netbeans.modules.form.adito.layout;
 
 import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.NbAditoInterface;
 import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.layout.IAditoLayoutProvider;
-import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.layout.anchor.*;
+import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.layout.anchor.IAnchorLayoutPropertyTypes;
 import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.layout.common.IAditoLayoutConstraints;
 import org.netbeans.modules.form.layoutsupport.LayoutConstraints;
 
@@ -33,8 +33,12 @@ public class AditoComponentConstraints extends AbstractComponentConstraints<IAnc
   public Rectangle getBounds()
   {
     IAditoLayoutConstraints<IAnchorLayoutPropertyTypes> constraints = getConstraintsObject();
-    return new Rectangle(constraints.getValue(type().x()), constraints.getValue(type().y()),
-                         constraints.getValue(type().width()), constraints.getValue(type().height()));
+    Integer x = constraints.getValue(type().x());
+    Integer y = constraints.getValue(type().y());
+    Integer width = constraints.getValue(type().width());
+    Integer height = constraints.getValue(type().height());
+    return new Rectangle(x == null ? 0 : x, y == null ? 0 : y,
+                         width == null ? 0 : width, height == null ? 0 : height);
   }
 
   public void setBounds(Rectangle pBounds)
