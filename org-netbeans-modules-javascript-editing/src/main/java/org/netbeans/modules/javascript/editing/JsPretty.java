@@ -766,7 +766,7 @@ public class JsPretty {
     }
 
     // it would be better to have special tokens for them
-    private final String NON_FORMATTED_KEYWORD_AFTER_RBRACE = "catch finally"; // NOI18N
+    private static final String NON_FORMATTED_KEYWORD_AFTER_RBRACE = "catch finally"; // NOI18N
 
     private boolean isNonFormattedAfterRBrace(final org.netbeans.api.lexer.Token<? extends JsTokenId> token) {
         String text = token.text().toString();
@@ -795,7 +795,7 @@ public class JsPretty {
         return result;
     }
 
-    private class StackItem {
+    private static class StackItem {
         int indent;
         boolean tip = true;
         StackItem(int indent) {

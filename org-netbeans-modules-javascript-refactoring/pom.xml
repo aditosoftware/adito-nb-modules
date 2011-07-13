@@ -136,6 +136,13 @@
       <version>RELEASE70</version>
     </dependency>
 
+    <!-- Fuer IFileSearcher -->
+    <dependency>
+      <groupId>de.adito.aditoweb.modules.nb-ide</groupId>
+      <artifactId>nb-adito-interface</artifactId>
+      <version>3.2</version>
+    </dependency>
+
   </dependencies>
 
 

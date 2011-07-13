@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<project xsi:schemaLocation = "http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns = "http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi = "http://www.w3.org/2001/XMLSchema-instance">
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
@@ -53,6 +53,7 @@
         <artifactId>nbm-maven-plugin</artifactId>
         <configuration>
           <publicPackages>
+            <publicPackage>de.adito.aditoweb.nbm.nbide.nbaditointerface.common.*</publicPackage>
             <publicPackage>de.adito.aditoweb.nbm.nbide.nbaditointerface.form.*</publicPackage>
             <publicPackage>de.adito.aditoweb.nbm.nbide.nbaditointerface.windowsystem.*</publicPackage>
           </publicPackages>

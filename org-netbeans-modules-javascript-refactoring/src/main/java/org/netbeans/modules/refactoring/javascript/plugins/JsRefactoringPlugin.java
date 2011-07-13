@@ -49,9 +49,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import org.netbeans.modules.csl.spi.support.ModificationResult;
-import org.netbeans.modules.javascript.editing.AstUtilities;
-import org.netbeans.modules.javascript.editing.JsParseResult;
-import org.netbeans.modules.javascript.editing.JsUtils;
+import org.netbeans.modules.javascript.editing.*;
 import org.netbeans.modules.javascript.editing.lexer.JsTokenId;
 import org.netbeans.modules.parsing.api.Embedding;
 import org.netbeans.modules.parsing.api.ParserManager;
@@ -199,15 +197,18 @@ public abstract class JsRefactoringPlugin extends ProgressProviderAdapter implem
             if (RetoucheUtils.isJsFile(file)) {
                 // RetoucheUtils.isJsFile includes HTML files, PHP files, etc.
                 // where as JsUtils.isJsFile includes ONLY pure JavaScript files
-                if ((!JsUtils.isJsFile(file) && file.getSize() >= 1024*1024) || file.getSize() == 0) {
+                if ((!JsUtils.isJsFile(file) && file.getSize() >= 1024*1024)) {
                     // Skip really large HTML files
                     continue;
                 }
-                sources.add(Source.create(file));
+                Source source = Source.create(file);
+                if (source != null)
+                  sources.add(source);
             }
         }
 
         try {
+          //JsIndex.get(files).
             ParserManager.parse(sources, task);
             //for(Source s : sources) {
             //    ParserManager.parse(Collections.singletonList(s), task);

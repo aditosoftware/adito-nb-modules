@@ -295,7 +295,7 @@ public class JsCodeCompletion implements CodeCompletionHandler {
         int lexOffset = context.getCaretOffset();
         String prefix = context.getPrefix();
         QuerySupport.Kind kind = context.isPrefixMatch() ? QuerySupport.Kind.PREFIX : QuerySupport.Kind.EXACT;
-        QueryType queryType = context.getQueryType();
+        //QueryType queryType = context.getQueryType();
         this.caseSensitive = context.isCaseSensitive();
 
         if (prefix == null) {
@@ -347,7 +347,7 @@ public class JsCodeCompletion implements CodeCompletionHandler {
             request.prefix = prefix;
             request.th = th;
             request.kind = kind;
-            request.queryType = queryType;
+            //request.queryType = queryType;
             request.fileObject = fileObject;
             request.anchor = lexOffset - prefix.length();
             request.call = call;
@@ -490,17 +490,17 @@ public class JsCodeCompletion implements CodeCompletionHandler {
         VariableVisitor v = result.getVariableVisitor();
 
         Map<String, List<Node>> localVars = v.getLocalVars(node);
-        for (String name : localVars.keySet()) {
-            if (((kind == QuerySupport.Kind.EXACT) && prefix.equals(name)) ||
+        for (Map.Entry<String, List<Node>> entry : localVars.entrySet()){
+          String name = entry.getKey();
+          if (((kind == QuerySupport.Kind.EXACT) && prefix.equals(name)) ||
                     ((kind != QuerySupport.Kind.EXACT) && startsWith(name, prefix))) {
-                List<Node> nodeList = localVars.get(name);
+                List<Node> nodeList = entry.getValue();
                 if (nodeList != null && nodeList.size() > 0) {
                     AstElement element = AstElement.getElement(request.info, nodeList.get(0));
                     proposals.add(new JsCompletionItem(element, request));
                 }
             }
         }
-
 
         // Add in "arguments" local variable which is available to all functions
         String ARGUMENTS = "arguments"; // NOI18N
@@ -2459,7 +2459,7 @@ public class JsCodeCompletion implements CodeCompletionHandler {
         private JsIndex index;
         private QuerySupport.Kind kind;
         private JsParseResult result;
-        private QueryType queryType;
+        //private QueryType queryType;
         private FileObject fileObject;
         private Call call;
         private boolean inCall;

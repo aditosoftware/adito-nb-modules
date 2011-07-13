@@ -46,12 +46,11 @@ package org.netbeans.modules.refactoring.javascript;
 
 import java.awt.Color;
 import java.io.CharConversionException;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 import javax.swing.text.AttributeSet;
 import javax.swing.text.StyleConstants;
+
+import de.adito.aditoweb.nbm.nbide.nbaditointerface.common.IFileSearcher;
 import org.mozilla.nb.javascript.Node;
 import org.netbeans.api.editor.mimelookup.MimeLookup;
 import org.netbeans.api.editor.mimelookup.MimePath;
@@ -86,7 +85,7 @@ import org.openide.xml.XMLUtil;
 /**
  * Various utilies related to Js refactoring; the generic ones are based
  * on the ones from the Java refactoring module.
- * 
+ *
  * @author Jan Becicka
  * @author Tor Norbye
  */
@@ -99,12 +98,12 @@ public class RetoucheUtils {
         //return LanguageRegistry.getInstance().isRelevantFor(fo, JsTokenId.JAVASCRIPT_MIME_TYPE);
 
         // these are the mimetypes for which JsEmbeddingProvider is registered
-        return JsUtils.isJsFile(fo)
-                || fo.getMIMEType().equals("application/x-httpd-eruby") //NOI18N
-                || fo.getMIMEType().equals("text/html")  //NOI18N
-                || fo.getMIMEType().equals("text/x-jsp")  //NOI18N
-                || fo.getMIMEType().equals("text/x-tag")  //NOI18N
-                || fo.getMIMEType().equals("text/x-php5");  //NOI18N
+        return JsUtils.isJsFile(fo);
+                //|| fo.getMIMEType().equals("application/x-httpd-eruby") //NOI18N
+                //|| fo.getMIMEType().equals("text/html")  //NOI18N
+                //|| fo.getMIMEType().equals("text/x-jsp")  //NOI18N
+                //|| fo.getMIMEType().equals("text/x-tag")  //NOI18N
+                //|| fo.getMIMEType().equals("text/x-php5");  //NOI18N
     }
 
     public static BaseDocument getDocument(Parser.Result info) {
@@ -116,9 +115,9 @@ public class RetoucheUtils {
 
         return doc;
     }
-    
-    
-    /** Compute the names (full and simple, e.g. Foo::Bar and Bar) for the given node, if any, and return as 
+
+
+    /** Compute the names (full and simple, e.g. Foo::Bar and Bar) for the given node, if any, and return as
      * a String[2] = {name,simpleName} */
     public static String[] getNodeNames(Node node) {
         String name = null;
@@ -138,11 +137,11 @@ public class RetoucheUtils {
             return new String[] { null, null};
         }
         // TODO - FUNCTION - also get full name!
-        
+
         if (simpleName == null) {
             simpleName = name;
         }
-        
+
         return new String[] { name, simpleName };
     }
 
@@ -202,7 +201,7 @@ public class RetoucheUtils {
                 if (category == null) {
                     category = "whitespace"; //NOI18N
                 }
-                set = settings.getTokenFontColors(category);                
+                set = settings.getTokenFontColors(category);
             }
             String tokenText = htmlize(token.text().toString());
             buf.append(color(tokenText, set));
@@ -216,7 +215,7 @@ public class RetoucheUtils {
         }
         if (string.trim().length() == 0) {
             return string.replace(" ", "&nbsp;").replace("\n", "<br>"); //NOI18N
-        } 
+        }
         StringBuffer buf = new StringBuffer(string);
         if (StyleConstants.isBold(set)) {
             buf.insert(0,"<b>"); //NOI18N
@@ -234,16 +233,15 @@ public class RetoucheUtils {
         buf.append("</font>"); //NOI18N
         return buf.toString();
     }
-    
+
     private static String getHTMLColor(Color c) {
         String colorR = "0" + Integer.toHexString(c.getRed()); //NOI18N
-        colorR = colorR.substring(colorR.length() - 2); 
+        colorR = colorR.substring(colorR.length() - 2);
         String colorG = "0" + Integer.toHexString(c.getGreen()); //NOI18N
         colorG = colorG.substring(colorG.length() - 2);
         String colorB = "0" + Integer.toHexString(c.getBlue()); //NOI18N
         colorB = colorB.substring(colorB.length() - 2);
-        String html_color = "#" + colorR + colorG + colorB; //NOI18N
-        return html_color;
+      return "#" + colorR + colorG + colorB;
     }
 
     public static boolean isFileInOpenProject(FileObject file) {
@@ -251,27 +249,32 @@ public class RetoucheUtils {
         Project p = FileOwnerQuery.getOwner(file);
         return OpenProjects.getDefault().isProjectOpen(p);
     }
-    
+
     public static boolean isOnSourceClasspath(FileObject fo) {
         Project p = FileOwnerQuery.getOwner(fo);
         if (p==null) {
             return false;
         }
         Project[] opened = OpenProjects.getDefault().getOpenProjects();
-        for (int i = 0; i<opened.length; i++) {
-            if (p.equals(opened[i]) || opened[i].equals(p)) {
-                //SourceGroup[] gr = ProjectUtils.getSources(p).getSourceGroups(JsProject.SOURCES_TYPE_Js);
-                SourceGroup[] gr = ProjectUtils.getSources(p).getSourceGroups(Sources.TYPE_GENERIC);
-                for (int j = 0; j < gr.length; j++) {
-                    if (fo==gr[j].getRootFolder()) {
-                        return true;
-                    }
-                    if (FileUtil.isParentOf(gr[j].getRootFolder(), fo)) {
-                        return true;
-                    }
-                }
-                return false;
+        for (Project anOpened : opened)
+        {
+          if (p.equals(anOpened) || anOpened.equals(p))
+          {
+            //SourceGroup[] gr = ProjectUtils.getSources(p).getSourceGroups(JsProject.SOURCES_TYPE_Js);
+            SourceGroup[] gr = ProjectUtils.getSources(p).getSourceGroups(Sources.TYPE_GENERIC);
+            for (SourceGroup aGr : gr)
+            {
+              if (fo == aGr.getRootFolder())
+              {
+                return true;
+              }
+              if (FileUtil.isParentOf(aGr.getRootFolder(), fo))
+              {
+                return true;
+              }
             }
+            return false;
+          }
         }
         return false;
     }
@@ -374,33 +377,19 @@ public class RetoucheUtils {
     }
 
     public static Set<FileObject> getJsFilesInProject(FileObject fileInProject, boolean excludeReadOnlySourceRoots) {
-        Set<FileObject> files = new HashSet<FileObject>(100);
         Collection<FileObject> sourceRoots = QuerySupport.findRoots(fileInProject,
                 Collections.singleton(JsClassPathProvider.SOURCE_CP),
                 Collections.singleton(JsClassPathProvider.BOOT_CP),
                 Collections.<String>emptySet());
-        for (FileObject root : sourceRoots) {
-            if(excludeReadOnlySourceRoots && !root.canWrite()) {
-                continue; //skip read only source roots
-            }
-            String name = root.getName();
-            // Skip non-refactorable parts in renaming
-            if (name.equals("vendor") || name.equals("script")) { // NOI18N
-                continue;
-            }
-            addJsFiles(files, root);
-        }
-
-        return files;
+        IFileSearcher fileSearcher = Lookup.getDefault().lookup(IFileSearcher.class);
+        return fileSearcher.getMatchingFiles(sourceRoots, new IFileSearcher.FileMatcher()
+        {
+          @Override
+          public boolean fits(FileObject pFo)
+          {
+            return isJsFile(pFo) && pFo.getSize() > 0;
+          }
+        });
     }
 
-    private static void addJsFiles(Set<FileObject> files, FileObject f) {
-        if (f.isFolder()) {
-            for (FileObject child : f.getChildren()) {
-                addJsFiles(files, child);
-            }
-        } else if (isJsFile(f)) {
-            files.add(f);
-        }
-    }
 }
