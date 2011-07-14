@@ -47,7 +47,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.EnumSet;
+//import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
@@ -936,7 +936,11 @@ public class JsIndexer extends EmbeddingIndexer {
         private boolean cachedIndexable;
 
         private boolean isIndexable(Indexable indexable, Snapshot snapshot) {
-            String name = snapshot.getSource().getFileObject().getNameExt();
+            FileObject sourceFo = snapshot.getSource().getFileObject();
+            if (!(sourceFo != null && JsUtils.isJsFile(sourceFo) && sourceFo.getSize() > 0))
+                return false;
+
+            String name = sourceFo.getNameExt();
 
             if (name.endsWith(".js"))  {
                 // we are indexing a javascript file (not embedded javascript)
@@ -950,13 +954,12 @@ public class JsIndexer extends EmbeddingIndexer {
                     }
                 }
 
-                FileObject fo = snapshot.getSource().getFileObject();
                 if (name.endsWith("min.js") && name.length() > 6 && !Character.isLetter(name.charAt(name.length()-7))) { // NOI18N
                     // See if we have a corresponding "un-min'ed" version in the same directory;
                     // if so, skip it
                     // Subtrack out the -min part
                     name = name.substring(0, name.length()-7); // NOI18N
-                    if (fo.getParent().getFileObject(name, "js") != null) { // NOI18N
+                    if (sourceFo.getParent().getFileObject(name, "js") != null) { // NOI18N
                         // The file has been deleted
                         // I still need to return yes here such that the file is deleted from the index.
                         return false;
@@ -970,7 +973,7 @@ public class JsIndexer extends EmbeddingIndexer {
                     // (Perhaps hardcode the list). It would be good if we could check multiple of the loadpath directories
                     // too, not just the same directory since there's a good likelihood (with the library manager) you
                     // have these in different dirs.
-                    FileObject parent = fo.getParent();
+                    FileObject parent = sourceFo.getParent();
                     if (parent == null) {
                         // Unlikely but let's play it safe
                         return true;
