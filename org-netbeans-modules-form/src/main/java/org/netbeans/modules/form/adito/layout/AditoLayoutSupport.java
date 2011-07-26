@@ -101,10 +101,6 @@ public class AditoLayoutSupport extends AbstractLayoutSupport
   public boolean paintDragFeedback(Container container, Container containerDelegate, Component component,
                                    LayoutConstraints newConstraints, int newIndex, Graphics g)
   {
-    if (newConstraints == null)
-    {
-      System.out.print(""); // TODO: sout
-    }
     Rectangle r = ((AditoComponentConstraints) newConstraints).getBounds();
     int w = r.width;
     int h = r.height;

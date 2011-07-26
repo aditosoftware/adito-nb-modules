@@ -388,7 +388,10 @@ public class AditoPersistenceManager extends PersistenceManager
         newComponent = new RADVisualContainer();
         break;
       case NONVISUAL:
-        newComponent = new RADNonVisualContainerVisualComponent();
+        if (FormUtils.isVisualizableClass(componentInfo.getComponentClass()))
+          newComponent = new RADNonVisualContainerVisualComponent();
+        else
+          newComponent = new RADNonVisualContainerNonVisualComponent();
         break;
       default:
         PersistenceException ex = new PersistenceException("Unknown component element: " + pChildModel.toString()); // NOI18N

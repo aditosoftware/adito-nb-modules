@@ -1,14 +1,11 @@
 package org.netbeans.modules.form.adito.perstistencemanager;
 
-
 import org.netbeans.modules.form.*;
 
 /**
- * Container der nicht-sichtbare Komponenten enthält.
- *
- * @author J. Boesl, 28.06.11
+ * @author J. Boesl, 26.07.11
  */
-public class RADNonVisualContainerVisualComponent extends RADVisualComponent implements ComponentContainer
+public class RADNonVisualContainerNonVisualComponent extends RADComponent implements ComponentContainer
 {
 
   private NonVisComponentContainer nonVisContainer = new NonVisComponentContainer()
@@ -16,15 +13,15 @@ public class RADNonVisualContainerVisualComponent extends RADVisualComponent imp
     @Override
     void assignParentComponent(RADComponent pComp)
     {
-      pComp.setParentComponent(RADNonVisualContainerVisualComponent.this);
+      pComp.setParentComponent(RADNonVisualContainerNonVisualComponent.this);
     }
   };
 
   @Override
-  protected void setBeanInstance(Object pBeanInstance)
+  protected void setBeanInstance(Object beanInstance)
   {
-    nonVisContainer.setBeanInstance(pBeanInstance);
-    super.setBeanInstance(pBeanInstance);
+    nonVisContainer.setBeanInstance(beanInstance);
+    super.setBeanInstance(beanInstance);
   }
 
   @Override
@@ -62,4 +59,5 @@ public class RADNonVisualContainerVisualComponent extends RADVisualComponent imp
   {
     return nonVisContainer.getIndexOf(comp);
   }
+
 }
