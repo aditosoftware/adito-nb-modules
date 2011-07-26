@@ -67,6 +67,18 @@ public class AditoPersistenceManager extends PersistenceManager
       RADComponent topComp = formModel.getTopRADComponent();
       _loadComponent(pInfo, modelRoot, topComp, null);
       _copyValues(topComp);
+
+      List<RADComponent> list = new ArrayList<RADComponent>();
+      List<FileObject> others = NbAditoInterface.lookup(IAditoModelDataProvider.class).getOthers(modelRoot);
+      for (FileObject other : others)
+      {
+        RADComponent othersRadComp = _restoreComponent(pInfo, other, null);
+        if (othersRadComp != null)
+          list.add(othersRadComp);
+      }
+      RADComponent[] nonVisualComps = new RADComponent[list.size()];
+      list.toArray(nonVisualComps);
+      formModel.getModelContainer().initSubComponents(nonVisualComps);
     }
     catch (Exception e)
     {
@@ -123,21 +135,16 @@ public class AditoPersistenceManager extends PersistenceManager
     // load subcomponents
     RADComponent[] childComponents;
 
-    FileObject childModels = NbAditoInterface.lookup(IAditoModelDataProvider.class).getSubModels(pModelComp);
-    if (childModels != null)
+    List<FileObject> childModels = NbAditoInterface.lookup(IAditoModelDataProvider.class).getSubModels(pModelComp);
+    List<RADComponent> list = new ArrayList<RADComponent>();
+    for (FileObject childModel : childModels)
     {
-      List<RADComponent> list = new ArrayList<RADComponent>();
-      for (FileObject childModel : childModels.getChildren())
-      {
-        RADComponent newComp = _restoreComponent(pInfo, childModel, pComponent);
-        if (newComp != null)
-          list.add(newComp);
-      }
-      childComponents = new RADComponent[list.size()];
-      list.toArray(childComponents);
+      RADComponent newComp = _restoreComponent(pInfo, childModel, pComponent);
+      if (newComp != null)
+        list.add(newComp);
     }
-    else
-      childComponents = new RADComponent[0];
+    childComponents = new RADComponent[list.size()];
+    list.toArray(childComponents);
 
 
     if (visualContainer != null)
@@ -354,13 +361,13 @@ public class AditoPersistenceManager extends PersistenceManager
     }
   }
 
-  private RADComponent _restoreComponent(APersistenceManagerInfo pInfo, FileObject pChildModel, RADComponent pParentComponent)
-      throws PersistenceException
+  private RADComponent _restoreComponent(APersistenceManagerInfo pInfo, FileObject pChildModel,
+                                         RADComponent pParentComponent) throws PersistenceException
   {
     AComponentInfo componentInfo = AComponentInfo.create(pChildModel, pInfo);
     if (componentInfo == null)
     {
-      System.out.println("null for: " + pChildModel.getPath());
+      System.out.println("null for: " + pChildModel.getPath()); // TODO: "null for: "
       return null;
     }
 
@@ -385,80 +392,6 @@ public class AditoPersistenceManager extends PersistenceManager
         pInfo.getNonfatalErrors().add(ex);
         return null;
     }
-
-
-//    if (XML_COMPONENT.equals(nodeName))
-//    {
-//      if (compClass == InvalidComponent.class)
-//      {
-//        if (parentComponent instanceof RADVisualContainer)
-//        {
-//          newComponent = new RADVisualComponent();
-//        }
-//        else
-//        {
-//          newComponent = new RADComponent();
-//        }
-//      }
-//      else
-//      {
-//        if (FormUtils.isVisualizableClass(compClass))
-//        {
-//          newComponent = new RADVisualComponent();
-//        }
-//        else
-//        {
-//          newComponent = new RADComponent();
-//        }
-//      }
-//    }
-//    else if (XML_MENU_COMPONENT.equals(nodeName))
-//    {
-//      if (RADVisualComponent.getMenuType(compClass) != null)
-//      {
-//        newComponent = new RADVisualComponent();
-//      }
-//      else
-//      {
-//        newComponent = new RADMenuItemComponent();
-//      }
-//    }
-//    else if (XML_MENU_CONTAINER.equals(nodeName))
-//    {
-//      if (RADVisualComponent.getMenuType(compClass) != null)
-//      {
-//        newComponent = new RADVisualContainer();
-//      }
-//      else
-//      {
-//        newComponent = new RADMenuComponent();
-//      }
-//    }
-//    else if (XML_CONTAINER.equals(nodeName))
-//    {
-//      if (compClass == InvalidComponent.class)
-//      {
-//        newComponent = new RADVisualContainer();
-//      }
-//      else
-//      {
-//        if (java.awt.Container.class.isAssignableFrom(compClass))
-//          newComponent = new RADVisualContainer();
-//        else newComponent = new RADContainer();
-//      }
-//    }
-//    else
-//    {
-//      PersistenceException ex = new PersistenceException(
-//          "Unknown component element"); // NOI18N
-//      annotateException(ex,
-//                        ErrorManager.ERROR,
-//                        FormUtils.getFormattedBundleString("FMT_ERR_UnknownElement", // NOI18N
-//                                                           new Object[]{nodeName})
-//      );
-//      nonfatalErrors.add(ex);
-//      return null;
-//    }
 
     // initialize the metacomponent
     Throwable compEx = null;
