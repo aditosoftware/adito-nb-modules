@@ -171,6 +171,8 @@ public class FormDataBridge
 
   private FormProperty _getFormProperty(String pRadPropName)
   {
+    if (pRadPropName == null)
+      return null;
     Node.Property prop = radComponent.getPropertyByName(pRadPropName);
     return prop instanceof FormProperty ? (FormProperty) prop : null;
   }

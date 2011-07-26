@@ -74,7 +74,10 @@ public class AditoPersistenceManager extends PersistenceManager
       {
         RADComponent othersRadComp = _restoreComponent(pInfo, other, null);
         if (othersRadComp != null)
+        {
           list.add(othersRadComp);
+          _copyValues(othersRadComp);
+        }
       }
       RADComponent[] nonVisualComps = new RADComponent[list.size()];
       list.toArray(nonVisualComps);

@@ -38,7 +38,7 @@ public final class AditoHandleLayer
         (RADNonVisualContainerVisualComponent) pMetacomp.getParentComponent();
     Component parentComp = (Component) pFormDesigner.getComponent(parentRad);
 
-    if (!parentComp.isShowing())
+    if (parentComp == null || !parentComp.isShowing())
       return;
 
     Object comp = pFormDesigner.getComponent(pMetacomp);

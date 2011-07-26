@@ -1004,7 +1004,11 @@ public class FormDesigner extends TopComponent implements MultiViewElement
                 ensureComponentIsShown((RADVisualComponent)metacomp);
             }
             else if (metacomp.getParentComponent() instanceof RADNonVisualContainerVisualComponent)
-              ensureComponentIsShown(componentToLayoutComponent(metacomp.getParentComponent()));
+            {
+              RADVisualComponent parentalRadVisualComp = componentToLayoutComponent(metacomp.getParentComponent());
+              if (parentalRadVisualComp != null)
+                ensureComponentIsShown(parentalRadVisualComp);
+            }
             selectionChanged();
         }
     }
