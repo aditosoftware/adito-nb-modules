@@ -1,6 +1,6 @@
 package org.netbeans.modules.form.adito.components;
 
-import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.layout.INonVisualLayoutComponent;
+import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.layout.INonVisualsContainer;
 import org.netbeans.modules.form.*;
 import org.netbeans.modules.form.adito.perstistencemanager.RADNonVisualContainerVisualComponent;
 
@@ -66,7 +66,7 @@ public final class AditoHandleLayer
 
   private static void _layerPaint(Graphics2D pG, Component pParentComp, Object pComp)
   {
-    Rectangle rect = ((INonVisualLayoutComponent) pParentComp).getBounds(pComp);
+    Rectangle rect = ((INonVisualsContainer) pParentComp).getBounds(pComp);
     if (rect == null)
       return;
     pG.drawRect(rect.x, rect.y, rect.width, rect.height);

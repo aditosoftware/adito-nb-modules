@@ -5,8 +5,10 @@ import java.awt.*;
 /**
  * @author J. Boesl, 29.06.11
  */
-public interface INonVisualLayoutComponent
+public interface INonVisualsContainer
 {
+
+  void setName(String pName);
 
   void addNonVisComp(Object pNonVisualComponent);
 

@@ -1,6 +1,6 @@
 package org.netbeans.modules.form.adito.perstistencemanager;
 
-import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.layout.INonVisualLayoutComponent;
+import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.layout.INonVisualsContainer;
 import org.netbeans.modules.form.*;
 
 import java.util.*;
@@ -12,17 +12,25 @@ abstract class NonVisComponentContainer implements ComponentContainer
 {
 
   private Set<RADComponent> subComponents;
-  private INonVisualLayoutComponent beanInstance;
+  private INonVisualsContainer beanInstance;
+  private String name;
 
 
   abstract void assignParentComponent(RADComponent pComp);
 
 
-  protected void setBeanInstance(Object pBeanInstance)
+  void setBeanInstance(Object pBeanInstance)
   {
-    if (!(pBeanInstance instanceof INonVisualLayoutComponent))
+    if (!(pBeanInstance instanceof INonVisualsContainer))
       throw new IllegalArgumentException("invalid bean component for " + getClass().getSimpleName() + ": " + pBeanInstance);
-    beanInstance = (INonVisualLayoutComponent) pBeanInstance;
+    beanInstance = (INonVisualsContainer) pBeanInstance;
+    _updateName();
+  }
+
+  void setName(String pName)
+  {
+    name = pName;
+    _updateName();
   }
 
 
@@ -83,6 +91,12 @@ abstract class NonVisComponentContainer implements ComponentContainer
     beanInstance.addNonVisComp(comp.getBeanInstance());
     subComponents.add(comp);
     assignParentComponent(comp);
+  }
+
+  private void _updateName()
+  {
+    if (beanInstance != null)
+      beanInstance.setName(name);
   }
 
 }

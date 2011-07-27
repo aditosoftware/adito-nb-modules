@@ -21,6 +21,13 @@ public class RADNonVisualContainerVisualComponent extends RADVisualComponent imp
   };
 
   @Override
+  public void setName(String name)
+  {
+    nonVisContainer.setName(name);
+    super.setName(name);
+  }
+
+  @Override
   protected void setBeanInstance(Object pBeanInstance)
   {
     nonVisContainer.setBeanInstance(pBeanInstance);
@@ -62,4 +69,5 @@ public class RADNonVisualContainerVisualComponent extends RADVisualComponent imp
   {
     return nonVisContainer.getIndexOf(comp);
   }
+
 }
