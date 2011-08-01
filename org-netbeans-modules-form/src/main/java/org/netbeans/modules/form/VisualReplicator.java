@@ -54,7 +54,7 @@ import java.util.logging.Logger;
 //import org.jdesktop.beansbinding.BindingGroup;
 
 import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.layout.INonVisualsContainer;
-import org.netbeans.modules.form.adito.perstistencemanager.RADNonVisualContainerVisualComponent;
+import org.netbeans.modules.form.adito.perstistencemanager.*;
 import org.openide.ErrorManager;
 
 import org.netbeans.modules.form.fakepeer.FakePeerSupport;
@@ -723,9 +723,10 @@ public class VisualReplicator {
         }
 
         // Extrabehandlung fuer Container die nicht-sichtbare Komponenten enthalten.
-        if (metacomp instanceof RADNonVisualContainerVisualComponent)
+        if (metacomp instanceof RADNonVisualContainerVisualComponent ||
+            metacomp instanceof RADNonVisualContainerNonVisualComponent)
         {
-          RADNonVisualContainerVisualComponent metacont = (RADNonVisualContainerVisualComponent) metacomp;
+          ComponentContainer metacont = (ComponentContainer) metacomp;
           INonVisualsContainer nonVisLayoutCompClone = (INonVisualsContainer) compClone;
           for (RADComponent sub : metacont.getSubBeans())
           {

@@ -13,7 +13,6 @@ abstract class NonVisComponentContainer implements ComponentContainer
 
   private Set<RADComponent> subComponents;
   private INonVisualsContainer beanInstance;
-  private String name;
 
 
   abstract void assignParentComponent(RADComponent pComp);
@@ -24,15 +23,7 @@ abstract class NonVisComponentContainer implements ComponentContainer
     if (!(pBeanInstance instanceof INonVisualsContainer))
       throw new IllegalArgumentException("invalid bean component for " + getClass().getSimpleName() + ": " + pBeanInstance);
     beanInstance = (INonVisualsContainer) pBeanInstance;
-    _updateName();
   }
-
-  void setName(String pName)
-  {
-    name = pName;
-    _updateName();
-  }
-
 
   @Override
   public RADComponent[] getSubBeans()
@@ -91,12 +82,6 @@ abstract class NonVisComponentContainer implements ComponentContainer
     beanInstance.addNonVisComp(comp.getBeanInstance());
     subComponents.add(comp);
     assignParentComponent(comp);
-  }
-
-  private void _updateName()
-  {
-    if (beanInstance != null)
-      beanInstance.setName(name);
   }
 
 }

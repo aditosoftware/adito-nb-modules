@@ -387,8 +387,6 @@ public class RADComponent {
       if (!needsVariableRename(name))
         return;
       setStoredName(name);
-      if (getNodeReference() != null)
-        getNodeReference().updateName();
     }
 
     /**
@@ -400,8 +398,6 @@ public class RADComponent {
       if (!needsVariableRename(name))
         return;
       setStoredName(name);
-      if (getNodeReference() != null)
-        getNodeReference().updateName();
 
 //        if (!org.openide.util.Utilities.isJavaIdentifier(name)) {
 //            IllegalArgumentException iae =
@@ -439,6 +435,8 @@ public class RADComponent {
 
     public void setStoredName(String name) {
         storedName = name;
+        if (getNodeReference() != null)
+          getNodeReference().updateName();
     }
 
 //    private void renameDefaultEventHandlers(String oldComponentName,
