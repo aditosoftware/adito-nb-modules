@@ -61,7 +61,7 @@ import org.jdesktop.layout.LayoutStyle;
 
 import org.netbeans.core.spi.multiview.*;
 import org.netbeans.modules.form.adito.AditoFormUtils;
-import org.netbeans.modules.form.adito.perstistencemanager.RADNonVisualContainerVisualComponent;
+import org.netbeans.modules.form.adito.components.AditoFormDesignerExtension;
 import org.netbeans.modules.form.menu.MenuEditLayer;
 import org.netbeans.modules.form.palette.PaletteItem;
 import org.openide.DialogDisplayer;
@@ -77,7 +77,6 @@ import org.openide.explorer.ExplorerUtils;
 import org.openide.explorer.ExplorerManager;
 
 import org.netbeans.modules.form.assistant.*;
-//import org.netbeans.modules.form.wizard.ConnectionWizard;
 import org.netbeans.modules.form.layoutsupport.LayoutSupportManager;
 import org.netbeans.modules.form.layoutdesign.*;
 import org.netbeans.modules.form.layoutdesign.support.SwingLayoutBuilder;
@@ -1003,11 +1002,11 @@ public class FormDesigner extends TopComponent implements MultiViewElement
                 selectedLayoutComponents.add(layoutComponent);
                 ensureComponentIsShown((RADVisualComponent)metacomp);
             }
-            else if (metacomp.getParentComponent() instanceof RADNonVisualContainerVisualComponent)
+            else if (AditoFormDesignerExtension.canHandle(metacomp))
             {
-              RADVisualComponent parentalRadVisualComp = componentToLayoutComponent(metacomp.getParentComponent());
-              if (parentalRadVisualComp != null)
-                ensureComponentIsShown(parentalRadVisualComp);
+              RADVisualComponent handledComponent = AditoFormDesignerExtension.handle(this, metacomp);
+              if (handledComponent != null)
+                ensureComponentIsShown(handledComponent);
             }
             selectionChanged();
         }

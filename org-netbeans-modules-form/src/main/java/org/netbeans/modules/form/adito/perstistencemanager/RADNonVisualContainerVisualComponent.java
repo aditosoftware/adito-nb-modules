@@ -8,7 +8,7 @@ import org.netbeans.modules.form.*;
  *
  * @author J. Boesl, 28.06.11
  */
-public class RADNonVisualContainerVisualComponent extends RADVisualComponent implements ComponentContainer
+public class RADNonVisualContainerVisualComponent extends RADVisualComponent implements INonVisComponentContainer
 {
 
   private NonVisComponentContainer nonVisContainer = new NonVisComponentContainer()
@@ -26,6 +26,11 @@ public class RADNonVisualContainerVisualComponent extends RADVisualComponent imp
   {
     nonVisContainer.setBeanInstance(pBeanInstance);
     super.setBeanInstance(pBeanInstance);
+  }
+
+  public void setActive()
+  {
+    nonVisContainer.setActive();
   }
 
   @Override
