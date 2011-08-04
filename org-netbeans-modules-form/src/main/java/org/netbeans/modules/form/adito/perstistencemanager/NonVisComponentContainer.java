@@ -68,7 +68,7 @@ abstract class NonVisComponentContainer implements INonVisComponentContainer
   @Override
   public void remove(RADComponent comp)
   {
-    beanInstance.removeNonVisComp(comp.getBeanInstance());
+    beanInstance.removeNonSwingComp(comp.getBeanInstance());
     if (subComponents.remove(comp))
       comp.setParentComponent(null);
   }
@@ -85,7 +85,7 @@ abstract class NonVisComponentContainer implements INonVisComponentContainer
 
   private void _add(RADComponent comp)
   {
-    beanInstance.addNonVisComp(comp.getBeanInstance());
+    beanInstance.addNonSwingComp(comp.getBeanInstance());
     subComponents.add(comp);
     assignParentComponent(comp);
   }

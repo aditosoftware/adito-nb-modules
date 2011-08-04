@@ -66,7 +66,7 @@ public final class AditoHandleLayer
 
   private static void _layerPaint(Graphics2D pG, Component pParentComp, Object pComp)
   {
-    Rectangle rect = ((INonVisualsContainer) pParentComp).getBounds(pComp);
+    Rectangle rect = ((INonVisualsContainer) pParentComp).getChildBounds(pComp);
     if (rect == null)
       return;
     pG.drawRect(rect.x, rect.y, rect.width, rect.height);

@@ -15,10 +15,10 @@ public interface INonVisualsContainer
    */
   void setActive();
 
-  void addNonVisComp(Object pNonVisualComponent);
+  boolean addNonSwingComp(Object pComp);
 
-  void removeNonVisComp(Object pNonVisualComponent);
+  boolean removeNonSwingComp(Object pComp);
 
-  Rectangle getBounds(Object pNonVisualComponent);
+  Rectangle getChildBounds(Object pComp);
 
 }
