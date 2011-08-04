@@ -1,11 +1,11 @@
 package org.netbeans.modules.form.adito.perstistencemanager;
 
-import org.netbeans.modules.form.RADComponent;
+import org.netbeans.modules.form.*;
 
 /**
  * @author J. Boesl, 26.07.11
  */
-public class RADNonVisualContainerNonVisualComponent extends RADComponent implements INonVisComponentContainer
+public class RADNonVisualContainerNonVisualComponent extends RADComponent implements ComponentContainer
 {
 
   private NonVisComponentContainer nonVisContainer = new NonVisComponentContainer()
@@ -22,11 +22,6 @@ public class RADNonVisualContainerNonVisualComponent extends RADComponent implem
   {
     nonVisContainer.setBeanInstance(beanInstance);
     super.setBeanInstance(beanInstance);
-  }
-
-  public void setActive()
-  {
-    nonVisContainer.setActive();
   }
 
   @Override

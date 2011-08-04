@@ -1,6 +1,6 @@
 package org.netbeans.modules.form.adito.components;
 
-import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.layout.INonVisualsContainer;
+import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.layout.INonSwingContainer;
 import org.netbeans.modules.form.*;
 import org.netbeans.modules.form.adito.perstistencemanager.*;
 
@@ -30,8 +30,8 @@ public final class AditoFormDesignerExtension
     if (handled != null)
     {
       Object component = pFormDesigner.getComponent(pMetaComp);
-      if (component instanceof INonVisualsContainer)
-        ((INonVisualsContainer) component).setActive();
+      if (component instanceof INonSwingContainer)
+        ((INonSwingContainer) component).setActive();
     }
     return handled;
   }

@@ -53,7 +53,7 @@ import java.util.logging.Logger;
 
 //import org.jdesktop.beansbinding.BindingGroup;
 
-import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.layout.INonVisualsContainer;
+import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.layout.INonSwingContainer;
 import org.netbeans.modules.form.adito.perstistencemanager.*;
 import org.openide.ErrorManager;
 
@@ -727,7 +727,7 @@ public class VisualReplicator {
             metacomp instanceof RADNonVisualContainerNonVisualComponent)
         {
           ComponentContainer metacont = (ComponentContainer) metacomp;
-          INonVisualsContainer nonVisLayoutCompClone = (INonVisualsContainer) compClone;
+          INonSwingContainer nonVisLayoutCompClone = (INonSwingContainer) compClone;
           for (RADComponent sub : metacont.getSubBeans())
           {
             Object subClone = getClonedComponent(sub);

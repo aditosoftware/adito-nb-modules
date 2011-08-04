@@ -1,18 +1,18 @@
 package org.netbeans.modules.form.adito.perstistencemanager;
 
-import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.layout.INonVisualsContainer;
-import org.netbeans.modules.form.RADComponent;
+import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.layout.INonSwingContainer;
+import org.netbeans.modules.form.*;
 
 import java.util.*;
 
 /**
  * @author J. Boesl, 26.07.11
  */
-abstract class NonVisComponentContainer implements INonVisComponentContainer
+abstract class NonVisComponentContainer implements ComponentContainer
 {
 
   private Set<RADComponent> subComponents;
-  private INonVisualsContainer beanInstance;
+  private INonSwingContainer beanInstance;
 
 
   abstract void assignParentComponent(RADComponent pComp);
@@ -20,15 +20,9 @@ abstract class NonVisComponentContainer implements INonVisComponentContainer
 
   void setBeanInstance(Object pBeanInstance)
   {
-    if (!(pBeanInstance instanceof INonVisualsContainer))
+    if (!(pBeanInstance instanceof INonSwingContainer))
       throw new IllegalArgumentException("invalid bean component for " + getClass().getSimpleName() + ": " + pBeanInstance);
-    beanInstance = (INonVisualsContainer) pBeanInstance;
-  }
-
-  @Override
-  public void setActive()
-  {
-    beanInstance.setActive();
+    beanInstance = (INonSwingContainer) pBeanInstance;
   }
 
   @Override
