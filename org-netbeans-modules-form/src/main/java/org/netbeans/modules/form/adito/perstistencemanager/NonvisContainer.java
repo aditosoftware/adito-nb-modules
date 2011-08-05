@@ -77,7 +77,7 @@ abstract class NonvisContainer<T extends INonSwingContainer> implements Componen
     NonvisContainerRADComponent nonvis = _check(pComp, NonvisContainerRADComponent.class);
     if (nonvis == null)
       return;
-    beanInstance.removeNonSwingComp(nonvis.getBeanInstanceTyped());
+    beanInstance.removeCompNonSwing(nonvis.getBeanInstanceTyped());
     if (subComponents.remove(nonvis))
       //noinspection NullableProblems
       nonvis.setParentComponent(null);
@@ -98,7 +98,7 @@ abstract class NonvisContainer<T extends INonSwingContainer> implements Componen
     NonvisContainerRADComponent nonvis = _check(pComp, NonvisContainerRADComponent.class);
     if (nonvis == null)
       return;
-    beanInstance.addNonSwingComp(nonvis.getBeanInstanceTyped());
+    beanInstance.addCompNonSwing(nonvis.getBeanInstanceTyped());
     if (subComponents.add(nonvis))
       assignParentComponent(nonvis);
   }

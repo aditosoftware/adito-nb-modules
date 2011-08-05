@@ -732,7 +732,7 @@ public class VisualReplicator {
                 Object subClone = getClonedComponent(sub);
                 if (subClone == null)
                     subClone = cloneComponent(sub, relativeProperties);
-                nonVisLayoutCompClone.addNonSwingComp((INonSwingComponent) subClone);
+                nonVisLayoutCompClone.addCompNonSwing((INonSwingComponent) subClone);
             }
         }
 

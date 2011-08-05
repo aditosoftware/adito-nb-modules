@@ -8,10 +8,10 @@ import java.awt.*;
 public interface INonSwingContainer
 {
 
-  Rectangle getNonSwingBounds();
+  Rectangle getBoundsNonSwing();
 
-  boolean addNonSwingComp(INonSwingComponent pComp);
+  boolean addCompNonSwing(INonSwingComponent pComp);
 
-  boolean removeNonSwingComp(INonSwingComponent pComp);
+  boolean removeCompNonSwing(INonSwingComponent pComp);
 
 }
