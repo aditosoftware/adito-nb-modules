@@ -8,27 +8,39 @@ import java.util.*;
 /**
  * @author J. Boesl, 26.07.11
  */
-abstract class NonVisComponentContainer implements ComponentContainer
+abstract class NonVisComponentContainer<T extends INonSwingContainer> implements ComponentContainer
 {
 
-  private Set<RADComponent> subComponents;
-  private INonSwingContainer beanInstance;
+  private final Class<T> childType;
+  private Set<RADNonVisualContainerNonVisualComponent> subComponents;
+  private T beanInstance;
 
 
   abstract void assignParentComponent(RADComponent pComp);
 
 
+  protected NonVisComponentContainer(Class<T> pChildType)
+  {
+    childType = pChildType;
+  }
+
   void setBeanInstance(Object pBeanInstance)
   {
-    if (!(pBeanInstance instanceof INonSwingContainer))
-      throw new IllegalArgumentException("invalid bean component for " + getClass().getSimpleName() + ": " + pBeanInstance);
-    beanInstance = (INonSwingContainer) pBeanInstance;
+    T t = _check(pBeanInstance, childType);
+    if (t == null)
+      throw new IllegalArgumentException("invalid bean component for " + getClass() + ": " + pBeanInstance);
+    beanInstance = t;
+  }
+
+  public T getBeanInstance()
+  {
+    return beanInstance;
   }
 
   @Override
-  public RADComponent[] getSubBeans()
+  public RADNonVisualContainerNonVisualComponent[] getSubBeans()
   {
-    RADComponent[] components = new RADComponent[subComponents.size()];
+    RADNonVisualContainerNonVisualComponent[] components = new RADNonVisualContainerNonVisualComponent[subComponents.size()];
     subComponents.toArray(components);
     return components;
   }
@@ -36,7 +48,7 @@ abstract class NonVisComponentContainer implements ComponentContainer
   @Override
   public void initSubComponents(RADComponent[] initComponents)
   {
-    subComponents = new LinkedHashSet<RADComponent>(initComponents.length);
+    subComponents = new LinkedHashSet<RADNonVisualContainerNonVisualComponent>(initComponents.length);
     for (RADComponent initComponent : initComponents)
       _add(initComponent);
   }
@@ -44,8 +56,8 @@ abstract class NonVisComponentContainer implements ComponentContainer
   @Override
   public void reorderSubComponents(int[] perm)
   {
-    RADComponent[] subs = getSubBeans();
-    RADComponent[] components = new RADComponent[subs.length];
+    RADNonVisualContainerNonVisualComponent[] subs = getSubBeans();
+    RADNonVisualContainerNonVisualComponent[] components = new RADNonVisualContainerNonVisualComponent[subs.length];
     for (int i = 0; i < perm.length; i++)
       components[perm[i]] = subs[i];
 
@@ -60,11 +72,15 @@ abstract class NonVisComponentContainer implements ComponentContainer
   }
 
   @Override
-  public void remove(RADComponent comp)
+  public void remove(RADComponent pComp)
   {
-    beanInstance.removeNonSwingComp(comp.getBeanInstance());
-    if (subComponents.remove(comp))
-      comp.setParentComponent(null);
+    RADNonVisualContainerNonVisualComponent nonvis = _check(pComp, RADNonVisualContainerNonVisualComponent.class);
+    if (nonvis == null)
+      return;
+    beanInstance.removeNonSwingComp(nonvis.getBeanInstanceTyped());
+    if (subComponents.remove(nonvis))
+      //noinspection NullableProblems
+      nonvis.setParentComponent(null);
   }
 
   @Override
@@ -77,11 +93,22 @@ abstract class NonVisComponentContainer implements ComponentContainer
     return -1;
   }
 
-  private void _add(RADComponent comp)
+  private void _add(RADComponent pComp)
   {
-    beanInstance.addNonSwingComp(comp.getBeanInstance());
-    subComponents.add(comp);
-    assignParentComponent(comp);
+    RADNonVisualContainerNonVisualComponent nonvis = _check(pComp, RADNonVisualContainerNonVisualComponent.class);
+    if (nonvis == null)
+      return;
+    beanInstance.addNonSwingComp(nonvis.getBeanInstanceTyped());
+    if (subComponents.add(nonvis))
+      assignParentComponent(nonvis);
+  }
+
+  private <T> T _check(Object pBeanInstance, Class<T> pChildType)
+  {
+    if (pBeanInstance == null || !(pChildType.isAssignableFrom(pBeanInstance.getClass())))
+      return null;
+    //noinspection unchecked
+    return (T) pBeanInstance;
   }
 
 }

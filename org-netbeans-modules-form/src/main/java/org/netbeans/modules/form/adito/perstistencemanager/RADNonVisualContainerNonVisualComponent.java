@@ -1,5 +1,6 @@
 package org.netbeans.modules.form.adito.perstistencemanager;
 
+import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.layout.INonSwingComponent;
 import org.netbeans.modules.form.*;
 
 /**
@@ -8,7 +9,8 @@ import org.netbeans.modules.form.*;
 public class RADNonVisualContainerNonVisualComponent extends RADComponent implements ComponentContainer
 {
 
-  private NonVisComponentContainer nonVisContainer = new NonVisComponentContainer()
+  private NonVisComponentContainer<INonSwingComponent> nonvisContainer = new NonVisComponentContainer<INonSwingComponent>(
+      INonSwingComponent.class)
   {
     @Override
     void assignParentComponent(RADComponent pComp)
@@ -20,44 +22,49 @@ public class RADNonVisualContainerNonVisualComponent extends RADComponent implem
   @Override
   protected void setBeanInstance(Object beanInstance)
   {
-    nonVisContainer.setBeanInstance(beanInstance);
+    nonvisContainer.setBeanInstance(beanInstance);
     super.setBeanInstance(beanInstance);
   }
 
-  @Override
-  public RADComponent[] getSubBeans()
+  INonSwingComponent getBeanInstanceTyped()
   {
-    return nonVisContainer.getSubBeans();
+    return nonvisContainer.getBeanInstance();
+  }
+
+  @Override
+  public RADNonVisualContainerNonVisualComponent[] getSubBeans()
+  {
+    return nonvisContainer.getSubBeans();
   }
 
   @Override
   public void initSubComponents(RADComponent[] initComponents)
   {
-    nonVisContainer.initSubComponents(initComponents);
+    nonvisContainer.initSubComponents(initComponents);
   }
 
   @Override
   public void reorderSubComponents(int[] perm)
   {
-    nonVisContainer.reorderSubComponents(perm);
+    nonvisContainer.reorderSubComponents(perm);
   }
 
   @Override
   public void add(RADComponent comp)
   {
-    nonVisContainer.add(comp);
+    nonvisContainer.add(comp);
   }
 
   @Override
   public void remove(RADComponent comp)
   {
-    nonVisContainer.remove(comp);
+    nonvisContainer.remove(comp);
   }
 
   @Override
   public int getIndexOf(RADComponent comp)
   {
-    return nonVisContainer.getIndexOf(comp);
+    return nonvisContainer.getIndexOf(comp);
   }
 
 }

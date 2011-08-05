@@ -54,7 +54,6 @@ import org.netbeans.modules.form.adito.perstistencemanager.RADNonVisualContainer
 import org.openide.*;
 import org.openide.nodes.Node;
 import org.openide.util.Mutex;
-import org.openide.util.NbBundle;
 import org.openide.filesystems.FileObject;
 
 import org.netbeans.modules.form.layoutsupport.*;

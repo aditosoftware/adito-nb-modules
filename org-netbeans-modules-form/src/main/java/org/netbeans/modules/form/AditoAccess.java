@@ -14,9 +14,9 @@ public final class AditoAccess
   {
   }
 
-  public static Point pointFromComponentToHandleLayer(FormDesigner pFormDesigner, Point p, Component targetComp)
+  public static Point pointFromComponentToHandleLayer(FormDesigner pFormDesigner, Component targetComp)
   {
-    return pFormDesigner.pointFromComponentToHandleLayer(p, targetComp);
+    return pFormDesigner.pointFromComponentToHandleLayer(new Point(), targetComp);
   }
 
   public static Rectangle visibleRect(FormDesigner pFormDesigner, Component pComponent)

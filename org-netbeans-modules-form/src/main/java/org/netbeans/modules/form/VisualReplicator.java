@@ -53,7 +53,7 @@ import java.util.logging.Logger;
 
 //import org.jdesktop.beansbinding.BindingGroup;
 
-import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.layout.INonSwingContainer;
+import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.layout.*;
 import org.netbeans.modules.form.adito.perstistencemanager.*;
 import org.openide.ErrorManager;
 
@@ -723,19 +723,17 @@ public class VisualReplicator {
         }
 
         // Extrabehandlung fuer Container die nicht-sichtbare Komponenten enthalten.
-        if (metacomp instanceof RADNonVisualContainerVisualComponent ||
-            metacomp instanceof RADNonVisualContainerNonVisualComponent)
+        if (metacomp instanceof RADNonVisualContainerVisualComponent || metacomp instanceof RADNonVisualContainerNonVisualComponent)
         {
-          ComponentContainer metacont = (ComponentContainer) metacomp;
-          INonSwingContainer nonVisLayoutCompClone = (INonSwingContainer) compClone;
-          for (RADComponent sub : metacont.getSubBeans())
-          {
-            Object subClone = getClonedComponent(sub);
-            if (subClone == null) {
-                subClone = cloneComponent(sub, relativeProperties);
+            ComponentContainer metacont = (ComponentContainer) metacomp;
+            INonSwingContainer nonVisLayoutCompClone = (INonSwingContainer) compClone;
+            for (RADComponent sub : metacont.getSubBeans())
+            {
+                Object subClone = getClonedComponent(sub);
+                if (subClone == null)
+                    subClone = cloneComponent(sub, relativeProperties);
+                nonVisLayoutCompClone.addNonSwingComp((INonSwingComponent) subClone);
             }
-            nonVisLayoutCompClone.addNonSwingComp(subClone);
-          }
         }
 
         else if (metacomp instanceof RADVisualContainer) {

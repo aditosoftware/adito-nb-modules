@@ -8,17 +8,10 @@ import java.awt.*;
 public interface INonSwingContainer
 {
 
-  void setName(String pName);
+  Rectangle getBounds();
 
-  /**
-   * Komponente soll hergeschaltet werden, wenn sie versteckt sein kann. Kann sonst ignoriert werden.
-   */
-  void setActive();
+  boolean addNonSwingComp(INonSwingComponent pComp);
 
-  boolean addNonSwingComp(Object pComp);
-
-  boolean removeNonSwingComp(Object pComp);
-
-  Rectangle getChildBounds(Object pComp);
+  boolean removeNonSwingComp(INonSwingComponent pComp);
 
 }
