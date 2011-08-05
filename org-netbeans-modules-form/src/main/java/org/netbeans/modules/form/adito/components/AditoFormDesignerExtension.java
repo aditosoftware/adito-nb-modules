@@ -16,8 +16,8 @@ public final class AditoFormDesignerExtension
 
   public static boolean canHandle(RADComponent pMetaComp)
   {
-    return pMetaComp != null && (pMetaComp instanceof RADNonVisualContainerVisualComponent ||
-        pMetaComp instanceof RADNonVisualContainerNonVisualComponent || canHandle(pMetaComp.getParentComponent()));
+    return pMetaComp != null && (pMetaComp instanceof NonvisContainerRADVisualComponent ||
+        pMetaComp instanceof NonvisContainerRADComponent || canHandle(pMetaComp.getParentComponent()));
   }
 
   public static RADVisualComponent handle(FormDesigner pFormDesigner, RADComponent pMetaComp)

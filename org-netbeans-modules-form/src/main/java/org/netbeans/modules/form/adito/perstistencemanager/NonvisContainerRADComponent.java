@@ -1,42 +1,38 @@
 package org.netbeans.modules.form.adito.perstistencemanager;
 
-
-import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.layout.INonSwingContainer;
+import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.layout.INonSwingComponent;
 import org.netbeans.modules.form.*;
 
 /**
- * Container der nicht-sichtbare Komponenten enthält.
- *
- * @author J. Boesl, 28.06.11
+ * @author J. Boesl, 26.07.11
  */
-public class RADNonVisualContainerVisualComponent extends RADVisualComponent implements ComponentContainer
+public class NonvisContainerRADComponent extends RADComponent implements ComponentContainer
 {
 
-  private NonVisComponentContainer<INonSwingContainer> nonvisContainer = new NonVisComponentContainer<INonSwingContainer>(
-      INonSwingContainer.class)
+  private NonvisContainer<INonSwingComponent> nonvisContainer = new NonvisContainer<INonSwingComponent>(
+      INonSwingComponent.class)
   {
     @Override
     void assignParentComponent(RADComponent pComp)
     {
-      pComp.setParentComponent(RADNonVisualContainerVisualComponent.this);
+      pComp.setParentComponent(NonvisContainerRADComponent.this);
     }
   };
 
-
   @Override
-  protected void setBeanInstance(Object pBeanInstance)
+  protected void setBeanInstance(Object beanInstance)
   {
-    nonvisContainer.setBeanInstance(pBeanInstance);
-    super.setBeanInstance(pBeanInstance);
+    nonvisContainer.setBeanInstance(beanInstance);
+    super.setBeanInstance(beanInstance);
   }
 
-  INonSwingContainer getBeanInstanceTyped()
+  INonSwingComponent getBeanInstanceTyped()
   {
     return nonvisContainer.getBeanInstance();
   }
 
   @Override
-  public RADNonVisualContainerNonVisualComponent[] getSubBeans()
+  public NonvisContainerRADComponent[] getSubBeans()
   {
     return nonvisContainer.getSubBeans();
   }
@@ -45,7 +41,6 @@ public class RADNonVisualContainerVisualComponent extends RADVisualComponent imp
   public void initSubComponents(RADComponent[] initComponents)
   {
     nonvisContainer.initSubComponents(initComponents);
-
   }
 
   @Override

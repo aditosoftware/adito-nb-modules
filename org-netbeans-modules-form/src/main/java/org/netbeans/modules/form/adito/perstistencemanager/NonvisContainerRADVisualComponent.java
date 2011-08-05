@@ -1,38 +1,42 @@
 package org.netbeans.modules.form.adito.perstistencemanager;
 
-import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.layout.INonSwingComponent;
+
+import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.layout.INonSwingContainer;
 import org.netbeans.modules.form.*;
 
 /**
- * @author J. Boesl, 26.07.11
+ * Container der nicht-sichtbare Komponenten enthält.
+ *
+ * @author J. Boesl, 28.06.11
  */
-public class RADNonVisualContainerNonVisualComponent extends RADComponent implements ComponentContainer
+public class NonvisContainerRADVisualComponent extends RADVisualComponent implements ComponentContainer
 {
 
-  private NonVisComponentContainer<INonSwingComponent> nonvisContainer = new NonVisComponentContainer<INonSwingComponent>(
-      INonSwingComponent.class)
+  private NonvisContainer<INonSwingContainer> nonvisContainer = new NonvisContainer<INonSwingContainer>(
+      INonSwingContainer.class)
   {
     @Override
     void assignParentComponent(RADComponent pComp)
     {
-      pComp.setParentComponent(RADNonVisualContainerNonVisualComponent.this);
+      pComp.setParentComponent(NonvisContainerRADVisualComponent.this);
     }
   };
 
+
   @Override
-  protected void setBeanInstance(Object beanInstance)
+  protected void setBeanInstance(Object pBeanInstance)
   {
-    nonvisContainer.setBeanInstance(beanInstance);
-    super.setBeanInstance(beanInstance);
+    nonvisContainer.setBeanInstance(pBeanInstance);
+    super.setBeanInstance(pBeanInstance);
   }
 
-  INonSwingComponent getBeanInstanceTyped()
+  INonSwingContainer getBeanInstanceTyped()
   {
     return nonvisContainer.getBeanInstance();
   }
 
   @Override
-  public RADNonVisualContainerNonVisualComponent[] getSubBeans()
+  public NonvisContainerRADComponent[] getSubBeans()
   {
     return nonvisContainer.getSubBeans();
   }
@@ -41,6 +45,7 @@ public class RADNonVisualContainerNonVisualComponent extends RADComponent implem
   public void initSubComponents(RADComponent[] initComponents)
   {
     nonvisContainer.initSubComponents(initComponents);
+
   }
 
   @Override

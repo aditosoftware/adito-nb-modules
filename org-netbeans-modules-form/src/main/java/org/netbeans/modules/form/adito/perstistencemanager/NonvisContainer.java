@@ -8,18 +8,18 @@ import java.util.*;
 /**
  * @author J. Boesl, 26.07.11
  */
-abstract class NonVisComponentContainer<T extends INonSwingContainer> implements ComponentContainer
+abstract class NonvisContainer<T extends INonSwingContainer> implements ComponentContainer
 {
 
   private final Class<T> childType;
-  private Set<RADNonVisualContainerNonVisualComponent> subComponents;
+  private Set<NonvisContainerRADComponent> subComponents;
   private T beanInstance;
 
 
   abstract void assignParentComponent(RADComponent pComp);
 
 
-  protected NonVisComponentContainer(Class<T> pChildType)
+  protected NonvisContainer(Class<T> pChildType)
   {
     childType = pChildType;
   }
@@ -38,9 +38,9 @@ abstract class NonVisComponentContainer<T extends INonSwingContainer> implements
   }
 
   @Override
-  public RADNonVisualContainerNonVisualComponent[] getSubBeans()
+  public NonvisContainerRADComponent[] getSubBeans()
   {
-    RADNonVisualContainerNonVisualComponent[] components = new RADNonVisualContainerNonVisualComponent[subComponents.size()];
+    NonvisContainerRADComponent[] components = new NonvisContainerRADComponent[subComponents.size()];
     subComponents.toArray(components);
     return components;
   }
@@ -48,7 +48,7 @@ abstract class NonVisComponentContainer<T extends INonSwingContainer> implements
   @Override
   public void initSubComponents(RADComponent[] initComponents)
   {
-    subComponents = new LinkedHashSet<RADNonVisualContainerNonVisualComponent>(initComponents.length);
+    subComponents = new LinkedHashSet<NonvisContainerRADComponent>(initComponents.length);
     for (RADComponent initComponent : initComponents)
       _add(initComponent);
   }
@@ -56,8 +56,8 @@ abstract class NonVisComponentContainer<T extends INonSwingContainer> implements
   @Override
   public void reorderSubComponents(int[] perm)
   {
-    RADNonVisualContainerNonVisualComponent[] subs = getSubBeans();
-    RADNonVisualContainerNonVisualComponent[] components = new RADNonVisualContainerNonVisualComponent[subs.length];
+    NonvisContainerRADComponent[] subs = getSubBeans();
+    NonvisContainerRADComponent[] components = new NonvisContainerRADComponent[subs.length];
     for (int i = 0; i < perm.length; i++)
       components[perm[i]] = subs[i];
 
@@ -74,7 +74,7 @@ abstract class NonVisComponentContainer<T extends INonSwingContainer> implements
   @Override
   public void remove(RADComponent pComp)
   {
-    RADNonVisualContainerNonVisualComponent nonvis = _check(pComp, RADNonVisualContainerNonVisualComponent.class);
+    NonvisContainerRADComponent nonvis = _check(pComp, NonvisContainerRADComponent.class);
     if (nonvis == null)
       return;
     beanInstance.removeNonSwingComp(nonvis.getBeanInstanceTyped());
@@ -95,7 +95,7 @@ abstract class NonVisComponentContainer<T extends INonSwingContainer> implements
 
   private void _add(RADComponent pComp)
   {
-    RADNonVisualContainerNonVisualComponent nonvis = _check(pComp, RADNonVisualContainerNonVisualComponent.class);
+    NonvisContainerRADComponent nonvis = _check(pComp, NonvisContainerRADComponent.class);
     if (nonvis == null)
       return;
     beanInstance.addNonSwingComp(nonvis.getBeanInstanceTyped());

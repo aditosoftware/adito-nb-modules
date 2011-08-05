@@ -723,7 +723,7 @@ public class VisualReplicator {
         }
 
         // Extrabehandlung fuer Container die nicht-sichtbare Komponenten enthalten.
-        if (metacomp instanceof RADNonVisualContainerVisualComponent || metacomp instanceof RADNonVisualContainerNonVisualComponent)
+        if (metacomp instanceof NonvisContainerRADVisualComponent || metacomp instanceof NonvisContainerRADComponent)
         {
             ComponentContainer metacont = (ComponentContainer) metacomp;
             INonSwingContainer nonVisLayoutCompClone = (INonSwingContainer) compClone;
