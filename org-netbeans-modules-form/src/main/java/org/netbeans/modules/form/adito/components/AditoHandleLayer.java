@@ -31,14 +31,19 @@ public final class AditoHandleLayer
     RADComponent parentRad = pMetacomp;
     while (true)
     {
-      if (parentRad == null || parentRad instanceof RADVisualComponent)
+      if (parentRad == null)
+        return;
+      if (parentRad instanceof RADVisualComponent)
         break;
       parentRad = parentRad.getParentComponent();
     }
     _translate(translationPoint, _getTranslationPoint(pFormDesigner, parentRad));
 
     INonSwingComponent nonSwingComponent = (INonSwingComponent) pFormDesigner.getComponent(pMetacomp);
-    Rectangle visRect = AditoAccess.visibleRect(pFormDesigner, (Component) pFormDesigner.getComponent(parentRad));
+    Component parentComponent = (Component) pFormDesigner.getComponent(parentRad);
+    if (parentComponent == null)
+      return;
+    Rectangle visRect = AditoAccess.visibleRect(pFormDesigner, parentComponent);
     _layerPaint(pG, translationPoint, visRect, nonSwingComponent);
   }
 

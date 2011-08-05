@@ -56,6 +56,7 @@ import java.beans.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.layout.*;
 import org.jdesktop.layout.Baseline;
 import org.jdesktop.layout.LayoutStyle;
 
@@ -1004,9 +1005,12 @@ public class FormDesigner extends TopComponent implements MultiViewElement
             }
             else if (AditoFormDesignerExtension.canHandle(metacomp))
             {
-              RADVisualComponent handledComponent = AditoFormDesignerExtension.handle(this, metacomp);
-              if (handledComponent != null)
-                ensureComponentIsShown(handledComponent);
+                RADVisualComponent handledComponent = AditoFormDesignerExtension.handle(metacomp);
+                if (handledComponent != null)
+                    ensureComponentIsShown(handledComponent);
+                Object component = getComponent(metacomp);
+                if (component instanceof INonSwingContainer)
+                    ((INonSwingComponent) component).setActive();
             }
             selectionChanged();
         }

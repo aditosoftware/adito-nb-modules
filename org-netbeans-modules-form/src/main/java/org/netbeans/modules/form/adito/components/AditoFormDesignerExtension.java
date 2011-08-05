@@ -1,6 +1,5 @@
 package org.netbeans.modules.form.adito.components;
 
-import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.layout.*;
 import org.netbeans.modules.form.*;
 import org.netbeans.modules.form.adito.perstistencemanager.*;
 
@@ -20,20 +19,13 @@ public final class AditoFormDesignerExtension
         pMetaComp instanceof NonvisContainerRADComponent || canHandle(pMetaComp.getParentComponent()));
   }
 
-  public static RADVisualComponent handle(FormDesigner pFormDesigner, RADComponent pMetaComp)
+  public static RADVisualComponent handle(RADComponent pMetaComp)
   {
     if (pMetaComp == null)
       return null;
     if (pMetaComp instanceof RADVisualComponent)
       return (RADVisualComponent) pMetaComp;
-    RADVisualComponent handled = handle(pFormDesigner, pMetaComp.getParentComponent());
-    if (handled != null)
-    {
-      Object component = pFormDesigner.getComponent(pMetaComp);
-      if (component instanceof INonSwingContainer)
-        ((INonSwingComponent) component).setActive();
-    }
-    return handled;
+    return handle(pMetaComp.getParentComponent());
   }
 
 }
