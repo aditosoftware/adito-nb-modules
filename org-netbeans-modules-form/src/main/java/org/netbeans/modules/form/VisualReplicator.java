@@ -48,13 +48,13 @@ import java.awt.*;
 import java.lang.reflect.Method;
 import javax.swing.*;
 import java.util.*;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 //import org.jdesktop.beansbinding.BindingGroup;
 
-import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.layout.*;
-import org.netbeans.modules.form.adito.perstistencemanager.*;
+import org.netbeans.modules.form.adito.components.AditoVisualReplicator;
 import org.openide.ErrorManager;
 
 import org.netbeans.modules.form.fakepeer.FakePeerSupport;
@@ -89,6 +89,21 @@ public class VisualReplicator {
     private boolean designRestrictions;
 
     private ViewConverter[] converters;
+
+    protected AditoVisualReplicator aditoVisualReplicator = new AditoVisualReplicator()
+    {
+      @Override
+      public Object cloneComponent(RADComponent metacomp, List<RADProperty> relativeProperties) throws Exception
+      {
+        return VisualReplicator.this.cloneComponent(metacomp, relativeProperties);
+      }
+
+      @Override
+      public Object getClonedComponent(RADComponent metacomp)
+      {
+        return VisualReplicator.this.getClonedComponent(metacomp);
+      }
+    };
 
     // ---------
 
@@ -230,7 +245,9 @@ public class VisualReplicator {
     }
 
     public void reorderComponents(ComponentContainer metacont) {
-        if (metacont instanceof RADVisualContainer) {
+        if (aditoVisualReplicator.canHandle(metacont))
+            aditoVisualReplicator.reorder(metacont);
+        else if (metacont instanceof RADVisualContainer) {
             updateContainerLayout((RADVisualContainer) metacont);
         } else if (metacont instanceof RADMenuComponent) { // AWT menu
             // using Swing equivalents of AWT menus for visualization in designer...
@@ -517,6 +534,8 @@ public class VisualReplicator {
                 menuCont.remove(menuComp);
             else return;
         }
+        else if (aditoVisualReplicator.canHandle(metacomp))
+            aditoVisualReplicator.removeComponent(metacomp, metacont);
 
         removeMapping(metacomp);
     }
@@ -723,19 +742,10 @@ public class VisualReplicator {
         }
 
         // Extrabehandlung fuer Container die nicht-sichtbare Komponenten enthalten.
-        if (metacomp instanceof NonvisContainerRADVisualComponent || metacomp instanceof NonvisContainerRADComponent)
+        if (aditoVisualReplicator.canHandle(metacomp))
         {
-            ComponentContainer metacont = (ComponentContainer) metacomp;
-            INonSwingContainer nonVisLayoutCompClone = (INonSwingContainer) compClone;
-            for (RADComponent sub : metacont.getSubBeans())
-            {
-                Object subClone = getClonedComponent(sub);
-                if (subClone == null)
-                    subClone = cloneComponent(sub, relativeProperties);
-                nonVisLayoutCompClone.addCompNonSwing((INonSwingComponent) subClone);
-            }
+            aditoVisualReplicator.cloneComponent(metacomp, compClone, relativeProperties);
         }
-
         else if (metacomp instanceof RADVisualContainer) {
             RADVisualContainer metacont = (RADVisualContainer) metacomp;
             final Container cont = (Container) compClone;
