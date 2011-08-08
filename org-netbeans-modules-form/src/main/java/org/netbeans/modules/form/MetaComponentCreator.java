@@ -49,8 +49,10 @@ import javax.swing.*;
 import javax.swing.border.Border;
 import java.util.*;
 
+import com.sun.tools.internal.xjc.reader.gbind.ElementSets;
+import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.layout.INonSwingContainer;
 import org.netbeans.modules.form.adito.DMHelper;
-import org.netbeans.modules.form.adito.perstistencemanager.NonvisContainerRADVisualComponent;
+import org.netbeans.modules.form.adito.perstistencemanager.*;
 import org.openide.*;
 import org.openide.nodes.Node;
 import org.openide.util.Mutex;
@@ -583,6 +585,9 @@ public class MetaComponentCreator {
                     }
                 }
             }
+          //else if (INonSwingContainer.class.isAssignableFrom(beanClass))
+          //  target.targetType = TargetType.OTHER;
+
         }
         if (targetComp == null) {
             target.targetType = TargetType.OTHER;
@@ -622,7 +627,11 @@ public class MetaComponentCreator {
     private RADComponent makeCopy(RADComponent sourceComp/*, int targetPlacement*/) {
         RADComponent newComp;
 
-        if (sourceComp instanceof RADVisualContainer) {
+        if (sourceComp instanceof NonvisContainerRADComponent)
+            newComp = new NonvisContainerRADComponent();
+        else if (sourceComp instanceof NonvisContainerRADVisualComponent)
+            newComp = new NonvisContainerRADVisualComponent();
+        else if (sourceComp instanceof RADVisualContainer) {
             newComp = new RADVisualContainer();
         } else if (sourceComp instanceof NonvisContainerRADVisualComponent) {
             newComp = new NonvisContainerRADVisualComponent();
