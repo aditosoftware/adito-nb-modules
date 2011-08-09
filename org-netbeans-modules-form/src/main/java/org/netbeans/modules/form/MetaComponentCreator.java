@@ -49,7 +49,6 @@ import javax.swing.*;
 import javax.swing.border.Border;
 import java.util.*;
 
-import com.sun.tools.internal.xjc.reader.gbind.ElementSets;
 import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.layout.INonSwingContainer;
 import org.netbeans.modules.form.adito.DMHelper;
 import org.netbeans.modules.form.adito.perstistencemanager.*;
@@ -585,9 +584,8 @@ public class MetaComponentCreator {
                     }
                 }
             }
-          //else if (INonSwingContainer.class.isAssignableFrom(beanClass))
-          //  target.targetType = TargetType.OTHER;
-
+          else if (INonSwingContainer.class.isAssignableFrom(beanClass)) // TODO
+            target.targetType = TargetType.OTHER;                        // TODO
         }
         if (targetComp == null) {
             target.targetType = TargetType.OTHER;
