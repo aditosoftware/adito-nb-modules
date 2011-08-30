@@ -1901,7 +1901,8 @@ public class FormDesigner extends TopComponent implements MultiViewElement
         @Override
         public void run()
         {
-          _finishComponentShowing();
+          if (formEditor != null)
+            _finishComponentShowing();
         }
       }, 100); // verzögert, damit der Rest der Gui Zeit hat sich aufzubauen.
     }
