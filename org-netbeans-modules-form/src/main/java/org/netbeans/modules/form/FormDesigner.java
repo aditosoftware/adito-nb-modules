@@ -1764,7 +1764,7 @@ public class FormDesigner extends TopComponent implements MultiViewElement
 
     @Override
     public JComponent getToolbarRepresentation() {
-        return getFormToolBar();
+        return new JPanel(); //getFormToolBar();
     }
 
     @Override

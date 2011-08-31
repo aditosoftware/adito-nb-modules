@@ -44,8 +44,7 @@
 
 package org.netbeans.modules.form;
 
-import java.awt.Cursor;
-import java.awt.EventQueue;
+import java.awt.*;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.CharConversionException;
@@ -724,7 +723,7 @@ public class FormEditorSupport extends DataEditorSupport implements EditorCookie
                 group.close();
         }
     }
-    
+
     // -------
     // window system & multiview
     
@@ -865,9 +864,11 @@ public class FormEditorSupport extends DataEditorSupport implements EditorCookie
      */
     void setTopComponent(TopComponent topComp) {
         multiviewTC = (CloneableTopComponent)topComp;
-
         // Hack damit das dataObject von der TopComponent bezogen werden kann.
         multiviewTC.putClientProperty(DATAOBJECT_CLIENT_PROPERTY, formDataObject);
+        // Hack damit die Toolbar + MultiViewButton nicht angezeigt werden.
+        Container container = (Container) topComp.getComponent(0);
+        container.getComponent(0).setVisible(false);
 
         String[] titles = getMVTCDisplayName(formDataObject);
         multiviewTC.setDisplayName(titles[0]);
