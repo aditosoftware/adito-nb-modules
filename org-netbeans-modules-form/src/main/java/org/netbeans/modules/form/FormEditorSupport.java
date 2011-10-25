@@ -596,49 +596,59 @@ public class FormEditorSupport extends DataEditorSupport implements EditorCookie
     
     @Override
     protected boolean notifyModified () {
-        boolean alreadyModified = isModified();
-        boolean retVal = super.notifyModified();
+        //boolean alreadyModified = isModified();
+        //boolean retVal = false;
+        //try
+        //{
+        //  retVal = super.notifyModified();
+        //}
+        //catch (Exception e)
+        //{
+        //  e.printStackTrace();
+        //}
+        //
+        //if (retVal) { // java source modification
+        //    addSaveCookie();
+        //}
         
-        if (retVal) { // java source modification
-            addSaveCookie();
-        }
-        
-        if (!alreadyModified) {
-            FileObject formFile = formDataObject.getFormFile();
-            if (!formFile.canWrite()) { // Issue 74092
-                FileLock lock = null;
-                try {
-                    lock = formFile.lock();
-                } catch (UserQuestionException uqex) {
-                    NotifyDescriptor nd = new NotifyDescriptor.Confirmation(
-                            uqex.getLocalizedMessage(),
-                            FormUtils.getBundleString("TITLE_UserQuestion"), // NOI18N
-                            NotifyDescriptor.YES_NO_OPTION);
-                    DialogDisplayer.getDefault().notify(nd);
-                    if (NotifyDescriptor.YES_OPTION.equals(nd.getValue())) {
-                        try {
-                            uqex.confirmed();
-                            EventQueue.invokeLater(new Runnable() {
-                                @Override
-                                public void run()  {
-                                    reloadForm();
-                                }
-                            });
-                        } catch (IOException ioex) {
-                            ErrorManager.getDefault().notify(ErrorManager.INFORMATIONAL, ioex);
-                        }
-                    }
-                } catch (IOException ex) {
-                    ErrorManager.getDefault().notify(ErrorManager.INFORMATIONAL, ex);
-                } finally {
-                    if (lock != null) {
-                        lock.releaseLock();
-                    }
-                }
-            }
-            updateMVTCDisplayName();
-        }
-        return retVal;
+        //if (!alreadyModified) {
+            //FileObject formFile = formDataObject.getFormFile();
+            //if (!formFile.canWrite()) { // Issue 74092
+            //    FileLock lock = null;
+            //    try {
+            //        lock = formFile.lock();
+            //    } catch (UserQuestionException uqex) {
+            //        NotifyDescriptor nd = new NotifyDescriptor.Confirmation(
+            //                uqex.getLocalizedMessage(),
+            //                FormUtils.getBundleString("TITLE_UserQuestion"), // NOI18N
+            //                NotifyDescriptor.YES_NO_OPTION);
+            //        DialogDisplayer.getDefault().notify(nd);
+            //        if (NotifyDescriptor.YES_OPTION.equals(nd.getValue())) {
+            //            try {
+            //                uqex.confirmed();
+            //                EventQueue.invokeLater(new Runnable() {
+            //                    @Override
+            //                    public void run()  {
+            //                        reloadForm();
+            //                    }
+            //                });
+            //            } catch (IOException ioex) {
+            //                ErrorManager.getDefault().notify(ErrorManager.INFORMATIONAL, ioex);
+            //            }
+            //        }
+            //    } catch (IOException ex) {
+            //        ErrorManager.getDefault().notify(ErrorManager.INFORMATIONAL, ex);
+            //    } finally {
+            //        if (lock != null) {
+            //            lock.releaseLock();
+            //        }
+            //    }
+            //}
+            //updateMVTCDisplayName();
+        //}
+        //return retVal;
+        // TODO: vernünftige Lösung für speichern/laden/modified
+      return super.notifyModified();
     }
     
     @Override
@@ -866,6 +876,7 @@ public class FormEditorSupport extends DataEditorSupport implements EditorCookie
         multiviewTC = (CloneableTopComponent)topComp;
         // Hack damit das dataObject von der TopComponent bezogen werden kann.
         multiviewTC.putClientProperty(DATAOBJECT_CLIENT_PROPERTY, formDataObject);
+        multiviewTC.putClientProperty(TopComponent.PROP_CLOSING_DISABLED, true);
         // Hack damit die Toolbar + MultiViewButton nicht angezeigt werden.
         Container container = (Container) topComp.getComponent(0);
         container.getComponent(0).setVisible(false);
@@ -1374,15 +1385,21 @@ public class FormEditorSupport extends DataEditorSupport implements EditorCookie
         }
         
         @Override
-        protected FileLock takeLock() throws java.io.IOException {            
-            return ((FormDataObject) getDataObject()).getPrimaryEntry().takeLock();
+        protected FileLock takeLock() throws java.io.IOException {
+          // TODO: vernünftige Lösung für speichern/laden/modified
+            return null; //((FormDataObject) getDataObject()).getPrimaryEntry().takeLock();
         }
         
         @Override
         public CloneableOpenSupport findCloneableOpenSupport() {
             return this.getDataObject().getCookie(FormEditorSupport.class);
         }
-        
+
+      @Override
+      public void markModified() throws IOException
+      {
+        // TODO: vernünftige Lösung für speichern/laden/modified
+      }
     }
         
     private final SaveCookie saveCookie = new SaveCookie() {
