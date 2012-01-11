@@ -417,69 +417,69 @@ public class UnsupportedCalls extends JsAstRule {
     private static final Set<String> NAME_SET = new HashSet<String>(262);
     private static final Map<String,Boolean> MUST_CHECK_FQN = new HashMap<String,Boolean>(262);
     private static final Map<String,String> NAME_TO_FQN = new HashMap<String,String>(262);
-//    private static final Map<String,EnumSet<BrowserVersion>> COMPAT_MAP = new HashMap<String,EnumSet<BrowserVersion>>(262);
-//    private static final EnumSet<BrowserVersion> FF2FF3OPERASAFARI2SAFARI3KONQ = BrowserVersion.fromFlags("FF2|FF3|OPERA|SAFARI2|SAFARI3|KONQ"); // NOI18N
-//    private static final EnumSet<BrowserVersion> NOT_IE = BrowserVersion.fromFlags("FF1|FF2|FF3|OPERA|SAFARI2|SAFARI3|KONQ"); // NOI18N
-//    private static final EnumSet<BrowserVersion> NOT_IE55 = BrowserVersion.fromFlags("IE6|IE7|FF1|FF2|FF3|OPERA|SAFARI2|SAFARI3|KONQ"); // NOI18N
-//    private static final EnumSet<BrowserVersion> NOT_IE55_OR_6 = BrowserVersion.fromFlags("IE7|FF1|FF2|FF3|OPERA|SAFARI2|SAFARI3|KONQ"); // NOI18N
-//    private static final EnumSet<BrowserVersion> FIREFOX = BrowserVersion.fromFlags("FF1|FF2|FF3"); // NOI18N
-//    private static final EnumSet<BrowserVersion> FF3 = BrowserVersion.fromFlags("FF3"); // NOI18N
-//    private static final EnumSet<BrowserVersion> FF2FF3OPERASAFARI3KONQ = BrowserVersion.fromFlags("FF2|FF3|OPERA|SAFARI3|KONQ"); // NOI18N
-//    private static final EnumSet<BrowserVersion> IE = BrowserVersion.fromFlags("IE55|IE6|IE7"); // NOI18N
+    //private static final Map<String,EnumSet<BrowserVersion>> COMPAT_MAP = new HashMap<String,EnumSet<BrowserVersion>>(262);
+    //private static final EnumSet<BrowserVersion> FF2FF3OPERASAFARI2SAFARI3KONQ = BrowserVersion.fromFlags("FF2|FF3|OPERA|SAFARI2|SAFARI3|KONQ"); // NOI18N
+    //private static final EnumSet<BrowserVersion> NOT_IE = BrowserVersion.fromFlags("FF1|FF2|FF3|OPERA|SAFARI2|SAFARI3|KONQ"); // NOI18N
+    //private static final EnumSet<BrowserVersion> NOT_IE55 = BrowserVersion.fromFlags("IE6|IE7|FF1|FF2|FF3|OPERA|SAFARI2|SAFARI3|KONQ"); // NOI18N
+    //private static final EnumSet<BrowserVersion> NOT_IE55_OR_6 = BrowserVersion.fromFlags("IE7|FF1|FF2|FF3|OPERA|SAFARI2|SAFARI3|KONQ"); // NOI18N
+    //private static final EnumSet<BrowserVersion> FIREFOX = BrowserVersion.fromFlags("FF1|FF2|FF3"); // NOI18N
+    //private static final EnumSet<BrowserVersion> FF3 = BrowserVersion.fromFlags("FF3"); // NOI18N
+    //private static final EnumSet<BrowserVersion> FF2FF3OPERASAFARI3KONQ = BrowserVersion.fromFlags("FF2|FF3|OPERA|SAFARI3|KONQ"); // NOI18N
+    //private static final EnumSet<BrowserVersion> IE = BrowserVersion.fromFlags("IE55|IE6|IE7"); // NOI18N
     static {
-//        COMPAT_MAP.put("CanvasGradient.addColorStop", FF2FF3OPERASAFARI2SAFARI3KONQ); // NOI18N
-//        COMPAT_MAP.put("CanvasRenderingContext2D.arc", FF2FF3OPERASAFARI2SAFARI3KONQ); // NOI18N
-//        COMPAT_MAP.put("CanvasRenderingContext2D.arcTo", FF2FF3OPERASAFARI2SAFARI3KONQ); // NOI18N
-//        COMPAT_MAP.put("CanvasRenderingContext2D.beginPath", FF2FF3OPERASAFARI2SAFARI3KONQ); // NOI18N
-//        COMPAT_MAP.put("CanvasRenderingContext2D.bezierCurveTo", FF2FF3OPERASAFARI2SAFARI3KONQ); // NOI18N
-//        COMPAT_MAP.put("CanvasRenderingContext2D.clearRect", FF2FF3OPERASAFARI2SAFARI3KONQ); // NOI18N
-//        COMPAT_MAP.put("CanvasRenderingContext2D.clip", FF2FF3OPERASAFARI2SAFARI3KONQ); // NOI18N
-//        COMPAT_MAP.put("CanvasRenderingContext2D.closePath", FF2FF3OPERASAFARI2SAFARI3KONQ); // NOI18N
-//        COMPAT_MAP.put("CanvasRenderingContext2D.createImageData", FF2FF3OPERASAFARI2SAFARI3KONQ); // NOI18N
-//        COMPAT_MAP.put("CanvasRenderingContext2D.createLinearGradient", FF2FF3OPERASAFARI2SAFARI3KONQ); // NOI18N
-//        COMPAT_MAP.put("CanvasRenderingContext2D.createPattern", FF2FF3OPERASAFARI2SAFARI3KONQ); // NOI18N
-//        COMPAT_MAP.put("CanvasRenderingContext2D.createRadialGradient", FF2FF3OPERASAFARI2SAFARI3KONQ); // NOI18N
-//        COMPAT_MAP.put("CanvasRenderingContext2D.drawImage", FF2FF3OPERASAFARI2SAFARI3KONQ); // NOI18N
-//        COMPAT_MAP.put("CanvasRenderingContext2D.fill", FF2FF3OPERASAFARI2SAFARI3KONQ); // NOI18N
-//        COMPAT_MAP.put("CanvasRenderingContext2D.fillRect", FF2FF3OPERASAFARI2SAFARI3KONQ); // NOI18N
-//        COMPAT_MAP.put("CanvasRenderingContext2D.getImageData", FF2FF3OPERASAFARI2SAFARI3KONQ); // NOI18N
-//        COMPAT_MAP.put("CanvasRenderingContext2D.isPointInPath", FF2FF3OPERASAFARI2SAFARI3KONQ); // NOI18N
-//        COMPAT_MAP.put("CanvasRenderingContext2D.lineTo", FF2FF3OPERASAFARI2SAFARI3KONQ); // NOI18N
-//        COMPAT_MAP.put("CanvasRenderingContext2D.load", FF2FF3OPERASAFARI2SAFARI3KONQ); // NOI18N
-//        COMPAT_MAP.put("CanvasRenderingContext2D.moveTo", FF2FF3OPERASAFARI2SAFARI3KONQ); // NOI18N
-//        COMPAT_MAP.put("CanvasRenderingContext2D.putImageData", FF2FF3OPERASAFARI2SAFARI3KONQ); // NOI18N
-//        COMPAT_MAP.put("CanvasRenderingContext2D.quadraticCurveTo", FF2FF3OPERASAFARI2SAFARI3KONQ); // NOI18N
-//        COMPAT_MAP.put("CanvasRenderingContext2D.rect", FF2FF3OPERASAFARI2SAFARI3KONQ); // NOI18N
-//        COMPAT_MAP.put("CanvasRenderingContext2D.rotate", FF2FF3OPERASAFARI2SAFARI3KONQ); // NOI18N
-//        COMPAT_MAP.put("CanvasRenderingContext2D.save", FF2FF3OPERASAFARI2SAFARI3KONQ); // NOI18N
-//        COMPAT_MAP.put("CanvasRenderingContext2D.scale", FF2FF3OPERASAFARI2SAFARI3KONQ); // NOI18N
-//        COMPAT_MAP.put("CanvasRenderingContext2D.setTransform", FF2FF3OPERASAFARI2SAFARI3KONQ); // NOI18N
-//        COMPAT_MAP.put("CanvasRenderingContext2D.stroke", FF2FF3OPERASAFARI2SAFARI3KONQ); // NOI18N
-//        COMPAT_MAP.put("CanvasRenderingContext2D.strokeRect", FF2FF3OPERASAFARI2SAFARI3KONQ); // NOI18N
-//        COMPAT_MAP.put("CanvasRenderingContext2D.transform", FF2FF3OPERASAFARI2SAFARI3KONQ); // NOI18N
-//        COMPAT_MAP.put("CanvasRenderingContext2D.translate", FF2FF3OPERASAFARI2SAFARI3KONQ); // NOI18N
-//        COMPAT_MAP.put("Document.adoptNode", NOT_IE55_OR_6); // NOI18N
-//        COMPAT_MAP.put("Document.createAttributeNS", NOT_IE55_OR_6); // NOI18N
-//        COMPAT_MAP.put("Document.createDocumentFragment", NOT_IE55); // NOI18N
-//        COMPAT_MAP.put("Document.createElementNS", NOT_IE55_OR_6); // NOI18N
-//        COMPAT_MAP.put("Document.getElementsByTagNameNS", NOT_IE55_OR_6); // NOI18N
-//        COMPAT_MAP.put("Document.implementation.createDocument", NOT_IE); // NOI18N
-//        COMPAT_MAP.put("Document.implementation.hasFeature", NOT_IE55); // NOI18N
-//        COMPAT_MAP.put("Document.importNode", NOT_IE55_OR_6); // NOI18N
-//        COMPAT_MAP.put("Document.normalizeDocument", NOT_IE55_OR_6); // NOI18N
-//        COMPAT_MAP.put("Document.renameNode", NOT_IE55_OR_6); // NOI18N
-//        COMPAT_MAP.put("DocumentRange.createRange", NOT_IE); // NOI18N
-//        COMPAT_MAP.put("DocumentTraversal.createNodeIterator", NOT_IE); // NOI18N
-//        COMPAT_MAP.put("DocumentTraversal.createTreeWalker", NOT_IE); // NOI18N
-//        COMPAT_MAP.put("Element.applyElement", IE); // NOI18N
-//        COMPAT_MAP.put("Element.contains", NOT_IE); // NOI18N
-//        COMPAT_MAP.put("Element.createAttribute", NOT_IE55); // NOI18N
-//        COMPAT_MAP.put("Element.getAttributeNS", NOT_IE55_OR_6); // NOI18N
-//        COMPAT_MAP.put("Element.getAttributeNode", NOT_IE55); // NOI18N
-//        COMPAT_MAP.put("Element.getAttributeNodeNS", NOT_IE55_OR_6); // NOI18N
-//        COMPAT_MAP.put("Element.getBoundingClientRect", FF3); // NOI18N
-//        COMPAT_MAP.put("Element.getClientRects", FF3); // NOI18N
-//        COMPAT_MAP.put("Element.getElementsByTagNameNS", NOT_IE55_OR_6); // NOI18N
+        //COMPAT_MAP.put("CanvasGradient.addColorStop", FF2FF3OPERASAFARI2SAFARI3KONQ); // NOI18N
+        //COMPAT_MAP.put("CanvasRenderingContext2D.arc", FF2FF3OPERASAFARI2SAFARI3KONQ); // NOI18N
+        //COMPAT_MAP.put("CanvasRenderingContext2D.arcTo", FF2FF3OPERASAFARI2SAFARI3KONQ); // NOI18N
+        //COMPAT_MAP.put("CanvasRenderingContext2D.beginPath", FF2FF3OPERASAFARI2SAFARI3KONQ); // NOI18N
+        //COMPAT_MAP.put("CanvasRenderingContext2D.bezierCurveTo", FF2FF3OPERASAFARI2SAFARI3KONQ); // NOI18N
+        //COMPAT_MAP.put("CanvasRenderingContext2D.clearRect", FF2FF3OPERASAFARI2SAFARI3KONQ); // NOI18N
+        //COMPAT_MAP.put("CanvasRenderingContext2D.clip", FF2FF3OPERASAFARI2SAFARI3KONQ); // NOI18N
+        //COMPAT_MAP.put("CanvasRenderingContext2D.closePath", FF2FF3OPERASAFARI2SAFARI3KONQ); // NOI18N
+        //COMPAT_MAP.put("CanvasRenderingContext2D.createImageData", FF2FF3OPERASAFARI2SAFARI3KONQ); // NOI18N
+        //COMPAT_MAP.put("CanvasRenderingContext2D.createLinearGradient", FF2FF3OPERASAFARI2SAFARI3KONQ); // NOI18N
+        //COMPAT_MAP.put("CanvasRenderingContext2D.createPattern", FF2FF3OPERASAFARI2SAFARI3KONQ); // NOI18N
+        //COMPAT_MAP.put("CanvasRenderingContext2D.createRadialGradient", FF2FF3OPERASAFARI2SAFARI3KONQ); // NOI18N
+        //COMPAT_MAP.put("CanvasRenderingContext2D.drawImage", FF2FF3OPERASAFARI2SAFARI3KONQ); // NOI18N
+        //COMPAT_MAP.put("CanvasRenderingContext2D.fill", FF2FF3OPERASAFARI2SAFARI3KONQ); // NOI18N
+        //COMPAT_MAP.put("CanvasRenderingContext2D.fillRect", FF2FF3OPERASAFARI2SAFARI3KONQ); // NOI18N
+        //COMPAT_MAP.put("CanvasRenderingContext2D.getImageData", FF2FF3OPERASAFARI2SAFARI3KONQ); // NOI18N
+        //COMPAT_MAP.put("CanvasRenderingContext2D.isPointInPath", FF2FF3OPERASAFARI2SAFARI3KONQ); // NOI18N
+        //COMPAT_MAP.put("CanvasRenderingContext2D.lineTo", FF2FF3OPERASAFARI2SAFARI3KONQ); // NOI18N
+        //COMPAT_MAP.put("CanvasRenderingContext2D.load", FF2FF3OPERASAFARI2SAFARI3KONQ); // NOI18N
+        //COMPAT_MAP.put("CanvasRenderingContext2D.moveTo", FF2FF3OPERASAFARI2SAFARI3KONQ); // NOI18N
+        //COMPAT_MAP.put("CanvasRenderingContext2D.putImageData", FF2FF3OPERASAFARI2SAFARI3KONQ); // NOI18N
+        //COMPAT_MAP.put("CanvasRenderingContext2D.quadraticCurveTo", FF2FF3OPERASAFARI2SAFARI3KONQ); // NOI18N
+        //COMPAT_MAP.put("CanvasRenderingContext2D.rect", FF2FF3OPERASAFARI2SAFARI3KONQ); // NOI18N
+        //COMPAT_MAP.put("CanvasRenderingContext2D.rotate", FF2FF3OPERASAFARI2SAFARI3KONQ); // NOI18N
+        //COMPAT_MAP.put("CanvasRenderingContext2D.save", FF2FF3OPERASAFARI2SAFARI3KONQ); // NOI18N
+        //COMPAT_MAP.put("CanvasRenderingContext2D.scale", FF2FF3OPERASAFARI2SAFARI3KONQ); // NOI18N
+        //COMPAT_MAP.put("CanvasRenderingContext2D.setTransform", FF2FF3OPERASAFARI2SAFARI3KONQ); // NOI18N
+        //COMPAT_MAP.put("CanvasRenderingContext2D.stroke", FF2FF3OPERASAFARI2SAFARI3KONQ); // NOI18N
+        //COMPAT_MAP.put("CanvasRenderingContext2D.strokeRect", FF2FF3OPERASAFARI2SAFARI3KONQ); // NOI18N
+        //COMPAT_MAP.put("CanvasRenderingContext2D.transform", FF2FF3OPERASAFARI2SAFARI3KONQ); // NOI18N
+        //COMPAT_MAP.put("CanvasRenderingContext2D.translate", FF2FF3OPERASAFARI2SAFARI3KONQ); // NOI18N
+        //COMPAT_MAP.put("Document.adoptNode", NOT_IE55_OR_6); // NOI18N
+        //COMPAT_MAP.put("Document.createAttributeNS", NOT_IE55_OR_6); // NOI18N
+        //COMPAT_MAP.put("Document.createDocumentFragment", NOT_IE55); // NOI18N
+        //COMPAT_MAP.put("Document.createElementNS", NOT_IE55_OR_6); // NOI18N
+        //COMPAT_MAP.put("Document.getElementsByTagNameNS", NOT_IE55_OR_6); // NOI18N
+        //COMPAT_MAP.put("Document.implementation.createDocument", NOT_IE); // NOI18N
+        //COMPAT_MAP.put("Document.implementation.hasFeature", NOT_IE55); // NOI18N
+        //COMPAT_MAP.put("Document.importNode", NOT_IE55_OR_6); // NOI18N
+        //COMPAT_MAP.put("Document.normalizeDocument", NOT_IE55_OR_6); // NOI18N
+        //COMPAT_MAP.put("Document.renameNode", NOT_IE55_OR_6); // NOI18N
+        //COMPAT_MAP.put("DocumentRange.createRange", NOT_IE); // NOI18N
+        //COMPAT_MAP.put("DocumentTraversal.createNodeIterator", NOT_IE); // NOI18N
+        //COMPAT_MAP.put("DocumentTraversal.createTreeWalker", NOT_IE); // NOI18N
+        //COMPAT_MAP.put("Element.applyElement", IE); // NOI18N
+        //COMPAT_MAP.put("Element.contains", NOT_IE); // NOI18N
+        //COMPAT_MAP.put("Element.createAttribute", NOT_IE55); // NOI18N
+        //COMPAT_MAP.put("Element.getAttributeNS", NOT_IE55_OR_6); // NOI18N
+        //COMPAT_MAP.put("Element.getAttributeNode", NOT_IE55); // NOI18N
+        //COMPAT_MAP.put("Element.getAttributeNodeNS", NOT_IE55_OR_6); // NOI18N
+        //COMPAT_MAP.put("Element.getBoundingClientRect", FF3); // NOI18N
+        //COMPAT_MAP.put("Element.getClientRects", FF3); // NOI18N
+        //COMPAT_MAP.put("Element.getElementsByTagNameNS", NOT_IE55_OR_6); // NOI18N
 //// This one is overridden in prototype... Element.hasAttribute may be referring to it!
 //// For now, don't warn about this one.
 ////        COMPAT_MAP.put("Element.hasAttribute", NOT_IE); // NOI18N
