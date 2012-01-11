@@ -144,9 +144,7 @@ public class JsWhereUsedQueryPlugin extends JsRefactoringPlugin {
             }
 
             if (!isLocal) {
-              Set<FileObject> jsFilesInProject = RetoucheUtils.getJsFilesInProject(file);
-              jsFilesInProject.addAll(set);
-              return jsFilesInProject;
+                set.addAll(RetoucheUtils.getJsFilesInProject(file));
             }
         }
 
