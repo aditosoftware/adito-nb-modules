@@ -63,8 +63,8 @@ import org.netbeans.modules.csl.api.Modifier;
 import org.netbeans.modules.csl.api.OffsetRange;
 import org.netbeans.modules.csl.api.StructureItem;
 import org.netbeans.modules.csl.api.StructureScanner;
-//import org.netbeans.editor.BaseDocument;
-//import org.netbeans.editor.Utilities;
+import org.netbeans.editor.BaseDocument;
+import org.netbeans.editor.Utilities;
 import org.netbeans.modules.csl.spi.GsfUtilities;
 import org.netbeans.modules.csl.spi.ParserResult;
 import org.netbeans.modules.javascript.editing.lexer.LexUtilities;
@@ -805,7 +805,7 @@ public class JsAnalyzer implements StructureScanner {
             while (node != null) {
                 assert node.getType() == Token.STRING;
                 String path = node.getString();
-                if (path.indexOf(',') != -1) {
+                if (path.indexOf(",") != -1) {
                     String[] paths = path.split(",");
                     for (String s : paths) {
                         if (s.startsWith("'") || s.startsWith("\"")) {
@@ -839,11 +839,11 @@ public class JsAnalyzer implements StructureScanner {
      *  This creates a fake class "Spry", containing "Effect", containing
      *  "Animator", and so on.
      */
-    static class JsFakeStructureItem implements StructureItem {
+    class JsFakeStructureItem implements StructureItem {
         private String name;
         private AstElement element;
         private ElementKind kind;
-        //private JsParseResult info;
+        private JsParseResult info;
         List<StructureItem> children = new ArrayList<StructureItem>();
         int begin;
         int end;
@@ -852,7 +852,7 @@ public class JsAnalyzer implements StructureScanner {
             this.name = name;
             this.kind = kind;
             this.element = node;
-            //this.info = info;
+            this.info = info;
         }
         
         private void addChild(StructureItem child) {
@@ -948,7 +948,7 @@ public class JsAnalyzer implements StructureScanner {
         }
     }
 
-    private static class JsStructureItem implements StructureItem {
+    private class JsStructureItem implements StructureItem {
         private AstElement element;
         private ElementKind kind;
         private JsParseResult info;

@@ -47,7 +47,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
-//import java.util.EnumSet;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
@@ -82,7 +82,7 @@ import org.openide.util.Exceptions;
 /**
  * Index Ruby structure into the persistent store for retrieval by
  * {@link JsIndex}.
- *
+ * 
  * @todo Index methods as func.in and then distinguish between exact completion and multi-completion.
  * @todo Ensure that all the stub files are compileable!
  * @todo Should I perhaps store globals and functions using the same query prefix (since I typically
@@ -97,19 +97,19 @@ import org.openide.util.Exceptions;
  *        jQuery.each( "ajaxStart,ajaxStop,ajaxComplete,ajaxError,ajaxSuccess,ajaxSend".split(","), function(i,o){
  *                jQuery.fn[o] = function(f){
  *    jQuery.each( ("blur,focus,load,resize,scroll,unload,click,dblclick," +
- *            "mousedown,mouseup,mousemove,mouseover,mouseout,change,select," +
+ *            "mousedown,mouseup,mousemove,mouseover,mouseout,change,select," + 
  *            "submit,keydown,keypress,keyup,error").split(","), function(i, name){
- *
+ * 
  * @todo jquery- needs to preindex jquery: the stuff to register "ready" and "load" there
  *    on document and element classes.
- *
+ * 
  * @author Tor Norbye
  */
 public class JsIndexer extends EmbeddingIndexer {
     private static final Logger LOG = Logger.getLogger(JsIndexer.class.getName());
-
+    
     static final boolean PREINDEXING = Boolean.getBoolean("gsf.preindexing");
-
+    
     // I need to be able to search several things:
     // (1) by function root name, e.g. quickly all functions that start
     //    with "f" should find unknown.foo.
@@ -135,7 +135,7 @@ public class JsIndexer extends EmbeddingIndexer {
 
     // XXX: use this when getting FileObject for IndexedElement that was created for sdoc
     static final String FIELD_SDOC_URL = "sdocurl"; //NOI18N
-
+    
 
 // XXX: parsingapi
 //    public boolean acceptQueryPath(String url) {
@@ -182,15 +182,15 @@ public class JsIndexer extends EmbeddingIndexer {
         if (LOG.isLoggable(Level.FINE)) {
             LOG.fine("Analyzing: " + indexable.getRelativePath()); //NOI18N
         }
-
+        
         TreeAnalyzer analyzer = new TreeAnalyzer(r, support, indexable);
         analyzer.analyze();
-
+        
         for(IndexDocument d : analyzer.getDocuments()) {
             support.addDocument(d);
         }
     }
-
+    
     private static class TreeAnalyzer {
         private final JsParseResult result;
         private final FileObject file;
@@ -199,7 +199,7 @@ public class JsIndexer extends EmbeddingIndexer {
         private final List<IndexDocument> documents = new ArrayList<IndexDocument>();
 
         private String url;
-
+        
         private TreeAnalyzer(JsParseResult result, IndexingSupport indexingSupport, Indexable indexable) {
             this.result = result;
             this.file = result.getSnapshot().getSource().getFileObject();
@@ -285,7 +285,7 @@ public class JsIndexer extends EmbeddingIndexer {
                 docOffset = docRange.getStart();
             }
             Map<String,String> typeMap = element.getDocProps();
-
+              
             // Look up compatibility
             int index = IndexedElement.FLAG_INDEX;
             String compatibility = "";
@@ -320,13 +320,13 @@ public class JsIndexer extends EmbeddingIndexer {
                 flags = flags | IndexedElement.DOCUMENTED;
             }
             sb.append(IndexedElement.encode(flags));
-
+            
             // Parameters
             sb.append(';');
             index++;
             assert index == IndexedElement.ARG_INDEX;
             if (element instanceof FunctionAstElement) {
-                FunctionAstElement func = (FunctionAstElement)element;
+                FunctionAstElement func = (FunctionAstElement)element;            
 
                 int argIndex = 0;
                 for (String param : func.getParameters()) {
@@ -334,7 +334,7 @@ public class JsIndexer extends EmbeddingIndexer {
                         // Prototype inserts these as the first param to handle inheritance/super
                         argIndex++;
                         continue;
-                    }
+                    } 
                     if (argIndex > 0) {
                         sb.append(',');
                     }
@@ -356,7 +356,7 @@ public class JsIndexer extends EmbeddingIndexer {
             assert index == IndexedElement.NODE_INDEX;
             sb.append('0');
             //sb.append(IndexedElement.encode(element.getNode().getSourceStart()));
-
+            
             // Documentation offset
             sb.append(';');
             index++;
@@ -370,7 +370,7 @@ public class JsIndexer extends EmbeddingIndexer {
             index++;
             assert index == IndexedElement.BROWSER_INDEX;
             sb.append(compatibility);
-
+            
             // Types
             sb.append(';');
             index++;
@@ -386,7 +386,7 @@ public class JsIndexer extends EmbeddingIndexer {
                 sb.append(type);
             }
             sb.append(';');
-
+            
             String signature = sb.toString();
             return signature;
         }
@@ -396,7 +396,7 @@ public class JsIndexer extends EmbeddingIndexer {
             String name = element.getName();
             StringBuilder base = new StringBuilder();
             base.append(name.toLowerCase());
-            base.append(';');
+            base.append(';');                
             if (in != null) {
                 base.append(in);
             }
@@ -405,7 +405,7 @@ public class JsIndexer extends EmbeddingIndexer {
             base.append(';');
             base.append(signature);
             document.addPair(FIELD_BASE, base.toString(), true, true);
-
+            
             StringBuilder fqn = new StringBuilder();
             if (in != null && in.length() > 0) {
                 fqn.append(in.toLowerCase());
@@ -428,7 +428,7 @@ public class JsIndexer extends EmbeddingIndexer {
                 cache.wipe(in != null && in.length() > 0 ? in + "." + name : name);
             }
         }
-
+        
         private OffsetRange getDocumentationOffset(AstElement element) {
             int astOffset = element.getNode().getSourceStart();
             try {
@@ -454,13 +454,13 @@ public class JsIndexer extends EmbeddingIndexer {
                 return OffsetRange.NONE;
             }
         }
-
+        
         private void indexScriptDoc(Snapshot snapshot, String sdocUrl) {
             // I came across the following tags in YUI:
-            // @type, @param, @method, @class, @return, @constructor, @namespace,
+            // @type, @param, @method, @class, @return, @constructor, @namespace, 
             // @static, @private, @event, @property, @extends, @final, @module,
-            // @requires, @since, @protected, @default, @name, @see, @title,
-            // @attribute, @deprecated, @todo, @uses, @optional, @description,
+            // @requires, @since, @protected, @default, @name, @see, @title, 
+            // @attribute, @deprecated, @todo, @uses, @optional, @description, 
             // @public, @config, @throws
             //
             // I also saw these case variations:
@@ -470,9 +470,9 @@ public class JsIndexer extends EmbeddingIndexer {
             // @beta, @for, @readonly, @writeonce, @knownissue, @browser, @link, @object, @scope
             //
             // Finally, there were these typos:
-            // @propery, @depreciated, @parem, @parm,
+            // @propery, @depreciated, @parem, @parm, 
             assert sdocUrl == null || sdocUrl.endsWith(".sdoc") : sdocUrl; // NOI18N
-
+            
             IndexDocument document = indexingSupport.createDocument(indexable);
             documents.add(document);
 
@@ -577,13 +577,13 @@ public class JsIndexer extends EmbeddingIndexer {
                                 // TODO - how do I encode constants?
                             }
                         }
-
+                        
                         if (fullName != null && id == null) {
                             id = fullName;
                             // When using @name, @class is just used as a description
                             clz = null;
                         }
-
+                        
                         if (id == null && clz != null && name == null) {
                             if (nameSpace != null) {
                                 id = nameSpace + "." + clz + "." + name;
@@ -625,8 +625,8 @@ public class JsIndexer extends EmbeddingIndexer {
                             }
 
                             // Browser compatibility ... TODO
-
-
+                            
+                            
                             int index = IndexedElement.FLAG_INDEX;
                             StringBuilder sb = new StringBuilder();
 
@@ -676,8 +676,8 @@ public class JsIndexer extends EmbeddingIndexer {
                             // Create items
                             StringBuilder base = new StringBuilder();
                             base.append(name.toLowerCase());
-
-                            base.append(';');
+                            
+                            base.append(';');                
                             if (in != null) {
                                 base.append(in);
                             }
@@ -708,14 +708,14 @@ public class JsIndexer extends EmbeddingIndexer {
                 }
             }
         }
-
+        
         private boolean indexRelatedScriptDocs() {
             // (1) If it's a simple library like JQuery, use the assocaited file, else
             // (2) If it's a YUI file, use the associated file in sdoc, else
             // (3) If it's a YUI "collections" file, use the associated set of files (I must iterate)
             // Finally, in all cases, see if there's a corresponding sdoc file in the dir and if so,
             // use it.
-
+            
             //            if (fo != null) {
             //                // Prioritize sdoc files bundled next to the file
             //                if (fo != null && fo.getParent() != null) {
@@ -729,7 +729,7 @@ public class JsIndexer extends EmbeddingIndexer {
             //                    }
             //                }
             //            }
-
+            
             int begin = url.lastIndexOf('/');
             if (url.startsWith("jquery-", begin+1)) { // NOI18N
                 indexScriptDoc("jquery.sdoc", false); // NOI18N
@@ -759,7 +759,7 @@ public class JsIndexer extends EmbeddingIndexer {
                     return true;
                 }
             }
-
+            
             return false;
         }
 
@@ -774,13 +774,13 @@ public class JsIndexer extends EmbeddingIndexer {
                 }
                 return;
             }
-
+            
             if (fo.getExt().equals("sdoc")) { // NOI18N
                 Source source = Source.create(fo);
                 indexScriptDoc(source.createSnapshot(), url);
             }
         }
-
+        
         private static FileObject sdocsRoot;
         private static String sdocsRootUrl;
 
@@ -830,18 +830,18 @@ public class JsIndexer extends EmbeddingIndexer {
             }
         }
     }
-
+    
     public File getPreindexedData() {
         return null;
     }
-
+    
 //    private static FileObject preindexedDb;
 //
 //    /** For testing only */
 //    public static void setPreindexedDb(FileObject preindexedDb) {
 //        JsIndexer.preindexedDb = preindexedDb;
 //    }
-
+    
     public FileObject getPreindexedDb() {
 //        if (preindexedDb == null) {
 //            File preindexed = InstalledFileLocator.getDefault().locate(
@@ -874,12 +874,9 @@ public class JsIndexer extends EmbeddingIndexer {
 
     private static String getClusterUrl() {
         if (clusterUrl == null) {
-            File f = InstalledFileLocator.getDefault().locate(
-                "jsstubs/allstubs.zip",
-                "org.netbeans.modules.javascript.editing", false); // NOI18N
-            //File f =
-            //        InstalledFileLocator.getDefault().locate("jsstubs/sdocs.zip", // NOI18N
-            //                "org.netbeans.modules.javascript.editing", false); // NOI18N
+            File f =
+                    InstalledFileLocator.getDefault().locate("jsstubs/allstubs.zip", // NOI18N
+                            "org.netbeans.modules.javascript.editing", false); // NOI18N
 
             if (f == null) {
                 throw new RuntimeException("Can't find cluster");
@@ -936,11 +933,7 @@ public class JsIndexer extends EmbeddingIndexer {
         private boolean cachedIndexable;
 
         private boolean isIndexable(Indexable indexable, Snapshot snapshot) {
-            FileObject sourceFo = snapshot.getSource().getFileObject();
-            if (!(sourceFo != null && JsUtils.isJsFile(sourceFo) && sourceFo.getSize() > 0))
-                return false;
-
-            String name = sourceFo.getNameExt();
+            String name = snapshot.getSource().getFileObject().getNameExt();
 
             if (name.endsWith(".js"))  {
                 // we are indexing a javascript file (not embedded javascript)
@@ -954,12 +947,13 @@ public class JsIndexer extends EmbeddingIndexer {
                     }
                 }
 
+                FileObject fo = snapshot.getSource().getFileObject();
                 if (name.endsWith("min.js") && name.length() > 6 && !Character.isLetter(name.charAt(name.length()-7))) { // NOI18N
                     // See if we have a corresponding "un-min'ed" version in the same directory;
                     // if so, skip it
                     // Subtrack out the -min part
                     name = name.substring(0, name.length()-7); // NOI18N
-                    if (sourceFo.getParent().getFileObject(name, "js") != null) { // NOI18N
+                    if (fo.getParent().getFileObject(name, "js") != null) { // NOI18N
                         // The file has been deleted
                         // I still need to return yes here such that the file is deleted from the index.
                         return false;
@@ -973,7 +967,7 @@ public class JsIndexer extends EmbeddingIndexer {
                     // (Perhaps hardcode the list). It would be good if we could check multiple of the loadpath directories
                     // too, not just the same directory since there's a good likelihood (with the library manager) you
                     // have these in different dirs.
-                    FileObject parent = sourceFo.getParent();
+                    FileObject parent = fo.getParent();
                     if (parent == null) {
                         // Unlikely but let's play it safe
                         return true;
@@ -1038,7 +1032,7 @@ public class JsIndexer extends EmbeddingIndexer {
 
         @Override
         public void rootsRemoved(final Iterable<? extends URL> removedRoots) {
-
+            
         }
 
         @Override

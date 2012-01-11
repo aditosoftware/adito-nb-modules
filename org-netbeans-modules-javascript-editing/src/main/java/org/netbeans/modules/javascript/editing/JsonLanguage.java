@@ -98,10 +98,9 @@ public class JsonLanguage extends DefaultLanguageConfig {
     }
 
     @Override
-  public Set<String> getSourcePathIds()
-  {
-    return Collections.singleton(JsClassPathProvider.SOURCE_CP);
-  }
+    public Set<String> getSourcePathIds() {
+        return Collections.singleton(JsClassPathProvider.SOURCE_CP);
+    }
 
   @Override
     public Set<String> getLibraryPathIds() {

@@ -52,7 +52,7 @@ import java.util.Map;
  */
 public class FunctionCache {
     public static final FunctionCache INSTANCE = new FunctionCache();
-    static final String NONE = "NONE";
+    static final String NONE = new String("NONE");
     
     Map<String,String> cache = new HashMap<String,String>(500);
     

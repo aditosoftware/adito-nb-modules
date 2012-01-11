@@ -86,6 +86,7 @@ import org.netbeans.modules.javascript.editing.lexer.JsCommentTokenId;
 import org.netbeans.modules.javascript.editing.lexer.JsLexer;
 import org.netbeans.modules.javascript.editing.lexer.JsTokenId;
 import org.netbeans.modules.javascript.editing.lexer.LexUtilities;
+import org.netbeans.modules.parsing.api.Embedding;
 import org.netbeans.modules.parsing.api.ParserManager;
 import org.netbeans.modules.parsing.api.ResultIterator;
 import org.netbeans.modules.parsing.api.Source;
@@ -295,7 +296,7 @@ public class JsCodeCompletion implements CodeCompletionHandler {
         int lexOffset = context.getCaretOffset();
         String prefix = context.getPrefix();
         QuerySupport.Kind kind = context.isPrefixMatch() ? QuerySupport.Kind.PREFIX : QuerySupport.Kind.EXACT;
-        //QueryType queryType = context.getQueryType();
+        QueryType queryType = context.getQueryType();
         this.caseSensitive = context.isCaseSensitive();
 
         if (prefix == null) {
@@ -347,7 +348,7 @@ public class JsCodeCompletion implements CodeCompletionHandler {
             request.prefix = prefix;
             request.th = th;
             request.kind = kind;
-            //request.queryType = queryType;
+            request.queryType = queryType;
             request.fileObject = fileObject;
             request.anchor = lexOffset - prefix.length();
             request.call = call;
@@ -492,7 +493,7 @@ public class JsCodeCompletion implements CodeCompletionHandler {
         Map<String, List<Node>> localVars = v.getLocalVars(node);
         for (Map.Entry<String, List<Node>> entry : localVars.entrySet()){
           String name = entry.getKey();
-          if (((kind == QuerySupport.Kind.EXACT) && prefix.equals(name)) ||
+            if (((kind == QuerySupport.Kind.EXACT) && prefix.equals(name)) ||
                     ((kind != QuerySupport.Kind.EXACT) && startsWith(name, prefix))) {
                 List<Node> nodeList = entry.getValue();
                 if (nodeList != null && nodeList.size() > 0) {
@@ -501,6 +502,7 @@ public class JsCodeCompletion implements CodeCompletionHandler {
                 }
             }
         }
+
 
         // Add in "arguments" local variable which is available to all functions
         String ARGUMENTS = "arguments"; // NOI18N
@@ -880,14 +882,31 @@ public class JsCodeCompletion implements CodeCompletionHandler {
 
     private void addElementIds(final List<CompletionProposal> proposals, final CompletionRequest request, final String prefix) {
         Source source = request.info.getSnapshot().getSource();
-        if (source.getMimeType().equals(JsUtils.HTML_MIME_TYPE)) {
-            try {
-                ParserManager.parse(Collections.singleton(source), new UserTask() {
+        try {
+            ParserManager.parse(Collections.singleton(source), new UserTask() {
 
-                    public
-                    @Override
-                    void run(ResultIterator resultIterator) throws Exception {
-                        HtmlParserResult htmlResult = (HtmlParserResult) resultIterator.getParserResult();
+                public
+                @Override
+                void run(ResultIterator resultIterator) throws Exception {
+                    HtmlParserResult htmlResult = null;
+                    if (resultIterator.getParserResult() instanceof HtmlParserResult) {
+                        htmlResult = (HtmlParserResult) resultIterator.getParserResult();
+                    } else {
+                        Embedding htmlEmbeding = null;
+                        for(Embedding embedding : resultIterator.getEmbeddings()) {
+                            if (embedding.getMimeType().equals(JsUtils.HTML_MIME_TYPE)) {
+                                htmlEmbeding = embedding;
+                            }
+                        }
+                        if (htmlEmbeding != null) {
+                            resultIterator = resultIterator.getResultIterator(htmlEmbeding);
+                            if (resultIterator != null) {
+                                htmlResult = (HtmlParserResult) resultIterator.getParserResult();
+                            }
+                        }
+                        
+                    }
+                    if (htmlResult != null) {
                         Set<SyntaxElement.TagAttribute> elementIds = new HashSet<SyntaxElement.TagAttribute>();
                         for (SyntaxElement element : htmlResult.getSyntaxAnalyzerResult().getElements().items()) {
                             if (element.type() == SyntaxElement.TYPE_TAG) {
@@ -913,10 +932,10 @@ public class JsCodeCompletion implements CodeCompletionHandler {
                             }
                         }
                     }
-                });
-            } catch (ParseException e) {
-                LOG.log(Level.WARNING, null, e);
-            }
+                }
+            });
+        } catch (ParseException e) {
+            LOG.log(Level.WARNING, null, e);
         }
     }
 
@@ -2459,7 +2478,7 @@ public class JsCodeCompletion implements CodeCompletionHandler {
         private JsIndex index;
         private QuerySupport.Kind kind;
         private JsParseResult result;
-        //private QueryType queryType;
+        private QueryType queryType;
         private FileObject fileObject;
         private Call call;
         private boolean inCall;

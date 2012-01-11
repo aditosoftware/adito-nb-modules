@@ -51,11 +51,11 @@ import org.netbeans.modules.csl.api.ElementKind;
  * @author Tor Norbye
  */
 public class GlobalAstElement extends AstElement {
-    //Node var;
+    Node var;
     
     GlobalAstElement(JsParseResult info, Node var) {
         super(info, var);
-        //this.var = var;
+        this.var = var;
     }
     
     @Override

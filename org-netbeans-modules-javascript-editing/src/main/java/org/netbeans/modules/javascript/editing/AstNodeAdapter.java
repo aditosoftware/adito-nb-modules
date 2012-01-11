@@ -37,8 +37,8 @@ class AstNodeAdapter implements TreeNode {
     private Node node;
     private AstNodeAdapter parent;
     private AstNodeAdapter[] children;
-    //private List<AstNodeAdapter> childrenList;
-    //int endOffset = -1;
+    private List<AstNodeAdapter> childrenList;
+    int endOffset = -1;
 
     AstNodeAdapter(AstNodeAdapter parent, Node node) {
         this.parent = parent;

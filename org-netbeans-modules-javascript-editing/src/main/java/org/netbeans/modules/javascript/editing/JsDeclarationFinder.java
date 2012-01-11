@@ -445,7 +445,7 @@ public class JsDeclarationFinder implements DeclarationFinder {
         return DeclarationLocation.NONE;
     }
     
-    private static class JsAltLocation implements AlternativeLocation {
+    private class JsAltLocation implements AlternativeLocation {
         private IndexedElement element;
         private boolean isPreferred;
         private String cachedDisplayItem;

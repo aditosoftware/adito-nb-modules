@@ -679,18 +679,15 @@ public abstract class IndexedElement extends JsElement {
             lastSlash++;
             if (filename.startsWith("stub_core", lastSlash)) { // NOI18N
                 return "Core JS";
-            }
-//            else if (filename.startsWith("stub_", lastSlash)) { // NOI18N
-//                return "DOM";
-//            } else if (filename.startsWith("jquery", lastSlash)) { // NOI18N
-//                return "jQuery";
-//            } else if (filename.startsWith("dojo", lastSlash)) { // NOI18N
-//                return "dojo";
-//            } else if (filename.startsWith("yui", lastSlash)) { // NOI18N
-//                return "YUI";
-//            }
-            else if (filename.startsWith("stub_adito", lastSlash))
-            { // NOI18N
+            //} else if (filename.startsWith("stub_", lastSlash)) { // NOI18N
+            //    return "DOM";
+            //} else if (filename.startsWith("jquery", lastSlash)) { // NOI18N
+            //    return "jQuery";
+            //} else if (filename.startsWith("dojo", lastSlash)) { // NOI18N
+            //    return "dojo";
+            //} else if (filename.startsWith("yui", lastSlash)) { // NOI18N
+            //    return "YUI";
+            } else if (filename.startsWith("stub_adito", lastSlash)) { // NOI18N
               return "ADITO JS";
             }
             // TODO: Map to sdocs somehow. Tricky because sometimes I get the source
