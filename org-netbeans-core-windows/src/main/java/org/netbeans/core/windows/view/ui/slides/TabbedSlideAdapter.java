@@ -62,12 +62,13 @@ import javax.swing.ImageIcon;
 import javax.swing.SingleSelectionModel;
 import javax.swing.event.ChangeListener;
 import org.netbeans.core.windows.Constants;
-import org.netbeans.core.windows.Switches;
+import org.netbeans.core.windows.ModeImpl;
 import org.netbeans.core.windows.WindowManagerImpl;
 import org.netbeans.core.windows.actions.ActionUtils;
 import org.netbeans.core.windows.view.ui.Tabbed;
 import org.netbeans.swing.tabcontrol.DefaultTabDataModel;
 import org.netbeans.core.windows.view.dnd.DragAndDropFeedbackVisualizer;
+import org.netbeans.core.windows.view.dnd.TopComponentDraggable;
 import org.netbeans.swing.tabcontrol.SlideBarDataModel;
 import org.netbeans.swing.tabcontrol.TabData;
 import org.netbeans.swing.tabcontrol.TabDataModel;
@@ -94,18 +95,23 @@ public final class TabbedSlideAdapter implements Tabbed {
     private List<ActionListener> actionListeners;
     private final ChangeSupport cs = new ChangeSupport(this);
     
+    private final ModeImpl slidingMode;
+    
     /** Creates a new instance of SlideBarTabs */
     public TabbedSlideAdapter(String side) {
         dataModel = new SlideBarDataModel.Impl();
         setSide(side);
         selModel = new DefaultSingleSelectionModel();
         slideBar = new SlideBar(this, (SlideBarDataModel)dataModel, selModel);
+        slidingMode = findSlidingMode();
     }
     
+    @Override
     public void requestAttention (TopComponent tc) {
         slideBar.setBlinking(tc, true);
     }
     
+    @Override
     public void cancelRequestAttention (TopComponent tc) {
         slideBar.setBlinking(tc, false);
     }
@@ -119,10 +125,13 @@ public final class TabbedSlideAdapter implements Tabbed {
             orientation = SlideBarDataModel.EAST;
         } else if (Constants.BOTTOM.equals(side)) {
             orientation = SlideBarDataModel.SOUTH;
+        } else if (Constants.TOP.equals(side)) {
+            orientation = SlideBarDataModel.NORTH;
         }
         ((SlideBarDataModel)dataModel).setOrientation(orientation);
     }
 
+    @Override
     public final synchronized void addActionListener(ActionListener listener) {
         if (actionListeners == null) {
             actionListeners = new ArrayList<ActionListener>();
@@ -135,6 +144,7 @@ public final class TabbedSlideAdapter implements Tabbed {
      *
      * @param listener The listener to remove.
      */
+    @Override
     public final synchronized void removeActionListener(ActionListener listener) {
         if (actionListeners != null) {
             actionListeners.remove(listener);
@@ -156,10 +166,12 @@ public final class TabbedSlideAdapter implements Tabbed {
         }
     }
     
+    @Override
     public void addChangeListener(ChangeListener listener) {
         cs.addChangeListener(listener);
     }    
     
+    @Override
     public void removeChangeListener(ChangeListener listener) {
         cs.removeChangeListener(listener);
     }
@@ -176,19 +188,23 @@ public final class TabbedSlideAdapter implements Tabbed {
         slideBar.removePropertyChangeListener(name, listener);
     }
     
+    @Override
     public void addTopComponent(String name, Icon icon, TopComponent tc, String toolTip) {
         dataModel.addTab(dataModel.size(), new TabData(tc, icon, name, toolTip));
     }
     
+    @Override
     public TopComponent getSelectedTopComponent() {
         int index = selModel.getSelectedIndex();
         return index < 0 ? null : (TopComponent)dataModel.getTab(index).getComponent();
     }
     
+    @Override
     public TopComponent getTopComponentAt(int index) {
         return (TopComponent)dataModel.getTab(index).getComponent();
     }
     
+    @Override
     public TopComponent[] getTopComponents() {
         int size = dataModel.size();
         TopComponent[] result = new TopComponent[size];
@@ -198,22 +214,27 @@ public final class TabbedSlideAdapter implements Tabbed {
         return result;
     }
     
+    @Override
     public void setActive(boolean active) {
         slideBar.setActive(active);
     }
     
+    @Override
     public void setIconAt(int index, Icon icon) {
         dataModel.setIcon(index, icon);
     }
     
+    @Override
     public void setTitleAt(int index, String title) {
         dataModel.setText(index, title);
     }
     
+    @Override
     public void setToolTipTextAt(int index, String toolTip) {
         // XXX - not supported yet
     }
     
+    @Override
     public void setTopComponents(TopComponent[] tcs, TopComponent selected) {
         TabData[] data = new TabData[tcs.length];
         int toSelect=-1;
@@ -235,10 +256,12 @@ public final class TabbedSlideAdapter implements Tabbed {
         setSelectedComponent(selected);
     }
     
+    @Override
     public int getTabCount() {
         return dataModel.size();
     }    
     
+    @Override
     public int indexOf(Component tc) {
         int size = dataModel.size();
         for (int i=0; i < size; i++) {
@@ -247,15 +270,18 @@ public final class TabbedSlideAdapter implements Tabbed {
         return -1;
     }
     
+    @Override
     public void insertComponent(String name, Icon icon, Component comp, String toolTip, int position) {
         dataModel.addTab(position, new TabData(comp, icon, name, toolTip));
     }
     
+    @Override
     public void removeComponent(Component comp) {
         int i = indexOf(comp);
         dataModel.removeTab(i);
     }
     
+    @Override
     public void setSelectedComponent(Component comp) {
         int newIndex = indexOf(comp);
         if (selModel.getSelectedIndex() != newIndex) {
@@ -268,22 +294,27 @@ public final class TabbedSlideAdapter implements Tabbed {
         }
     }
     
+    @Override
     public int tabForCoordinate(Point p) {
         return slideBar.tabForCoordinate(p.x, p.y);
     }
     
+    @Override
     public Component getComponent() {
         return slideBar;
     }
 
 /*************** No DnD support yet **************/
     
+    @Override
     public Object getConstraintForLocation(Point location, boolean attachingPossible) {
         int tab = slideBar.nextTabForCoordinate(location.x, location.y);
         return Integer.valueOf(tab);
     }
     
-    public Shape getIndicationForLocation(Point location, TopComponent startingTransfer, Point startingPoint, boolean attachingPossible) {
+    @Override
+    public Shape getIndicationForLocation(Point location, TopComponentDraggable startingTransfer, 
+                            Point startingPoint, boolean attachingPossible) {
         
 //        int tab = tabForCoordinate(location);
         int nextTab = slideBar.nextTabForCoordinate(location.x, location.y);
@@ -291,7 +322,7 @@ public final class TabbedSlideAdapter implements Tabbed {
         if (getTabCount() != 0) {
             if (nextTab == 0) {
                 Rectangle rect = getTabBounds(0);
-                if (sbdm.getOrientation() == SlideBarDataModel.SOUTH) {
+                if (isHorizontal()) {
                     rect.x = 0;
                     rect.width = rect.width / 2;
                 } else {
@@ -303,7 +334,7 @@ public final class TabbedSlideAdapter implements Tabbed {
                 Rectangle rect1 = getTabBounds(nextTab - 1);
                 Rectangle rect2 = getTabBounds(nextTab);
                 Rectangle result = new Rectangle();
-                if (sbdm.getOrientation() == SlideBarDataModel.SOUTH) {
+                if (isHorizontal()) {
                     result.y = rect1.y;
                     result.height = rect1.height;
                     result.x = rect1.x + (rect1.width / 2);
@@ -317,7 +348,7 @@ public final class TabbedSlideAdapter implements Tabbed {
                 return result;
             } else if (nextTab == getTabCount()) {
                 Rectangle rect = getTabBounds(getTabCount() - 1);
-                if (sbdm.getOrientation() == SlideBarDataModel.SOUTH) {
+                if (isHorizontal()) {
                     rect.x = rect.x + rect.width;
                 } else {
                     rect.y = rect.y + rect.height;
@@ -325,13 +356,13 @@ public final class TabbedSlideAdapter implements Tabbed {
                 return rect;
             }
         } 
-        Rectangle rect = slideBar.getBounds();
-        if (sbdm.getOrientation() == SlideBarDataModel.SOUTH) {
+        if (isHorizontal()) {
             return new Rectangle(10, 0, 50, 20);
         }
         return new Rectangle(0, 10, 20, 50);
     }
     
+    @Override
     public Image createImageOfTab(int tabIndex) {
         TabData dt = slideBar.getModel().getTab(tabIndex);
         if (dt.getComponent() instanceof TopComponent) {
@@ -374,19 +405,13 @@ public final class TabbedSlideAdapter implements Tabbed {
     }
     
     /** Add action for disabling slide */
+    @Override
     public Action[] getPopupActions(Action[] defaultActions, int tabIndex) {
         boolean isMDI = WindowManagerImpl.getInstance().getEditorAreaState() == Constants.EDITOR_AREA_JOINED;
-        TabData td = slideBar.getModel().getTab(tabIndex);
-        boolean slidingEnabled = true;
-        if( td.getComponent() instanceof TopComponent ) {
-            slidingEnabled = Switches.isSlidingEnabled((TopComponent)td.getComponent());
-        }
-        Action[] result = new Action[defaultActions.length + (isMDI && Switches.isTopComponentSlidingEnabled() && slidingEnabled ? 2 : 0)];
+        Action[] result = new Action[defaultActions.length + (isMDI ? 1 : 0)];
         System.arraycopy(defaultActions, 0, result, 0, defaultActions.length);
-        if (isMDI && Switches.isTopComponentSlidingEnabled() && slidingEnabled) {
-            result[defaultActions.length] = 
-                new ActionUtils.AutoHideWindowAction(slideBar, tabIndex, true);
-            result[defaultActions.length+1] =
+        if (isMDI) {
+            result[defaultActions.length] =
                 new ActionUtils.ToggleWindowTransparencyAction(slideBar,
                     tabIndex,
                     slideBar.isSlidedTabTransparent()
@@ -395,16 +420,55 @@ public final class TabbedSlideAdapter implements Tabbed {
         return result;
     }
     
+    @Override
     public Rectangle getTabBounds(int tabIndex) {
         return slideBar.getTabBounds(tabIndex);
     }
 
+    @Override
     public boolean isTransparent() {
         return false;
     }
 
+    @Override
     public void setTransparent(boolean transparent) {
         throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public Rectangle getTabsArea() {
+        Rectangle res = slideBar.getBounds();
+        res.setLocation( 0, 0 );
+        return res;
+    }
+    
+    final ModeImpl getSlidingMode() {
+        return slidingMode;
+    }
+    
+    private ModeImpl findSlidingMode() {
+        String modeName;
+        switch( ((SlideBarDataModel)dataModel).getOrientation() ) {
+            case SlideBarDataModel.EAST:
+                modeName = "rightSlidingSide"; //NOI18N
+                break;
+            case SlideBarDataModel.SOUTH:
+                modeName = "bottomSlidingSide"; //NOI18N
+                break;
+            case SlideBarDataModel.NORTH:
+                modeName = "topSlidingSide"; //NOI18N
+                break;
+            case SlideBarDataModel.WEST:
+            default:
+                modeName = "leftSlidingSide"; //NOI18N
+        }
+        return ( ModeImpl ) WindowManagerImpl.getInstance().findMode( modeName );
+    }
+
+    
+    final boolean isHorizontal() {
+        return ((SlideBarDataModel)dataModel).getOrientation() == SlideBarDataModel.SOUTH 
+                || ((SlideBarDataModel)dataModel).getOrientation() == SlideBarDataModel.NORTH;
     }
 }
 

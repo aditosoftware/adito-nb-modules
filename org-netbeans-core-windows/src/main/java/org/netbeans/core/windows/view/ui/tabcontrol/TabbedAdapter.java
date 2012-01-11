@@ -69,6 +69,7 @@ import java.util.Arrays;
 import org.netbeans.core.windows.ModeImpl;
 import org.netbeans.core.windows.Switches;
 import org.netbeans.core.windows.actions.ActionUtils;
+import org.netbeans.core.windows.view.dnd.TopComponentDraggable;
 import org.netbeans.swing.tabcontrol.TabDisplayer;
 import org.netbeans.swing.tabcontrol.WinsysInfoForTabbedContainer;
 import org.netbeans.swing.tabcontrol.event.TabActionEvent;
@@ -95,6 +96,7 @@ public class TabbedAdapter extends TabbedContainer implements Tabbed, Tabbed.Acc
     public TabbedAdapter (int type) {
         super (null, type, new WinsysInfo(type));
         getSelectionModel().addChangeListener(new ChangeListener() {
+            @Override
             public void stateChanged (ChangeEvent ce) {
                 int idx = getSelectionModel().getSelectedIndex();
                 if (idx != -1) {
@@ -106,10 +108,12 @@ public class TabbedAdapter extends TabbedContainer implements Tabbed, Tabbed.Acc
 //        if (fillC != null) setBackground (fillC);
     }
     
+    @Override
     public void addTopComponent(String name, javax.swing.Icon icon, TopComponent tc, String toolTip) {
         insertComponent (name, icon, tc, toolTip, getTabCount());
     }
     
+    @Override
     public TopComponent getTopComponentAt(int index) {
         if (index == -1 || index >= getModel().size()) {
             return null;
@@ -117,11 +121,13 @@ public class TabbedAdapter extends TabbedContainer implements Tabbed, Tabbed.Acc
         return (TopComponent)getModel().getTab(index).getComponent();
     }
     
+    @Override
     public TopComponent getSelectedTopComponent() {
         int i = getSelectionModel().getSelectedIndex();
         return i == -1 ? null : getTopComponentAt(i);
     }
     
+    @Override
     public void requestAttention (TopComponent tc) {
         int idx = indexOf(tc);
         if (idx >= 0) {
@@ -132,6 +138,7 @@ public class TabbedAdapter extends TabbedContainer implements Tabbed, Tabbed.Acc
         }
     }
 
+    @Override
     public void cancelRequestAttention (TopComponent tc) {
         int idx = indexOf(tc);
         if (idx >= 0) {
@@ -142,6 +149,7 @@ public class TabbedAdapter extends TabbedContainer implements Tabbed, Tabbed.Acc
         }
     }    
 
+    @Override
     public void insertComponent(String name, javax.swing.Icon icon, Component comp, String toolTip, int position) {
         TabData td = new TabData (comp, icon, name, toolTip);
         
@@ -153,6 +161,7 @@ public class TabbedAdapter extends TabbedContainer implements Tabbed, Tabbed.Acc
         comp.addPropertyChangeListener(JComponent.TOOL_TIP_TEXT_KEY, getTooltipListener(comp));
     }
  
+    @Override
     public void setSelectedComponent(Component comp) {
         int i = indexOf (comp);
         if (i == -1 && null != comp) {
@@ -163,6 +172,7 @@ public class TabbedAdapter extends TabbedContainer implements Tabbed, Tabbed.Acc
         }
     }
     
+    @Override
     public TopComponent[] getTopComponents() {
         ComponentConverter cc = getComponentConverter();
         TabData[] td = (TabData[]) getModel().getTabs().toArray(new TabData[0]);
@@ -173,6 +183,7 @@ public class TabbedAdapter extends TabbedContainer implements Tabbed, Tabbed.Acc
         return result;
     }
     
+    @Override
     public void removeComponent(Component comp) {
         int i=indexOf(comp);
         getModel().removeTab(i);
@@ -194,6 +205,7 @@ public class TabbedAdapter extends TabbedContainer implements Tabbed, Tabbed.Acc
         getModel().addTabs (0, data);
     }
 
+    @Override
     public void setTopComponents(TopComponent[] tcs, TopComponent selected) {
         // #100144 - correct null selection and log, probably some problem in
         // winsys model consistency, but without reproduction no chance to find out
@@ -269,6 +281,7 @@ public class TabbedAdapter extends TabbedContainer implements Tabbed, Tabbed.Acc
      * @return Integer object representing found tab index. Returns null if
      * no such tab can be found.
      */
+    @Override
     public Object getConstraintForLocation(Point location, boolean attachingPossible) {
         //#47909
         // first process the tabs when mouse is inside the tabs area..
@@ -293,18 +306,20 @@ public class TabbedAdapter extends TabbedContainer implements Tabbed, Tabbed.Acc
      * TBD - extend for various feedback types
      * @return Shape representing feedback indication
      */
+    @Override
     public Shape getIndicationForLocation(Point location,
-        TopComponent startingTransfer, Point startingPoint, boolean attachingPossible) {
+        TopComponentDraggable startingTransfer, Point startingPoint, boolean attachingPossible) {
 
         Rectangle rect = getBounds();
         rect.setLocation(0, 0);
         
+        TopComponent draggedTC = startingTransfer.getTopComponent();
         //#47909
         int tab = tabForCoordinate(location);
         // first process the tabs when mouse is inside the tabs area..
         // need to process before the side resolution.
         if (tab != -1) {
-            Shape s = getDropIndication(startingTransfer, location);
+            Shape s = getDropIndication(draggedTC, location);
             if(s != null) {
                 return s;
             }
@@ -329,13 +344,13 @@ public class TabbedAdapter extends TabbedContainer implements Tabbed, Tabbed.Acc
         }
 
         // #47909 now check shape again.. when no sides were checked, assume changing tabs when in component center.
-        Shape s = getDropIndication(startingTransfer, location);
+        Shape s = getDropIndication(draggedTC, location);
         if(s != null) {
             return s;
         }
         
-        if(startingPoint != null
-            && indexOf(startingTransfer) != -1) {
+        if( startingTransfer.isTopComponentTransfer() && startingPoint != null 
+            && indexOf(startingTransfer.getTopComponent()) != -1) {
             return getStartingIndication(startingPoint, location);
         }
         
@@ -409,6 +424,7 @@ public class TabbedAdapter extends TabbedContainer implements Tabbed, Tabbed.Acc
      * @param listener The listener to register.
      *
      */
+    @Override
     public void addChangeListener(ChangeListener listener) {
         cs.addChangeListener(listener);
     }    
@@ -417,6 +433,7 @@ public class TabbedAdapter extends TabbedContainer implements Tabbed, Tabbed.Acc
      * @param listener The listener to remove.
      *
      */
+    @Override
     public void removeChangeListener(ChangeListener listener) {
         cs.removeChangeListener(listener);
     }
@@ -455,32 +472,28 @@ public class TabbedAdapter extends TabbedContainer implements Tabbed, Tabbed.Acc
         Debug.log(TabbedAdapter.class, message);
     }
     
+    @Override
     public Component getComponent() {
         return this;
     }
     
     /** Add action for enabling auto hide of views */
+    @Override
     public Action[] getPopupActions(Action[] defaultActions, int tabIndex) {
-        boolean isDocked = WindowManagerImpl.getInstance().isDocked(getTopComponentAt(tabIndex));
-        boolean slidingEnabled = true;
-        TabData td = getModel().getTab(tabIndex);
-        if( td.getComponent() instanceof TopComponent ) {
-            slidingEnabled = Switches.isSlidingEnabled((TopComponent)td.getComponent());
+        if( tabIndex < 0 ) {
+            ModeImpl mode = getModeImpl();
+            if( null != mode )
+                return ActionUtils.createDefaultPopupActions( mode );
+            return null;
         }
-        // no auto hide for editors and floating views
-        if (TabbedContainer.TYPE_EDITOR == getType() || !isDocked 
-                || !Switches.isTopComponentSlidingEnabled() || !slidingEnabled) {
-            return defaultActions;
-        }
-        int actionCount = defaultActions.length;
-        Action[] result = new Action[actionCount + 1];
-        System.arraycopy(defaultActions, 0, result, 0, actionCount);
-        // #82052: undock action as last item, auto hide as first before last
-        if (actionCount > 0) {
-            result[actionCount] = result[actionCount - 1];
-            result[actionCount - 1] = new ActionUtils.AutoHideWindowAction(this, tabIndex, false);
-        }
-        return result;
+        return defaultActions;
+    }
+    
+    private ModeImpl getModeImpl() {
+        TopComponent[] topComponents = getTopComponents();
+        if( topComponents.length < 1 )
+            return null;
+        return ( ModeImpl ) WindowManagerImpl.getInstance().findMode( topComponents[0] );
     }
 
     /** Finds out in what state is window system mode containing given component.
@@ -498,22 +511,31 @@ public class TabbedAdapter extends TabbedContainer implements Tabbed, Tabbed.Acc
     
     /********** implementation of SlideController *****************/
     
+    @Override
     public void userToggledAutoHide(int tabIndex, boolean enabled) {
         postActionEvent(new TabActionEvent(this, TabbedContainer.COMMAND_ENABLE_AUTO_HIDE, tabIndex));
     }    
 
+    @Override
     public void userToggledTransparency(int tabIndex) {
         postActionEvent(new TabActionEvent(this, TabbedContainer.COMMAND_TOGGLE_TRANSPARENCY, tabIndex));
     }    
     
     /********* implementation of Tabbed.Accessor **************/
     
+    @Override
     public Tabbed getTabbed() {
         return this;
     }
     
+    @Override
     public Rectangle getTabBounds(int tabIndex) {
         return getTabRect(tabIndex, new Rectangle());
+    }
+    
+    @Override
+    public Rectangle getTabsArea() {
+        return getUI().getTabsArea();
     }
 
     /********* implementation of WinsysInfoForTabbed ********/
@@ -524,6 +546,7 @@ public class TabbedAdapter extends TabbedContainer implements Tabbed, Tabbed.Acc
             this.containerType = containerType;
         }
         
+        @Override
         public Object getOrientation (Component comp) {
             WindowManagerImpl wmi = WindowManagerImpl.getInstance();
             // don't show pin button in separate views
@@ -539,12 +562,15 @@ public class TabbedAdapter extends TabbedContainer implements Tabbed, Tabbed.Acc
                 result = TabDisplayer.ORIENTATION_EAST;
             } else if (side.equals(Constants.BOTTOM)) {
                 result = TabDisplayer.ORIENTATION_SOUTH;
+            } else if (side.equals(Constants.TOP)) {
+                result = TabDisplayer.ORIENTATION_NORTH;
             } else {
                 result = TabDisplayer.ORIENTATION_CENTER;
             }
             return result;   
         }
 
+        @Override
         public boolean inMaximizedMode (Component comp) {
             return isInMaximizedMode(comp);
         }    
@@ -584,6 +610,11 @@ public class TabbedAdapter extends TabbedContainer implements Tabbed, Tabbed.Acc
             return !Boolean.TRUE.equals(tc.getClientProperty(TopComponent.PROP_SLIDING_DISABLED))
                     && isTopComponentSlidingEnabled();
         }
+
+        @Override
+        public boolean isModeSlidingEnabled() {
+            return Switches.isModeSlidingEnabled();
+        }
     } // end of LocInfo
 
     /** Returns instance of weak property change listener used to listen to 
@@ -601,6 +632,7 @@ public class TabbedAdapter extends TabbedContainer implements Tabbed, Tabbed.Acc
     /** Listening to changes of tooltips of currently asociated top components */
     private class ToolTipListener implements PropertyChangeListener {
         
+        @Override
         public void propertyChange(PropertyChangeEvent evt) {
             if (JComponent.TOOL_TIP_TEXT_KEY.equals(evt.getPropertyName())) {
                 List tabs = getModel().getTabs();

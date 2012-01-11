@@ -56,6 +56,7 @@ import org.netbeans.core.windows.SplitConstraint;
 
 import java.util.HashSet;
 import java.util.Set;
+import org.netbeans.core.windows.Switches;
 import org.netbeans.core.windows.WindowManagerImpl;
 import org.openide.windows.TopComponent;
 
@@ -307,7 +308,10 @@ final class ModesSubModel {
         if(activeMode == null || modes.contains(activeMode)) {
             this.activeMode = activeMode;
             if ((activeMode != null) && (activeMode.getKind() == Constants.MODE_KIND_EDITOR)) {
-                lastActiveEditorMode = activeMode;
+                if( activeMode.getState() != Constants.MODE_STATE_SEPARATED 
+                        || !Switches.isOpenNewEditorsDocked() ) {
+                    lastActiveEditorMode = activeMode;
+                }
             }
             return true;
         }
@@ -363,6 +367,7 @@ final class ModesSubModel {
         editorSplitSubModel.setSplitWeights( snapshots, splitWeights );
     }
     
+    @Override
     public String toString() {
         return getClass().getName() + "@" + Integer.toHexString(hashCode()) // NOI18N
             + "\n" + editorSplitSubModel; // NOI18N
@@ -405,6 +410,22 @@ final class ModesSubModel {
             ));
         }
         return result;
+    }
+    
+    public void dock( ModeImpl prevMode, ModeImpl floatingMode ) {
+        assert modes.contains( prevMode );
+        assert modes.contains( floatingMode );
+        SplitConstraint[] constraints = getModeConstraints( prevMode );
+        boolean editorMode = prevMode.getKind() == Constants.MODE_KIND_EDITOR;
+        if( editorMode ) {
+            editorSplitSubModel.getEditorArea().addMode(floatingMode, constraints);
+            removeMode( prevMode );
+            editorSplitSubModel.removeMode( floatingMode );
+        } else {
+            editorSplitSubModel.removeMode(floatingMode);
+            editorSplitSubModel.addMode(floatingMode, constraints);
+            removeMode( prevMode );
+        }
     }
     
     ////////////////////////////////////////////

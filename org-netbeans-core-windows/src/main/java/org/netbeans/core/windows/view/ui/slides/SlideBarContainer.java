@@ -64,6 +64,7 @@ import org.netbeans.core.windows.WindowManagerImpl;
 import org.netbeans.core.windows.view.ModeView;
 import org.netbeans.core.windows.view.SlidingView;
 import org.netbeans.core.windows.view.ViewElement;
+import org.netbeans.core.windows.view.dnd.TopComponentDraggable;
 import org.netbeans.core.windows.view.dnd.WindowDnDManager;
 import org.netbeans.core.windows.view.ui.AbstractModeContainer;
 import org.netbeans.core.windows.view.ui.ModeComponent;
@@ -95,10 +96,13 @@ public final class SlideBarContainer extends AbstractModeContainer {
     private SlidingView getSlidingView() {
         return (SlidingView)super.getModeView();
     }
+    
+    @Override
     public void requestAttention (TopComponent tc) {
         tabbedHandler.requestAttention(tc);
     }
 
+    @Override
     public void cancelRequestAttention (TopComponent tc) {
         tabbedHandler.cancelRequestAttention (tc);
     }    
@@ -112,22 +116,27 @@ public final class SlideBarContainer extends AbstractModeContainer {
         return tabbedHandler.getTabBounds(tabIndex);
     }
 
+    @Override
     protected Component getModeComponent() {
         return panel;
     }
     
+    @Override
     protected Tabbed createTabbed() {
         return new TabbedSlideAdapter(((SlidingView)modeView).getSide());
     }
     
+    @Override
     protected boolean isAttachingPossible() {
         return false;
     }
 
+    @Override
     protected TopComponentDroppable getModeDroppable() {
         return panel;
     }    
     
+    @Override
     protected void updateActive(boolean active) {
         // #48588 - when in SDI, slidein needs to front the editor frame.
         if(active) {
@@ -138,6 +147,7 @@ public final class SlideBarContainer extends AbstractModeContainer {
         }
     }
     
+    @Override
     public boolean isActive() {
         Window window = SwingUtilities.getWindowAncestor(panel);
         // #54791 - just a doublecheck, IMHO should not happen anymore
@@ -145,6 +155,7 @@ public final class SlideBarContainer extends AbstractModeContainer {
         return window == null ? false : window.isActive();
     }    
     
+    @Override
     protected void updateTitle(String title) {
         // XXX - we have no title?
     }
@@ -157,6 +168,8 @@ public final class SlideBarContainer extends AbstractModeContainer {
     private static Border leftBorder;
     private static Border rightEmptyBorder;
     private static Border rightBorder;
+    private static Border topEmptyBorder;
+    private static Border topBorder;
     
     /** Builds empty border around slide bar. Computes its correct size
      * based on given orientation
@@ -170,6 +183,9 @@ public final class SlideBarContainer extends AbstractModeContainer {
         }
         if (Constants.BOTTOM.equals(orientation)) {
             top = 2; left = 1; bottom = 1; right = 1; 
+        }
+        if (Constants.TOP.equals(orientation)) {
+            top = 1; left = 1; bottom = 2; right = 1; 
         }
         if (Constants.RIGHT.equals(orientation)) {
             top = 1; left = 2; bottom = 1; right = 1; 
@@ -193,6 +209,12 @@ public final class SlideBarContainer extends AbstractModeContainer {
                                 BorderFactory.createMatteBorder(1, 0, 0, 0, new Color(187,187,187) ) );
 
                 bottomEmptyBorder = BorderFactory.createMatteBorder(3, 0, 0, 0, UIManager.getColor("NbSplitPane.background")); //NOI18N
+                
+                topBorder = BorderFactory.createCompoundBorder(
+                                BorderFactory.createMatteBorder(0, 0, 1, 0, UIManager.getColor("NbBrushedMetal.darkShadow")), //NOI18N
+                                BorderFactory.createMatteBorder(0, 0, 1, 0, new Color(187,187,187) ) );
+
+                topEmptyBorder = BorderFactory.createMatteBorder(0, 0, 3, 0, UIManager.getColor("NbSplitPane.background")); //NOI18N
 
                 leftEmptyBorder = BorderFactory.createMatteBorder(0, 0, 0, 3, UIManager.getColor("NbSplitPane.background")); //NOI18N
 
@@ -224,41 +246,51 @@ public final class SlideBarContainer extends AbstractModeContainer {
                 setOpaque( false);
         }
         
+        @Override
         public ModeView getModeView() {
             return modeContainer.getModeView();
         }
         
+        @Override
         public int getKind() {
             return modeContainer.getKind();
         }
         
         // TopComponentDroppable>>
+        @Override
         public Shape getIndicationForLocation(Point location) {
             return modeContainer.getIndicationForLocation(location);
         }
         
+        @Override
         public Object getConstraintForLocation(Point location) {
             return modeContainer.getConstraintForLocation(location);
         }
         
+        @Override
         public Component getDropComponent() {
             return modeContainer.getDropComponent();
         }
         
+        @Override
         public ViewElement getDropViewElement() {
             return modeContainer.getDropModeView();
         }
         
-        public boolean canDrop(TopComponent transfer, Point location) {
-            return modeContainer.canDrop(transfer);
+        @Override
+        public boolean canDrop(TopComponentDraggable transfer, Point location) {
+            return modeContainer.canDrop(transfer) && !transfer.isModeTransfer();
         }
         
-        public boolean supportsKind(int kind, TopComponent transfer) {
-            if(Constants.SWITCH_MODE_ADD_NO_RESTRICT
-                  || WindowManagerImpl.getInstance().isTopComponentAllowedToMoveAnywhere(transfer)) {
+        @Override
+        public boolean supportsKind(TopComponentDraggable transfer) {
+            if(transfer.isModeTransfer())
+                return false;
+            
+            if(transfer.isAllowedToMoveAnywhere()) {
                  return true;
             }
-            boolean isNonEditor = kind == Constants.MODE_KIND_VIEW || kind == Constants.MODE_KIND_SLIDING;
+            boolean isNonEditor = transfer.getKind() == Constants.MODE_KIND_VIEW || transfer.getKind() == Constants.MODE_KIND_SLIDING;
             boolean thisIsNonEditor = getKind() == Constants.MODE_KIND_VIEW || getKind() == Constants.MODE_KIND_SLIDING;
 
             return (isNonEditor == thisIsNonEditor);
@@ -299,6 +331,11 @@ public final class SlideBarContainer extends AbstractModeContainer {
                     result = bottomEmptyBorder;
                 else
                     result = bottomBorder;
+            } else if( Constants.TOP.equals(side) ) {
+                if( modeContainer.getTopComponents().length == 0 )
+                    result = topEmptyBorder;
+                else
+                    result = topBorder;
             } else if( Constants.RIGHT.equals(side) ) {
                 if( modeContainer.getTopComponents().length == 0 )
                     result = rightEmptyBorder;

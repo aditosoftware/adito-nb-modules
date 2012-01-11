@@ -47,6 +47,7 @@ package org.netbeans.core.windows.view;
 
 
 import org.netbeans.core.windows.Constants;
+import org.netbeans.core.windows.view.dnd.TopComponentDraggable;
 import org.netbeans.core.windows.view.dnd.WindowDnDManager;
 import org.netbeans.core.windows.view.ui.DesktopImpl;
 import org.netbeans.core.windows.view.ui.EditorAreaFrame;
@@ -392,6 +393,8 @@ final class ViewHierarchy {
         for(SlidingView curSv: addedViews) {
             desktop.addSlidingView(curSv);
         }
+        
+        desktop.updateCorners();
     }
     
     
@@ -1044,7 +1047,10 @@ final class ViewHierarchy {
         }
     }
 
-    
+    void userStartedKeyboardDragAndDrop( TopComponentDraggable draggable ) {
+        windowDnDManager.startKeyboardDragAndDrop( draggable );
+    }
+
     /** Main window listener. */
     private static class MainWindowListener extends ComponentAdapter
     implements WindowStateListener {

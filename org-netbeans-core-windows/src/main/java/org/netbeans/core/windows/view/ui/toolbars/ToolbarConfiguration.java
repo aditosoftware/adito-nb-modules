@@ -117,9 +117,14 @@ public final class ToolbarConfiguration implements ToolbarPool.Configuration {
         configDisplayName = displayName;
         // asociate name and configuration instance
         name2config.put(name, this);
-        toolbarPanel = new JPanel( new GridLayout(0,1) );
-        if( UIManager.getBoolean( "NbMainWindow.showCustomBackground" ) ) //NOI18N
-            toolbarPanel.setOpaque(false);
+        toolbarPanel = new JPanel( new GridLayout(0,1) ) {
+            @Override
+            public boolean isOpaque() {
+                if( null != UIManager.get("NbMainWindow.showCustomBackground") ) //NOI18N
+                    return !UIManager.getBoolean("NbMainWindow.showCustomBackground"); //NOI18N
+                return super.isOpaque();
+            }
+        };
 
         this.rows = new ArrayList<ToolbarRow>(rows);
     }
@@ -151,12 +156,23 @@ public final class ToolbarConfiguration implements ToolbarPool.Configuration {
         }
     }
 
+    @NbBundle.Messages({
+        "MSG_ToolbarsInitializing=Initializing..."
+    })
     private void fillToolbarsMenu (JComponent menu, boolean isContextMenu) {
+        final ToolbarPool pool = getToolbarPool();
+        if (!pool.isFinished()) {
+            final JMenuItem mi = new JMenuItem();
+            mi.setText(Bundle.MSG_ToolbarsInitializing());
+            mi.setEnabled(false);
+            menu.add(mi);
+            return;
+        }
         boolean fullScreen = MainWindow.getInstance().isFullScreenMode();
 
         Map<String, ToolbarConstraints> name2constr = collectAllConstraints();
         // generate list of available toolbars
-        for( Toolbar tb : getToolbarPool().getToolbars() ) {
+        for( Toolbar tb : pool.getToolbars() ) {
             final Toolbar bar = tb;
             final String tbName = tb.getName();
             ToolbarConstraints tc = name2constr.get(tbName);
@@ -589,6 +605,11 @@ public final class ToolbarConfiguration implements ToolbarPool.Configuration {
 
     private void adjustToolbarPanelBorder() {
         if( toolbarPanel.getComponentCount() > 0 ) {
+            Border b = UIManager.getBorder( "Nb.MainWindow.Toolbar.Border");
+            if( null != b ) {
+                toolbarPanel.setBorder( b );
+                return;
+            }
             //add border
             if ("Windows".equals(UIManager.getLookAndFeel().getID())) { //NOI18N
                 if( isXPTheme() ) {

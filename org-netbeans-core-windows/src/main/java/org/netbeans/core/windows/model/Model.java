@@ -108,6 +108,8 @@ public interface Model {
     public void addModeAroundEditor(ModeImpl mode, String side);
     /** Removes mode. */
     public void removeMode(ModeImpl mode);
+    /** Renames a mode */
+    public void setModeName(ModeImpl mode, String name);
     /** Sets mode constraints. */
     public void setModeConstraints(ModeImpl mode, SplitConstraint[] constraints);
     /** Adds top component group. */
@@ -228,7 +230,7 @@ public interface Model {
     public void addModeClosedTopComponent(ModeImpl mode, TopComponent tc);
     // XXX
     /** Adds unloaded TopComponent. */
-    public void addModeUnloadedTopComponent(ModeImpl mode, String tcID);
+    public void addModeUnloadedTopComponent(ModeImpl mode, String tcID, int index);
     // XXX
     public void setModeUnloadedSelectedTopComponent(ModeImpl mode, String tcID);
     /** Remember which top component was the selected one before switching to/from maximized mode */
@@ -268,6 +270,10 @@ public interface Model {
     public int getModeFrameState(ModeImpl mode);
     /** Gets whether it is permanent. */
     public boolean isModePermanent(ModeImpl mode);
+    /** Make mode permanent
+     * @since 2.30
+     */
+    public void makeModePermanent( ModeImpl target );
     /** */
     public boolean isModeEmpty(ModeImpl mode);
     /** Indicates whether the mode contains the TopComponent. */
@@ -284,6 +290,17 @@ public interface Model {
     public List<String> getModeOpenedTopComponentsIDs(ModeImpl mode);
     public List<String> getModeClosedTopComponentsIDs(ModeImpl mode);
     public List<String> getModeTopComponentsIDs(ModeImpl mode);
+
+    /** @since 2.30 */
+    public boolean isModeMinimized(ModeImpl mode);
+    /** @since 2.30 */
+    public void setModeMinimized(ModeImpl mode, boolean minimized);
+    /** @since 2.30 */
+    public Collection<String> getModeOtherNames(ModeImpl mode);
+    /** @since 2.30 */
+    public void addModeOtherName(ModeImpl mode, String otherModeName);
+    /** @since 2.31 */
+    public void dockMode( ModeImpl prevMode, ModeImpl floatingMode );
     
     // Info about previous top component context, used by sliding kind of modes
     
@@ -368,6 +385,7 @@ public interface Model {
     public void setSplitWeights( ModelElement[] snapshots, double[] splitWeights );
     // controller updates <<
     ////////////////////////
+
 
     
 }
