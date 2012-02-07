@@ -122,12 +122,6 @@ public class FormDataObject extends MultiDataObject {
         return isValid() ? getNodeDelegate().getLookup() : Lookup.EMPTY;
     }
 
-    @Override
-    public String getName()
-    {
-      return getPrimaryFile().getParent().getName(); // TODO: der Name soll über EditorContextProvider bezogen werden.
-    }
-
     private class OpenEdit implements OpenCookie, EditCookie {
         @Override
         public void open() {
