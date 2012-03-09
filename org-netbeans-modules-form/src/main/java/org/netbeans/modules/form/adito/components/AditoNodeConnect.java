@@ -3,7 +3,7 @@ package org.netbeans.modules.form.adito.components;
 import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.NbAditoInterface;
 import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.sync.*;
 import org.netbeans.modules.form.RADComponent;
-import org.openide.loaders.*;
+import org.openide.loaders.DataFolder;
 import org.openide.nodes.Sheet;
 
 import java.awt.*;
@@ -24,7 +24,7 @@ public final class AditoNodeConnect
     return _resolve(pComponent, new _C<Image>()
     {
       @Override
-      public Image resolve(DataObject pDataObject)
+      public Image resolve(DataFolder pDataObject)
       {
         return pDataObject.getNodeDelegate().getIcon(pType);
       }
@@ -36,7 +36,7 @@ public final class AditoNodeConnect
     return _resolve(pComponent, new _C<String>()
     {
       @Override
-      public String resolve(DataObject pDataObject)
+      public String resolve(DataFolder pDataObject)
       {
         return pDataObject.getNodeDelegate().getDisplayName();
       }
@@ -48,7 +48,7 @@ public final class AditoNodeConnect
     return _resolve(pComponent, new _C<Sheet>()
     {
       @Override
-      public Sheet resolve(DataObject pDataObject)
+      public Sheet resolve(DataFolder pDataObject)
       {
         IFormComponentInfoProvider compInfoProvider = NbAditoInterface.lookup(IFormComponentInfoProvider.class);
         IFormComponentInfo componentInfo = compInfoProvider.createModelPropProvider(pDataObject);
@@ -62,7 +62,7 @@ public final class AditoNodeConnect
     _resolve(pComponent, new _C<Object>()
     {
       @Override
-      public Object resolve(DataObject pDataObject)
+      public Object resolve(DataFolder pDataObject)
       {
         pDataObject.getNodeDelegate().addPropertyChangeListener(pListener);
         return null;
@@ -83,7 +83,7 @@ public final class AditoNodeConnect
    */
   private interface _C<T>
   {
-    T resolve(DataObject pDataObject);
+    T resolve(DataFolder pDataObject);
   }
 
 }
