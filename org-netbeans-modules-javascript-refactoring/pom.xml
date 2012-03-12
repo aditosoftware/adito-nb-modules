@@ -13,7 +13,7 @@
   <groupId>org.netbeans.modules</groupId>
   <artifactId>org-netbeans-modules-javascript-refactoring</artifactId>
   <packaging>nbm</packaging>
-  <version>RELEASE71</version>
+  <version>RELEASE711</version>
   <name>Netbeans IDE module: org-netbeans-modules-javascript-refactoring</name>
 
 
@@ -21,117 +21,117 @@
     <dependency>
       <groupId>org.netbeans.api</groupId>
       <artifactId>org-mozilla-rhino-patched</artifactId>
-      <version>RELEASE71</version>
+      <version>RELEASE711</version>
     </dependency>
     <dependency>
       <groupId>org.netbeans.api</groupId>
       <artifactId>org-netbeans-api-annotations-common</artifactId>
-      <version>RELEASE71</version>
+      <version>RELEASE711</version>
     </dependency>
     <dependency>
       <groupId>org.netbeans.api</groupId>
       <artifactId>org-netbeans-api-java-classpath</artifactId>
-      <version>RELEASE71</version>
+      <version>RELEASE711</version>
     </dependency>
     <dependency>
       <groupId>org.netbeans.api</groupId>
       <artifactId>org-netbeans-modules-csl-api</artifactId>
-      <version>RELEASE71</version>
+      <version>RELEASE711</version>
     </dependency>
     <dependency>
       <groupId>org.netbeans.api</groupId>
       <artifactId>org-netbeans-modules-editor-lib</artifactId>
-      <version>RELEASE71</version>
+      <version>RELEASE711</version>
     </dependency>
     <dependency>
       <groupId>org.netbeans.api</groupId>
       <artifactId>org-netbeans-modules-editor-mimelookup</artifactId>
-      <version>RELEASE71</version>
+      <version>RELEASE711</version>
     </dependency>
     <dependency>
       <groupId>org.netbeans.api</groupId>
       <artifactId>org-netbeans-modules-editor-settings</artifactId>
-      <version>RELEASE71</version>
+      <version>RELEASE711</version>
     </dependency>
     <dependency>
       <groupId>org.netbeans.modules</groupId>
       <artifactId>org-netbeans-modules-javascript-editing</artifactId>
-      <version>RELEASE71</version>
+      <version>RELEASE711</version>
     </dependency>
     <dependency>
       <groupId>org.netbeans.api</groupId>
       <artifactId>org-netbeans-modules-lexer</artifactId>
-      <version>RELEASE71</version>
+      <version>RELEASE711</version>
     </dependency>
     <dependency>
       <groupId>org.netbeans.api</groupId>
       <artifactId>org-netbeans-modules-parsing-api</artifactId>
-      <version>RELEASE71</version>
+      <version>RELEASE711</version>
     </dependency>
     <dependency>
       <groupId>org.netbeans.api</groupId>
       <artifactId>org-netbeans-modules-projectapi</artifactId>
-      <version>RELEASE71</version>
+      <version>RELEASE711</version>
     </dependency>
     <dependency>
       <groupId>org.netbeans.api</groupId>
       <artifactId>org-netbeans-modules-projectuiapi</artifactId>
-      <version>RELEASE71</version>
+      <version>RELEASE711</version>
     </dependency>
     <dependency>
       <groupId>org.netbeans.api</groupId>
       <artifactId>org-netbeans-modules-queries</artifactId>
-      <version>RELEASE71</version>
+      <version>RELEASE711</version>
     </dependency>
     <dependency>
       <groupId>org.netbeans.api</groupId>
       <artifactId>org-netbeans-modules-refactoring-api</artifactId>
-      <version>RELEASE71</version>
+      <version>RELEASE711</version>
     </dependency>
     <dependency>
       <groupId>org.netbeans.api</groupId>
       <artifactId>org-openide-awt</artifactId>
-      <version>RELEASE71</version>
+      <version>RELEASE711</version>
     </dependency>
     <dependency>
       <groupId>org.netbeans.api</groupId>
       <artifactId>org-openide-explorer</artifactId>
-      <version>RELEASE71</version>
+      <version>RELEASE711</version>
     </dependency>
     <dependency>
       <groupId>org.netbeans.api</groupId>
       <artifactId>org-openide-filesystems</artifactId>
-      <version>RELEASE71</version>
+      <version>RELEASE711</version>
     </dependency>
     <dependency>
       <groupId>org.netbeans.api</groupId>
       <artifactId>org-openide-loaders</artifactId>
-      <version>RELEASE71</version>
+      <version>RELEASE711</version>
     </dependency>
     <dependency>
       <groupId>org.netbeans.api</groupId>
       <artifactId>org-openide-nodes</artifactId>
-      <version>RELEASE71</version>
+      <version>RELEASE711</version>
     </dependency>
     <dependency>
       <groupId>org.netbeans.api</groupId>
       <artifactId>org-openide-text</artifactId>
-      <version>RELEASE71</version>
+      <version>RELEASE711</version>
     </dependency>
     <dependency>
       <groupId>org.netbeans.api</groupId>
       <artifactId>org-openide-util</artifactId>
-      <version>RELEASE71</version>
+      <version>RELEASE711</version>
     </dependency>
     <dependency>
       <groupId>org.netbeans.api</groupId>
       <artifactId>org-openide-util-lookup</artifactId>
-      <version>RELEASE71</version>
+      <version>RELEASE711</version>
     </dependency>
     <dependency>
       <groupId>org.netbeans.api</groupId>
       <artifactId>org-openide-windows</artifactId>
-      <version>RELEASE71</version>
+      <version>RELEASE711</version>
     </dependency>
 
     <!-- Fuer IFileSearcher -->
