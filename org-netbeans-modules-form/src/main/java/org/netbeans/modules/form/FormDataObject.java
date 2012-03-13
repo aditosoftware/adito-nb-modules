@@ -50,8 +50,7 @@ import java.util.List;
 
 import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.NbAditoInterface;
 import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.model.*;
-import org.openide.cookies.EditCookie;
-import org.openide.cookies.OpenCookie;
+import org.openide.cookies.*;
 import org.openide.filesystems.FileObject;
 import org.openide.loaders.*;
 import org.openide.nodes.Node;
@@ -62,7 +61,7 @@ import org.openide.util.Lookup;
  *
  * @author Ian Formanek, Petr Hamernik
  */
-public class FormDataObject extends MultiDataObject {
+public class FormDataObject extends XMLDataObject {
     /** generated Serialized Version UID */
     static final long serialVersionUID = -975322003627854168L;
 
