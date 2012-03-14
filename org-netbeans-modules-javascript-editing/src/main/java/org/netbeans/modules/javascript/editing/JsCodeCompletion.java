@@ -23,7 +23,7 @@
  * License Header, with the fields enclosed by brackets [] replaced by
  * your own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
- * 
+ *
  * If you wish your version of this file to be governed by only the CDDL
  * or only the GPL Version 2, indicate your decision by adding
  * "[Contributor] elects to include this software in this distribution
@@ -34,9 +34,9 @@
  * However, if you add GPL Version 2 code and therefore, elected the GPL
  * Version 2 license, then the option applies only if the new code is
  * made subject to such option by the copyright holder.
- * 
+ *
  * Contributor(s):
- * 
+ *
  * Portions Copyrighted 2007 Sun Microsystems, Inc.
  */
 package org.netbeans.modules.javascript.editing;
@@ -100,7 +100,7 @@ import org.openide.util.NbBundle;
 
 /**
  * Code completion handler for JavaScript
- * 
+ *
  * @todo Do completion on element id's inside $() calls (prototype.js) and $$() calls for CSS rules.
  *   See http://www.sitepoint.com/article/painless-javascript-prototype
  * @todo Track logical classes and inheritance ("extend")
@@ -131,7 +131,7 @@ import org.openide.util.NbBundle;
  *    filtering Java-style?), and explanations for each parameter
  *  @todo Need preindexing support for unit tests - and separate files
  * @todo Insert semicolon too when you insert methods, in custom templates (unless you're in a call), a var block, etc.
- * 
+ *
  * @author Tor Norbye
  */
 public class JsCodeCompletion implements CodeCompletionHandler {
@@ -904,7 +904,7 @@ public class JsCodeCompletion implements CodeCompletionHandler {
                                 htmlResult = (HtmlParserResult) resultIterator.getParserResult();
                             }
                         }
-                        
+
                     }
                     if (htmlResult != null) {
                         Set<SyntaxElement.TagAttribute> elementIds = new HashSet<SyntaxElement.TagAttribute>();
@@ -1000,7 +1000,7 @@ public class JsCodeCompletion implements CodeCompletionHandler {
                             return "";
                         }
                     }
-//                        
+//
 //                // We're within a String that has embedded Js. Drop into the
 //                // embedded language and see if we're within a literal string there.
 //                if (id == JsTokenId.EMBEDDED_RUBY) {
@@ -1452,7 +1452,7 @@ public class JsCodeCompletion implements CodeCompletionHandler {
                 }
             }
 
-            // Try just the method call (e.g. across all classes). This is ignoring the 
+            // Try just the method call (e.g. across all classes). This is ignoring the
             // left hand side because we can't resolve it.
             if ((elements.size() == 0) && (prefix.length() > 0 || type == null)) {
 //                if (prefix.length() == 0) {
@@ -1731,7 +1731,7 @@ public class JsCodeCompletion implements CodeCompletionHandler {
         // we have these guys on the class itself, not associated with a method parameter.
         // Shall I take this to be a set of constructor properties?
         // In YUI it's different; many of the properties we want to inherit are NOT marked as @config,
-        // such as "animate" in the Editor. 
+        // such as "animate" in the Editor.
         String fqn = null;
         AstPath path = request.path;
         Node leaf = path.leaf();
@@ -1985,7 +1985,7 @@ public class JsCodeCompletion implements CodeCompletionHandler {
 //                Exceptions.printStackTrace(ble);
 //            }
 //        }
-//        
+//
         return QueryType.NONE;
     }
 
@@ -2132,7 +2132,7 @@ public class JsCodeCompletion implements CodeCompletionHandler {
     private static int callLineStart = -1;
     private static IndexedFunction callMethod;
 
-    /** Compute the current method call at the given offset. Returns false if we're not in a method call. 
+    /** Compute the current method call at the given offset. Returns false if we're not in a method call.
      * The argument index is returned in parameterIndexHolder[0] and the method being
      * called in methodHolder[0].
      */
@@ -2249,7 +2249,7 @@ public class JsCodeCompletion implements CodeCompletionHandler {
 //                                anchorOffset = callRange.getEnd()+1;
 //                            }
 //                        }
-//                        
+//
 //                        break;
 //                    }
                 }
@@ -2266,7 +2266,7 @@ public class JsCodeCompletion implements CodeCompletionHandler {
             }
 
             if (call == null) {
-                // Find the call in around the caret. Beware of 
+                // Find the call in around the caret. Beware of
                 // input sanitization which could have completely
                 // removed the current parameter (e.g. with just
                 // a comma, or something like ", @" or ", :")
@@ -2308,7 +2308,7 @@ public class JsCodeCompletion implements CodeCompletionHandler {
 //                                }
 //                            }
 //                        }
-//                        
+//
 //                        Node argsNode = ((CallNode)node).getArgsNode();
 //
 //                        if (argsNode != null) {
@@ -2349,7 +2349,7 @@ public class JsCodeCompletion implements CodeCompletionHandler {
 //                                }
 //                            }
 //                        }
-//                        
+//
 //                        Node argsNode = ((FCallNode)node).getArgsNode();
 //
 //                        if (argsNode != null) {
@@ -2373,7 +2373,7 @@ public class JsCodeCompletion implements CodeCompletionHandler {
 //                        //   create_table |
 //                        // This is okay as long as the caret is outside and to
 //                        // the right of this call.
-//                        
+//
 //                        final OffsetRange callRange = AstUtilities.getCallRange(node);
 //                        if (haveSanitizedComma && originalAstOffset > callRange.getEnd() && it.hasNext()) {
 //                            for (int i = 0; i < 3; i++) {
@@ -2390,7 +2390,7 @@ public class JsCodeCompletion implements CodeCompletionHandler {
 //                                }
 //                            }
 //                        }
-//                        
+//
 //                        if (originalAstOffset > callRange.getEnd()) {
 //                            index = 0;
 //                            call = node;

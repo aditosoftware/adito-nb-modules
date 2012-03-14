@@ -71,7 +71,7 @@ import org.netbeans.modules.javascript.editing.lexer.LexUtilities;
 import org.openide.util.Exceptions;
 
 
-/** 
+/**
  * Provide bracket completion for JavaScript.
  * This class provides three broad services:
  *  - Identifying matching pairs (parentheses, begin/end pairs etc.), which
@@ -101,7 +101,7 @@ public class JsKeystrokeHandler implements KeystrokeHandler {
     //private static final boolean REFLOW_COMMENTS = Boolean.getBoolean("js.autowrap.comments"); // NOI18N
 
     /** When true, continue comments if you press return in a line comment (that does not
-     * also have code on the same line 
+     * also have code on the same line
      */
     static final boolean CONTINUE_COMMENTS = Boolean.getBoolean("js.cont.comment"); // NOI18N
 
@@ -132,7 +132,7 @@ public class JsKeystrokeHandler implements KeystrokeHandler {
 
     public JsKeystrokeHandler() {
     }
-    
+
     public boolean isInsertMatchingEnabled(BaseDocument doc) {
         // The editor options code is calling methods on BaseOptions instead of looking in the settings map :(
         //Boolean b = ((Boolean)Settings.getValue(doc.getKitClass(), SettingsNames.PAIR_CHARACTERS_COMPLETION));
@@ -141,27 +141,27 @@ public class JsKeystrokeHandler implements KeystrokeHandler {
         if (options != null) {
             return options.getMatchBrackets();
         }
-        
+
         return true;
     }
 
     public int beforeBreak(Document document, int offset, JTextComponent target)
         throws BadLocationException {
         isAfter = false;
-        
+
         Caret caret = target.getCaret();
         BaseDocument doc = (BaseDocument)document;
-        
+
         boolean insertMatching = isInsertMatchingEnabled(doc);
-        
+
         int lineBegin = Utilities.getRowStart(doc,offset);
         int lineEnd = Utilities.getRowEnd(doc,offset);
-        
+
         if (lineBegin == offset && lineEnd == offset) {
             // Pressed return on a blank newline - do nothing
             return -1;
         }
-        
+
         TokenSequence<?extends JsTokenId> ts = LexUtilities.getJsTokenSequence(doc, offset);
 
         if (ts == null) {
@@ -204,7 +204,7 @@ public class JsKeystrokeHandler implements KeystrokeHandler {
                 sb.append(IndentUtils.createIndentString(doc, indent));
                 doc.remove(offset, restOfLine.length());
             }
-            
+
             if (insertRBrace) {
                 sb.append("}"); // NOI18N
             }
@@ -212,10 +212,10 @@ public class JsKeystrokeHandler implements KeystrokeHandler {
             int insertOffset = offset;
             doc.insertString(insertOffset, sb.toString(), null);
             caret.setDot(insertOffset);
-            
+
             return -1;
         }
-        
+
         if (id == JsTokenId.ERROR) {
             // See if it's a block comment opener
             String text = token.text().toString();
@@ -230,15 +230,15 @@ public class JsKeystrokeHandler implements KeystrokeHandler {
                 sb.append(" */"); // NOI18N
                 // TODO - possibly populate associated types in JS-doc style!
                 //if (text.startsWith("/**")) {
-                //    
+                //
                 //}
                 doc.insertString(offset, sb.toString(), null);
                 caret.setDot(offset);
                 return offset+offsetDelta;
             }
         }
-        
-        if (id == JsTokenId.STRING_LITERAL || 
+
+        if (id == JsTokenId.STRING_LITERAL ||
                 (id == JsTokenId.STRING_END) && offset < ts.offset()+ts.token().length()) {
             // Instead of splitting a string "foobar" into "foo"+"bar", just insert a \ instead!
             //int indent = GsfUtilities.getLineIndent(doc, offset);
@@ -253,9 +253,9 @@ public class JsKeystrokeHandler implements KeystrokeHandler {
             return offset + 1 + str.length();
         }
 
-        
 
-        if (id == JsTokenId.REGEXP_LITERAL || 
+
+        if (id == JsTokenId.REGEXP_LITERAL ||
                 (id == JsTokenId.REGEXP_END) && offset < ts.offset()+ts.token().length()) {
             // Instead of splitting a string "foobar" into "foo"+"bar", just insert a \ instead!
             //int indent = GsfUtilities.getLineIndent(doc, offset);
@@ -267,7 +267,7 @@ public class JsKeystrokeHandler implements KeystrokeHandler {
             caret.setDot(offset+str.length());
             return offset + 1 + str.length();
         }
-        
+
         // Special case: since I do hash completion, if you try to type
         //     y = Thread.start {
         //         code here
@@ -299,7 +299,7 @@ public class JsKeystrokeHandler implements KeystrokeHandler {
                 }
             }
         }
-        
+
         if (id == JsTokenId.WHITESPACE) {
             // Pressing newline in the whitespace before a comment
             // should be identical to pressing newline with the caret
@@ -315,7 +315,7 @@ public class JsKeystrokeHandler implements KeystrokeHandler {
                 }
             }
         }
-        
+
         if (id == JsTokenId.BLOCK_COMMENT && offset > ts.offset() && offset < ts.offset()+ts.token().length()) {
             // Continue *'s
             int begin = Utilities.getRowFirstNonWhite(doc, offset);
@@ -347,7 +347,7 @@ public class JsKeystrokeHandler implements KeystrokeHandler {
 
                 int insertOffset = offset; // offset < length ? offset+1 : offset;
                 if (offset == begin && insertOffset > 0) {
-                    insertOffset = Utilities.getRowStart(doc, offset);                    
+                    insertOffset = Utilities.getRowStart(doc, offset);
                     int sp = Utilities.getRowStart(doc, offset)+sb.length();
                     doc.insertString(insertOffset, sb.toString(), null);
                     caret.setDot(sp);
@@ -358,7 +358,7 @@ public class JsKeystrokeHandler implements KeystrokeHandler {
                 return insertOffset+sb.length()+1;
             }
         }
-        
+
         boolean isComment = id == JsTokenId.LINE_COMMENT;
         if (id == JsTokenId.EOL) {
             if (ts.movePrevious() && ts.token().id() == JsTokenId.LINE_COMMENT) {
@@ -366,7 +366,7 @@ public class JsKeystrokeHandler implements KeystrokeHandler {
                 isComment = true;
             }
         }
-        
+
         if (isComment) {
             // Only do this if the line only contains comments OR if there is content to the right on this line,
             // or if the next line is a comment!
@@ -379,13 +379,13 @@ public class JsKeystrokeHandler implements KeystrokeHandler {
             boolean previousLineWasComment = false;
             boolean nextLineIsComment = false;
             int rowStart = Utilities.getRowStart(doc, offset);
-            if (rowStart > 0) {                
+            if (rowStart > 0) {
                 int prevBegin = Utilities.getRowFirstNonWhite(doc, rowStart-1);
                 if (prevBegin != -1) {
                     Token<? extends JsTokenId> firstToken = LexUtilities.getToken(doc, prevBegin);
                     if (firstToken != null && firstToken.id() == JsTokenId.LINE_COMMENT) {
                         previousLineWasComment = true;
-                    }                
+                    }
                 }
             }
             int rowEnd = Utilities.getRowEnd(doc, offset);
@@ -395,14 +395,14 @@ public class JsKeystrokeHandler implements KeystrokeHandler {
                     Token<? extends JsTokenId> firstToken = LexUtilities.getToken(doc, nextBegin);
                     if (firstToken != null && firstToken.id() == JsTokenId.LINE_COMMENT) {
                         nextLineIsComment = true;
-                    }                
+                    }
                 }
             }
-            
+
             // See if we have more input on this comment line (to the right
             // of the inserted newline); if so it's a "split" operation on
             // the comment
-            if (previousLineWasComment || nextLineIsComment || 
+            if (previousLineWasComment || nextLineIsComment ||
                     (offset > ts.offset() && offset < ts.offset()+ts.token().length())) {
                 if (ts.offset()+token.length() > offset+1) {
                     // See if the remaining text is just whitespace
@@ -433,7 +433,7 @@ public class JsKeystrokeHandler implements KeystrokeHandler {
                     }
                 }
             }
-                
+
             if (continueComment) {
                 // Line comments should continue
                 int indent = GsfUtilities.getLineIndent(doc, offset);
@@ -454,7 +454,7 @@ public class JsKeystrokeHandler implements KeystrokeHandler {
 
                 int insertOffset = offset; // offset < length ? offset+1 : offset;
                 if (offset == begin && insertOffset > 0) {
-                    insertOffset = Utilities.getRowStart(doc, offset);                    
+                    insertOffset = Utilities.getRowStart(doc, offset);
                     int sp = Utilities.getRowStart(doc, offset)+sb.length();
                     doc.insertString(insertOffset, sb.toString(), null);
                     caret.setDot(sp);
@@ -568,7 +568,7 @@ public class JsKeystrokeHandler implements KeystrokeHandler {
         if (!isInsertMatchingEnabled(doc)) {
             return false;
         }
-        
+
         //dumpTokens(doc, caretOffset);
 
         if (target.getSelectionStart() != -1) {
@@ -595,8 +595,8 @@ public class JsKeystrokeHandler implements KeystrokeHandler {
                         if (ts != null && ts.token().id() != JsTokenId.STRING_LITERAL) { // Not inside strings!
                             int lastChar = selection.charAt(selection.length()-1);
                             // Replace the surround-with chars?
-                            if (selection.length() > 1 && 
-                                    ((firstChar == '"' || firstChar == '\'' || firstChar == '(' || 
+                            if (selection.length() > 1 &&
+                                    ((firstChar == '"' || firstChar == '\'' || firstChar == '(' ||
                                     firstChar == '{' || firstChar == '[' || firstChar == '/') &&
                                     lastChar == matching(firstChar))) {
                                 doc.remove(end-1, 1);
@@ -746,7 +746,7 @@ public class JsKeystrokeHandler implements KeystrokeHandler {
 //                }
 //            }
 //        }
-        
+
         // See if our automatic adjustment of indentation when typing (for example) "end" was
         // premature - if you were typing a longer word beginning with one of my adjustment
         // prefixes, such as "endian", then put the indentation back.
@@ -792,12 +792,12 @@ public class JsKeystrokeHandler implements KeystrokeHandler {
         case ']':
         case '(':
         case '[': {
-            
+
             if (!isInsertMatchingEnabled(doc)) {
                 return false;
             }
 
-            
+
             Token<?extends JsTokenId> token = LexUtilities.getToken(doc, dotPos);
             if (token == null) {
                 return true;
@@ -856,9 +856,9 @@ public class JsKeystrokeHandler implements KeystrokeHandler {
 //        case 'n':
 //            // See if it's the end of an "when" - if so, reindent
 //            reindent(doc, dotPos, JsTokenId.WHEN, caret);
-//            
+//
 //            break;
-            
+
         case '/': {
             if (!isInsertMatchingEnabled(doc)) {
                 return false;
@@ -903,7 +903,7 @@ public class JsKeystrokeHandler implements KeystrokeHandler {
 
         return true;
     }
-    
+
     private void reindent(BaseDocument doc, int offset, TokenId id, Caret caret)
         throws BadLocationException {
         TokenSequence<?extends JsTokenId> ts = LexUtilities.getJsTokenSequence(doc, offset);
@@ -950,12 +950,12 @@ public class JsKeystrokeHandler implements KeystrokeHandler {
             }
         }
     }
-    
+
     /** Replaced by JsBracesMatcher */
     public OffsetRange findMatching(Document document, int offset /*, boolean simpleSearch*/) {
         return OffsetRange.NONE;
     }
-    
+
     /**
     * Hook called after a character *ch* was backspace-deleted from
     * *doc*. The function possibly removes bracket or quote pair if
@@ -969,7 +969,7 @@ public class JsKeystrokeHandler implements KeystrokeHandler {
     public boolean charBackspaced(Document document, int dotPos, JTextComponent target, char ch)
         throws BadLocationException {
         BaseDocument doc = (BaseDocument)document;
-        
+
         switch (ch) {
         case ' ': {
             // Backspacing over "// " ? Delete the "//" too!
@@ -978,7 +978,7 @@ public class JsKeystrokeHandler implements KeystrokeHandler {
                 if (ts.offset() == dotPos-2) {
                     doc.remove(dotPos-2, 2);
                     target.getCaret().setDot(dotPos-2);
-                
+
                     return true;
                 }
             }
@@ -1000,7 +1000,7 @@ public class JsKeystrokeHandler implements KeystrokeHandler {
             }
             break;
         }
-        
+
         case '/': {
             // Backspacing over "//" ? Delete the whole "//"
             TokenSequence<?extends JsTokenId> ts = LexUtilities.getPositionedSequence(doc, dotPos);
@@ -1008,7 +1008,7 @@ public class JsKeystrokeHandler implements KeystrokeHandler {
                 if (ts.offset() == dotPos-1) {
                     doc.remove(dotPos-1, 1);
                     target.getCaret().setDot(dotPos-1);
-                
+
                     return true;
                 }
             }
@@ -1342,7 +1342,7 @@ public class JsKeystrokeHandler implements KeystrokeHandler {
                 (previousToken.id() == beginToken)) {
             insideString = true;
         }
-        
+
         if (id == JsTokenId.EOL && previousToken != null) {
             if (previousToken.id() == beginToken) {
                 insideString = true;
@@ -1382,7 +1382,7 @@ public class JsKeystrokeHandler implements KeystrokeHandler {
                             return true;
                         }
                     }
- 
+
                     doc.remove(dotPos, 1);
 
                     return true;
@@ -1398,7 +1398,7 @@ public class JsKeystrokeHandler implements KeystrokeHandler {
 
         return false;
     }
-    
+
     /**
      * Checks whether dotPos is a position at which bracket and quote
      * completion is performed. Brackets and quotes are not completed
@@ -1495,7 +1495,7 @@ public class JsKeystrokeHandler implements KeystrokeHandler {
 
         AstPath path = new AstPath(jspr.getRootNode(), astOffset);
         List<OffsetRange> ranges = new ArrayList<OffsetRange>();
-        
+
         // Check if the caret is within a comment, and if so insert a new
         // leaf "node" which contains the comment line and then comment block
         try {
@@ -1573,7 +1573,7 @@ public class JsKeystrokeHandler implements KeystrokeHandler {
 //            }
 
             OffsetRange range = AstUtilities.getRange(node);
-            
+
             // The contains check should be unnecessary, but I end up getting
             // some weird positions for some Rhino AST nodes
             if (range.containsInclusive(astOffset) && !range.equals(previous)) {
@@ -1634,7 +1634,7 @@ public class JsKeystrokeHandler implements KeystrokeHandler {
                     return start;
                 }
             }
-            
+
         }
 
         if (id == JsTokenId.IDENTIFIER) {
@@ -1643,7 +1643,7 @@ public class JsKeystrokeHandler implements KeystrokeHandler {
             int wordOffset = offset-ts.offset();
             if (reverse) {
                 // Find previous
-                int offsetInImage = offset - 1 - ts.offset(); 
+                int offsetInImage = offset - 1 - ts.offset();
                 if (offsetInImage < 0) {
                     return -1;
                 }
@@ -1680,7 +1680,7 @@ public class JsKeystrokeHandler implements KeystrokeHandler {
                             return ts.offset();
                         }
                     }
-                    
+
                     return ts.offset();
                 }
             } else {
@@ -1691,7 +1691,7 @@ public class JsKeystrokeHandler implements KeystrokeHandler {
                     // <%s|%>
                     return -1;
                 }
-                if (Character.isUpperCase(s.charAt(wordOffset))) { 
+                if (Character.isUpperCase(s.charAt(wordOffset))) {
                     // if starting from a Uppercase char, first skip over follwing upper case chars
                     for (int i = start; i < length; i++) {
                         char charAtI = s.charAt(i);
@@ -1712,7 +1712,7 @@ public class JsKeystrokeHandler implements KeystrokeHandler {
                 }
             }
         }
-        
+
         // Default handling in the IDE
         return -1;
     }

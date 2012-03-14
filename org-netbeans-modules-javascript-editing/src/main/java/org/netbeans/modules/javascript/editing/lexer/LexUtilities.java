@@ -96,8 +96,8 @@ public class LexUtilities {
 
     private LexUtilities() {
     }
-    
-    /** 
+
+    /**
      * Return the comment sequence (if any) for the comment prior to the given offset.
      */
     public static TokenSequence<? extends JsCommentTokenId> getCommentFor(Snapshot snapshot, int offset) {
@@ -106,7 +106,7 @@ public class LexUtilities {
             return null;
         }
         jts.move(offset);
-        
+
         while (jts.movePrevious()) {
             TokenId id = jts.token().id();
             if (id == JsTokenId.BLOCK_COMMENT) {
@@ -115,7 +115,7 @@ public class LexUtilities {
                 return null;
             }
         }
-        
+
         return null;
     }
 
@@ -123,7 +123,7 @@ public class LexUtilities {
     public static int getLexerOffset(JsParseResult info, int astOffset) {
         return info.getSnapshot().getOriginalOffset(astOffset);
     }
-    
+
     public static OffsetRange getLexerOffsets(JsParseResult info, OffsetRange astRange) {
         int rangeStart = astRange.getStart();
         int start = info.getSnapshot().getOriginalOffset(rangeStart);
@@ -182,7 +182,7 @@ public class LexUtilities {
         TokenHierarchy<?> th = snapshot.getTokenHierarchy();
         return getJsTokenSequence(th, offset);
     }
-    
+
     /** Find the JavaScript token sequence (in case it's embedded in something else at the top level */
     @SuppressWarnings("unchecked")
     public static TokenSequence<?extends JsTokenId> getJsTokenSequence(TokenHierarchy<?> th, int offset) {
@@ -227,7 +227,7 @@ public class LexUtilities {
     public static TokenSequence<?extends JsTokenId> getPositionedSequence(Snapshot snapshot, int offset) {
         return getPositionedSequence(snapshot, offset, true);
     }
-    
+
     public static TokenSequence<?extends JsTokenId> getPositionedSequence(Document doc, int offset, boolean lookBack) {
         return _getPosSeq(getJsTokenSequence(doc, offset), offset, lookBack);
     }
@@ -245,14 +245,14 @@ public class LexUtilities {
             } else if (lookBack && !ts.moveNext() && !ts.movePrevious()) {
                 return null;
             }
-            
+
             return ts;
         }
 
         return null;
     }
 
-    
+
     public static Token<?extends JsTokenId> getToken(Document doc, int offset) {
         TokenSequence<?extends JsTokenId> ts = getPositionedSequence(doc, offset);
 
@@ -265,7 +265,7 @@ public class LexUtilities {
 
     public static Token<?extends JsTokenId> getToken(Snapshot snapshot, int offset) {
         TokenSequence<?extends JsTokenId> ts = getPositionedSequence(snapshot, offset);
-        
+
         if (ts != null) {
             return ts.token();
         }
@@ -288,7 +288,7 @@ public class LexUtilities {
         return 0;
     }
 
-    
+
     public static Token<?extends JsTokenId> findNextNonWsNonComment(TokenSequence<?extends JsTokenId> ts) {
         return findNext(ts, Arrays.asList(JsTokenId.WHITESPACE, JsTokenId.EOL, JsTokenId.LINE_COMMENT, JsTokenId.BLOCK_COMMENT));
     }
@@ -296,37 +296,37 @@ public class LexUtilities {
     public static Token<?extends JsTokenId> findPreviousNonWsNonComment(TokenSequence<?extends JsTokenId> ts) {
         return findPrevious(ts, Arrays.asList(JsTokenId.WHITESPACE, JsTokenId.EOL, JsTokenId.LINE_COMMENT, JsTokenId.BLOCK_COMMENT));
     }
-    
+
     public static Token<?extends JsTokenId> findNext(TokenSequence<?extends JsTokenId> ts, List<JsTokenId> ignores) {
         if (ignores.contains(ts.token().id())) {
             while (ts.moveNext() && ignores.contains(ts.token().id())) {}
         }
         return ts.token();
     }
-    
+
     public static Token<?extends JsTokenId> findNextIncluding(TokenSequence<?extends JsTokenId> ts, List<JsTokenId> includes) {
         while (ts.moveNext() && !includes.contains(ts.token().id())) {}
         return ts.token();
     }
-    
+
     public static Token<?extends JsTokenId> findPreviousIncluding(TokenSequence<?extends JsTokenId> ts, List<JsTokenId> includes) {
             while (ts.movePrevious() && !includes.contains(ts.token().id())) {}
         return ts.token();
     }
-    
+
     public static Token<?extends JsTokenId> findPrevious(TokenSequence<?extends JsTokenId> ts, List<JsTokenId> ignores) {
         if (ignores.contains(ts.token().id())) {
             while (ts.movePrevious() && ignores.contains(ts.token().id())) {}
         }
         return ts.token();
     }
-    
+
     static boolean skipParenthesis(TokenSequence<?extends JsTokenId> ts) {
         return skipParenthesis(ts, false);
     }
-    
+
     /**
-     * Tries to skip parenthesis 
+     * Tries to skip parenthesis
      */
     public static boolean skipParenthesis(TokenSequence<?extends JsTokenId> ts, boolean back) {
         int balance = 0;
@@ -337,7 +337,7 @@ public class LexUtilities {
         }
 
         TokenId id = token.id();
-            
+
 //        // skip whitespaces
 //        if (id == JsTokenId.WHITESPACE) {
 //            while (ts.moveNext() && ts.token().id() == JsTokenId.WHITESPACE) {}
@@ -376,7 +376,7 @@ public class LexUtilities {
 
         return false;
     }
-    
+
     /** Search forwards in the token sequence until a token of type <code>down</code> is found */
     public static OffsetRange findFwd(Document doc, TokenSequence<?extends JsTokenId> ts, TokenId up,
         TokenId down) {
@@ -385,7 +385,7 @@ public class LexUtilities {
         while (ts.moveNext()) {
             Token<?extends JsTokenId> token = ts.token();
             TokenId id = token.id();
-            
+
             if (id == up) {
                 balance++;
             } else if (id == down) {
@@ -443,10 +443,10 @@ public class LexUtilities {
             default:
                 return OffsetRange.NONE;
         }
-        
+
         boolean eolFound = false;
         int lastEolOffset = ts.offset();
-        
+
         // skip whitespaces and comments
         if (id == JsTokenId.WHITESPACE || id == JsTokenId.LINE_COMMENT || id == JsTokenId.BLOCK_COMMENT || id == JsTokenId.EOL) {
             if (ts.token().id() == JsTokenId.EOL) {
@@ -470,7 +470,7 @@ public class LexUtilities {
         }
         return  OffsetRange.NONE;
     }
-    
+
     public static OffsetRange getMultilineRange(Document doc, TokenSequence<? extends JsTokenId> ts) {
         int index = ts.index();
         OffsetRange offsetRange = findMultilineRange(ts);
@@ -478,7 +478,7 @@ public class LexUtilities {
         ts.moveNext();
         return offsetRange;
     }
-    
+
     /**
      * Return true iff the given token is a token that indents its content,
      * such as the various begin tokens as well as "else", "when", etc.
@@ -577,7 +577,7 @@ public class LexUtilities {
         if (token != null) {
             return token.id() == JsTokenId.LINE_COMMENT;
         }
-        
+
         return false;
     }
 
@@ -599,7 +599,7 @@ public class LexUtilities {
     /**
      * Get the comment block for the given offset. The offset may be either within the comment
      * block, or the comment corresponding to a code node, depending on isAfter.
-     * 
+     *
      * @param doc The document
      * @param caretOffset The offset in the document
      * @param isAfter If true, the offset is pointing to some code AFTER the code block
@@ -626,12 +626,12 @@ public class LexUtilities {
                 }
                 return OffsetRange.NONE;
             }
-            
+
             if (!ts.moveNext() && !ts.movePrevious()) {
                 return null;
             }
             Token<?extends TokenId> token = ts.token();
-            
+
             if (token != null && token.id() == JsTokenId.BLOCK_COMMENT) {
                 return new OffsetRange(ts.offset(), ts.offset()+token.length());
             }
@@ -680,14 +680,14 @@ public class LexUtilities {
         } catch (BadLocationException ble) {
             Exceptions.printStackTrace(ble);
         }
-        
+
         return OffsetRange.NONE;
     }
 
     /**
-     * Back up to the first space character prior to the given offset - as long as 
+     * Back up to the first space character prior to the given offset - as long as
      * it's on the same line!  If there's only leading whitespace on the line up
-     * to the lex offset, return the offset itself 
+     * to the lex offset, return the offset itself
      * @todo Rewrite this now that I have a separate newline token, EOL, that I can
      *   break on - no need to call Utilities.getRowStart.
      */
@@ -742,7 +742,7 @@ public class LexUtilities {
                 }
             }
         }
-        
+
         return lexOffset;
     }
 
@@ -753,7 +753,7 @@ public class LexUtilities {
     public static List<String> gatherDocumentation(JsParseResult info, int nodeOffset) {
         LinkedList<String> comments = new LinkedList<String>();
         int elementBegin = nodeOffset;
-        
+
         try {
             CharSequence text = info.getSnapshot().getText();
             if (elementBegin < 0 || elementBegin >= text.length()) {
@@ -819,5 +819,5 @@ public class LexUtilities {
         return comments;
     }
 
-    
+
 }
