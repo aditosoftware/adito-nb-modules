@@ -29,6 +29,6 @@ public interface IAditoModelDataProvider
 
   FileObject removeDataModel(DataObject pModelDataObject);
 
-  List<Node.Cookie> getCookies(DataObject pDataObject);
+  List<Node.Cookie> getContainerCookies(DataObject pDataObject);
 
 }

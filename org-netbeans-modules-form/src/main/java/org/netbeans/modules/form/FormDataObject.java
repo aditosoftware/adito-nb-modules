@@ -45,11 +45,8 @@
 
 package org.netbeans.modules.form;
 
-import java.io.IOException;
-import java.util.List;
-
 import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.NbAditoInterface;
-import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.model.*;
+import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.model.IAditoModelDataProvider;
 import org.openide.cookies.*;
 import org.openide.filesystems.FileObject;
 import org.openide.loaders.*;
@@ -57,16 +54,23 @@ import org.openide.nodes.Node;
 import org.openide.nodes.Node.Cookie;
 import org.openide.util.Lookup;
 
-/** The DataObject for forms.
+import java.io.IOException;
+import java.util.List;
+
+/**
+ * The DataObject for forms.
  *
  * @author Ian Formanek, Petr Hamernik
  */
-public class FormDataObject extends XMLDataObject {
-    /** generated Serialized Version UID */
-    static final long serialVersionUID = -975322003627854168L;
+public class FormDataObject extends MultiDataObject
+{
+  /**
+   * generated Serialized Version UID
+   */
+  static final long serialVersionUID = -975322003627854168L;
 
-    //--------------------------------------------------------------------
-    // Private variables
+  //--------------------------------------------------------------------
+  // Private variables
 
 //    /** If true, a postInit method is called after reparsing - used after createFromTemplate */
 //    transient private boolean templateInit;
@@ -75,116 +79,139 @@ public class FormDataObject extends XMLDataObject {
 //    /** A flag to prevent multiple registration of ComponentRefListener */
 //    transient private boolean componentRefRegistered;
 
-    transient private FormEditorSupport formEditor;
+  transient private FormEditorSupport formEditor;
 
-    transient private OpenEdit openEdit;
+  transient private OpenEdit openEdit;
 
-    //--------------------------------------------------------------------
-    // Constructors
+  //--------------------------------------------------------------------
+  // Constructors
 
-    public FormDataObject(FileObject pFo, FormDataLoader pLoader)
-        throws DataObjectExistsException
+  public FormDataObject(FileObject pFo, FormDataLoader pLoader)
+      throws DataObjectExistsException
+  {
+    super(pFo, pLoader);
+    getCookieSet().assign(SaveAsCapable.class, new SaveAsCapable()
     {
-        super(pFo, pLoader);
-        getCookieSet().assign( SaveAsCapable.class, new SaveAsCapable() {
-            @Override
-            public void saveAs(FileObject folder, String fileName) throws IOException {
-                getFormEditorSupport().saveAs( folder, fileName );
-            }
-        });
-      List<Cookie> cookies = NbAditoInterface.lookup(IAditoModelDataProvider.class).getCookies(this);
-      for (Cookie cookie : cookies)
-        getCookieSet().add(cookie);
+      @Override
+      public void saveAs(FileObject folder, String fileName) throws IOException
+      {
+        getFormEditorSupport().saveAs(folder, fileName);
+      }
+    });
+    List<Cookie> cookies = NbAditoInterface.lookup(IAditoModelDataProvider.class).getContainerCookies(this);
+    for (Cookie cookie : cookies)
+      getCookieSet().add(cookie);
+  }
+
+  //--------------------------------------------------------------------
+  // Other methods
+
+  @Override
+  public <T extends Cookie> T getCookie(Class<T> type)
+  {
+    T retValue;
+
+    if (OpenCookie.class.equals(type) || EditCookie.class.equals(type))
+    {
+      if (openEdit == null)
+        openEdit = new OpenEdit();
+      retValue = type.cast(openEdit);
     }
+    else if (type.isAssignableFrom(FormEditorSupport.class))
+    {
+      retValue = (T) getFormEditorSupport();
+    }
+    else
+    {
+      retValue = super.getCookie(type);
+    }
+    return retValue;
+  }
 
-    //--------------------------------------------------------------------
-    // Other methods
+  @Override
+  public Lookup getLookup()
+  {
+    return isValid() ? getNodeDelegate().getLookup() : Lookup.EMPTY;
+  }
 
+  private class OpenEdit implements OpenCookie, EditCookie
+  {
     @Override
-    public <T extends Cookie> T getCookie(Class<T> type) {
-        T retValue;
-
-        if (OpenCookie.class.equals(type) || EditCookie.class.equals(type)) {
-            if (openEdit == null)
-                openEdit = new OpenEdit();
-            retValue = type.cast(openEdit);
-        } else if (type.isAssignableFrom(FormEditorSupport.class)) {
-            retValue = (T) getFormEditorSupport();
-        } else {
-            retValue = super.getCookie(type);
-        }
-        return retValue;
-    }
-
-    @Override
-    public Lookup getLookup() {
-        return isValid() ? getNodeDelegate().getLookup() : Lookup.EMPTY;
-    }
-
-    private class OpenEdit implements OpenCookie, EditCookie {
-        @Override
-        public void open() {
-            // open form editor with form designer selected
-            getFormEditorSupport().openFormEditor(true);
-        }
-        @Override
-        public void edit() {
-            // open form editor with java editor selected (form not loaded)
-            getFormEditorSupport().open();
-        }
-    }
-
-    public FileObject getFormFile() {
-        return getPrimaryEntry().getFile();
-    }
-
-    public boolean isReadOnly() {
-        return !getPrimaryFile().canWrite();
-    }
-
-    public boolean formFileReadOnly() {
-        return isReadOnly();
-    }
-
-    public synchronized FormEditorSupport getFormEditorSupport() {
-        if (formEditor == null) {
-            formEditor = new FormEditorSupport(this, getCookieSet());
-        }
-        return formEditor;
-    }
-
-    // PENDING remove when form_new_layout is merged to trunk
-    public FormEditorSupport getFormEditor() {
-        return getFormEditorSupport();
-    }
-    // END of PENDING
-
-    /** Provides node that should represent this data object. When a node for
-     * representation in a parent is requested by a call to getNode(parent) it
-     * is the exact copy of this node with only parent changed. This
-     * implementation creates instance <CODE>DataNode</CODE>.  <P> This method
-     * is called only once.
-     *
-     * @return the node representation for this data object
-     * @see FormDataNode
-     */
-    @Override
-    protected Node createNodeDelegate() {
-      return new FormDataNode(this);
-    }
-
-    //--------------------------------------------------------------------
-    // Serialization
-
-    private void readObject(java.io.ObjectInputStream is)
-        throws java.io.IOException, ClassNotFoundException {
-        is.defaultReadObject();
+    public void open()
+    {
+      // open form editor with form designer selected
+      getFormEditorSupport().openFormEditor(true);
     }
 
     @Override
-    protected DataObject handleCopyRename(DataFolder df, String name, String ext) throws IOException {
-        FileObject fo = getPrimaryEntry().copyRename (df.getPrimaryFile (), name, ext);
-        return DataObject.find( fo );
+    public void edit()
+    {
+      // open form editor with java editor selected (form not loaded)
+      getFormEditorSupport().open();
     }
+  }
+
+  public FileObject getFormFile()
+  {
+    return getPrimaryEntry().getFile();
+  }
+
+  public boolean isReadOnly()
+  {
+    return !getPrimaryFile().canWrite();
+  }
+
+  public boolean formFileReadOnly()
+  {
+    return isReadOnly();
+  }
+
+  public synchronized FormEditorSupport getFormEditorSupport()
+  {
+    if (formEditor == null)
+    {
+      formEditor = new FormEditorSupport(this, getCookieSet());
+    }
+    return formEditor;
+  }
+
+  // PENDING remove when form_new_layout is merged to trunk
+  public FormEditorSupport getFormEditor()
+  {
+    return getFormEditorSupport();
+  }
+  // END of PENDING
+
+  /**
+   * Provides node that should represent this data object. When a node for
+   * representation in a parent is requested by a call to getNode(parent) it
+   * is the exact copy of this node with only parent changed. This
+   * implementation creates instance <CODE>DataNode</CODE>.  <P> This method
+   * is called only once.
+   *
+   * @return the node representation for this data object
+   * @see FormDataNode
+   */
+  @Override
+  protected Node createNodeDelegate()
+  {
+    return new FormDataNode(this);
+  }
+
+  //--------------------------------------------------------------------
+  // Serialization
+
+  private void readObject(java.io.ObjectInputStream is)
+      throws java.io.IOException, ClassNotFoundException
+  {
+    is.defaultReadObject();
+  }
+
+  @Override
+  protected DataObject handleCopyRename(DataFolder df, String name, String ext) throws IOException
+  {
+    FileObject fo = getPrimaryEntry().copyRename(df.getPrimaryFile(), name, ext);
+    return DataObject.find(fo);
+  }
 
 }
