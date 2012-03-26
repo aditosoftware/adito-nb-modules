@@ -64,27 +64,13 @@ import java.util.List;
  */
 public class FormDataObject extends MultiDataObject
 {
-  /**
-   * generated Serialized Version UID
-   */
-  static final long serialVersionUID = -975322003627854168L;
-
-  //--------------------------------------------------------------------
-  // Private variables
-
-//    /** If true, a postInit method is called after reparsing - used after createFromTemplate */
-//    transient private boolean templateInit;
-//    /** If true, the form is marked as modified after regeneration - used if created from template */
-//    transient private boolean modifiedInit;
-//    /** A flag to prevent multiple registration of ComponentRefListener */
-//    transient private boolean componentRefRegistered;
-
   transient private FormEditorSupport formEditor;
-
   transient private OpenEdit openEdit;
 
   //--------------------------------------------------------------------
   // Constructors
+
+  static final long serialVersionUID =-975322003627854168L;
 
   public FormDataObject(FileObject pFo, FormDataLoader pLoader)
       throws DataObjectExistsException
@@ -118,13 +104,9 @@ public class FormDataObject extends MultiDataObject
       retValue = type.cast(openEdit);
     }
     else if (type.isAssignableFrom(FormEditorSupport.class))
-    {
       retValue = (T) getFormEditorSupport();
-    }
     else
-    {
       retValue = super.getCookie(type);
-    }
     return retValue;
   }
 
