@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 1997-2010 Oracle and/or its affiliates. All rights reserved.
+ * Copyright 2011 Oracle and/or its affiliates. All rights reserved.
  *
  * Oracle and Java are registered trademarks of Oracle and/or its affiliates.
  * Other names may be trademarks of their respective owners.
@@ -24,12 +24,6 @@
  * your own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
  *
- * Contributor(s):
- *
- * The Original Software is NetBeans. The Initial Developer of the Original
- * Software is Sun Microsystems, Inc. Portions Copyright 1997-2006 Sun
- * Microsystems, Inc. All Rights Reserved.
- *
  * If you wish your version of this file to be governed by only the CDDL
  * or only the GPL Version 2, indicate your decision by adding
  * "[Contributor] elects to include this software in this distribution
@@ -40,32 +34,37 @@
  * However, if you add GPL Version 2 code and therefore, elected the GPL
  * Version 2 license, then the option applies only if the new code is
  * made subject to such option by the copyright holder.
- */
-
-
-package org.netbeans.modules.form.actions;
-
-
-import java.awt.event.ActionEvent;
-import javax.swing.AbstractAction;
-import org.netbeans.modules.form.ComponentInspector;
-import org.openide.util.ImageUtilities;
-import org.openide.util.NbBundle;
-
-/** Opens Inspector (Component Inspector) TopComponent.
  *
- * @author   Peter Zavadsky
+ * Contributor(s):
+ *
+ * Portions Copyrighted 2011 Sun Microsystems, Inc.
  */
-public class InspectorAction extends AbstractAction {
+package org.netbeans.modules.form;
 
-  /** Opens component inspector (Form structure) component. */
-    @Override
-    public void actionPerformed(ActionEvent evt) {
-        // show ComponentInspector
-        ComponentInspector inspector = ComponentInspector.getInstance();
-        inspector.open();
-        inspector.requestActive();
-    }
+import java.io.IOException;
+import javax.swing.text.Document;
+import javax.swing.text.Position;
+import org.netbeans.api.editor.guards.GuardedSectionManager;
+import org.openide.filesystems.FileObject;
+import org.openide.nodes.Node;
+
+/**
+ *
+ * @author Tomas Pavek
+ */
+public interface EditorSupport extends Node.Cookie {
+    static String SECTION_INIT_COMPONENTS = "initComponents"; // NOI18N
+    static String SECTION_VARIABLES = "variables"; // NOI18N
     
+    Document getDocument();
+    GuardedSectionManager getGuardedSectionManager();
+    void markModified();
+    Object getJavaContext();
+    void openAt(Position pos);
+    void discardEditorUndoableEdits();
+    void saveAs(FileObject folder, String fileName) throws IOException;
+    void openDesign();
+    void openSource();
+    void reloadForm();
+    boolean isJavaEditorDisplayed();
 }
-

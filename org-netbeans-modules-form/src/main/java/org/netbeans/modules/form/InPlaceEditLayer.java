@@ -149,12 +149,13 @@ public class InPlaceEditLayer extends JPanel
 
     // ------------
 
-    static boolean supportsEditingFor(Class compClass) {
+    static boolean supportsEditingFor(Class compClass, boolean layerRequired) {
         return JLabel.class.isAssignableFrom(compClass)
                || AbstractButton.class.isAssignableFrom(compClass)
                || JTabbedPane.class.isAssignableFrom(compClass)
-               || JTextField.class.isAssignableFrom(compClass)
-               || JTextArea.class.isAssignableFrom(compClass);
+               || (!layerRequired
+                   && (JTextField.class.isAssignableFrom(compClass)
+                       || JTextArea.class.isAssignableFrom(compClass)));
     }
 
     boolean isEditingInitialized() {
@@ -228,7 +229,7 @@ public class InPlaceEditLayer extends JPanel
         }
         else if (editedComp instanceof JTabbedPane) {
             inPlaceField = new InPlaceTextField(editedText);
-            inPlaceField.setFont(editedComp.getFont());
+            inPlaceField.setFont(((JTabbedPane)editedComp).getFont());
             inPlaceField.setHorizontalAlignment(SwingConstants.CENTER);
             Insets insets = inPlaceField.getInsets();
             inPlaceField.setMargin(new Insets(0, insets.left, 0, insets.right));
@@ -423,7 +424,7 @@ public class InPlaceEditLayer extends JPanel
             icon = button.getIcon();
             if (icon != null || editedComp instanceof JMenuItem) {
                 Integer gap = (Integer)UIManager.get("Button.textIconGap"); // NOI18N
-                itGap = gap != null ? gap : 4;
+                itGap = gap != null ? gap.intValue() : 4;
             }
             else itGap = 0;
             text = button.getText();

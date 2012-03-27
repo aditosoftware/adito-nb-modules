@@ -49,6 +49,8 @@ import java.util.*;
 import javax.swing.AbstractButton;
 import javax.swing.JLabel;
 import org.netbeans.modules.form.layoutdesign.LayoutComponent;
+import org.netbeans.modules.form.layoutdesign.LayoutConstants;
+import org.netbeans.modules.form.layoutdesign.LayoutInterval;
 
 /**
  * Utilities for swing layout support.
@@ -62,7 +64,7 @@ public class SwingLayoutUtils {
     public static final int STATUS_NON_RESIZABLE = 0;
     /** The component is resizable by default. */
     public static final int STATUS_RESIZABLE = 1;
-    
+
     /**
      * Contains class names of non-resizable components e.g.
      * components that are non-resizable unless one (or more) of
@@ -71,13 +73,14 @@ public class SwingLayoutUtils {
     private static Set<String> nonResizableComponents = new HashSet<String>();
     static {
         nonResizableComponents.addAll(
-            Arrays.asList("javax.swing.JLabel", // NOI18N
-                          "javax.swing.JButton", // NOI18N
-                          "javax.swing.JToggleButton", // NOI18N
-                          "javax.swing.JCheckBox", // NOI18N
-                          "javax.swing.JRadioButton", // NOI18N
-                          "javax.swing.JList" // NOI18N
-            )
+            Arrays.asList(new String[] {
+                "javax.swing.JLabel", // NOI18N
+                "javax.swing.JButton", // NOI18N
+                "javax.swing.JToggleButton", // NOI18N
+                "javax.swing.JCheckBox", // NOI18N
+                "javax.swing.JRadioButton", // NOI18N
+                "javax.swing.JList", // NOI18N
+            })
         );
     }
 
@@ -89,23 +92,46 @@ public class SwingLayoutUtils {
     private static Set<String> resizableComponents = new HashSet<String>();
     static {
         resizableComponents.addAll(
-            Arrays.asList("javax.swing.JComboBox", // NOI18N
-                          "javax.swing.JTextField", // NOI18N
-                          "javax.swing.JTextArea", // NOI18N
-                          "javax.swing.JTabbedPane", // NOI18N
-                          "javax.swing.JScrollPane", // NOI18N
-                          "javax.swing.JSplitPane", // NOI18N
-                          "javax.swing.JFormattedTextField", // NOI18N
-                          "javax.swing.JPasswordField", // NOI18N
-                          "javax.swing.JSpinner", // NOI18N
-                          "javax.swing.JSeparator", // NOI18N
-                          "javax.swing.JTextPane", // NOI18N
-                          "javax.swing.JEditorPane", // NOI18N
-                          "javax.swing.JInternalFrame", // NOI18N
-                          "javax.swing.JLayeredPane", // NOI18N
-                          "javax.swing.JDesktopPane" // NOI18N
-            )
+            Arrays.asList(new String[] {
+                "javax.swing.JComboBox", // NOI18N
+                "javax.swing.JTextField", // NOI18N
+                "javax.swing.JTextArea", // NOI18N
+                "javax.swing.JTabbedPane", // NOI18N
+                "javax.swing.JScrollPane", // NOI18N
+                "javax.swing.JSplitPane", // NOI18N
+                "javax.swing.JFormattedTextField", // NOI18N
+                "javax.swing.JPasswordField", // NOI18N
+                "javax.swing.JSpinner", // NOI18N
+                "javax.swing.JSeparator", // NOI18N
+                "javax.swing.JTextPane", // NOI18N
+                "javax.swing.JEditorPane", // NOI18N
+                "javax.swing.JInternalFrame", // NOI18N
+                "javax.swing.JLayeredPane", // NOI18N
+                "javax.swing.JDesktopPane" // NOI18N
+            })
         );
+    }
+
+    /**
+     * Determines whether the given class represents component
+     * that is resizable (by default) or not.
+     *
+     * @param componentClass <code>Class</code> object corresponding
+     * to component we are interested in.
+     * @return <code>STATUS_RESIZABLE</code>, <code>STATUS_NON_RESIZABLE</code>
+     * or <code>STATUS_UNKNOWN</code>.
+     */
+    public static int getResizableStatus(Component component) {
+        int status = getSpecialStatus(component);
+        if (status == STATUS_UNKNOWN) {
+            String className = component.getClass().getName();
+            if (resizableComponents.contains(className)) {
+                status = STATUS_RESIZABLE;
+            } else if (nonResizableComponents.contains(className)) {
+                status = STATUS_NON_RESIZABLE;
+            }
+        }
+        return status;
     }
 
     private static int getSpecialStatus(Component component) {
@@ -131,7 +157,7 @@ public class SwingLayoutUtils {
                 if (lc != null) {
                     if (lc.isLinkSized(dimension)) {
                         String cid = lc.getId();
-                        Integer id = lc.getLinkSizeId(dimension);
+                        Integer id = new Integer(lc.getLinkSizeId(dimension));
                         List<String> l = linkSizeGroup.get(id);
                         if (l == null) {
                             l = new ArrayList<String>();
@@ -146,5 +172,31 @@ public class SwingLayoutUtils {
         }
         return linkSizeGroup;
     }
-    
+
+    /**
+     * GroupLayout does not like the default ending container gap resizing if
+     * there is some other interval in parallel aligned at the trailing edge
+     * with it (or resizing), having smaller min size. It fails to compute the
+     * correct group size then. Simplest case of two buttons:
+     *   par(jButton1_resizing_or_trailing,
+     *       seq(jButton2_fixed, default_cont_gap_resizing))
+     * @param seq the sequence to check
+     * @return the undesirable resizing container gap at the end of the sequence
+     *         that should not be used, null if everything's ok
+     */
+    public static LayoutInterval getUnsupportedResizingContainerGap(LayoutInterval seq) {
+        if (seq.isSequential() && seq.getSubIntervalCount() > 1 && seq.getParent() != null) {
+            LayoutInterval gap = seq.getSubInterval(seq.getSubIntervalCount()-1);
+            if (gap.getPreferredSize() == LayoutConstants.NOT_EXPLICITLY_DEFINED && gap.getMaximumSize() == Short.MAX_VALUE
+                    && LayoutInterval.getNeighbor(seq, LayoutConstants.TRAILING, false, true, false) == null) {
+                for (Iterator<LayoutInterval> it=seq.getParent().getSubIntervals(); it.hasNext(); ) {
+                    LayoutInterval sub = it.next();
+                    if (sub != seq && LayoutInterval.isAlignedAtBorder(sub, LayoutConstants.TRAILING)) {
+                        return gap;
+                    }
+                }
+            }
+        }
+        return null;
+    }
 }

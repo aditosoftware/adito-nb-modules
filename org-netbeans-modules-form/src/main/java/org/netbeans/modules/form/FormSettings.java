@@ -45,6 +45,8 @@
 package org.netbeans.modules.form;
 
 import java.util.*;
+import javax.swing.UIManager;
+import org.netbeans.modules.form.project.ClassPathUtils;
 
 /**
  * Settings for one form.
@@ -62,19 +64,19 @@ public class FormSettings {
 
         // Variables Modifier
         int variablesModifier = FormLoaderSettings.getInstance().getVariablesModifier();
-        settings.put(FormLoaderSettings.PROP_VARIABLES_MODIFIER, variablesModifier);
+        settings.put(FormLoaderSettings.PROP_VARIABLES_MODIFIER, new Integer(variablesModifier));
         
         // Local Variables
         boolean localVariables = FormLoaderSettings.getInstance().getVariablesLocal();
-        settings.put(FormLoaderSettings.PROP_VARIABLES_LOCAL, localVariables);
+        settings.put(FormLoaderSettings.PROP_VARIABLES_LOCAL, Boolean.valueOf(localVariables));
         
         // Generate Mnemonics Code
         boolean generateMnemonicsCode = FormLoaderSettings.getInstance().getGenerateMnemonicsCode();
-        settings.put(FormLoaderSettings.PROP_GENERATE_MNEMONICS, generateMnemonicsCode);
+        settings.put(FormLoaderSettings.PROP_GENERATE_MNEMONICS, Boolean.valueOf(generateMnemonicsCode));
         
         // Listener Generation Style
         int listenerGenerationStyle = FormLoaderSettings.getInstance().getListenerGenerationStyle();
-        settings.put(FormLoaderSettings.PROP_LISTENER_GENERATION_STYLE, listenerGenerationStyle);
+        settings.put(FormLoaderSettings.PROP_LISTENER_GENERATION_STYLE, new Integer(listenerGenerationStyle));
 
         // Generate FQN
         boolean generateFQN = FormLoaderSettings.getInstance().getGenerateFQN();
@@ -85,75 +87,103 @@ public class FormSettings {
     // code generation
 
     public int getVariablesModifier() {
-      return (Integer)settings.get(FormLoaderSettings.PROP_VARIABLES_MODIFIER);
+        Integer variablesModifier = (Integer)settings.get(FormLoaderSettings.PROP_VARIABLES_MODIFIER);
+        return variablesModifier.intValue();
     }
 
-  public boolean getVariablesLocal() {
-    return (Boolean)settings.get(FormLoaderSettings.PROP_VARIABLES_LOCAL);
+    public void setVariablesModifier(int value) {
+        settings.put(FormLoaderSettings.PROP_VARIABLES_MODIFIER, new Integer(value));
     }
 
-  public boolean getAutoSetComponentName() {
+    public boolean getVariablesLocal() {
+        Boolean variablesLocal = (Boolean)settings.get(FormLoaderSettings.PROP_VARIABLES_LOCAL);
+        return variablesLocal.booleanValue();
+    }
+
+    public void setVariablesLocal(boolean value) {
+        settings.put(FormLoaderSettings.PROP_VARIABLES_LOCAL, Boolean.valueOf(value));
+    }
+
+    public boolean getAutoSetComponentName() {
         Boolean setting = (Boolean) settings.get(FormLoaderSettings.PROP_AUTO_SET_COMPONENT_NAME);
         boolean autoName;
         if (setting != null) {
-            autoName = setting;
+            autoName = setting.booleanValue();
         } else { // no setting - detect for newly created form, false otherwise
-            autoName = FormEditor.getFormEditor(formModel).needPostCreationUpdate() && getDefaultAutoSetComponentName();
+            autoName = FormEditor.getFormEditor(formModel).needPostCreationUpdate()
+                    ? getDefaultAutoSetComponentName() : false;
             setAutoSetComponentName(autoName);
         }
         return autoName;
     }
 
     public void setAutoSetComponentName(boolean setName) {
-        settings.put(FormLoaderSettings.PROP_AUTO_SET_COMPONENT_NAME, setName);
+        settings.put(FormLoaderSettings.PROP_AUTO_SET_COMPONENT_NAME, Boolean.valueOf(setName));
     }
 
     boolean getDefaultAutoSetComponentName() {
         int globalNaming = FormLoaderSettings.getInstance().getAutoSetComponentName();
         boolean autoName = globalNaming == FormLoaderSettings.AUTO_NAMING_ON;
-//        if (globalNaming == FormLoaderSettings.AUTO_NAMING_DEFAULT) {
-//            ResourceSupport resourceSupport = FormEditor.getResourceSupport(formModel);
-//            if (resourceSupport.projectUsesResources()) {
-//                autoName = true;
-//            }
-//        }
+      // STRIPPED
+        /*if (globalNaming == FormLoaderSettings.AUTO_NAMING_DEFAULT) {
+            ResourceSupport resourceSupport = FormEditor.getResourceSupport(formModel);
+            if (resourceSupport.projectUsesResources()) {
+                autoName = true;
+            }
+        }*/
         return autoName;
     }
 
-  // TODO: stripped
-//    public int getLayoutCodeTarget() {
-//        return checkLayoutCodeTarget();
-//    }
+    public boolean getGenerateMnemonicsCode() {
+        Boolean generateMnemonicsCode = (Boolean)settings.get(FormLoaderSettings.PROP_GENERATE_MNEMONICS);
+        return generateMnemonicsCode.booleanValue();
+    }
 
-  // TODO: stripped
-//    private int checkLayoutCodeTarget() {
-//        Integer lctSetting = (Integer)settings.get(FormLoaderSettings.PROP_LAYOUT_CODE_TARGET);
-//        int layoutCodeTarget;
-//        if (lctSetting != null) {
-//            layoutCodeTarget = lctSetting.intValue();
-//        }
-//        else { // no setting
-//            layoutCodeTarget = FormEditor.getFormEditor(formModel).needPostCreationUpdate() ?
-//                JavaCodeGenerator.LAYOUT_CODE_AUTO : // newly created form - detect
-//                JavaCodeGenerator.LAYOUT_CODE_LIBRARY; // old form - use library
-//        }
-//        if (layoutCodeTarget == JavaCodeGenerator.LAYOUT_CODE_AUTO) {
-//            int globalLCT = FormLoaderSettings.getInstance().getLayoutCodeTarget();
-//            if (globalLCT == JavaCodeGenerator.LAYOUT_CODE_AUTO) {
-//                boolean isAquaLookAndFeel = "Aqua".equals(UIManager.getLookAndFeel().getID()); // NOI18N
-//                layoutCodeTarget = !isAquaLookAndFeel && ClassPathUtils.isJava6ProjectPlatform(
-//                        FormEditor.getFormDataObject(formModel).getPrimaryFile()) ?
-//                    JavaCodeGenerator.LAYOUT_CODE_JDK6 : JavaCodeGenerator.LAYOUT_CODE_LIBRARY;
-//            }
-//            else layoutCodeTarget = globalLCT;
-//            setLayoutCodeTarget(layoutCodeTarget);
-//        }
-//        else if (lctSetting == null) {
-//            setLayoutCodeTarget(layoutCodeTarget);
-//        }
-//
-//        return layoutCodeTarget;
-//    }
+    public void setGenerateMnemonicsCode(boolean value) {
+        settings.put(FormLoaderSettings.PROP_GENERATE_MNEMONICS, Boolean.valueOf(value));
+    }
+
+    public int getListenerGenerationStyle() {
+        Integer listenerGenerationStyle = (Integer)settings.get(FormLoaderSettings.PROP_LISTENER_GENERATION_STYLE);
+        return listenerGenerationStyle.intValue();
+    }
+
+    public void setListenerGenerationStyle(int value) {
+        settings.put(FormLoaderSettings.PROP_LISTENER_GENERATION_STYLE, new Integer(value));
+    }
+
+  // STRIPPED
+    /*public int getLayoutCodeTarget() {
+        return checkLayoutCodeTarget();
+    }*/
+
+  // STRIPPED
+    /*private int checkLayoutCodeTarget() {
+        Integer lctSetting = (Integer)settings.get(FormLoaderSettings.PROP_LAYOUT_CODE_TARGET);
+        int layoutCodeTarget;
+        if (lctSetting != null) {
+            layoutCodeTarget = lctSetting.intValue();
+        }
+        else { // no setting
+            layoutCodeTarget = JavaCodeGenerator.LAYOUT_CODE_AUTO;
+        }
+        if (layoutCodeTarget == JavaCodeGenerator.LAYOUT_CODE_AUTO) {
+            int globalLCT = FormLoaderSettings.getInstance().getLayoutCodeTarget();
+            if (globalLCT == JavaCodeGenerator.LAYOUT_CODE_AUTO) {
+                boolean isAquaLookAndFeel = "Aqua".equals(UIManager.getLookAndFeel().getID()); // NOI18N
+                layoutCodeTarget = !isAquaLookAndFeel && ClassPathUtils.isJava6ProjectPlatform(
+                        FormEditor.getFormDataObject(formModel).getPrimaryFile()) ?
+                    JavaCodeGenerator.LAYOUT_CODE_JDK6 : JavaCodeGenerator.LAYOUT_CODE_LIBRARY;
+            }
+            else layoutCodeTarget = globalLCT;
+            setLayoutCodeTarget(layoutCodeTarget);
+        }
+        else if (lctSetting == null) {
+            setLayoutCodeTarget(layoutCodeTarget);
+        }
+
+        return layoutCodeTarget;
+    }*/
 
     // -----
     // resource management / internationalization
@@ -162,66 +192,66 @@ public class FormSettings {
     static final String PROP_AUTO_I18N = "i18nAutoMode"; // NOI18N
 
   // TODO: stripped
-//    void setResourceAutoMode(int value) {
-//        settings.put(ResourceSupport.PROP_AUTO_RESOURCING, value);
-//        settings.put(PROP_AUTO_I18N, value == ResourceSupport.AUTO_I18N); // for compatibility
-//    }
-//
-//    int getResourceAutoMode() {
-//        Integer resSetting = (Integer) settings.get(ResourceSupport.PROP_AUTO_RESOURCING);
-//        int resAutoMode = ResourceSupport.AUTO_OFF;
-//        if (resSetting != null) {
-//            resAutoMode = resSetting.intValue();
-//        }
-//        else {
-//            Boolean i18nSetting = (Boolean) settings.get(PROP_AUTO_I18N);
-//            if (i18nSetting != null) {
-//                if (Boolean.TRUE.equals(i18nSetting))
-//                    resAutoMode = ResourceSupport.AUTO_I18N;
-//            }
-//            else { // no setting available
-//                if (FormEditor.getFormEditor(formModel).needPostCreationUpdate()) {
-//                    int globalResAutoMode = FormLoaderSettings.getInstance().getI18nAutoMode();
-//                    if (globalResAutoMode == FormLoaderSettings.AUTO_RESOURCE_ON) {
-//                        ResourceSupport resourceSupport = FormEditor.getResourceSupport(formModel);
-//                        if (resourceSupport.projectUsesResources())
-//                            resAutoMode = ResourceSupport.AUTO_RESOURCING; // only if app framework already on cp
-//                        else
-//                            resAutoMode = ResourceSupport.AUTO_I18N;
-//                    }
-//                    else if (globalResAutoMode == FormLoaderSettings.AUTO_RESOURCE_DEFAULT) { // detect
-//                        ResourceSupport resourceSupport = FormEditor.getResourceSupport(formModel);
-//                        if (resourceSupport.projectWantsUseResources())
-//                            resAutoMode = ResourceSupport.AUTO_RESOURCING; // only if app framework already on cp
-//                        else if (resourceSupport.isDefaultInternationalizableProject())
-//                            resAutoMode = ResourceSupport.AUTO_I18N; // NBM project
-//                    }
-//                }
-//                setResourceAutoMode(resAutoMode);
-//            }
-//        }
-//        return resAutoMode;
-//    }
-//
-//    public boolean isI18nAutoMode() {
-//        return getResourceAutoMode() == ResourceSupport.AUTO_I18N;
-//    }
-//
-//    public void setFormBundle(String bundleName) {
-//        settings.put(ResourceSupport.PROP_FORM_BUNDLE, bundleName);
-//    }
-//
-//    public String getFormBundle() {
-//        return (String) settings.get(ResourceSupport.PROP_FORM_BUNDLE);
-//    }
-//
-//    public void setGenerateFQN(boolean generateFQN) {
-//        settings.put(FormLoaderSettings.PROP_GENERATE_FQN, generateFQN);
-//    }
-//
-//    public boolean getGenerateFQN() {
-//        return (Boolean)settings.get(FormLoaderSettings.PROP_GENERATE_FQN);
-//    }
+/*    void setResourceAutoMode(int value) {
+        settings.put(ResourceSupport.PROP_AUTO_RESOURCING, value);
+        settings.put(PROP_AUTO_I18N, value == ResourceSupport.AUTO_I18N); // for compatibility
+    }
+
+    int getResourceAutoMode() {
+        Integer resSetting = (Integer) settings.get(ResourceSupport.PROP_AUTO_RESOURCING);
+        int resAutoMode = ResourceSupport.AUTO_OFF;
+        if (resSetting != null) {
+            resAutoMode = resSetting.intValue();
+        }
+        else {
+            Boolean i18nSetting = (Boolean) settings.get(PROP_AUTO_I18N);
+            if (i18nSetting != null) {
+                if (Boolean.TRUE.equals(i18nSetting))
+                    resAutoMode = ResourceSupport.AUTO_I18N;
+            }
+            else { // no setting available
+                if (FormEditor.getFormEditor(formModel).needPostCreationUpdate()) {
+                    int globalResAutoMode = FormLoaderSettings.getInstance().getI18nAutoMode();
+                    if (globalResAutoMode == FormLoaderSettings.AUTO_RESOURCE_ON) {
+                        ResourceSupport resourceSupport = FormEditor.getResourceSupport(formModel);
+                        if (resourceSupport.projectUsesResources())
+                            resAutoMode = ResourceSupport.AUTO_RESOURCING; // only if app framework already on cp
+                        else
+                            resAutoMode = ResourceSupport.AUTO_I18N;
+                    }
+                    else if (globalResAutoMode == FormLoaderSettings.AUTO_RESOURCE_DEFAULT) { // detect
+                        ResourceSupport resourceSupport = FormEditor.getResourceSupport(formModel);
+                        if (resourceSupport.projectWantsUseResources())
+                            resAutoMode = ResourceSupport.AUTO_RESOURCING; // only if app framework already on cp
+                        else if (resourceSupport.isDefaultInternationalizableProject())
+                            resAutoMode = ResourceSupport.AUTO_I18N; // NBM project
+                    }
+                }
+                setResourceAutoMode(resAutoMode);
+            }
+        }
+        return resAutoMode;
+    }
+
+    public boolean isI18nAutoMode() {
+        return getResourceAutoMode() == ResourceSupport.AUTO_I18N;
+    }
+
+    public void setFormBundle(String bundleName) {
+        settings.put(ResourceSupport.PROP_FORM_BUNDLE, bundleName);
+    }
+
+    public String getFormBundle() {
+        return (String) settings.get(ResourceSupport.PROP_FORM_BUNDLE);
+    }
+
+    public void setGenerateFQN(boolean generateFQN) {
+        settings.put(FormLoaderSettings.PROP_GENERATE_FQN, generateFQN);
+    }
+
+    public boolean getGenerateFQN() {
+        return (Boolean)settings.get(FormLoaderSettings.PROP_GENERATE_FQN);
+    }*/
 
     // design locale is not persisted in settings
 
@@ -239,8 +269,18 @@ public class FormSettings {
         settings.put(name, value);
     }
 
-  boolean isSessionSetting(String name) {
-        return !name.startsWith(SESSION_PREFIX);
+    public Object get(String name) {
+        Object value;
+        if (settings.containsKey(name)) {
+            value = settings.get(name);
+        } else {
+            value = settings.get(SESSION_PREFIX + name);
+        }
+        return value;
+    }
+
+    boolean isSessionSetting(String name) {
+        return name.startsWith(SESSION_PREFIX);
     }
     
     Map<String,Object> allSettings() {

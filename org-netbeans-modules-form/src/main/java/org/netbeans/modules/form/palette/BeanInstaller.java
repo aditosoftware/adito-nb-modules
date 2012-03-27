@@ -57,19 +57,28 @@ import java.net.URL;
 import java.text.MessageFormat;
 //import java.util.logging.Level;
 //import java.util.logging.Logger;
+//import javax.lang.model.element.Element;
+//import javax.lang.model.element.ElementKind;
+//import javax.lang.model.element.ExecutableElement;
+//import javax.lang.model.element.TypeElement;
 //import org.netbeans.api.java.source.CancellableTask;
 //import org.netbeans.api.java.source.CompilationController;
 //import org.netbeans.api.java.source.JavaSource;
 //import org.netbeans.api.java.source.JavaSource.Phase;
+import org.netbeans.api.project.FileOwnerQuery;
+import org.netbeans.api.project.Project;
 //import org.netbeans.modules.classfile.ClassFile;
 //import org.netbeans.modules.classfile.Method;
 
+//import org.netbeans.modules.form.palette.PaletteItemDataObject;
+//import org.netbeans.modules.form.palette.PaletteUtils;
 import org.openide.*;
-import org.openide.loaders.*;
 import org.openide.nodes.Node;
 import org.openide.filesystems.*;
+import org.openide.loaders.DataObject;
 
 import org.netbeans.modules.form.project.*;
+//import org.netbeans.modules.nbform.project.ClassSourceResolver;
 import org.openide.util.Exceptions;
 
 /**
@@ -80,107 +89,132 @@ import org.openide.util.Exceptions;
 
 public final class BeanInstaller {
 
-    private static Reference<AddToPaletteWizard> wizardRef;
+    //private static Reference<AddToPaletteWizard> wizardRef;
 
     private BeanInstaller() {
     }
 
     // --------
 
-    /** Installs beans from given source type. Lets the user choose the source,
-     * the beans, and the target category in a wizard. */
-    public static void installBeans(Class<? extends ClassSource.Entry> sourceType) {
-        AddToPaletteWizard wizard = getAddWizard();
-        if (wizard.show(sourceType))
-            createPaletteItems(wizard.getSelectedBeans(),
-                               wizard.getSelectedCategory());
-    }
+    ///** Installs beans from given source type. Lets the user choose the source,
+    //* the beans, and the target category in a wizard. */
+    //public static void installBeans(Class<? extends ClassSource.Entry> sourceType) {
+    //    AddToPaletteWizard wizard = getAddWizard();
+    //    if (wizard.show(sourceType))
+    //        createPaletteItems(wizard.getSelectedBeans(),
+    //                           wizard.getSelectedCategory());
+    //}
+    //
+    ///** Installs beans represented by given nodes (selected by the user). Lets
+    // * the user choose the palette category. */
+    //public static void installBeans(Node[] nodes) {
+    //    final List<ClassSource> beans = new LinkedList<ClassSource>();
+    //    final List<String> unableToInstall = new LinkedList<String>();
+    //    final List<String> noBeans = new LinkedList<String>();
+    //    for (int i=0; i < nodes.length; i++) {
+    //        DataObject dobj = nodes[i].getCookie(DataObject.class);
+    //        if (dobj == null)
+    //            continue;
+    //
+    //        final FileObject fo = dobj.getPrimaryFile();
+    //        JavaClassHandler handler = new JavaClassHandler() {
+    //            @Override
+    //            public void handle(String className, String problem) {
+    //                if (problem == null) {
+    //                    ClassSource classSource = getProjectClassSource(fo, className);
+    //                    if (classSource == null) {
+    //                        // Issue 47947
+    //                        unableToInstall.add(className);
+    //                    } else {
+    //                        beans.add(classSource);
+    //                    }
+    //                } else {
+    //                    noBeans.add(className);
+    //                    noBeans.add(problem);
+    //                }
+    //            }
+    //        };
+    //        scanFileObject(fo.getParent(), fo, handler);
+    //    }
+    //
+    //    if (unableToInstall.size() > 0) {
+    //        Iterator iter = unableToInstall.iterator();
+    //        StringBuilder sb = new StringBuilder();
+    //        while (iter.hasNext()) {
+    //            sb.append(iter.next()).append(", "); // NOI18N
+    //        }
+    //        sb.delete(sb.length()-2, sb.length());
+    //        String messageFormat = PaletteUtils.getBundleString("MSG_cannotInstallBeans"); // NOI18N
+    //        String message = MessageFormat.format(messageFormat, new Object[] {sb.toString()});
+    //        NotifyDescriptor nd = new NotifyDescriptor.Message(message);
+    //        DialogDisplayer.getDefault().notify(nd);
+    //        if (beans.isEmpty()) return;
+    //    }
 
-    /** Installs beans represented by given nodes (selected by the user). Lets
-     * the user choose the palette category. */
-    public static void installBeans(Node[] nodes) {       
-        final List<ClassSource> beans = new LinkedList<ClassSource>();
-        final List<String> unableToInstall = new LinkedList<String>();
-        final List<String> noBeans = new LinkedList<String>();
-      for (Node node : nodes)
-      {
-        DataObject dobj = node.getCookie(DataObject.class);
-        if (dobj == null)
-          continue;
+    //    String message = null;
+    //    if (beans.isEmpty()) {
+    //        message = PaletteUtils.getBundleString("MSG_noBeansUnderNodes"); // NOI18N
+    //    }
+    //    if (!noBeans.isEmpty()) {
+    //        Iterator<String> iter = noBeans.iterator();
+    //        while (iter.hasNext()) {
+    //            String className = iter.next();
+    //            String format = iter.next();
+    //            String msg = MessageFormat.format(format, className);
+    //            if (message != null) {
+    //                message += '\n';
+    //            } else {
+    //                message = ""; // NOI18N
+    //            }
+    //            message += msg;
+    //        }
+    //    }
+    //    if (message != null) {
+    //        NotifyDescriptor nd = new NotifyDescriptor.Message(message);
+    //        DialogDisplayer.getDefault().notify(nd);
+    //    }
+    //    if (beans.isEmpty()) return;
+    //
+    //    String category = CategorySelector.selectCategory();
+    //    if (category == null)
+    //        return; // canceled by user
+    //
+    //    final FileObject categoryFolder = PaletteUtils.getPaletteFolder()
+    //                                                   .getFileObject(category);
+    //    try {
+    //        FileUtil.runAtomicAction(
+    //        new FileSystem.AtomicAction () {
+    //            @Override
+    //            public void run() {
+    //                Iterator it = beans.iterator();
+    //                while (it.hasNext()) {
+    //                    ClassSource classSource = (ClassSource)it.next();
+    //                    try {
+    //                        PaletteItemDataObject.createFile(categoryFolder, classSource);
+    //                        // TODO check the class if it can be loaded?
+    //                    }
+    //                    catch (java.io.IOException ex) {
+    //                        ErrorManager.getDefault().notify(ErrorManager.INFORMATIONAL, ex);
+    //                    }
+    //                }
+    //            }
+    //        });
+    //    }
+    //    catch (java.io.IOException ex) {} // should not happen
+    //}
 
-        final FileObject fo = dobj.getPrimaryFile();
-        JavaClassHandler handler = new JavaClassHandler()
-        {
-        };
-        scanFileObject(fo.getParent(), fo, handler);
-      }
-        
-        if (unableToInstall.size() > 0) {
-            Iterator iter = unableToInstall.iterator();
-            StringBuilder sb = new StringBuilder();
-            while (iter.hasNext()) {
-                sb.append(iter.next()).append(", "); // NOI18N
-            }
-            sb.delete(sb.length()-2, sb.length());
-            String messageFormat = PaletteUtils.getBundleString("MSG_cannotInstallBeans"); // NOI18N
-            String message = MessageFormat.format(messageFormat, sb.toString());
-            NotifyDescriptor nd = new NotifyDescriptor.Message(message);
-            DialogDisplayer.getDefault().notify(nd);
-            if (beans.isEmpty()) return;
+    /**
+     * Creates ClassSource object corresponding to project output classpath.
+     * @param fileInProject FileObject being source (.java) or output (.class) file in a project
+     * @param className String name of class for which the ClassSource is created
+     */
+    public static ClassSource getProjectClassSource(FileObject fileInProject, String className) {
+        Project project = FileOwnerQuery.getOwner(fileInProject);
+        if (project == null) {
+            return null; // the file is not in any project
         }
-
-        String message = null;
-        if (beans.isEmpty()) {
-            message = PaletteUtils.getBundleString("MSG_noBeansUnderNodes"); // NOI18N
-        }
-        if (!noBeans.isEmpty()) {
-            Iterator<String> iter = noBeans.iterator();
-            while (iter.hasNext()) {
-                String className = iter.next();
-                String format = iter.next();
-                String msg = MessageFormat.format(format, className);
-                if (message != null) {
-                    message += '\n';
-                } else {
-                    message = ""; // NOI18N
-                }
-                message += msg;
-            }
-        }
-        if (message != null) {
-            NotifyDescriptor nd = new NotifyDescriptor.Message(message);
-            DialogDisplayer.getDefault().notify(nd);
-        }
-        if (beans.isEmpty()) return;
-
-        String category = CategorySelector.selectCategory();
-        if (category == null)
-            return; // canceled by user
-
-        final FileObject categoryFolder = PaletteUtils.getPaletteFolder()
-                                                       .getFileObject(category);
-        try {
-            FileUtil.runAtomicAction(
-            new FileSystem.AtomicAction () {
-                @Override
-                public void run() {
-                  for (ClassSource bean : beans)
-                  {
-                    ClassSource classSource = bean;
-                    try
-                    {
-                      PaletteItemDataObject.createFile(categoryFolder, classSource);
-                      // TODO check the class if it can be loaded?
-                    }
-                    catch (IOException ex)
-                    {
-                      ErrorManager.getDefault().notify(ErrorManager.INFORMATIONAL, ex);
-                    }
-                  }
-                }
-            });
-        }
-        catch (java.io.IOException ex) {} // should not happen
+        ClassSource.Entry entry = new ClassSourceResolver.ProjectEntry(project);
+        return new ClassSource(className, entry);
     }
 
     /** Finds available JavaBeans in given JAR files. Looks for beans
@@ -285,19 +319,17 @@ public final class BeanInstaller {
             new FileSystem.AtomicAction () {
                 @Override
                 public void run() {
-                  for (ItemInfo bean : beans)
-                    try
-                    {
-                      PaletteItemDataObject.createFile(
-                          categoryFolder,
-                          new ClassSource(bean.classname,
-                                          bean.entry));
-                      // TODO check the class if it can be loaded?
-                    }
-                    catch (IOException ex)
-                    {
-                      ErrorManager.getDefault().notify(ErrorManager.INFORMATIONAL, ex);
-                    }
+                    for (int i=0; i < beans.length; i++)
+                        try {
+                            PaletteItemDataObject.createFile(
+                                categoryFolder,
+                                new ClassSource(beans[i].classname,
+                                                beans[i].entry));
+                            // TODO check the class if it can be loaded?
+                        }
+                        catch (java.io.IOException ex) {
+                            ErrorManager.getDefault().notify(ErrorManager.INFORMATIONAL, ex);
+                        }
                 }
             });
         }
@@ -308,36 +340,41 @@ public final class BeanInstaller {
      * be JavaBeans. */
     private static void scanFolderForBeans(FileObject folder, final Map<String,ItemInfo> beans, final ClassSource.Entry root) {
         JavaClassHandler handler = new JavaClassHandler() {
+            @Override
+            public void handle(String className, String problem) {
+                if (problem == null) {
+                    ItemInfo ii = new ItemInfo();
+                    ii.classname = className;
+                    ii.entry = root;
+                    beans.put(ii.classname, ii);
+                }
+            }
         };
                     
         FileObject[] files = folder.getChildren();
-      for (FileObject fo : files)
-      {
-        if (fo.isFolder())
-        {
-          scanFolderForBeans(fo, beans, root);
+        for (int i=0; i < files.length; i++) {
+            FileObject fo = files[i];
+            if (fo.isFolder()) {
+                scanFolderForBeans(fo, beans, root);
+            }
+            else try {
+                if ("class".equals(fo.getExt()) // NOI18N
+                     && (DataObject.find(fo) != null))
+                {                   
+                    scanFileObject(folder, fo, handler);
+                }
+            }
+            catch (org.openide.loaders.DataObjectNotFoundException ex) {} // should not happen
         }
-        else try
-        {
-          if ("class".equals(fo.getExt()) // NOI18N
-              && (DataObject.find(fo) != null))
-          {
-            scanFileObject(folder, fo, handler);
-          }
-        }
-        catch (DataObjectNotFoundException ex)
-        {
-        } // should not happen
-      }
     }    
     
     private static void scanFileObject(FileObject folder, final FileObject fileObject, final JavaClassHandler handler) {
-      // TODO: stripped
-//        if ("class".equals(fileObject.getExt())) { // NOI18N
-//            processClassFile(fileObject, handler);
-//        } else if ("java".equals(fileObject.getExt())) { // NOI18N
-//            processJavaFile(fileObject, handler);
-//        }
+      // STRIPPED
+        //if ("class".equals(fileObject.getExt())) { // NOI18N
+        //    processClassFile(fileObject, handler);
+        //} else if ("java".equals(fileObject.getExt())) { // NOI18N
+        //    processJavaFile(fileObject, handler);
+        //}
     }     
     
     /**
@@ -348,133 +385,140 @@ public final class BeanInstaller {
     public static String findJavaBeanName(FileObject file) {
         final String[] fqn = new String[1];
         scanFileObject(null, file, new JavaClassHandler() {
+            @Override
+            public void handle(String className, String problem) {
+                if (problem == null) {
+                    fqn[0] = className;
+                }
+            }
         });
         return fqn[0];
     }
 
-  // TODO: stripped
-//    private static void processJavaFile(final FileObject javaFO, final JavaClassHandler handler) {
-//        try {
-//            JavaSource js = JavaSource.forFileObject(javaFO);
-//            js.runUserActionTask(new CancellableTask<CompilationController>() {
-//                @Override
-//                public void cancel() {
-//                }
-//
-//                @Override
-//                public void run(CompilationController ctrl) throws Exception {
-//                    ctrl.toPhase(Phase.ELEMENTS_RESOLVED);
-//                    TypeElement clazz = findClass(ctrl, javaFO.getName());
-//                    if (clazz != null) {
-//                        handler.handle(clazz.getQualifiedName().toString(), isDeclaredAsJavaBean(clazz));
-//                    }
-//                }
-//            }, true);
-//        } catch (IOException ex) {
-//            Logger.getLogger(BeanInstaller.class.getClass().getName()).
-//                    log(Level.SEVERE, javaFO.toString(), ex);
-//        }
-//    }
+  // STRIPPED
+    //private static void processJavaFile(final FileObject javaFO, final JavaClassHandler handler) {
+    //    try {
+    //        JavaSource js = JavaSource.forFileObject(javaFO);
+    //        js.runUserActionTask(new CancellableTask<CompilationController>() {
+    //            @Override
+    //            public void cancel() {
+    //            }
+    //
+    //            @Override
+    //            public void run(CompilationController ctrl) throws Exception {
+    //                ctrl.toPhase(Phase.ELEMENTS_RESOLVED);
+    //                TypeElement clazz = findClass(ctrl, javaFO.getName());
+    //                if (clazz != null) {
+    //                    handler.handle(clazz.getQualifiedName().toString(), isDeclaredAsJavaBean(clazz));
+    //                }
+    //            }
+    //        }, true);
+    //    } catch (IOException ex) {
+    //        Logger.getLogger(BeanInstaller.class.getClass().getName()).
+    //                log(Level.SEVERE, javaFO.toString(), ex);
+    //    }
+    //}
 
-  // TODO: stripped
-//    private static TypeElement findClass(CompilationController ctrl, String className) {
-//        for (Tree decl : ctrl.getCompilationUnit().getTypeDecls()) {
-//            if (className.equals(((ClassTree) decl).getSimpleName().toString())) {
-//                TreePath path = ctrl.getTrees().getPath(ctrl.getCompilationUnit(), decl);
-//                TypeElement clazz = (TypeElement) ctrl.getTrees().getElement(path);
-//                return clazz;
-//            }
-//        }
-//        return null;
-//    }
+  // STRIPPED
+    //private static TypeElement findClass(CompilationController ctrl, String className) {
+    //    for (Tree decl : ctrl.getCompilationUnit().getTypeDecls()) {
+    //        if (className.equals(((ClassTree) decl).getSimpleName().toString())) {
+    //            TreePath path = ctrl.getTrees().getPath(ctrl.getCompilationUnit(), decl);
+    //            TypeElement clazz = (TypeElement) ctrl.getTrees().getElement(path);
+    //            return clazz;
+    //        }
+    //    }
+    //    return null;
+    //}
 
-  // TODO: stripped
-//    private static void processClassFile(FileObject classFO, JavaClassHandler handler) {
-//        try {
-//            // XXX rewrite this to use javax.lang.model.element.* as soon as JavaSource introduce .class files support
-//            InputStream is = null;
-//            ClassFile clazz;
-//            try {
-//                is = classFO.getInputStream();
-//                clazz = new ClassFile(is, false);
-//            } finally {
-//                if (is != null) {
-//                    is.close();
-//                }
-//            }
-//            if (clazz != null) {
-//                handler.handle(clazz.getName().getExternalName(), isDeclaredAsJavaBean(clazz));
-//            }
-//        } catch (IOException ex) {
-//            Logger.getLogger(BeanInstaller.class.getClass().getName()).
-//                    log(Level.SEVERE, classFO.toString(), ex);
-//        }
-//
-//    }
-        
-//    public static String isDeclaredAsJavaBean(TypeElement clazz) {
-//        if (ElementKind.CLASS != clazz.getKind()) {
-//            return PaletteUtils.getBundleString("MSG_notAClass"); // NOI18N
-//        }
-//
-//        Set<javax.lang.model.element.Modifier> mods = clazz.getModifiers();
-//        if (mods.contains(javax.lang.model.element.Modifier.ABSTRACT)) {
-//            return PaletteUtils.getBundleString("MSG_abstractClass"); // NOI18N
-//        }
-//
-//        if (!mods.contains(javax.lang.model.element.Modifier.PUBLIC)) {
-//            return PaletteUtils.getBundleString("MSG_notPublic"); // NOI18N
-//        }
-//
-//        for (Element member : clazz.getEnclosedElements()) {
-//            mods = member.getModifiers();
-//            if (ElementKind.CONSTRUCTOR == member.getKind() &&
-//                    mods.contains(javax.lang.model.element.Modifier.PUBLIC) &&
-//                    ((ExecutableElement) member).getParameters().isEmpty()) {
-//                return null;
-//            }
-//        }
-//
-//        return PaletteUtils.getBundleString("MSG_noPublicConstructor"); // NOI18N
-//    }
+  // STRIPPED
+    //private static void processClassFile(FileObject classFO, JavaClassHandler handler) {
+    //    try {
+    //        // XXX rewrite this to use javax.lang.model.element.* as soon as JavaSource introduce .class files support
+    //        InputStream is = null;
+    //        ClassFile clazz;
+    //        try {
+    //            is = classFO.getInputStream();
+    //            clazz = new ClassFile(is, false);
+    //        } finally {
+    //            if (is != null) {
+    //                is.close();
+    //            }
+    //        }
+    //        if (clazz != null) {
+    //            handler.handle(clazz.getName().getExternalName(), isDeclaredAsJavaBean(clazz));
+    //        }
+    //    } catch (IOException ex) {
+    //        Logger.getLogger(BeanInstaller.class.getClass().getName()).
+    //                log(Level.SEVERE, classFO.toString(), ex);
+    //    }
+    //
+    //}
 
-  // TODO: stripped
-//    public static String isDeclaredAsJavaBean(ClassFile clazz) {
-//        int access = clazz.getAccess();
-//
-//        if (Modifier.isInterface(access) || clazz.isAnnotation() ||
-//                clazz.isEnum() || clazz.isSynthetic()) {
-//            return PaletteUtils.getBundleString("MSG_notAClass"); // NOI18N
-//        }
-//
-//        if (Modifier.isAbstract(access)) {
-//            return PaletteUtils.getBundleString("MSG_abstractClass"); // NOI18N
-//        }
-//
-//        if (!Modifier.isPublic(access)) {
-//            return PaletteUtils.getBundleString("MSG_notPublic"); // NOI18N
-//        }
-//
-//        for (Object omethod : clazz.getMethods()) {
-//            Method method = (Method) omethod;
-//            if (method.isPublic() && method.getParameters().isEmpty() &&
-//                    "<init>".equals(method.getName())) { // NOI18N
-//                return null;
-//            }
-//        }
-//        return PaletteUtils.getBundleString("MSG_noPublicConstructor"); // NOI18N
-//    }
+  // STRIPPED
+    //public static String isDeclaredAsJavaBean(TypeElement clazz) {
+    //    if (ElementKind.CLASS != clazz.getKind()) {
+    //        return PaletteUtils.getBundleString("MSG_notAClass"); // NOI18N
+    //    }
+    //
+    //    Set<javax.lang.model.element.Modifier> mods = clazz.getModifiers();
+    //    if (mods.contains(javax.lang.model.element.Modifier.ABSTRACT)) {
+    //        return PaletteUtils.getBundleString("MSG_abstractClass"); // NOI18N
+    //    }
+    //
+    //    if (!mods.contains(javax.lang.model.element.Modifier.PUBLIC)) {
+    //        return PaletteUtils.getBundleString("MSG_notPublic"); // NOI18N
+    //    }
+    //
+    //    for (Element member : clazz.getEnclosedElements()) {
+    //        mods = member.getModifiers();
+    //        if (ElementKind.CONSTRUCTOR == member.getKind() &&
+    //                mods.contains(javax.lang.model.element.Modifier.PUBLIC) &&
+    //                ((ExecutableElement) member).getParameters().isEmpty()) {
+    //            return null;
+    //        }
+    //    }
+    //
+    //    return PaletteUtils.getBundleString("MSG_noPublicConstructor"); // NOI18N
+    //}
+
+  // STRIPPED
+    //public static String isDeclaredAsJavaBean(ClassFile clazz) {
+    //    int access = clazz.getAccess();
+    //
+    //    if (Modifier.isInterface(access) || clazz.isAnnotation() ||
+    //            clazz.isEnum() || clazz.isSynthetic()) {
+    //        return PaletteUtils.getBundleString("MSG_notAClass"); // NOI18N
+    //    }
+    //
+    //    if (Modifier.isAbstract(access)) {
+    //        return PaletteUtils.getBundleString("MSG_abstractClass"); // NOI18N
+    //    }
+    //
+    //    if (!Modifier.isPublic(access)) {
+    //        return PaletteUtils.getBundleString("MSG_notPublic"); // NOI18N
+    //    }
+    //
+    //    for (Object omethod : clazz.getMethods()) {
+    //        Method method = (Method) omethod;
+    //        if (method.isPublic() && method.getParameters().isEmpty() &&
+    //                "<init>".equals(method.getName())) { // NOI18N
+    //            return null;
+    //        }
+    //    }
+    //    return PaletteUtils.getBundleString("MSG_noPublicConstructor"); // NOI18N
+    //}
     
-    private static AddToPaletteWizard getAddWizard() {
-        AddToPaletteWizard wizard = null;
-        if (wizardRef != null)
-            wizard = wizardRef.get();
-        if (wizard == null) {
-            wizard = new AddToPaletteWizard();
-            wizardRef = new WeakReference<AddToPaletteWizard>(wizard);
-        }
-        return wizard;
-    }
+    //private static AddToPaletteWizard getAddWizard() {
+    //    AddToPaletteWizard wizard = null;
+    //    if (wizardRef != null)
+    //        wizard = wizardRef.get();
+    //    if (wizard == null) {
+    //        wizard = new AddToPaletteWizard();
+    //        wizardRef = new WeakReference<AddToPaletteWizard>(wizard);
+    //    }
+    //    return wizard;
+    //}
 
     // --------
 
@@ -493,7 +537,8 @@ public final class BeanInstaller {
         }
     }
     
-    private interface JavaClassHandler {
+    private interface JavaClassHandler {        
+        public void handle(String className, String problem);        
     }
     
 }

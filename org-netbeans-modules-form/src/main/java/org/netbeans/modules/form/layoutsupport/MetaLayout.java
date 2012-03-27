@@ -83,14 +83,14 @@ class MetaLayout extends RADComponent {
         }
     }
 
-  // TODO: stripped
-//    @Override
-//    public BindingProperty[][] getBindingProperties() {
-//        // don't even try to find binding properties for a layout manager,
-//        // would not be used anyway
-//        return new BindingProperty[][] { new BindingProperty[] {},
-//                          new BindingProperty[] {}, new BindingProperty[] {} };
-//    }
+  // STRIPPED
+    /*@Override
+    public BindingProperty[][] getBindingProperties() {
+        // don't even try to find binding properties for a layout manager,
+        // would not be used anyway
+        return new BindingProperty[][] { new BindingProperty[] {},
+                          new BindingProperty[] {}, new BindingProperty[] {} };
+    }*/
 
     @Override
     protected PropertyChangeListener createPropertyListener() {

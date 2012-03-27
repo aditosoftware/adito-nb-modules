@@ -51,6 +51,7 @@ import java.util.*;
 import org.openide.nodes.*;
 
 import org.netbeans.modules.form.*;
+//import org.netbeans.modules.form.codestructure.*; // STRIPPED
 import org.netbeans.modules.form.layoutsupport.delegates.NullLayoutSupport;
 import org.netbeans.modules.form.fakepeer.FakePeerSupport;
 
@@ -73,6 +74,7 @@ public final class LayoutSupportManager implements LayoutSupportContext {
     private LayoutSupportDelegate layoutDelegate;
     private boolean needInit;
     private boolean initializeFromInstance;
+    //private boolean initializeFromCode; // STRIPPED
 
     private Node.PropertySet[] propertySets;
 
@@ -82,6 +84,11 @@ public final class LayoutSupportManager implements LayoutSupportContext {
 
     private Container primaryContainer; // bean instance from metaContainer
     private Container primaryContainerDelegate; // container delegate for it
+
+    //private CodeStructure codeStructure; // STRIPPED
+
+    //private CodeExpression containerCodeExpression; // STRIPPED
+    //private CodeExpression containerDelegateCodeExpression; // STRIPPED
 
   // ----------
     // initialization
@@ -209,7 +216,12 @@ public final class LayoutSupportManager implements LayoutSupportContext {
         }
     }
 
-  public boolean isSpecialLayout() {
+    public boolean isUnknownLayout() {
+        return layoutDelegate == null
+               || layoutDelegate instanceof UnknownLayoutSupport;
+    }
+
+    public boolean isSpecialLayout() {
         // Every standard layout manager has its own layout delegate.
         // Hence, the DefaultLayoutSupport is used by special layout managers only.
         return !(layoutDelegate instanceof DefaultLayoutSupport);
@@ -252,6 +264,11 @@ public final class LayoutSupportManager implements LayoutSupportContext {
         } catch (PropertyVetoException pvex) {
             // should not happen
         }
+    }
+
+    public void clearPrimaryContainer() {
+        layoutDelegate.clearContainer(getPrimaryContainer(),
+                                      getPrimaryContainerDelegate());
     }
 
   public RADVisualContainer getMetaContainer() {
@@ -367,17 +384,15 @@ public final class LayoutSupportManager implements LayoutSupportContext {
             if (layoutDelegate == null) return new Node.PropertySet[0]; // Issue 63916
             propertySets = layoutDelegate.getPropertySets();
 
-          for (Node.PropertySet propertySet : propertySets)
-          {
-            Node.Property[] props = propertySet.getProperties();
-            for (Node.Property prop1 : props)
-              if (prop1 instanceof FormProperty)
-              {
-                FormProperty prop = (FormProperty) prop1;
-                prop.addVetoableChangeListener(getLayoutListener());
-                prop.addPropertyChangeListener(getLayoutListener());
-              }
-          }
+            for (int i=0; i < propertySets.length; i++) {
+                Node.Property[] props = propertySets[i].getProperties();
+                for (int j=0; j < props.length; j++)
+                    if (props[j] instanceof FormProperty) {
+                        FormProperty prop = (FormProperty) props[j];
+                        prop.addVetoableChangeListener(getLayoutListener());
+                        prop.addPropertyChangeListener(getLayoutListener());
+                    }
+            }
         }
         return propertySets;
     }
@@ -387,11 +402,11 @@ public final class LayoutSupportManager implements LayoutSupportContext {
             return ((AbstractLayoutSupport)layoutDelegate).getAllProperties();
 
         java.util.List<Node.Property> allPropsList = new ArrayList<Node.Property>();
-      for (Node.PropertySet propertySet : propertySets)
-      {
-        Node.Property[] props = propertySet.getProperties();
-        allPropsList.addAll(Arrays.asList(props));
-      }
+        for (int i=0; i < propertySets.length; i++) {
+            Node.Property[] props = propertySets[i].getProperties();
+            for (int j=0; j < props.length; j++)
+                allPropsList.add(props[j]);
+        }
 
         Node.Property[] allProperties = new Node.Property[allPropsList.size()];
         allPropsList.toArray(allProperties);
@@ -403,9 +418,9 @@ public final class LayoutSupportManager implements LayoutSupportContext {
             return ((AbstractLayoutSupport)layoutDelegate).getProperty(name);
 
         Node.Property[] properties = getAllProperties();
-      for (Node.Property property : properties)
-        if (name.equals(property.getName()))
-          return property;
+        for (int i=0; i < properties.length; i++)
+            if (name.equals(properties[i].getName()))
+                return properties[i];
 
         return null;
     }
@@ -427,7 +442,9 @@ public final class LayoutSupportManager implements LayoutSupportContext {
     }
 
     // components adding/removing
-    public void addComponents(RADVisualComponent[] components, LayoutConstraints[] constraints, int index)
+    public void addComponents(RADVisualComponent[] components,
+                              LayoutConstraints[] constraints,
+                              int index)
     {
         Component[] comps = new Component[components.length];
 
@@ -563,7 +580,7 @@ public final class LayoutSupportManager implements LayoutSupportContext {
                                                 Container containerDelegate,
                                                 Component component)
     {
-        return !layoutDelegate.removeComponentFromContainer(
+        return layoutDelegate.removeComponentFromContainer(
                             container, containerDelegate, component);
     }
 
@@ -760,9 +777,9 @@ public final class LayoutSupportManager implements LayoutSupportContext {
             if (metacomp.getNodeReference() != null) // propagate the change to node
                 metacomp.getNodeReference().firePropertyChangeHelper(
 //                                                     null, null, null);
-                    ev.getPropertyName(),
-                    ev.getOldValue(),
-                    ev.getNewValue());
+                                              ev.getPropertyName(),
+                                              ev.getOldValue(),
+                                              ev.getNewValue());
         }
         else {
             if (metacomp.getNodeReference() != null) // propagate the change to node

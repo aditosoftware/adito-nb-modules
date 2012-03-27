@@ -133,8 +133,7 @@ public class RADVisualFormContainer extends RADVisualContainer implements FormCo
             designerSize = new Dimension(value.width - diffDim.width,
                                          value.height - diffDim.height);
         }
-        else
-          designerSize = value;
+        else designerSize = value;
         setDesignerSizeImpl(designerSize, false);
 
         getFormModel().fireSyntheticPropertyChanged(this, PROP_FORM_SIZE, old, value);
@@ -252,7 +251,7 @@ public class RADVisualFormContainer extends RADVisualContainer implements FormCo
             setAuxValue(FormDesigner.PROP_DESIGNER_SIZE, getDesignerSize());
         }
         getFormModel().fireSyntheticPropertyChanged(this, PROP_FORM_SIZE_POLICY,
-                                                    old, value);
+                                        new Integer(old), new Integer(value));
     }
 
     // ------------------------------------------------------------------------------
@@ -271,14 +270,14 @@ public class RADVisualFormContainer extends RADVisualContainer implements FormCo
             @Override
             public Object getValue() throws
                 IllegalAccessException, IllegalArgumentException, java.lang.reflect.InvocationTargetException {
-                return getFormSizePolicy();
+                return new Integer(getFormSizePolicy());
             }
 
             @Override
             public void setValue(Object val) throws IllegalAccessException,
                                                     IllegalArgumentException, java.lang.reflect.InvocationTargetException {
                 if (!(val instanceof Integer)) throw new IllegalArgumentException();
-                setFormSizePolicy((Integer) val);
+                setFormSizePolicy(((Integer)val).intValue());
                 if (getNodeReference() != null)
                     getNodeReference().fireComponentPropertySetsChange();
             }
@@ -367,7 +366,7 @@ public class RADVisualFormContainer extends RADVisualContainer implements FormCo
             public void setValue(Object val) throws IllegalAccessException,
                                                     IllegalArgumentException, java.lang.reflect.InvocationTargetException {
                 if (!(val instanceof Boolean)) throw new IllegalArgumentException();
-                setGeneratePosition((Boolean) val);
+                setGeneratePosition(((Boolean)val).booleanValue());
                 if (getNodeReference() != null)
                     getNodeReference().fireComponentPropertySetsChange();
             }
@@ -396,7 +395,7 @@ public class RADVisualFormContainer extends RADVisualContainer implements FormCo
             public void setValue(Object val) throws IllegalAccessException,
                                                     IllegalArgumentException, java.lang.reflect.InvocationTargetException {
                 if (!(val instanceof Boolean)) throw new IllegalArgumentException();
-                setGenerateSize((Boolean) val);
+                setGenerateSize(((Boolean)val).booleanValue());
                 if (getNodeReference() != null)
                     getNodeReference().fireComponentPropertySetsChange();
             }
@@ -423,7 +422,7 @@ public class RADVisualFormContainer extends RADVisualContainer implements FormCo
             public void setValue(Object val) throws IllegalAccessException,
                                                     IllegalArgumentException, java.lang.reflect.InvocationTargetException {
                 if (!(val instanceof Boolean)) throw new IllegalArgumentException();
-                setGenerateCenter((Boolean) val);
+                setGenerateCenter(((Boolean)val).booleanValue());
                 if (getNodeReference() != null)
                     getNodeReference().fireComponentPropertySetsChange();
             }
@@ -461,7 +460,7 @@ public class RADVisualFormContainer extends RADVisualContainer implements FormCo
 
         java.util.List<Node.Property> propList = new java.util.ArrayList<Node.Property>();
 
-//        propList.add(JavaCodeGenerator.createBeanClassNameProperty(this)); // TODO: stripped
+        //propList.add(JavaCodeGenerator.createBeanClassNameProperty(this)); // STRIPPED
 
         if (java.awt.Window.class.isAssignableFrom(getBeanClass())
             || javax.swing.JInternalFrame.class.isAssignableFrom(getBeanClass()))
@@ -552,7 +551,7 @@ public class RADVisualFormContainer extends RADVisualContainer implements FormCo
         /** @return text for the current value */
         @Override
         public String getAsText() {
-            int value = (Integer) getValue();
+            int value =((Integer)getValue()).intValue();
             return names[value];
         }
 

@@ -74,9 +74,10 @@ public class FormModelEvent extends EventObject
     public static final int COMPONENT_REMOVED = 8;
     public static final int COMPONENTS_REORDERED = 9;
     public static final int COMPONENT_PROPERTY_CHANGED = 10;
-//    public static final int BINDING_PROPERTY_CHANGED = 16;
+    //public static final int BINDING_PROPERTY_CHANGED = 16; // STRIPPED
     public static final int SYNTHETIC_PROPERTY_CHANGED = 11;
     public static final int EVENT_HANDLER_ADDED = 12;
+    public static final int EVENT_HANDLER_REMOVED = 13;
     public static final int EVENT_HANDLER_RENAMED = 14;
     public static final int OTHER_CHANGE = 15;
 
@@ -90,19 +91,24 @@ public class FormModelEvent extends EventObject
     private int componentIndex = -1;
     private int[] reordering;
     private String propertyName;
+    //private String subPropertyName; // STRIPPED
     private Object oldPropertyValue;
     private Object newPropertyValue;
+    //private Event componentEvent; // STRIPPED
 
     private UndoableEdit undoableEdit;
 
     // -----------
 
-  // -----------
+    private FormModelEvent additionalEvent;
+    private static List<FormModelEvent> interestList; // events interested in additional events
+
+    // -----------
 
     FormModelEvent(FormModel source, int changeType) {
         super(source);
         this.changeType = changeType;
-        informInterestedEvents(this);
+        //informInterestedEvents(this); // STRIPPED
     }
 
     void setProperty(String propName, Object oldValue, Object newValue) {
@@ -111,7 +117,12 @@ public class FormModelEvent extends EventObject
         newPropertyValue = newValue;
     }
 
-  void setComponentAndContainer(RADComponent metacomp,
+  // STRIPPED
+    /*void setSubProperty(String subPropertyName) {
+        this.subPropertyName = subPropertyName;
+    }*/
+
+    void setComponentAndContainer(RADComponent metacomp,
                                   ComponentContainer metacont)
     {
         component = metacomp;
@@ -172,13 +183,34 @@ public class FormModelEvent extends EventObject
         }
     }
 
+  // STRIPPED
+    /*void setEvent(Event event, // may be null if the handler is just updated
+                  String handler,
+                  String bodyText,
+                  String annotationText,
+                  boolean createdNew)
+    {
+        if (event != null)
+            component = event.getComponent();
+        componentEvent = event;
+        propertyName = handler;
+        newPropertyValue = bodyText;
+        oldPropertyValue = annotationText;
+        createdDeleted = createdNew;
+    }*/
+
     void setEvent(String oldHandlerName, String newHandlerName) {
         oldPropertyValue = oldHandlerName;
         propertyName = newHandlerName;
         newPropertyValue = newHandlerName;
     }
 
-  private static ComponentContainer deriveContainer(RADComponent comp) {
+  // STRIPPED
+    /*void setChangeType(int changeType) {
+        this.changeType = changeType;
+    }*/
+
+    private static ComponentContainer deriveContainer(RADComponent comp) {
         if (comp == null)
             return null;
         if (comp.getParentComponent() instanceof ComponentContainer)
@@ -202,7 +234,7 @@ public class FormModelEvent extends EventObject
         return changeType != FORM_LOADED
                && changeType != FORM_TO_BE_SAVED
                && changeType != FORM_TO_BE_CLOSED
-               && changeType != EVENT_HANDLER_ADDED;
+               && (changeType != EVENT_HANDLER_ADDED /*|| componentEvent != null*/); // STRIPPED
     }
 
     public final boolean getCreatedDeleted() {
@@ -221,11 +253,21 @@ public class FormModelEvent extends EventObject
         return constraints;
     }
 
-  public final String getPropertyName() {
+  // STRIPPED
+    /*public final int getComponentIndex() {
+        return componentIndex;
+    }*/
+
+    public final String getPropertyName() {
         return propertyName;
     }
 
-  public final RADProperty getComponentProperty() {
+  // STRIPPED
+    /*public final String getSubPropertyName() {
+        return subPropertyName;
+    }*/
+
+    public final RADProperty getComponentProperty() {
         return component != null && propertyName != null ?
             component.getBeanProperty(propertyName) : null;
     }
@@ -238,6 +280,15 @@ public class FormModelEvent extends EventObject
         return newPropertyValue;
     }
 
+  // STRIPPED
+    /*public final MetaBinding getOldBinding() {
+        return (MetaBinding) oldPropertyValue;
+    }
+
+    public final MetaBinding getNewBinding() {
+        return (MetaBinding) newPropertyValue;
+    }*/
+
     public final LayoutSupportDelegate getOldLayoutSupport() {
         return (LayoutSupportDelegate) oldPropertyValue;
     }
@@ -245,6 +296,69 @@ public class FormModelEvent extends EventObject
     public final LayoutSupportDelegate getNewLayoutSupport() {
         return (LayoutSupportDelegate) newPropertyValue;
     }
+
+  // STRIPPED
+    /*public final int[] getReordering() {
+        return reordering;
+    }
+
+    public final Event getComponentEvent() {
+        return componentEvent;
+    }
+
+    public final String getEventHandler() {
+        return propertyName;
+    }
+
+    public final String getOldEventHandler() {
+        return (String) oldPropertyValue;
+    }
+
+    public final String getNewEventHandler() {
+        return (String) newPropertyValue;
+    }
+
+    public final String getEventHandlerContent() {
+        if (changeType == EVENT_HANDLER_ADDED
+            || changeType == EVENT_HANDLER_REMOVED)
+        {
+            if (additionalEvent != null) {
+                if (additionalEvent.changeType == EVENT_HANDLER_REMOVED
+                    || additionalEvent.changeType == EVENT_HANDLER_ADDED)
+                {
+                    oldPropertyValue = additionalEvent.oldPropertyValue;
+                }
+                additionalEvent = null;
+            }
+            return (String) oldPropertyValue;
+        }
+        return null;
+    }
+
+    public final void setEventHandlerContent(String text) {
+        if (changeType == EVENT_HANDLER_ADDED
+                || changeType == EVENT_HANDLER_REMOVED)
+            oldPropertyValue = text;
+    }
+
+    public final String getEventHandlerAnnotation() {
+        if (changeType == EVENT_HANDLER_ADDED || changeType == EVENT_HANDLER_REMOVED) {
+            if (additionalEvent != null) {
+                if (additionalEvent.changeType == EVENT_HANDLER_REMOVED || additionalEvent.changeType == EVENT_HANDLER_ADDED) {
+                    newPropertyValue = additionalEvent.newPropertyValue;
+                }
+                additionalEvent = null;
+            }
+            return (String)newPropertyValue;
+        }
+        return null;
+    }
+
+    public final void setEventHandlerAnnotation(String text) {
+        if (changeType == EVENT_HANDLER_ADDED || changeType == EVENT_HANDLER_REMOVED) {
+            newPropertyValue = text;
+        }
+    }*/
 
     // ----------
 
@@ -258,10 +372,33 @@ public class FormModelEvent extends EventObject
     // methods for events interested in additional events occured
     // (used for undo/redo processing of event handlers)
 
-  private static void informInterestedEvents(FormModelEvent newEvent) {
+  // STRIPPED
+    /*private static void addToInterestList(FormModelEvent ev) {
+        if (interestList == null) {
+            interestList = new ArrayList<FormModelEvent>();
+        } else {
+            interestList.remove(ev);
+        }
+
+        interestList.add(ev);
     }
 
-  // ----------
+    private static void removeFromInterestList(FormModelEvent ev) {
+        if (interestList != null)
+            interestList.remove(ev);
+    }
+
+    private static void informInterestedEvents(FormModelEvent newEvent) {
+        if (interestList != null)
+            for (Iterator it=interestList.iterator(); it.hasNext(); )
+                ((FormModelEvent)it.next()).newEventCreated(newEvent);
+    }
+
+    private void newEventCreated(FormModelEvent newEvent) {
+        additionalEvent = newEvent;
+    }*/
+
+    // ----------
 
     private class FormUndoableEdit extends AbstractUndoableEdit {
         @Override
@@ -306,6 +443,23 @@ public class FormModelEvent extends EventObject
                     FormModel.t("UNDO: synthetic property change"); // NOI18N
                     undoSyntheticPropertyChange();
                     break;
+                // STRIPPED
+                /*case EVENT_HANDLER_ADDED:
+                    FormModel.t("UNDO: event handler addition"); // NOI18N
+                    undoEventHandlerAddition();
+                    break;
+                case EVENT_HANDLER_REMOVED:
+                    FormModel.t("UNDO: event handler removal"); // NOI18N
+                    undoEventHandlerRemoval();
+                    break;
+                case EVENT_HANDLER_RENAMED:
+                    FormModel.t("UNDO: event handler renaming"); // NOI18N
+                    undoEventHandlerRenaming();
+                    break;
+                case BINDING_PROPERTY_CHANGED:
+                    FormModel.t("UNDO: binding property change"); // NOI18N
+                    undoBindingPropertyChange();
+                    break;*/
 
                 default: FormModel.t("UNDO: "+changeType); // NOI18N
                          break;
@@ -357,6 +511,23 @@ public class FormModelEvent extends EventObject
                     FormModel.t("REDO: synthetic property change"); // NOI18N
                     redoSyntheticPropertyChange();
                     break;
+                // STRIPPED
+                /*case EVENT_HANDLER_ADDED:
+                    FormModel.t("REDO: event handler addition"); // NOI18N
+                    redoEventHandlerAddition();
+                    break;
+                case EVENT_HANDLER_REMOVED:
+                    FormModel.t("REDO: event handler removal"); // NOI18N
+                    redoEventHandlerRemoval();
+                    break;
+                case EVENT_HANDLER_RENAMED:
+                    FormModel.t("REDO: event handler renaming"); // NOI18N
+                    redoEventHandlerRenaming();
+                    break;
+               case BINDING_PROPERTY_CHANGED:
+                    FormModel.t("REDO: binding property change"); // NOI18N
+                    redoBindingPropertyChange();
+                    break;*/
 
                 default: FormModel.t("REDO: "+changeType); // NOI18N
                          break;
@@ -591,134 +762,274 @@ public class FormModelEvent extends EventObject
                 }
         }
 
-      // TODO: stripped
-//        private void undoBindingPropertyChange() {
-//            String subPropName = getSubPropertyName();
-//            BindingProperty prop = getComponent().getBindingProperty(getPropertyName());
-//            if (subPropName == null) {
-//                if (prop != null) {
-//                    try {
-//                        prop.setValue(getOldBinding());
-//                    } catch (Exception ex) { // should not happen
-//                        Logger.getLogger(getClass().getName()).log(Level.INFO, ex.getMessage(), ex);
-//                    }
-//                }
-//            } else {
-//                FormProperty subProp = prop.getSubProperty(subPropName);
-//                try {
-//                    subProp.setValue(getOldPropertyValue());
-//                } catch (Exception ex) {
-//                    Logger.getLogger(getClass().getName()).log(Level.INFO, ex.getMessage(), ex);
-//                }
-//            }
-//        }
+      // STRIPPED
+        /*private void undoBindingPropertyChange() {
+            String subPropName = getSubPropertyName();
+            BindingProperty prop = getComponent().getBindingProperty(getPropertyName());
+            if (subPropName == null) {
+                if (prop != null) {
+                    try {
+                        prop.setValue(getOldBinding());
+                    } catch (Exception ex) { // should not happen
+                        Logger.getLogger(getClass().getName()).log(Level.INFO, ex.getMessage(), ex);
+                    }
+                }
+            } else {
+                FormProperty subProp = prop.getSubProperty(subPropName);
+                try {
+                    subProp.setValue(getOldPropertyValue());
+                } catch (Exception ex) {
+                    Logger.getLogger(getClass().getName()).log(Level.INFO, ex.getMessage(), ex);
+                }
+            }
+        }
 
-      // TODO: stripped
-//        private void redoBindingPropertyChange() {
-//            String subPropName = getSubPropertyName();
-//            BindingProperty prop = getComponent().getBindingProperty(getPropertyName());
-//            if (subPropName == null) {
-//                if (prop != null) {
-//                    try {
-//                        prop.setValue(getNewBinding());
-//                    } catch (Exception ex) { // should not happen
-//                        Logger.getLogger(getClass().getName()).log(Level.INFO, ex.getMessage(), ex);
-//                    }
-//                }
-//            } else {
-//                FormProperty subProp = prop.getSubProperty(subPropName);
-//                try {
-//                    subProp.setValue(getNewPropertyValue());
-//                } catch (Exception ex) {
-//                    Logger.getLogger(getClass().getName()).log(Level.INFO, ex.getMessage(), ex);
-//                }
-//            }
-//        }
+        private void redoBindingPropertyChange() {
+            String subPropName = getSubPropertyName();
+            BindingProperty prop = getComponent().getBindingProperty(getPropertyName());
+            if (subPropName == null) {
+                if (prop != null) {
+                    try {
+                        prop.setValue(getNewBinding());
+                    } catch (Exception ex) { // should not happen
+                        Logger.getLogger(getClass().getName()).log(Level.INFO, ex.getMessage(), ex);
+                    }
+                }
+            } else {
+                FormProperty subProp = prop.getSubProperty(subPropName);
+                try {
+                    subProp.setValue(getNewPropertyValue());
+                } catch (Exception ex) {
+                    Logger.getLogger(getClass().getName()).log(Level.INFO, ex.getMessage(), ex);
+                }
+            }
+        }*/
 
         private void undoSyntheticPropertyChange() {
             String propName = getPropertyName();
+            RADComponent metacomp = getComponent();
             if (propName.startsWith(RADProperty.SYNTH_PREFIX)) {
                 // special case - pre/post init code of a property
                 if (propName.startsWith(RADProperty.SYNTH_PRE_CODE)) {
-                    FormProperty prop = (FormProperty)
-                      getComponent().getPropertyByName(
+                    FormProperty prop = (FormProperty) metacomp.getPropertyByName(
                         propName.substring(RADProperty.SYNTH_PRE_CODE.length()));
                     prop.setPreCode((String)getOldPropertyValue());
                 }
                 else if (propName.startsWith(RADProperty.SYNTH_POST_CODE)) {
-                    FormProperty prop = (FormProperty)
-                      getComponent().getPropertyByName(
+                    FormProperty prop = (FormProperty) metacomp.getPropertyByName(
                         propName.substring(RADProperty.SYNTH_POST_CODE.length()));
                     prop.setPostCode((String)getOldPropertyValue());
                 }
             } else { 
                 Node.Property[] props;
-                if (getComponent() == null) { // form synthetic property
+                if (metacomp == null) { // form synthetic property
                     FormEditor formEditor = FormEditor.getFormEditor(getFormModel());
                     FormRootNode rootNode = (FormRootNode)formEditor.getFormRootNode();
                     props = rootNode.getAllProperties();
                 } else { // component synthetic property
-                    props = getComponent().getSyntheticProperties();
+                    props = metacomp.getSyntheticProperties();
                 }
-              for (Node.Property prop : props)
-              {
-                if (prop.getName().equals(propName))
-                {
-                  try
-                  {
-                    prop.setValue(getOldPropertyValue());
-                  }
-                  catch (Exception ex)
-                  { // should not happen
-                    Logger.getLogger(getClass().getName()).log(Level.INFO, ex.getMessage(), ex);
-                  }
-                  break;
+                boolean found = false;
+                for (int i=0; i < props.length; i++) {
+                    if (props[i].getName().equals(propName)) {
+                        found = true;
+                        try {
+                            props[i].setValue(getOldPropertyValue());
+                        }
+                        catch (Exception ex) { // should not happen
+                            Logger.getLogger(getClass().getName()).log(Level.INFO, ex.getMessage(), ex);
+                        }
+                        break;
+                    }
                 }
-              }
+                if (!found) { // hack for FormDesigner.PROP_DESIGNER_SIZE property on subcontainers
+                    getFormModel().fireSyntheticPropertyChanged(metacomp, propName,
+                            getNewPropertyValue(), getOldPropertyValue());
+                }
             }
         }
 
         private void redoSyntheticPropertyChange() {
             String propName = getPropertyName();
+            RADComponent metacomp = getComponent();
             if (propName.startsWith(RADProperty.SYNTH_PREFIX)) {
                 // special case - pre/post init code of a property
                 if (propName.startsWith(RADProperty.SYNTH_PRE_CODE)) {
-                    FormProperty prop = (FormProperty)
-                      getComponent().getPropertyByName(
+                    FormProperty prop = (FormProperty) metacomp.getPropertyByName(
                         propName.substring(RADProperty.SYNTH_PRE_CODE.length()));
                     prop.setPreCode((String)getNewPropertyValue());
                 }
                 else if (propName.startsWith(RADProperty.SYNTH_POST_CODE)) {
-                    FormProperty prop = (FormProperty)
-                      getComponent().getPropertyByName(
+                    FormProperty prop = (FormProperty) metacomp.getPropertyByName(
                         propName.substring(RADProperty.SYNTH_POST_CODE.length()));
                     prop.setPostCode((String)getNewPropertyValue());
                 }
             } else {
                 Node.Property[] props;
-                if (getComponent() == null) { // form synthetic property
+                if (metacomp == null) { // form synthetic property
                     FormEditor formEditor = FormEditor.getFormEditor(getFormModel());
                     FormRootNode rootNode = (FormRootNode)formEditor.getFormRootNode();
                     props = rootNode.getAllProperties();
                 } else { // component synthetic property
-                    props = getComponent().getSyntheticProperties();
+                    props = metacomp.getSyntheticProperties();
                 }
-              for (Node.Property prop : props)
-              {
-                if (prop.getName().equals(propName))
-                {
-                  try
-                  {
-                    prop.setValue(getNewPropertyValue());
-                  }
-                  catch (Exception ex)
-                  { // should not happen
-                    Logger.getLogger(getClass().getName()).log(Level.INFO, ex.getMessage(), ex);
-                  }
-                  break;
+                boolean found = false;
+                for (int i=0; i < props.length; i++) {
+                    if (props[i].getName().equals(propName)) {
+                        found = true;
+                        try {
+                            props[i].setValue(getNewPropertyValue());
+                        }
+                        catch (Exception ex) { // should not happen
+                            Logger.getLogger(getClass().getName()).log(Level.INFO, ex.getMessage(), ex);
+                        }
+                        break;
+                    }
                 }
-              }
+                if (!found) { // hack for FormDesigner.PROP_DESIGNER_SIZE property on subcontainers
+                    getFormModel().fireSyntheticPropertyChanged(metacomp, propName,
+                            getOldPropertyValue(), getNewPropertyValue());
+                }
             }
         }
+
+      // STRIPPED
+        /*private void undoEventHandlerAddition() {
+            Event event = getComponentEvent();
+            if (event == null)
+                return;
+
+            addToInterestList(FormModelEvent.this);
+
+            getFormModel().getFormEvents().detachEvent(event, getEventHandler());
+
+            removeFromInterestList(FormModelEvent.this);
+
+            // hack: reset the event property to update the property sheet
+            Node.Property prop = getComponent().getPropertyByName(event.getId());
+            if (prop != null) {
+                try {
+                    if (getEventHandler().equals(prop.getValue()))
+                        prop.setValue(null);
+                }
+                catch (Exception ex) { // should not happen
+                    Logger.getLogger(getClass().getName()).log(Level.INFO, ex.getMessage(), ex);
+                }
+            }
+        }
+
+        private void redoEventHandlerAddition() {
+            Event event = getComponentEvent();
+            if (event == null)
+                return;
+
+            getFormModel().getFormEvents().attachEvent(
+                event,
+                getEventHandler(),
+                getEventHandlerContent(),
+                getEventHandlerAnnotation());
+
+            // hack: set the event property to update the property sheet
+            Node.Property prop = getComponent().getPropertyByName(event.getId());
+            if (prop != null) {
+                try {
+                    prop.setValue(getEventHandler());
+                }
+                catch (Exception ex) { // should not happen
+                    Logger.getLogger(getClass().getName()).log(Level.INFO, ex.getMessage(), ex);
+                }
+            }
+        }
+
+        private void undoEventHandlerRemoval() {
+            Event event = getComponentEvent();
+            if (event == null)
+                return;
+
+            getFormModel().getFormEvents().attachEvent(
+                event,
+                getEventHandler(),
+                getEventHandlerContent(),
+                getEventHandlerAnnotation());
+
+            // hack: set the event property to update the property sheet
+            Node.Property prop = getComponent().getPropertyByName(event.getId());
+            if (prop != null) {
+                try {
+                    prop.setValue(getEventHandler());
+                }
+                catch (Exception ex) { // should not happen
+                    Logger.getLogger(getClass().getName()).log(Level.INFO, ex.getMessage(), ex);
+                }
+            }
+        }
+
+        private void redoEventHandlerRemoval() {
+            Event event = getComponentEvent();
+            if (event == null)
+                return;
+
+            addToInterestList(FormModelEvent.this);
+
+            getFormModel().getFormEvents().detachEvent(event, getEventHandler());
+
+            removeFromInterestList(FormModelEvent.this);
+
+            // hack: reset the event property to reflect the change in property sheet
+            Node.Property prop = getComponent().getPropertyByName(event.getId());
+            if (prop != null) {
+                try {
+                    if (getEventHandler().equals(prop.getValue()))
+                        prop.setValue(null);
+                }
+                catch (Exception ex) { // should not happen
+                    Logger.getLogger(getClass().getName()).log(Level.INFO, ex.getMessage(), ex);
+                }
+            }
+        }
+
+        private void undoEventHandlerRenaming() {
+            FormEvents formEvents = getFormModel().getFormEvents();
+
+            formEvents.renameEventHandler(getNewEventHandler(),
+                                          getOldEventHandler());
+
+            Event[] events = formEvents.getEventsForHandler(
+                                            getOldEventHandler());
+            for (int i=0 ; i < events.length; i++) {
+                Node.Property prop = events[i].getComponent()
+                                       .getPropertyByName(events[i].getId());
+                if (prop != null) {
+                    try {
+                        prop.setValue(getOldEventHandler());
+                    }
+                    catch (Exception ex) { // should not happen
+                        Logger.getLogger(getClass().getName()).log(Level.INFO, ex.getMessage(), ex);
+                    }
+                }
+            }
+        }
+
+        private void redoEventHandlerRenaming() {
+            FormEvents formEvents = getFormModel().getFormEvents();
+
+            formEvents.renameEventHandler(getOldEventHandler(),
+                                          getNewEventHandler());
+
+            Event[] events = formEvents.getEventsForHandler(
+                                            getNewEventHandler());
+            for (int i=0 ; i < events.length; i++) {
+                Node.Property prop = events[i].getComponent()
+                                       .getPropertyByName(events[i].getId());
+                if (prop != null) {
+                    try {
+                        prop.setValue(getNewEventHandler());
+                    }
+                    catch (Exception ex) { // should not happen
+                        Logger.getLogger(getClass().getName()).log(Level.INFO, ex.getMessage(), ex);
+                    }
+                }
+            }
+        }*/
     }
 }

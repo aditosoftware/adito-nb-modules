@@ -44,35 +44,20 @@
 
 package org.netbeans.modules.form;
 
-//import com.sun.source.tree.AnnotationTree;
-//import com.sun.source.tree.ClassTree;
-//import com.sun.source.tree.CompilationUnitTree;
-//import com.sun.source.tree.MethodTree;
-//import com.sun.source.tree.ModifiersTree;
-//import com.sun.source.tree.Tree;
-//import com.sun.source.util.SourcePositions;
-//import java.awt.EventQueue;
-import java.awt.*;
+import java.awt.EventQueue;
 import java.beans.*;
 import java.io.IOException;
 import java.util.*;
-import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.prefs.PreferenceChangeEvent;
 import java.util.prefs.PreferenceChangeListener;
 import javax.swing.*;
-import org.netbeans.api.project.libraries.Library;
-import org.netbeans.api.project.libraries.LibraryManager;
-//import javax.swing.text.BadLocationException;
+import javax.swing.text.Document;
+import org.netbeans.api.editor.guards.GuardedSectionManager;
 import org.netbeans.api.editor.guards.SimpleSection;
-//import org.netbeans.api.java.classpath.ClassPath;
-//import org.netbeans.api.java.queries.SourceLevelQuery;
-//import org.netbeans.api.java.source.CancellableTask;
-//import org.netbeans.api.java.source.JavaSource;
-//import org.netbeans.api.java.source.WorkingCopy;
-//import org.netbeans.api.project.FileOwnerQuery;
-//import org.netbeans.api.project.Project;
+import org.netbeans.api.project.FileOwnerQuery;
+import org.netbeans.api.project.Project;
 import org.netbeans.modules.form.actions.EditContainerAction;
 import org.netbeans.modules.form.actions.EditFormAction;
 import org.netbeans.modules.form.assistant.AssistantModel;
@@ -89,6 +74,8 @@ import org.openide.util.actions.SystemAction;
 
 import org.netbeans.modules.form.project.ClassSource;
 import org.netbeans.modules.form.project.ClassPathUtils;
+import org.openide.util.Exceptions;
+import org.openide.util.Lookup;
 
 /**
  * Form editor.
@@ -96,9 +83,6 @@ import org.netbeans.modules.form.project.ClassPathUtils;
  * @author Jan Stola
  */
 public class FormEditor {
-    static final int LOADING = 1;
-    static final int SAVING = 2;
-
     /** The FormModel instance holding the form itself */
     private FormModel formModel;
 
@@ -110,12 +94,29 @@ public class FormEditor {
      * was closed and no other designer of given form was activated since then. */
     private FormDesigner formDesigner;
 
+    /** Integration into the editor framework environment. */
+    private EditorSupport editorSupport;
+
+    /** The code generator for the form */
+    //private CodeGenerator codeGenerator; // STRIPPED
+
+    /** The FormJavaSource for the form */
+    //private FormJavaSource formJavaSource; // STRIPPED
+
+    /** ResourceSupport instance for the form */
+    //private ResourceSupport resourceSupport; // STRIPPED
+
+    /** Instance of binding support for the form.*/
+    //private boolean bindingSupportInitialized; // STRIPPED
+    //private BindingDesignSupport bindingSupport; // STRIPPED
+
     /** List of exceptions occurred during the last persistence operation */
     private List<Throwable> persistenceErrors;
     
     /** Persistence manager responsible for saving the form */
     private PersistenceManager persistenceManager;
-    
+    private String prefetchedSuperclassName;
+
     /** An indicator whether the form has been loaded (from the .form file) */
     private boolean formLoaded = false;
     
@@ -140,11 +141,16 @@ public class FormEditor {
     /** List of actions that are tried when a component is double-clicked. */
     private List<Action> defaultActions;
 
+    /** Indicates that a task has been posted to ask the user about format
+     * upgrade - not to show the confirmation dialog multiple times.
+     */
+    private boolean upgradeCheckPosted;
 
     // -----
 
-    FormEditor(FormDataObject formDataObject) {
+    public FormEditor(FormDataObject formDataObject, EditorSupport sourceEditor) {
         this.formDataObject = formDataObject;
+        this.editorSupport = sourceEditor;
     }
 
     /** @return root node representing the form (in pair with the class node) */
@@ -166,115 +172,160 @@ public class FormEditor {
         return formDataObject;
     }
 
+    EditorSupport getEditorSupport() {
+        return editorSupport;
+    }
+
+    Document getSourcesDocument() {
+        return getEditorSupport().getDocument();
+    }
+
+    GuardedSectionManager getGuardedSectionManager() {
+        return getEditorSupport().getGuardedSectionManager();
+    }
+
+    SimpleSection getVariablesSection() {
+        return getGuardedSectionManager().findSimpleSection("variables"); // NOI18N
+    }
+
+    SimpleSection getInitComponentSection() {
+        return getGuardedSectionManager().findSimpleSection("initComponents"); // NOI18N
+    }
+
+  // STRIPPED
+    /*FormJavaSource getFormJavaSource() {
+        return getFormJavaSource(false);
+    }
+
+    private FormJavaSource getFormJavaSource(boolean create) {
+        if (formJavaSource == null && create) {
+            formJavaSource = new FormJavaSource(formDataObject, editorSupport.getJavaContext());
+        }
+        return formJavaSource;
+    }
+
+    CodeGenerator getCodeGenerator() {
+        if (!formLoaded)
+            return null;
+        if (codeGenerator == null)
+            codeGenerator = new JavaCodeGenerator();
+        return codeGenerator;
+    }
+
+    public void regenerateCodeIfNeeded() {
+        JavaCodeGenerator codeGen = (JavaCodeGenerator) getCodeGenerator();
+        if (codeGen != null) {
+            codeGen.regenerateCode();
+        }
+    }
+
+    ResourceSupport getResourceSupport() {
+        if (resourceSupport == null && formModel != null) {
+            resourceSupport = new ResourceSupport(formModel);
+            resourceSupport.init();
+        }
+        return resourceSupport;
+    }
+
+    BindingDesignSupport getBindingSupport() {
+        if (!bindingSupportInitialized && formModel != null) {
+            BindingDesignSupportProvider provider = Lookup.getDefault().lookup(BindingDesignSupportProvider.class);
+            if (provider != null) {
+                bindingSupport = provider.create(formModel);
+            }
+            bindingSupportInitialized = true;
+        }
+        return bindingSupport;
+    }*/
+
+    public boolean isFormLoaded() {
+        return formLoaded;
+    }
+
+    public boolean loadForm() {
+        if (!formLoaded) {
+            Runnable r = new Runnable() {
+                @Override
+                public void run() {
+                    loadFormData();
+                }
+            };
+            if (java.awt.EventQueue.isDispatchThread()) {
+                r.run();
+            } else { // loading must be done in AWT event dispatch thread
+                try {
+                    java.awt.EventQueue.invokeAndWait(r);
+                } catch (Exception ex) {
+                    Exceptions.printStackTrace(ex);
+                }
+            }
+        }
+        return formLoaded;
+    }
+
     /**
-     * To be used just before loading a form to set a persistence manager that
-     * already has the form recognized and superclass determined
-     * (i.e. potentially long java parsing already done).
+     * Called in EDT to prepare loading of the form.
+     * @return true on success (so loading can proceed), false if some error happened
      */
-    void setPersistenceManager(PersistenceManager pm) {
-        persistenceManager = pm;
-    }
-
-    boolean isFormLoaded() {
-        return formLoaded;
-    }
-    
-    /** This methods loads the form, reports errors, creates the FormDesigner */
-    void loadFormDesigner() {
-        getFormDataObject().getFormEditorSupport().showOpeningStatus("FMT_OpeningForm"); // NOI18N
-
-        preCreationUpdate();
-
-        // load form data and report errors
-        try {
-            loadFormData();
-        }
-        catch (PersistenceException ex) { // a fatal loading error happened
-            logPersistenceError(ex, 0);
-            //if (!formLoaded) { // loading failed - don't keep empty designer opened
-            //    java.awt.EventQueue.invokeLater(new Runnable() {
-            //        @Override
-            //        public void run() {
-            //            getFormDataObject().getFormEditorSupport().selectJavaEditor();
-            //        }
-            //    });
-            //}
-        }
-
-        getFormDataObject().getFormEditorSupport().hideOpeningStatus();
-
-        // report errors during loading
-        reportErrors(LOADING);
-
-        // may do additional setup for just created form
-        postCreationUpdate();
-    }
-
-    boolean loadForm() {
-        if (formLoaded)
-            return true;
-
-        if (java.awt.EventQueue.isDispatchThread()) {
+    public boolean prepareLoading() {
+        resetPersistenceErrorLog();
+        if (persistenceManager == null) {
             try {
-                loadFormData();
-            }
-            catch (PersistenceException ex) {
+                persistenceManager = recognizeForm(formDataObject);
+            } catch (PersistenceException ex) {
                 logPersistenceError(ex, 0);
+                return false;
             }
         }
-        else { // loading must be done in AWT event dispatch thread
-            try {
-                java.awt.EventQueue.invokeAndWait(new Runnable() {
-                    @Override
-                    public void run() {
-                        try {
-                            loadFormData();
-                        }
-                        catch (PersistenceException ex) {
-                            logPersistenceError(ex, 0);
-                        }
-                    }
-                });
-            }
-            catch (Exception ex) {
-                ex.printStackTrace();
-            }
-        }
-
-        return formLoaded;
+        //getFormJavaSource(true); // STRIPPED
+        prefetchedSuperclassName = null;
+        return true;
     }
-    
-    /** This method performs the form data loading. All open/load methods go
-     * through this one.
+
+    /**
+     * Optional part of loading, called in a background thread.
      */
-    private void loadFormData() throws PersistenceException {
-        if (formLoaded)
-            return; // form already loaded
+    public void loadOnBackground() {
+      // STRIPPED
+        /*FormJavaSource javaSource = getFormJavaSource();
+        if (javaSource != null) { // i.e. form not closed meanwhile
+            prefetchedSuperclassName = javaSource.getSuperClassName();
+        }*/
+    }
+
+    /**
+     * Called in EDT to perform the actual form data loading.
+     */
+    public boolean loadFormData() {
+        assert !formLoaded;
+        if (persistenceManager == null && !prepareLoading()) {
+            return false;
+        }
 
         // Issue 151166 - hack
-        //Project p = FileOwnerQuery.getOwner(formDataObject.getFormFile());
-        //// FileOwnerQuery.getOwner() on form opened using Template editor returns null
-        //if (p != null) {
-        //    FileObject projectDirectory = p.getProjectDirectory();
-        //    FileObject nbprojectFolder = projectDirectory.getFileObject("nbproject", null); // NOI18N
-        //    if ((nbprojectFolder == null) && (projectDirectory.getFileObject("pom", "xml") != null)) { // NOI18N
-        //        // Maven project
-        //        ClassPathUtils.resetFormClassLoader(p);
-        //    }
-        //}
- 
-        resetPersistenceErrorLog(); // clear log of errors
+        /*Project p = FileOwnerQuery.getOwner(formDataObject.getFormFile());
+        // FileOwnerQuery.getOwner() on form opened using Template editor returns null
+        if (p != null) {
+            FileObject projectDirectory = p.getProjectDirectory();
+            FileObject nbprojectFolder = projectDirectory.getFileObject("nbproject", null); // NOI18N
+            if ((nbprojectFolder == null) && (projectDirectory.getFileObject("pom", "xml") != null)) { // NOI18N
+                // Maven project
+                ClassPathUtils.resetFormClassLoader(p);
+            }
+        }*/
 
-        // first find PersistenceManager for loading the form
-        if (persistenceManager == null) {
-            persistenceManager = recognizeForm(formDataObject);
-        }
+      // STRIPPED
+        /*if (persistenceManager instanceof GandalfPersistenceManager) {
+            ((GandalfPersistenceManager)persistenceManager).setPrefetchedSuperclassName(prefetchedSuperclassName);
+            prefetchedSuperclassName = null;
+        }*/
 
         // create and register new FormModel instance
         formModel = new FormModel();
         formModel.setName(formDataObject.getName());        
         formModel.setReadOnly(formDataObject.isReadOnly());
-	
+	      //formModel.getCodeStructure().setFormJavaSource(getFormJavaSource(true)); // STRIPPED
+
         openForms.put(formModel, this);
 
         Logger.getLogger("TIMER").log(Level.FINE, "FormModel", new Object[] { formDataObject.getPrimaryFile(), formModel}); // NOI18N
@@ -298,36 +349,63 @@ public class FormEditor {
             });
         }
         catch (PersistenceException ex) { // some fatal error occurred
-            persistenceManager = null;
             openForms.remove(formModel);
-            formModel = null;
-            throw ex;
+            closeForm();
+            logPersistenceError(ex, 0);
+            return false;
         }
         catch (Exception ex) { // should not happen, but for sure...
-            ex.printStackTrace();
-            persistenceManager = null;
+            Logger.getLogger(FormEditor.class.getName()).log(Level.INFO, ex.getLocalizedMessage(), ex);
             openForms.remove(formModel);
-            formModel = null;
-            return;
+            closeForm();
+            return false;
         }
-                                
+
         // form is successfully loaded...
         formLoaded = true;
 
+      // STRIPPED
+        /*getCodeGenerator().initialize(formModel);
+        ResourceSupport resupport = getResourceSupport(); // make sure ResourceSupport is created and initialized
+        if (resupport.getDesignLocale() != null) {
+            resupport.updateDesignLocale();
+        }*/
+
+        //getBindingSupport(); // STRIPPED
         formModel.fireFormLoaded();
         if (formModel.wasCorrected()) // model repaired or upgraded
             formModel.fireFormChanged(false);
 
-        // create form nodes hierarchy and add it to SourceChildren
+        // create form nodes hierarchy
         formRootNode = new FormRootNode(formModel);
         formRootNode.getChildren().getNodes();
-        formDataObject.getNodeDelegate().getChildren().add(new Node[] { formRootNode });
-        
+
         attachFormListener();
         attachDataObjectListener();
         attachSettingsListener();
         attachPaletteListener();
+
+        return true;
     }
+
+  // STRIPPED
+    /** Public method for saving form data to file. Does not save the
+    * source code (document), does not report errors and does not throw
+    * any exceptions.
+    * @return whether there was not any fatal error during saving (true means
+    *         everything was ok); returns true even if nothing was saved
+    *         because form was not loaded or read-only, etc.
+    *//*
+    public boolean saveForm() {
+        try {
+            saveFormData();
+            return true;
+        }
+        catch (PersistenceException ex) {
+            logPersistenceError(ex, 0);
+            return false;
+        }
+    }*/
 
   void saveFormData() throws PersistenceException {
         if (formLoaded && !formDataObject.formFileReadOnly() && !formModel.isReadOnly()) {
@@ -346,7 +424,7 @@ public class FormEditor {
             persistenceErrors = new ArrayList<Throwable>();
     }
     
-    private void logPersistenceError(Throwable t, int index) {
+    void logPersistenceError(Throwable t, int index) {
         if (persistenceErrors == null)
             persistenceErrors = new ArrayList<Throwable>();
 
@@ -364,14 +442,7 @@ public class FormEditor {
         Iterator<PersistenceManager> it = PersistenceManager.getManagers();
         if (!it.hasNext()) { // there's no PersistenceManager available
             PersistenceException ex = new PersistenceException(
-                                      "No persistence manager registered"); // NOI18N
-            ErrorManager.getDefault().annotate(
-                ex,
-                ErrorManager.ERROR,
-                null,
-                FormUtils.getBundleString("MSG_ERR_NoPersistenceManager"), // NOI18N
-                null,
-                null);
+                    FormUtils.getBundleString("MSG_ERR_NoPersistenceManager")); // NOI18N
             throw ex;
         }
 
@@ -396,14 +467,7 @@ public class FormEditor {
         PersistenceException ex;
         if (!anyPersistenceError()) {
             // no error occurred, the format is just unknown
-            ex = new PersistenceException("Form file format not recognized"); // NOI18N
-            ErrorManager.getDefault().annotate(
-                ex,
-                ErrorManager.ERROR,
-                null,
-                FormUtils.getBundleString("MSG_ERR_NotRecognizedForm"), // NOI18N
-                null,
-                null);
+            ex = new PersistenceException(FormUtils.getBundleString("MSG_ERR_NotRecognizedForm")); // NOI18N
         }
         else { // some errors occurred when recognizing the form file format
             Throwable annotateT = null;
@@ -422,12 +486,12 @@ public class FormEditor {
                 annotateT,
                 FormUtils.getBundleString("MSG_ERR_LoadingErrors") // NOI18N
             );
-          for (Throwable persistenceError : persistenceErrors)
-          {
-            PersistenceException pe = (PersistenceException) persistenceError;
-            Throwable t = pe.getOriginalException();
-            ErrorManager.getDefault().annotate(ex, (t != null ? t : pe));
-          }
+            for (int i=0; i < n; i++) {
+                PersistenceException pe = (PersistenceException)
+                                          persistenceErrors.get(i);
+                Throwable t = pe.getOriginalException();
+                ErrorManager.getDefault().annotate(ex, (t != null ? t : pe));
+            }
             // all the exceptions were attached to the main exception to
             // be thrown, so the log can be cleared
             resetPersistenceErrorLog();
@@ -439,123 +503,98 @@ public class FormEditor {
         logPersistenceError(t, -1);
     }
 
-    boolean anyPersistenceError() {
+    public boolean anyPersistenceError() {
         return persistenceErrors != null && !persistenceErrors.isEmpty();
     }
-    
-    /** Reports errors occurred during loading or saving the form.
-     * 
-     * @param operation operation being performed.
-     */
-    public void reportErrors(int operation) {        
-        if (!anyPersistenceError())
-            return; // no errors or warnings logged
+
+    public void reportSavingErrors() { // TODO can get rid of this? (throw exc on failed saving)
+        reportErrors(false);
+    }
+
+    public String reportLoadingErrors() {
+        return reportErrors(formLoaded);
+    }
+
+    private String reportErrors(boolean checkNonFatalLoadingErrors) {
+        if (!anyPersistenceError()) {
+            return null; // no errors or warnings logged
+        }
 
         final ErrorManager errorManager = ErrorManager.getDefault();
-//        final GandalfPersistenceManager persistManager =
-//                    (GandalfPersistenceManager) persistenceManager;
+        final AditoPersistenceManager persistManager =
+                    (AditoPersistenceManager) persistenceManager;
 
-        boolean checkLoadingErrors = operation == LOADING && formLoaded;
-        boolean anyNonFatalLoadingError = false; // was there a real error?
+        boolean dataLossError = false;
 
         StringBuilder userErrorMsgs = new StringBuilder();
 
-      for (Object persistenceError : persistenceErrors)
-      {
-        Throwable t = (Throwable) persistenceError;
-        if (t instanceof PersistenceException)
-        {
-          Throwable th = ((PersistenceException) t).getOriginalException();
-          if (th != null)
-            t = th;
-        }
-
-        if (checkLoadingErrors && !anyNonFatalLoadingError)
-        {
-          // was there a real loading error (not just warnings) causing
-          // some data not loaded?
-          ErrorManager.Annotation[] annotations =
-              errorManager.findAnnotations(t);
-          int severity = 0;
-          if ((annotations != null) && (annotations.length != 0))
-          {
-            for (ErrorManager.Annotation annotation : annotations)
-            {
-              int s = annotation.getSeverity();
-              if (s == ErrorManager.UNKNOWN)
-                s = ErrorManager.EXCEPTION;
-              if (s > severity)
-                severity = s;
-            }
-          }
-          else severity = ErrorManager.EXCEPTION;
-
-          if (severity > ErrorManager.WARNING)
-            anyNonFatalLoadingError = true;
-        }
-        errorManager.notify(ErrorManager.INFORMATIONAL, t);
-
-        if (persistenceManager != null)
-        {
-          // form file was recognized, there is instance of persistance managager
-          // creating report about problems while loading components,
-          // setting props of components, ...
-          userErrorMsgs.append("Here should be some ExceptionAnnotation Gandalf provides. AditoPersistenceManager doesn't do that (yet)."); // TODO? //persistenceManager.getExceptionAnnotation(t));
-          userErrorMsgs.append("\n\n");  // NOI18N
-        }
-        else
-        {
-          // form file was not recognized
-          errorManager.notify(ErrorManager.WARNING, t);
-        }
-      }
-        
-        if (checkLoadingErrors && anyNonFatalLoadingError) {
-            // the form was loaded with some non-fatal errors - some data
-            // was not loaded - show a warning about possible data loss
-            final String wholeMsg = userErrorMsgs.append(
-                    FormUtils.getBundleString("MSG_FormLoadedWithErrors")).toString();  // NOI18N
-
-            java.awt.EventQueue.invokeLater(new Runnable() {
-                @Override
-                public void run() {
-                    // for some reason this would be displayed before the
-                    // ErrorManager if not invoked later
-                    if (!isFormLoaded()) {
-                        return; // issue #164444
+        for (Iterator it=persistenceErrors.iterator(); it.hasNext(); ) {
+            Throwable t  = (Throwable) it.next();
+            String originalMessage = null;
+            if (t instanceof PersistenceException) {
+                Throwable th = ((PersistenceException)t).getOriginalException();
+                if (th != null) {
+                    // log the original exception so the user has a chance to find it in the log
+                    Logger.getLogger("").log(Level.INFO, null, th); // NOI18N
+                    if (checkNonFatalLoadingErrors) {
+                        t = th;
+                    } else {
+                        originalMessage = th.getLocalizedMessage();
                     }
-                    
-                    JButton viewOnly = new JButton(FormUtils.getBundleString("CTL_ViewOnly"));		// NOI18N
-                    JButton allowEditing = new JButton(FormUtils.getBundleString("CTL_AllowEditing"));	// NOI18N                                        
-                    
-                    Object ret = DialogDisplayer.getDefault().notify(new NotifyDescriptor(
-                        wholeMsg,
-                        FormUtils.getBundleString("CTL_FormLoadedWithErrors"), // NOI18N
-                        NotifyDescriptor.DEFAULT_OPTION,
-                        NotifyDescriptor.WARNING_MESSAGE,
-                        new Object[] { viewOnly, allowEditing, NotifyDescriptor.CANCEL_OPTION },
-                        viewOnly ));
-                   
-                    if(ret == viewOnly) {
-                        setFormReadOnly();
-                    } else if(ret == allowEditing) {    
-                        destroyInvalidComponents();
-                    } else { // close form, switch to source editor
-                        getFormDesigner().reset(FormEditor.this); // might be reused
-                        closeForm();
-                        //getFormDataObject().getFormEditorSupport().selectJavaEditor();
-                    }                                                      
                 }
-            });
+            }
+
+            if (checkNonFatalLoadingErrors && !dataLossError) {
+                // Loaded, but wasn't there an error causing some data missing?
+                ErrorManager.Annotation[] annotations =
+                        errorManager.findAnnotations(t);
+                int severity = 0;
+                if ((annotations != null) && (annotations.length != 0)) {
+                    for (int i=0; i < annotations.length; i++) {
+                        int s = annotations[i].getSeverity();
+                        if (s == ErrorManager.UNKNOWN)
+                            s = ErrorManager.EXCEPTION;
+                        if (s > severity)
+                            severity = s;
+                    }
+                }
+                else severity = ErrorManager.EXCEPTION;
+
+                if (severity > ErrorManager.WARNING)
+                    dataLossError = true;
+            }
+
+            if (checkNonFatalLoadingErrors && persistManager != null) {
+                // creating report about problems while loading components,
+                // setting props of components, ...
+                //userErrorMsgs.append(persistManager.getExceptionAnnotation(t)); // TODO: evtl. provide errors
+                userErrorMsgs.append("\n\n");  // NOI18N
+            } else { // fatal error
+                String message = t.getLocalizedMessage();
+                if (originalMessage != null && originalMessage.length() > 0) {
+                    message = message != null && message.length() > 0 ?
+                              (message + "\n\n" + originalMessage) : originalMessage; // NOI18N
+                }
+                DialogDisplayer.getDefault().notify(new NotifyDescriptor.Message(
+                        message, NotifyDescriptor.ERROR_MESSAGE));
+            }
         }
 
         resetPersistenceErrorLog();
-    }    
-    
+
+        if (checkNonFatalLoadingErrors && dataLossError) {
+            // the form was loaded with some non-fatal errors - some data
+            // was not loaded - show a warning about possible data loss
+            return userErrorMsgs.append(FormUtils.getBundleString("MSG_FormLoadedWithErrors")).toString();  // NOI18N
+        } else {
+            return null;
+        }
+    }
+
     /**
      * Destroys all components from {@link #formModel} taged as invalid
      */
-    private void destroyInvalidComponents() {
+    public void destroyInvalidComponents() {
         Collection<RADComponent> allComps = formModel.getAllComponents();
         List<RADComponent> invalidComponents = new ArrayList<RADComponent>(allComps.size());
         // collect all invalid components
@@ -581,35 +620,15 @@ public class FormEditor {
     /**
      * Sets the FormEditor in Read-Only mode
      */
-    private void setFormReadOnly() {
+    public void setFormReadOnly() {
         formModel.setReadOnly(true);
         getFormDesigner().getHandleLayer().setViewOnly(true);                                                
         detachFormListener();
-        getFormDataObject().getFormEditorSupport().updateMVTCDisplayName();                                
     }
 
     boolean needPostCreationUpdate() {
         return Boolean.TRUE.equals(formDataObject.getPrimaryFile().getAttribute("justCreatedByNewWizard")); // NOI18N
         // see o.n.m.f.w.TemplateWizardIterator.instantiate()
-    }
-
-    private void preCreationUpdate() {
-        FileObject fob = formDataObject.getPrimaryFile();
-        Object libName = fob.getAttribute("requiredLibrary"); // NOI18N
-        if (libName != null) {
-            Object className = fob.getAttribute("requiredClass"); // NOI18N
-            if ((className == null) || !ClassPathUtils.isOnClassPath(fob, className.toString())) {
-                try {
-                    Library lib = LibraryManager.getDefault().getLibrary((String)libName);
-                    ClassPathUtils.updateProject(fob, new ClassSource(
-                            (className == null) ? null : className.toString(),
-                            new ClassSource.LibraryEntry(lib))
-                    );
-                } catch (IOException ioex) {
-                    Logger.getLogger(FormEditor.class.getName()).log(Level.INFO, ioex.getLocalizedMessage(), ioex);
-                }
-            }
-        }
     }
 
     /**
@@ -618,42 +637,35 @@ public class FormEditor {
      * of layout code generation needs to be honored, or properties
      * internationalized or converted to resources.
      */
-    private void postCreationUpdate() {
+    public boolean postCreationUpdate() {
         if (formLoaded && formModel != null && !formModel.isReadOnly()
-            && needPostCreationUpdate()) // just created via New wizard
-        {   // detect settings, update the form, regenerate code, save
+                && !anyPersistenceError() && needPostCreationUpdate()) {
+            // detect settings, update the form, regenerate code, save
             // make sure no upgrade warning is shown
-//            formModel.setMaxVersionLevel(FormModel.LATEST_VERSION);
+            //formModel.setMaxVersionLevel(FormModel.LATEST_VERSION);
             // switch to resources if needed
-          // TODO: stripped
-//            FormLAF.executeWithLookAndFeel(formModel, new Runnable() {
-//                @Override
-//                public void run() {
-//                    getResourceSupport().prepareNewForm();
-//                }
-//            });
+          // STRIPPED
+            /*FormLAF.executeWithLookAndFeel(formModel, new Runnable() {
+                @Override
+                public void run() {
+                    getResourceSupport().prepareNewForm();
+                }
+            });
             // make sure layout code generation type is detected
-//            formModel.getSettings().getLayoutCodeTarget(); // TODO: stripped
+            formModel.getSettings().getLayoutCodeTarget();*/
             // hack: regenerate code immediately
             // - needs to be forced since there might be no change fired
             // - don't wait for the next round, we want to save now
             formModel.fireFormChanged(true);
-            // remove SuppressWarnings annotation if necessary
-            checkSuppressWarningsAnnotation();
-            // save the form if changed
-            FormEditorSupport fes = formDataObject.getFormEditorSupport();
             try {
-                if (fes.isModified()) {
-                    saveFormData();
-                    fes.saveSourceOnly();
-                }
                 formDataObject.getPrimaryFile().setAttribute("justCreatedByNewWizard", null); // NOI18N
                 formDataObject.getPrimaryFile().setAttribute("nonEditableTemplate", null); // NOI18N
+            } catch (IOException ex) {
+                Logger.getLogger(FormEditor.class.getName()).log(Level.INFO, ex.getLocalizedMessage(), ex);
             }
-            catch (Exception ex) { // no problem should happen for just created form
-                ErrorManager.getDefault().notify(ErrorManager.INFORMATIONAL, ex);
-            }
+            return true;
         }
+        return false;
     }
 
     /** @return the last activated FormDesigner for this form */
@@ -668,7 +680,7 @@ public class FormEditor {
     void setFormDesigner(FormDesigner designer) {
         formDesigner = designer;
     }
-    
+
     /** Closes the form. Used when closing the form editor or reloading
      * the form. */
     void closeForm() {
@@ -679,65 +691,41 @@ public class FormEditor {
             formModelToAssistant.remove(formModel);
             formLoaded = false;
             
-            // remove nodes hierarchy
-            if (formDataObject.isValid()) {
-                // Avoiding deadlock (issue 51796)
-                java.awt.EventQueue.invokeLater(new Runnable() {
-                    @Override
-                    public void run() {
-                        if (formDataObject.isValid()) {
-                            formDataObject.getNodeDelegate().getChildren()
-                                .remove(new Node[] { formRootNode });
-                        }
-                        formRootNode = null;
-                    }
-                });
-            }
-            
             // remove listeners
             detachFormListener();
             detachDataObjectListener();
             detachPaletteListener();
 
-            // focus the next form in inspector
-            FormEditor next;
             if (openForms.isEmpty()) {
-                next = null;
                 detachSettingsListener();
-            }
-            else { // still any opened forms - focus some
-                next = openForms.values().iterator().next();
-            }
-            if (ComponentInspector.exists()) {
-                ComponentInspector.getInstance().focusForm(next);
             }
 
             // close the floating windows
             if (floatingWindows != null) {
                 if (floatingWindows.size() > 0) {
                     List<java.awt.Window> tempList = new LinkedList<java.awt.Window>(floatingWindows);
-                  for (Window aTempList : tempList)
-                  {
-                    if (aTempList.isVisible())
-                      aTempList.setVisible(false);
-                  }
+                    Iterator it = tempList.iterator();
+                    while (it.hasNext()) {
+                        java.awt.Window window = (java.awt.Window) it.next();
+                        if (window.isVisible())
+                            window.setVisible(false);
+                    }
                 }
                 floatingWindows = null;
             }
-            
-            // reset references
-            formDesigner = null;
-            persistenceManager = null;
-            persistenceErrors = null;
-            formModel = null;
-          // TODO: stripped
-//            codeGenerator = null;
-//	          formJavaSource = null;
-//            resourceSupport = null;
-//            bindingSupport = null;
         }
+        // cleanup just for sure
+        formRootNode = null;
+        formDesigner = null;
+        persistenceManager = null;
+        formModel = null;
+        //codeGenerator = null; // STRIPPED
+        //formJavaSource = null; // STRIPPED
+        prefetchedSuperclassName = null;
+        //resourceSupport = null; // STRIPPED
+        //bindingSupport = null; // STRIPPED
     }
-    
+
     private void attachFormListener() {
         if (formListener != null || formDataObject.isReadOnly() || formModel.isReadOnly())
             return;
@@ -756,85 +744,74 @@ public class FormEditor {
                 Set<RADComponent> compsToSelect = null;
                 FormNode nodeToSelect = null;
 
-              for (FormModelEvent ev : events)
-              {
-                if (ev.isModifying())
-                  modifying = true;
+                for (int i=0; i < events.length; i++) {
+                    FormModelEvent ev = events[i];
 
-                int type = ev.getChangeType();
-                if (type == FormModelEvent.CONTAINER_LAYOUT_EXCHANGED
-                    || type == FormModelEvent.CONTAINER_LAYOUT_CHANGED
-                    || type == FormModelEvent.COMPONENT_ADDED
-                    || type == FormModelEvent.COMPONENT_REMOVED
-                    || type == FormModelEvent.COMPONENTS_REORDERED)
-                {
-                  ComponentContainer cont = ev.getContainer();
-                  if (changedContainers == null
-                      || !changedContainers.contains(cont))
-                  {
-                    updateNodeChildren(cont);
-                    if (changedContainers != null)
-                      changedContainers.add(cont);
-                  }
+                    if (ev.isModifying())
+                        modifying = true;
 
-                  if (type == FormModelEvent.COMPONENT_REMOVED)
-                  {
-                    FormNode select;
-                    if (cont instanceof RADComponent)
+                    int type = ev.getChangeType();
+                    if (type == FormModelEvent.CONTAINER_LAYOUT_EXCHANGED
+                        || type == FormModelEvent.CONTAINER_LAYOUT_CHANGED
+                        || type == FormModelEvent.COMPONENT_ADDED
+                        || type == FormModelEvent.COMPONENT_REMOVED
+                        || type == FormModelEvent.COMPONENTS_REORDERED)
                     {
-                      select = ((RADComponent) cont).getNodeReference();
-                    }
-                    else
-                    {
-                      select = getOthersContainerNode();
-                    }
+                        ComponentContainer cont = ev.getContainer();
+                        if (changedContainers == null
+                            || !changedContainers.contains(cont))
+                        {
+                            updateNodeChildren(cont);
+                            if (changedContainers != null)
+                                changedContainers.add(cont);
+                        }
 
-                    if (!(nodeToSelect instanceof RADComponentNode))
-                    {
-                      if (nodeToSelect != formRootNode)
-                        nodeToSelect = select;
-                    }
-                    else if (nodeToSelect != select)
-                      nodeToSelect = formRootNode;
-                  }
-                  else if (type == FormModelEvent.CONTAINER_LAYOUT_EXCHANGED)
-                  {
-                    nodeToSelect = ((RADVisualContainer) cont)
-                        .getLayoutNodeReference();
-                  }
-                  else if (type == FormModelEvent.COMPONENT_ADDED
-                      && ev.getComponent().isInModel())
-                  {
-                    if (compsToSelect == null)
-                      compsToSelect = new HashSet<RADComponent>();
+                        if (type == FormModelEvent.COMPONENT_REMOVED) {
+                            FormNode select;
+                            if (cont instanceof RADComponent) {
+                                select = ((RADComponent)cont).getNodeReference();
+                             } else {
+                                select = getOthersContainerNode();
+                             }
 
-                    compsToSelect.add(ev.getComponent());
-                    compsToSelect.remove(ev.getContainer());
-                  }
+                            if (!(nodeToSelect instanceof RADComponentNode)) {
+                                if (nodeToSelect != formRootNode)
+                                    nodeToSelect = select;
+                            }
+                            else if (nodeToSelect != select)
+                                nodeToSelect = formRootNode;
+                        }
+                        else if (type == FormModelEvent.CONTAINER_LAYOUT_EXCHANGED) {
+                            nodeToSelect = ((RADVisualContainer)cont)
+                                                .getLayoutNodeReference();
+                        }
+                        else if (type == FormModelEvent.COMPONENT_ADDED
+                                 && ev.getComponent().isInModel())
+                        {
+                            if (compsToSelect == null)
+                                compsToSelect = new HashSet<RADComponent>();
+
+                            compsToSelect.add(ev.getComponent());
+                            compsToSelect.remove(ev.getContainer());
+                        }
+                    }
                 }
-              }
 
                 FormDesigner designer = getFormDesigner();
                 if (designer != null) {
                     if (compsToSelect != null) {
-                        designer.clearSelectionImpl();
-                      for (Object aCompsToSelect : compsToSelect)
-                      {
-                        designer.addComponentToSelectionImpl((RADComponent) aCompsToSelect);
-                      }
-                        designer.updateComponentInspector();
-//                        RADComponent[] comps =
-//                            new RADComponent[compsToSelect.size()];
-//                        compsToSelect.toArray(comps);
-//                        designer.setSelectedComponents(comps);
+                        RADComponent[] comps = new RADComponent[compsToSelect.size()];
+                        compsToSelect.toArray(comps);
+                        designer.setSelectedComponents(comps);
                     }
-                    else if (nodeToSelect != null)
-                        designer.setSelectedNode(nodeToSelect);
+                    else if (nodeToSelect != null) {
+                        designer.setSelectedNodes(nodeToSelect);
+                    }
                 }
 
                 if (modifying)  { // mark the form document modified explicitly
-                    getFormDataObject().getFormEditorSupport().markFormModified();
-//                    checkFormVersionUpgrade(); // TODO: stripped
+                    getEditorSupport().markModified();
+                    //checkFormVersionUpgrade(); // STRIPPED
                 }
             }
         };
@@ -873,66 +850,67 @@ public class FormEditor {
      * user refuses the upgrade, undo is performed (for that all the fired
      * changes must be already processed).
      */
-    // TODO: stripped
-//    private void checkFormVersionUpgrade() {
-//        FormModel.FormVersion currentVersion = formModel.getCurrentVersionLevel();
-//        FormModel.FormVersion maxVersion = formModel.getMaxVersionLevel();
-//        if (currentVersion.ordinal() > maxVersion.ordinal()) {
-//            if (EventQueue.isDispatchThread()) {
-//                processVersionUpgrade(true);
-//            } else { // not a result of a user action, or some forgotten upgrade...
-//                confirmVersionUpgrade();
-//            }
-//        }
-//    }
-//
-//    private void processVersionUpgrade(boolean processingEvents) {
-//        if (!processingEvents && formModel.hasPendingEvents()) {
-//            processingEvents = true;
-//        }
-//        if (processingEvents) { // post a task for later, if not already posted
-//            if (!upgradeCheckPosted) {
-//                upgradeCheckPosted = true;
-//                EventQueue.invokeLater(new Runnable() {
-//                    @Override
-//                    public void run() {
-//                        upgradeCheckPosted = false;
-//                        if (formModel != null) {
-//                            processVersionUpgrade(false);
-//                        }
-//                    }
-//                });
-//            }
-//        } else { // all events processed
-//            String upgradeOption = FormUtils.getBundleString("CTL_UpgradeOption"); // NOI18N
-//            String undoOption = FormUtils.getBundleString("CTL_CancelOption"); // NOI18N
-//            NotifyDescriptor d = new NotifyDescriptor(
-//                    FormUtils.getBundleString("MSG_UpgradeQuestion"), // NOI18N
-//                    FormUtils.getBundleString("TITLE_FormatUpgrade"), // NOI18N
-//                    NotifyDescriptor.DEFAULT_OPTION,
-//                    NotifyDescriptor.QUESTION_MESSAGE,
-//                    new String[] { upgradeOption, undoOption},
-//                    upgradeOption);
-//            if (DialogDisplayer.getDefault().notify(d) == upgradeOption) {
-//                confirmVersionUpgrade();
-//            } else { // upgrade refused
-//                revertVersionUpgrade();
-//            }
-//        }
-//    }
-//
-//    private void confirmVersionUpgrade() {
-//        if (formModel != null) {
-//            formModel.setMaxVersionLevel(FormModel.LATEST_VERSION);
-//        }
-//    }
-//
-//    private void revertVersionUpgrade() {
-//        if (formModel != null) {
-//            formModel.getUndoRedoManager().undo();
-//            formModel.revertVersionLevel();
-//        }
-//    }
+    // STRIPPED
+/*    private void checkFormVersionUpgrade() {
+        FormModel.FormVersion currentVersion = formModel.getCurrentVersionLevel();
+        FormModel.FormVersion maxVersion = formModel.getMaxVersionLevel();
+        if (currentVersion.ordinal() > maxVersion.ordinal()) {
+            if (EventQueue.isDispatchThread()) {
+                processVersionUpgrade(true);
+            } else { // not a result of a user action, or some forgotten upgrade...
+                confirmVersionUpgrade();
+            }
+        }
+    }
+
+    private void processVersionUpgrade(boolean processingEvents) {
+        if (!processingEvents && formModel.hasPendingEvents()) {
+            processingEvents = true;
+        }
+        if (processingEvents) { // post a task for later, if not already posted
+            if (!upgradeCheckPosted) {
+                upgradeCheckPosted = true;
+                EventQueue.invokeLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        upgradeCheckPosted = false;
+                        if (formModel != null) {
+                            processVersionUpgrade(false);
+                        }
+                    }
+                });
+            }
+        } else { // all events processed
+            String upgradeOption = FormUtils.getBundleString("CTL_UpgradeOption"); // NOI18N
+            String undoOption = FormUtils.getBundleString("CTL_CancelOption"); // NOI18N
+            NotifyDescriptor d = new NotifyDescriptor(
+                    FormUtils.getBundleString("MSG_UpgradeQuestion"), // NOI18N
+                    FormUtils.getBundleString("TITLE_FormatUpgrade"), // NOI18N
+                    NotifyDescriptor.DEFAULT_OPTION,
+                    NotifyDescriptor.QUESTION_MESSAGE,
+                    new String[] { upgradeOption, undoOption},
+                    upgradeOption);
+            if (DialogDisplayer.getDefault().notify(d) == upgradeOption) {
+                confirmVersionUpgrade();
+            } else { // upgrade refused
+                revertVersionUpgrade();
+            }
+        }
+    }
+
+    private void confirmVersionUpgrade() {
+        if (formModel != null) {
+            formModel.confirmVersionLevel();
+            formModel.setMaxVersionLevel(FormModel.LATEST_VERSION);
+        }
+    }
+
+    private void revertVersionUpgrade() {
+        if (formModel != null) {
+            formModel.getUndoRedoManager().undo();
+            formModel.revertVersionLevel();
+        }
+    }*/
 
     private void attachDataObjectListener() {
         if (dataObjectListener != null)
@@ -949,17 +927,12 @@ public class FormEditor {
                     // multiview updated by FormEditorSupport
                     // code regenerated by FormRefactoringUpdate
                 }
-                else if (DataObject.PROP_COOKIE.equals(ev.getPropertyName())) {
-                    if (ComponentInspector.exists()) { // #40224
-                        Node[] nodes = ComponentInspector.getInstance()
-                                 .getExplorerManager().getSelectedNodes();
-                      for (Node node : nodes)
-                      {
-                        if (node instanceof FormNode)
-                        { // Issue 181709
-                          ((FormNode) node).updateCookies();
+                else if (DataObject.PROP_COOKIE.equals(ev.getPropertyName())
+                         && formDesigner != null) {
+                    for (Node node : formDesigner.getSelectedNodes()) {
+                        if (node instanceof FormNode) { // Issue 181709
+                            ((FormNode)node).updateCookies();
                         }
-                      }
                     }
                 }
             }
@@ -982,37 +955,32 @@ public class FormEditor {
         settingsListener = new PreferenceChangeListener() {
             @Override
             public void preferenceChange(PreferenceChangeEvent evt) {
-              for (FormModel formModel : openForms.keySet())
-              {
-                String propName = evt.getKey();
+                Iterator iter = openForms.keySet().iterator();
+                while (iter.hasNext()) {
+                    FormModel formModel = (FormModel) iter.next();
+                    String propName = evt.getKey();
 
-                if (FormLoaderSettings.PROP_USE_INDENT_ENGINE.equals(propName))
-                {
-                  formModel.fireSyntheticPropertyChanged(null, propName,
-                                                          null, evt.getNewValue());
+                    if (FormLoaderSettings.PROP_USE_INDENT_ENGINE.equals(propName)) {
+                        formModel.fireSyntheticPropertyChanged(null, propName,
+                                                               null, evt.getNewValue());
+                    } else if (FormLoaderSettings.PROP_SELECTION_BORDER_SIZE.equals(propName)
+                          || FormLoaderSettings.PROP_SELECTION_BORDER_COLOR.equals(propName)
+                          || FormLoaderSettings.PROP_CONNECTION_BORDER_COLOR.equals(propName)
+                          || FormLoaderSettings.PROP_FORMDESIGNER_BACKGROUND_COLOR.equals(propName)
+                          || FormLoaderSettings.PROP_FORMDESIGNER_BORDER_COLOR.equals(propName))
+                    {
+                        FormDesigner designer = getFormDesigner(formModel);
+                        if (designer != null) {
+                            designer.updateVisualSettings();
+                        }
+                    } else if (FormLoaderSettings.PROP_PALETTE_IN_TOOLBAR.equals(propName)) {
+                        FormDesigner designer = getFormDesigner(formModel);
+                        if (designer != null) {
+                            designer.getFormToolBar().showPaletteButton(
+                                FormLoaderSettings.getInstance().isPaletteInToolBar());
+                        }
+                    }
                 }
-                else if (FormLoaderSettings.PROP_SELECTION_BORDER_SIZE.equals(propName)
-                    || FormLoaderSettings.PROP_SELECTION_BORDER_COLOR.equals(propName)
-                    || FormLoaderSettings.PROP_CONNECTION_BORDER_COLOR.equals(propName)
-                    || FormLoaderSettings.PROP_FORMDESIGNER_BACKGROUND_COLOR.equals(propName)
-                    || FormLoaderSettings.PROP_FORMDESIGNER_BORDER_COLOR.equals(propName))
-                {
-                  FormDesigner designer = getFormDesigner(formModel);
-                  if (designer != null)
-                  {
-                    designer.updateVisualSettings();
-                  }
-                }
-                else if (FormLoaderSettings.PROP_PALETTE_IN_TOOLBAR.equals(propName))
-                {
-                  FormDesigner designer = getFormDesigner(formModel);
-                  if (designer != null)
-                  {
-                    designer.getFormToolBar().showPaletteButton(
-                        FormLoaderSettings.getInstance().isPaletteInToolBar());
-                  }
-                }
-              }
             }
         };
 
@@ -1074,23 +1042,23 @@ public class FormEditor {
         }
     }
 
+    // STRIPPED
     /**
-     * Returns code editor pane for the specified form.
-     * 
-     * @param formModel form model.
-     * @return JEditorPane set up with the actuall forms java source*/
-    public static JEditorPane createCodeEditorPane(FormModel formModel) {                        
-        FormDataObject dobj = getFormDataObject(formModel);
-      // TODO: stripped
-//        JavaCodeGenerator codeGen = (JavaCodeGenerator) FormEditor.getCodeGenerator(formModel);
-//        codeGen.regenerateCode();
+    * Returns code editor pane for the specified form.
+    *
+    * @param formModel form model.
+    * @return JEditorPane set up with the actuall forms java source*//*
+    public static JEditorPane createCodeEditorPane(FormModel formModel) {
+        FormEditor formEditor = FormEditor.getFormEditor(formModel);
+        JavaCodeGenerator codeGen = (JavaCodeGenerator) formEditor.getCodeGenerator();
+        codeGen.regenerateCode();
 
         JEditorPane codePane = new JEditorPane();
-        SimpleSection sec = dobj.getFormEditorSupport().getInitComponentSection();
+        SimpleSection sec = formEditor.getInitComponentSection();
         int pos = sec.getText().indexOf('{') + 2 + sec.getStartPosition().getOffset();
-        FormUtils.setupEditorPane(codePane, dobj.getPrimaryFile(), pos);
+        FormUtils.setupEditorPane(codePane, formEditor.getFormDataObject().getPrimaryFile(), pos);
         return codePane;
-    }
+    }*/
 
     public static synchronized AssistantModel getAssistantModel(FormModel formModel) {
         assert (formModel != null);
@@ -1110,16 +1078,16 @@ public class FormEditor {
         return formEditor != null ? formEditor.getFormDesigner() : null;
     }
 
+  // STRIPPED
     /**
      * Returns code generator for the specified form.
-     * 
+     *
      * @param formModel form model.
-     * @return CodeGenerator for given form */
-  // TODO: stripped
-//    public static CodeGenerator getCodeGenerator(FormModel formModel) {
-//        FormEditor formEditor = openForms.get(formModel);
-//        return formEditor != null ? formEditor.getCodeGenerator() : null;
-//    }
+     * @return CodeGenerator for given form *//*
+    public static CodeGenerator getCodeGenerator(FormModel formModel) {
+        FormEditor formEditor = openForms.get(formModel);
+        return formEditor != null ? formEditor.getCodeGenerator() : null;
+    }*/
 
     /**
      * Returns form data object for the specified form.
@@ -1131,37 +1099,36 @@ public class FormEditor {
         return formEditor != null ? formEditor.getFormDataObject() : null;
     }
 
+  // STRIPPED
     /**
      * Returns <code>FormJavaSource</code> for the specified form.
      * 
      * @param formModel form model.
-     * @return FormJavaSource of given form */
-//    public static FormJavaSource getFormJavaSource(FormModel formModel) {
-//        FormEditor formEditor = openForms.get(formModel);
-//        return formEditor != null ? formEditor.getFormJavaSource() : null;
-//    }
+     * @return FormJavaSource of given form *//*
+    public static FormJavaSource getFormJavaSource(FormModel formModel) {
+        FormEditor formEditor = openForms.get(formModel);
+        return formEditor != null ? formEditor.getFormJavaSource() : null;
+    }
 
-    /**
+    *//**
      * Returns <code>ResourceSupport</code> for the specified form.
      * 
      * @param formModel form model.
-     * @return ResourceSupport of given form */
-  // TODO: stripped
-//    static ResourceSupport getResourceSupport(FormModel formModel) {
-//        FormEditor formEditor = openForms.get(formModel);
-//        return formEditor != null ? formEditor.getResourceSupport() : null;
-//    }
+     * @return ResourceSupport of given form *//*
+    static ResourceSupport getResourceSupport(FormModel formModel) {
+        FormEditor formEditor = openForms.get(formModel);
+        return formEditor != null ? formEditor.getResourceSupport() : null;
+    }
 
-    /**
+    *//**
      * Returns <code>BindingDesignSupport</code> for the specified form.
      * 
      * @param formModel form model.
-     * @return BindingDesignSupport of given form */
-  // TODO: stripped
-//    static BindingDesignSupport getBindingSupport(FormModel formModel) {
-//        FormEditor formEditor = openForms.get(formModel);
-//        return formEditor != null ? formEditor.getBindingSupport() : null;
-//    }
+     * @return BindingDesignSupport of given form *//*
+    static BindingDesignSupport getBindingSupport(FormModel formModel) {
+        FormEditor formEditor = openForms.get(formModel);
+        return formEditor != null ? formEditor.getBindingSupport() : null;
+    }*/
 
     /**
      * Returns form editor for the specified form.
@@ -1189,6 +1156,22 @@ public class FormEditor {
             floatingWindows.remove(window);
     }
 
+  // STRIPPED
+    /*public void registerDefaultComponentAction(Action action) {
+        if (defaultActions == null) {
+            createDefaultComponentActionsList();
+        } else {
+            defaultActions.remove(action);
+        }
+        defaultActions.add(0, action);
+    }
+
+    public void unregisterDefaultComponentAction(Action action) {
+        if (defaultActions != null) {
+            defaultActions.remove(action);
+        }
+    }*/
+
   private void createDefaultComponentActionsList() {
         defaultActions = new LinkedList<Action>();
         defaultActions.add(SystemAction.get(EditContainerAction.class));
@@ -1212,16 +1195,12 @@ public class FormEditor {
     public static boolean updateProjectForNaturalLayout(FormModel formModel) {
         FormEditor formEditor = getFormEditor(formModel);
         if (formEditor != null
-//                && formModel.getSettings().getLayoutCodeTarget() != JavaCodeGenerator.LAYOUT_CODE_JDK6 // TODO: stripped
-                && !ClassPathUtils.isOnClassPath(formEditor.getFormDataObject().getFormFile(), org.jdesktop.layout.GroupLayout.class.getName())) {
+                //&& formModel.getSettings().getLayoutCodeTarget() != JavaCodeGenerator.LAYOUT_CODE_JDK6
+                && !ClassPathUtils.isOnClassPath(formEditor.getFormDataObject().getFormFile(), "org.jdesktop.layout.GroupLayout")) { // NOI18N
             try {
-                Library lib = LibraryManager.getDefault().getLibrary("swing-layout"); // NOI18N
-                if (lib == null) {
-                    return false;
-                }
                 ClassSource cs = new ClassSource("", // class name is not needed // NOI18N
-                                                 new ClassSource.LibraryEntry(lib));
-                return Boolean.TRUE == ClassPathUtils.updateProject(formEditor.getFormDataObject().getFormFile(), cs);
+                        ClassSource.unpickle("library", "swing-layout")); // NOI18N // Hack
+                return Boolean.TRUE == ClassPathUtils.updateProject(formEditor.getFormDataObject().getFormFile(), cs, true);
             }
             catch (IOException ex) {
                 ErrorManager.getDefault().notify(ErrorManager.INFORMATIONAL, ex);
@@ -1233,103 +1212,23 @@ public class FormEditor {
         return false;
     }
 
-//    /**
-//     * Updates project classpath with the beans binding library.
-//     *
-//     * @param formModel form model.
-//     * @return <code>true</code> if the project was updated.
-//     */
-//    public static boolean updateProjectForBeansBinding(FormModel formModel) {
-//        FormEditor formEditor = getFormEditor(formModel);
-//        if (formEditor != null
-//                && !ClassPathUtils.isOnClassPath(formEditor.getFormDataObject().getFormFile(), org.jdesktop.beansbinding.Binding.class.getName())) {
-//            try {
-//                Library lib = LibraryManager.getDefault().getLibrary("beans-binding"); // NOI18N
-//                if (lib == null) {
-//                    return false;
-//                }
-//                ClassSource cs = new ClassSource("", // class name is not needed // NOI18N
-//                                                 new ClassSource.LibraryEntry(lib));
-//                return Boolean.TRUE == ClassPathUtils.updateProject(formEditor.getFormDataObject().getFormFile(), cs);
-//            }
-//            catch (IOException ex) {
-//                ErrorManager.getDefault().notify(ErrorManager.INFORMATIONAL, ex);
-//            }
-//        }
-//        return false;
-//    }
+  // STRIPPED
+  //  /**
+  //  * Updates project classpath with the beans binding library.
+  //  *
+  //  * @param formModel form model.
+  //  * @return <code>true</code> if the project was updated.
+  //  */
+  //  public static boolean updateProjectForBeansBinding(FormModel formModel) {
+  //      FormEditor formEditor = getFormEditor(formModel);
+  //      if (formEditor != null) {
+  //          return formEditor.getBindingSupport().updateProjectForBeansBinding();
+  //      }
+  //      return false;
+  //  }
 
     public static boolean isNonVisualTrayEnabled() {
         return Boolean.getBoolean("netbeans.form.non_visual_tray"); // NOI18N
-    }
-
-    private void checkSuppressWarningsAnnotation() {
-      // TODO: stripped
-//        FileObject fo = getFormDataObject().getPrimaryFile();
-//        String sourceLevel = SourceLevelQuery.getSourceLevel(fo);
-//        boolean invalidSL = (sourceLevel != null) && ("1.5".compareTo(sourceLevel) > 0); // NOI18N
-//        ClassPath cp = ClassPath.getClassPath(fo, ClassPath.BOOT);
-//        if (invalidSL || cp.findResource("java/lang/SuppressWarnings.class") == null) { // NOI18N
-//            // The project's bootclasspath doesn't contain SuppressWarnings class.
-//            // So, remove this annotation from initComponents() method.
-//            final String foName = fo.getName();
-//            JavaSource js = JavaSource.forFileObject(fo);
-//            final int[] positions = new int[] {-1,-1};
-//            try {
-//                js.runModificationTask(new CancellableTask<WorkingCopy>() {
-//                    @Override
-//                    public void cancel() {
-//                    }
-//                    @Override
-//                    public void run(WorkingCopy wcopy) throws Exception {
-//                        wcopy.toPhase(JavaSource.Phase.RESOLVED);
-//
-//                        ClassTree clazz = null;
-//                        CompilationUnitTree cu = wcopy.getCompilationUnit();
-//                        for (Tree tree : cu.getTypeDecls()) {
-//                            if (tree.getKind() == Tree.Kind.CLASS) {
-//                                ClassTree cand = (ClassTree)tree;
-//                                if (foName.equals(cand.getSimpleName().toString())) {
-//                                    clazz = cand;
-//                                }
-//                            }
-//                        }
-//                        if (clazz == null) return;
-//
-//                        for (Tree tree : clazz.getMembers()) {
-//                            if (tree.getKind() == Tree.Kind.METHOD) {
-//                                MethodTree method = (MethodTree)tree;
-//                                if ("initComponents".equals(method.getName().toString()) // NOI18N
-//                                        && (method.getParameters().isEmpty())) {
-//                                    ModifiersTree modifiers = method.getModifiers();
-//                                    for (AnnotationTree annotation : modifiers.getAnnotations()) {
-//                                        if (annotation.getAnnotationType().toString().contains("SuppressWarnings")) { // NOI18N
-//                                            SourcePositions sp = wcopy.getTrees().getSourcePositions();
-//                                            positions[0] = (int)sp.getStartPosition(cu, annotation);
-//                                            positions[1] = (int)sp.getEndPosition(cu, annotation);
-//                                            // We cannot use the following code because
-//                                            // part of the modifier is in guarded block
-//                                            //ModifiersTree newModifiers = wcopy.getTreeMaker().removeModifiersAnnotation(method.getModifiers(), annotation);
-//                                            //wcopy.rewrite(modifiers, newModifiers);
-//                                        }
-//                                    }
-//                                }
-//                            }
-//                        }
-//
-//                    }
-//                }).commit();
-//            } catch (IOException ioex) {
-//                Logger.getLogger(FormEditor.class.getName()).log(Level.INFO, ioex.getLocalizedMessage(), ioex);
-//            }
-//            if (positions[0] != -1) {
-//                try {
-//                    getFormDataObject().getFormEditorSupport().getDocument().remove(positions[0], positions[1]-positions[0]);
-//                } catch (BadLocationException blex) {
-//                    Logger.getLogger(FormEditor.class.getName()).log(Level.INFO, blex.getLocalizedMessage(), blex);
-//                }
-//            }
-//        }
     }
 
 }

@@ -71,6 +71,7 @@ public class RADVisualComponent extends RADComponent {
 
     // [??]
     private Map<String,LayoutConstraints> constraints = new HashMap<String,LayoutConstraints>();
+//    transient private RADVisualContainer parent;
 
     private Node.Property[] constraintsProperties;
     private ConstraintsListenerConvertor constraintsListener;
@@ -81,25 +82,49 @@ public class RADVisualComponent extends RADComponent {
     // -----------------------------------------------------------------------------
     // Initialization
 
+//    public void setParentComponent(RADComponent parentComp) {
+//        super.setParentComponent(parentComp);
+//        if (parentComp != null)
+//            getConstraintsProperties();
+//    }
 
+//    void initParent(RADVisualContainer parent) {
+//        this.parent = parent;
+//    }
+
+/*    protected void setBeanInstance(Object beanInstance) {
+        if (beanInstance instanceof java.awt.Component) {
+            boolean attached = FakePeerSupport.attachFakePeer(
+                                            (java.awt.Component)beanInstance);
+            if (attached && beanInstance instanceof java.awt.Container)
+                FakePeerSupport.attachFakePeerRecursively(
+                                            (java.awt.Container)beanInstance);
+        }
+
+        super.setBeanInstance(beanInstance);
+    } */
 
     // -----------------------------------------------------------------------------
     // Public interface
+
+    /** @return The JavaBean visual component represented by this RADVisualComponent */
+//    public java.awt.Component getComponent() { // [is it needed ???]
+//        return (java.awt.Component) getBeanInstance();
+//    }
 
     public final RADVisualContainer getParentContainer() {
         return (RADVisualContainer) getParentComponent();
     }
 
-    /**
-     * @return The index of this component within visual components of its parent
-     */
+    /** @return The index of this component within visual components of its parent */
     public final int getComponentIndex() {
-        RADVisualContainer parent = getParentContainer();
+        RADVisualContainer parent = (RADVisualContainer) getParentComponent();
         return parent != null ? parent.getIndexOf(this) : -1;
+//        return ((ComponentContainer)getParentComponent()).getIndexOf(this);
     }
 
     final LayoutSupportManager getParentLayoutSupport() {
-        RADVisualContainer parent = getParentContainer();
+        RADVisualContainer parent = (RADVisualContainer) getParentComponent();
         return parent != null ? parent.getLayoutSupport() : null;
     }
 
@@ -191,34 +216,31 @@ public class RADVisualComponent extends RADComponent {
     // ---------------
     // Properties
 
-//    @Override
-//    protected void getPropertySets(List<Node.PropertySet> propSets) {
-//        super.getPropertySets(propSets);
-//        if (SUPPRESS_PROPERTY_TABS) {
-//            return;
-//        }
-//
-//        if (constraintsProperties == null)
-//            createConstraintsProperties();
-//
-//        if (constraintsProperties != null && constraintsProperties.length > 0)
-//        {
-//          Node.PropertySet propertySet = new Node.PropertySet("layout", // NOI18N
-//                                                              FormUtils.getBundleString("CTL_LayoutTab"), // NOI18N
-//                                                              FormUtils.getBundleString("CTL_LayoutTabHint")) // NOI18N
-//          {
-//            @Override
-//            public Node.Property[] getProperties()
-//            {
-//              Node.Property[] props = getConstraintsProperties();
-//              return (props == null) ? NO_PROPERTIES : props;
-//            }
-//          };
-//          propertySet.setValue("tabName", "--Layout");
-//          propSets.add(1, propertySet);
-////          propSets.add(propSets.size() - 1, propertySet);
-//        }
-//    }
+  // STRIPPED
+    /*@Override
+    protected synchronized void createPropertySets(List<Node.PropertySet> propSets) {
+        super.createPropertySets(propSets);
+        if (SUPPRESS_PROPERTY_TABS) {
+            return;
+        }
+
+        if (constraintsProperties == null)
+            createConstraintsProperties();
+
+        if (constraintsProperties != null && constraintsProperties.length > 0)
+            propSets.add(propSets.size() - 1,
+                         new Node.PropertySet("layout", // NOI18N
+                    FormUtils.getBundleString("CTL_LayoutTab"), // NOI18N
+                    FormUtils.getBundleString("CTL_LayoutTabHint")) // NOI18N
+            {
+                @Override
+                public Node.Property[] getProperties() {
+                    Node.Property[] props = getConstraintsProperties();
+                    return (props == null) ? NO_PROPERTIES : props;
+                }
+            });
+
+    }*/
 
     /** Called to modify original properties obtained from BeanInfo.
      * Properties may be added, removed etc. - due to specific needs
@@ -264,7 +286,7 @@ public class RADVisualComponent extends RADComponent {
     } */
 
     @Override
-    protected void clearProperties() {
+    protected synchronized void clearProperties() {
         super.clearProperties();
         constraintsProperties = null;
     }
@@ -272,7 +294,7 @@ public class RADVisualComponent extends RADComponent {
     // ---------
     // constraints properties
 
-    public Node.Property[] getConstraintsProperties() {
+    public synchronized Node.Property[] getConstraintsProperties() {
         if (constraintsProperties == null)
             createConstraintsProperties();
         return constraintsProperties;
@@ -287,21 +309,21 @@ public class RADVisualComponent extends RADComponent {
       }
       createConstraintsProperties();
 
-//        if (constraintsProperties != null) {
-//          for (Node.Property constraintsProperty : constraintsProperties)
-//            nameToProperty.remove(constraintsProperty.getName());
-//
-//            constraintsProperties = null;
-//            propertySets = null;
-//
-//            RADComponentNode node = getNodeReference();
-//            if (node != null)
-//                node.fireComponentPropertySetsChange();
-//        }
+      // STRIPPED
+        /*if (constraintsProperties != null) {
+            for (int i=0; i < constraintsProperties.length; i++)
+                nameToProperty.remove(constraintsProperties[i].getName());
 
+            constraintsProperties = null;
+            propertySets = null;
+
+            RADComponentNode node = getNodeReference();
+            if (node != null)
+                node.fireComponentPropertySetsChange();
+        }*/
     }
 
-    private void createConstraintsProperties() {
+    private synchronized void createConstraintsProperties() {
         constraintsProperties = null;
 
         LayoutSupportManager layoutSupport = getParentLayoutSupport();
@@ -314,32 +336,12 @@ public class RADVisualComponent extends RADComponent {
                 }
             }
         } else if (getParentContainer() != null) {
-            LayoutComponent component = getFormModel().getLayoutModel().getLayoutComponent(getId());
-            if (component == null) return; // Will be called again later
             constraintsProperties = new Node.Property[] {
-                new LayoutComponentSizeProperty(component, LayoutConstants.HORIZONTAL),
-                new LayoutComponentSizeProperty(component, LayoutConstants.VERTICAL),
-                new LayoutComponentResizableProperty(component, LayoutConstants.HORIZONTAL),
-                new LayoutComponentResizableProperty(component, LayoutConstants.VERTICAL)
+                new LayoutComponentSizeProperty(LayoutConstants.HORIZONTAL),
+                new LayoutComponentSizeProperty(LayoutConstants.VERTICAL),
+                new LayoutComponentResizableProperty(LayoutConstants.HORIZONTAL),
+                new LayoutComponentResizableProperty(LayoutConstants.VERTICAL)
             };
-            component.addPropertyChangeListener(new PropertyChangeListener() {
-                @Override
-                public void propertyChange(PropertyChangeEvent evt) {
-                    RADComponentNode node = getNodeReference();
-                    if (node != null) {
-                        String propName = evt.getPropertyName();
-                        if (LayoutConstants.PROP_HORIZONTAL_PREF_SIZE.equals(propName)) {
-                            node.firePropertyChangeHelper(PROP_LAYOUT_COMPONENT_HORIZONTAL_SIZE, null, null);
-                        } else if (LayoutConstants.PROP_VERTICAL_PREF_SIZE.equals(propName)) {
-                            node.firePropertyChangeHelper(PROP_LAYOUT_COMPONENT_VERTICAL_SIZE, null, null);
-                        } else if (LayoutConstants.PROP_HORIZONTAL_MAX_SIZE.equals(propName)) {
-                            node.firePropertyChangeHelper(PROP_LAYOUT_COMPONENT_HORIZONTAL_RESIZABLE, null, null);
-                        } else if (LayoutConstants.PROP_VERTICAL_MAX_SIZE.equals(propName)) {
-                            node.firePropertyChangeHelper(PROP_LAYOUT_COMPONENT_VERTICAL_RESIZABLE, null, null);
-                        }
-                    }
-                }
-            });
         }
 
         if (constraintsProperties == null) {
@@ -347,27 +349,24 @@ public class RADVisualComponent extends RADComponent {
             return;
         }
 
-      for (Node.Property constraintsProperty : constraintsProperties)
-      {
-        if (constraintsProperty instanceof FormProperty)
-        {
-          FormProperty prop = (FormProperty) constraintsProperty;
+        for (int i=0; i < constraintsProperties.length; i++) {
+            if (constraintsProperties[i] instanceof FormProperty) {
+                FormProperty prop = (FormProperty)constraintsProperties[i];
 
-          // we suppose the constraint property is not a RADProperty...
-          prop.addVetoableChangeListener(getConstraintsListener());
-          prop.addPropertyChangeListener(getConstraintsListener());
-          prop.addValueConvertor(getConstraintsListener());
+                // we suppose the constraint property is not a RADProperty...
+                prop.addVetoableChangeListener(getConstraintsListener());
+                prop.addPropertyChangeListener(getConstraintsListener());
+                prop.addValueConvertor(getConstraintsListener());
 
-          prop.setPropertyContext(new FormPropertyContext.Component(this));
+                prop.setPropertyContext(new FormPropertyContext.Component(this));
 
-          if (isReadOnly() || !isValid())
-          {
-            int type = prop.getAccessType() | FormProperty.NO_WRITE;
-            prop.setAccessType(type);
-          }
-          nameToProperty.put(prop.getName(), prop);
+                if (isReadOnly() || !isValid()) {
+                    int type = prop.getAccessType() | FormProperty.NO_WRITE;
+                    prop.setAccessType(type);
+                }
+                nameToProperty.put(prop.getName(), prop);
+            }
         }
-      }
     }
 
     private ConstraintsListenerConvertor getConstraintsListener() {
@@ -445,7 +444,7 @@ public class RADVisualComponent extends RADComponent {
         private LayoutComponent component;
         private int dimension;
         
-        private LayoutComponentSizeProperty(LayoutComponent component, int dimension) {
+        private LayoutComponentSizeProperty(int dimension) {
             super(dimension == LayoutConstants.HORIZONTAL ? PROP_LAYOUT_COMPONENT_HORIZONTAL_SIZE
                 : PROP_LAYOUT_COMPONENT_VERTICAL_SIZE, Integer.class, null, null);
             boolean horizontal = dimension == LayoutConstants.HORIZONTAL;
@@ -453,11 +452,22 @@ public class RADVisualComponent extends RADComponent {
                 "PROP_LAYOUT_COMPONENT_HORIZONTAL_SIZE" : "PROP_LAYOUT_COMPONENT_VERTICAL_SIZE")); // NOI18N
             setShortDescription(FormUtils.getBundleString(horizontal ?
                 "HINT_LAYOUT_COMPONENT_HORIZONTAL_SIZE" : "HINT_LAYOUT_COMPONENT_VERTICAL_SIZE")); // NOI18N
-            this.component = component;
             this.dimension = dimension;
             setValue("canEditAsText", Boolean.TRUE); // NOI18N
         }
-            
+
+        private LayoutComponent getComponent() {
+            if (component == null) {
+                component = getFormModel().getLayoutModel().getLayoutComponent(getId());
+                if (component != null) {
+                    String sourcePropertyName = (dimension == LayoutConstants.HORIZONTAL) ?
+                        LayoutConstants.PROP_HORIZONTAL_PREF_SIZE : LayoutConstants.PROP_VERTICAL_PREF_SIZE;
+                    component.addPropertyChangeListener(new PropertySynchronizer(sourcePropertyName, getName()));
+                }
+            }
+            return component;
+        }
+
         @Override
         public void setValue(Object value) {
             if (!(value instanceof Integer))
@@ -466,12 +476,12 @@ public class RADVisualComponent extends RADComponent {
             Integer oldValue = (Integer)getValue();
             Integer newValue = (Integer)value;
             LayoutModel layoutModel = getFormModel().getLayoutModel();
-            LayoutInterval interval = component.getLayoutInterval(dimension);
+            LayoutInterval interval = getComponent().getLayoutInterval(dimension);
             Object layoutUndoMark = layoutModel.getChangeMark();
             javax.swing.undo.UndoableEdit ue = layoutModel.getUndoableEdit();
             boolean autoUndo = true;
             try {
-                layoutModel.setIntervalSize(interval, interval.getMinimumSize(false), newValue, interval.getMaximumSize(false));
+                layoutModel.setUserIntervalSize(interval, dimension, newValue.intValue());
                 getNodeReference().firePropertyChangeHelper(
                     getName(), oldValue, newValue);
                 autoUndo = false;
@@ -488,7 +498,8 @@ public class RADVisualComponent extends RADComponent {
         
         @Override
         public Object getValue() {
-          return component.getLayoutInterval(dimension).getPreferredSize(false);
+            int size = getComponent().getLayoutInterval(dimension).getPreferredSize();
+            return new Integer(size);
         }
 
         @Override
@@ -498,12 +509,12 @@ public class RADVisualComponent extends RADComponent {
         
         @Override
         public void restoreDefaultValue() {
-            setValue(LayoutConstants.NOT_EXPLICITLY_DEFINED);
+            setValue(new Integer(LayoutConstants.NOT_EXPLICITLY_DEFINED));
         }
         
         @Override
         public boolean isDefaultValue() {
-            return (Integer) getValue() == LayoutConstants.NOT_EXPLICITLY_DEFINED;
+            return ((Integer)getValue()).intValue() == LayoutConstants.NOT_EXPLICITLY_DEFINED;
         }
         
         @Override
@@ -519,7 +530,7 @@ public class RADVisualComponent extends RADComponent {
                 @Override
                 public String getAsText() {
                     Integer value = (Integer)getValue();
-                    if (value == LayoutConstants.NOT_EXPLICITLY_DEFINED) {
+                    if (value.intValue() == LayoutConstants.NOT_EXPLICITLY_DEFINED) {
                         return notExplicitelyDefined;
                     } else {
                         return value.toString();
@@ -551,7 +562,28 @@ public class RADVisualComponent extends RADComponent {
         }
     
     }
-    
+
+    class PropertySynchronizer implements PropertyChangeListener {
+        private String sourcePropertyName;
+        private String targetPropertyName;
+
+        PropertySynchronizer(String sourcePropertyName, String targetPropertyName) {
+            this.sourcePropertyName = sourcePropertyName;
+            this.targetPropertyName = targetPropertyName;
+        }
+
+        @Override
+        public void propertyChange(PropertyChangeEvent evt) {
+            String propName = evt.getPropertyName();
+            if (sourcePropertyName.equals(propName)) {
+                RADComponentNode node = getNodeReference();
+                if (node != null) {
+                    node.firePropertyChangeHelper(targetPropertyName, null, null);
+                }
+            }
+        }
+    }
+
     /**
      * Property that determines whether the component should be resizable.
      */
@@ -559,7 +591,7 @@ public class RADVisualComponent extends RADComponent {
         private LayoutComponent component;
         private int dimension;
         
-        private LayoutComponentResizableProperty(LayoutComponent component, int dimension) {
+        private LayoutComponentResizableProperty(int dimension) {
             super(dimension == LayoutConstants.HORIZONTAL ? PROP_LAYOUT_COMPONENT_HORIZONTAL_RESIZABLE
                 : PROP_LAYOUT_COMPONENT_VERTICAL_RESIZABLE, Boolean.class, null, null);
             boolean horizontal = dimension == LayoutConstants.HORIZONTAL;
@@ -567,10 +599,21 @@ public class RADVisualComponent extends RADComponent {
                 "PROP_LAYOUT_COMPONENT_HORIZONTAL_RESIZABLE" : "PROP_LAYOUT_COMPONENT_VERTICAL_RESIZABLE")); // NOI18N
             setShortDescription(FormUtils.getBundleString(horizontal ?
                 "HINT_LAYOUT_COMPONENT_HORIZONTAL_RESIZABLE" : "HINT_LAYOUT_COMPONENT_VERTICAL_RESIZABLE")); // NOI18N
-            this.component = component;
             this.dimension = dimension;
         }
-            
+
+        private LayoutComponent getComponent() {
+            if (component == null) {
+                component = getFormModel().getLayoutModel().getLayoutComponent(getId());
+                if (component != null) {
+                    String sourcePropertyName = (dimension == LayoutConstants.HORIZONTAL) ?
+                        LayoutConstants.PROP_HORIZONTAL_MAX_SIZE : LayoutConstants.PROP_VERTICAL_MAX_SIZE;
+                    component.addPropertyChangeListener(new PropertySynchronizer(sourcePropertyName, getName()));
+                }
+            }
+            return component;
+        }
+
         @Override
         public void setValue(Object value) {
             if (!(value instanceof Boolean))
@@ -578,17 +621,14 @@ public class RADVisualComponent extends RADComponent {
             
             Boolean oldValue = (Boolean)getValue();
             Boolean newValue = (Boolean)value;
-            boolean resizable = newValue;
+            boolean resizable = newValue.booleanValue();
             LayoutModel layoutModel = getFormModel().getLayoutModel();
-            LayoutInterval interval = component.getLayoutInterval(dimension);
+            LayoutInterval interval = getComponent().getLayoutInterval(dimension);
             Object layoutUndoMark = layoutModel.getChangeMark();
             javax.swing.undo.UndoableEdit ue = layoutModel.getUndoableEdit();
             boolean autoUndo = true;
             try {
-                layoutModel.setIntervalSize(interval,
-                    resizable ? LayoutConstants.NOT_EXPLICITLY_DEFINED : LayoutConstants.USE_PREFERRED_SIZE,
-                    interval.getPreferredSize(false),
-                    resizable ? Short.MAX_VALUE : LayoutConstants.USE_PREFERRED_SIZE);
+                layoutModel.setUserIntervalSize(interval, dimension, interval.getPreferredSize(), resizable);
                 getNodeReference().firePropertyChangeHelper(
                     getName(), oldValue, newValue);                
                 autoUndo = false;
@@ -605,9 +645,9 @@ public class RADVisualComponent extends RADComponent {
         
         @Override
         public Object getValue() {
-            int pref = component.getLayoutInterval(dimension).getPreferredSize(false);
-            int max = component.getLayoutInterval(dimension).getMaximumSize(false);
-            return (max != pref) && (max != LayoutConstants.USE_PREFERRED_SIZE);
+            int pref = getComponent().getLayoutInterval(dimension).getPreferredSize();
+            int max = getComponent().getLayoutInterval(dimension).getMaximumSize();
+            return Boolean.valueOf((max != pref) && (max != LayoutConstants.USE_PREFERRED_SIZE));
         }
 
         @Override

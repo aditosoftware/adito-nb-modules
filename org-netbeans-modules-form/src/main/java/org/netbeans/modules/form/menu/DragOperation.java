@@ -47,7 +47,10 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Insets;
 import java.awt.Point;
+import java.awt.dnd.DropTargetDropEvent;
+import java.awt.event.MouseEvent;
 import java.util.ArrayList;
+import java.util.EventObject;
 import java.util.List;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JComponent;
@@ -78,9 +81,8 @@ class DragOperation {
     private JComponent dragComponent;
     private boolean started = false;
     private JComponent targetComponent;
-    private enum Op { PICK_AND_PLOP_FROM_PALETTE, INTER_MENU_DRAG, NO_MENUBAR }
-
-  private Op op = Op.PICK_AND_PLOP_FROM_PALETTE;
+    private enum Op { PICK_AND_PLOP_FROM_PALETTE, INTER_MENU_DRAG, NO_MENUBAR };
+    private Op op = Op.PICK_AND_PLOP_FROM_PALETTE;
     private JMenuItem payloadComponent;
     private List<JMenuItem> payloadComponents;
     private PaletteItem currentItem;
@@ -124,7 +126,7 @@ class DragOperation {
             payloadComponents.add(item);
         }
         
-        dragComponent = createDragFeedbackComponent(item, null);
+        dragComponent = (JMenuItem) createDragFeedbackComponent(item, null);
         dragComponent.setSize(dragComponent.getPreferredSize());
         dragComponent.setLocation(pt);
         menuEditLayer.layers.add(dragComponent, JLayeredPane.DRAG_LAYER);
@@ -146,8 +148,7 @@ class DragOperation {
         PaletteItem paletteItem = PaletteUtils.getSelectedItem();
         if(paletteItem != null) {
             MetaComponentCreator creator = menuEditLayer.formDesigner.getFormModel().getComponentCreator();
-            RADVisualComponent precreated = creator.precreateVisualComponent(
-                    paletteItem.getComponentClassSource());
+            RADVisualComponent precreated = creator.precreateVisualComponent(paletteItem);
             if(precreated != null) {
                 Object comp = precreated.getBeanInstance();
                 if(comp instanceof JComponent) {
@@ -197,7 +198,7 @@ class DragOperation {
                 dragItem.setText(item.getText());
                 dragItem.setIcon(item.getIcon());
                 if(! (item instanceof JMenu)) {
-                    if(DropTargetLayer.isMetal()) {
+                    if(!DropTargetLayer.isMetal()) {
                         dragItem.setAccelerator(item.getAccelerator());
                     }
                 }
@@ -220,7 +221,7 @@ class DragOperation {
             dragComponent = null;
         }
         
-        if(menuEditLayer.doesFormContainMenuBar()) {
+        if(!menuEditLayer.doesFormContainMenuBar()) {
             //op = Op.NO_MENUBAR;
             menuEditLayer.showMenubarWarning = true;
             FormEditor.getAssistantModel(menuEditLayer.formDesigner.getFormModel()).setContext("missingMenubar"); // NOI18N
@@ -301,16 +302,20 @@ class DragOperation {
     }
     
     
-    
-    void end(Point pt) {
-        end(pt, true);
+    // The EventObject is needed in order to determine the Shift modifier
+    void end(EventObject e) {
+        end(e, true);
     }
-    void end(Point pt, boolean clear) {
+    void end(EventObject e, boolean clear) {
+        Point pt = (e instanceof MouseEvent) ? ((MouseEvent)e).getPoint() : ((DropTargetDropEvent)e).getLocation();
         started = false;
         currentItem = null;
         if(dragComponent == null) return;
-        menuEditLayer.layers.remove(dragComponent);
-        menuEditLayer.dropTargetLayer.clearDropTarget();
+        if ((e instanceof DropTargetDropEvent)
+                || ((e instanceof MouseEvent) && !((MouseEvent) e).isShiftDown())) {// #195795: Do not deselect the dropTarget when Shift is pressed
+            menuEditLayer.layers.remove(dragComponent);
+            menuEditLayer.dropTargetLayer.clearDropTarget();
+        }
         
         switch (op) {
         case PICK_AND_PLOP_FROM_PALETTE: completePickAndPlopFromPalette(pt, clear); break;
@@ -319,8 +324,11 @@ class DragOperation {
         }
         
         menuEditLayer.glassLayer.requestFocusInWindow();
-        payloadComponent = null;
-        targetComponent = null;
+        if ((e instanceof DropTargetDropEvent)
+                || ((e instanceof MouseEvent) && !((MouseEvent) e).isShiftDown())) {// #195795: Do not deselect the dropTarget when Shift is pressed
+            payloadComponent = null;
+            targetComponent = null;
+        }
         menuEditLayer.repaint();
         
     }
@@ -332,6 +340,8 @@ class DragOperation {
             menuEditLayer.repaint();
         }
         menuEditLayer.dropTargetLayer.clearDropTarget();
+        // #133628: deselect menu-related component in the palette
+        menuEditLayer.formDesigner.toggleSelectionMode();
     }
     
     // only looks at JMenu and JMenubar RADComponents as well as anything in the popups
@@ -411,25 +421,12 @@ class DragOperation {
     private void completePickAndPlopFromPalette(Point pt, boolean clear) {
         PaletteItem paletteItem = PaletteUtils.getSelectedItem();
         if(paletteItem == null) return;
-        
-        if(targetComponent == null) return;
-        
-        
-        //check if it's still a valid target
-        JComponent tcomp = getDeepestComponent(pt);
-        if(targetComponent != tcomp) {
-            if(clear) {
-                menuEditLayer.formDesigner.toggleSelectionMode();
-            }
-            return;
-        }
-        
+                
         JComponent newComponent = null;
         // get the pre-created component
         MetaComponentCreator creator = menuEditLayer.formDesigner.getFormModel().getComponentCreator();
         if(creator != null) {
-            RADVisualComponent precreated = creator.precreateVisualComponent(
-                    paletteItem.getComponentClassSource());
+            RADVisualComponent precreated = creator.precreateVisualComponent(paletteItem);
             if(precreated != null) {
                 newComponent = (JComponent) precreated.getBeanInstance();
             }
@@ -448,6 +445,25 @@ class DragOperation {
         creator.getPrecreatedLayoutComponent();
         
         Point pt2 = SwingUtilities.convertPoint(menuEditLayer.glassLayer, pt, targetComponent);
+        
+        JComponent tcomp = getDeepestComponent(pt);
+        // targetComponent was a valid drop-target (paletteItem was above it before)
+        // but now pt's position indicates that paletteItem is no longer above it
+        if(targetComponent != tcomp) {
+            // #115563: add menu-related component to the Inspector's "Other Components" node
+            creator.addPrecreatedComponent(null, null);
+            if(clear) {
+                menuEditLayer.formDesigner.toggleSelectionMode();
+            }
+            return;
+        }
+        if(targetComponent == null) {
+            // #115563: add menu-related component to the Inspector's "Other Components" node
+            creator.addPrecreatedComponent(null, null);
+            // #133628: deselect menu-related component in the palette
+            menuEditLayer.formDesigner.toggleSelectionMode();
+            return;
+        }
         // dragged to a menu, add inside the menu instead of next to it
         if(targetComponent instanceof JMenu) {
             

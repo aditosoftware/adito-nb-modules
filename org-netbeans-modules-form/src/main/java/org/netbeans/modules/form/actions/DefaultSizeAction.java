@@ -60,11 +60,10 @@ public class DefaultSizeAction extends NodeAction {
 
     @Override
     protected boolean enable(Node[] nodes) {
-      for (Node node : nodes)
-      {
-        if (getValidComponent(node) == null)
-          return false; // all components must be valid
-      }
+        for (int i=0; i < nodes.length; i++) {
+            if (getValidComponent(nodes[i]) == null)
+                return false; // all components must be valid
+        }
         return true;
     }
 
@@ -80,39 +79,30 @@ public class DefaultSizeAction extends NodeAction {
         boolean autoUndo = true;
 
         try {
-          for (Node node : nodes)
-          {
-            RADVisualComponent metacomp = getValidComponent(node);
-            if (metacomp == null)
-              return; // all components must be valid
+            for (int i=0; i < nodes.length; i++) {
+                RADVisualComponent metacomp = getValidComponent(nodes[i]);
+                if (metacomp == null)
+                    return; // all components must be valid
 
-            if (layoutDesigner == null)
-            {
-              formModel = metacomp.getFormModel();
-              formDesigner = FormEditor.getFormDesigner(formModel);
-              layoutDesigner = formDesigner.getLayoutDesigner();
-              layoutModel = formModel.getLayoutModel();
-              layoutUndoMark = layoutModel.getChangeMark();
-              layoutUE = layoutModel.getUndoableEdit();
-            }
-            layoutDesigner.setDefaultSize(metacomp.getId());
-            if (metacomp instanceof RADVisualContainer)
-            {
-              formModel.fireContainerLayoutChanged((RADVisualContainer) metacomp, null, null, null);
-              // [should be recursive]
-            }
-            if (topDesignComponent == null && metacomp == formDesigner.getTopDesignComponent())
-            {
-              topDesignComponent = metacomp;
-            }
-            else
-            { // update container the component is in
-              formModel.fireContainerLayoutChanged(metacomp.getParentContainer(), null, null, null);
-            }
-          }
-
-            if (topDesignComponent != null) {
-                formDesigner.resetDesignerSize();
+                if (layoutDesigner == null) {
+                    formModel = metacomp.getFormModel();
+                    formDesigner = FormEditor.getFormDesigner(formModel);
+                    layoutDesigner = formDesigner.getLayoutDesigner();
+                    layoutModel = formModel.getLayoutModel();
+                    layoutUndoMark = layoutModel.getChangeMark();
+                    layoutUE = layoutModel.getUndoableEdit();
+                }
+                layoutDesigner.setDefaultSize(metacomp.getId());
+                if (metacomp instanceof RADVisualContainer) {
+                    formModel.fireContainerLayoutChanged((RADVisualContainer)metacomp, null, null, null);
+                    // [should be recursive]
+                }
+                if (topDesignComponent == null && metacomp == formDesigner.getTopDesignComponent()) {
+                    topDesignComponent = metacomp;
+                }
+                else { // update container the component is in
+                    formModel.fireContainerLayoutChanged(metacomp.getParentContainer(), null, null, null);
+                }
             }
             autoUndo = false;
         } finally  {

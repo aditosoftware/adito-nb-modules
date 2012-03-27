@@ -44,27 +44,15 @@
 
 package org.netbeans.modules.form.project;
 
-import java.io.File;
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URI;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
-//import org.netbeans.api.java.project.classpath.ProjectClassPathModifier;
-import org.netbeans.api.project.FileOwnerQuery;
-import org.netbeans.api.project.Project;
-import org.netbeans.api.project.ant.AntArtifact;
-import org.netbeans.api.project.ant.AntArtifactQuery;
-import org.netbeans.api.project.libraries.Library;
-import org.netbeans.api.project.libraries.LibraryManager;
 import org.openide.filesystems.FileObject;
 import org.openide.filesystems.FileUtil;
-import org.openide.util.Exceptions;
-import org.openide.util.NbBundle;
+import org.openide.util.Lookup;
 
 /**
  * Describes a source (i.e. classpath) of a component class to be used in form
@@ -73,9 +61,9 @@ import org.openide.util.NbBundle;
  * @author Tomas Pavek, Jesse Glick
  */
 public final class ClassSource {
-
     private final String className;
-  private final Collection<? extends Entry> entries;
+    private final String typeParameters;
+    private final Collection<? extends Entry> entries;
 
     /**
      * @param className name of the class, can be null
@@ -89,13 +77,18 @@ public final class ClassSource {
     public ClassSource(String className, Collection<? extends Entry> entries, String typeParameters) {
         this.className = className;
         this.entries = entries;
+        this.typeParameters = typeParameters;
     }
 
     public String getClassName() {
         return className;
     }
 
-  public Collection<? extends Entry> getEntries() {
+    public String getTypeParameters() {
+        return typeParameters;
+    }
+
+    public Collection<? extends Entry> getEntries() {
         return entries;
     }
 
@@ -125,10 +118,6 @@ public final class ClassSource {
         return true;
     }
 
-    private static final String TYPE_JAR = "jar"; // NOI18N
-    private static final String TYPE_LIBRARY = "library"; // NOI18N
-    private static final String TYPE_PROJECT = "project"; // NOI18N
-
     /**
      * Reconstruct from serialized form.
      * Used by {@link PaletteItemDataObject} for storing *.palette_item files.
@@ -136,40 +125,14 @@ public final class ClassSource {
      * @param name as in {@link Entry#getPicklingName}
      */
     public static Entry unpickle(String type, String name) {
-        if (type.equals(TYPE_JAR)) {
-            return new JarEntry(new File(name));
-        } else if (type.equals(TYPE_LIBRARY)) {
-            Library lib;
-            int hash = name.indexOf('#');
-            if (hash != -1) {
-                try {
-                    lib = LibraryManager.forLocation(new URL(name.substring(0, hash))).getLibrary(name.substring(hash + 1));
-                } catch (IllegalArgumentException x) {
-                    Exceptions.printStackTrace(x);
-                    return null;
-                } catch (MalformedURLException x) {
-                    Exceptions.printStackTrace(x);
-                    return null;
-                }
-            } else {
-                lib = LibraryManager.getDefault().getLibrary(name);
-            }
-            return lib != null ? new LibraryEntry(lib) : null;
-        } else if (type.equals(TYPE_PROJECT)) {
-            File file = new File(name);
-            file = FileUtil.normalizeFile(file);
-            AntArtifact aa = AntArtifactQuery.findArtifactFromFile(file);
-            return aa != null ? new ProjectEntry(aa) : null;
-        } else {
-            return null;
-        }
+        Resolver resolver = Lookup.getDefault().lookup(Resolver.class);
+        return resolver.resolve(type, name);
     }
 
     /**
      * One logical component of the classpath.
      */
     public static abstract class Entry {
-        private Entry() {}
         /** List of folder URLs (dirs or roots of JARs) making up the classpath. */
         public abstract List<URL> getClasspath();
         /** Tries to add the classpath entries to a project, as with {@link ProjectClassPathModifier}. 
@@ -192,144 +155,15 @@ public final class ClassSource {
             return super.toString() + getClasspath();
         }
     }
-
-    private static URL translateURL(URL u) {
-        if (FileUtil.isArchiveFile(u)) {
-            return FileUtil.getArchiveRoot(u);
-        } else {
-            return u;
-        }
-    }
-
-    /** Entry based on a single JAR file. */
-    public static final class JarEntry extends Entry {
-        private final File jar;
-        public JarEntry(File jar) {
-            assert jar != null;
-            this.jar = jar;
-        }
-
-      @Override
-        public List<URL> getClasspath() {
-            try {
-                return Collections.singletonList(translateURL(jar.toURI().toURL()));
-            } catch (MalformedURLException x) {
-                assert false : x;
-                return Collections.emptyList();
-            }
-        }
-        @Override
-        public Boolean addToProjectClassPath(FileObject projectArtifact, String classPathType) throws IOException, UnsupportedOperationException {
-            URL u = jar.toURI().toURL();
-            FileObject jarFile = FileUtil.toFileObject(jar);
-            if (jarFile == null) {
-                return Boolean.FALSE; // Issue 147451
-            }
-            if (FileUtil.isArchiveFile(jarFile)) {
-                u = FileUtil.getArchiveRoot(u);
-            }
-          // TODO: stripped
-            return false; //Boolean.valueOf(ProjectClassPathModifier.addRoots(new URL[] {u}, projectArtifact, classPathType));
-        }
-        @Override
-        public String getDisplayName() {
-            return NbBundle.getMessage(ClassSource.class, "FMT_JarSource", jar.getAbsolutePath());
-        }
-        @Override
-        public String getPicklingType() {
-            return TYPE_JAR;
-        }
-        @Override
-        public String getPicklingName() {
-            return jar.getAbsolutePath();
-        }
-    }
-
-    /** Entry based on a (global or project) library. */
-    public static final class LibraryEntry extends Entry {
-        private final Library lib;
-        public LibraryEntry(Library lib) {
-            assert lib != null;
-            this.lib = lib;
-        }
-
-      @Override
-        public List<URL> getClasspath() {
-            // No need to translate to jar protocol; Library.getContent should have done this already.
-            return lib.getContent("classpath"); // NOI18N
-        }
-        @Override
-        public Boolean addToProjectClassPath(FileObject projectArtifact, String classPathType) throws IOException, UnsupportedOperationException {
-          // TODO: stripped
-            return false; //Boolean.valueOf(ProjectClassPathModifier.addLibraries(new Library[] {lib}, projectArtifact, classPathType));
-        }
-        @Override
-        public String getDisplayName() {
-            return NbBundle.getMessage(ClassSource.class, "FMT_LibrarySource", lib.getDisplayName());
-        }
-        @Override
-        public String getPicklingType() {
-            return TYPE_LIBRARY;
-        }
-        @Override
-        public String getPicklingName() {
-            // For backward compatibility with old *.palette_item files, treat bare names as global libraries.
-            // Project libraries are given as e.g. "file:/some/where/libs/index.properties#mylib"
-            LibraryManager mgr = lib.getManager();
-            if (mgr == LibraryManager.getDefault()) {
-                return lib.getName();
-            } else {
-                return mgr.getLocation() + "#" + lib.getName(); // NOI18N
-            }
-        }
-    }
-
-    /** Entry based on a (sub-)project build artifact. */
-    public static final class ProjectEntry extends Entry {
-        private final AntArtifact artifact;
-        public ProjectEntry(AntArtifact artifact) {
-            assert artifact != null;
-            this.artifact = artifact;
-        }
-
-      @Override
-        public List<URL> getClasspath() {
-            List<URL> cp = new ArrayList<URL>();
-            for (URI loc : artifact.getArtifactLocations()) {
-                try {
-                    cp.add(translateURL(artifact.getScriptLocation().toURI().resolve(loc).normalize().toURL()));
-                } catch (MalformedURLException x) {
-                    assert false : x;
-                }
-            }
-            return cp;
-        }
-        @Override
-        public Boolean addToProjectClassPath(FileObject projectArtifact, String classPathType) throws IOException, UnsupportedOperationException {
-            if (artifact.getProject() != FileOwnerQuery.getOwner(projectArtifact)) {
-              // TODO: stripped
-                return false; //Boolean.valueOf(ProjectClassPathModifier.addAntArtifacts(new AntArtifact[] {artifact}, artifact.getArtifactLocations(), projectArtifact, classPathType));
-            }
-            return Boolean.FALSE;
-        }
-        @Override
-        public String getDisplayName() {
-            Project p = artifact.getProject();
-            return NbBundle.getMessage(ClassSource.class, "FMT_ProjectSource",
-                    p != null ? FileUtil.getFileDisplayName(p.getProjectDirectory()) : artifact.getScriptLocation().getAbsolutePath());
-        }
-        @Override
-        public String getPicklingType() {
-            return TYPE_PROJECT;
-        }
-        @Override
-        public String getPicklingName() {
-            if (artifact.getArtifactLocations().length > 0) {
-                return new File(artifact.getScriptLocation().toURI().resolve(artifact.getArtifactLocations()[0]).normalize()).getAbsolutePath();
-            } else {
-                return "";
-            }
-        }
+    
+    public static interface Resolver {
+        /**
+         * Reconstruct from serialized form.
+         * Used by {@link PaletteItemDataObject} for storing *.palette_item files.
+         * @param type as in {@link Entry#getPicklingType}
+         * @param name as in {@link Entry#getPicklingName}
+         */
+        Entry resolve(String type, String name);        
     }
 
 }

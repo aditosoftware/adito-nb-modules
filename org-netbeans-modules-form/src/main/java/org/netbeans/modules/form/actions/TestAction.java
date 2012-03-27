@@ -64,6 +64,7 @@ import org.netbeans.modules.form.palette.PaletteItem;
 import org.netbeans.modules.form.palette.PaletteUtils;
 import org.netbeans.modules.form.project.ClassPathUtils;
 import org.openide.filesystems.FileObject;
+import org.openide.util.Lookup;
 
 /**
  * Preview design action.
@@ -79,9 +80,21 @@ public class TestAction extends CallableSystemAction implements Runnable {
     private Map<String,Map<String,Frame>> previews = new HashMap<String,Map<String,Frame>>();
 
     public TestAction() {
-        setEnabled(false);
     }
 
+    @Override
+    public boolean isEnabled() {
+        FormDesigner designer = FormDesigner.getSelectedDesigner();
+        return designer != null && designer.getTopDesignComponent() != null;
+    }
+
+    /**
+     * Forces re-evaluation of enabled state.
+     */
+    public void updateEnabled() {
+        firePropertyChange("enabled", null, null); // NOI18N
+    }
+    
     @Override
     protected boolean asynchronous() {
         return false;
@@ -115,7 +128,7 @@ public class TestAction extends CallableSystemAction implements Runnable {
 
     @Override
     public void performAction() {
-        if (formDesigner != null) {
+        if (FormDesigner.getSelectedDesigner() != null) {
             selectedLaf = null;
             if (java.awt.EventQueue.isDispatchThread())
                 run();
@@ -126,9 +139,11 @@ public class TestAction extends CallableSystemAction implements Runnable {
 
     @Override
     public void run() {
-        RADVisualComponent topComp = formDesigner.getTopDesignComponent();
-        if (topComp == null)
+        FormDesigner designer = FormDesigner.getSelectedDesigner();
+        RADVisualComponent topComp = designer != null ? designer.getTopDesignComponent() : null;
+        if (topComp == null) {
             return;
+        }
 
         RADVisualComponent parent = topComp.getParentContainer();
         while (parent != null) {
@@ -136,12 +151,24 @@ public class TestAction extends CallableSystemAction implements Runnable {
             parent = topComp.getParentContainer();
         }
 
-        FormModel formModel = formDesigner.getFormModel();
         RADVisualFormContainer formContainer =
             topComp instanceof RADVisualFormContainer ?
                 (RADVisualFormContainer) topComp : null;
+        
+        createPreview(topComp, formContainer);
+    }
 
+    /**
+     * Creates preview of some {@code RADVisualComponent}.
+     * 
+     * @param componentToPreview component to preview.
+     * @param formContainer corresponding {@code RADVisualFormContainer} (can be {@code null}).
+     * @return preview of {@code componentToPreview}.
+     */
+    public Frame createPreview(RADVisualComponent componentToPreview,
+            RADVisualFormContainer formContainer) {
         try {
+            FormModel formModel = componentToPreview.getFormModel();
             if (selectedLaf == null) {
                 selectedLaf = UIManager.getLookAndFeel().getClass();
             }
@@ -161,7 +188,7 @@ public class TestAction extends CallableSystemAction implements Runnable {
             // create a copy of form
             final ClassLoader classLoader = ClassPathUtils.getProjectClassLoader(formFile);
             final FormLAF.PreviewInfo previewInfo = FormLAF.initPreviewLaf(selectedLaf, classLoader);
-            final Frame frame = (Frame) FormDesigner.createFormView(topComp, previewInfo);
+            final Frame frame = (Frame) FormDesigner.createFormView(componentToPreview, previewInfo);
             frame.setEnabled(true); // Issue 178457
             frame.addWindowListener(new WindowAdapter() {
                 @Override
@@ -174,12 +201,13 @@ public class TestAction extends CallableSystemAction implements Runnable {
             // set title
             String title = frame.getTitle();
             if (title == null || "".equals(title)) { // NOI18N
-                title = topComp == formModel.getTopRADComponent() ?
-                        formModel.getName() : topComp.getName();
+                title = componentToPreview == formModel.getTopRADComponent() ?
+                        formModel.getName() : componentToPreview.getName();
                 frame.setTitle(java.text.MessageFormat.format(
                     org.openide.util.NbBundle.getBundle(TestAction.class)
                                                .getString("FMT_TestingForm"), // NOI18N
-                    title));
+                    new Object[] { title }
+                ));
             }
 
             // prepare close operation
@@ -216,6 +244,7 @@ public class TestAction extends CallableSystemAction implements Runnable {
             }
             frame.setUndecorated(false);
             frame.setFocusableWindowState(true);
+            frame.setModalExclusionType(Dialog.ModalExclusionType.APPLICATION_EXCLUDE);
 
             // Issue 66594 and 12084
             final boolean pack = shouldPack;
@@ -234,10 +263,12 @@ public class TestAction extends CallableSystemAction implements Runnable {
                     frame.setVisible(true);
                 }
             });
+            return frame;
         }
         catch (Exception ex) {
             org.openide.ErrorManager.getDefault().notify(org.openide.ErrorManager.INFORMATIONAL, ex);
         }
+        return null;
     }
 
     @Override
@@ -255,12 +286,12 @@ public class TestAction extends CallableSystemAction implements Runnable {
 
     // -------
 
-    private FormDesigner formDesigner;
-
-    public void setFormDesigner(FormDesigner designer) {
-        formDesigner = designer;
-        setEnabled(formDesigner != null && formDesigner.getTopDesignComponent() != null);
-    }
+//    private FormDesigner formDesigner;
+//
+//    public void setFormDesigner(FormDesigner designer) {
+//        formDesigner = designer;
+//        setEnabled(formDesigner != null && formDesigner.getTopDesignComponent() != null);
+//    }
     
     // LAFMenu
 
@@ -285,79 +316,61 @@ public class TestAction extends CallableSystemAction implements Runnable {
                 
                 // Swing L&Fs
                 UIManager.LookAndFeelInfo[] lafs = UIManager.getInstalledLookAndFeels();
-              for (UIManager.LookAndFeelInfo laf1 : lafs)
-              {
-                String className = laf1.getClassName();
-                if (isSynthLAF)
-                {
-                  try
-                  {
-                    Class lafClass = Class.forName(className);
-                    if (!lafName.equals(className) && SynthLookAndFeel.class.isAssignableFrom(lafClass))
-                    {
-                      continue; // 134848, 145807: Cannot use two different SynthLookAndFeels
+                for (int i=0; i<lafs.length; i++) {
+                    String className = lafs[i].getClassName();
+                    if (isSynthLAF) {
+                        try {
+                            Class lafClass = Class.forName(className);
+                            if (!lafName.equals(className) && SynthLookAndFeel.class.isAssignableFrom(lafClass)) {
+                                continue; // 134848, 145807: Cannot use two different SynthLookAndFeels
+                            }
+                        } catch (ClassNotFoundException cnfex) {
+                            // should not happen
+                            ErrorManager.getDefault().notify(ErrorManager.INFORMATIONAL, cnfex);
+                        }
                     }
-                  }
-                  catch (ClassNotFoundException cnfex)
-                  {
-                    // should not happen
-                    ErrorManager.getDefault().notify(ErrorManager.INFORMATIONAL, cnfex);
-                  }
+                    mi = new JMenuItem(lafs[i].getName());
+                    mi.putClientProperty("lafInfo", new LookAndFeelItem(lafs[i].getClassName())); // NOI18N
+                    mi.addActionListener(this);
+                    popup.add(mi);
                 }
-                mi = new JMenuItem(laf1.getName());
-                mi.putClientProperty("lafInfo", new LookAndFeelItem(laf1.getClassName())); // NOI18N
-                mi.addActionListener(this);
-                popup.add(mi);
-              }
 
                 // L&Fs from the Palette
                 Node[] cats = PaletteUtils.getCategoryNodes(PaletteUtils.getPaletteNode(), false);
-              for (Node cat : cats)
-              {
-                if ("LookAndFeels".equals(cat.getName()))
-                { // NOI18N
-                  final Node lafNode = cat;
-                  Node[] items = PaletteUtils.getItemNodes(lafNode, true);
-                  if (items.length != 0)
-                  {
-                    popup.add(new JSeparator());
-                  }
-                  for (Node item : items)
-                  {
-                    PaletteItem pitem = item.getLookup().lookup(PaletteItem.class);
-                    boolean supported = false;
-                    try
-                    {
-                      Class clazz = pitem.getComponentClass();
-                      if ((clazz != null) && (LookAndFeel.class.isAssignableFrom(clazz)))
-                      {
-                        LookAndFeel laf = (LookAndFeel) clazz.newInstance();
-                        supported = laf.isSupportedLookAndFeel();
-                        if (supported && isSynthLAF && !lafName.equals(pitem.getComponentClassName())
-                            && SynthLookAndFeel.class.isAssignableFrom(clazz))
-                        {
-                          supported = false; // 134848, 145807: Cannot use two different SynthLookAndFeels
+                for (int i=0; i<cats.length; i++) {
+                    if ("LookAndFeels".equals(cats[i].getName())) { // NOI18N
+                        final Node lafNode = cats[i];
+                        Node[] items = PaletteUtils.getItemNodes(lafNode, true);
+                        if (items.length != 0) {
+                            popup.add(new JSeparator());
                         }
-                      }
+                        for (int j=0; j<items.length; j++) {
+                            PaletteItem pitem = items[j].getLookup().lookup(PaletteItem.class);
+                            boolean supported = false;
+                            try {
+                                Class clazz = pitem.getComponentClass();
+                                if ((clazz != null) && (LookAndFeel.class.isAssignableFrom(clazz))) {
+                                    LookAndFeel laf = (LookAndFeel)clazz.newInstance();
+                                    supported = laf.isSupportedLookAndFeel();
+                                    if (supported && isSynthLAF && !lafName.equals(pitem.getComponentClassName())
+                                            && SynthLookAndFeel.class.isAssignableFrom(clazz)) {
+                                        supported = false; // 134848, 145807: Cannot use two different SynthLookAndFeels
+                                    }
+                                }
+                            } catch (Exception ex) {
+                                ErrorManager.getDefault().notify(ErrorManager.INFORMATIONAL, ex);
+                            } catch (LinkageError ex) {
+                                ErrorManager.getDefault().notify(ErrorManager.INFORMATIONAL, ex);
+                            }
+                            if (supported) {
+                                mi = new JMenuItem(items[j].getDisplayName());
+                                mi.putClientProperty("lafInfo", new LookAndFeelItem(pitem)); // NOI18N
+                                mi.addActionListener(this);
+                                popup.add(mi);
+                            }
+                        }
                     }
-                    catch (Exception ex)
-                    {
-                      ErrorManager.getDefault().notify(ErrorManager.INFORMATIONAL, ex);
-                    }
-                    catch (LinkageError ex)
-                    {
-                      ErrorManager.getDefault().notify(ErrorManager.INFORMATIONAL, ex);
-                    }
-                    if (supported)
-                    {
-                      mi = new JMenuItem(item.getDisplayName());
-                      mi.putClientProperty("lafInfo", new LookAndFeelItem(pitem)); // NOI18N
-                      mi.addActionListener(this);
-                      popup.add(mi);
-                    }
-                  }
                 }
-              }
 
                 initialized = true;
             }
@@ -399,13 +412,18 @@ public class TestAction extends CallableSystemAction implements Runnable {
             this.className = pitem.getComponentClassName();
         }
 
-      public Class getLAFClass() throws ClassNotFoundException {
+        public String getClassName() {
+            return className;
+        }
+
+        public Class getLAFClass() throws ClassNotFoundException {
             Class clazz;
             if (pitem == null) {
                 if (className == null) {
                     clazz = UIManager.getLookAndFeel().getClass();
                 } else {
-                    clazz = Class.forName(className);
+                    ClassLoader classLoader = Lookup.getDefault().lookup(ClassLoader.class);
+                    clazz = Class.forName(className, true, classLoader);
                 }
             } else {
                 clazz = pitem.getComponentClass();

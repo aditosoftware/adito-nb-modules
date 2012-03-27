@@ -106,6 +106,8 @@ public abstract class FormProperty extends Node.Property {
     public static final int NO_READ = DETACHED_READ | NO_READ_PROP; // no reading from property (bits 0,2)
     public static final int NO_WRITE = DETACHED_WRITE | NO_WRITE_PROP; // no writing to property (bits 1,3)
 
+    // Placeholder for the default value
+    public static final Object DEFAULT_VALUE = new Object();
 
     // ------------------------
     // variables
@@ -286,8 +288,9 @@ public abstract class FormProperty extends Node.Property {
                                               IllegalArgumentException,
                                               InvocationTargetException
     {
-//        if (!canWrite())
-//            throw new IllegalAccessException("Not a writeable property: "+getName());
+        if (value == DEFAULT_VALUE) {
+            value = getDefaultValue();
+        }
         // let the registered converters do something with the value (e.g. i18n)
         if (fireChanges)
             value = convertValue(value);
@@ -536,8 +539,8 @@ public abstract class FormProperty extends Node.Property {
     }
 
     /** This method updates state of the property according to the target
-     * object. This may be usefulting target objec when property needs to be initialized
-     * with exist. But this approach doesn't work well with
+     * object. This may be useful when property needs to be initialized
+     * with existing target object. But this approach doesn't work well with
      * bound and derived properties...
      * 
      * @throws java.lang.IllegalAccessException when there is an access problem.
@@ -725,6 +728,39 @@ public abstract class FormProperty extends Node.Property {
             e.printStackTrace();
         }
         return null;
+    }
+
+    /** Gets the java code for setting the property value (without the object
+     * on which the property is set, and without semicolon at the end).
+     * This method is optional. Example: setText("Button 1")
+     */
+    String getPartialSetterCode(String javaInitStr) {
+        if (javaInitStr == null)
+            return null;
+
+        Method writeMethod = getWriteMethod();
+        if (writeMethod == null)
+            return null;
+
+        return writeMethod.getName() + "(" + javaInitStr + ")"; // NOI18N
+    }
+
+    /** Gets the complete java code for setting the property, including the
+     * semicolon at the end of the line. This method is optional.
+     * Example: jButton1.setText("Button 1");
+     */
+    String getWholeSetterCode(String javaInitStr) {
+        return null;
+    }
+
+    /** 
+     * Gets the write method setting the property. 
+     * Used by {@link JavaCodeGenerator}.
+     *
+     * @return write method.
+     */
+    protected Method getWriteMethod() {
+	return null;
     }
     
     /** Gets the code to be generated before the property setter code
@@ -1144,15 +1180,15 @@ public abstract class FormProperty extends Node.Property {
             this.propertyEditor = propertyEditor;
         }
 
-        ValueWithEditor(Object value, PropertyEditor propertyEditor, boolean pEditorSetByUser) {
+        ValueWithEditor(Object value, PropertyEditor propertyEditor, boolean editorSetByUser) {
             this(value, propertyEditor);
-            this.editorSetByUser = pEditorSetByUser;
+            this.editorSetByUser = editorSetByUser;
         }
 
-        ValueWithEditor(Object value, int propertyEditorIndex) {
+        ValueWithEditor(Object value, int propertyEditorIndex, boolean editorSetByUser) {
             this.value = value;
             this.propertyEditorIndex = propertyEditorIndex;
-            this.editorSetByUser = true;
+            this.editorSetByUser = editorSetByUser;
         }
 
         public Object getValue() {
@@ -1163,7 +1199,11 @@ public abstract class FormProperty extends Node.Property {
             return propertyEditor;
         }
 
-      PropertyEditor getPropertyEditor(FormProperty property) {
+        boolean getEditorSetByUser() {
+            return editorSetByUser;
+        }
+
+        PropertyEditor getPropertyEditor(FormProperty property) {
             if (propertyEditor != null)
                 return propertyEditor;
             if (propertyEditorIndex < 0)

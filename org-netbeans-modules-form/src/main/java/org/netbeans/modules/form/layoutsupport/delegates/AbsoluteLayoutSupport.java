@@ -55,6 +55,7 @@ import org.netbeans.lib.awtextra.AbsoluteLayout;
 import org.netbeans.lib.awtextra.AbsoluteConstraints;
 
 import org.netbeans.modules.form.layoutsupport.*;
+//import org.netbeans.modules.form.codestructure.*; // STRIPPED
 import org.netbeans.modules.form.FormProperty;
 import org.netbeans.modules.form.FormLoaderSettings;
 
@@ -71,7 +72,14 @@ import org.netbeans.modules.form.FormLoaderSettings;
 
 public class AbsoluteLayoutSupport extends AbstractLayoutSupport {
 
-  private static Constructor constrConstructor;
+    /** The icon for AbsoluteLayout. */
+    private static String iconURL =
+        "org/netbeans/modules/form/layoutsupport/resources/AbsoluteLayout.gif"; // NOI18N
+    /** The icon for AbsoluteLayout. */
+    private static String icon32URL =
+        "org/netbeans/modules/form/layoutsupport/resources/AbsoluteLayout32.gif"; // NOI18N
+
+    private static Constructor constrConstructor;
 
     private static FormLoaderSettings formSettings = FormLoaderSettings.getInstance();
 
@@ -94,11 +102,9 @@ public class AbsoluteLayoutSupport extends AbstractLayoutSupport {
         switch (type) {
             case BeanInfo.ICON_COLOR_16x16:
             case BeanInfo.ICON_MONO_16x16:
-              String iconURL = "org/netbeans/modules/form/layoutsupport/resources/AbsoluteLayout.gif";
-              return ImageUtilities.loadImage(iconURL);
+                return ImageUtilities.loadImage(iconURL);
             default:
-              String icon32URL = "org/netbeans/modules/form/layoutsupport/resources/AbsoluteLayout32.gif";
-              return ImageUtilities.loadImage(icon32URL);
+                return ImageUtilities.loadImage(icon32URL);
         }
     }
 
@@ -196,7 +202,7 @@ public class AbsoluteLayoutSupport extends AbstractLayoutSupport {
             y = computeGridSize(y, formSettings.getGridY());
         }
 
-        assistantParams = new Object[] {x, y};
+        assistantParams = new Object[] {Integer.valueOf(x), Integer.valueOf(y)};
         return createNewConstraints(constr, x, y, w, h);
     }
 
@@ -362,7 +368,7 @@ public class AbsoluteLayoutSupport extends AbstractLayoutSupport {
 
     // -------
 
-  /** This method is called to get a default component layout constraints
+    /** This method is called to get a default component layout constraints
      * metaobject in case it is not provided (e.g. in addComponents method).
      * @return the default LayoutConstraints object for the supported layout
      */
@@ -393,6 +399,7 @@ public class AbsoluteLayoutSupport extends AbstractLayoutSupport {
         int mod = size % step;
         return mod >= step/2 ? size + step - mod : size - mod;
     }
+
 
     // -------------
 
@@ -447,11 +454,11 @@ public class AbsoluteLayoutSupport extends AbstractLayoutSupport {
 
                     @Override
                     public Object getTargetValue() {
-                        return x;
+                        return new Integer(x);
                     }
                     @Override
                     public void setTargetValue(Object value) {
-                        x = (Integer) value;
+                        x = ((Integer)value).intValue();
                     }
                     @Override
                     public void setPropertyContext(
@@ -467,11 +474,11 @@ public class AbsoluteLayoutSupport extends AbstractLayoutSupport {
 
                     @Override
                     public Object getTargetValue() {
-                        return y;
+                        return new Integer(y);
                     }
                     @Override
                     public void setTargetValue(Object value) {
-                        y = (Integer) value;
+                        y = ((Integer)value).intValue();
                     }
                     @Override
                     public void setPropertyContext(
@@ -487,11 +494,11 @@ public class AbsoluteLayoutSupport extends AbstractLayoutSupport {
 
                     @Override
                     public Object getTargetValue() {
-                        return w;
+                        return new Integer(w);
                     }
                     @Override
                     public void setTargetValue(Object value) {
-                        w = (Integer) value;
+                        w = ((Integer)value).intValue();
                     }
                     @Override
                     public boolean supportsDefaultValue () {
@@ -499,7 +506,7 @@ public class AbsoluteLayoutSupport extends AbstractLayoutSupport {
                     }
                     @Override
                     public Object getDefaultValue() {
-                        return -1;
+                        return new Integer(-1);
                     }
                     @Override
                     public PropertyEditor getExpliciteEditor() {
@@ -532,11 +539,11 @@ public class AbsoluteLayoutSupport extends AbstractLayoutSupport {
 
                     @Override
                     public Object getTargetValue() {
-                        return h;
+                        return new Integer(h);
                     }
                     @Override
                     public void setTargetValue(Object value) {
-                        h = (Integer) value;
+                        h = ((Integer)value).intValue();
                     }
                     @Override
                     public boolean supportsDefaultValue () {
@@ -544,7 +551,7 @@ public class AbsoluteLayoutSupport extends AbstractLayoutSupport {
                     }
                     @Override
                     public Object getDefaultValue() {
-                        return -1;
+                        return new Integer(-1);
                     }
                     @Override
                     public PropertyEditor getExpliciteEditor() {
@@ -574,11 +581,10 @@ public class AbsoluteLayoutSupport extends AbstractLayoutSupport {
 
         private void reinstateProperties() {
             try {
-              for (Node.Property property : properties)
-              {
-                FormProperty prop = (FormProperty) property;
-                prop.reinstateProperty();
-              }
+                for (int i=0; i < properties.length; i++) {
+                    FormProperty prop = (FormProperty) properties[i];
+                    prop.reinstateProperty();
+                }
             }
             catch(IllegalAccessException e1) {} // should not happen
             catch(java.lang.reflect.InvocationTargetException e2) {} // should not happen
@@ -592,7 +598,7 @@ public class AbsoluteLayoutSupport extends AbstractLayoutSupport {
      */
     public static final class SizeEditor extends PropertyEditorSupport {
 
-        final Integer prefValue = -1;
+        final Integer prefValue = new Integer(-1);
         final String prefTag = getBundle().getString("VALUE_preferred"); // NOI18N
 
         @Override

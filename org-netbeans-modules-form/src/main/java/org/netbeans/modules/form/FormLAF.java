@@ -52,7 +52,6 @@ import java.util.logging.Logger;
 import javax.swing.*;
 import javax.swing.plaf.ComponentUI;
 import javax.swing.plaf.metal.*;
-import org.jdesktop.layout.LayoutStyle;
 import org.netbeans.modules.form.project.ClassPathUtils;
 import org.openide.util.*;
 import org.openide.ErrorManager;
@@ -177,12 +176,6 @@ public class FormLAF {
             ClassLoader classLoader = lafClass.getClassLoader();
             if (classLoader != null) previewDefaults.put("ClassLoader", classLoader); // NOI18N
 
-            // Force switch of the LayoutStyle
-            if (previewDefaults.get("LayoutStyle.instance") == null) { // NOI18N
-                previewDefaults.put("LayoutStyle.instance", // NOI18N
-                    createLayoutStyle(previewLookAndFeel)); 
-            }
-
             return info;
         } catch (Exception ex) {
             ErrorManager.getDefault().notify(ErrorManager.INFORMATIONAL, ex);
@@ -238,7 +231,7 @@ public class FormLAF {
 
         java.lang.reflect.Method method = UIManager.class.getDeclaredMethod("getLAFState", new Class[0]); // NOI18N
         method.setAccessible(true);
-        Object lafState = method.invoke(null);
+        Object lafState = method.invoke(null, new Object[0]);
         method = lafState.getClass().getDeclaredMethod("setLookAndFeelDefaults", new Class[] {UIDefaults.class}); // NOI18N
         method.setAccessible(true);
 
@@ -246,7 +239,7 @@ public class FormLAF {
         assert !(ide instanceof DelegatingDefaults);
 
         delDefaults = new DelegatingDefaults(null, original.getDefaults(), ide);
-        method.invoke(lafState, delDefaults);
+        method.invoke(lafState, new Object[] {delDefaults});
 
         // See UIDefaults.getUIClass() method - it stores className-class pairs
         // in its map. When project classpath is updated new versions
@@ -341,6 +334,14 @@ public class FormLAF {
         });
     }
 
+    public static void executeWithLAFLocks(Runnable runnable) {
+        synchronized (Introspector.class) {
+            synchronized (UIManager.getDefaults()) {
+                runnable.run();
+            }
+        }
+    }
+
     private static void useDesignerLookAndFeel(FormModel formModel) {
         if (!initialized) {
             try {
@@ -383,7 +384,7 @@ public class FormLAF {
         try {
             java.lang.reflect.Method method = Hashtable.class.getDeclaredMethod("getIterator", new Class[] {int.class}); // NOI18N
             method.setAccessible(true);
-            Object i = method.invoke(what, 2/*Hashtable.ENTRIES*/);
+            Object i = method.invoke(what, new Object[] {2/*Hashtable.ENTRIES*/});
             if (i instanceof Iterator) {
                 Iterator iter = (Iterator)i;
                 while (iter.hasNext()) {
@@ -399,61 +400,8 @@ public class FormLAF {
         }
     }
 
-    /**
-     * HACK - creates a LayoutStyle that corresponds to the given LAF.
-     * LayoutStyle is created according to UIManager.getLookAndFeel()
-     * which is not affected by our LAF switch => we have to create
-     * the new LayoutStyle manually.
-     */
-    private static LayoutStyle createLayoutStyle(LookAndFeel laf) {
-        String lafID = laf.getID();
-        boolean useCoreLayoutStyle = false;
-        try {
-            Class.forName("javax.swing.LayoutStyle"); // NOI18N
-            useCoreLayoutStyle = true;
-        } catch (ClassNotFoundException cnfex) {}
-        String layoutStyleClass;
-        if (useCoreLayoutStyle) {
-            if ("Aqua" == lafID) { // NOI18N
-                try {
-                    laf.getClass().getDeclaredMethod("getLayoutStyle", new Class[0]); // NOI18N
-                    layoutStyleClass = "Swing"; // NOI18N
-                } catch (NoSuchMethodException nsfex) {
-                    // getLayoutStyle() not overriden => use our own (issue 52)
-                    layoutStyleClass = "Aqua";
-                }
-            } else {
-                layoutStyleClass = "Swing"; // NOI18N
-            }
-        } else if ("Metal" == lafID) { // NOI18N
-            layoutStyleClass = "Metal"; // NOI18N
-        }
-        else if ("Windows" == lafID) { // NOI18N
-            layoutStyleClass = "Windows"; // NOI18N
-        }
-        else if ("GTK" == lafID) { // NOI18N
-            layoutStyleClass = "Gnome"; // NOI18N
-        }
-        else if ("Aqua" == lafID) { // NOI18N
-            layoutStyleClass = "Aqua"; // NOI18N
-        } else {
-            layoutStyleClass = ""; // NOI18N
-        }
-        layoutStyleClass = "org.jdesktop.layout." + layoutStyleClass + "LayoutStyle"; // NOI18N
-        LayoutStyle layoutStyle = null;
-        try {
-            Class clazz = Class.forName(layoutStyleClass);
-            java.lang.reflect.Constructor constr = clazz.getDeclaredConstructor(new Class[0]);
-            constr.setAccessible(true);
-            layoutStyle = (LayoutStyle)constr.newInstance((Object[])null);
-        } catch (Exception ex) {
-            Logger.getLogger(FormLAF.class.getName()).log(Level.INFO, ex.getMessage(), ex);
-        }
-        return layoutStyle;
-    }
-
-    static LayoutStyle getDesignerLayoutStyle() {
-        return LayoutStyle.getSharedInstance();
+    static javax.swing.LayoutStyle getDesignerLayoutStyle() {
+        return javax.swing.LayoutStyle.getInstance();
     }
 
     /**
@@ -549,7 +497,7 @@ public class FormLAF {
         try {
             java.lang.reflect.Method method = UIManager.class.getDeclaredMethod("getLAFState", new Class[0]); // NOI18N
             method.setAccessible(true);
-            Object lafState = method.invoke(null);
+            Object lafState = method.invoke(null, new Object[0]);
             Field field = lafState.getClass().getDeclaredField("lookAndFeel"); // NOI18N
             field.setAccessible(true);
             value = field.get(lafState);
@@ -560,6 +508,10 @@ public class FormLAF {
         return value;
     }
 
+    public static boolean getUsePreviewDefaults() {
+        return preview && !delDefaults.isDelegating();
+    }
+    
     public static boolean inLAFBlock() {
         return preview || delDefaults.isDelegating();
     }

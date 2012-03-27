@@ -66,14 +66,14 @@ public class RADMenuComponent extends RADMenuItemComponent implements ComponentC
     /** Initialization of supportedMenus map. */
     static {
         supportedMenus = new HashMap<Integer,Class[]>();
-        supportedMenus.put(T_MENUBAR,
+        supportedMenus.put(new Integer(T_MENUBAR),
                            new Class[] { Menu.class });
-        supportedMenus.put(T_MENU,
+        supportedMenus.put(new Integer(T_MENU),
                            new Class[] { MenuItem.class,
                                          CheckboxMenuItem.class,
                                          Menu.class,
                                          Separator.class });
-        supportedMenus.put(T_POPUPMENU,
+        supportedMenus.put(new Integer(T_POPUPMENU),
                            new Class[] { MenuItem.class,
                                          CheckboxMenuItem.class,
                                          Menu.class,
@@ -110,7 +110,7 @@ public class RADMenuComponent extends RADMenuItemComponent implements ComponentC
         if (isReadOnly())
             return RADComponent.NO_NEW_TYPES;
 
-        Class[] classes = supportedMenus.get(getMenuItemType());
+        Class[] classes = supportedMenus.get(new Integer(getMenuItemType()));
 
         if (classes == null)
             return RADComponent.NO_NEW_TYPES;
@@ -123,12 +123,12 @@ public class RADMenuComponent extends RADMenuItemComponent implements ComponentC
     }
 
     public boolean canAddItem(Class itemType) {
-        Class[] classes = supportedMenus.get(getMenuItemType());
+        Class[] classes = supportedMenus.get(new Integer(getMenuItemType()));
 
         if (classes != null)
-          for (Class aClass : classes)
-            if (aClass == itemType) // or more general isAssignableFrom ??
-              return true;
+            for (int i=0; i < classes.length; i++)
+                if (classes[i] == itemType) // or more general isAssignableFrom ??
+                    return true;
 
         return false;
     }
@@ -152,14 +152,13 @@ public class RADMenuComponent extends RADMenuItemComponent implements ComponentC
             subComponents.ensureCapacity(initComponents.length);
         }
 
-      for (RADComponent comp : initComponents)
-      {
-        if (comp instanceof RADMenuItemComponent)
-        {
-          subComponents.add(comp);
-          comp.setParentComponent(this);
+        for (int i = 0; i < initComponents.length; i++) {
+            RADComponent comp = initComponents[i];
+            if (comp instanceof RADMenuItemComponent) {
+                subComponents.add(comp);
+                comp.setParentComponent(this);
+            }
         }
-      }
     }
 
     @Override
@@ -223,7 +222,7 @@ public class RADMenuComponent extends RADMenuItemComponent implements ComponentC
         }
 
         /** Create the object.
-         * @exception java.io.IOException if something fails
+         * @exception IOException if something fails
          */
         @Override
         public void create() throws java.io.IOException {

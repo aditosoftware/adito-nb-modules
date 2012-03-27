@@ -249,30 +249,28 @@ public class SetAnchoringAction extends NodeAction {
             Set<RADVisualContainer> containers = new HashSet<RADVisualContainer>();
             boolean autoUndo = true;
             try {
-              for (Object o : mi.getRADComponents())
-              {
-                RADComponent radC = (RADComponent) o;
-                String compId = radC.getId();
-                LayoutComponent layoutComp = layoutModel.getLayoutComponent(compId);
-                boolean changed = false;
-                int[] alignment = layoutDesigner.getAdjustableComponentAlignment(layoutComp, index / 2);
-                if (((alignment[1] & (1 << index % 2)) != 0) && (alignment[0] != index % 2))
-                {
-                  layoutDesigner.adjustComponentAlignment(layoutComp, index / 2, index % 2);
-                  changed = true;
+                Iterator iter = mi.getRADComponents().iterator();
+                while (iter.hasNext()) {
+                    RADComponent radC = (RADComponent)iter.next();
+                    String compId = radC.getId();
+                    LayoutComponent layoutComp = layoutModel.getLayoutComponent(compId);
+                    boolean changed = false;
+                    int[] alignment = layoutDesigner.getAdjustableComponentAlignment(layoutComp, index/2);
+                    if (((alignment[1] & (1 << index%2)) != 0) && (alignment[0] != index%2)) {
+                        layoutDesigner.adjustComponentAlignment(layoutComp, index/2, index%2);
+                        changed = true;
+                    }
+                    if (changed) {
+                        RADVisualComponent comp = (RADVisualComponent)formModel.getMetaComponent(compId);
+                        containers.add(comp.getParentContainer());
+                    }
                 }
-                if (changed)
-                {
-                  RADVisualComponent comp = (RADVisualComponent) formModel.getMetaComponent(compId);
-                  containers.add(comp.getParentContainer());
-                }
-              }
                 autoUndo = false;
             } finally {
-              for (RADVisualContainer container : containers)
-              {
-                formModel.fireContainerLayoutChanged(container, null, null, null);
-              }
+                Iterator<RADVisualContainer> iter = containers.iterator();
+                while (iter.hasNext()) {
+                    formModel.fireContainerLayoutChanged(iter.next(), null, null, null);
+                }
                 if (!layoutUndoMark.equals(layoutModel.getChangeMark())) {
                     formModel.addUndoableEdit(ue);
                 }

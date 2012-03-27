@@ -46,6 +46,7 @@ package org.netbeans.modules.form.palette;
 
 import javax.swing.*;
 
+import org.netbeans.modules.form.palette.PaletteUtils;
 import org.openide.nodes.Node;
 import org.openide.explorer.view.ListView;
 import org.openide.explorer.*;

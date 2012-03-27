@@ -62,6 +62,7 @@ import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import org.netbeans.modules.form.HandleLayer;
 import org.netbeans.modules.form.RADComponent;
+import org.netbeans.modules.form.menu.DropTargetLayer.DropTargetType;
 import org.netbeans.modules.form.menu.MenuEditLayer.SelectedPortion;
 import org.openide.util.Utilities;
 
@@ -84,8 +85,9 @@ class DropTargetLayer extends JComponent {
     private Point currentTargetPoint;
     private DropTargetType currentTargetType;
     private JComponent currentTargetComponent;
-
-  //private static BasicStroke DROP_TARGET_LINE_STROKE = new BasicStroke(2,
+    private JComponent selectedComponent;
+    
+    //private static BasicStroke DROP_TARGET_LINE_STROKE = new BasicStroke(2,
     //        BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL, 1f,  new float[] {5f, 5f}, 0f);
     public static final BasicStroke DROP_TARGET_LINE_STROKE = new BasicStroke(
           3.0f, BasicStroke.CAP_ROUND, 1, 1.0f,
@@ -101,7 +103,7 @@ class DropTargetLayer extends JComponent {
     
     
     public void setSelectedComponent(JComponent selectedComponent) {
-      JComponent selectedComponent1 = selectedComponent;
+        this.selectedComponent = selectedComponent;
         repaint();
     }
     
@@ -261,7 +263,8 @@ class DropTargetLayer extends JComponent {
             JMenuItem menu = (JMenuItem) selected;
             Point location = SwingUtilities.convertPoint(menu, new Point(0, 0), this);
             g2.translate(location.x, location.y);
-            g2.setStroke(SELECTION_STROKE);
+            // #114610: keep drop rectangle guidelines consistent when menu component is inserted from menu-bar into submenu
+            g2.setStroke((currentTargetType == DropTargetType.INTO_SUBMENU) ? DROP_TARGET_LINE_STROKE : SELECTION_STROKE);
             g2.setColor(SELECTION_COLOR);
             g2.drawRect(0, 0, menu.getWidth() - 1, menu.getHeight() - 1);
             g2.translate(-location.x, -location.y);
@@ -456,11 +459,11 @@ class DropTargetLayer extends JComponent {
  
     static boolean isMetal() {
         String laf = UIManager.getLookAndFeel().getName();
-        if(laf==null) return true;
+        if(laf==null) return false;
         if(laf.startsWith("Metal")) { // NOI18N
-            return false;
+            return true;
         }
-        return true;
+        return false;
     }
 
     static boolean isVista() {

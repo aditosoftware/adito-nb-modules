@@ -66,6 +66,7 @@ import org.openide.util.lookup.*;
 import org.netbeans.api.java.classpath.ClassPath;
 import org.netbeans.api.project.Project;
 import org.netbeans.api.project.FileOwnerQuery;
+import org.netbeans.modules.form.FormServices;
 import org.netbeans.modules.form.FormUtils;
 
 import org.netbeans.modules.form.project.ClassSource;
@@ -138,7 +139,7 @@ public final class PaletteUtils {
     public static void showPaletteManager() {
         try {
             PaletteFactory.createPalette("FormDesignerPalette", // NOI18N
-                                         new FormPaletteActions(),
+                                         createPaletteActions(),
                                          new ClassPathFilter(null), // filters out only invisible Layouts category
                                          null)
                     .showCustomizer();
@@ -146,6 +147,11 @@ public final class PaletteUtils {
         catch (IOException ex) {
             ErrorManager.getDefault().notify(ex);
         }
+    }
+
+    private static PaletteActions createPaletteActions() {
+        FormServices services = Lookup.getDefault().lookup(FormServices.class);
+        return services.createPaletteActions();
     }
 
     public static void setContext(FileObject fileInProject) {
@@ -180,7 +186,7 @@ public final class PaletteUtils {
 
     public static Lookup getPaletteLookup(FileObject context) {
         ProjectPaletteInfo pInfo = preparePalette(context);
-        return pInfo != null ? pInfo.paletteLookup : Lookups.fixed();
+        return pInfo != null ? pInfo.paletteLookup : Lookups.fixed(new Object[0]);
     }
 
     private static PaletteController getPalette() {
@@ -250,14 +256,13 @@ public final class PaletteUtils {
                         if (pInfo != null) {
                             PaletteLookup lookup = pInfo.paletteLookup;
                             PaletteController oldPalette = pInfo.getPalette();
-                            PaletteController newPalette = createPalette(filter);
                             if (pInfo.paletteListeners != null) {
                                 for (PropertyChangeListener l : pInfo.paletteListeners) {
                                     oldPalette.removePropertyChangeListener(l);
-                                    newPalette.addPropertyChangeListener(l);
+                                    palette.addPropertyChangeListener(l);
                                 }
                             }
-                            lookup.setPalette(newPalette);
+                            lookup.setPalette(palette);
                         }
                     }
                 });
@@ -302,7 +307,7 @@ public final class PaletteUtils {
     private static PaletteController createPalette(ClassPathFilter filter) {
         try {
             return PaletteFactory.createPalette("FormDesignerPalette", // NOI18N
-                                                new FormPaletteActions(),
+                                                createPaletteActions(),
                                                 filter,
                                                 null);
         }
@@ -367,22 +372,19 @@ public final class PaletteUtils {
             // This is not the node returned by getPaletteNode()!
             Node paletteNode = getPalette().getRoot().lookup(Node.class);
             Node[] categories = getCategoryNodes(paletteNode, true, true, true, true);
-          for (Node category : categories)
-          {
-            Node[] items = getItemNodes(category, true);
-            for (Node item1 : items)
-            {
-              PaletteItem formItem = item1.getLookup().lookup(PaletteItem.class);
-              if (item.equals(formItem))
-              {
-                getPalette().setSelectedItem(category.getLookup(), item1.getLookup());
-              }
+            for( int i=0; i<categories.length; i++ ) {
+                Node[] items = getItemNodes( categories[i], true );
+                for( int j=0; j<items.length; j++ ) {
+                    PaletteItem formItem = items[j].getLookup().lookup( PaletteItem.class );
+                    if( item.equals( formItem ) ) {
+                        getPalette().setSelectedItem( categories[i].getLookup(), items[j].getLookup() );
+                    }
+                }
             }
-          }
         }
     }
     
-    public static Image getIconForClass(String className, int type, boolean optimalResult) {
+    public static Image getIconForClass(String className, String classDetails, int type, boolean optimalResult) {
         Image img = null;
         for (PaletteItem item : getAllItems(optimalResult)) {
             if (PaletteItem.TYPE_CHOOSE_BEAN.equals(item.getExplicitComponentType())) {
@@ -394,6 +396,9 @@ public final class PaletteUtils {
                     img = node.getIcon(type);
                 } else {
                     img = item.getIcon(type);
+                }
+                if ((classDetails == null) || (classDetails.equals(item.getInitializerId()))) {
+                    break;
                 }
             }
         }
@@ -408,25 +413,20 @@ public final class PaletteUtils {
         HashSet<PaletteItem> uniqueItems = null;
         // collect valid items from all categories (including invisible)
         Node[] categories = getCategoryNodes(getPaletteNode(), false, true, false, optimalResult);
-      for (Node category : categories)
-      {
-        Node[] items = getItemNodes(category, true, optimalResult);
-        for (Node item : items)
-        {
-          PaletteItem formItem = item.getLookup().lookup(PaletteItem.class);
-          if (null != formItem)
-          {
-            if (null == uniqueItems)
-            {
-              uniqueItems = new HashSet<PaletteItem>();
+        for( int i=0; i<categories.length; i++ ) {
+            Node[] items = getItemNodes(categories[i], true, optimalResult);
+            for( int j=0; j<items.length; j++ ) {
+                PaletteItem formItem = items[j].getLookup().lookup( PaletteItem.class );
+                if( null != formItem ) {
+                    if( null == uniqueItems ) {
+                        uniqueItems = new HashSet<PaletteItem>();
+                    }
+                    if (!PaletteItem.TYPE_CHOOSE_BEAN.equals(formItem.getExplicitComponentType())) {
+                        uniqueItems.add(formItem);
+                    }
+                }
             }
-            if (!PaletteItem.TYPE_CHOOSE_BEAN.equals(formItem.getExplicitComponentType()))
-            {
-              uniqueItems.add(formItem);
-            }
-          }
         }
-      }
         PaletteItem[] res;
         if( null != uniqueItems ) {
             res = uniqueItems.toArray( new PaletteItem[uniqueItems.size()] );
@@ -436,7 +436,7 @@ public final class PaletteUtils {
         return res;
     }
     
-    static String getBundleString(String key) {
+    public static String getBundleString(String key) {
         return NbBundle.getBundle(PaletteUtils.class).getString(key);
     }
     
@@ -469,7 +469,9 @@ public final class PaletteUtils {
             }
             else if (validList == null) {
                 validList = new ArrayList<Node>(nodes.length);
-              validList.addAll(Arrays.asList(nodes).subList(0, i));
+                for (int j=0; j < i; j++) {
+                    validList.add(nodes[j]);
+                }
             }
         }
         if (validList != null)
@@ -525,7 +527,9 @@ public final class PaletteUtils {
                 }
             } else if( list == null ) {
                 list = new ArrayList<Node>(nodes.length);
-              list.addAll(Arrays.asList(nodes).subList(0, i));
+                for( int j=0; j < i; j++ ) {
+                    list.add(nodes[j]);
+                }
             }
         }
         if( list != null ) {
@@ -548,7 +552,7 @@ public final class PaletteUtils {
             if (value == null) {
                 value = Boolean.TRUE;
             }
-            return Boolean.valueOf(value.toString());
+            return Boolean.valueOf(value.toString()).booleanValue();
         }
         return false;
     }
@@ -600,12 +604,11 @@ public final class PaletteUtils {
                 return false;
 
             DataObject[] dobjs = folder.getChildren();
-          for (DataObject dobj : dobjs)
-          {
-            PaletteItem item = dobj.getCookie(PaletteItem.class);
-            if (item == null || isValidItem(item))
-              return true;
-          }
+            for (int i=0; i < dobjs.length; i++) {
+                PaletteItem item = dobjs[i].getCookie(PaletteItem.class);
+                if (item == null || isValidItem(item))
+                    return true;
+            }
             return dobjs.length == 0;
         }
 
@@ -693,7 +696,7 @@ public final class PaletteUtils {
         }
 
         void setPalette(PaletteController palette) {
-            content.set(Arrays.asList(palette), null);
+            content.set(Arrays.asList(new PaletteController[] { palette }), null);
         }
     }
 }

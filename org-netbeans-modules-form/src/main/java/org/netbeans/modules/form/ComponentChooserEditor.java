@@ -61,7 +61,8 @@ public class ComponentChooserEditor implements PropertyEditor,
                                                XMLPropertyEditor,
                                                NamedPropertyEditor
 {
-  public static final int NONVISUAL_COMPONENTS = 3;
+    public static final int ALL_COMPONENTS = 0;
+    public static final int NONVISUAL_COMPONENTS = 3;
 //    public static final int VISUAL_COMPONENTS = 1;
 //    public static final int OTHER_COMPONENTS = 2;
 
@@ -73,6 +74,7 @@ public class ComponentChooserEditor implements PropertyEditor,
     private static String defaultText = null;
 
     private FormModel formModel;
+    private FormProperty property;
     private List<RADComponent> components;
     private Class[] beanTypes = null;
     private int componentCategory = 0;
@@ -117,29 +119,32 @@ public class ComponentChooserEditor implements PropertyEditor,
         if (value != null && INVALID_REF.equals(value.getDescription()))
             return BeanSupport.NO_VALUE; // special - invalid value was loaded
         
-        return isDefaultValue() ? defaultValue : value; 
+        return isDefaultValue() ? FormProperty.DEFAULT_VALUE : value;
     }
 
     @Override
     public String[] getTags() {
         List compList = getComponents();
 
-        int extraValues = 0;        
-        int count = 0;
+        int extraValues;
+        int count;
         String[] names;                                    
-        
+
+        boolean includeNone = shouldIncludeNone();
         if( isDefaultValue() ) {
-            extraValues = 2;        
+            extraValues = includeNone ? 2 : 1;
             count = compList.size() + extraValues;
             names = new String[count];                                    
             names[0] = defaultString();            
         } else {
-            extraValues = 1;        
+            extraValues = includeNone ? 1 : 0;
             count = compList.size() + extraValues;
             names = new String[count];                                                
         } 
-        names[extraValues - 1] = noneString();
-        
+        if (includeNone) {
+            names[extraValues - 1] = noneString();
+        }
+
         if (count > extraValues) {
             for (int i=extraValues; i < count; i++)
                 names[i] = ((RADComponent)compList.get(i-extraValues)).getName();
@@ -147,6 +152,31 @@ public class ComponentChooserEditor implements PropertyEditor,
         }
 
         return names;
+    }
+
+    /**
+     * Determines whether none/null value should be offered by this
+     * property editor.
+     *
+     * @return {@code true} if none/null value should be offered
+     * or {@code false} otherwise.
+     */
+    private boolean shouldIncludeNone() {
+        // Do not include null/none for some properties that cannot handle it
+        boolean include = true;
+        if (property instanceof RADProperty) {
+            RADProperty radProperty = (RADProperty)property;
+            String propName = radProperty.getName();
+            RADComponent metacomp = radProperty.getRADComponent();
+            Object instance = metacomp.getBeanInstance();
+            if (((instance instanceof javax.swing.text.JTextComponent)
+                    && ("caret".equals(propName) || "document".equals(propName))) // NOI18N
+                    || ((instance instanceof javax.swing.AbstractButton)
+                    && "model".equals(propName))) { // NOI18N
+                include = false;
+            }
+        }
+        return include;
     }
 
     private boolean isDefaultValue() {
@@ -227,6 +257,7 @@ public class ComponentChooserEditor implements PropertyEditor,
     @Override
     public void setContext(FormModel model, FormProperty prop) {
         formModel = model;
+        property = prop;
     }
 
     // FormAwareEditor implementation
@@ -234,15 +265,27 @@ public class ComponentChooserEditor implements PropertyEditor,
     public void updateFormVersionLevel() {
     }
 
-  public void setBeanTypes(Class[] types) {
+    public FormModel getFormModel() {
+        return formModel;
+    }
+
+    public void setBeanTypes(Class[] types) {
         beanTypes = types;
     }
 
-  public void setComponentCategory(int cat) {
+    public Class[] getBeanTypes() {
+        return beanTypes;
+    }
+
+    public void setComponentCategory(int cat) {
         componentCategory = cat;
     }
 
-  // ----------------
+    public int getComponentCategory() {
+        return componentCategory;
+    }
+
+    // ----------------
     // XMLPropertyEditor implementation
 
     private static final String XML_COMPONENT = "ComponentRef"; // NOI18N
@@ -434,16 +477,15 @@ public class ComponentChooserEditor implements PropertyEditor,
                 && !INVALID_REF.equals(componentName))
             {
                 List compList = getComponents();
-              for (Object aCompList : compList)
-              {
-                RADComponent comp = (RADComponent) aCompList;
-                if (comp.getName().equals(componentName))
-                {
-                  if (comp.isInModel())
-                    component = comp;
-                  break;
+                Iterator it = compList.iterator();
+                while (it.hasNext()) {
+                    RADComponent comp = (RADComponent) it.next();
+                    if (comp.getName().equals(componentName)) {
+                        if (comp.isInModel())
+                            component = comp;
+                        break;
+                    }
                 }
-              }
             }
             else if (component != null) {
                 if (!component.isInModel())

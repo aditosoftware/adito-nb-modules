@@ -1,10 +1,10 @@
 OpenIDE-Module-Java-Dependencies: Java > 1.6
-OpenIDE-Module-Specification-Version: 1.31.1.2
+OpenIDE-Module-Specification-Version: 1.39.1.4
 AutoUpdate-Show-In-Client: false
 OpenIDE-Module: org.netbeans.modules.form/2
 OpenIDE-Module-Localizing-Bundle: org/netbeans/modules/form/Bundle2.pr
  operties
-OpenIDE-Module-Implementation-Version: 2
+OpenIDE-Module-Implementation-Version: 4
 OpenIDE-Module-Install: org/netbeans/modules/form/FormEditorModule.cla
  ss
 OpenIDE-Module-Needs: javax.script.ScriptEngine.freemarker

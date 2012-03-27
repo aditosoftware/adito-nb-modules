@@ -57,18 +57,16 @@ import java.util.Map;
 import javax.swing.undo.UndoableEdit;
 import org.openide.*;
 import org.openide.nodes.*;
-import org.openide.filesystems.FileObject;
 import org.openide.util.Mutex;
 import org.openide.util.MutexException;
 import org.openide.util.datatransfer.PasteType;
 import org.openide.util.datatransfer.ExTransferable;
 import org.openide.util.datatransfer.MultiTransferObject;
 import org.openide.ErrorManager;
-import org.openide.loaders.DataObject;
 import org.netbeans.modules.form.project.*;
 import org.netbeans.modules.form.layoutdesign.*;
 import org.netbeans.modules.form.layoutsupport.LayoutSupportManager;
-import org.netbeans.modules.form.palette.BeanInstaller;
+import org.openide.util.Lookup;
 
 /**
  * Support class for copy/cut/paste operations in form editor.
@@ -122,13 +120,11 @@ class CopySupport {
 
         @Override
         public boolean isDataFlavorSupported(DataFlavor flavor) {
-          for (DataFlavor flavor1 : flavors)
-          {
-            if (flavor1 == flavor)
-            {
-              return true;
+            for (int i = 0; i < flavors.length; i++) {
+                if (flavors[i] == flavor) {
+                    return true;
+                }
             }
-          }
             return false;
         }
 
@@ -196,74 +192,61 @@ class CopySupport {
         boolean cut = false; // true - cut, false - copy
         List<RADComponent> sourceComponents = null;
 
-      for (Transferable t : allTrans)
-      {
-        boolean metaCompTransfer;
-        if (t.isDataFlavorSupported(getComponentCopyFlavor()))
-        {
-          assert !cut;
-          metaCompTransfer = true;
-        }
-        else if (t.isDataFlavorSupported(getComponentCutFlavor()))
-        {
-          assert cut || sourceComponents == null;
-          metaCompTransfer = true;
-          cut = true;
-        }
-        else
-        {
-          metaCompTransfer = false;
-        }
-        if (metaCompTransfer)
-        {
-          RADComponent transComp = null;
-          try
-          {
-            Object data = t.getTransferData(t.getTransferDataFlavors()[0]);
-            if (data instanceof RADComponent)
-            {
-              transComp = (RADComponent) data;
+        for (int i=0; i < allTrans.length; i++) {
+            Transferable t = allTrans[i];
+            boolean metaCompTransfer;
+            if (t.isDataFlavorSupported(getComponentCopyFlavor())) {
+                assert !cut;
+                metaCompTransfer = true;
+            } else if (t.isDataFlavorSupported(getComponentCutFlavor())) {
+                assert cut || sourceComponents == null;
+                metaCompTransfer = true;
+                cut = true;
+            } else {
+                metaCompTransfer = false;
             }
-          }
-          catch (UnsupportedFlavorException e)
-          {
-          } // should not happen
-          catch (IOException e)
-          {
-          } // should not happen
+            if (metaCompTransfer) {
+                RADComponent transComp = null;
+                try {
+                    Object data = t.getTransferData(t.getTransferDataFlavors()[0]);
+                    if (data instanceof RADComponent) {
+                        transComp = (RADComponent) data;
+                    }
+                }
+                catch (UnsupportedFlavorException e) {} // should not happen
+                catch (java.io.IOException e) {} // should not happen
 
-          if (transComp != null
-              // only cut to another container
-              && (!cut || canPasteCut(transComp, targetForm, targetComponent))
-              // must be a valid source/target combination
-              && (MetaComponentCreator.canAddComponent(transComp.getBeanClass(),
-                                                       targetComponent)
-              || (!cut && MetaComponentCreator.canApplyComponent(transComp.getBeanClass(),
-                                                                 targetComponent)))
-              // hack needed due to screwed design of menu metacomponents
-              && (!(targetComponent instanceof RADMenuComponent)
-              || transComp instanceof RADMenuItemComponent))
-          {   // pasting this meta component is allowed
-            if (sourceComponents == null)
-            {
-              sourceComponents = new LinkedList<RADComponent>();
+                if (transComp != null
+                    // only cut to another container
+                    && (!cut || canPasteCut(transComp, targetForm, targetComponent))
+                    // must be a valid source/target combination
+                    && (MetaComponentCreator.canAddComponent(transComp.getBeanClass(),
+                                                             targetComponent)
+                        || (!cut && MetaComponentCreator.canApplyComponent(transComp.getBeanClass(),
+                                                                           targetComponent)))
+                    // hack needed due to screwed design of menu metacomponents
+                    && (!(targetComponent instanceof RADMenuComponent)
+                          || transComp instanceof RADMenuItemComponent))
+                {   // pasting this meta component is allowed
+                    if (sourceComponents == null) {
+                        sourceComponents = new LinkedList<RADComponent>();
+                    }
+                    RADComponent componentToCopy = getComponentToCopy(transComp, targetComponent, cut);
+                    if (!sourceComponents.contains(componentToCopy)) { // Issue 203382
+                        sourceComponents.add(componentToCopy);
+                    }
+                    canPaste = true;
+                }
+            } else { // java node (compiled class) could be copied
+                ClassSource classSource = CopySupport.getCopiedBeanClassSource(t);
+                if (classSource != null) {
+                //                && (MetaComponentCreator.canAddComponent(cls, component)
+                //                   || MetaComponentCreator.canApplyComponent(cls, component)))
+                    s.add(new ClassPaste(t, classSource, targetForm, targetComponent));
+                    canPaste = true;
+                }
             }
-            sourceComponents.add(getComponentToCopy(transComp, targetComponent, cut));
-            canPaste = true;
-          }
         }
-        else
-        { // java node (compiled class) could be copied
-          ClassSource classSource = CopySupport.getCopiedBeanClassSource(t);
-          if (classSource != null)
-          {
-            //                && (MetaComponentCreator.canAddComponent(cls, component)
-            //                   || MetaComponentCreator.canApplyComponent(cls, component)))
-            s.add(new ClassPaste(t, classSource, targetForm, targetComponent));
-            canPaste = true;
-          }
-        }
-      }
 
         if (sourceComponents != null) {
             s.add(new RADPaste(sourceComponents, targetForm, targetComponent, cut));
@@ -396,7 +379,7 @@ class CopySupport {
                     }
                 } else if (sourceContainer != null && sourceContainer.getLayoutSupport() != null
                            && (getComponentBounds(sourceComponents.get(0)) == null
-                               || isConvertibleLayout(sourceContainer))) {
+                               || !isConvertibleLayout(sourceContainer))) {
                     sourceContainer = null; // old layout which is not suitable for conversion
                 }
             }
@@ -470,12 +453,9 @@ class CopySupport {
                                         sourceComp.getId(), getComponentSize(sourceComp),
                                         targetComponent.getId());
                             }
-                        } else if (move && sourceLayout != null) { // new-to-old layout copy
-                            // need to remove layout component
-                            LayoutComponent layoutComp = sourceLayout.getLayoutComponent(sourceComp.getId());
-                            if (layoutComp != null) {
-                                sourceLayout.removeComponent(sourceComp.getId(), !layoutComp.isLayoutContainer());
-                            }
+                        } else if (move && sourceLayout != null && sourceForm == targetForm) {
+                            // new-to-old layout copy, need to remove layout component from source
+                            getLayoutDesigner().removeComponentsFromParent(sourceComp.getId());
                         } // old-to-old layout copy is fully handled by MetaComponentCreator
                     } // also copying menu component needs no additional treatment
                 }
@@ -543,7 +523,7 @@ class CopySupport {
 
         private static boolean isConvertibleLayout(RADVisualContainer metaCont) {
             LayoutSupportManager ls = metaCont.getLayoutSupport();
-            return ls.isDedicated() || ls.getSupportedClass() == java.awt.CardLayout.class;
+            return !ls.isDedicated() && ls.getSupportedClass() != java.awt.CardLayout.class;
         }
 
         private LayoutDesigner getLayoutDesigner() {
@@ -601,8 +581,7 @@ class CopySupport {
 
         private Transferable doPaste() throws IOException {
             if ((classSource.getClassName().indexOf('.') == -1) // Issue 79573
-//                && !FormJavaSource.isInDefaultPackage(targetForm) // TODO: stripped
-                ) {
+                /*&& !FormJavaSource.isInDefaultPackage(targetForm)*/) { // STRIPPED
                 String message = FormUtils.getBundleString("MSG_DefaultPackageBean"); // NOI18N
                 NotifyDescriptor nd = new NotifyDescriptor.Message(message, NotifyDescriptor.WARNING_MESSAGE);
                 DialogDisplayer.getDefault().notify(nd);
@@ -614,21 +593,9 @@ class CopySupport {
         }
     }
 
-    static String getCopiedBeanClassName(FileObject fo) {
-        return BeanInstaller.findJavaBeanName(fo);
-    }
-
-    static ClassSource getCopiedBeanClassSource(Transferable t) {
-        DataObject dobj = NodeTransfer.cookie(t, NodeTransfer.COPY, DataObject.class);
-        FileObject fo = (dobj != null && dobj.isValid()) ? dobj.getPrimaryFile() : null;
-        if (fo == null)
-            return null;
-
-        String clsName = getCopiedBeanClassName(fo);
-        if (clsName == null)
-            return null;
-
-        return ClassPathUtils.getProjectClassSource(fo, clsName);
+    static ClassSource getCopiedBeanClassSource(Transferable transferable) {
+        FormServices services = Lookup.getDefault().lookup(FormServices.class);
+        return services.getCopiedBeanClassSource(transferable);
     }
 
 }

@@ -57,6 +57,7 @@ import org.openide.util.Mutex;
 import org.openide.util.MutexException;
 
 import org.netbeans.modules.form.layoutsupport.*;
+//import org.netbeans.modules.form.codestructure.CodeStructure; // STRIPPED
 import org.netbeans.modules.form.layoutdesign.*;
 
 /**
@@ -72,19 +73,21 @@ public class FormModel
 
     private boolean readOnly = false;
 
-//    public enum FormVersion {
-//        BASIC, // form file version up to 1.2
-//        NB50, // form file verson 1.3
-//        NB60_PRE, // until NB 6.0 beta 1 (incl. 5.5 with 6.0 update), form file version 1.4
-//        NB60, // since NB 6.0 beta1, form file version 1.5
-//        NB61, // since NB 6.1 milestone 2, form file version 1.6
-//        NB65 // since NB 6.5 milestone 1, form file version 1.7
-//    }
-//    final static FormVersion LATEST_VERSION = FormVersion.NB65;
-//
-//    private FormVersion currentVersionLevel;
-//    private FormVersion lastVersionLevel;
-//    private FormVersion maxVersionLevel; // max version to upgrade to without user confirmation
+  // STRIPPED
+    /*public enum FormVersion {
+        BASIC, // form file version up to 1.2
+        NB50, // form file verson 1.3
+        NB60_PRE, // until NB 6.0 beta 1 (incl. 5.5 with 6.0 update), form file version 1.4
+        NB60, // since NB 6.0 beta1, form file version 1.5
+        NB61, // since NB 6.1 milestone 2, form file version 1.6
+        NB65, // since NB 6.5 milestone 1, form file version 1.7
+        NB71 // since NB 7.1, form file version 1.8
+    }
+    final static FormVersion LATEST_VERSION = FormVersion.NB71;
+
+    private FormVersion currentVersionLevel;
+    private FormVersion lastConfirmedVersionLevel;
+    private FormVersion maxVersionLevel;*/ // max version to upgrade to without user confirmation
 
     // the class on which the form is based (which is extended in the java file)
     private Class<?> formBaseClass;
@@ -109,13 +112,17 @@ public class FormModel
     private CompoundEdit compoundEdit;
     private boolean undoCompoundEdit = false;
 
+    //private FormEvents formEvents; // STRIPPED
+
     // list of listeners registered on FormModel
     private ArrayList<FormModelListener> listeners;
     private List<FormModelEvent> eventList;
     private boolean firing;
 
     private MetaComponentCreator metaCreator;
-    
+
+    //private CodeStructure codeStructure = new CodeStructure(false); // STRIPPED
+
     private FormSettings settings = new FormSettings(this);
     
     private boolean freeDesignDefaultLayout = false;
@@ -180,39 +187,51 @@ public class FormModel
         formName = name;
     }
 
-//    /**
-//     * Requires the form version to be at least 'minVersion'. If the actual
-//     * version is lower, it is upgraded to 'upgradeTo'. If the upgrad exceeds
-//     * the maximum version level set for this form (roughly corresponding
-//     * to the NB version in which the form was created) a confirmation message
-//     * is shown to the user later (see FormEditor.checkFormVersionUpgrade).
-//     * @param minVersion the minimum version level required
-//     * @param upgradeTo version level to upgrade to if the minimum version is not met
-//     */
-//    public void raiseVersionLevel(FormVersion minVersion, FormVersion upgradeTo) {
-//        if (minVersion.ordinal() > currentVersionLevel.ordinal()
-//                && (undoRedoRecording || !formLoaded)) {
-//            assert upgradeTo.ordinal() >= minVersion.ordinal();
-//            setCurrentVersionLevel(upgradeTo);
-//        }
-//    }
-//
-//    void setCurrentVersionLevel(FormVersion version) {
-//        lastVersionLevel = currentVersionLevel;
-//        currentVersionLevel = version;
-//    }
-//
-//    FormVersion getCurrentVersionLevel() {
-//        return currentVersionLevel;
-//    }
-//
-//  void setMaxVersionLevel(FormVersion version) {
-//        maxVersionLevel = version;
-//    }
-//
-//    FormVersion getMaxVersionLevel() {
-//        return maxVersionLevel;
-//    }
+  // STRIPPED
+  //  /**
+  //   * Requires the form version to be at least 'minVersion'. If the actual
+  //   * version is lower, it is upgraded to 'upgradeTo'. If the upgrad exceeds
+  //   * the maximum version level set for this form (roughly corresponding
+  //   * to the NB version in which the form was created) a confirmation message
+  //   * is shown to the user later (see FormEditor.checkFormVersionUpgrade).
+  //   * @param minVersion the minimum version level required
+  //   * @param upgradeTo version level to upgrade to if the minimum version is not met
+  //   */
+  /*  public void raiseVersionLevel(FormVersion minVersion, FormVersion upgradeTo) {
+        if (minVersion.ordinal() > currentVersionLevel.ordinal()
+                && (undoRedoRecording || !formLoaded)) {
+            assert upgradeTo.ordinal() >= minVersion.ordinal();
+            setCurrentVersionLevel(upgradeTo);
+        }
+    }*/
+
+  // STRIPPED
+    /*void setCurrentVersionLevel(FormVersion version) {
+        if (lastConfirmedVersionLevel == null) {
+            lastConfirmedVersionLevel = currentVersionLevel;
+        }
+        currentVersionLevel = version;
+    }
+
+    FormVersion getCurrentVersionLevel() {
+        return currentVersionLevel;
+    }
+
+    void revertVersionLevel() {
+        currentVersionLevel = lastConfirmedVersionLevel;
+    }
+
+    void confirmVersionLevel() {
+        lastConfirmedVersionLevel = currentVersionLevel;
+    }
+
+    void setMaxVersionLevel(FormVersion version) {
+        maxVersionLevel = version;
+    }
+
+    FormVersion getMaxVersionLevel() {
+        return maxVersionLevel;
+    }*/
 
     void setReadOnly(boolean readOnly) {
         this.readOnly = readOnly;
@@ -269,11 +288,12 @@ public class FormModel
     }
 
     public RADComponent findRADComponent(String name) {
-      for (RADComponent radComponent : idToComponents.values())
-      {
-        if (name.equals(radComponent.getName()))
-          return radComponent;
-      }
+        Iterator allComps = idToComponents.values().iterator(); // getMetaComponents().iterator();
+        while (allComps.hasNext()) {
+            RADComponent comp = (RADComponent) allComps.next();
+            if (name.equals(comp.getName()))
+                return comp;
+        }
         return null;
     }
 
@@ -331,26 +351,33 @@ public class FormModel
         return list;
     }
 
+  // STRIPPED
+    /*public FormEvents getFormEvents() {
+        if (formEvents == null)
+            formEvents = new FormEvents(this);
+        return formEvents;
+    }*/
+
     private static void collectMetaComponents(ComponentContainer cont,
                                               java.util.List<RADComponent> list) {
         RADComponent[] comps = cont.getSubBeans();
-      for (RADComponent comp : comps)
-      {
-        list.add(comp);
-        if (comp instanceof ComponentContainer)
-          collectMetaComponents((ComponentContainer) comp, list);
-      }
+        for (int i = 0; i < comps.length; i++) {
+            RADComponent comp = comps[i];
+            list.add(comp);
+            if (comp instanceof ComponentContainer)
+                collectMetaComponents((ComponentContainer) comp, list);
+        }
     }
 
     private static void collectVisualMetaComponents(RADVisualContainer cont,
                                                     java.util.List<RADComponent> list) {
         RADVisualComponent[] comps = cont.getSubComponents();
-      for (RADVisualComponent comp : comps)
-      {
-        list.add(comp);
-        if (comp instanceof RADVisualContainer)
-          collectVisualMetaComponents((RADVisualContainer) comp, list);
-      }
+        for (int i = 0; i < comps.length; i++) {
+            RADComponent comp = comps[i];
+            list.add(comp);
+            if (comp instanceof RADVisualContainer)
+                collectVisualMetaComponents((RADVisualContainer) comp, list);
+        }
     }
 
     public FormSettings getSettings() {
@@ -420,7 +447,7 @@ public class FormModel
             LayoutConstraints c = constraints instanceof LayoutConstraints ?
                                   (LayoutConstraints) constraints : null;
             LayoutConstraints[] constrArray = new LayoutConstraints[] { c };
-            int index = constraints instanceof Integer ? (Integer) constraints : -1;
+            int index = constraints instanceof Integer ? ((Integer)constraints).intValue() : -1;
 
             // component needs to be "in model" (have code expression) before added to layout
             if (newlyAdded || !metacomp.isInModel()) {
@@ -558,6 +585,11 @@ public class FormModel
     }
 
     void removeComponentImpl(RADComponent metacomp, boolean fromModel) {
+      // STRIPPED
+        /*if (fromModel && formEvents != null) {
+            removeEventHandlersRecursively(metacomp);
+        }*/
+
         RADComponent parent = metacomp.getParentComponent();
         ComponentContainer parentContainer =
             parent instanceof ComponentContainer ?
@@ -577,10 +609,9 @@ public class FormModel
     private void removeLayoutComponentsRecursively(RADComponent metacomp) {
         if (metacomp instanceof ComponentContainer) {
             RADComponent[] comps = ((ComponentContainer)metacomp).getSubBeans();
-          for (RADComponent comp : comps)
-          {
-            removeLayoutComponentsRecursively(comp);
-          }
+            for (int i=0; i<comps.length; i++) {
+                removeLayoutComponentsRecursively(comps[i]);
+            }
         }
         LayoutComponent layoutComp = layoutModel == null ? null : layoutModel.getLayoutComponent(metacomp.getId());
         if (layoutComp != null && layoutComp.getParent() == null) {
@@ -596,10 +627,27 @@ public class FormModel
             idToComponents.remove(metacomp.getId());
     }
 
+    // removes all event handlers attached to given component and all
+    // its subcomponents
+  // STRIPPED
+    /*private void removeEventHandlersRecursively(RADComponent comp) {
+        if (comp instanceof ComponentContainer) {
+            RADComponent[] subcomps = ((ComponentContainer)comp).getSubBeans();
+            for (int i=0; i<subcomps.length; i++)
+                removeEventHandlersRecursively(subcomps[i]);
+        }
+
+        Event[] events = comp.getKnownEvents();
+        for (int i=0; i < events.length; i++)
+            if (events[i].hasEventHandlers())
+                getFormEvents().detachEvent(events[i]);
+    }*/
+
     static void setInModelRecursively(RADComponent metacomp, boolean inModel) {
         if (metacomp instanceof ComponentContainer) {
             RADComponent[] comps = ((ComponentContainer)metacomp).getSubBeans();
-          for (RADComponent comp : comps) setInModelRecursively(comp, inModel);
+            for (int i=0; i < comps.length; i++)
+                setInModelRecursively(comps[i], inModel);
         }
         metacomp.setInModel(inModel);
     }
@@ -664,7 +712,7 @@ public class FormModel
         compoundEdit.addEdit(edit);
     }
 
-    UndoRedo.Manager getUndoRedoManager() {
+    public UndoRedo.Manager getUndoRedoManager() {
 //        if (undoRedoManager == null) {
 //            undoRedoManager = new UndoRedoManager();
 //            undoRedoManager.setLimit(50);
@@ -674,7 +722,7 @@ public class FormModel
 
     // [Undo manager performing undo/redo in AWT event thread should not be
     //  probably implemented here - in FormModel - but seperately.]
-    class UndoRedoManager extends UndoRedo.Manager {
+    public class UndoRedoManager extends UndoRedo.Manager {
         private Mutex.ExceptionAction<Object> runUndo = new Mutex.ExceptionAction<Object>() {
             @Override
             public Object run() throws Exception {
@@ -690,11 +738,30 @@ public class FormModel
             }
         };
 
+        private boolean undoInProgress;
+        private boolean redoInProgress;
+        public boolean isUndoInProgress() {
+            return undoInProgress;
+        }
+        public boolean isRedoInProgress() {
+            return redoInProgress;
+        }
+
         public void superUndo() throws CannotUndoException {
-            super.undo();
+            undoInProgress = true;
+            try {
+                super.undo();
+            } finally {
+                undoInProgress = false;
+            }
         }
         public void superRedo() throws CannotRedoException {
-            super.redo();
+            redoInProgress = true;
+            try {
+                super.redo();
+            } finally {
+                redoInProgress = false;
+            }
         }
 
         @Override
@@ -993,33 +1060,33 @@ public class FormModel
         return ev;
     }
 
-  // TODO: stripped
-//    private static boolean bindingModifiedLogged = false;
-//    public FormModelEvent fireBindingChanged(RADComponent metacomp,
-//                                             String path,
-//                                             String subProperty,
-//                                             Object oldValue,
-//                                             Object newValue)
-//    {
-//        FormModelEvent ev = new FormModelEvent(this, FormModelEvent.BINDING_PROPERTY_CHANGED);
-//        ev.setComponentAndContainer(metacomp, null);
-//        ev.setProperty(path, oldValue, newValue);
-//        ev.setSubProperty(subProperty);
-//        sendEvent(ev);
-//
-//        if (undoRedoRecording && oldValue != newValue) {
-//            if (!bindingModifiedLogged) {
-//                Logger logger = Logger.getLogger("org.netbeans.ui.metrics.form"); // NOI18N
-//                LogRecord rec = new LogRecord(Level.INFO, "USG_FORM_BINDING_MODIFIED"); // NOI18N
-//                rec.setLoggerName(logger.getName());
-//                logger.log(rec);
-//                bindingModifiedLogged = true;
-//            }
-//            addUndoableEdit(ev.getUndoableEdit());
-//        }
-//
-//        return ev;
-//    }
+  // STRIPPED
+/*    private static boolean bindingModifiedLogged = false;
+    public FormModelEvent fireBindingChanged(RADComponent metacomp,
+                                             String path,
+                                             String subProperty,
+                                             Object oldValue,
+                                             Object newValue)
+    {
+        FormModelEvent ev = new FormModelEvent(this, FormModelEvent.BINDING_PROPERTY_CHANGED);
+        ev.setComponentAndContainer(metacomp, null);
+        ev.setProperty(path, oldValue, newValue);
+        ev.setSubProperty(subProperty);
+        sendEvent(ev);
+
+        if (undoRedoRecording && oldValue != newValue) {
+            if (!bindingModifiedLogged) {
+                Logger logger = Logger.getLogger("org.netbeans.ui.metrics.form"); // NOI18N
+                LogRecord rec = new LogRecord(Level.INFO, "USG_FORM_BINDING_MODIFIED"); // NOI18N
+                rec.setLoggerName(logger.getName());
+                logger.log(rec);
+                bindingModifiedLogged = true;
+            }
+            addUndoableEdit(ev.getUndoableEdit());
+        }
+
+        return ev;
+    }*/
 
     /** Fires an event informing about changing a synthetic property of
      * a component. An undoable edit is created and registered automatically.
@@ -1052,6 +1119,64 @@ public class FormModel
 
         return ev;
     }
+
+    /** Fires an event informing about attaching a new event to an event handler
+     * (createdNew parameter indicates whether the event handler was created
+     * first). An undoable edit is created and registered automatically.
+     *
+     * @param event event for which the handler was created.
+     * @param handler name of the event handler.
+     * @param bodyText body of the event handler.
+     * @param createdNew newly created event handler?
+     * @return event that has been fired.
+     */
+  // STRIPPED
+    /*public FormModelEvent fireEventHandlerAdded(Event event,
+                                                String handler,
+                                                String bodyText,
+                                                String annotationText,
+                                                boolean createdNew)
+    {
+        t("event handler added: "+handler); // NOI18N
+
+        FormModelEvent ev =
+            new FormModelEvent(this, FormModelEvent.EVENT_HANDLER_ADDED);
+        ev.setEvent(event, handler, bodyText, annotationText, createdNew);
+        sendEvent(ev);
+
+        if (undoRedoRecording && event != null && handler != null)
+            addUndoableEdit(ev.getUndoableEdit());
+
+        return ev;
+    }*/
+
+    /** Fires an event informing about detaching an event from event handler
+     * (handlerDeleted parameter indicates whether the handler was deleted as
+     * the last event was detached). An undoable edit is created and registered
+     * automatically.
+     *
+     * @param event event for which the handler was removed.
+     * @param handler removed event handler.
+     * @param handlerDeleted was deleted?
+     * @return event that has been fired.
+     */
+  // STRIPPED
+    /*public FormModelEvent fireEventHandlerRemoved(Event event,
+                                                  String handler,
+                                                  boolean handlerDeleted)
+    {
+        t("firing event handler removed: "+handler); // NOI18N
+
+        FormModelEvent ev =
+            new FormModelEvent(this, FormModelEvent.EVENT_HANDLER_REMOVED);
+        ev.setEvent(event, handler, null, null, handlerDeleted);
+        sendEvent(ev);
+
+        if (undoRedoRecording && event != null && handler != null)
+            addUndoableEdit(ev.getUndoableEdit());
+
+        return ev;
+    }*/
 
     /** Fires an event informing about renaming an event handler. An undoable
      * edit is created and registered automatically.
@@ -1202,21 +1327,25 @@ public class FormModel
             }
             targets = (ArrayList) listeners.clone();
         }
-      for (Object target : targets)
-      {
-        FormModelListener l = (FormModelListener) target;
-        l.formChanged(events);
-      }
+        for (int i=0; i < targets.size(); i++) {
+            FormModelListener l = (FormModelListener) targets.get(i);
+            l.formChanged(events);
+        }
     }
 
     // -------------
-    
+
+  // STRIPPED
+    /*public CodeStructure getCodeStructure() {
+        return codeStructure;
+    }*/
+
     public boolean isFreeDesignDefaultLayout() {
         return freeDesignDefaultLayout;
     }
     
-    void setFreeDesignDefaultLayout() {
-        this.freeDesignDefaultLayout = true;
+    void setFreeDesignDefaultLayout(boolean freeDesignDefaultLayout) {
+        this.freeDesignDefaultLayout = freeDesignDefaultLayout;
     }
 
 //    CodeGenerator getCodeGenerator() {
@@ -1249,9 +1378,9 @@ public class FormModel
         @Override
         public void initSubComponents(RADComponent[] initComponents) {
             otherComponents.clear();
-          for (RADComponent initComponent : initComponents)
-            if (initComponent != topRADComponent)
-              otherComponents.add(initComponent);
+            for (int i = 0; i < initComponents.length; i++)
+                if (initComponents[i] != topRADComponent)
+                    otherComponents.add(initComponents[i]);
         }
 
         @Override

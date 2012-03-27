@@ -69,13 +69,14 @@ import org.netbeans.modules.form.project.ClassSource;
  * @author Tomas Pavek
  */
 
-class PaletteItemDataObject extends MultiDataObject implements CookieSet.Factory {
+public class PaletteItemDataObject extends MultiDataObject implements CookieSet.Factory {
 
     static final String XML_ROOT = "palette_item"; // NOI18N
     static final String ATTR_VERSION = "version"; // NOI18N
     static final String TAG_COMPONENT = "component"; // NOI18N
     static final String ATTR_CLASSNAME = "classname"; // NOI18N
     static final String ATTR_TYPE = "type"; // NOI18N
+    static final String ATTR_INITIALIZER_ID = "initializer-id"; // NOI18N
 //    static final String ATTR_IS_CONTAINER = "is-container"; // NOI18N
     static final String TAG_CLASSPATH = "classpath"; // NOI18N
     static final String TAG_RESOURCE= "resource"; // NOI18N
@@ -132,6 +133,7 @@ class PaletteItemDataObject extends MultiDataObject implements CookieSet.Factory
             paletteItem.componentClassSource = null;
 //            paletteItem.isContainer_explicit = null;
             paletteItem.componentType_explicit = null;
+            paletteItem.componentInitializerId = null;
         }
 
         displayName = null;
@@ -191,6 +193,7 @@ class PaletteItemDataObject extends MultiDataObject implements CookieSet.Factory
             // TODO report errors, validate using DTD?
             
             item.setComponentExplicitType(handler.componentExplicitType);
+            item.setComponentInitializerId(handler.componentInitializerId);
             if (handler.componentClassName != null || displayName_key != null) {
                 item.setComponentClassSource(new ClassSource(handler.componentClassName, handler.entries));
                 paletteItem = item;
@@ -208,7 +211,7 @@ class PaletteItemDataObject extends MultiDataObject implements CookieSet.Factory
      * @param source classpath source type - "jar", "library", "project"
      * @param classpath names of classpath roots - e.g. JAR file paths
      */
-    static void createFile(FileObject folder, ClassSource classSource)
+    public static void createFile(FileObject folder, ClassSource classSource)
         throws IOException
     {
         String classname = classSource.getClassName();
@@ -465,12 +468,14 @@ class PaletteItemDataObject extends MultiDataObject implements CookieSet.Factory
         List<ClassSource.Entry> entries;
         String componentClassName;
         String componentExplicitType;
+        String componentInitializerId;
         
         @Override
         public void startDocument() throws SAXException {
             entries = new ArrayList<ClassSource.Entry>();
             componentClassName = null;
             componentExplicitType = null;
+            componentInitializerId = null;
         }
 
         @Override
@@ -492,6 +497,7 @@ class PaletteItemDataObject extends MultiDataObject implements CookieSet.Factory
                 String className = attributes.getValue(ATTR_CLASSNAME);
                 componentClassName = className;
                 componentExplicitType = attributes.getValue(ATTR_TYPE);
+                componentInitializerId = attributes.getValue(ATTR_INITIALIZER_ID);
             } else if (TAG_CLASSPATH.equals(qName)) {
                 // Content is processed in the next branch
             } else if (TAG_RESOURCE.equals(qName)) {

@@ -138,7 +138,7 @@ class VisualDesignerPopupFactory extends PopupFactory {
         for(JMenu m : containerMap.keySet()) {
             if(m != menu) {
                 // hide if not an ancestor of this menu
-                if(isAncestor(m, menu)) {/* &&
+                if(!isAncestor(m,menu)) {/* && 
                         (canvas.isTopLevelMenu(m) ||
                          canvas.hasSelectedDescendants(m))
                         ) {*/
@@ -150,7 +150,7 @@ class VisualDesignerPopupFactory extends PopupFactory {
     }
     
     private boolean isAncestor(JMenu m, JMenu menu) {
-        return !canvas.isAncestor(menu, m);
+        return canvas.isAncestor(menu, m);
     }
     
     private static class VisualDesignerJPanelContainer extends JPanel {

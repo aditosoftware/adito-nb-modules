@@ -47,6 +47,7 @@ package org.netbeans.modules.form.project;
 import java.io.*;
 import java.net.*;
 import java.util.*;
+import java.util.logging.Level;
 
 import org.openide.ErrorManager;
 import org.openide.filesystems.*;
@@ -54,10 +55,12 @@ import org.openide.util.Lookup;
 import org.openide.util.NbBundle;
 
 import org.netbeans.api.project.*;
-import org.netbeans.api.project.ant.*;
 import org.netbeans.api.java.classpath.ClassPath;
+import org.netbeans.api.progress.ProgressHandle;
+import org.netbeans.api.progress.ProgressRunnable;
+import org.netbeans.api.progress.ProgressUtils;
+import org.netbeans.modules.form.FormUtils;
 import org.netbeans.spi.java.classpath.support.ClassPathSupport;
-//import org.netbeans.api.java.queries.SourceForBinaryQuery;
 
 /**
  * Utility methods related to classpath in projects.
@@ -95,18 +98,17 @@ public class ClassPathUtils {
     public static Class<?> loadClass(String name, FileObject fileInProject)
         throws ClassNotFoundException
     {
-      return Class.forName(name, true, Lookup.getDefault().lookup(ClassLoader.class));
-        //return Class.forName(name, true, getFormClassLoader(fileInProject));
+        return Class.forName(name, true, getFormClassLoader(fileInProject));
         // LinkageError left uncaught
     }
 
     public static boolean checkUserClass(String name, FileObject fileInProject) {
         ClassPath classPath = ClassPath.getClassPath(fileInProject, ClassPath.EXECUTE);
         if (classPath == null)
-            return true;
+            return false;
 
         String fileName = name.replace('.', '/').concat(".class"); // NOI18N
-        return classPath.findResource(fileName) == null;
+        return classPath.findResource(fileName) != null;
     }
 
     public static void resetFormClassLoader(Project p) {
@@ -183,62 +185,13 @@ public class ClassPathUtils {
         return loader.loadClass(classSource.getClassName());
     }
 
-    /** Creates ClassSource object corresponding to project output classpath.
-     * @param fileInProject FileObject being source (.java) or output (.class)
-     *        file in a project
-     * @param classname String name of class for which the ClassSource is
-     *        created
-     */
-    public static ClassSource getProjectClassSource(FileObject fileInProject,
-                                                    String classname)
-    {
-        Project project = FileOwnerQuery.getOwner(fileInProject);
-        if (project == null)
-            return null; // the file is not in any project
-
-        // find the project output (presumably a JAR file) where the given
-        // source file is compiled (packed) to
-        AntArtifact[] artifacts =
-            AntArtifactQuery.findArtifactsByType(project, "jar"); // NOI18N
-        if (artifacts.length == 0)
-            return null; // there is no project output
-
-      // TODO: stripped
-//        for (AntArtifact aa : artifacts) {
-//            ClassSource.Entry entry = new ClassSource.ProjectEntry(aa);
-//            for (URL binaryRoot : entry.getClasspath()) {
-//                for (FileObject sourceRoot : SourcefForBinaryQuery.findSourceRoots(binaryRoot).getRoots()) {
-//                    if (FileUtil.isParentOf(sourceRoot, fileInProject)) {
-//                        // Looks like the one.
-//                        return new ClassSource(classname, entry);
-//                    }
-//                }
-//            }
-//        }
-
-        // no output found for given source file - the file might not be
-        // a source file ... but a binary output file - in this case return
-        // simply all project outputs as there is no good way to recognize
-        // the right one (and j2se project has just one output anyway)
-
-        if (!fileInProject.getExt().equals("class")) // NOI18N
-            return null; // not interested in other than .class binary files
-
-        List<ClassSource.Entry> entries = new ArrayList<ClassSource.Entry>();
-        for (AntArtifact aa : artifacts) {
-            ClassSource.Entry entry = new ClassSource.ProjectEntry(aa);
-            entries.add(entry);
-        }
-        return new ClassSource(classname, entries);
-    }
-    
     public static boolean isOnClassPath(FileObject fileInProject, String className) {
         String resourceName = className.replace('.', '/') + ".class"; // NOI18N
-        ClassPath classPath = ClassPath.getClassPath(fileInProject, ClassPath.EXECUTE);
+        ClassPath classPath = ClassPath.getClassPath(fileInProject, ClassPath.COMPILE);
         if (classPath == null)
-            return true;
+            return false;
 
-        return classPath.findResource(resourceName) == null;
+        return classPath.findResource(resourceName) != null;
     }
 
     public static boolean isJava6ProjectPlatform(FileObject fileInProject) {
@@ -253,10 +206,15 @@ public class ClassPathUtils {
      * @return null if operation was cancelled by user otherwise true or false
      *  if project classpath was changed or not
      */
-    public static Boolean updateProject(FileObject fileInProject,
-                                        ClassSource classSource)
-        throws IOException
-    {
+    public static Boolean updateProject(FileObject fileInProject, ClassSource classSource)
+            throws IOException {
+        return updateProject(fileInProject, classSource, false);
+    }
+
+    public static Boolean updateProject(final FileObject fileInProject,
+            final ClassSource classSource, boolean asynchronous)
+            throws IOException {
+
         if (!classSource.hasEntries())
             return Boolean.FALSE; // nothing to add to project
 
@@ -264,7 +222,37 @@ public class ClassPathUtils {
 	if(project==null)
 	    return Boolean.FALSE;
 
-        return classSource.addToProjectClassPath(fileInProject, ClassPath.COMPILE);
+        Boolean updated = null;
+        if (asynchronous) {
+            FormUtils.getRequestProcessor().post(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        classSource.addToProjectClassPath(fileInProject, ClassPath.COMPILE);
+                    } catch (IOException ioex) {
+                        FormUtils.LOGGER.log(Level.INFO, null, ioex);
+                    }
+                }
+            });
+        } else {
+            String msg = getBundleString("MSG_UpdatingClassPath"); // NOI18N
+            Object retVal = ProgressUtils.showProgressDialogAndRun(new ProgressRunnable<Object>() {
+                @Override
+                public Object run(ProgressHandle handle) {
+                    try {
+                        return classSource.addToProjectClassPath(fileInProject, ClassPath.COMPILE);
+                    } catch (IOException ioex) {
+                        return ioex;
+                    }
+                }
+            }, msg, false);
+            if (retVal instanceof IOException) {
+                throw (IOException)retVal;
+            } else {
+                updated = (Boolean)retVal;
+            }
+        }
+        return updated;
     }
 
     /** Provides description for ClassSource object usable e.g. for error
@@ -316,24 +304,24 @@ public class ClassPathUtils {
             return false;
         }
 
-      for (ClassPattern cp : list)
-      {
-        switch (cp.type)
-        {
-          case (ClassPattern.CLASS):
-            if (className.equals(cp.name))
-              return true;
-            break;
-          case (ClassPattern.PACKAGE):
-            if (className.startsWith(cp.name) && (className.lastIndexOf('.') <= cp.name.length()))
-              return true;
-            break;
-          case (ClassPattern.PACKAGE_AND_SUBPACKAGES):
-            if (className.startsWith(cp.name))
-              return true;
-            break;
+        Iterator it = list.iterator();
+        while (it.hasNext()) {
+            ClassPattern cp = (ClassPattern) it.next();
+            switch (cp.type) {
+                case (ClassPattern.CLASS):
+                    if (className.equals(cp.name))
+                        return true;
+                    break;
+                case (ClassPattern.PACKAGE):
+                    if (className.startsWith(cp.name) && (className.lastIndexOf('.') <= cp.name.length()))
+                        return true;
+                    break;
+                case (ClassPattern.PACKAGE_AND_SUBPACKAGES):
+                    if (className.startsWith(cp.name))
+                        return true;
+                    break;
+            }
         }
-      }
         return false;
     }
 
@@ -394,42 +382,34 @@ public class ClassPathUtils {
             return list;
 
         FileObject[] files = folder.getChildren();
-      for (FileObject file : files)
-      {
-        try
-        {
-          BufferedReader r = new BufferedReader(new InputStreamReader(file.getInputStream()));
-          String line = r.readLine();
-          while (line != null)
-          {
-            line = line.trim();
-            if (!line.equals(""))
-            { // NOI18N
-              ClassPattern cp;
-              if (line.endsWith("**"))
-              { // NOI18N
-                cp = new ClassPattern(line.substring(0, line.length() - 2),
-                                      ClassPattern.PACKAGE_AND_SUBPACKAGES);
-              }
-              else if (line.endsWith("*"))
-              { // NOI18N
-                cp = new ClassPattern(line.substring(0, line.length() - 1),
-                                      ClassPattern.PACKAGE);
-              }
-              else
-              {
-                cp = new ClassPattern(line, ClassPattern.CLASS);
-              }
-              list.add(cp);
+        for (int i=0; i < files.length; i++) {
+            try {
+                BufferedReader r = new BufferedReader(new InputStreamReader(files[i].getInputStream()));
+                String line = r.readLine();
+                while (line != null) {
+                    line = line.trim();
+                    if (!line.equals("")) { // NOI18N
+                        ClassPattern cp;
+                        if (line.endsWith("**")) { // NOI18N
+                            cp = new ClassPattern(line.substring(0, line.length()-2),
+                                                  ClassPattern.PACKAGE_AND_SUBPACKAGES);
+                        }
+                        else if (line.endsWith("*")) { // NOI18N
+                            cp = new ClassPattern(line.substring(0, line.length()-1),
+                                                  ClassPattern.PACKAGE);
+                        }
+                        else {
+                            cp = new ClassPattern(line, ClassPattern.CLASS);
+                        }
+                        list.add(cp);
+                    }
+                    line = r.readLine();
+                }
             }
-            line = r.readLine();
-          }
+            catch (IOException ex) {
+                ErrorManager.getDefault().notify(ErrorManager.INFORMATIONAL, ex);
+            }
         }
-        catch (IOException ex)
-        {
-          ErrorManager.getDefault().notify(ErrorManager.INFORMATIONAL, ex);
-        }
-      }
         return list;
     }
 

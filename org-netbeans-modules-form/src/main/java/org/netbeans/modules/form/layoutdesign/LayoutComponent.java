@@ -86,7 +86,10 @@ public final class LayoutComponent implements LayoutConstants {
 
     // Subcomponents of this component.
     private List<LayoutComponent> subComponents;
-    
+
+    // Difference of actual visualized size to component's minimum size.
+    private int[] diffToMinSize;
+
     private PropertyChangeSupport propertyChangeSupport = new PropertyChangeSupport(this);
 
     // horizontal size-link
@@ -202,6 +205,10 @@ public final class LayoutComponent implements LayoutConstants {
         layoutIntervals[dimension] = interval;
     }
 
+    LayoutRegion getCurrentSpace() {
+        return getLayoutInterval(HORIZONTAL).getCurrentSpace();
+    }
+
     public boolean isLayoutContainer() {
         return layoutRoots != null;
     }
@@ -216,6 +223,18 @@ public final class LayoutComponent implements LayoutConstants {
 
     LayoutInterval[] getParentRoots() {
         return parentComponent != null ? parentComponent.getLayoutRoots(layoutIntervals[0]) : null;
+    }
+
+    void setDiffToMinimumSize(int dimension, int diff) {
+        if (diffToMinSize == null) {
+            diffToMinSize = new int[DIM_COUNT];
+        }
+        diffToMinSize[dimension] = diff;
+    }
+
+    int getDiffToMinimumSize(int dimension) {
+        assert isLayoutContainer();
+        return diffToMinSize != null ? diffToMinSize[dimension] : 0;
     }
 
     // -----
@@ -293,12 +312,32 @@ public final class LayoutComponent implements LayoutConstants {
     }
 
     void setLayoutRoots(List<LayoutInterval[]> roots) {
+        LayoutRegion[] space;
+        if (layoutRoots != null && !layoutRoots.isEmpty()) {
+            space = new LayoutRegion[] {
+                layoutRoots.get(0)[HORIZONTAL].getCurrentSpace(),
+                layoutRoots.get(0)[VERTICAL].getCurrentSpace() };
+        } else {
+            space = null;
+        }
+
         if (roots == null && layoutRoots != null) {
             // instead of no roots create default empty roots (to keep this a container)
             // for no roots use setLayoutContainer(false, null)
             createRoots();
         } else {
             layoutRoots = roots;
+        }
+
+        if (space != null) {
+            for (LayoutInterval[] r : layoutRoots) {
+                for (int i=0; i < r.length; i++) {
+                    LayoutRegion rs = r[i].getCurrentSpace();
+                    if (space[i].isSet() && !rs.isSet()) {
+                        rs.set(space[i]);
+                    }
+                }
+            }
         }
     }
 
@@ -388,18 +427,15 @@ public final class LayoutComponent implements LayoutConstants {
     void setCurrentInterior(Rectangle bounds) {
         LayoutRegion space = null;
         for (LayoutInterval[] roots : layoutRoots) {
-          for (LayoutInterval root : roots)
-          {
-            if (space == null)
-            {
-              space = root.getCurrentSpace();
-              space.set(bounds, LayoutRegion.UNKNOWN);
+            for (int i=0; i < roots.length; i++) {
+                if (space == null) {
+                    space = roots[i].getCurrentSpace();
+                    space.set(bounds, LayoutRegion.UNKNOWN);
+                }
+                else {
+                    roots[i].setCurrentSpace(space);
+                }
             }
-            else
-            {
-              root.setCurrentSpace(space);
-            }
-          }
         }
     }
 

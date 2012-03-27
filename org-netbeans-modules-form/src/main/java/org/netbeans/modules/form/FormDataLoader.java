@@ -49,6 +49,7 @@ import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.NbAditoInterface;
 import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.model.IAditoModelDataProvider;
 import org.openide.filesystems.FileObject;
 import org.openide.loaders.*;
+import org.openide.util.Lookup;
 
 /** Loader for Forms. Recognizes file with extension .form and .java and with extension class if
  * there is their source and form file.
@@ -62,7 +63,6 @@ public class FormDataLoader extends UniFileLoader {
     public static final String ADITO_EXTENSION = "aod"; // NOI18N
 
     static final long serialVersionUID =7259146057404524013L;
-
     /** Constructs a new FormDataLoader */
     public FormDataLoader() {
         super("org.netbeans.modules.form.FormDataObject"); // NOI18N
@@ -116,9 +116,9 @@ public class FormDataLoader extends UniFileLoader {
 
     @Override
     protected MultiDataObject.Entry createPrimaryEntry(MultiDataObject obj, FileObject primaryFile) {
-//        return JavaDataSupport.createJavaFileEntry(obj, primaryFile); // TODO: stripped
-//      System.out.println("createPrimaryEntry(..) at " + getClass().getSimpleName() + " currently not supported");
-      return new FileEntry(obj, primaryFile);
+        FormServices services = Lookup.getDefault().lookup(FormServices.class);
+        MultiDataObject.Entry entry = services.createPrimaryEntry(obj, primaryFile);
+        return entry;
     }
 
 }

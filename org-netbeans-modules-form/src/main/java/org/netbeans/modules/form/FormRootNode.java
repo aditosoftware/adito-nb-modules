@@ -45,7 +45,9 @@
 package org.netbeans.modules.form;
 
 import java.awt.datatransfer.Transferable;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
 import javax.swing.Action;
 import org.openide.nodes.*;
 import org.openide.util.actions.SystemAction;
@@ -70,7 +72,6 @@ class FormRootNode extends FormNode {
     public FormRootNode(FormModel formModel) {
         super(new RootChildren(formModel), formModel);
         setName("Form Root Node"); // NOI18N
-        //setIconBaseWithExtension("org/netbeans/modules/form/resources/formDesigner.gif"); // NOI18N
         setIconBaseWithExtension("org/netbeans/modules/form/resources/form.gif"); // NOI18N
         updateName(formModel.getName());
     }
@@ -103,7 +104,9 @@ class FormRootNode extends FormNode {
             }
             l.add(SystemAction.get(ReloadAction.class));
             l.add(null);
-          l.addAll(Arrays.asList(super.getActions(context)));
+            for (Action a : super.getActions(context)) {
+                l.add(a);
+            }
             actions = l.toArray(new Action[l.size()]);
         }
         return actions;
@@ -120,17 +123,17 @@ class FormRootNode extends FormNode {
     
     @Override
     public Node.PropertySet[] getPropertySets() {
-      // TODO: stripped
-//        Node.PropertySet codeSet = new Node.PropertySet(
-//                "codeGeneration", // NOI18N
-//                FormUtils.getBundleString("CTL_SyntheticTab"), // NOI18N
-//                FormUtils.getBundleString("CTL_SyntheticTabHint")) // NOI18N
-//        {
-//            @Override
-//            public Node.Property[] getProperties() {
-//                return getCodeGenProperties();
-//            }
-//        };
+      // STRIPPED
+/*        Node.PropertySet codeSet = new Node.PropertySet(
+                "codeGeneration", // NOI18N
+                FormUtils.getBundleString("CTL_SyntheticTab"), // NOI18N
+                FormUtils.getBundleString("CTL_SyntheticTabHint")) // NOI18N
+        {
+            @Override
+            public Node.Property[] getProperties() {
+                return getCodeGenProperties();
+            }
+        };*/
         Node.PropertySet resourceSet = new Node.PropertySet(
                 "resources", // NOI18N
                 FormUtils.getBundleString("CTL_ResourceTab"), // NOI18N
@@ -141,7 +144,7 @@ class FormRootNode extends FormNode {
                 return getResourceProperties();
             }
         };
-        return new Node.PropertySet[] { /*codeSet,*/ resourceSet };
+        return new Node.PropertySet[] { /*codeSet,*/ resourceSet }; // STRIPPED
     }
 
     Node.Property[] getCodeGenProperties() {
@@ -151,8 +154,8 @@ class FormRootNode extends FormNode {
     }
     
     private Node.Property[] createCodeGenProperties() {
-      // TODO: stripped
-//        return FormEditor.getCodeGenerator(getFormModel()).getSyntheticProperties(null);
+      // STRIPPED
+      //  return FormEditor.getCodeGenerator(getFormModel()).getSyntheticProperties(null);
       return null;
     }
 
@@ -164,8 +167,8 @@ class FormRootNode extends FormNode {
 
     private Node.Property[] createResourceProperties() {
       return new Node.Property[0];
-      // TODO: stripped
-//        return FormEditor.getResourceSupport(getFormModel()).createFormProperties();
+      // STRIPPED
+      //  return FormEditor.getResourceSupport(getFormModel()).createFormProperties();
     }
 
     Node.Property[] getAllProperties() {

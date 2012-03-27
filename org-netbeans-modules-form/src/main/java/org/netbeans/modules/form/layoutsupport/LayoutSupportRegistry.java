@@ -118,6 +118,33 @@ public class LayoutSupportRegistry {
         return className != null ? loadClass(className) : null;
     }
 
+    public String getSupportNameForContainer(String containerClassName) {
+        String className = getContainersMap().get(containerClassName);
+        if (className == null) {
+            Class containerClass = loadClass(containerClassName);
+            if (containerClass != null)
+                className = findSuperClass(getContainersMap(), containerClass);
+//            if (className == null && needPaletteRescan) {
+//                className = scanPalette(containerClassName);
+//                if (className == null) // try container superclass again
+//                    className = findSuperClass(getContainersMap(),
+//                                               containerClass);
+//            }
+        }
+
+        return className;
+    }
+
+    public Class getSupportClassForLayout(Class layoutClass) {
+        String className = getLayoutsMap().get(layoutClass.getName());
+        if (className == null && needPaletteRescan)
+            className = scanPalette(layoutClass.getName());
+        if (className == null)
+            className = findSuperClass(getLayoutsMap(), layoutClass);
+
+        return className != null ? loadClass(className) : null;
+    }
+
   public String getSupportNameForLayout(String layoutClassName) {
         String className = getLayoutsMap().get(layoutClassName);
         if (className == null && needPaletteRescan)
@@ -134,10 +161,52 @@ public class LayoutSupportRegistry {
     // ------------
     // registering methods
 
-  // ------------
+    public static void registerSupportForContainer(
+                           Class containerClass,
+                           Class layoutDelegateClass)
+    {
+        getContainersMap().put(containerClass.getName(),
+                               layoutDelegateClass.getName());
+    }
+
+    public static void registerSupportForContainer(
+                           String containerClassName,
+                           String layoutDelegateClassName)
+    {
+        getContainersMap().put(containerClassName, layoutDelegateClassName);
+    }
+
+    public static void registertSupportForLayout(
+                           Class layoutClass,
+                           Class layoutDelegateClass)
+    {
+        getLayoutsMap().put(layoutClass.getName(),
+                            layoutDelegateClass.getName());
+    }
+
+    public static void registerSupportForLayout(
+                           String layoutClassName,
+                           String layoutDelegateClassName)
+    {
+        getLayoutsMap().put(layoutClassName, layoutDelegateClassName);
+    }
+
+    // ------------
     // creation methods
 
-  public LayoutSupportDelegate createSupportForLayout(Class layoutClass)
+    public LayoutSupportDelegate createSupportForContainer(Class containerClass)
+        throws ClassNotFoundException,
+               InstantiationException,
+               IllegalAccessException
+    {
+        Class delegateClass = getSupportClassForContainer(containerClass);
+        if (delegateClass == null)
+            return null;
+
+        return (LayoutSupportDelegate) delegateClass.newInstance();
+    }
+
+    public LayoutSupportDelegate createSupportForLayout(Class layoutClass)
         throws ClassNotFoundException,
                InstantiationException,
                IllegalAccessException
@@ -153,18 +222,24 @@ public class LayoutSupportRegistry {
                loadClass(delegateClassName).newInstance();
     }
 
-  // -----------
+    public static LayoutSupportDelegate createSupportInstance(
+                                            Class layoutDelegateClass)
+        throws InstantiationException, IllegalAccessException
+    {
+        return (LayoutSupportDelegate) layoutDelegateClass.newInstance();
+    }
+
+    // -----------
     // private methods
 
     private String findSuperClass(Map map, Class subClass) {
-      for (Object o : map.entrySet())
-      {
-        Map.Entry en = (Map.Entry) o;
-        String className = (String) en.getKey();
-        Class<?> keyClass = loadClass(className);
-        if (keyClass != null && keyClass.isAssignableFrom(subClass))
-          return (String) en.getValue();
-      }
+        for (Iterator it=map.entrySet().iterator(); it.hasNext(); ) {
+            Map.Entry en = (Map.Entry) it.next();
+            String className = (String) en.getKey();
+            Class<?> keyClass = loadClass(className);
+            if (keyClass != null && keyClass.isAssignableFrom(subClass))
+                return (String) en.getValue();
+        }
         return null;
     }
 
@@ -196,85 +271,76 @@ public class LayoutSupportRegistry {
         String foundSupportClassName = null;
 
         FileObject[] paletteCategories = paletteFolder.getChildren();
-      for (FileObject categoryFolder : paletteCategories)
-      {
-        if (!categoryFolder.isFolder())
-          continue;
+        for (int i=0; i < paletteCategories.length; i++) {
+            FileObject categoryFolder = paletteCategories[i];
+            if (!categoryFolder.isFolder())
+                continue;
 
-        if (newPaletteListener)
-          categoryFolder.addFileChangeListener(paletteListener);
+            if (newPaletteListener)
+                categoryFolder.addFileChangeListener(paletteListener);
 
-        FileObject[] paletteItems = categoryFolder.getChildren();
-        for (FileObject paletteItem : paletteItems)
-        {
-          DataObject itemDO = null;
-          try
-          {
-            itemDO = DataObject.find(paletteItem);
-          }
-          catch (DataObjectNotFoundException ex)
-          {
-            continue;
-          }
+            FileObject[] paletteItems = categoryFolder.getChildren();
+            for (int j=0; j < paletteItems.length; j++) {
+                DataObject itemDO = null;
+                try {
+                    itemDO = DataObject.find(paletteItems[j]);
+                }
+                catch (DataObjectNotFoundException ex) {
+                    continue;
+                }
 
-          PaletteItem item = itemDO.getCookie(PaletteItem.class);
-          if (item == null || !item.isLayout())
-            continue;
+                PaletteItem item = itemDO.getCookie(PaletteItem.class);
+                if (item == null || !item.isLayout())
+                    continue;
 
-          Class itemClass = item.getComponentClass();
-          if (itemClass == null)
-            continue; // cannot resolve class - ignore
+                Class itemClass = item.getComponentClass();
+                if (itemClass == null)
+                    continue; // cannot resolve class - ignore
 
-          Class delegateClass = null;
-          Class supportedClass = null;
+                Class delegateClass = null;
+                Class supportedClass = null;
 
-          if (LayoutSupportDelegate.class.isAssignableFrom(itemClass))
-          {
-            // register LayoutSupportDelegate directly
-            delegateClass = itemClass;
-            try
-            {
-              LayoutSupportDelegate delegate =
-                  (LayoutSupportDelegate) delegateClass.newInstance();
-              supportedClass = delegate.getSupportedClass();
+                if (LayoutSupportDelegate.class.isAssignableFrom(itemClass)) {
+                    // register LayoutSupportDelegate directly
+                    delegateClass = itemClass;
+                    try {
+                        LayoutSupportDelegate delegate =
+                            (LayoutSupportDelegate) delegateClass.newInstance();
+                        supportedClass = delegate.getSupportedClass();
+                    }
+                    catch (Exception ex) {
+                        org.openide.ErrorManager.getDefault().notify(
+                            org.openide.ErrorManager.INFORMATIONAL, ex);
+                        continue; // invalid - ignore
+                    }
+                }
+                else if (LayoutManager.class.isAssignableFrom(itemClass)) {
+                    // register default support for layout
+                    supportedClass = itemClass;
+                }
+
+                if (supportedClass != null) {
+                    Map<String,String> map;
+                    if (Container.class.isAssignableFrom(supportedClass))
+                        map = getContainersMap();
+                    else if (LayoutManager.class.isAssignableFrom(supportedClass))
+                        map = getLayoutsMap();
+                    else continue; // invalid - ignore
+
+                    String supportedClassName = supportedClass.getName();
+                    if (map.get(supportedClassName) == null) {
+                        String delegateClassName = delegateClass != null ?
+                                                     delegateClass.getName():
+                                                     DEFAULT_SUPPORT;
+
+                        map.put(supportedClassName, delegateClassName);
+
+                        if (supportedClassName.equals(wantedClassName))
+                            foundSupportClassName = delegateClassName;
+                    }
+                }
             }
-            catch (Exception ex)
-            {
-              ErrorManager.getDefault().notify(
-                  ErrorManager.INFORMATIONAL, ex);
-              continue; // invalid - ignore
-            }
-          }
-          else if (LayoutManager.class.isAssignableFrom(itemClass))
-          {
-            // register default support for layout
-            supportedClass = itemClass;
-          }
-
-          if (supportedClass != null)
-          {
-            Map<String, String> map;
-            if (Container.class.isAssignableFrom(supportedClass))
-              map = getContainersMap();
-            else if (LayoutManager.class.isAssignableFrom(supportedClass))
-              map = getLayoutsMap();
-            else continue; // invalid - ignore
-
-            String supportedClassName = supportedClass.getName();
-            if (map.get(supportedClassName) == null)
-            {
-              String delegateClassName = delegateClass != null ?
-                  delegateClass.getName() :
-                  DEFAULT_SUPPORT;
-
-              map.put(supportedClassName, delegateClassName);
-
-              if (supportedClassName.equals(wantedClassName))
-                foundSupportClassName = delegateClassName;
-            }
-          }
         }
-      }
 
         needPaletteRescan = false;
         return foundSupportClassName;

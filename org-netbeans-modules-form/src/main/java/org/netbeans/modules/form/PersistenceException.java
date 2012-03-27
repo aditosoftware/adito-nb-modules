@@ -75,4 +75,3 @@ public class PersistenceException extends Exception {
         return originalException;
     }
 }
-

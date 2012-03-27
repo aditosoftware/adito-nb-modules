@@ -54,7 +54,6 @@ import org.openide.modules.ModuleInstall;
 /**
  * Module installation class for Form Editor
  */
-@SuppressWarnings({"UnusedDeclaration"})
 public class FormEditorModule extends ModuleInstall {
 
     private static final String BEANINFO_PATH_AWT = "org.netbeans.modules.form.beaninfo.awt"; // NOI18N
@@ -64,10 +63,12 @@ public class FormEditorModule extends ModuleInstall {
     public void restored() {
         Beans.setDesignTime(true);
 
-      // TODO: stripped
-//        FormPropertyEditorManager.registerEditor(
-//            javax.swing.KeyStroke.class,
-//            org.netbeans.modules.form.editors.KeyStrokeEditor.class);
+      // STRIPPED
+        /*// TODO historically registered here, but it should be better just on search
+        // path (i.e. in editors2 package)
+        FormPropertyEditorManager.registerEditor(
+            javax.swing.KeyStroke.class,
+            org.netbeans.modules.form.editors.KeyStrokeEditor.class);*/
 
         // Add beaninfo search path.
         String[] sp = Introspector.getBeanInfoSearchPath();

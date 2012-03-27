@@ -49,9 +49,6 @@ import java.util.*;
 import java.util.List;
 import javax.swing.*;
 
-import org.jdesktop.layout.LayoutStyle;
-import org.jdesktop.layout.GroupLayout;
-
 import org.netbeans.modules.form.layoutdesign.*;
 
 /**
@@ -84,17 +81,18 @@ public class SwingLayoutBuilder {
      */
     private Map<String,Component> componentIDMap;
 
-    private boolean designMode;
+    /**
+     * To workaround some cases of default ending container gaps
+     * GroupLayout does not like.
+     */
+    private Set<LayoutInterval> unsupportedContResGaps;
 
     public SwingLayoutBuilder(LayoutModel layoutModel,
-                              Container container, String containerId,
-                              boolean designMode)
-    {
+                              Container container, String containerId) {
         componentIDMap = new HashMap<String,Component>();
         this.layoutModel = layoutModel;
         this.container = container;
         this.containerLC = layoutModel.getLayoutComponent(containerId);
-        this.designMode = designMode;
     }
 
     /**
@@ -145,19 +143,16 @@ public class SwingLayoutBuilder {
     public void clearContainer() {
         // Issue 121068 - componentResized event lost, but needed by JSlider
         // forces new componentResized event when the container is laid out
-        issue121068Hack(container);
+        issue121068Hack();
         container.removeAll();
         componentIDMap.clear();
     }
 
-    private void issue121068Hack(Component component) {
-        if (component instanceof JSlider) {
-            component.setBounds(0,0,0,0);
-        }
-        if (component instanceof Container) {
-            Container cont = (Container)component;
-            for (int i=0; i<cont.getComponentCount(); i++) {
-                issue121068Hack(cont.getComponent(i));
+    private void issue121068Hack() {
+        for (int i=0; i < container.getComponentCount(); i++) {
+            Component comp = container.getComponent(i);
+            if (comp instanceof JSlider) {
+                comp.setBounds(0,0,0,0);
             }
         }
     }
@@ -166,6 +161,7 @@ public class SwingLayoutBuilder {
         Throwable th = null;
         boolean reset = true;
         container.removeAll();
+        unsupportedContResGaps = null;
         try {
             GroupLayout layout = new GroupLayout(container);
             container.setLayout(layout);
@@ -187,12 +183,12 @@ public class SwingLayoutBuilder {
                         GroupLayout.ParallelGroup parallel;
                         if (!(layoutGroups[dim] instanceof GroupLayout.ParallelGroup)) {
                             parallel = layout.createParallelGroup();
-                            parallel.add(layoutGroups[dim]);
+                            parallel.addGroup(layoutGroups[dim]);
                             layoutGroups[dim] = parallel;
                         } else {
                             parallel = (GroupLayout.ParallelGroup) layoutGroups[dim];
                         }
-                        parallel.add(group);
+                        parallel.addGroup(group);
                     }
                 }
             }
@@ -202,6 +198,7 @@ public class SwingLayoutBuilder {
             // Try to create the layout (to be able to reset it in case of some problem)
             layout.layoutContainer(container);
             layout.invalidateLayout(container);
+            unsupportedContResGaps = null;
             reset = false;
         } finally {
             if (reset) {
@@ -227,8 +224,8 @@ public class SwingLayoutBuilder {
         GroupLayout.Group group = null;
         if (interval.isGroup()) {            
             if (interval.isParallel()) {
-                int groupAlignment = convertAlignment(interval.getGroupAlignment());
-                boolean notResizable = interval.getMaximumSize(designMode) == LayoutConstants.USE_PREFERRED_SIZE;
+                GroupLayout.Alignment groupAlignment = convertAlignment(interval.getGroupAlignment());
+                boolean notResizable = interval.getMaximumSize() == LayoutConstants.USE_PREFERRED_SIZE;
                 group = layout.createParallelGroup(groupAlignment, !notResizable);
             } else if (interval.isSequential()) {
                 group = layout.createSequentialGroup();
@@ -257,53 +254,73 @@ public class SwingLayoutBuilder {
         int alignment = getIntervalAlignment(interval);
         if (interval.isGroup()) {
             if (group instanceof GroupLayout.SequentialGroup) {
-                ((GroupLayout.SequentialGroup)group).add(composeGroup(layout, interval, first, last));
+                ((GroupLayout.SequentialGroup)group).addGroup(composeGroup(layout, interval, first, last));
             } else {
-                ((GroupLayout.ParallelGroup)group).add(
+                if (interval.isSequential() && last) {
+                    LayoutInterval contResGap = SwingLayoutUtils.getUnsupportedResizingContainerGap(interval);
+                    if (contResGap != null) { // GroupLayout bug workaround - will use fixed gap instead
+                        addUnsupportedContResGap(contResGap);
+                        alignment = LayoutConstants.LEADING;
+                    }
+                }
+                ((GroupLayout.ParallelGroup)group).addGroup(
                         convertAlignment(alignment),
                         composeGroup(layout, interval, first, last));
             }
         } else {
-            int minimum = interval.getMinimumSize(designMode);
-            int preferred = interval.getPreferredSize(designMode);
+            int minimum = interval.getMinimumSize();
+            int preferred = interval.getPreferredSize();
+            int maximum = interval.getMaximumSize();
             int min = convertSize(minimum, interval);
             int pref = convertSize(preferred, interval);
-            int max = convertSize(interval.getMaximumSize(designMode), interval);
+            int max = convertSize(maximum, interval);
             if (interval.isComponent()) {
                 LayoutComponent layoutComp = interval.getComponent();
                 Component comp = componentIDMap.get(layoutComp.getId());
                 assert (comp != null);
+                boolean horizontal = layoutComp.getLayoutInterval(LayoutConstants.HORIZONTAL) == interval;
                 if (minimum == LayoutConstants.NOT_EXPLICITLY_DEFINED) {
-                    int dimension = (layoutComp.getLayoutInterval(LayoutConstants.HORIZONTAL) == interval) ? LayoutConstants.HORIZONTAL : LayoutConstants.VERTICAL;
-                    if ((dimension == LayoutConstants.HORIZONTAL) && comp.getClass().getName().equals("javax.swing.JComboBox")) { // Issue 68612 // NOI18N
+                    if (horizontal && comp.getClass().getName().equals("javax.swing.JComboBox")) { // Issue 68612 // NOI18N
                         min = 0;
                     } else if (preferred >= 0) {
                         Dimension minDim = comp.getMinimumSize();
-                        int compMin = (dimension == LayoutConstants.HORIZONTAL) ? minDim.width : minDim.height;
+                        int compMin = horizontal ? minDim.width : minDim.height;
                         if (compMin > preferred) {
                             min = convertSize(LayoutConstants.USE_PREFERRED_SIZE, interval);
                         }
                     }
                 }
+                // workaround for bug in GroupLayout that does not align properly on baseline
+                // if some component has 0 preferred width (even if actual size is bigger)
+                if (pref == 0 && max >= Short.MAX_VALUE && horizontal
+                        && layoutComp.getLayoutInterval(LayoutConstants.VERTICAL).getAlignment() == LayoutConstants.BASELINE) {
+                    pref = 1;
+                }
                 if (group instanceof GroupLayout.SequentialGroup) {
-                    ((GroupLayout.SequentialGroup)group).add(comp, min, pref, max);
+                    ((GroupLayout.SequentialGroup)group).addComponent(comp, min, pref, max);
                 } else {
                     GroupLayout.ParallelGroup pGroup = (GroupLayout.ParallelGroup)group;
-                    pGroup.add(convertAlignment(alignment), comp, min, pref, max);
+                    pGroup.addComponent(comp, convertAlignment(alignment), min, pref, max);
                 }
             } else {
                 assert interval.isEmptySpace();
-                if (interval.isDefaultPadding(designMode)) {
+                if (interval.isDefaultPadding()) {
                     assert (group instanceof GroupLayout.SequentialGroup);
                     GroupLayout.SequentialGroup seqGroup = (GroupLayout.SequentialGroup)group;
                     if (first || last) {
-                        seqGroup.addContainerGap(pref, max);
+                        if (last && isUnsupportedContResGap(interval)) {
+                            // workaround GroupLayout bug - default container gap
+                            // should not be resizing
+                            seqGroup.addContainerGap();
+                        } else {
+                            seqGroup.addContainerGap(pref, max);
+                        }
                     } else {
                         LayoutConstants.PaddingType paddingType = interval.getPaddingType();
                         if (paddingType == null || paddingType == LayoutConstants.PaddingType.RELATED) {
-                            seqGroup.addPreferredGap(LayoutStyle.RELATED, pref, max);
+                            seqGroup.addPreferredGap(LayoutStyle.ComponentPlacement.RELATED, pref, max);
                         } else if (paddingType == LayoutConstants.PaddingType.UNRELATED) {
-                            seqGroup.addPreferredGap(LayoutStyle.UNRELATED, pref, max);
+                            seqGroup.addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED, pref, max);
                         } else if (paddingType == LayoutConstants.PaddingType.SEPARATE) {
                             // special case - SEPARATE padding not known by LayoutStyle
                             if (pref == GroupLayout.DEFAULT_SIZE) {
@@ -312,7 +329,7 @@ public class SwingLayoutBuilder {
                             if (max == GroupLayout.DEFAULT_SIZE) {
                                 max = PADDING_SEPARATE_VALUE;
                             }
-                            seqGroup.add(PADDING_SEPARATE_VALUE, pref, max);
+                            seqGroup.addGap(PADDING_SEPARATE_VALUE, pref, max);
                         } else {
                             assert paddingType == LayoutConstants.PaddingType.INDENT;
                             // TBD
@@ -325,16 +342,16 @@ public class SwingLayoutBuilder {
                     if (group instanceof GroupLayout.SequentialGroup) {
                         if (pref < 0) { // survive invalid pref size (#159536)
                             ((GroupLayout.SequentialGroup)group)
-                                    .addPreferredGap(LayoutStyle.RELATED, GroupLayout.DEFAULT_SIZE, max);
+                                    .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED, GroupLayout.DEFAULT_SIZE, max);
                         } else {
-                            ((GroupLayout.SequentialGroup)group).add(min, pref, max);
+                            ((GroupLayout.SequentialGroup)group).addGap(min, pref, max);
                         }
                     } else {
                         if (pref < 0) { // survive invalid pref size (#159536)
                             pref = 0;
                             min = 0;
                         }
-                        ((GroupLayout.ParallelGroup)group).add(min, pref, max);
+                        ((GroupLayout.ParallelGroup)group).addGap(min, pref, max);
                     }
                 }
             }
@@ -367,15 +384,15 @@ public class SwingLayoutBuilder {
         return alignment;
     }
 
-    private static int convertAlignment(int alignment) {
-        int groupAlignment = 0;
+    private static GroupLayout.Alignment convertAlignment(int alignment) {
+        GroupLayout.Alignment groupAlignment;
         switch (alignment) {
-            case LayoutConstants.DEFAULT: groupAlignment = GroupLayout.LEADING; break;
-            case LayoutConstants.LEADING: groupAlignment = GroupLayout.LEADING; break;
-            case LayoutConstants.TRAILING: groupAlignment = GroupLayout.TRAILING; break;
-            case LayoutConstants.CENTER: groupAlignment = GroupLayout.CENTER; break;
-            case LayoutConstants.BASELINE: groupAlignment = GroupLayout.BASELINE; break;
-            default: assert false; break;
+            case LayoutConstants.DEFAULT: groupAlignment = GroupLayout.Alignment.LEADING; break;
+            case LayoutConstants.LEADING: groupAlignment = GroupLayout.Alignment.LEADING; break;
+            case LayoutConstants.TRAILING: groupAlignment = GroupLayout.Alignment.TRAILING; break;
+            case LayoutConstants.CENTER: groupAlignment = GroupLayout.Alignment.CENTER; break;
+            case LayoutConstants.BASELINE: groupAlignment = GroupLayout.Alignment.BASELINE; break;
+            default: throw new IllegalArgumentException("Alignment: " + alignment); // NOI18N
         }
         return groupAlignment;
     }
@@ -386,7 +403,7 @@ public class SwingLayoutBuilder {
             case LayoutConstants.NOT_EXPLICITLY_DEFINED: convertedSize = GroupLayout.DEFAULT_SIZE; break;
             case LayoutConstants.USE_PREFERRED_SIZE:
                 convertedSize = interval.isEmptySpace() ?
-                                convertSize(interval.getPreferredSize(designMode), interval) :
+                                convertSize(interval.getPreferredSize(), interval) :
                                 GroupLayout.PREFERRED_SIZE;
                 break;
             default: convertedSize = (size >= 0) ? size : GroupLayout.DEFAULT_SIZE;
@@ -405,39 +422,42 @@ public class SwingLayoutBuilder {
         Map<Integer,List<String>> links = SwingLayoutUtils.createLinkSizeGroups(containerLC, dimension);
         
         Set<Integer> linksSet = links.keySet();
-      for (Integer aLinksSet : linksSet)
-      {
-        List<String> group = links.get(aLinksSet);
-        List<Component> components = new ArrayList<Component>();
-        for (String compId : group)
-        {
-          LayoutComponent lc = layoutModel.getLayoutComponent(compId);
-          if (lc != null)
-          {
-            Component comp = componentIDMap.get(lc.getId());
-            if (comp == null)
-            {
-              return;
+        Iterator<Integer> i = linksSet.iterator();
+        while (i.hasNext()) {
+            List<String> group = links.get(i.next());
+            List<Component> components = new ArrayList<Component>();
+            for (int j=0; j < group.size(); j++) {
+                String compId = group.get(j);
+                LayoutComponent lc = layoutModel.getLayoutComponent(compId);
+                if (lc != null) {
+                    Component comp = componentIDMap.get(lc.getId());
+                    if (comp == null) {
+                        return;
+                    } else {
+                        components.add(comp);
+                    }
+                }
             }
-            else
-            {
-              components.add(comp);
+            Component[] compArray = components.toArray(new Component[components.size()]);
+            if (compArray != null) {
+                if (dimension == LayoutConstants.HORIZONTAL) {
+                    layout.linkSize(SwingConstants.HORIZONTAL, compArray);
+                }
+                if (dimension == LayoutConstants.VERTICAL) {
+                    layout.linkSize(SwingConstants.VERTICAL, compArray);
+                }
             }
-          }
         }
-        Component[] compArray = components.toArray(new Component[components.size()]);
-        if (compArray != null)
-        {
-          if (dimension == LayoutConstants.HORIZONTAL)
-          {
-            layout.linkSize(compArray, GroupLayout.HORIZONTAL);
-          }
-          if (dimension == LayoutConstants.VERTICAL)
-          {
-            layout.linkSize(compArray, GroupLayout.VERTICAL);
-          }
-        }
-      }
     }
 
+    private void addUnsupportedContResGap(LayoutInterval gap) {
+        if (unsupportedContResGaps == null) {
+            unsupportedContResGaps = new HashSet<LayoutInterval>();
+        }
+        unsupportedContResGaps.add(gap);
+    }
+
+    private boolean isUnsupportedContResGap(LayoutInterval gap) {
+        return unsupportedContResGaps != null && unsupportedContResGaps.contains(gap);
+    }
 }

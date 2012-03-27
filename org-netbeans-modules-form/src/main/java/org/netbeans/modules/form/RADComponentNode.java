@@ -51,7 +51,9 @@ import java.awt.datatransfer.*;
 import java.text.MessageFormat;
 import java.util.*;
 import java.beans.*;
+import java.lang.reflect.InvocationTargetException;
 import java.security.*;
+import java.util.logging.Level;
 import javax.swing.Action;
 
 import org.netbeans.modules.form.adito.components.AditoNodeConnect;
@@ -65,6 +67,7 @@ import org.openide.explorer.propertysheet.editors.NodeCustomizer;
 
 import org.netbeans.modules.form.actions.*;
 import org.netbeans.modules.form.layoutsupport.*;
+//import org.netbeans.modules.form.editors.TableCustomizer; // STRIPPED
 import org.netbeans.modules.form.menu.AddSubItemAction;
 import org.netbeans.modules.form.menu.InsertMenuAction;
 import org.netbeans.modules.form.menu.MenuEditLayer;
@@ -94,7 +97,7 @@ public class RADComponentNode extends FormNode
         super(children, component.getFormModel());
         this.component = component;
         component.setNodeReference(this);
-        // getCookieSet().add(this);
+        //        getCookieSet().add(this);
         if (component instanceof ComponentContainer)
             getCookieSet().add(new ComponentsIndex());
         updateName();
@@ -148,12 +151,14 @@ public class RADComponentNode extends FormNode
         // try to get a special icon
         icon = BeanSupport.getBeanIcon(component.getBeanClass(), iconType);
         if (icon == null) {
+            final String className = component.getBeanClass().getName();
+            final String classDetails = (String)component.getAuxValue(RADComponent.AUX_VALUE_CLASS_DETAILS);
             if (!iconsInitialized) {
                 // getIconForClass invokes getNodes(true) which cannot be called in Mutex
                 EventQueue.invokeLater(new Runnable() {
                     @Override
                     public void run() {
-                        Image icon = PaletteUtils.getIconForClass(component.getBeanClass().getName(), iconType, true);
+                        Image icon = PaletteUtils.getIconForClass(className, classDetails, iconType, true);
 			iconsInitialized = true;
                         if (icon != null) {
                             img.put(iconType, icon);
@@ -162,7 +167,7 @@ public class RADComponentNode extends FormNode
                     }
                 });
             } else {
-                icon = PaletteUtils.getIconForClass(component.getBeanClass().getName(), iconType, false);
+                icon = PaletteUtils.getIconForClass(className, classDetails, iconType, false);
             }
 
             if (icon == null) {
@@ -233,20 +238,19 @@ public class RADComponentNode extends FormNode
                     actions.add(SystemAction.get(TestAction.class));
                     actions.add(null);
                 }
-//                Event[] events = new Event[0]; //component.getKnownEvents();
-//              for (Event event : events)
-//              {
-//                if (event.hasEventHandlers())
-//                {
-//                  actions.add(SystemAction.get(EventsAction.class));
-//                  actions.add(null);
-//                  break;
-//                }
-//              }
+              // STRIPPED
+                /*Event[] events = component.getKnownEvents();
+                for (int i=0; i < events.length; i++) {
+                    if (events[i].hasEventHandlers()) {
+                        actions.add(SystemAction.get(EventsAction.class));
+                        actions.add(null);
+                        break;
+                    }
+                }*/
 
                 actions.add(SystemAction.get(CopyAction.class));
             } else {
-                if (InPlaceEditLayer.supportsEditingFor(component.getBeanClass())) {
+                if (InPlaceEditLayer.supportsEditingFor(component.getBeanClass(), false)) {
                     actions.add(SystemAction.get(InPlaceEditAction.class));
                 }
                 if (javax.swing.JTable.class.isAssignableFrom(component.getBeanClass())) {
@@ -257,20 +261,22 @@ public class RADComponentNode extends FormNode
                 } else {
                     actions.add(SystemAction.get(TestAction.class));
                 }
-//                actions.add(SystemAction.get(BindAction.class));
-//                actions.add(SystemAction.get(EventsAction.class));
+              // STRIPPED
+                /*if (FormEditor.getBindingSupport(component.getFormModel()) != null) {
+                    actions.add(SystemAction.get(BindAction.class));
+                }
+                actions.add(SystemAction.get(EventsAction.class));*/
                 actions.add(null);
 
                 java.util.List actionProps = component.getActionProperties();
-              for (Object actionProp : actionProps)
-              {
-                final RADProperty prop = (RADProperty) actionProp;
-                Action action = PropertyAction.createIfEditable(prop);
-                if (action != null)
-                {
-                  actions.add(action);
+                Iterator iter = actionProps.iterator();
+                while (iter.hasNext()) {
+                    final RADProperty prop = (RADProperty)iter.next();
+                    Action action = PropertyAction.createIfEditable(prop);
+                    if (action != null) {
+                        actions.add(action);
+                    }
                 }
-              }
                 addSeparator(actions);
 
                 if (component instanceof ComponentContainer) {
@@ -302,11 +308,13 @@ public class RADComponentNode extends FormNode
                 }
 
                 actions.add(null);
+                //actions.add(SystemAction.get(CustomCodeAction.class)); // STRIPPED
             }
             actions.add(null);
 
             javax.swing.Action[] superActions = super.getActions(context);
-          actions.addAll(Arrays.asList(superActions));
+            for (int i=0; i < superActions.length; i++)
+                actions.add(superActions[i]);
 
             this.actions = new Action[actions.size()];
             actions.toArray(this.actions);
@@ -448,9 +456,10 @@ public class RADComponentNode extends FormNode
     protected Component createCustomizer() {
         Class customizerClass = component.getBeanInfo().getBeanDescriptor().getCustomizerClass();
         if (customizerClass == null) {
-//            if (javax.swing.JTable.class.isAssignableFrom(component.getBeanClass())) {
-//                customizerClass = TableCustomizer.class;
-//            } else {
+          // STRIPPED
+            /*if (javax.swing.JTable.class.isAssignableFrom(component.getBeanClass())) {
+                customizerClass = TableCustomizer.class;
+            } else {*/
                 return null;
 //            }
         }
@@ -475,6 +484,10 @@ public class RADComponentNode extends FormNode
         if (customizerObject instanceof NodeCustomizer)
             ((NodeCustomizer)customizerObject)
                     .attach(component.getNodeReference());
+
+        // Issue 203352 - default values of properties must be initialized
+        // before the customizer is shown/used
+        //component.ensureDefaultPropertyValuesInitialization(); // STRIPPED
 
         Customizer customizer = (Customizer) customizerObject;
 
@@ -521,19 +534,17 @@ public class RADComponentNode extends FormNode
                 Object oldValue = evt != null ? evt.getOldValue() : null;
                 Object newValue = evt != null ? evt.getNewValue() : null;
 
-              for (FormProperty prop : properties)
-              {
-                try
-                {
-                  prop.reinstateProperty();
-                  //                        if (prop.isChanged()) // [what if changed to default value?]
-                  prop.propertyValueChanged(oldValue, newValue);
+                for (int i=0; i < properties.length; i++) {
+                    FormProperty prop = properties[i];
+                    try {
+                        prop.reinstateProperty();
+                        //                        if (prop.isChanged()) // [what if changed to default value?]
+                        prop.propertyValueChanged(oldValue, newValue);
+                    }
+                    catch (Exception ex) { // unlikely to happen
+                        ex.printStackTrace();
+                    }
                 }
-                catch (Exception ex)
-                { // unlikely to happen
-                  ex.printStackTrace();
-                }
-              }
                 return null;
             }
         });
@@ -645,12 +656,13 @@ public class RADComponentNode extends FormNode
                     keys.add(keyLayout);
                 }
 
-              for (RADComponent subComp : subComps)
-                if (subComp != menuComp)
-                  keys.add(subComp);
+                for (int i=0; i < subComps.length; i++)
+                    if (subComps[i] != menuComp)
+                        keys.add(subComps[i]);
             }
             else {
-              keys.addAll(Arrays.asList(subComps));
+                for (int i=0; i < subComps.length; i++)
+                    keys.add(subComps[i]);
             }
 
             setKeys(keys);

@@ -77,7 +77,7 @@ public class RADVisualContainer extends RADVisualComponent implements ComponentC
         super.setBeanInstance(beanInstance);
 
         if (layoutSupport != null) // need new layout support for new container bean
-            layoutSupport = new LayoutSupportManager(this);
+            layoutSupport = new LayoutSupportManager(this/*, getFormModel().getCodeStructure()*/); // STRIPPED
     }
 
     @Override
@@ -131,7 +131,7 @@ public class RADVisualContainer extends RADVisualComponent implements ComponentC
     void setOldLayoutSupport(boolean old) {
         if (old) {
             if (layoutSupport == null) {
-                layoutSupport = new LayoutSupportManager(this);
+                layoutSupport = new LayoutSupportManager(this/*, getFormModel().getCodeStructure()*/); // STRIPPED
             }
         }
         else {
@@ -351,18 +351,15 @@ public class RADVisualContainer extends RADVisualComponent implements ComponentC
             subComponents.ensureCapacity(initComponents.length);
         }
 
-      for (RADComponent metacomp : initComponents)
-      {
-        if (!isMenuTypeComponent() && canHaveMenu(metacomp.getBeanClass()))
-        {
-          containerMenu = metacomp;
+        for (int i=0; i < initComponents.length; i++) {
+            RADComponent metacomp = initComponents[i];
+            if (!isMenuTypeComponent() && canHaveMenu(metacomp.getBeanClass())) {
+                containerMenu = metacomp;
+            } else {
+                subComponents.add((RADVisualComponent)metacomp);
+            }
+            metacomp.setParentComponent(this);
         }
-        else
-        {
-          subComponents.add((RADVisualComponent) metacomp);
-        }
-        metacomp.setParentComponent(this);
-      }
 
         if (layoutSupport == null)
             refillContainerInstance();

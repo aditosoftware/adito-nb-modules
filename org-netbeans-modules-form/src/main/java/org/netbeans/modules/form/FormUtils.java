@@ -56,17 +56,13 @@ import javax.swing.*;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.TreeModelListener;
 import javax.swing.plaf.ComponentUI;
-import javax.swing.text.Document;
 import javax.swing.tree.DefaultTreeModel;
-import org.netbeans.api.editor.DialogBinding;
 
 import org.openide.ErrorManager;
 import org.openide.util.*;
 import org.openide.nodes.Node;
 import org.openide.filesystems.FileObject;
 import org.netbeans.modules.form.project.ClassPathUtils;
-import org.openide.loaders.DataObject;
-import org.openide.loaders.DataObjectNotFoundException;
 
 /**
  * A class that contains utility methods for the formeditor.
@@ -88,10 +84,10 @@ public class FormUtils
     private static final Object CLASS_AND_SUBCLASSES = new Object();
     private static final Object CLASS_AND_SWING_SUBCLASSES = new Object();
 
-    static final Object PROP_PREFERRED = new Object();
-    static final Object PROP_NORMAL = new Object();
-    static final Object PROP_EXPERT = new Object();
-    static final Object PROP_HIDDEN = new Object();
+    public static final Object PROP_PREFERRED = new Object();
+    public static final Object PROP_NORMAL = new Object();
+    public static final Object PROP_EXPERT = new Object();
+    public static final Object PROP_HIDDEN = new Object();
 
     static final String PROP_REQUIRES_PARENT = "thisPropertyRequiresParent"; // NOI18N
     static final String PROP_REQUIRES_CHILDREN = "thisPropertyRequiresChildren"; // NOI18N
@@ -351,14 +347,22 @@ public class FormUtils
                 "documentBase", PROP_HIDDEN },
         { "javax.swing.JFileChooser", CLASS_EXACTLY,
                 "acceptAllFileFilter", PROP_HIDDEN,
-                "choosableFileFilters", PROP_HIDDEN }
+                "choosableFileFilters", PROP_HIDDEN },
+        { "javax.swing.Box$Filler", CLASS_EXACTLY,
+                "minimumSize", PROP_PREFERRED,
+                "preferredSize", PROP_PREFERRED,
+                "maximumSize", PROP_PREFERRED,
+                "background", PROP_NORMAL,
+                "border", PROP_NORMAL,
+                "foreground", PROP_NORMAL,
+                "toolTipText", PROP_NORMAL}
     };
 
     /** Table with explicit changes to propeties accessibility. E.g. some
      * properties needs to be restricted to "detached write". */
     private static Object[][] propertiesAccess = {
         { "javax.swing.JFrame", CLASS_AND_SUBCLASSES,
-              "defaultCloseOperation", FormProperty.DETACHED_WRITE}
+              "defaultCloseOperation", new Integer(FormProperty.DETACHED_WRITE) }
     };
 
     /** Table of properties that need the component to be added in the parent,
@@ -410,7 +414,9 @@ public class FormUtils
             "model", "mnemonic",
             "model", "text" },
         { "javax.swing.JRadioButton",
-            "model", "buttonGroup" }
+            "model", "buttonGroup" },
+        { "javax.swing.JFileChooser",
+            "dialogType", "approveButtonText"}
     };
 
     /** Table enumerating properties that can hold HTML text. */
@@ -446,6 +452,7 @@ public class FormUtils
         "javax.swing.JOptionPane", // NOI18N
         "javax.swing.JColorChooser", // NOI18N
         "javax.swing.JFileChooser", // NOI18N
+        "javax.swing.Box$Filler" // NOI18N
     };
 
     private static Map<Class<?>, Map<String, DefaultValueDeviation>> defaultValueDeviations;
@@ -540,7 +547,7 @@ public class FormUtils
             for (TreeModelListener listener : listeners) {
                 model.removeTreeModelListener(listener);
             }
-            Object clone = cloneBeanInstance(o, formModel);
+            Object clone = cloneBeanInstance(o, null, formModel);
             for (TreeModelListener listener : listeners) {
                 model.addTreeModelListener(listener);
             }
@@ -549,7 +556,7 @@ public class FormUtils
         // for TableModel we use TableModelEditor.NbTableModel which takes care of its serialization
 
         if (o instanceof Serializable) {
-            return cloneBeanInstance(o, formModel);
+            return cloneBeanInstance(o, null, formModel);
         }
 
         throw new CloneNotSupportedException();
@@ -560,13 +567,13 @@ public class FormUtils
      * If not serializable, then all properties (taken from BeanInfo) are
      * copied (property values cloned recursively).
      * 
-     *
      * @param bean bean to clone.
+     * @param bInfo bean info.
      * @param formModel form model.
      * @return clone of the given bean.
      * @throws java.lang.CloneNotSupportedException when cloning was unsuccessful.
      */
-    public static Object cloneBeanInstance(Object bean, FormModel formModel)
+    public static Object cloneBeanInstance(Object bean, BeanInfo bInfo, FormModel formModel)
         throws CloneNotSupportedException
     {
         if (bean == null)
@@ -592,8 +599,6 @@ public class FormUtils
             }
         }
 
-        BeanInfo bInfo;
-
         // object is not Serializable
         Object clone;
         try {
@@ -601,7 +606,8 @@ public class FormUtils
             if (clone == null)
                 throw new CloneNotSupportedException();
 
-            bInfo = Utilities.getBeanInfo(bean.getClass());
+            if (bInfo == null)
+                bInfo = Utilities.getBeanInfo(bean.getClass());
         }
         catch (Exception ex) {
             LOGGER.log(Level.INFO, "Cannot clone "+bean.getClass().getName(), ex); // NOI18N
@@ -610,37 +616,29 @@ public class FormUtils
 
         // default instance successfully created, now copy properties
         PropertyDescriptor[] pds = bInfo.getPropertyDescriptors();
-      for (PropertyDescriptor pd : pds)
-      {
-        Method getter = pd.getReadMethod();
-        Method setter = pd.getWriteMethod();
-        if (getter != null && setter != null)
-        {
-          Object propertyValue;
-          try
-          {
-            propertyValue = getter.invoke(bean);
-          }
-          catch (Exception e1)
-          { // ignore - do not copy this property
-            continue;
-          }
-          try
-          {
-            propertyValue = cloneObject(propertyValue, formModel);
-          }
-          catch (Exception e2)
-          { // ignore - do not clone property value
-          }
-          try
-          {
-            setter.invoke(clone, propertyValue);
-          }
-          catch (Exception e3)
-          { // ignore - do not copy this property
-          }
+        for (int i=0; i < pds.length; i++) {
+            Method getter = pds[i].getReadMethod();
+            Method setter = pds[i].getWriteMethod();
+            if (getter != null && setter != null) {
+                Object propertyValue;
+                try {
+                    propertyValue = getter.invoke(bean, new Object[0]);
+                }
+                catch (Exception e1) { // ignore - do not copy this property
+                    continue;
+                }
+                try {
+                    propertyValue = cloneObject(propertyValue, formModel);
+                }
+                catch (Exception e2) { // ignore - do not clone property value
+                }
+                try {
+                    setter.invoke(clone, new Object[] { propertyValue });
+                }
+                catch (Exception e3) { // ignore - do not copy this property
+                }
+            }
         }
-      }
 
         return clone;
     }
@@ -714,7 +712,7 @@ public class FormUtils
                 Field ui_Field = JComponent.class.getDeclaredField("ui"); // NOI18N
                 ui_Field.setAccessible(true);
 
-                byte count = (Byte) getWriteObjCounter_Method.invoke(null, comp);
+                byte count = ((Byte)getWriteObjCounter_Method.invoke(null, comp)).byteValue();
                 if (count > 0) { // counter not 0, serialization has not finished
                     count = 0;
                     setWriteObjCounter_Method.invoke(null, comp, count);
@@ -821,28 +819,28 @@ public class FormUtils
                 }
                 else tnProp.setValue(copiedValue);
 
-              // TODO: stripped
-//                if (sfProp != null && tfProp != null) {
+              // STRIPPED
+                /*if (sfProp != null && tfProp != null) {
                     // also clone current PropertyEditor
-//                    PropertyEditor sPrEd = sfProp.getCurrentEditor();
-//                    PropertyEditor tPrEd = tfProp.getCurrentEditor();
-//                    if (sPrEd != null
-//                        && (tPrEd == null
-//                            || sPrEd.getClass() != tPrEd.getClass())
-//                        && (propertyValue == copiedValue
-//                            || (propertyValue != null && copiedValue != null
-//                                && propertyValue.getClass() == copiedValue.getClass())))
-//                    {
-//                        tPrEd = sPrEd instanceof RADConnectionPropertyEditor ?
-//                            new RADConnectionPropertyEditor(tfProp.getValueType()) :
-//                            (PropertyEditor)CreationFactory.createDefaultInstance(
-//                                                             sPrEd.getClass());
-//                        tfProp.setCurrentEditor(tPrEd);
-//                    }
-//                }
+                    PropertyEditor sPrEd = sfProp.getCurrentEditor();
+                    PropertyEditor tPrEd = tfProp.getCurrentEditor();
+                    if (sPrEd != null
+                        && (tPrEd == null
+                            || sPrEd.getClass() != tPrEd.getClass())
+                        && (propertyValue == copiedValue
+                            || (propertyValue != null && copiedValue != null
+                                && propertyValue.getClass() == copiedValue.getClass())))
+                    {
+                        tPrEd = sPrEd instanceof RADConnectionPropertyEditor ?
+                            new RADConnectionPropertyEditor(tfProp.getValueType()) :
+                            (PropertyEditor)CreationFactory.createDefaultInstance(
+                                                             sPrEd.getClass());
+                        tfProp.setCurrentEditor(tPrEd);
+                    }
+                }
 
                 // also copy the resource/i18n attributes set on the property
-//                copyPropertyAttrs(snProp, tnProp, ResourceSupport.getPropertyAttrNames());
+                copyPropertyAttrs(snProp, tnProp, ResourceSupport.getPropertyAttrNames());*/
             }
             catch (Exception ex) { // ignore
                 ErrorManager.getDefault().notify(ErrorManager.INFORMATIONAL, ex);
@@ -880,8 +878,7 @@ public class FormUtils
                     Object value = prop.getValue();
                     if (value instanceof RADComponent
                             || value instanceof RADComponent.ComponentReference
-//                            || isRelativeConnectionValue(value) // TODO: stripped
-                        ) {
+                            /*|| isRelativeConnectionValue(value)*/) { // STRIPPED
                         relativeProperties.add(prop);
                         continue;
                     }
@@ -904,7 +901,7 @@ public class FormUtils
 
                     newValue = FormUtils.cloneObject(realValue, prop.getPropertyContext().getFormModel());
                 }
-                writeMethod.invoke(targetBean, newValue);
+                writeMethod.invoke(targetBean, new Object[] { newValue });
             }
             catch (CloneNotSupportedException ex) { // ignore, don't report
             }
@@ -914,17 +911,17 @@ public class FormUtils
         }
     }
 
-  // TODO: stripped
-//    static boolean isRelativeConnectionValue(Object value) {
-//        if (value instanceof RADConnectionPropertyEditor.RADConnectionDesignValue) {
-//            RADConnectionPropertyEditor.RADConnectionDesignValue conValue
-//                = (RADConnectionPropertyEditor.RADConnectionDesignValue) value;
-//            return conValue.type == RADConnectionPropertyEditor.RADConnectionDesignValue.TYPE_BEAN
-//                    || conValue.type == RADConnectionPropertyEditor.RADConnectionDesignValue.TYPE_METHOD
-//                    || conValue.type == RADConnectionPropertyEditor.RADConnectionDesignValue.TYPE_PROPERTY;
-//        }
-//        return false;
-//    }
+  // STRIPPED
+    /*static boolean isRelativeConnectionValue(Object value) {
+        if (value instanceof RADConnectionPropertyEditor.RADConnectionDesignValue) {
+            RADConnectionPropertyEditor.RADConnectionDesignValue conValue
+                = (RADConnectionPropertyEditor.RADConnectionDesignValue) value;
+            return conValue.type == RADConnectionPropertyEditor.RADConnectionDesignValue.TYPE_BEAN
+                    || conValue.type == RADConnectionPropertyEditor.RADConnectionDesignValue.TYPE_METHOD
+                    || conValue.type == RADConnectionPropertyEditor.RADConnectionDesignValue.TYPE_PROPERTY;
+        }
+        return false;
+    }*/
 
     public static Method getPropertyWriteMethod(RADProperty property, Class targetClass) {
         Method method = property.getPropertyDescriptor().getWriteMethod();
@@ -943,27 +940,8 @@ public class FormUtils
     }
 
     public static void setupEditorPane(javax.swing.JEditorPane editor, FileObject srcFile, int ccPosition) {
-        DataObject dob = null;
-        try {
-            dob = DataObject.find(srcFile);
-        } catch (DataObjectNotFoundException dnfex) {
-            LOGGER.log(Level.INFO, dnfex.getMessage(), dnfex);
-        }
-        if (!(dob instanceof FormDataObject)) {
-            LOGGER.log(Level.INFO, "Unable to find FormDataObject for {0}", srcFile); // NOI18N
-            return;
-        }
-        FormDataObject formDob = (FormDataObject)dob;
-        Document document = formDob.getFormEditorSupport().getDocument();
-        DialogBinding.bindComponentToDocument(document, ccPosition, 0, editor);
-
-        // do not highlight current row
-        editor.putClientProperty(
-            "HighlightsLayerExcludes", //NOI18N
-            "^org\\.netbeans\\.modules\\.editor\\.lib2\\.highlighting\\.CaretRowHighlighting$" //NOI18N
-        );
-
-        setupTextUndoRedo(editor);
+        FormServices services = Lookup.getDefault().lookup(FormServices.class);
+        services.setupCodeEditorPane(editor, srcFile, ccPosition);
     }
 
     public static void setupTextUndoRedo(javax.swing.text.JTextComponent editor) {
@@ -1055,9 +1033,9 @@ public class FormUtils
         if ("javax.swing.JPopupMenu".equals(beanClassName)) { // NOI18N
             return 1;
         }
-      for (String forbiddenContainer : forbiddenContainers)
-        if (beanClassName.equals(forbiddenContainer))
-          return 0; // cannot be container
+        for (int i=0; i < forbiddenContainers.length; i++)
+            if (beanClassName.equals(forbiddenContainers[i]))
+                return 0; // cannot be container
 
         Object isContainerValue = null;
         try {
@@ -1074,7 +1052,7 @@ public class FormUtils
         }
 
         if (isContainerValue instanceof Boolean)
-            return (Boolean) isContainerValue ? 1 : 0;
+            return ((Boolean)isContainerValue).booleanValue() ? 1 : 0;
         return -1; // "isContainer" attribute not specified
     }
 
@@ -1111,7 +1089,7 @@ public class FormUtils
         return false;
     }
 
-    static ViewConverter[] getViewConverters() {
+    public static ViewConverter[] getViewConverters() {
         Lookup.Result<ViewConverter> result = Lookup.getDefault().lookupResult(ViewConverter.class);
         Collection<? extends ViewConverter> all = result.allInstances();
         ViewConverter[] converters = new ViewConverter[all.size()];
@@ -1143,7 +1121,7 @@ public class FormUtils
      * @return Object[] array of property categories for given bean class, or
      *         null if nothing specified for the class
      */
-    static Object[] getPropertiesCategoryClsf(Class beanClass,
+    public static Object[] getPropertiesCategoryClsf(Class beanClass,
                                               BeanDescriptor beanDescriptor)
     {
         List<Object> reClsf = null;
@@ -1171,9 +1149,7 @@ public class FormUtils
      * properties classification for given bean class (returned from
      * getPropertiesCategoryClsf method).
      */
-    static Object getPropertyCategory(FeatureDescriptor pd,
-                                      Object[] propsClsf)
-    {
+    public static Object getPropertyCategory(FeatureDescriptor pd, Object[] propsClsf) {
         Object cat = findPropertyClsf(pd.getName(), propsClsf);
         if (cat != null)
             return cat;
@@ -1203,7 +1179,7 @@ public class FormUtils
                                  Object[] propsClsf)
     {
         Object access = findPropertyClsf(pd.getName(), propsClsf);
-        return access == null ? 0 : (Integer) access;
+        return access == null ? 0 : ((Integer)access).intValue();
     }
 
     static Object[] getPropertiesParentChildDepsClsf(Class beanClass) {
@@ -1244,25 +1220,25 @@ public class FormUtils
         // Set of names of super classes of the bean and interfaces implemented by the bean.
         Set<String> superClasses = superClasses(beanClass);
 
-      for (Object[] clsf : table)
-      {
-        String refClass = (String) clsf[0];
-        Object subclasses = clsf[1];
+        for (int i=0; i < table.length; i++) {
+            Object[] clsf = table[i];
+            String refClass = (String)clsf[0];
+            Object subclasses = clsf[1];
 
-        if (refClass.equals(beanClass.getName())
-            ||
-            (subclasses == CLASS_AND_SUBCLASSES
-                && superClasses.contains(refClass))
-            ||
-            (subclasses == CLASS_AND_SWING_SUBCLASSES
-                && superClasses.contains(refClass)
-                && beanClass.getName().startsWith("javax.swing.")))
-        { // NOI18N
-          if (list == null)
-            list = new ArrayList<Object>(8);
-          list.addAll(Arrays.asList(clsf).subList(2, clsf.length));
+            if (refClass.equals(beanClass.getName())
+                ||
+                (subclasses == CLASS_AND_SUBCLASSES
+                         && superClasses.contains(refClass))
+                ||
+                (subclasses == CLASS_AND_SWING_SUBCLASSES
+                         && superClasses.contains(refClass)
+                         && beanClass.getName().startsWith("javax.swing."))) { // NOI18N
+                if (list == null)
+                    list = new ArrayList<Object>(8);
+                for (int j=2; j < clsf.length; j++)
+                    list.add(clsf[j]);
+            }
         }
-      }
 
         if (list != null) {
             Object[] array = new Object[list.size()];
@@ -1396,7 +1372,9 @@ public class FormUtils
         if ((firstIndex != -1) && (secondIndex != -1) && (firstIndex > secondIndex)) {
             // Move the first one before the second
             RADProperty first = properties[firstIndex];
-          System.arraycopy(properties, secondIndex, properties, secondIndex + 1, firstIndex - secondIndex);
+            for (int i=firstIndex; i>secondIndex; i--) {
+                properties[i] = properties[i-1];
+            }
             properties[secondIndex] = first;
         }
     }
@@ -1417,26 +1395,37 @@ public class FormUtils
         Set<String> superClasses = superClasses(beanClass);
 
         java.util.List<Object> list = new LinkedList<Object>();
-      for (Object[] order : table)
-      {
-        String refClass = (String) order[0];
+        for (int i=0; i < table.length; i++) {
+            Object[] order = table[i];
+            String refClass = (String)order[0];
 
-        if (superClasses.contains(refClass))
-        {
-          list.addAll(Arrays.asList(order).subList(1, order.length));
+            if (superClasses.contains(refClass)) {
+                for (int j=1; j<order.length; j++) {
+                    list.add(order[j]);
+                }
+            }
         }
-      }
         return list.toArray();
     }
 
     public static void checkVersionLevelForProperty(FormProperty property,
             Object value, PropertyEditor editor) {
-        FormModel formModel = property.getPropertyContext().getFormModel();
+        FormPropertyContext context = property.getPropertyContext();
+        FormModel formModel = context.getFormModel();
         if (formModel != null) {
             if (editor instanceof FormAwareEditor) {
                 ((FormAwareEditor)editor).updateFormVersionLevel();
-//            } else if (value instanceof ResourceValue) {
-//                formModel.raiseVersionLevel(FormModel.FormVersion.NB60, FormModel.FormVersion.NB60);
+        /*    } else if (value instanceof ResourceValue) {
+                formModel.raiseVersionLevel(FormModel.FormVersion.NB60, FormModel.FormVersion.NB60);
+            }
+            Object owner = context.getOwner();
+            if (owner instanceof RADComponent) {
+                String propName = property.getName();
+                Class beanClass = ((RADComponent)owner).getBeanClass();
+                if (("alignOnBaseline".equals(propName) && beanClass.equals(FlowLayout.class)) // NOI18N
+                        || beanClass.equals(GridBagLayout.class)) {
+                    formModel.raiseVersionLevel(FormModel.FormVersion.NB71, FormModel.FormVersion.NB71);
+                }*/
             }
         }
         // this method is not called for binding properties - see BindingProperty.setValue
@@ -1519,39 +1508,30 @@ public class FormUtils
             return null;
 
         List<RADComponent> components = new ArrayList<RADComponent>();
-      for (Node node : nodes)
-      {
-        RADComponentCookie radCookie = node.getCookie(RADComponentCookie.class);
-        if (radCookie != null)
-        {
-          RADComponent metacomp = radCookie.getRADComponent();
-          if ((metacomp instanceof RADVisualComponent))
-          {
-            RADVisualComponent visComp = (RADVisualComponent) metacomp;
-            RADVisualContainer visCont = visComp.getParentContainer();
-            if ((visCont != null) && JScrollPane.class.isAssignableFrom(visCont.getBeanInstance().getClass()))
-            {
-              visComp = visCont;
-              visCont = visCont.getParentContainer();
-            }
+        for (int i=0; i<nodes.length; i++) {
+            RADComponentCookie radCookie = nodes[i].getCookie(RADComponentCookie.class);
+            if (radCookie != null) {
+                RADComponent metacomp = radCookie.getRADComponent();
+                if ((metacomp instanceof RADVisualComponent)) {
+                    RADVisualComponent visComp = (RADVisualComponent)metacomp;
+                    RADVisualContainer visCont = visComp.getParentContainer();
+                    if ((visCont != null) && javax.swing.JScrollPane.class.isAssignableFrom(visCont.getBeanInstance().getClass())) {
+                        visComp = visCont;
+                        visCont = visCont.getParentContainer();
+                    }
 
-            if (isVisualInDesigner(visComp) && (visCont != null)
-                && (visCont.getLayoutSupport() == null)
-                && !visComp.isMenuComponent())
-            {
-              components.add(visComp);
+                    if (isVisualInDesigner(visComp) && (visCont!= null)
+                            && (visCont.getLayoutSupport() == null)
+                            && !visComp.isMenuComponent()) {
+                        components.add(visComp);
+                    } else {
+                        return null;
+                    }
+                } else {
+                    return null;
+                }
             }
-            else
-            {
-              return null;
-            }
-          }
-          else
-          {
-            return null;
-          }
         }
-      }
         return components;
     }
 
@@ -1568,10 +1548,9 @@ public class FormUtils
     private static Set<String> superClasses(Class beanClass) {
         Set<String> superClasses = new HashSet<String>();
         Class[] infaces = beanClass.getInterfaces();
-      for (Class inface : infaces)
-      {
-        superClasses.add(inface.getName());
-      }
+        for (int i=0; i<infaces.length; i++) {
+            superClasses.add(infaces[i].getName());
+        }
         Class superClass = beanClass;
         do {
             superClasses.add(superClass.getName());
@@ -1633,7 +1612,12 @@ public class FormUtils
         }
 
         public TypeHelper(String name) {
-          this.name = name;
+            this(name, null);
+        }
+
+        public TypeHelper(String name, Map<String,TypeHelper> actualTypeArgs) {
+            this.name = name;
+            this.actualTypeArgs = actualTypeArgs;
         }
 
         /**
@@ -1684,7 +1668,7 @@ public class FormUtils
         /**
          * Returns (undefined ;-)) normalized form of this type.
          */
-        TypeHelper normalize() {
+        public TypeHelper normalize() {
             TypeHelper t = this;
             if (type instanceof TypeVariable) {
                 if (actualTypeArgs != null) {
@@ -1710,6 +1694,44 @@ public class FormUtils
                 t = new TypeHelper(sub.getType());
             }
             return t;
+        }
+
+        /**
+         * Returns type of element of the given type - expects type that implements
+         * <code>Collection</code> interface.
+         *
+         * @param type type that implements <code>Collection</code> interface.
+         * @return type of element of the given type.
+         */
+        public TypeHelper typeOfElement() {
+            Type t = getType();
+            TypeHelper elemType = new TypeHelper();
+            if (t instanceof ParameterizedType) {
+                ParameterizedType pt = (ParameterizedType)t;
+                Type[] args = pt.getActualTypeArguments();
+                // PENDING generalize and improve - track the type variables to the nearest
+                // known collection superclass or check parameter type of add(E o) method
+                if (args.length == 1) { // The only argument should be type of the collection element
+                    Type tt = args[0];
+                    elemType = new TypeHelper(tt, actualTypeArgs);
+                }
+            } else if (t instanceof Class) {
+                Class classa = (Class)t;
+                TypeVariable[] tvar = classa.getTypeParameters();
+                // PENDING dtto
+                if ((actualTypeArgs != null) && (tvar.length == 1)) {
+                    TypeHelper tt = actualTypeArgs.get(tvar[0].getName());
+                    if (tt != null) {
+                        if (tt.getType() == null) {
+                            elemType = tt;
+                        } else {
+                            Type typ = FormUtils.typeToClass(tt);
+                            elemType = new TypeHelper(typ, actualTypeArgs);
+                        }
+                    }
+                }
+            }
+            return elemType;
         }
 
         @Override
@@ -1747,44 +1769,28 @@ public class FormUtils
     public static String escapeCharactersInString(String str) {
         StringBuilder buf = new StringBuilder(str.length() * 6); // x -> \u1234
         char[] chars = str.toCharArray();
-      for (char c : chars)
-      {
-        switch (c)
-        {
-          case '\b':
-            buf.append("\\b");
-            break; // NOI18N
-          case '\t':
-            buf.append("\\t");
-            break; // NOI18N
-          case '\n':
-            buf.append("\\n");
-            break; // NOI18N
-          case '\f':
-            buf.append("\\f");
-            break; // NOI18N
-          case '\r':
-            buf.append("\\r");
-            break; // NOI18N
-          case '\"':
-            buf.append("\\\"");
-            break; // NOI18N
-          case '\\':
-            buf.append("\\\\");
-            break; // NOI18N
-          default:
-            if (c >= 0x0020/* && c <= 0x007f*/)
-              buf.append(c);
-            else
-            {
-              buf.append("\\u"); // NOI18N
-              String hex = Integer.toHexString(c);
-              for (int j = 0; j < 4 - hex.length(); j++)
-                buf.append('0');
-              buf.append(hex);
+        for (int i = 0; i < chars.length; i++) {
+            char c = chars[i];
+            switch (c) {
+            case '\b': buf.append("\\b"); break; // NOI18N
+            case '\t': buf.append("\\t"); break; // NOI18N
+            case '\n': buf.append("\\n"); break; // NOI18N
+            case '\f': buf.append("\\f"); break; // NOI18N
+            case '\r': buf.append("\\r"); break; // NOI18N
+            case '\"': buf.append("\\\""); break; // NOI18N
+            case '\\': buf.append("\\\\"); break; // NOI18N
+            default:
+                if (c >= 0x0020/* && c <= 0x007f*/)
+                    buf.append(c);
+                else {
+                    buf.append("\\u"); // NOI18N
+                    String hex = Integer.toHexString(c);
+                    for (int j = 0; j < 4 - hex.length(); j++)
+                        buf.append('0');
+                    buf.append(hex);
+                }
             }
         }
-      }
         return buf.toString();
     }
  
@@ -1806,7 +1812,7 @@ public class FormUtils
     }
 
     // helper method for getBeanInfo(Class)
-    static BeanInfo getBeanInfo(Class clazz, int mode) throws IntrospectionException {
+    public static BeanInfo getBeanInfo(Class clazz, int mode) throws IntrospectionException {
         if (mode == Introspector.IGNORE_IMMEDIATE_BEANINFO) {
             try {
                 return Introspector.getBeanInfo(clazz, Introspector.IGNORE_IMMEDIATE_BEANINFO);
@@ -1825,6 +1831,37 @@ public class FormUtils
 
     public static RequestProcessor getRequestProcessor() {
         return RP;
+    }
+
+    static boolean isStandardJavaComponent(Class clazz) {
+        boolean standard = false;
+        if (java.awt.Component.class.isAssignableFrom(clazz)) {
+            String name = clazz.getName();
+            standard = name.startsWith("java.awt.") || name.startsWith("javax.swing."); // NOI18N
+        }
+        return standard;
+    }
+
+    // Copy of JComponent.getVisibleRect() that is (for some odd reason) not
+    // defined in java.awt.Component
+    static Rectangle getVisibleRect(Component comp) {
+        Rectangle rect = new Rectangle();
+        computeVisibleRect(comp, rect);
+        return rect;
+    }
+    
+    private static void computeVisibleRect(Component c, Rectangle visibleRect) {
+        Container p = c.getParent();
+        Rectangle bounds = c.getBounds();
+
+        if (p == null || p instanceof Window || p instanceof java.applet.Applet) {
+            visibleRect.setBounds(0, 0, bounds.width, bounds.height);
+        } else {
+            computeVisibleRect(p, visibleRect);
+            visibleRect.x -= bounds.x;
+            visibleRect.y -= bounds.y;
+            SwingUtilities.computeIntersection(0,0,bounds.width,bounds.height,visibleRect);
+        }
     }
 
 }

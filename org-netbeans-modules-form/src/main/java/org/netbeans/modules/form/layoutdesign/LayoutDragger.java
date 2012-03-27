@@ -230,36 +230,36 @@ class LayoutDragger implements LayoutConstants {
         sizing = new SizeDef[DIM_COUNT];
         LayoutComponent comp = movingComponents[0]; // [limitation: only one component can be resized]
         LayoutRegion space = movingFormation[0];
-        java.awt.Dimension prefSize = null;
+        java.awt.Dimension prefSize = comp.isLayoutContainer()
+                ? visualMapper.getComponentMinimumSize(comp.getId())
+                : visualMapper.getComponentPreferredSize(comp.getId());
         for (int i=0; i < DIM_COUNT; i++) {
             if (isResizing(i)) {
                 SizeDef sizeDef = new SizeDef();
                 sizing[i] = sizeDef;
                 sizeDef.originalSize = space.size(i);
+                sizeDef.minSize = i == HORIZONTAL ? prefSize.width : prefSize.height;
                 if (comp.isLayoutContainer()) {
                     // [TODO: ideally the resizing gap should be handled for each layer]
+                    sizeDef.contPrefSize = sizeDef.originalSize
+                            - LayoutInterval.getDiffToDefaultSize(comp.getLayoutInterval(i), true);
                     LayoutInterval resGap = findResizingGap(comp.getDefaultLayoutRoot(i));
                     if (resGap != null) {
-                        sizeDef.resizingGap = resGap;
-                        sizeDef.originalGapSize = LayoutInterval.getIntervalCurrentSize(resGap, i);
-                        sizeDef.preferredGapSize = LayoutUtils.getSizeOfDefaultGap(resGap, visualMapper);
-                        sizeDef.preferredSize = sizeDef.originalSize
-                                - sizeDef.originalGapSize + sizeDef.preferredGapSize;
-                        sizeDef.zeroPreferredSize = isZeroResizingGap(resGap) ?
-                                sizeDef.originalSize - sizeDef.originalGapSize : Short.MIN_VALUE;
-                    }
-                    else {
-                        if (prefSize == null) {
-                            prefSize = visualMapper.getComponentMinimumSize(comp.getId());
+                        sizeDef.adjustingGap = resGap;
+                        sizeDef.originalGapSize = LayoutInterval.getCurrentSize(resGap, i);
+                        sizeDef.defaultGapSize = LayoutUtils.getSizeOfDefaultGap(resGap, visualMapper);
+                        if (LayoutInterval.canResize(resGap)) {
+                            sizeDef.minSizeWithDefaultGap = sizeDef.minSize;
+                            if (isZeroResizingGap(resGap)) {
+                                sizeDef.minSizeWithZeroGap = sizeDef.originalSize - sizeDef.originalGapSize;
+                            }
+                        } else {
+                            sizeDef.minSizeWithDefaultGap = sizeDef.minSize - sizeDef.originalGapSize + sizeDef.defaultGapSize;
+                            if (isZeroResizingGap(resGap)) {
+                                sizeDef.minSizeWithZeroGap = sizeDef.minSize - sizeDef.originalGapSize;
+                            }
                         }
-                        sizeDef.preferredSize = i == HORIZONTAL ? prefSize.width : prefSize.height;
                     }
-                }
-                else {
-                    if (prefSize == null) {
-                        prefSize = visualMapper.getComponentPreferredSize(comp.getId());
-                    }
-                    sizeDef.preferredSize = i == HORIZONTAL ? prefSize.width : prefSize.height;
                 }
             }
         }
@@ -282,11 +282,13 @@ class LayoutDragger implements LayoutConstants {
     }
 
     private static boolean isZeroResizingGap(LayoutInterval gap) {
-        return LayoutInterval.getNeighbor(gap, LEADING, false, false) == null
-            || LayoutInterval.getNeighbor(gap, TRAILING, false, false) == null;
+        return LayoutInterval.getNeighbor(gap, TRAILING, false, true, false) == null;
     }
 
     void setTargetContainer(LayoutComponent container, LayoutInterval[] roots) {
+        if (container != targetContainer) {
+            bestPositions[HORIZONTAL] = bestPositions[VERTICAL] = null;
+        }
         targetContainer = container;
         targetRoots = roots;
     }
@@ -350,8 +352,9 @@ class LayoutDragger implements LayoutConstants {
     boolean snappedToDefaultSize(int dimension) {
         if (isResizing(dimension) && bestPositions[dimension] == null) {
             int size = movingSpace.size(dimension);
-            return size == sizing[dimension].preferredSize
-                || size == sizing[dimension].zeroPreferredSize;
+            SizeDef sizeDef = sizing[dimension];
+            return size == sizeDef.minSize || size == sizeDef.contPrefSize
+                    || size == sizeDef.minSizeWithDefaultGap || size == sizeDef.minSizeWithZeroGap;
         }
         return false;
     }
@@ -408,10 +411,9 @@ class LayoutDragger implements LayoutConstants {
             }
         }
         movingSpace = new LayoutRegion();
-      for (LayoutRegion movingBound1 : movingBounds)
-      {
-        movingSpace.expand(movingBound1);
-      }
+        for (int i=0; i<movingBounds.length; i++) {
+            movingSpace.expand(movingBounds[i]);
+        }
         if (canSnapToBaseline) { // awfull, but working
             int baselinePos = movingBounds[0].positions[VERTICAL][BASELINE];
             if (baselinePos > 0) {
@@ -444,12 +446,11 @@ class LayoutDragger implements LayoutConstants {
                     // snap effect
                     if (snapDistance != LayoutRegion.UNKNOWN) {
                         cursorPos[dimension] -= snapDistance;
-                      for (LayoutRegion movingBound : movingBounds)
-                      {
-                        movingBound.reshape(dimension,
+                        for (int i=0; i<movingBounds.length; i++) {
+                            movingBounds[i].reshape(dimension,
                                             movingEdges[dimension],
                                             -snapDistance);
-                      }
+                        }
                         movingSpace.reshape(dimension,
                                             movingEdges[dimension],
                                             -snapDistance);
@@ -689,7 +690,7 @@ class LayoutDragger implements LayoutConstants {
                 boolean preferredNextTo = isPreferredNextTo(bestNextTo, bestAligned);
                 int nextToDst = smallestDistance(findingsNextTo[dimension]);
                 int alignedDst = smallestDistance(findingsAligned[dimension]);
-                if (relatedPositions(bestNextTo, bestAligned)) {
+                if (!relatedPositions(bestNextTo, bestAligned)) {
                     // penalize the aligned position according to distance in the other dimension
                     int alignedOrtDst = Math.abs(LayoutRegion.nonOverlapDistance(
                         bestAligned.interval.getCurrentSpace(), movingSpace, dimension ^ 1));
@@ -716,10 +717,21 @@ class LayoutDragger implements LayoutConstants {
 
         if (snapping) {
             if (isResizing(dimension)) {
-                int prefSizeDiff = movingSpace.size(dimension) - sizing[dimension].preferredSize;
-                int zeroSizeDiff = movingSpace.size(dimension) - sizing[dimension].zeroPreferredSize;
-                int sizeDiff = Math.abs(prefSizeDiff) <= Math.abs(zeroSizeDiff) ?
-                               prefSizeDiff : zeroSizeDiff;
+                int size = movingSpace.size(dimension);
+                SizeDef sd = sizing[dimension];
+                int sizeDiff = size - sd.minSize;
+                int diff2 = size - sd.contPrefSize;
+                if (Math.abs(diff2) < Math.abs(sizeDiff)) {
+                    sizeDiff = diff2;
+                }
+                diff2 = size - sd.minSizeWithDefaultGap;
+                if (Math.abs(diff2) < Math.abs(sizeDiff)) {
+                    sizeDiff = diff2;
+                }
+                diff2 = size - sd.minSizeWithZeroGap;
+                if (Math.abs(diff2) < Math.abs(sizeDiff)) {
+                    sizeDiff = diff2;
+                }
                 int absDiff = Math.abs(sizeDiff);
                 if (absDiff < SNAP_DISTANCE && (best == null || absDiff < Math.abs(best.distance))) {
                     best = null; // snapping to preferred size has precedence here
@@ -798,7 +810,7 @@ class LayoutDragger implements LayoutConstants {
                 continue;
             }
 
-            if (orthogonalOverlap(interval, idx))
+            if (!orthogonalOverlap(interval, idx))
                 continue;
 
             int nextToAlignment = DEFAULT;
@@ -894,19 +906,19 @@ class LayoutDragger implements LayoutConstants {
         LayoutInterval sub = interval.getSubInterval(index);
         LayoutRegion subSpace = sub.getCurrentSpace();
         if (LayoutRegion.overlap(movingSpace, subSpace, dimension^1, 0))
-            return false;
+            return true;
 
         if (dimension == VERTICAL) { // there may be some exceptions in vertical dimension
             if (sub.isSequential()) // sub-sequence to be checked later
-                return false;
+                return true;
 
             // [note: can do this reliably only for root vertical sequence - with
             //        more sequences LayoutFeeder might ignore it anyway]
             if (interval.getParent() != null && interval.getParent().getSubIntervalCount() > 1)
-                return true;
+                return false;
 
             if (!LayoutRegion.overlap(movingSpace, interval.getCurrentSpace(), dimension, 0))
-                return false; // not in parallel with any sibling
+                return true; // not in parallel with any sibling
             if (interval.isSequential()) {
                 // check if it is before first or after last
                 if (LayoutRegion.distance(movingSpace, subSpace, dimension, TRAILING, LEADING) > 0) {
@@ -917,7 +929,7 @@ class LayoutDragger implements LayoutConstants {
                             break;
                     }
                     if (index < 0) // 'sub' is the first interval
-                        return false;
+                        return true;
                 }
                 else if (LayoutRegion.distance(subSpace, movingSpace, dimension, TRAILING, LEADING) > 0) {
                     // moving interval is locate behind 'sub''
@@ -927,12 +939,12 @@ class LayoutDragger implements LayoutConstants {
                             break;
                     }
                     if (index == interval.getSubIntervalCount()) // 'sub' is the last interval
-                        return false;
+                        return true;
                 }
             }
         }
 
-        return true;
+        return false;
     }
 
     private int checkNextToPosition(LayoutInterval sub, int alignment) {
@@ -950,9 +962,9 @@ class LayoutDragger implements LayoutConstants {
             if (snapping) {
                 // if the examined interval already has neighbor default gap,
                 // then use its padding type and don't check other
-                LayoutInterval gap = LayoutInterval.getNeighbor(sub, i^1, false, false);
+                LayoutInterval gap = LayoutInterval.getNeighbor(sub, i^1, false, true, false);
                 if (gap != null && LayoutInterval.isFixedDefaultPadding(gap)) {
-                    LayoutInterval neighbor = LayoutInterval.getNeighbor(gap, i^1, true, false);
+                    LayoutInterval neighbor = LayoutInterval.getNeighbor(gap, i^1, true, true, false);
                     if (neighbor != null && isValidInterval(neighbor)) {
                         paddingType = gap.getPaddingType();
                         if (paddingType == null) {
@@ -1408,17 +1420,15 @@ class LayoutDragger implements LayoutConstants {
 
     private static int smallestDistance(PositionDef[] positions) {
         int bestDst = -1;
-      for (PositionDef pos : positions)
-      {
-        if (pos.isSet())
-        {
-          int dst = Math.abs(pos.distance);
-          if (bestDst < 0 || dst < bestDst)
-          {
-            bestDst = dst;
-          }
+        for (int i=0; i < positions.length; i++) {
+            PositionDef pos = positions[i];
+            if (pos.isSet()) {
+                int dst = Math.abs(pos.distance);
+                if (bestDst < 0 || dst < bestDst) {
+                    bestDst = dst;
+                }
+            }
         }
-      }
         return bestDst;
     }
 
@@ -1448,12 +1458,12 @@ class LayoutDragger implements LayoutConstants {
 
     private static boolean relatedPositions(PositionDef nextTo, PositionDef aligned) {
         if (nextTo.interval == null || aligned.interval == null)
-            return true;
+            return false;
 
         LayoutInterval neighbor = LayoutInterval.getNeighbor(
-                aligned.interval, nextTo.alignment, true, false);
-        return neighbor != nextTo.interval
-            && (neighbor != null || nextTo.interval.getParent() != null);
+                aligned.interval, nextTo.alignment, true, true, false);
+        return neighbor == nextTo.interval
+               || (neighbor == null && nextTo.interval.getParent() == null);
     }
 
     private PositionDef getAlignedEqualToNextTo(PositionDef bestNextTo) {
@@ -1466,7 +1476,7 @@ class LayoutDragger implements LayoutConstants {
             // choose aligned position if its interval is just next to
             // bestNextTo.interval (both positions would lead to same result)
             LayoutInterval neighbor = LayoutInterval.getNeighbor(
-                             alignedAlternative.interval, alignment, true, false);
+                             alignedAlternative.interval, alignment, true, true, false);
             if (neighbor != null
                     && (neighbor == bestNextTo.interval || neighbor.isParentOf(bestNextTo.interval)))
                 return alignedAlternative;
@@ -1504,13 +1514,11 @@ class LayoutDragger implements LayoutConstants {
             return false;
         }
         else {
-          for (LayoutComponent movingComponent : movingComponents)
-          {
-            if (movingComponent.getLayoutInterval(dimension) == interval)
-            {
-              return false;
+            for (int i=0; i < movingComponents.length; i++) {
+                if (movingComponents[i].getLayoutInterval(dimension) == interval) {
+                    return false;
+                }
             }
-          }
             return true;
         }
     }
@@ -1526,14 +1534,14 @@ class LayoutDragger implements LayoutConstants {
         if (interval.isParentOf(resizing)) {
             return interval.getParent() == null && clearWayToParent(resizing, interval, dimension, alignment)
                    && (!toDeepToMerge(resizing, interval, alignment)
-                       || LayoutInterval.getNeighbor(resizing, alignment, true, false) == null) ?
+                       || LayoutInterval.getNeighbor(resizing, alignment, true, true, false) == null) ?
                    1 : 0;
         }
 
         LayoutInterval commonParent = LayoutInterval.getCommonParent(interval, resizing);
         if (commonParent.isSequential()) {
             if (toDeepToMerge(resizing, commonParent, alignment)
-                && LayoutInterval.getNeighbor(resizing, alignment, true, false) != interval)
+                && LayoutInterval.getNeighbor(resizing, alignment, true, true, false) != interval)
                 return -1;
 
             resizing = getClearWayToParent(resizing, commonParent, dimension, alignment);
@@ -1565,7 +1573,7 @@ class LayoutDragger implements LayoutConstants {
                 if (!clearWayToParent(resizing, interval, dimension, alignment))
                     return false;
                 if (toDeepToMerge(resizing, interval, alignment)) {
-                    LayoutInterval neighbor = LayoutInterval.getNeighbor(resizing, alignment, true, false);
+                    LayoutInterval neighbor = LayoutInterval.getNeighbor(resizing, alignment, true, true, false);
                     if (neighbor != null && interval.isParentOf(neighbor))
                         return false;
                 }
@@ -1673,8 +1681,8 @@ class LayoutDragger implements LayoutConstants {
                        int dimension, int alignment)
     {
         int oppAlignment = (alignment == LEADING) ? TRAILING : LEADING;
-        List movingComps = LayoutUtils.edgeSubComponents(moving, alignment);
-        List fixedComps = LayoutUtils.edgeSubComponents(interval, oppAlignment);
+        List movingComps = LayoutUtils.edgeSubComponents(moving, alignment, false);
+        List fixedComps = LayoutUtils.edgeSubComponents(interval, oppAlignment, false);
         List sources = (alignment == LEADING) ? fixedComps : movingComps;
         List targets = (alignment == LEADING) ? movingComps : fixedComps;
         Map<String,LayoutRegion> map = new HashMap<String,LayoutRegion>();
@@ -1731,24 +1739,53 @@ class LayoutDragger implements LayoutConstants {
 
     static class SizeDef {
         private int originalSize;
-        private int preferredSize;
-        private int zeroPreferredSize; // size of container if resizing gap goes to zero
-        private LayoutInterval resizingGap; // inside resizing container
+        private int minSize;
+        private int contPrefSize = Short.MIN_VALUE;
+        private int minSizeWithDefaultGap = Short.MIN_VALUE;
+        private int minSizeWithZeroGap = Short.MIN_VALUE;
+        private LayoutInterval adjustingGap; // inside resizing container
         private int originalGapSize;
-        private int preferredGapSize;
+        private int defaultGapSize;
 
         LayoutInterval getResizingGap() {
-            return resizingGap;
+            return adjustingGap;
         }
 
         int getResizingGapSize(int currentSize) {
-            if (resizingGap == null)
+            if (adjustingGap == null) {
                 return LayoutRegion.UNKNOWN;
-            if (currentSize == zeroPreferredSize)
+            }
+            if (currentSize == minSizeWithZeroGap) {
                 return 0;
-            int gapSize = originalGapSize - originalSize + currentSize;
-            return currentSize == preferredSize || gapSize < 0 ? //preferredGapSize
-                   NOT_EXPLICITLY_DEFINED : gapSize;
+            }
+            if (currentSize == minSizeWithDefaultGap) {
+                return NOT_EXPLICITLY_DEFINED;
+            }
+            int gapSize;
+            if (LayoutInterval.canResize(adjustingGap)) {
+                gapSize = originalGapSize - originalSize + currentSize;
+                if (gapSize == 0) {
+                    if (minSizeWithZeroGap < 0 && adjustingGap.getMinimumSize() != 0) {
+                        gapSize = NOT_EXPLICITLY_DEFINED;
+                    }
+                } else {
+                    int minGapSize = defaultGapSize < 0 || adjustingGap.getMinimumSize() == 0 ?
+                                     0 : defaultGapSize;
+                    if (gapSize <= minGapSize) {
+                        gapSize = NOT_EXPLICITLY_DEFINED;
+                    }
+                }
+            } else {
+                if (currentSize < minSize) {
+                    gapSize = originalGapSize - minSize + currentSize;
+                    if (gapSize < 0) {
+                        gapSize = NOT_EXPLICITLY_DEFINED;
+                    }
+                } else {
+                    return LayoutRegion.UNKNOWN;
+                }
+            }
+            return gapSize;
         }
     }
 }

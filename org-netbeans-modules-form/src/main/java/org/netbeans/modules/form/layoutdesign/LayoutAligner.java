@@ -101,22 +101,20 @@ class LayoutAligner implements LayoutConstants {
             // Calculate leading and trailing intervals
             Map<LayoutInterval,LayoutInterval> leadingMap = new HashMap<LayoutInterval,LayoutInterval>();
             Map<LayoutInterval,LayoutInterval> trailingMap = new HashMap<LayoutInterval,LayoutInterval>();
-          for (LayoutInterval interval : intervals)
-          {
-            LayoutInterval parent = interval.getParent();
-            // Special handling for standalone component intervals in parParent
-            if (parent == parParent) parent = interval;
-            LayoutInterval leading = leadingMap.get(parent);
-            LayoutInterval trailing = trailingMap.get(parent);
-            if ((leading == null) || (parent.indexOf(leading) > parent.indexOf(interval)))
-            {
-              leadingMap.put(parent, interval);
-            }
-            if ((trailing == null) || (parent.indexOf(trailing) < parent.indexOf(interval)))
-            {
-              trailingMap.put(parent, interval);
-            }
-          }
+            for (int i=0; i<intervals.length; i++) {
+                LayoutInterval interval = intervals[i];
+                LayoutInterval parent = interval.getParent();
+                // Special handling for standalone component intervals in parParent
+                if (parent == parParent) parent = interval;
+                LayoutInterval leading = leadingMap.get(parent);
+                LayoutInterval trailing = trailingMap.get(parent);
+                if ((leading == null) || (parent.indexOf(leading) > parent.indexOf(interval))) {
+                    leadingMap.put(parent, interval);
+                }
+                if ((trailing == null) || (parent.indexOf(trailing) < parent.indexOf(interval))) {
+                    trailingMap.put(parent, interval);
+                }
+            }        
             // Create arrays of leading/trailing intervals
             LayoutInterval[] leadingIntervals = new LayoutInterval[leadingMap.size()];
             LayoutInterval[] trailingIntervals = new LayoutInterval[trailingMap.size()];
@@ -145,7 +143,7 @@ class LayoutAligner implements LayoutConstants {
             iter = gapsToResize.iterator();
             while (iter.hasNext()) {
                 LayoutInterval gap = (LayoutInterval)iter.next();
-                designer.setIntervalResizing(gap, true);
+                operations.setIntervalResizing(gap, true);
             }
         }
 
@@ -168,31 +166,25 @@ class LayoutAligner implements LayoutConstants {
     private void markByAlignAttributes(LayoutInterval parParent, LayoutInterval[] intervals) {
         layoutModel.changeIntervalAttribute(parParent, LayoutInterval.ATTR_ALIGN_PRE, true);
         layoutModel.changeIntervalAttribute(parParent, LayoutInterval.ATTR_ALIGN_POST, true);
-      for (LayoutInterval interval : intervals)
-      {
-        while (interval != parParent)
-        {
-          LayoutInterval parent = interval.getParent();
-          layoutModel.changeIntervalAttribute(interval, LayoutInterval.ATTR_ALIGN_PRE, true);
-          layoutModel.changeIntervalAttribute(interval, LayoutInterval.ATTR_ALIGN_POST, true);
-          if (parent.isSequential())
-          {
-            int index = parent.indexOf(interval);
-            for (int j = 0; j < parent.getSubIntervalCount(); j++)
-            {
-              if (j < index)
-              {
-                markByAlignAttribute(parent.getSubInterval(j), LayoutInterval.ATTR_ALIGN_PRE);
-              }
-              else if (j > index)
-              {
-                markByAlignAttribute(parent.getSubInterval(j), LayoutInterval.ATTR_ALIGN_POST);
-              }
+        for (int i=0; i<intervals.length; i++) {
+            LayoutInterval interval = intervals[i];
+            while (interval != parParent) {
+                LayoutInterval parent = interval.getParent();
+                layoutModel.changeIntervalAttribute(interval, LayoutInterval.ATTR_ALIGN_PRE, true);
+                layoutModel.changeIntervalAttribute(interval, LayoutInterval.ATTR_ALIGN_POST, true);
+                if (parent.isSequential()) {
+                    int index = parent.indexOf(interval);
+                    for (int j=0; j<parent.getSubIntervalCount(); j++) {
+                        if (j < index) {
+                            markByAlignAttribute(parent.getSubInterval(j), LayoutInterval.ATTR_ALIGN_PRE);
+                        } else if (j > index) {
+                            markByAlignAttribute(parent.getSubInterval(j), LayoutInterval.ATTR_ALIGN_POST);
+                        }
+                    }
+                }
+                interval = parent;
             }
-          }
-          interval = parent;
         }
-      }
     }
 
     /**
@@ -545,24 +537,24 @@ class LayoutAligner implements LayoutConstants {
         int leadingPosition = Short.MAX_VALUE;
         int trailingPosition = 0;
         int targetEffAlignment = LayoutConstants.DEFAULT;
-      for (LayoutInterval interval : intervals)
-      {
-        // This method should be called only for components
-        assert interval.isComponent();
-
-        LayoutRegion region = interval.getCurrentSpace();
-        int leading = region.positions[dimension][LEADING];
-        int trailing = region.positions[dimension][TRAILING];
-        leadingPosition = Math.min(leading, leadingPosition);
-        trailingPosition = Math.max(trailing, trailingPosition);
-
-        int effAlignment = LayoutInterval.getEffectiveAlignment(interval);
-        if (((effAlignment == LEADING) || (effAlignment == TRAILING))
-            && ((targetEffAlignment == DEFAULT) || (effAlignment == alignment)))
-        {
-          targetEffAlignment = effAlignment;
+        for (int i=0; i<intervals.length; i++) {
+            LayoutInterval interval = intervals[i];
+            
+            // This method should be called only for components
+            assert interval.isComponent();
+            
+            LayoutRegion region = interval.getCurrentSpace();
+            int leading = region.positions[dimension][LEADING];
+            int trailing = region.positions[dimension][TRAILING];
+            leadingPosition = Math.min(leading, leadingPosition);
+            trailingPosition = Math.max(trailing, trailingPosition);
+            
+            int effAlignment = LayoutInterval.getEffectiveAlignment(interval);
+            if (((effAlignment == LEADING) || (effAlignment == TRAILING))
+                && ((targetEffAlignment == DEFAULT) || (effAlignment == alignment))) {
+                targetEffAlignment = effAlignment;
+            }
         }
-      }
         
         boolean resizable = false;
         boolean sequenceResizable;
@@ -612,13 +604,13 @@ class LayoutAligner implements LayoutConstants {
             if ((alignment == TRAILING) && !closed) {
                 int preGap = leadingRegion.positions[dimension][LEADING]
                     - parentRegion.positions[dimension][LEADING];
-                LayoutInterval gapInterval = LayoutInterval.getNeighbor(leadingInterval, SEQUENTIAL, LEADING);
+                LayoutInterval gapInterval = LayoutInterval.getNeighbor(leadingInterval, LEADING, false, true, false);
                 leadingGaps = leadingGaps && (preGap != 0);
                 if ((gapInterval != null) && gapInterval.isEmptySpace() && parParent.isParentOf(gapInterval)
-                    && (LayoutInterval.getIntervalCurrentSize(gapInterval, dimension) == preGap)) {
+                    && (LayoutInterval.getCurrentSize(gapInterval, dimension) == preGap)) {
                     LayoutInterval gap = cloneGap(gapInterval);
                     newSequenceList.add(gap);
-                    gapSizes.put(gap, preGap);
+                    gapSizes.put(gap, new Integer(preGap));
                     if (alignment == TRAILING) {
                         sequenceResizable = sequenceResizable || LayoutInterval.canResize(gap);
                     }
@@ -649,17 +641,17 @@ class LayoutAligner implements LayoutConstants {
                 
                 // Determine gap between before the processed interval
                 LayoutRegion trailingRegion = trailingInterval.getCurrentSpace();
-                LayoutInterval gapInterval = LayoutInterval.getNeighbor(leadingInterval, SEQUENTIAL, TRAILING);
+                LayoutInterval gapInterval = LayoutInterval.getNeighbor(leadingInterval, TRAILING, false, true, false);
                 int gapSize = trailingRegion.positions[dimension][LEADING]
                     - leadingRegion.positions[dimension][TRAILING];
                 boolean gapFound = false;
                 if (gapInterval.isEmptySpace()) {
-                    LayoutInterval neighbor = LayoutInterval.getNeighbor(gapInterval, SEQUENTIAL, TRAILING);
+                    LayoutInterval neighbor = LayoutInterval.getNeighbor(gapInterval, TRAILING, false, true, false);
                     if (neighbor == trailingInterval) {
                         gapFound = true;
                         LayoutInterval gap = cloneGap(gapInterval);
                         newSequenceList.add(gap);
-                        gapSizes.put(gap, gapSize);
+                        gapSizes.put(gap, new Integer(gapSize));
                         if (((alignment == TRAILING) && !afterDefiningInterval)
                             || ((alignment == LEADING) && afterDefiningInterval)) {
                             sequenceResizable = sequenceResizable || LayoutInterval.canResize(gap);
@@ -692,12 +684,12 @@ class LayoutAligner implements LayoutConstants {
                 int postGap = parentRegion.positions[dimension][TRAILING]
                     - leadingRegion.positions[dimension][TRAILING];
                 trailingGaps = trailingGaps && (postGap != 0);
-                LayoutInterval gapInterval = LayoutInterval.getNeighbor(leadingInterval, SEQUENTIAL, TRAILING);
+                LayoutInterval gapInterval = LayoutInterval.getNeighbor(leadingInterval, TRAILING, false, true, false);
                 if ((gapInterval != null) && gapInterval.isEmptySpace() && parParent.isParentOf(gapInterval)
-                    && (LayoutInterval.getIntervalCurrentSize(gapInterval, dimension) == postGap)) {
+                    && (LayoutInterval.getCurrentSize(gapInterval, dimension) == postGap)) {
                     LayoutInterval gap = cloneGap(gapInterval);
                     newSequenceList.add(gap);
-                    gapSizes.put(gap, postGap);
+                    gapSizes.put(gap, new Integer(postGap));
                     if (alignment == LEADING) {
                         sequenceResizable = sequenceResizable || LayoutInterval.canResize(gap);
                     }
@@ -745,7 +737,7 @@ class LayoutAligner implements LayoutConstants {
                                 int maxSize = gapCandidate.getMaximumSize();
                                 if (diff > 0) {
                                     if (size != null) {
-                                        int actualSize = size;
+                                        int actualSize = size.intValue();
                                         diff += prefSize - actualSize;
                                     }
                                     if (minSize >= 0) {
@@ -773,46 +765,39 @@ class LayoutAligner implements LayoutConstants {
 
         // The content of all new sequence groups is known.
         // We can update the layout model.
-      for (List<LayoutInterval> newSequence1 : newSequences)
-      {
-        List newSequenceList = (List) newSequence1;
-        LayoutInterval newSequence = new LayoutInterval(SEQUENTIAL);
-        if (alignment == CENTER)
-        {
-          newSequence.setAlignment(CENTER);
-        }
-        Iterator iter = newSequenceList.iterator();
-        int sequenceAlignment = DEFAULT;
-        while (iter.hasNext())
-        {
-          LayoutInterval compInterval = (LayoutInterval) iter.next();
-          if (compInterval.isComponent())
-          { // e.g. compInterval.getParent() != null
-            if (sequenceAlignment == DEFAULT)
-            {
-              sequenceAlignment = LayoutInterval.getEffectiveAlignment(compInterval);
+        Iterator listIter = newSequences.iterator();
+        while (listIter.hasNext()) {
+            List newSequenceList = (List)listIter.next();
+            LayoutInterval newSequence = new LayoutInterval(SEQUENTIAL);
+            if (alignment == CENTER) {
+                newSequence.setAlignment(CENTER);
             }
-            designer.takeOutInterval(compInterval, parParent);
-            layoutModel.setIntervalAlignment(compInterval, DEFAULT);
-          }
-          layoutModel.addInterval(compInterval, newSequence, -1);
+            Iterator iter = newSequenceList.iterator();
+            int sequenceAlignment = DEFAULT;
+            while (iter.hasNext()) {
+                LayoutInterval compInterval = (LayoutInterval)iter.next();
+                if (compInterval.isComponent()) { // e.g. compInterval.getParent() != null
+                    if (sequenceAlignment == DEFAULT) {
+                        sequenceAlignment = LayoutInterval.getEffectiveAlignment(compInterval);
+                    }
+                    designer.takeOutInterval(compInterval, parParent);
+                    layoutModel.setIntervalAlignment(compInterval, DEFAULT);
+                }
+                layoutModel.addInterval(compInterval, newSequence, -1);
+            }
+            if ((alignment != CENTER) && !LayoutInterval.wantResize(newSequence)) {
+                newSequence.setAlignment(sequenceAlignment);
+            }
+            if (newSequenceList.size() == 1) {
+                LayoutInterval compInterval = (LayoutInterval)newSequenceList.get(0);
+                layoutModel.removeInterval(compInterval);
+                if (newSequence.getAlignment() != DEFAULT) {
+                    layoutModel.setIntervalAlignment(compInterval, newSequence.getAlignment());
+                }
+                newSequence = compInterval;
+            }
+            layoutModel.addInterval(newSequence, parParent, -1);
         }
-        if ((alignment != CENTER) && !LayoutInterval.wantResize(newSequence))
-        {
-          newSequence.setAlignment(sequenceAlignment);
-        }
-        if (newSequenceList.size() == 1)
-        {
-          LayoutInterval compInterval = (LayoutInterval) newSequenceList.get(0);
-          layoutModel.removeInterval(compInterval);
-          if (newSequence.getAlignment() != DEFAULT)
-          {
-            layoutModel.setIntervalAlignment(compInterval, newSequence.getAlignment());
-          }
-          newSequence = compInterval;
-        }
-        layoutModel.addInterval(newSequence, parParent, -1);
-      }
         if (alignment == CENTER) {
             layoutModel.setGroupAlignment(parParent, alignment);
         }
@@ -820,12 +805,6 @@ class LayoutAligner implements LayoutConstants {
         // Check resizability
         if ((gapsToResize.size() > 0) && !resizable && (alignment != CENTER)) {
             operations.suppressGroupResizing(parParent);
-          for (LayoutInterval aGapsToResize : gapsToResize)
-          {
-            LayoutInterval gap = aGapsToResize;
-            layoutModel.changeIntervalAttribute(gap, LayoutInterval.ATTRIBUTE_FORMER_FILL, false);
-            layoutModel.changeIntervalAttribute(gap, LayoutInterval.ATTRIBUTE_FILL, true);
-          }
         }
         return gapsToResize;
     }
@@ -848,21 +827,19 @@ class LayoutAligner implements LayoutConstants {
             if (i == index) continue;
             transferCandidates(interval, intervals[i], components);
         }*/
-      for (LayoutInterval component : components)
-      {
-        LayoutInterval candidate = component;
-        LayoutInterval oppCandidate = oppositeComponentInterval(candidate);
-        if (alignedIntervals(oppInterval, oppCandidate, BASELINE)
-            || alignedIntervals(oppInterval, oppCandidate, LEADING)
-            || alignedIntervals(oppInterval, oppCandidate, TRAILING)
-            || alignedIntervals(oppInterval, oppCandidate, CENTER))
-        {
-          if (parParent.isParentOf(candidate))
-          {
-            transferedComponents.add(candidate);
-          }
+        Iterator iter = components.iterator();
+        while (iter.hasNext()) {
+            LayoutInterval candidate = (LayoutInterval)iter.next();
+            LayoutInterval oppCandidate = oppositeComponentInterval(candidate);
+            if (alignedIntervals(oppInterval, oppCandidate, BASELINE)
+                || alignedIntervals(oppInterval, oppCandidate, LEADING)
+                || alignedIntervals(oppInterval, oppCandidate, TRAILING)
+                || alignedIntervals(oppInterval, oppCandidate, CENTER)) {
+                if (parParent.isParentOf(candidate)) {
+                    transferedComponents.add(candidate);
+                }
+            }
         }
-      }
         if (!transferedComponents.contains(interval)) {
             transferedComponents.add(interval);
         }
@@ -912,23 +889,20 @@ class LayoutAligner implements LayoutConstants {
         // find common parallel group for aligned intervals
         LayoutInterval commonGroup = null;
         LayoutInterval[] intervals = leadingInts;
-      for (LayoutInterval interval : intervals)
-      {
-        LayoutInterval parent = interval.getParent();
-        if (!parent.isParallel())
-        {
-          parent = parent.getParent();
-          assert parent.isParallel();
+        for (int i=0; i < intervals.length; i++) {
+            LayoutInterval interval = intervals[i];
+            LayoutInterval parent = interval.getParent();
+            if (!parent.isParallel()) {
+                parent = parent.getParent();
+                assert parent.isParallel();
+            }
+            if (commonGroup == null || (parent != commonGroup && parent.isParentOf(commonGroup))) {
+                commonGroup = parent;
+            }
+            else {
+                assert parent == commonGroup || commonGroup.isParentOf(parent);
+            }
         }
-        if (commonGroup == null || (parent != commonGroup && parent.isParentOf(commonGroup)))
-        {
-          commonGroup = parent;
-        }
-        else
-        {
-          assert parent == commonGroup || commonGroup.isParentOf(parent);
-        }
-      }
 
         // prepare separation to groups
         List<LayoutInterval> aligned = new LinkedList<LayoutInterval>();
@@ -1010,15 +984,14 @@ class LayoutAligner implements LayoutConstants {
 
         // add the intervals and their neighbors to the main aligned group
         // [need to fix the resizability (fill) and compute effective alignment]
-      for (LayoutInterval interval : aligned)
-      {
-        if (interval.getParent() != group)
-        {
-          layoutModel.removeInterval(interval);
-          operations.addContent(interval, group, -1);
+        for (Iterator<LayoutInterval> it=aligned.iterator(); it.hasNext(); ) {
+            LayoutInterval interval = it.next();
+            if (interval.getParent() != group) {
+                layoutModel.removeInterval(interval);
+                operations.addContent(interval, group, -1);
+            }
+            layoutModel.setIntervalAlignment(interval, alignment);
         }
-        layoutModel.setIntervalAlignment(interval, alignment);
-      }
 
         // create the remainder groups around the main one
         if (!restLeading.isEmpty()) {
@@ -1084,7 +1057,7 @@ class LayoutAligner implements LayoutConstants {
         else {
             commonParent = interval1.getParent();
             while (commonParent != null) {
-                if (hasAlignmentInParent(interval1, alignment)) {
+                if (!hasAlignmentInParent(interval1, alignment)) {
                     return false;
                 }
                 if (commonParent.isParentOf(interval2)) {
@@ -1100,7 +1073,7 @@ class LayoutAligner implements LayoutConstants {
         }
 
         do {
-            if (hasAlignmentInParent(otherInterval, alignment)) {
+            if (!hasAlignmentInParent(otherInterval, alignment)) {
                 return false;
             }
             otherInterval = otherInterval.getParent();
@@ -1113,17 +1086,17 @@ class LayoutAligner implements LayoutConstants {
         LayoutInterval parent = interval.getParent();
         if (parent.isSequential()) {
             if (alignment == LEADING) {
-                return parent.getSubInterval(0) != interval;
+                return parent.getSubInterval(0) == interval;
             }
             if (alignment == TRAILING) {
-                return parent.getSubInterval(parent.getSubIntervalCount()-1) != interval;
+                return parent.getSubInterval(parent.getSubIntervalCount()-1) == interval;
             }
-            return true;
+            return false;
         }
         else { // parallel group
             assert interval.getAlignment() != alignment || compatibleGroupAlignment(parent.getGroupAlignment(), alignment);
-            return interval.getAlignment() != alignment
-                && !LayoutInterval.wantResize(interval);
+            return interval.getAlignment() == alignment
+                   || LayoutInterval.wantResize(interval);
         }
     }
 
@@ -1174,63 +1147,56 @@ class LayoutAligner implements LayoutConstants {
 
     private void returnRemovedIntervals(LayoutInterval parParent, List removed, int dimension) {
         LayoutRegion parRegion = parParent.getCurrentSpace();
-      for (Object aRemoved : removed)
-      {
-        LayoutInterval interval = (LayoutInterval) aRemoved;
-        LayoutRegion region = interval.getCurrentSpace();
-        int pre = Math.max(0, region.positions[dimension][LEADING] - parRegion.positions[dimension][LEADING]);
-        int post = Math.max(0, parRegion.positions[dimension][TRAILING] - region.positions[dimension][TRAILING]);
-        if (((pre != 0) || (post != 0)) && !interval.isSequential())
-        {
-          LayoutInterval seq = new LayoutInterval(SEQUENTIAL);
-          if (interval.getAlignment() != BASELINE)
-            layoutModel.setIntervalAlignment(seq, interval.getAlignment());
-          layoutModel.setIntervalAlignment(interval, DEFAULT);
-          layoutModel.addInterval(interval, seq, -1);
-          interval = seq;
+        Iterator iter = removed.iterator();
+        while (iter.hasNext()) {
+            LayoutInterval interval = (LayoutInterval)iter.next();
+            LayoutRegion region = interval.getCurrentSpace();
+            int pre = Math.max(0, region.positions[dimension][LEADING] - parRegion.positions[dimension][LEADING]);
+            int post = Math.max(0, parRegion.positions[dimension][TRAILING] - region.positions[dimension][TRAILING]);
+            if (((pre != 0) || (post != 0)) && !interval.isSequential()) {
+                LayoutInterval seq = new LayoutInterval(SEQUENTIAL);
+                if (interval.getAlignment() != BASELINE)
+                    layoutModel.setIntervalAlignment(seq, interval.getAlignment());
+                layoutModel.setIntervalAlignment(interval, DEFAULT);
+                layoutModel.addInterval(interval, seq, -1);
+                interval = seq;
+            }
+            
+            // interval.isSequence() by now - remove boundary empty spaces
+            if (pre != 0) {
+                LayoutInterval first = interval.getSubInterval(0);
+                if (first.isEmptySpace()) {
+                    layoutModel.removeInterval(first);
+                    region = interval.getSubInterval(0).getCurrentSpace();
+                    pre = Math.max(0, region.positions[dimension][LEADING] - parRegion.positions[dimension][LEADING]);
+                }
+            }
+            if (post != 0) {
+                LayoutInterval last = interval.getSubInterval(interval.getSubIntervalCount()-1);
+                if (last.isEmptySpace()) {
+                    layoutModel.removeInterval(last);
+                    region = interval.getSubInterval(interval.getSubIntervalCount()-1).getCurrentSpace();
+                    post = Math.max(0, parRegion.positions[dimension][TRAILING] - region.positions[dimension][TRAILING]);
+                }
+            }
+            
+            // Insert new empty spaces
+            if (pre != 0) {
+                LayoutInterval gap = new LayoutInterval(SINGLE);
+                gap.setSize(pre);
+                if (interval.getAlignment() == TRAILING) operations.setIntervalResizing(gap, true);
+                layoutModel.addInterval(gap, interval, 0);
+            }
+            if (post != 0) {
+                LayoutInterval gap = new LayoutInterval(SINGLE);
+                gap.setSize(post);
+                if (interval.getAlignment() == LEADING) operations.setIntervalResizing(gap, true);
+                layoutModel.addInterval(gap, interval, -1);
+            }
+            
+            // Insert into parParent
+            layoutModel.addInterval(interval, parParent, -1);
         }
-
-        // interval.isSequence() by now - remove boundary empty spaces
-        if (pre != 0)
-        {
-          LayoutInterval first = interval.getSubInterval(0);
-          if (first.isEmptySpace())
-          {
-            layoutModel.removeInterval(first);
-            region = interval.getSubInterval(0).getCurrentSpace();
-            pre = Math.max(0, region.positions[dimension][LEADING] - parRegion.positions[dimension][LEADING]);
-          }
-        }
-        if (post != 0)
-        {
-          LayoutInterval last = interval.getSubInterval(interval.getSubIntervalCount() - 1);
-          if (last.isEmptySpace())
-          {
-            layoutModel.removeInterval(last);
-            region = interval.getSubInterval(interval.getSubIntervalCount() - 1).getCurrentSpace();
-            post = Math.max(0, parRegion.positions[dimension][TRAILING] - region.positions[dimension][TRAILING]);
-          }
-        }
-
-        // Insert new empty spaces
-        if (pre != 0)
-        {
-          LayoutInterval gap = new LayoutInterval(SINGLE);
-          gap.setSize(pre);
-          if (interval.getAlignment() == TRAILING) designer.setIntervalResizing(gap, true);
-          layoutModel.addInterval(gap, interval, 0);
-        }
-        if (post != 0)
-        {
-          LayoutInterval gap = new LayoutInterval(SINGLE);
-          gap.setSize(post);
-          if (interval.getAlignment() == LEADING) designer.setIntervalResizing(gap, true);
-          layoutModel.addInterval(gap, interval, -1);
-        }
-
-        // Insert into parParent
-        layoutModel.addInterval(interval, parParent, -1);
-      }
     }
 
     private void setAlignmentAccordingEffectiveAlignment(LayoutInterval aligned, LayoutInterval interval) {

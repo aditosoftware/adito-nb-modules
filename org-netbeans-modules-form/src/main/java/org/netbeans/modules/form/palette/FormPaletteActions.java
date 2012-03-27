@@ -44,10 +44,11 @@
 
 package org.netbeans.modules.form.palette;
 
-import javax.swing.AbstractAction;
+//import javax.swing.AbstractAction;
 import javax.swing.Action;
 
-import org.netbeans.modules.form.project.ClassSource;
+//import org.netbeans.modules.form.palette.PaletteUtils;
+//import org.netbeans.modules.nbform.project.ClassSourceResolver;
 import org.netbeans.spi.palette.PaletteActions;
 
 /**
@@ -63,36 +64,37 @@ public class FormPaletteActions extends PaletteActions {
     @Override
     public Action[] getImportActions() {
 
-        Action[] res = new Action[3];
-
-        res[0] = new AbstractAction( PaletteUtils.getBundleString("CTL_AddJAR_Button") ) { // NOI18N
-                    @Override
-                    public void actionPerformed(java.awt.event.ActionEvent e) {
-                        BeanInstaller.installBeans(ClassSource.JarEntry.class);
-                    }
-                 };
-        res[0].putValue( Action.LONG_DESCRIPTION, 
-                 PaletteUtils.getBundleString("ACSD_AddJAR_Button") ); // NOI18N
-        
-        res[1] = new AbstractAction( PaletteUtils.getBundleString("CTL_AddLibrary_Button") ) { // NOI18N
-                    @Override
-                    public void actionPerformed(java.awt.event.ActionEvent e) {
-                        BeanInstaller.installBeans(ClassSource.LibraryEntry.class);
-                    }
-                };
-        res[1].putValue( Action.LONG_DESCRIPTION, 
-                 PaletteUtils.getBundleString("ACSD_AddLibrary_Button") ); // NOI18N
-        
-        res[2] = new AbstractAction( PaletteUtils.getBundleString("CTL_AddProject_Button") ) { // NOI18N
-                    @Override
-                    public void actionPerformed(java.awt.event.ActionEvent e) {
-                        BeanInstaller.installBeans(ClassSource.ProjectEntry.class);
-                    }
-                };
-        res[2].putValue( Action.LONG_DESCRIPTION, 
-                 PaletteUtils.getBundleString("ACSD_AddProject_Button") ); // NOI18N
-        
-        return res;
+      return new Action[0];
+        //Action[] res = new Action[3];
+        //
+        //res[0] = new AbstractAction( PaletteUtils.getBundleString("CTL_AddJAR_Button") ) { // NOI18N
+        //            @Override
+        //            public void actionPerformed(java.awt.event.ActionEvent e) {
+        //                BeanInstaller.installBeans(ClassSourceResolver.JarEntry.class);
+        //            }
+        //         };
+        //res[0].putValue( Action.LONG_DESCRIPTION,
+        //         PaletteUtils.getBundleString("ACSD_AddJAR_Button") ); // NOI18N
+        //
+        //res[1] = new AbstractAction( PaletteUtils.getBundleString("CTL_AddLibrary_Button") ) { // NOI18N
+        //            @Override
+        //            public void actionPerformed(java.awt.event.ActionEvent e) {
+        //                BeanInstaller.installBeans(ClassSourceResolver.LibraryEntry.class);
+        //            }
+        //        };
+        //res[1].putValue( Action.LONG_DESCRIPTION,
+        //         PaletteUtils.getBundleString("ACSD_AddLibrary_Button") ); // NOI18N
+        //
+        //res[2] = new AbstractAction( PaletteUtils.getBundleString("CTL_AddProject_Button") ) { // NOI18N
+        //            @Override
+        //            public void actionPerformed(java.awt.event.ActionEvent e) {
+        //                BeanInstaller.installBeans(ClassSourceResolver.ProjectEntry.class);
+        //            }
+        //        };
+        //res[2].putValue( Action.LONG_DESCRIPTION,
+        //         PaletteUtils.getBundleString("ACSD_AddProject_Button") ); // NOI18N
+        //
+        //return res;
     }
 
     @Override

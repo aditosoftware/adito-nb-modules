@@ -62,7 +62,11 @@ class FakeScrollbarPeer extends FakeComponentPeer
         return new Delegate();
     }
 
-  //
+    public void setValues(int value, int visible, int minimum, int maximum) {}
+    public void setLineIncrement(int l) {}
+    public void setPageIncrement(int l) {}
+
+    //
     //
     //
 
@@ -86,6 +90,7 @@ class FakeScrollbarPeer extends FakeComponentPeer
                                         0, 0, sz.width, sz.height,
                                         target.getOrientation(),
                                         target.isEnabled(),
+                                        true,
                                         scrollValue,
                                         thumbAmount,
                                         scrollRange);

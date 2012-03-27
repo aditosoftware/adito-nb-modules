@@ -139,12 +139,12 @@ class FakeTextAreaPeer extends FakeTextComponentPeer
                 g.setColor(SystemColor.controlHighlight);
                 FakePeerUtils.drawScrollbar(g,2,h-FakePeerUtils.SCROLL_H-2,
                                             w-4-FakePeerUtils.SCROLL_W,FakePeerUtils.SCROLL_H,
-                                            Scrollbar.HORIZONTAL,false, 0,0,0);
+                                            Scrollbar.HORIZONTAL,false,true,0,0,0);
 
                 g.setColor(SystemColor.controlHighlight);
                 FakePeerUtils.drawScrollbar(g,w-FakePeerUtils.SCROLL_W-2,2,
                                             FakePeerUtils.SCROLL_W,h-4-FakePeerUtils.SCROLL_H,
-                                            Scrollbar.VERTICAL,false, 0,0,0);
+                                            Scrollbar.VERTICAL,false,true,0,0,0);
 
                 g.setColor(SystemColor.controlHighlight);
                 g.fillRect(w-FakePeerUtils.SCROLL_W-2,h-FakePeerUtils.SCROLL_H-2,

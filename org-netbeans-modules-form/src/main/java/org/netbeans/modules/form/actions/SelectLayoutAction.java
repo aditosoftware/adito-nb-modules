@@ -98,12 +98,11 @@ public class SelectLayoutAction extends CallableSystemAction {
     @Override
     public boolean isEnabled() {
         Node[] nodes = getNodes();
-      for (Node node : nodes)
-      {
-        RADVisualContainer container = getContainer(node);
-        if (container == null || container.hasDedicatedLayoutSupport())
-          return false;
-      }
+        for (int i=0; i < nodes.length; i++) {
+            RADVisualContainer container = getContainer(nodes[i]);
+            if (container == null || container.hasDedicatedLayoutSupport())
+                return false;
+        }
         return true;
     }
 
@@ -151,13 +150,11 @@ public class SelectLayoutAction extends CallableSystemAction {
     private static PaletteItem[] getAllLayouts() {
         PaletteItem[] allItems = PaletteUtils.getAllItems();
         java.util.List<PaletteItem> layoutsList = new ArrayList<PaletteItem>();
-      for (PaletteItem allItem : allItems)
-      {
-        if (allItem.isLayout())
-        {
-          layoutsList.add(allItem);
+        for (int i = 0; i < allItems.length; i++) {
+            if (allItems[i].isLayout()) {
+                layoutsList.add(allItems[i]);
+            }
         }
-      }
 
         PaletteItem[] layouts = new PaletteItem[layoutsList.size()];
         layoutsList.toArray(layouts);
@@ -191,17 +188,15 @@ public class SelectLayoutAction extends CallableSystemAction {
                 }
                 
                 PaletteItem[] layouts = getAllLayouts();
-              for (PaletteItem layout : layouts)
-              {
-                mi = new JMenuItem(layout.getNode().getDisplayName());
-                HelpCtx.setHelpIDString(mi, SelectLayoutAction.class.getName());
-                addSortedMenuItem(popup, mi);
-                mi.addActionListener(new LayoutActionListener(layout));
-                if (!hasFreeDesignSupport && isContainersLayout(container, layout))
-                {
-                  setBoldFontForMenuText(mi);
+                for (int i = 0; i < layouts.length; i++) {
+                    mi = new JMenuItem(layouts[i].getNode().getDisplayName());
+                    HelpCtx.setHelpIDString(mi, SelectLayoutAction.class.getName());                    
+                    addSortedMenuItem(popup, mi);
+                    mi.addActionListener(new LayoutActionListener(layouts[i]));
+                    if(!hasFreeDesignSupport && isContainersLayout(container, layouts[i])){
+                        setBoldFontForMenuText(mi);                                                                        
+                    }                     
                 }
-              }
                 initialized = true;
             }
             return popup;
@@ -246,23 +241,20 @@ public class SelectLayoutAction extends CallableSystemAction {
         @Override
         public void actionPerformed(ActionEvent evt) {
             Node[] nodes = getNodes();
-          for (Node node : nodes)
-          {
-            RADVisualContainer container = getContainer(node);
-            if (container == null)
-              continue;
+            for (int i = 0; i < nodes.length; i++) {
+                RADVisualContainer container = getContainer(nodes[i]);
+                if (container == null)
+                    continue;
 
-            if (paletteItem != null)
-            {
-              // set the selected layout on the container
-              container.getFormModel().getComponentCreator().createComponent(
-                  paletteItem.getComponentClassSource(), container, null);
+                if (paletteItem != null) {
+                    // set the selected layout on the container
+                    container.getFormModel().getComponentCreator().createComponent(
+                        paletteItem, container, null);
+                }
+                else if (container.getLayoutSupport() != null) {
+                    convertToNewLayout(container);
+                }
             }
-            else if (container.getLayoutSupport() != null)
-            {
-              convertToNewLayout(container);
-            }
-          }
         }
     }
 

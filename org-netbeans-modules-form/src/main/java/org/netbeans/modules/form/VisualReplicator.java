@@ -52,8 +52,6 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-//import org.jdesktop.beansbinding.BindingGroup;
-
 import org.netbeans.modules.form.adito.components.AditoVisualReplicator;
 import org.openide.ErrorManager;
 
@@ -83,8 +81,8 @@ public class VisualReplicator {
 
     private Map<String,SwingLayoutBuilder> layoutBuilders = new HashMap<String,SwingLayoutBuilder>();
 
-//    private BindingGroup bindingGroup; // TODO: stripped
-//    private BindingDesignSupport bindingSupport; // TODO: stripped
+    //private BindingDesignSupport bindingSupport; // STRIPPED
+    //private BindingDesignSupport.BindingVisualReplicator bindingReplicator; // STRIPPED
 
     private boolean designRestrictions;
 
@@ -109,10 +107,10 @@ public class VisualReplicator {
 
     public VisualReplicator(boolean designRestrictions,
                             ViewConverter[] converters/*,
-                            BindingDesignSupport bindingSupport*/) {
+                            BindingDesignSupport bindingSupport*/) { // STRIPPED
         this.designRestrictions = designRestrictions;
         this.converters = converters;
-//        this.bindingSupport = bindingSupport; // TODO: stripped
+        //this.bindingSupport = bindingSupport; // STRIPPED
     }
 
     // ---------
@@ -149,21 +147,19 @@ public class VisualReplicator {
             Container contDelegate = metacont.getContainerDelegate(cont);
 
             builder = new SwingLayoutBuilder(getFormModel().getLayoutModel(),
-                                             contDelegate, containerId,
-                                             getDesignRestrictions());
+                                             contDelegate, containerId);
             layoutBuilders.put(containerId, builder);
         }
         return builder;
     }
 
-  // TODO: stripped
-//    private BindingGroup getBindingGroup() {
-//        if (bindingGroup == null) {
-//            bindingGroup = new BindingGroup();
-//            bindingGroup.bind();
-//        }
-//        return bindingGroup;
-//    }
+  // STRIPPED
+    /*private BindingDesignSupport.BindingVisualReplicator getBindingReplicator() {
+        if (bindingReplicator == null) {
+            bindingReplicator = bindingSupport.createReplicator();
+        }
+        return bindingReplicator;
+    }*/
 
     // ---------
     // getters & setters
@@ -177,7 +173,7 @@ public class VisualReplicator {
         idToClone.clear();
         cloneToId.clear();
         layoutBuilders.clear();
-//        bindingGroup = null; // TODO: stripped
+        //bindingReplicator = null; // STRIPPED
     }
 
     public boolean getDesignRestrictions() {
@@ -218,23 +214,22 @@ public class VisualReplicator {
                     entry.setValue(rc.getBeanInstance());
                 }
             }
-          // TODO: stripped
-//            BindingGroup group = getBindingGroup();
-//            boolean restrictions = getDesignRestrictions();
-//            for (String id : mapToClones.keySet()) {
-//                RADComponent rc = formModel.getMetaComponent(id);
-//                if (rc != null) {
-//                    if (restrictions) { // this is an updated view (designer)
-//                        bindingSupport.establishUpdatedBindings(
-//                                rc, false, mapToClones, group, false);
-//                        // BindingDesignSupport will unbind and remove these bindings
-//                        // automatically if user removes a binding or whole component
-//                    } else { // this is a one-off view (preview)
-//                        BindingDesignSupport.establishOneOffBindings(
-//                                rc, false, mapToClones, group);
-//                    }
-//                }
-//            }
+          // STRIPPED
+            /*boolean restrictions = getDesignRestrictions();
+            for (String id : mapToClones.keySet()) {
+                RADComponent rc = formModel.getMetaComponent(id);
+                if ((rc != null) && (rc.getKnownBindingProperties().length != 0)) {
+                    if (restrictions) { // this is an updated view (designer)
+                        getBindingReplicator().establishUpdatedBindings(
+                                rc, false, mapToClones, false);
+                        // BindingDesignSupport will unbind and remove these bindings
+                        // automatically if user removes a binding or whole component
+                    } else { // this is a one-off view (preview)
+                        getBindingReplicator().establishOneOffBindings(
+                                rc, false, mapToClones);
+                    }
+                }
+            }*/
         }
         catch (Exception ex) {
             ErrorManager.getDefault().notify(ErrorManager.INFORMATIONAL, ex);
@@ -319,7 +314,7 @@ public class VisualReplicator {
                     visible = defaultComp.isVisible() ? Boolean.TRUE : Boolean.FALSE;
             }
             if (visible != null) {
-                comp.setVisible(visible);
+                comp.setVisible(visible.booleanValue());
             }
 
             // re-attach fake peer
@@ -341,12 +336,11 @@ public class VisualReplicator {
         else { // new layout support
             // Re-attach fake peers
             contDelegate.removeAll();
-          for (Component comp : comps)
-          {
-            FakePeerSupport.attachFakePeer(comp);
-            if (comp instanceof Container)
-              FakePeerSupport.attachFakePeerRecursively((Container) comp);
-          }
+            for (int i=0; i<comps.length; i++) {
+                FakePeerSupport.attachFakePeer(comps[i]);
+                if (comps[i] instanceof Container)
+                    FakePeerSupport.attachFakePeerRecursively((Container)comps[i]);
+            }
 
             setupContainerLayout(metacont, comps, compIds);
         }
@@ -373,18 +367,16 @@ public class VisualReplicator {
         }
 
         RADComponent[] subComps = metacont.getSubBeans();
-      for (RADComponent subComp : subComps)
-      {
-        Object compClone = getClonedComponent(subComp);
-        if (compClone == null)
-          addComponent(subComp);
-        else if (compClone instanceof Component)
-        {
-          Container cloneCont = ((Component) compClone).getParent();
-          if (cloneCont != container && cloneToId.get(cloneCont) != null)
-            return; // the clone is placed in another container in
-        }               // replicator, there's going to be another update
-      }
+        for (int i=0; i < subComps.length; i++) {
+            Object compClone = getClonedComponent(subComps[i]);
+            if (compClone == null)
+                addComponent(subComps[i]);
+            else if (compClone instanceof Component) {
+                Container cloneCont = ((Component)compClone).getParent();
+                if (cloneCont != container && cloneToId.get(cloneCont) != null)
+                    return; // the clone is placed in another container in
+            }               // replicator, there's going to be another update
+        }
     }
 
     // for adding just one component, for adding more components use
@@ -482,7 +474,7 @@ public class VisualReplicator {
                 LayoutSupportManager laysup = parentCont.getLayoutSupport();
                 if (laysup != null) { // old layout support
                     if (!laysup.removeComponentFromContainer(
-                        cont, contDelegate, comp))
+                                    cont, contDelegate, comp))
                     {   // layout delegate cannot remove individual components,
                         // we must clear the container and add the components again
                         laysup.clearContainer(cont, contDelegate);
@@ -509,13 +501,12 @@ public class VisualReplicator {
                     // Re-attach fake peers
                     contDelegate.removeAll();
                     RADVisualComponent[] metacomps = parentCont.getSubComponents();
-                  for (RADVisualComponent metacomp1 : metacomps)
-                  {
-                    Component component = (Component) getClonedComponent(metacomp1);
-                    FakePeerSupport.attachFakePeer(component);
-                    if (component instanceof Container)
-                      FakePeerSupport.attachFakePeerRecursively((Container) component);
-                  }
+                    for (int i=0; i<metacomps.length; i++) {
+                        Component component = (Component)getClonedComponent(metacomps[i]);
+                        FakePeerSupport.attachFakePeer(component);
+                        if (component instanceof Container)
+                            FakePeerSupport.attachFakePeerRecursively((Container)component);
+                    }
 
                     getLayoutBuilder(parentCont.getId()).removeComponentsFromContainer(
                         new Component[] { comp },
@@ -571,23 +562,24 @@ public class VisualReplicator {
             return;
 
         // Mnemonics support - start -
-        //if ("text".equals(property.getName()) // NOI18N
-        //    && (targetComp instanceof AbstractButton
-        //        || targetComp instanceof JLabel)
-        //    && JavaCodeGenerator.isUsingMnemonics(property.getRADComponent()))
-        //{
-        //    try {
-        //        String str = (String) property.getRealValue();
-        //        if (targetComp instanceof JLabel)
-        //            org.openide.awt.Mnemonics.setLocalizedText(
-        //                                        (JLabel)targetComp, str);
-        //        else
-        //            org.openide.awt.Mnemonics.setLocalizedText(
-        //                                        (AbstractButton)targetComp, str);
-        //        return;
-        //    }
-        //    catch (Exception ex) {} // ignore and continue
-        //}
+      // STRIPPED
+        /*if ("text".equals(property.getName()) // NOI18N
+            && (targetComp instanceof AbstractButton
+                || targetComp instanceof JLabel)
+            && JavaCodeGenerator.isUsingMnemonics(property.getRADComponent()))
+        {
+            try {
+                String str = (String) property.getRealValue();
+                if (targetComp instanceof JLabel)
+                    org.openide.awt.Mnemonics.setLocalizedText(
+                                                (JLabel)targetComp, str);
+                else
+                    org.openide.awt.Mnemonics.setLocalizedText(
+                                                (AbstractButton)targetComp, str);
+                return;
+            }
+            catch (Exception ex) {} // ignore and continue
+        }*/
         // Mnemonics support - end -
 
         boolean buttonGroup = ("buttonGroup".equals(property.getName()) && (targetComp instanceof AbstractButton)); // NOI18N
@@ -601,10 +593,10 @@ public class VisualReplicator {
             if (value instanceof RADComponent.ComponentReference) {
                 valueComp = ((RADComponent.ComponentReference)value).getComponent();
             }
-            // TODO: stripped
-//            else if (FormUtils.isRelativeConnectionValue(value)) {
-//                valueComp = ((RADConnectionPropertyEditor.RADConnectionDesignValue)value).getRADComponent();
-//            }
+            // STRIPPED
+            /*else if (FormUtils.isRelativeConnectionValue(value)) {
+                valueComp = ((RADConnectionPropertyEditor.RADConnectionDesignValue)value).getRADComponent();
+            }*/
             else {
                 valueComp = null;
             }
@@ -616,11 +608,11 @@ public class VisualReplicator {
                 if (clonedComp == null) { // there's no cloned instance yet
                     clonedComp = createClone(valueComp);
                 }
-              // TODO: stripped
-//                if (value instanceof RADConnectionPropertyEditor.RADConnectionDesignValue) {
-//                    clonedValue = ((RADConnectionPropertyEditor.RADConnectionDesignValue)value)
-//                            .getValueForBean(clonedComp);
-//                } else
+              // STRIPPED
+                /*if (value instanceof RADConnectionPropertyEditor.RADConnectionDesignValue) {
+                    clonedValue = ((RADConnectionPropertyEditor.RADConnectionDesignValue)value)
+                            .getValueForBean(clonedComp);
+                } else*/
                 {
                     clonedValue = clonedComp;
                 }
@@ -667,21 +659,21 @@ public class VisualReplicator {
         }
     }
 
-  // TODO: stripped
-//    public void updateBinding(MetaBinding newBinding) {
-//        if (newBinding != null && bindingSupport != null) {
-//            RADComponent metaTarget = newBinding.getTarget();
-//            // Converted components may not have the right properties to bind to
-//            Object target = isConverted(metaTarget) ? metaTarget.getBeanInstance() : getClonedComponent(metaTarget);
-//            if (target != null) {
-//                RADComponent metaSource = newBinding.getSource();
-//                Object source = isConverted(metaSource) ? metaSource.getBeanInstance() : getClonedComponent(metaSource);
-//                if (source == null) // source not cloned - let's use the bean instance directly
-//                    source = newBinding.getSource().getBeanInstance();
-//                bindingSupport.addBinding(newBinding, source, target, getBindingGroup(), false);
-//            }
-//        }
-//    }
+  // STRIPPED
+    /*public void updateBinding(MetaBinding newBinding) {
+        if (newBinding != null && bindingSupport != null) {
+            RADComponent metaTarget = newBinding.getTarget();
+            // Converted components may not have the right properties to bind to
+            Object target = isConverted(metaTarget) ? metaTarget.getBeanInstance() : getClonedComponent(metaTarget);
+            if (target != null) {
+                RADComponent metaSource = newBinding.getSource();
+                Object source = isConverted(metaSource) ? metaSource.getBeanInstance() : getClonedComponent(metaSource);
+                if (source == null) // source not cloned - let's use the bean instance directly
+                    source = newBinding.getSource().getBeanInstance();
+                getBindingReplicator().addBinding(newBinding, source, target, false);
+            }
+        }
+    }*/
 
     // ---------
     // executive private methods
@@ -792,15 +784,14 @@ public class VisualReplicator {
         }
         else if (metacomp instanceof RADMenuComponent) {
             RADComponent[] metacomps = ((RADMenuComponent)metacomp).getSubBeans();
-          for (RADComponent sub : metacomps)
-          {
-            Object menuItem = getClonedComponent(sub);
-            if (menuItem == null)
-            {
-              menuItem = cloneComponent(sub, relativeProperties);
+            for (int i = 0; i < metacomps.length; i++) {
+                RADComponent sub = metacomps[i];
+                Object menuItem = getClonedComponent(sub);
+                if (menuItem == null) {
+                    menuItem = cloneComponent(sub, relativeProperties);
+                }
+                addToMenu(compClone, menuItem);
             }
-            addToMenu(compClone, menuItem);
-          }
         }
 
         if (clone instanceof Component && getDesignRestrictions()) {
@@ -824,23 +815,24 @@ public class VisualReplicator {
         }
 
         // Mnemonics support - start -
-        //if ((clone instanceof AbstractButton || clone instanceof JLabel)
-        //    && JavaCodeGenerator.isUsingMnemonics(metacomp))
-        //{
-        //    FormProperty prop = metacomp.getBeanProperty("text"); // NOI18N
-        //    if (prop != null && prop.isChanged()) {
-        //        try {
-        //            String str = (String) prop.getRealValue();
-        //            if (clone instanceof JLabel)
-        //                org.openide.awt.Mnemonics.setLocalizedText(
-        //                                            (JLabel)clone, str);
-        //            else
-        //                org.openide.awt.Mnemonics.setLocalizedText(
-        //                                            (AbstractButton)clone, str);
-        //        }
-        //        catch (Exception ex) {} // ignore
-        //    }
-        //}
+      // STRIPPED
+        /*if ((clone instanceof AbstractButton || clone instanceof JLabel)
+            && JavaCodeGenerator.isUsingMnemonics(metacomp))
+        {
+            FormProperty prop = metacomp.getBeanProperty("text"); // NOI18N
+            if (prop != null && prop.isChanged()) {
+                try {
+                    String str = (String) prop.getRealValue();
+                    if (clone instanceof JLabel)
+                        org.openide.awt.Mnemonics.setLocalizedText(
+                                                    (JLabel)clone, str);
+                    else
+                        org.openide.awt.Mnemonics.setLocalizedText(
+                                                    (AbstractButton)clone, str);
+                }
+                catch (Exception ex) {} // ignore
+            }
+        }*/
         // Mnemonics support - end -
 
         return clone;
@@ -953,9 +945,9 @@ public class VisualReplicator {
     {
         component.setDoubleBuffered(value);
         Component[] subcomps = component.getComponents();
-      for (Component subcomp : subcomps)
-        if (subcomp instanceof JComponent)
-          setDoubleBufferedRecursively((JComponent) subcomp, value);
+        for (int i=0; i < subcomps.length; i++)
+            if (subcomps[i] instanceof JComponent)
+                setDoubleBufferedRecursively((JComponent)subcomps[i], value);
     }
 
     // -------
@@ -969,9 +961,9 @@ public class VisualReplicator {
                 RADComponent valueComp;
                 if (value instanceof RADComponent.ComponentReference) {
                     valueComp = ((RADComponent.ComponentReference)value).getComponent();
-                  // TODO: stripped
-//                } else if (FormUtils.isRelativeConnectionValue(value)) {
-//                    valueComp = ((RADConnectionPropertyEditor.RADConnectionDesignValue)value).getRADComponent();
+                  // STRIPPED
+                /*} else if (FormUtils.isRelativeConnectionValue(value)) {
+                    valueComp = ((RADConnectionPropertyEditor.RADConnectionDesignValue)value).getRADComponent();*/
                 } else {
                     valueComp = null;
                 }
@@ -983,11 +975,11 @@ public class VisualReplicator {
                         clonedComp = cloneComponent(valueComp, relativeProperties);
                     }
                     Object clonedValue;
-                  // TODO: stripped
-//                    if (value instanceof RADConnectionPropertyEditor.RADConnectionDesignValue) {
-//                        clonedValue = ((RADConnectionPropertyEditor.RADConnectionDesignValue)value)
-//                            .getValueForBean(clonedComp);
-//                    } else
+                  // STRIPPED
+                    /*if (value instanceof RADConnectionPropertyEditor.RADConnectionDesignValue) {
+                        clonedValue = ((RADConnectionPropertyEditor.RADConnectionDesignValue)value)
+                            .getValueForBean(clonedComp);
+                    } else*/
                     {
                         clonedValue = clonedComp;
                     }
@@ -999,7 +991,7 @@ public class VisualReplicator {
                     Method writeMethod = FormUtils.getPropertyWriteMethod(property, targetComp.getClass());
                     if (writeMethod != null) {
                         writeMethod.invoke(targetComp,
-                                           clonedValue);
+                                           new Object[] { clonedValue });
                     }
                     else if (clonedValue instanceof ButtonGroup
                              && targetComp instanceof AbstractButton)
@@ -1021,8 +1013,8 @@ public class VisualReplicator {
         if (metacomp instanceof ComponentContainer) {
             layoutBuilders.remove(metacomp.getId());
             RADComponent[] subcomps = ((ComponentContainer)metacomp).getSubBeans();
-          for (RADComponent subcomp : subcomps)
-            removeMapping(subcomp);
+            for (int i=0; i < subcomps.length; i++)
+                removeMapping(subcomps[i]);
         }
     }
 
@@ -1078,7 +1070,7 @@ public class VisualReplicator {
                     ((JRootPane)converted).setContentPane(contentCont);
                 } else if (MenuItem.class.isAssignableFrom(compClass)) { // converted AWT menu
                     ((JMenuItem)converted).setText(((MenuItem)component).getLabel());
-                    converted.setFont(((MenuItem) component).getFont());
+                    ((JMenuItem)converted).setFont(((MenuItem)component).getFont());
                 }
 
                 return new ConvertResult(converted, enclosed);

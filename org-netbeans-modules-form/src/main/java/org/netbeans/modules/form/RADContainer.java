@@ -65,11 +65,10 @@ public class RADContainer extends RADComponent implements ComponentContainer {
     @Override
     public void initSubComponents(RADComponent[] initComponents) {
         subComponents = new ArrayList<RADComponent>(initComponents.length);
-      for (RADComponent initComponent : initComponents)
-      {
-        subComponents.add(initComponent);
-        initComponent.setParentComponent(this);
-      }
+        for (int i = 0; i < initComponents.length; i++) {
+            subComponents.add(initComponents[i]);
+            initComponents[i].setParentComponent(this);
+        }
     }
 
     @Override
@@ -99,4 +98,17 @@ public class RADContainer extends RADComponent implements ComponentContainer {
         return subComponents.indexOf(comp);
     }
 
+    /**
+     * Called to obtain a Java code to be used to generate code to access the
+     * container for adding subcomponents.  It is expected that the returned
+     * code is either ""(in which case the form is the container) or is a name
+     * of variable or method call ending with
+     * "."(e.g. "container.getContentPane().").  This implementation returns
+     * "", as there is no sense to add visual components to non-visual
+     * containers
+     * @return the prefix code for generating code to add subcomponents to this container
+     */
+    public String getContainerGenName() {
+        return ""; // NOI18N
+    }
 }

@@ -50,7 +50,7 @@ import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.model.IAditoModelDataPr
 import org.openide.cookies.*;
 import org.openide.filesystems.FileObject;
 import org.openide.loaders.*;
-import org.openide.nodes.Node;
+import org.openide.nodes.*;
 import org.openide.nodes.Node.Cookie;
 import org.openide.util.Lookup;
 
@@ -64,7 +64,7 @@ import java.util.List;
  */
 public class FormDataObject extends MultiDataObject
 {
-  transient private FormEditorSupport formEditor;
+  transient private EditorSupport formEditor;
   transient private OpenEdit openEdit;
 
   //--------------------------------------------------------------------
@@ -121,15 +121,15 @@ public class FormDataObject extends MultiDataObject
     @Override
     public void open()
     {
-      // open form editor with form designer selected
-      getFormEditorSupport().openFormEditor(true);
+        // open form editor with form designer selected
+        getFormEditorSupport().openDesign();
     }
 
     @Override
     public void edit()
     {
-      // open form editor with java editor selected (form not loaded)
-      getFormEditorSupport().open();
+        // open form editor with java editor selected (form not loaded)
+        getFormEditorSupport().openSource();
     }
   }
 
@@ -148,40 +148,39 @@ public class FormDataObject extends MultiDataObject
     return isReadOnly();
   }
 
-  public synchronized FormEditorSupport getFormEditorSupport()
-  {
-    if (formEditor == null)
-    {
-      formEditor = new FormEditorSupport(this, getCookieSet());
+  public final CookieSet getCookies() {
+      return getCookieSet();
+  }
+
+  public synchronized EditorSupport getFormEditorSupport() {
+      if (formEditor == null) {
+          FormServices services = Lookup.getDefault().lookup(FormServices.class);
+          formEditor = services.createEditorSupport(this);
+      }
+      return formEditor;
+  }
+
+  //FileEntry getFormEntry() {
+  //    return formEntry;
+  //}
+
+    /** Provides node that should represent this data object. When a node for
+     * representation in a parent is requested by a call to getNode(parent) it
+     * is the exact copy of this node with only parent changed. This
+     * implementation creates instance <CODE>DataNode</CODE>.  <P> This method
+     * is called only once.
+     *
+     * @return the node representation for this data object
+     * @see DataNode
+     */
+    @Override
+    protected Node createNodeDelegate() {
+        FormServices services = Lookup.getDefault().lookup(FormServices.class);
+        return services.createFormDataNode(this);
     }
-    return formEditor;
-  }
 
-  // PENDING remove when form_new_layout is merged to trunk
-  public FormEditorSupport getFormEditor()
-  {
-    return getFormEditorSupport();
-  }
-  // END of PENDING
-
-  /**
-   * Provides node that should represent this data object. When a node for
-   * representation in a parent is requested by a call to getNode(parent) it
-   * is the exact copy of this node with only parent changed. This
-   * implementation creates instance <CODE>DataNode</CODE>.  <P> This method
-   * is called only once.
-   *
-   * @return the node representation for this data object
-   * @see FormDataNode
-   */
-  @Override
-  protected Node createNodeDelegate()
-  {
-    return new FormDataNode(this);
-  }
-
-  //--------------------------------------------------------------------
-  // Serialization
+    //--------------------------------------------------------------------
+    // Serialization
 
   private void readObject(java.io.ObjectInputStream is)
       throws java.io.IOException, ClassNotFoundException

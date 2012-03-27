@@ -87,6 +87,12 @@ import java.util.List;
 
 public abstract class AbstractLayoutSupport implements LayoutSupportDelegate
 {
+    /** Default icon URL. */
+    private static String iconURL =
+        "org/netbeans/modules/form/layoutsupport/resources/AbstractLayout.gif"; // NOI18N
+    /** Default icon URL. */
+    private static String icon32URL =
+        "org/netbeans/modules/form/layoutsupport/resources/AbstractLayout32.gif"; // NOI18N
 
   // ------
 
@@ -239,10 +245,8 @@ public abstract class AbstractLayoutSupport implements LayoutSupportDelegate
     {
       case BeanInfo.ICON_COLOR_16x16:
       case BeanInfo.ICON_MONO_16x16:
-        String iconURL = "org/netbeans/modules/form/layoutsupport/resources/AbstractLayout.gif";
         return ImageUtilities.loadImage(iconURL);
       default:
-        String icon32URL = "org/netbeans/modules/form/layoutsupport/resources/AbstractLayout32.gif";
         return ImageUtilities.loadImage(icon32URL);
     }
   }

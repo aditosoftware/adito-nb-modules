@@ -45,9 +45,11 @@
 package org.netbeans.modules.form;
 
 import java.awt.*;
+import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 import javax.swing.*;
 import javax.swing.border.Border;
+import org.openide.ErrorManager;
 
 import org.netbeans.modules.form.fakepeer.FakePeerSupport;
 
@@ -67,8 +69,12 @@ public class CreationFactory {
     interface PropertyParameters {
      
         public String getPropertyName();
+        
+        public String getJavaParametersString(FormProperty prop);
 
-      public Class[] getPropertyParametersTypes();
+        public Object[] getPropertyParametersValues(FormProperty prop);
+        
+        public Class[] getPropertyParametersTypes();
     }
     
     static class Property2ParametersMapper {              
@@ -91,9 +97,30 @@ public class CreationFactory {
                 return parameters.getPropertyParametersTypes();
             }            
             return propertyType;
+        }        
+        
+        public String getJavaParametersString(FormProperty prop) {            
+            if(parameters!=null){
+                return parameters.getJavaParametersString(prop);
+            }
+            return prop.getJavaInitializationString();
         }
 
-      public void setPropertyParameters(PropertyParameters parameters) {
+        public Object[] getPropertyParametersValues(FormProperty prop) {              
+            if(parameters!=null){
+                return parameters.getPropertyParametersValues(prop);
+            }    
+            try{
+                return new Object[] { prop.getRealValue() };   
+            } catch(InvocationTargetException ite) {
+                ErrorManager.getDefault().notify(ite);
+            } catch(IllegalAccessException iae){
+                ErrorManager.getDefault().notify(iae);
+            }                
+            return new Object[] {};   
+        }
+        
+        public void setPropertyParameters(PropertyParameters parameters) {
             this.parameters = parameters;
         }                        
     }    
@@ -120,8 +147,13 @@ public class CreationFactory {
     public static void registerDescriptor(CreationDescriptor desc) {
         getRegistry().put(desc.getDescribedClassName(), desc);
     }
+    
+    public static void unregisterDescriptor(CreationDescriptor desc) {
+        if (registry != null)
+            registry.remove(desc.getDescribedClassName());
+    }
 
-  // -----------
+    // -----------
     // creation methods
 
     public static Object createDefaultInstance(final Class cls)
@@ -129,14 +161,32 @@ public class CreationFactory {
     {
         CreationDescriptor cd = getDescriptor(cls);
         Object cl = UIManager.get("ClassLoader"); // NOI18N
+        Object cl2 = UIManager.getLookAndFeelDefaults().get("ClassLoader"); // NOI18N
+        ClassLoader uiCl = (cl instanceof ClassLoader) ? (ClassLoader)cl : null;
         ClassLoader systemCl = org.openide.util.Lookup.getDefault().lookup(ClassLoader.class);
-        if (cl == systemCl) { // System classloader doesn't help to load user classes like JXLoginPanel
-            UIManager.put("ClassLoader", null); // NOI18N
+        ClassLoader beanCl = cls.getClassLoader();
+        java.util.List<ClassLoader> loaders = new ArrayList<ClassLoader>();
+        if (beanCl != null) {
+            loaders.add(beanCl);
         }
+        loaders.add(systemCl);
+        if (uiCl != null) {
+            loaders.add(uiCl);
+        }
+        ClassLoader newCl = new MultiClassLoader(loaders.toArray(new ClassLoader[loaders.size()]));
+        UIManager.put("ClassLoader", newCl); // NOI18N
         Object instance = cd != null ?
                               cd.createDefaultInstance() :
                               cls.newInstance();
-        UIManager.put("ClassLoader", cl); // NOI18N
+        if (cl == cl2) {
+            // The original classloader (i.e., cl) was in look and feel defaults.
+            // It remains there, we just have to remove the value that
+            // we set in user defaults (see the structure of MultiUIDefaults).
+            UIManager.getDefaults().remove("ClassLoader"); // NOI18N
+        } else {
+            // The original classloader was in user defaults => return it back
+            UIManager.put("ClassLoader", cl); // NOI18N
+        }
         initAfterCreation(instance);
         return instance;
     }
@@ -154,30 +204,139 @@ public class CreationFactory {
         return instance;
     }
 
-  // ------------
-    // utility methods
+    public static Object createInstance(Class cls,
+                                        FormProperty[] props,
+                                        int style)
+        throws Exception
+    {
+        CreationDescriptor cd = getDescriptor(cls);
+        if (cd == null)
+            return null;
 
-  public static CreationDescriptor.Creator findCreator(
+        CreationDescriptor.Creator creator = cd.findBestCreator(props, style);
+        if (creator == null)
+            return null;
+
+        Object instance = creator.createInstance(props);
+        initAfterCreation(instance);
+        return instance;
+    }
+
+  // STRIPPED
+    /*public static String getJavaCreationCode(Class cls,
+                                             FormProperty[] props,
+                                             int style) {
+        CreationDescriptor cd = getDescriptor(cls);
+        if (cd != null) {
+            CreationDescriptor.Creator creator = cd.findBestCreator(props, style);
+            if (creator != null) {
+               creator.getJavaCreationCode(props, null, null);
+            }
+        }
+        return null;
+    }*/
+
+    // ------------
+    // utility methods
+    
+    public static FormProperty[] getPropertiesForCreator(
+                                           CreationDescriptor.Creator creator,
+                                           FormProperty[] properties) {
+
+        String[] propNames = creator.getPropertyNames();
+        FormProperty[] crProps = new FormProperty[propNames.length];
+
+        for (int i=0; i < propNames.length; i++) {
+            String propName = propNames[i];
+            for (int j=0; j < properties.length; j++)
+                if (propName.equals(properties[j].getName())) {
+                    crProps[i] = properties[j];
+                    break;
+                }
+            if (crProps[i] == null)
+                return null; // missing property, should not happen
+        }
+
+        return crProps;
+    }
+
+    public static FormProperty[] getRemainingProperties(
+                                           CreationDescriptor.Creator creator,
+                                           FormProperty[] properties) {
+
+        String[] propNames = creator.getPropertyNames();
+        FormProperty[] remProps = new FormProperty[properties.length - propNames.length];
+        if (remProps.length == 0) return remProps;
+
+        int ii = 0;
+        for (int i=0; i < properties.length; i++) {
+            String propName = properties[i].getName();
+            for (int j=0; j < propNames.length; j++) {
+                if (propName.equals(propNames[j])) break;
+                if (j+1 == propNames.length) {
+                    if (ii > remProps.length)
+                        return null; // should not happen
+                    remProps[ii++] = properties[i];
+                }
+            }
+        }
+
+        return remProps;
+    }
+
+    public static boolean containsProperty(CreationDescriptor desc,
+                                           String propName)
+    {
+        CreationDescriptor.Creator[] creators = desc.getCreators();
+        if (creators == null)
+            return false;
+
+        for (int i=0; i < creators.length; i++) {
+            String[] propNames = creators[i].getPropertyNames();
+            for (int j=0; j < propNames.length; j++)
+                if (propNames[j].equals(propName))
+                    return true;
+        }
+        return false;
+    }
+
+    public static boolean containsProperty(CreationDescriptor.Creator creator,
+                                           String propName)
+    {
+        String[] propNames = creator.getPropertyNames();
+        for (int j=0; j < propNames.length; j++)
+            if (propNames[j].equals(propName))
+                return true;
+        return false;
+    }
+
+    public static FormProperty findProperty(String propName,
+                                            FormProperty[] properties) {
+        for (int i=0; i < properties.length; i++)
+            if (properties[i].getName().equals(propName))
+                return properties[i];
+        return null;
+    }
+
+    public static CreationDescriptor.Creator findCreator(
                                                  CreationDescriptor desc,
                                                  Class[] paramTypes)
     {
         CreationDescriptor.Creator[] creators = desc.getCreators();
-      for (CreationDescriptor.Creator cr : creators)
-      {
-        if (cr.getParameterCount() == paramTypes.length)
-        {
-          Class[] types = cr.getParameterTypes();
-          boolean match = true;
-          for (int j = 0; j < types.length; j++)
-            if (!types[j].isAssignableFrom(paramTypes[j]))
-            {
-              match = false;
-              break;
+        for (int i=0; i < creators.length; i++) {
+            CreationDescriptor.Creator cr = creators[i];
+            if (cr.getParameterCount() == paramTypes.length) {
+                Class[] types = cr.getParameterTypes();
+                boolean match = true;
+                for (int j=0; j < types.length; j++)
+                    if (!types[j].isAssignableFrom(paramTypes[j])) {
+                        match = false;
+                        break;
+                    }
+                if (match)
+                    return cr;
             }
-          if (match)
-            return cr;
         }
-      }
         return null;
     }
 
@@ -196,21 +355,18 @@ public class CreationFactory {
         if (creators == null || creators.length == 0) return null;
 
         int[] placed = new int[creators.length];
-      for (FormProperty property : properties)
-      {
-        if (!changedOnly || property.isChanged())
-        {
-          String name = property.getName();
+        for (int i=0; i < properties.length; i++) {
+            if (!changedOnly || properties[i].isChanged()) {
+                String name = properties[i].getName();
 
-          for (int j = 0; j < creators.length; j++)
-          {
-            String[] crNames = creators[j].getPropertyNames();
-            for (String crName : crNames)
-              if (name.equals(crName))
-                placed[j]++;
-          }
+                for (int j=0; j < creators.length; j++) {
+                    String[] crNames = creators[j].getPropertyNames();
+                    for (int k=0; k < crNames.length; k++)
+                        if (name.equals(crNames[k]))
+                            placed[j]++;
+                }
+            }
         }
-      }
         return placed;
     }
 
@@ -291,19 +447,17 @@ public class CreationFactory {
             if (!name1.equals(name2)) {
                 FormProperty prop1 = null;
                 FormProperty prop2 = null;
-              for (FormProperty property : properties)
-                if (prop1 == null && name1.equals(property.getName()))
-                {
-                  prop1 = property;
-                  if (prop2 != null)
-                    break;
-                }
-                else if (prop2 == null && name2.equals(property.getName()))
-                {
-                  prop2 = property;
-                  if (prop1 != null)
-                    break;
-                }
+                for (int j=0; j < properties.length; j++)
+                    if (prop1 == null && name1.equals(properties[j].getName())) {
+                        prop1 = properties[j];
+                        if (prop2 != null)
+                            break;
+                    }
+                    else if (prop2 == null && name2.equals(properties[j].getName())) {
+                        prop2 = properties[j];
+                        if (prop1 != null)
+                            break;
+                    }
 
                 if (prop1 != null && !prop1.getValueType().isPrimitive()) {
                     try {
@@ -426,7 +580,7 @@ public class CreationFactory {
             { "borderInsets" }
         };
         
-        defaultConstrParams = new Object[] {1, 1, 1, 1};
+        defaultConstrParams = new Object[] { new Integer(1), new Integer(1), new Integer(1), new Integer(1) };
         methodName = "createEmptyBorder";
         
         registerDescriptor(new CreationDescriptor(
@@ -451,7 +605,7 @@ public class CreationFactory {
             { "border" }
         };
         
-        defaultConstrParams = new Object[] { null, "", 0, 0};
+        defaultConstrParams = new Object[] { null, "", new Integer(0), new Integer(0) };
         methodName = "createTitledBorder";                      
         registerDescriptor(new CreationDescriptor(
                 javax.swing.BorderFactory.class, javax.swing.border.TitledBorder.class, methodName,
@@ -486,7 +640,7 @@ public class CreationFactory {
                            "shadowOuterColor", "shadowInnerColor" }
         };
                       
-        defaultConstrParams = new Object[] {javax.swing.border.BevelBorder.RAISED};
+        defaultConstrParams = new Object[] { new Integer(javax.swing.border.BevelBorder.RAISED) };
         methodName = "createBevelBorder";                     
         registerDescriptor(new CreationDescriptor(
                 javax.swing.BorderFactory.class, javax.swing.border.BevelBorder.class, methodName, 
@@ -528,8 +682,8 @@ public class CreationFactory {
             { "borderInsets", "tileIcon" },
             { "borderInsets", "matteColor" }
         };         
-        defaultConstrParams = new Object[] {
-            1, 1, 1, 1,
+        defaultConstrParams = new Object[] { 
+            new Integer(1), new Integer(1), new Integer(1), new Integer(1),
             java.awt.Color.black
         };        
         methodName = "createMatteBorder";                                
@@ -634,6 +788,18 @@ public class CreationFactory {
             }
         );
 
+        // Box.Filler
+        constrParamTypes = new Class[][] {
+            { Dimension.class, Dimension.class, Dimension.class }
+        };
+        constrPropertyNames = new String[][] {
+            { "minimumSize", "preferredSize", "maximumSize" }
+        };
+        defaultConstrParams = new Object[] {new Dimension(), new Dimension(), new Dimension()};
+        registerDescriptor(new CreationDescriptor(
+                javax.swing.Box.Filler.class,
+                constrParamTypes, constrPropertyNames, defaultConstrParams));
+
         // ----------
 
         defaultDescriptorsCreated = true;
@@ -657,12 +823,41 @@ public class CreationFactory {
         public String getPropertyName() {
             return propertyName;
         }
-
-      @Override
+        
+        @Override
+        public String getJavaParametersString(FormProperty prop) {     
+            Insets insets = (Insets) getRealValue (prop);                    
+            if(insets != null) {
+                return insets.top + ", " + insets.left + ", " + insets.bottom + ", " + insets.right;
+            } else {
+                return "";
+            }                                                
+        }        
+        @Override
+        public Object[] getPropertyParametersValues(FormProperty prop) {                        
+            Insets insets = (Insets) getRealValue(prop);                            
+            if(insets != null) {
+                return new Object[] { new Integer(insets.top), new Integer(insets.left), new Integer(insets.bottom), new Integer(insets.right)};                
+            } else {
+                return new Object[] { };                
+            }                    
+        }    
+        
+        @Override
         public Class[] getPropertyParametersTypes() {
             return parameterTypes;
         }
-
+        
+        private static Object getRealValue(FormProperty prop){
+            try {
+                return prop.getRealValue();
+            } catch(InvocationTargetException ite) {
+                ErrorManager.getDefault().notify(ite);
+            } catch(IllegalAccessException iae){
+                ErrorManager.getDefault().notify(iae);
+            }                             
+            return null;
+        }           
     }
     
     

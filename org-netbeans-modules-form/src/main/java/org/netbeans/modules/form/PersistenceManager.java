@@ -106,28 +106,38 @@ public abstract class PersistenceManager {
     private static List<PersistenceManager> managers;
     private static List<String> managersByName;
 
-  public static Iterator<PersistenceManager> getManagers() {
-        ClassLoader classLoader = null;
-      for (String s : getManagersNamesList())
-      { // create managers registered by name
-        if (classLoader == null)
-          classLoader = Lookup.getDefault().lookup(ClassLoader.class);
+    public static void registerManager(PersistenceManager manager) {
+        getManagersList().add(manager);
+    }
 
-        try
-        {
-          PersistenceManager manager = (PersistenceManager)
-              classLoader.loadClass(s).newInstance();
-          getManagersList().add(manager);
+    public static void unregisterManager(PersistenceManager manager) {
+        getManagersList().remove(manager);
+    }
+
+    static void registerManager(String managerClassName) {
+        getManagersNamesList().add(managerClassName);
+    }
+
+    public static Iterator<PersistenceManager> getManagers() {
+        ClassLoader classLoader = null;
+        Iterator<String> iter = getManagersNamesList().iterator();
+        while (iter.hasNext()) { // create managers registered by name
+            if (classLoader == null)
+                classLoader = Lookup.getDefault().lookup(ClassLoader.class);
+
+            String pmClassName = iter.next();
+            try {
+                PersistenceManager manager = (PersistenceManager)
+                    classLoader.loadClass(pmClassName).newInstance();
+                getManagersList().add(manager);
+            }
+            catch (Exception ex1) {
+                notifyError(ex1, pmClassName);
+            }
+            catch (LinkageError ex2) {
+                notifyError(ex2, pmClassName);
+            }
         }
-        catch (Exception ex1)
-        {
-          notifyError(ex1, s);
-        }
-        catch (LinkageError ex2)
-        {
-          notifyError(ex2, s);
-        }
-      }
         getManagersNamesList().clear(); // [is it OK to lose unsuccessful managers?]
 
         return getManagersList().iterator();
@@ -136,7 +146,7 @@ public abstract class PersistenceManager {
     private static List<PersistenceManager> getManagersList() {
         if (managers == null) {
             managers = new ArrayList<PersistenceManager>();
-//            managers.add(new GandalfPersistenceManager());
+            //managers.add(new GandalfPersistenceManager());
             managers.add(new AditoPersistenceManager());
         }
         return managers;

@@ -85,17 +85,16 @@ public class AddAction extends CallableSystemAction {
     @Override
     public boolean isEnabled() {
         Node[] nodes = getNodes();
-      for (Node node : nodes)
-      {
-        FormCookie formCookie = node.getCookie(FormCookie.class);
-        if (formCookie == null)
-          return false;
+        for (int i=0; i < nodes.length; i++) {
+            FormCookie formCookie = nodes[i].getCookie(FormCookie.class);
+            if (formCookie == null)
+                return false;
 
-        RADComponentCookie radCookie = node.getCookie(RADComponentCookie.class);
-        if (radCookie != null
-            && !(radCookie.getRADComponent() instanceof ComponentContainer))
-          return false;
-      }
+            RADComponentCookie radCookie = nodes[i].getCookie(RADComponentCookie.class);
+            if (radCookie != null
+                  && !(radCookie.getRADComponent() instanceof ComponentContainer))
+                return false;
+        }
         return true;
     }
 
@@ -135,35 +134,31 @@ public class AddAction extends CallableSystemAction {
 
                     boolean added = false;
 
-              for (Node node : nodes)
-              {
-                FormCookie formCookie = node.getCookie(FormCookie.class);
-                if (formCookie == null)
-                  continue;
+                    for (int i=0; i < nodes.length; i++) {
+                        FormCookie formCookie = nodes[i].getCookie(FormCookie.class);
+                        if (formCookie == null)
+                            continue;
 
-                RADComponentCookie radCookie = node.getCookie(RADComponentCookie.class);
-                RADComponent targetComponent;
-                if (radCookie != null)
-                {
-                  targetComponent = radCookie.getRADComponent();
-                  if (!(targetComponent instanceof ComponentContainer))
-                    continue;
-                }
-                else targetComponent = null;
+                        RADComponentCookie radCookie = nodes[i].getCookie(RADComponentCookie.class);
+                        RADComponent targetComponent;
+                        if (radCookie != null) {
+                            targetComponent = radCookie.getRADComponent();
+                            if (!(targetComponent instanceof ComponentContainer))
+                                continue;
+                        }
+                        else targetComponent = null;
 
-                FormModel formModel = formCookie.getFormModel();
-                if (chooseBeanType != null)
-                {
-                  paletteItem.setClassFromCurrentProject(chooseBeanType,
-                                                         FormEditor.getFormDataObject(formModel).getPrimaryFile());
-                }
-                if (formModel.getComponentCreator().createComponent(
-                    paletteItem.getComponentClassSource(), targetComponent, null)
-                    != null)
-                {
-                  added = true;
-                }
-              }
+                        FormModel formModel = formCookie.getFormModel();
+                        if (chooseBeanType != null) {
+                            paletteItem.setClassFromCurrentProject(chooseBeanType,
+                                    FormEditor.getFormDataObject(formModel).getPrimaryFile());
+                        }
+                        if (formModel.getComponentCreator().createComponent(
+                                paletteItem, targetComponent, null)
+                                != null) {
+                            added = true;
+                        }
+                    }
 
                     return added;
                 }

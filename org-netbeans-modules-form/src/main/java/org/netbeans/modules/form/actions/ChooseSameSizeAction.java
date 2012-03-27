@@ -228,19 +228,17 @@ public class ChooseSameSizeAction extends NodeAction {
             RADComponent rc = (RADComponent)radComponents.get(0);
             RADVisualContainer visCont = ((RADVisualComponent)rc).getParentContainer();
 
-          for (Object radComponent : radComponents)
-          {
-            RADComponent rcomp = (RADComponent) radComponent;
-            if (!((RADVisualComponent) rcomp).getParentContainer().equals(visCont))
-            {
-              DialogDisplayer.getDefault().notify(
-                  new NotifyDescriptor.Message(
-                      NbBundle.getMessage(ChooseSameSizeAction.class, "TXT_ComponentsNotInOneContainer") //NOI18N
-                  )
-              );
-              return;
+            for (int i = 0; i < radComponents.size(); i++) {
+                RADComponent rcomp = (RADComponent)radComponents.get(i);
+                if (!((RADVisualComponent)rcomp).getParentContainer().equals(visCont)) {
+                    DialogDisplayer.getDefault().notify(
+                            new NotifyDescriptor.Message(
+                                NbBundle.getMessage(ChooseSameSizeAction.class, "TXT_ComponentsNotInOneContainer") //NOI18N
+                            )
+                    );
+                    return;
+                }
             }
-          }
                         
             FormModel formModel = rc.getFormModel();
             LayoutModel layoutModel = formModel.getLayoutModel();
@@ -254,15 +252,14 @@ public class ChooseSameSizeAction extends NodeAction {
                 if (mi.isSelected()) {
                     FormDesigner designer = FormEditor.getFormDesigner(formModel);
                     LayoutDesigner lDesigner = designer.getLayoutDesigner();
-                  for (Object compId1 : compIds)
-                  {
-                    String compId = (String) compId1;
-                    LayoutComponent lc = layoutModel.getLayoutComponent(compId);
-                    if (lDesigner.isComponentResizing(lc, dimension))
-                    {
-                      lDesigner.setComponentResizing(lc, dimension, false);
+                    Iterator iter = compIds.iterator();
+                    while (iter.hasNext()) {
+                        String compId = (String)iter.next();
+                        LayoutComponent lc = layoutModel.getLayoutComponent(compId);
+                        if (lDesigner.isComponentResizing(lc, dimension)) {
+                            lDesigner.setComponentResizing(lc, dimension, false);
+                        }
                     }
-                  }
                     layoutModel.setSameSize(compIds, dimension);
                 } else {
                     layoutModel.unsetSameSize(compIds, dimension);
@@ -282,14 +279,13 @@ public class ChooseSameSizeAction extends NodeAction {
     
     private static List<String> getComponentIds(List/*<RADComponent>*/ components) {
         List<String> ids = new ArrayList<String>();
-      for (Object component : components)
-      {
-        RADComponent rc = (RADComponent) component;
-        if (rc != null)
-        {
-          ids.add(rc.getId());
+        Iterator i = components.iterator();
+        while (i.hasNext()) {
+            RADComponent rc = (RADComponent)i.next();
+            if (rc != null) {
+                ids.add(rc.getId());
+            }
         }
-      }
         return ids;
     }
     

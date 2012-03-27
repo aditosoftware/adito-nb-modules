@@ -44,8 +44,9 @@
 
 package org.netbeans.modules.form;
 
-import java.util.*;
+import java.util.ArrayList;
 import java.awt.datatransfer.*;
+import java.util.List;
 import javax.swing.Action;
 
 import org.openide.nodes.*;
@@ -84,7 +85,9 @@ class FormOthersNode extends FormNode {
                 l.add(SystemAction.get(ReorderAction.class));
                 l.add(null);
             }
-          l.addAll(Arrays.asList(super.getActions(context)));
+            for (Action a : super.getActions(context)) {
+                l.add(a);
+            }
             actions = l.toArray(new Action[l.size()]);
         }
 
