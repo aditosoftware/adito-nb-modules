@@ -162,10 +162,10 @@ public class FormEditorSupport extends DataEditorSupport implements EditorSuppor
     /** ID of the form designer (in the multiview) */
     static final String MV_FORM_ID = "form"; //NOI18N
     /** ID of the java editor (in the multiview) */
-    private static final String MV_JAVA_ID = "java"; // NOI18N
+    //private static final String MV_JAVA_ID = "java"; // NOI18N
     
-    private static final int JAVA_ELEMENT_INDEX = 0;
-    private static final int FORM_ELEMENT_INDEX = 1;
+    //private static final int JAVA_ELEMENT_INDEX = 1;
+    private static final int FORM_ELEMENT_INDEX = 0;
     private int elementToOpen; // default element index when multiview TC is created
     
     /** Icon for the form editor multiview window */
@@ -204,7 +204,7 @@ public class FormEditorSupport extends DataEditorSupport implements EditorSuppor
             FormDataObject formDataObject,
             CookieSet cookies) {
         super(formDataObject, new Environment(formDataObject));
-        setMIMEType("text/x-java"); // NOI18N
+        setMIMEType("text/aod+xml"); // NOI18N
         this.formDataObject = formDataObject;
         this.cookies = cookies;
     }
@@ -314,7 +314,7 @@ public class FormEditorSupport extends DataEditorSupport implements EditorSuppor
             fsToStatusListener.put(fs, fsl);
         } // else do nothing - the listener is already added
     }
-    
+
     private static void detachStatusListeners() {
         Iterator iter = fsToStatusListener.entrySet().iterator();
         while (iter.hasNext()) {
@@ -325,13 +325,13 @@ public class FormEditorSupport extends DataEditorSupport implements EditorSuppor
         }
         fsToStatusListener.clear();
     }
-    
-    void selectJavaEditor(){
+
+    /*void selectJavaEditor(){
         MultiViewHandler handler = MultiViews.findMultiViewHandler(multiviewTC);
         if (handler != null) {
             handler.requestActive(handler.getPerspectives()[JAVA_ELEMENT_INDEX]);
         }
-    }
+    }*/
 
     @Override
     protected boolean asynchronousOpen() {
@@ -375,7 +375,7 @@ public class FormEditorSupport extends DataEditorSupport implements EditorSuppor
             DialogDisplayer.getDefault().notify(new NotifyDescriptor.Message(message));
             return;
         }
-        elementToOpen = JAVA_ELEMENT_INDEX;
+        //elementToOpen = JAVA_ELEMENT_INDEX;
         super.open();
         
         // This method must be executed in AWT thread because
@@ -383,7 +383,7 @@ public class FormEditorSupport extends DataEditorSupport implements EditorSuppor
         // and we don't have multiviewTC correctly set
         MultiViewHandler handler = MultiViews.findMultiViewHandler(multiviewTC);
         if (handler != null) {
-            handler.requestActive(handler.getPerspectives()[JAVA_ELEMENT_INDEX]);
+            handler.requestActive(handler.getPerspectives()[elementToOpen]);
             // will continue in loadOpeningForm
         }
     }
@@ -394,11 +394,11 @@ public class FormEditorSupport extends DataEditorSupport implements EditorSuppor
      * @param pos position
      */
     public void openAt(PositionRef pos) {
-        elementToOpen = JAVA_ELEMENT_INDEX;
+        //elementToOpen = JAVA_ELEMENT_INDEX;
         openCloneableTopComponent();
         
         MultiViewHandler handler = MultiViews.findMultiViewHandler(multiviewTC);
-        handler.requestActive(handler.getPerspectives()[JAVA_ELEMENT_INDEX]);
+        handler.requestActive(handler.getPerspectives()[elementToOpen]);
         
         openAt(pos, -1).getComponent().requestActive();
     }
@@ -412,12 +412,12 @@ public class FormEditorSupport extends DataEditorSupport implements EditorSuppor
         if (!formEditor.prepareLoading()) {
             reportErrors();
             // switch to Source tab - later because now in middle of switching to Design
-            EventQueue.invokeLater(new Runnable() {
+            /*EventQueue.invokeLater(new Runnable() {
                 @Override
                 public void run() {
                     selectJavaEditor();
                 }
-            });
+            });*/
             return false;
         }
         return true;
@@ -441,9 +441,9 @@ public class FormEditorSupport extends DataEditorSupport implements EditorSuppor
 
         reportErrors(); // report errors during loading, fatal or non-fatal
 
-        if (!success) { // loading failed - don't keep empty designer opened
+        /*if (!success) { // loading failed - don't keep empty designer opened
             selectJavaEditor();
-        }
+        }*/
 
         return success;
     }
@@ -509,7 +509,6 @@ public class FormEditorSupport extends DataEditorSupport implements EditorSuppor
 
     /**
      * Reports errors occurred during loading or saving the form.
-     * @param operation operation being performed.
      */
     private void reportErrors() {
         final String errorMsg = formEditor.reportLoadingErrors();
@@ -671,7 +670,7 @@ public class FormEditorSupport extends DataEditorSupport implements EditorSuppor
                     if (designerTC != null) {
                         designerTC.resetDesigner(false);
                     }
-                    selectJavaEditor();
+                    //selectJavaEditor();
                 }
             };
             if (EventQueue.isDispatchThread()) {
@@ -701,9 +700,9 @@ public class FormEditorSupport extends DataEditorSupport implements EditorSuppor
         }
         nodeListener = null;
         multiviewTC = null;
-        guardedProvider = null;
-        guardedEditor = null;
-        elementToOpen = JAVA_ELEMENT_INDEX;
+        //guardedProvider = null;
+        //guardedEditor = null;
+        //elementToOpen = JAVA_ELEMENT_INDEX;
     }
     
     private void multiViewClosed(CloneableTopComponent mvtc) {
@@ -1251,10 +1250,10 @@ public class FormEditorSupport extends DataEditorSupport implements EditorSuppor
             MultiViewHandler handler = MultiViews.findMultiViewHandler(tc);
             if (handler != null) {
                 String prefId = handler.getSelectedPerspective().preferredID();
-                if (MV_JAVA_ID.equals(prefId))
-                    return JAVA_ELEMENT_INDEX; // 0
+                //if (MV_JAVA_ID.equals(prefId))
+                //    return JAVA_ELEMENT_INDEX; // 1
                 if (MV_FORM_ID.equals(prefId))
-                    return FORM_ELEMENT_INDEX; // 1
+                    return FORM_ELEMENT_INDEX; // 0
             }
         }
         return -1;
@@ -1265,7 +1264,7 @@ public class FormEditorSupport extends DataEditorSupport implements EditorSuppor
         return null; // nothing else than FileObject is needed in NB
     }
 
-    public SimpleSection getVariablesSection() {
+    /*public SimpleSection getVariablesSection() {
         return getGuardedSectionManager().findSimpleSection(SECTION_VARIABLES);
     }
     
@@ -1355,15 +1354,15 @@ public class FormEditorSupport extends DataEditorSupport implements EditorSuppor
         } else {
             super.saveFromKitToStream(doc, kit, stream);
         }
-    }
+    }*/
     
-    @MultiViewElement.Registration(
+    /*@MultiViewElement.Registration(
         displayName="#CTL_SourceTabCaption",
         iconBase=iconURL,
         persistenceType=TopComponent.PERSISTENCE_ONLY_OPENED,
         preferredID=MV_JAVA_ID,
         mimeType="text/x-form",
-        position=1000
+        position=3000
     )
     public static class JavaEditorTopComponent
                      extends CloneableEditor
@@ -1482,10 +1481,10 @@ public class FormEditorSupport extends DataEditorSupport implements EditorSuppor
                     model = fe.getFormModel();
                     if (model != null) {
                       // STRIPPED
-                        /*CodeGenerator codeGen = FormEditor.getCodeGenerator(model);
+                        *//*CodeGenerator codeGen = FormEditor.getCodeGenerator(model);
                         if (codeGen != null) {
                             codeGen.regenerateCode();
-                        }*/
+                        }*//*
                     }
                 }
             }
@@ -1548,7 +1547,7 @@ public class FormEditorSupport extends DataEditorSupport implements EditorSuppor
             
             return false;
         }
-    }
+    }*/
     
     private static final class Environment extends DataEditorSupport.Env {
         

@@ -44,7 +44,7 @@
 
 package org.netbeans.modules.form;
 
-import java.awt.EventQueue;
+//import java.awt.EventQueue;
 import java.beans.*;
 import java.io.IOException;
 import java.util.*;
@@ -54,10 +54,10 @@ import java.util.prefs.PreferenceChangeEvent;
 import java.util.prefs.PreferenceChangeListener;
 import javax.swing.*;
 import javax.swing.text.Document;
-import org.netbeans.api.editor.guards.GuardedSectionManager;
-import org.netbeans.api.editor.guards.SimpleSection;
-import org.netbeans.api.project.FileOwnerQuery;
-import org.netbeans.api.project.Project;
+//import org.netbeans.api.editor.guards.GuardedSectionManager;
+//import org.netbeans.api.editor.guards.SimpleSection;
+//import org.netbeans.api.project.FileOwnerQuery;
+//import org.netbeans.api.project.Project;
 import org.netbeans.modules.form.actions.EditContainerAction;
 import org.netbeans.modules.form.actions.EditFormAction;
 import org.netbeans.modules.form.assistant.AssistantModel;
@@ -66,7 +66,7 @@ import org.netbeans.spi.palette.PaletteController;
 
 import org.openide.*;
 import org.openide.awt.UndoRedo;
-import org.openide.filesystems.FileObject;
+//import org.openide.filesystems.FileObject;
 import org.openide.loaders.DataObject;
 import org.openide.nodes.Node;
 import org.openide.util.Mutex;
@@ -75,7 +75,7 @@ import org.openide.util.actions.SystemAction;
 import org.netbeans.modules.form.project.ClassSource;
 import org.netbeans.modules.form.project.ClassPathUtils;
 import org.openide.util.Exceptions;
-import org.openide.util.Lookup;
+//import org.openide.util.Lookup;
 
 /**
  * Form editor.
@@ -180,7 +180,8 @@ public class FormEditor {
         return getEditorSupport().getDocument();
     }
 
-    GuardedSectionManager getGuardedSectionManager() {
+  // STRIPPED
+    /*GuardedSectionManager getGuardedSectionManager() {
         return getEditorSupport().getGuardedSectionManager();
     }
 
@@ -190,7 +191,7 @@ public class FormEditor {
 
     SimpleSection getInitComponentSection() {
         return getGuardedSectionManager().findSimpleSection("initComponents"); // NOI18N
-    }
+    }*/
 
   // STRIPPED
     /*FormJavaSource getFormJavaSource() {

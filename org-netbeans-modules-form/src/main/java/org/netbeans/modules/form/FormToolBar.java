@@ -89,7 +89,7 @@ final class FormToolBar {
         this.toolbar = toolbar;
         toolbar.putClientProperty("isPrimary", Boolean.TRUE); // for JDev // NOI18N
 
-        listener = new Listener();
+        /*listener = new Listener();
 
         // selection button
         selectionButton = new JToggleButton(
@@ -175,7 +175,7 @@ final class FormToolBar {
 
         if (!FormLoaderSettings.getInstance().isPaletteInToolBar()) {
             showPaletteButton(false);
-        }
+        }*/
     }
 
     JToolBar getToolBar() {

@@ -57,7 +57,7 @@ public interface EditorSupport extends Node.Cookie {
     static String SECTION_VARIABLES = "variables"; // NOI18N
     
     Document getDocument();
-    GuardedSectionManager getGuardedSectionManager();
+    //GuardedSectionManager getGuardedSectionManager(); // STRIPPED
     void markModified();
     Object getJavaContext();
     void openAt(Position pos);
