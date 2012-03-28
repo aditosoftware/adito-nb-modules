@@ -70,7 +70,7 @@ public class FormDataObject extends MultiDataObject
   //--------------------------------------------------------------------
   // Constructors
 
-  static final long serialVersionUID =-975322003627854168L;
+  private static final long serialVersionUID =-975322003627854168L;
 
   public FormDataObject(FileObject pFo, FormDataLoader pLoader)
       throws DataObjectExistsException

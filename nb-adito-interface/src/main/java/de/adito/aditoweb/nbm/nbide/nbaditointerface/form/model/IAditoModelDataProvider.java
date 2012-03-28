@@ -1,8 +1,10 @@
 package de.adito.aditoweb.nbm.nbide.nbaditointerface.form.model;
 
+import org.openide.awt.UndoRedo;
 import org.openide.filesystems.FileObject;
 import org.openide.loaders.*;
 import org.openide.nodes.Node;
+import org.openide.text.DataEditorSupport;
 
 import java.util.List;
 
@@ -30,5 +32,8 @@ public interface IAditoModelDataProvider
   FileObject removeDataModel(DataObject pModelDataObject);
 
   List<Node.Cookie> getContainerCookies(DataObject pDataObject);
+
+  public void installUpdateListeners(final DataObject pDataObject, final DataEditorSupport pDataEditorSupport,
+                                     final UndoRedo.Manager pUndoRedoManager);
 
 }

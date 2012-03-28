@@ -53,7 +53,7 @@ import java.util.logging.Logger;
 import java.util.prefs.PreferenceChangeEvent;
 import java.util.prefs.PreferenceChangeListener;
 import javax.swing.*;
-import javax.swing.text.Document;
+//import javax.swing.text.Document;
 //import org.netbeans.api.editor.guards.GuardedSectionManager;
 //import org.netbeans.api.editor.guards.SimpleSection;
 //import org.netbeans.api.project.FileOwnerQuery;
@@ -115,7 +115,7 @@ public class FormEditor {
     
     /** Persistence manager responsible for saving the form */
     private PersistenceManager persistenceManager;
-    private String prefetchedSuperclassName;
+    //private String prefetchedSuperclassName; // STRIPPED
 
     /** An indicator whether the form has been loaded (from the .form file) */
     private boolean formLoaded = false;
@@ -176,12 +176,12 @@ public class FormEditor {
         return editorSupport;
     }
 
-    Document getSourcesDocument() {
+  // STRIPPED
+    /*Document getSourcesDocument() {
         return getEditorSupport().getDocument();
     }
 
-  // STRIPPED
-    /*GuardedSectionManager getGuardedSectionManager() {
+    GuardedSectionManager getGuardedSectionManager() {
         return getEditorSupport().getGuardedSectionManager();
     }
 
@@ -279,7 +279,7 @@ public class FormEditor {
             }
         }
         //getFormJavaSource(true); // STRIPPED
-        prefetchedSuperclassName = null;
+        //prefetchedSuperclassName = null; // STRIPPED
         return true;
     }
 
@@ -390,14 +390,14 @@ public class FormEditor {
     }
 
   // STRIPPED
-    /** Public method for saving form data to file. Does not save the
-    * source code (document), does not report errors and does not throw
-    * any exceptions.
-    * @return whether there was not any fatal error during saving (true means
-    *         everything was ok); returns true even if nothing was saved
-    *         because form was not loaded or read-only, etc.
-    *//*
-    public boolean saveForm() {
+  //  /** Public method for saving form data to file. Does not save the
+  //  * source code (document), does not report errors and does not throw
+  //  * any exceptions.
+  //  * @return whether there was not any fatal error during saving (true means
+  //  *         everything was ok); returns true even if nothing was saved
+  //  *         because form was not loaded or read-only, etc.
+  //  */
+    /*public boolean saveForm() {
         try {
             saveFormData();
             return true;
@@ -722,7 +722,7 @@ public class FormEditor {
         formModel = null;
         //codeGenerator = null; // STRIPPED
         //formJavaSource = null; // STRIPPED
-        prefetchedSuperclassName = null;
+        //prefetchedSuperclassName = null; // STRIPPED
         //resourceSupport = null; // STRIPPED
         //bindingSupport = null; // STRIPPED
     }

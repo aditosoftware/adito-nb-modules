@@ -62,7 +62,7 @@ public class FormDataLoader extends UniFileLoader {
     /** The standard extension for Java source files. */
     public static final String ADITO_EXTENSION = "aod"; // NOI18N
 
-    static final long serialVersionUID =7259146057404524013L;
+    private static final long serialVersionUID =7259146057404524013L;
     /** Constructs a new FormDataLoader */
     public FormDataLoader() {
         super("org.netbeans.modules.form.FormDataObject"); // NOI18N

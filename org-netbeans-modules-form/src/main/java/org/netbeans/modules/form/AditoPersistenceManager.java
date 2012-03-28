@@ -48,7 +48,7 @@ public class AditoPersistenceManager extends PersistenceManager
   public void saveForm(FormDataObject pFormObject, FormModel pFormModel, List<Throwable> pNonfatalErrors)
       throws PersistenceException
   {
-    // Save gibts hier nicht. Das Model wird sowieso synchronisiert.
+    // Save gibt es hier nicht. Das Model wird sowieso synchronisiert.
   }
 
   private void _loadForm(APersistenceManagerInfo pInfo) throws PersistenceException
