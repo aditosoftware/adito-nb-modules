@@ -1,8 +1,9 @@
 package org.netbeans.core.windows;
 
 import de.adito.aditoweb.nbm.nbide.nbaditointerface.windowsystem.IAlwaysOpenTopComponentRegistry;
+import org.openide.util.Lookup;
 import org.openide.util.lookup.ServiceProvider;
-import org.openide.windows.*;
+import org.openide.windows.TopComponent;
 
 import java.util.*;
 
@@ -19,6 +20,17 @@ public class AlwaysOpenTopComponentRegistry implements IAlwaysOpenTopComponentRe
   public AlwaysOpenTopComponentRegistry()
   {
     tcs = new HashSet<TopComponent>();
+  }
+
+
+  static IAlwaysOpenTopComponentRegistry getDefault()
+  {
+    return Lookup.getDefault().lookup(IAlwaysOpenTopComponentRegistry.class);
+  }
+
+  static boolean canClose(TopComponent pTc)
+  {
+    return getDefault().contains(pTc) || pTc.canClose();
   }
 
 

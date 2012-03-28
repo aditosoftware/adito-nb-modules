@@ -1111,7 +1111,7 @@ public final class WindowManagerImpl extends WindowManager implements Workspace 
     }
 
     public void notifyTopComponentClosed(TopComponent tc) {
-      if (!Lookup.getDefault().lookup(IAlwaysOpenTopComponentRegistry.class).contains(tc)) {
+      if (!AlwaysOpenTopComponentRegistry.getDefault().contains(tc)) {
         // Inform component instance.
         componentCloseNotify(tc);
         // let others know that top component was closed...
@@ -1832,7 +1832,7 @@ public final class WindowManagerImpl extends WindowManager implements Workspace 
         final TopComponent[] editors = getEditorTopComponents();
         if( !keepDocumentWindows ) {
             for( TopComponent tc : editors ) {
-                if( !tc.canClose() )
+                if( !AlwaysOpenTopComponentRegistry.canClose(tc) ) // tc.canClose()
                     return false;
             }
         }

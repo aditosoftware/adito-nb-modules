@@ -831,7 +831,7 @@ final class Central implements ControllerHandler {
     public boolean addModeClosedTopComponent(ModeImpl mode, TopComponent tc) {
         boolean opened = getModeOpenedTopComponents(mode).contains(tc);
         
-        if(opened && !tc.canClose()) {
+        if(opened && !AlwaysOpenTopComponentRegistry.canClose(tc)) { // !tc.canClose()
             return false;
         }
         
@@ -961,7 +961,7 @@ final class Central implements ControllerHandler {
         
         boolean viewChange = getModeOpenedTopComponents(mode).contains(tc);
         
-        if(viewChange && !tc.canClose()) {
+        if(viewChange && !AlwaysOpenTopComponentRegistry.canClose(tc)) { // tc.canClose()
             return false;
         }
         
