@@ -53,8 +53,6 @@ import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.*;
-
-import de.adito.aditoweb.nbm.nbide.nbaditointerface.windowsystem.IAlwaysOpenTopComponentRegistry;
 import org.netbeans.core.windows.actions.ActionUtils;
 import org.netbeans.core.windows.persistence.PersistenceManager;
 import org.netbeans.core.windows.view.dnd.TopComponentDraggable;
