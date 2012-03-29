@@ -157,7 +157,8 @@ public class FormNode extends AbstractNode implements FormCookie {
      */
     public void firePropertyChangeHelper(String name,
                                          Object oldValue, Object newValue) {
-        super.firePropertyChange(name, oldValue, newValue);
+      // doesn't have to be fired - properties are synchronized anyways.
+        //super.firePropertyChange(name, oldValue, newValue);
     }
 
     // ----------
