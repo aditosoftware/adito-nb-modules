@@ -66,7 +66,7 @@ public class FormDataBridge
       String formPropName = pFormProperty.getName();
       String aditoPropName = componentPropertyMapping.getAditoPropName(formPropName);
       if (Strings.isNullOrEmpty(aditoPropName))
-        return;
+        return; // not a mapped value
       Node.Property aditoProperty = componentInfo.getProperty(aditoPropName);
       if (aditoProperty == null)
       {
@@ -79,13 +79,12 @@ public class FormDataBridge
       {
         try
         {
-          aditoProperty.setValue(formPropertyValue);
+          if (formPropertyValue != null || !aditoProperty.isDefaultValue())
+            aditoProperty.setValue(formPropertyValue);
         }
         catch (InvocationTargetException e)
         {
-          // TODO TODO TODO TODO TODO
-          // wenn die Property im Sheet noch nicht initialisiert ist schmeiﬂts ihn wenn primitive Daten
-          // abgeglichen werden sollen.
+          throw new RuntimeException(e); // TODO: runtimeEx
         }
       }
     }
@@ -145,8 +144,10 @@ public class FormDataBridge
         try
         {
           String aditoPropName = evt.getPropertyName();
-          Node.Property aditoProperty = componentInfo.getProperty(aditoPropName);
           String mappedName = componentPropertyMapping.getRadPropName(aditoPropName);
+          if (Strings.isNullOrEmpty(mappedName))
+            return; // not a mapped value
+          Node.Property aditoProperty = componentInfo.getProperty(aditoPropName);
           FormProperty formProperty = _getFormProperty(mappedName);
           if (formProperty == null)
           {
