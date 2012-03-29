@@ -89,48 +89,48 @@ final class FormToolBar {
         this.toolbar = toolbar;
         toolbar.putClientProperty("isPrimary", Boolean.TRUE); // for JDev // NOI18N
 
-        /*listener = new Listener();
+        //listener = new Listener();
 
         // selection button
         selectionButton = new JToggleButton(
             new ImageIcon(getClass().getResource(
                           "/org/netbeans/modules/form/resources/selection_mode.png")), // NOI18N
             false);
-        selectionButton.addActionListener(listener);
+        /*selectionButton.addActionListener(listener);
         selectionButton.addMouseListener(listener);
         selectionButton.setToolTipText(
             FormUtils.getBundleString("CTL_SelectionButtonHint")); // NOI18N
         HelpCtx.setHelpIDString(selectionButton, "gui.about"); // NOI18N
         selectionButton.setSelected(true);
-        initButton(selectionButton);
+        initButton(selectionButton);*/
 
         // connection button
         connectionButton = new JToggleButton(
             new ImageIcon(getClass().getResource(
                           "/org/netbeans/modules/form/resources/connection_mode.png")), // NOI18N
             false);
-        connectionButton.addActionListener(listener);
+        /*connectionButton.addActionListener(listener);
         connectionButton.addMouseListener(listener);
         connectionButton.setToolTipText(
             FormUtils.getBundleString("CTL_ConnectionButtonHint")); // NOI18N
         HelpCtx.setHelpIDString(connectionButton, "gui.connecting.intro"); // NOI18N
-        initButton(connectionButton);
+        initButton(connectionButton);*/
 
         // palette button
         paletteButton = new JToggleButton(
             new ImageIcon(getClass().getResource(
                           "/org/netbeans/modules/form/resources/beansButton.gif")), // NOI18N
             false);
-        paletteButton.addActionListener(listener);
+        /*paletteButton.addActionListener(listener);
         paletteButton.addMouseListener(listener);
         paletteButton.setToolTipText(
             FormUtils.getBundleString("CTL_BeansButtonHint")); // NOI18N
         HelpCtx.setHelpIDString(paletteButton, "gui.components.adding"); // NOI18N
-        initButton(paletteButton);
+        initButton(paletteButton);*/
 
         // status label
         addLabel = new JLabel();
-        addLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 6));
+        /*addLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 6));
 
         // popup menu
         toolbar.addMouseListener(listener);
