@@ -44,7 +44,7 @@ package org.netbeans.modules.form;
 import java.io.IOException;
 import javax.swing.text.Document;
 import javax.swing.text.Position;
-import org.netbeans.api.editor.guards.GuardedSectionManager;
+//import org.netbeans.api.editor.guards.GuardedSectionManager; // STRIPPED
 import org.openide.filesystems.FileObject;
 import org.openide.nodes.Node;
 

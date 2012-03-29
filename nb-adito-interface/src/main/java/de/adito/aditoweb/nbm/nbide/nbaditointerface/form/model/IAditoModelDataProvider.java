@@ -34,6 +34,6 @@ public interface IAditoModelDataProvider
   List<Node.Cookie> getContainerCookies(DataObject pDataObject);
 
   public void installUpdateListeners(final DataObject pDataObject, final DataEditorSupport pDataEditorSupport,
-                                     final UndoRedo.Manager pUndoRedoManager);
+                                     final UndoRedo.Manager pUndoRedoManager, Runnable pOnChange);
 
 }

@@ -204,7 +204,27 @@ public class FormEditorSupport extends DataEditorSupport implements EditorSuppor
         this.formDataObject = formDataObject;
         this.cookies = cookies;
 
-        NbAditoInterface.lookup(IAditoModelDataProvider.class).installUpdateListeners(formDataObject, this, getUndoRedo());
+        NbAditoInterface.lookup(IAditoModelDataProvider.class).installUpdateListeners(
+            formDataObject, this, getUndoRedo(), new Runnable()
+        {
+          @Override
+          public void run()
+          {
+            java.awt.EventQueue.invokeLater(new Runnable()
+            {
+              @Override
+              public void run()
+              {
+                FormDesignerTC designerTC = getFormDesignerTC();
+                if (designerTC != null)
+                {
+                  formEditor.closeForm();
+                  designerTC.resetDesigner(true); // will trigger loading
+                }
+              }
+            });
+          }
+        });
     }
 
     // ----------
