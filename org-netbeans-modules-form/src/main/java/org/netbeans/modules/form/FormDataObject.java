@@ -46,7 +46,7 @@
 package org.netbeans.modules.form;
 
 import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.NbAditoInterface;
-import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.model.IAditoModelDataProvider;
+import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.model.*;
 import org.openide.cookies.*;
 import org.openide.filesystems.FileObject;
 import org.openide.loaders.*;
@@ -55,7 +55,6 @@ import org.openide.nodes.Node.Cookie;
 import org.openide.util.Lookup;
 
 import java.io.IOException;
-import java.util.List;
 
 /**
  * The DataObject for forms.
@@ -66,17 +65,19 @@ public class FormDataObject extends MultiDataObject
 {
   transient private EditorSupport formEditor;
   transient private OpenEdit openEdit;
+  transient private final ICookieLookupHelper containerLookupHelper;
 
   //--------------------------------------------------------------------
   // Constructors
 
-  private static final long serialVersionUID =-975322003627854168L;
+  private static final long serialVersionUID = -975322003627854168L;
 
   public FormDataObject(FileObject pFo, FormDataLoader pLoader)
       throws DataObjectExistsException
   {
     super(pFo, pLoader);
-    getCookieSet().assign(SaveAsCapable.class, new SaveAsCapable()
+    CookieSet cookieSet = getCookieSet();
+    cookieSet.assign(SaveAsCapable.class, new SaveAsCapable()
     {
       @Override
       public void saveAs(FileObject folder, String fileName) throws IOException
@@ -84,9 +85,25 @@ public class FormDataObject extends MultiDataObject
         getFormEditorSupport().saveAs(folder, fileName);
       }
     });
-    List<Cookie> cookies = NbAditoInterface.lookup(IAditoModelDataProvider.class).getContainerCookies(this);
-    for (Cookie cookie : cookies)
-      getCookieSet().add(cookie);
+    //noinspection unchecked
+    cookieSet.add(new Class[]{OpenCookie.class, EditCookie.class, FormEditorSupport.class}, new CookieSet.Factory()
+    {
+      @Override
+      public <T extends Cookie> T createCookie(Class<T> klass)
+      {
+        if (OpenCookie.class.equals(klass) || EditCookie.class.equals(klass))
+        {
+          if (openEdit == null)
+            openEdit = new OpenEdit();
+          return klass.cast(openEdit);
+        }
+        else if (klass.isAssignableFrom(FormEditorSupport.class))
+          return  klass.cast( getFormEditorSupport());
+        return null;
+      }
+    });
+    containerLookupHelper = NbAditoInterface.lookup(IAditoModelDataProvider.class).getContainerLookupHelper(this,
+                                                                                                            cookieSet);
   }
 
   //--------------------------------------------------------------------
@@ -95,25 +112,19 @@ public class FormDataObject extends MultiDataObject
   @Override
   public <T extends Cookie> T getCookie(Class<T> type)
   {
-    T retValue;
-
-    if (OpenCookie.class.equals(type) || EditCookie.class.equals(type))
-    {
-      if (openEdit == null)
-        openEdit = new OpenEdit();
-      retValue = type.cast(openEdit);
-    }
-    else if (type.isAssignableFrom(FormEditorSupport.class))
-      retValue = (T) getFormEditorSupport();
-    else
-      retValue = super.getCookie(type);
-    return retValue;
+    return containerLookupHelper.getCookie(type);
   }
 
   @Override
   public Lookup getLookup()
   {
-    return isValid() ? getNodeDelegate().getLookup() : Lookup.EMPTY;
+    return containerLookupHelper.getLookup();
+  }
+
+  @Override
+  protected int associateLookup()
+  {
+    return 1;
   }
 
   private class OpenEdit implements OpenCookie, EditCookie
