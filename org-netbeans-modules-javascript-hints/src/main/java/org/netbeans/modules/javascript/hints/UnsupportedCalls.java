@@ -184,9 +184,9 @@ public class UnsupportedCalls extends JsAstRule {
             if (fqn == null) {
                 return;
             }
-            //if (!COMPAT_MAP.containsKey(fqn)) {
-            //    return;
-            //}
+            /*if (!COMPAT_MAP.containsKey(fqn)) {
+                return;
+            }*/
         } else {
             fqn = NAME_TO_FQN.get(name);
             if (fqn == null) {
@@ -199,23 +199,23 @@ public class UnsupportedCalls extends JsAstRule {
         }
         // Yessirree
         // TODO - figure out the real type
-        //EnumSet<BrowserVersion> compat = COMPAT_MAP.get(fqn);
-        //if (!SupportedBrowsers.getInstance().isSupported(compat)) {
-        //    // Quickfix!
-        //    OffsetRange astRange = AstUtilities.getRange(node);
-        //    OffsetRange lexRange = LexUtilities.getLexerOffsets(info, astRange);
-        //    if (lexRange == OffsetRange.NONE) {
-        //        return;
-        //    }
-        //
-        //    List<HintFix> fixList = new ArrayList<HintFix>(3);
-        //    fixList.add(new ShowDetails(info, fqn, compat));
-        //    fixList.add(new SkipFunction(context, fqn));
-        //    fixList.add(new ChangeTargetFix());
-        //    String displayName = NbBundle.getMessage(UnsupportedCalls.class, "UnsupportedCallFqn", fqn);
-        //    Hint desc = new Hint(this, displayName, info.getSnapshot().getSource().getFileObject(), lexRange, fixList, 1450);
-        //    result.add(desc);
-        //}
+        /*EnumSet<BrowserVersion> compat = COMPAT_MAP.get(fqn);
+        if (!SupportedBrowsers.getInstance().isSupported(compat)) {
+            // Quickfix!
+            OffsetRange astRange = AstUtilities.getRange(node);
+            OffsetRange lexRange = LexUtilities.getLexerOffsets(info, astRange);
+            if (lexRange == OffsetRange.NONE) {
+                return;
+            }
+
+            List<HintFix> fixList = new ArrayList<HintFix>(3);
+            fixList.add(new ShowDetails(info, fqn, compat));
+            fixList.add(new SkipFunction(context, fqn));
+            fixList.add(new ChangeTargetFix());
+            String displayName = NbBundle.getMessage(UnsupportedCalls.class, "UnsupportedCallFqn", fqn);
+            Hint desc = new Hint(this, displayName, info.getSnapshot().getSource().getFileObject(), lexRange, fixList, 1450);
+            result.add(desc);
+        }*/
     }
     
     private Collection<String> skip = null;
@@ -328,88 +328,88 @@ public class UnsupportedCalls extends JsAstRule {
         }
     }
 
-//    private static class ShowDetails implements HintFix {
-//        private EnumSet<BrowserVersion> compat;
-//        private JsParseResult info;
-//        private String fqn;
-//
-//        ShowDetails(JsParseResult info, String fqn, EnumSet<BrowserVersion> compat) {
-//            this.info = info;
-//            this.fqn = fqn;
-//            this.compat = compat;
-//        }
-//
-//        public String getDescription() {
-//            return NbBundle.getMessage(UnsupportedCalls.class, "ShowUnsupportedDetails");
-//        }
-//
-//        public void implement() throws Exception {
-//            int dot = fqn.lastIndexOf('.');
-//            String prefix;
-//            String type;
-//            if (dot != -1) {
-//                prefix = fqn.substring(dot+1);
-//                type = fqn.substring(0, dot);
-//            } else {
-//                prefix = "";
-//                type = fqn;
-//            }
-//// XXX: parsingapi
-////            Set<IndexedElement> elements = JsIndex.get(info.getIndex(JsTokenId.JAVASCRIPT_MIME_TYPE)).getElements(prefix, type, NameKind.EXACT_NAME, JsIndex.ALL_SCOPE, null);
-//            Set<IndexedElement> elements = Collections.<IndexedElement>emptySet();
-//            String html;
-//            if (elements.size() > 0) {
-//                IndexedElement element = elements.iterator().next();
-//                String signature = ElementUtilities.getSignature(element);
-//
-//                html = "<html><body>" + signature + "</body></html>"; // NOI18N
-//            } else {
-//                StringBuilder sb = new StringBuilder();
-//                sb.append("<p style=\"background:#ffcccc\">"); // NOI18N
-//                sb.append(NbBundle.getMessage(UnsupportedCalls.class, "NotSupportedBr"));
-//                sb.append("\n"); // NOI18N
-//                sb.append("<ul>"); // NOI18N
-//                for (BrowserVersion v : BrowserVersion.ALL) {
-//                    if (SupportedBrowsers.getInstance().isSupported(v) &&
-//                            !compat.contains(v)) {
-//                        sb.append("<li>"); // NOI18N
-//                        sb.append(v.getDisplayName());
-//                    }
-//                }
-//                sb.append("</ul>\n"); // NOI18N
-//                sb.append("\n"); // NOI18N
-//                sb.append("</p>"); // NOI18N
-//                html = "<html><body>" + sb.toString() + "</body></html>"; // NOI18N
-//            }
-//
-//            JButton close =
-//                    new JButton(NbBundle.getMessage(UnsupportedCalls.class, "CTL_Close"));
-//            JLabel htmlLabel = new JLabel(html);
-//            htmlLabel.setBorder(new EmptyBorder(12, 12, 11, 11));
-//            DialogDescriptor descriptor =
-//                new DialogDescriptor(htmlLabel, fqn,
-//                    true, new Object[] { close }, close, DialogDescriptor.DEFAULT_ALIGN,
-//                    new HelpCtx(UnsupportedCalls.class), null);
-//            Dialog dlg = null;
-//
-//            try {
-//                dlg = DialogDisplayer.getDefault().createDialog(descriptor);
-//                dlg.setVisible(true);
-//            } finally {
-//                if (dlg != null) {
-//                    dlg.dispose();
-//                }
-//            }
-//        }
-//
-//        public boolean isSafe() {
-//            return false;
-//        }
-//
-//        public boolean isInteractive() {
-//            return true;
-//        }
-//    }
+    /*private static class ShowDetails implements HintFix {
+        private EnumSet<BrowserVersion> compat;
+        private JsParseResult info;
+        private String fqn;
+        
+        ShowDetails(JsParseResult info, String fqn, EnumSet<BrowserVersion> compat) {
+            this.info = info;
+            this.fqn = fqn;
+            this.compat = compat;
+        }
+        
+        public String getDescription() {
+            return NbBundle.getMessage(UnsupportedCalls.class, "ShowUnsupportedDetails");
+        }
+        
+        public void implement() throws Exception {
+            int dot = fqn.lastIndexOf('.');
+            String prefix;
+            String type;
+            if (dot != -1) {
+                prefix = fqn.substring(dot+1);
+                type = fqn.substring(0, dot);
+            } else {
+                prefix = "";
+                type = fqn;
+            }
+// XXX: parsingapi
+//            Set<IndexedElement> elements = JsIndex.get(info.getIndex(JsTokenId.JAVASCRIPT_MIME_TYPE)).getElements(prefix, type, NameKind.EXACT_NAME, JsIndex.ALL_SCOPE, null);
+            Set<IndexedElement> elements = Collections.<IndexedElement>emptySet();
+            String html;
+            if (elements.size() > 0) {
+                IndexedElement element = elements.iterator().next();
+                String signature = ElementUtilities.getSignature(element);
+
+                html = "<html><body>" + signature + "</body></html>"; // NOI18N
+            } else {
+                StringBuilder sb = new StringBuilder();
+                sb.append("<p style=\"background:#ffcccc\">"); // NOI18N
+                sb.append(NbBundle.getMessage(UnsupportedCalls.class, "NotSupportedBr"));
+                sb.append("\n"); // NOI18N
+                sb.append("<ul>"); // NOI18N
+                for (BrowserVersion v : BrowserVersion.ALL) {
+                    if (SupportedBrowsers.getInstance().isSupported(v) && 
+                            !compat.contains(v)) {
+                        sb.append("<li>"); // NOI18N
+                        sb.append(v.getDisplayName());
+                    }
+                }
+                sb.append("</ul>\n"); // NOI18N
+                sb.append("\n"); // NOI18N
+                sb.append("</p>"); // NOI18N
+                html = "<html><body>" + sb.toString() + "</body></html>"; // NOI18N
+            }
+
+            JButton close =
+                    new JButton(NbBundle.getMessage(UnsupportedCalls.class, "CTL_Close"));
+            JLabel htmlLabel = new JLabel(html);
+            htmlLabel.setBorder(new EmptyBorder(12, 12, 11, 11));
+            DialogDescriptor descriptor =
+                new DialogDescriptor(htmlLabel, fqn,
+                    true, new Object[] { close }, close, DialogDescriptor.DEFAULT_ALIGN,
+                    new HelpCtx(UnsupportedCalls.class), null);
+            Dialog dlg = null;
+
+            try {
+                dlg = DialogDisplayer.getDefault().createDialog(descriptor);
+                dlg.setVisible(true);
+            } finally {
+                if (dlg != null) {
+                    dlg.dispose();
+                }
+            }
+        }
+
+        public boolean isSafe() {
+            return false;
+        }
+
+        public boolean isInteractive() {
+            return true;
+        }
+    }*/
     
     // TODO - add a way to customize this by user-configurable files
     // This code is automatically generated by #emitBrowserMaps()
@@ -417,149 +417,149 @@ public class UnsupportedCalls extends JsAstRule {
     private static final Set<String> NAME_SET = new HashSet<String>(262);
     private static final Map<String,Boolean> MUST_CHECK_FQN = new HashMap<String,Boolean>(262);
     private static final Map<String,String> NAME_TO_FQN = new HashMap<String,String>(262);
-    //private static final Map<String,EnumSet<BrowserVersion>> COMPAT_MAP = new HashMap<String,EnumSet<BrowserVersion>>(262);
-    //private static final EnumSet<BrowserVersion> FF2FF3OPERASAFARI2SAFARI3KONQ = BrowserVersion.fromFlags("FF2|FF3|OPERA|SAFARI2|SAFARI3|KONQ"); // NOI18N
-    //private static final EnumSet<BrowserVersion> NOT_IE = BrowserVersion.fromFlags("FF1|FF2|FF3|OPERA|SAFARI2|SAFARI3|KONQ"); // NOI18N
-    //private static final EnumSet<BrowserVersion> NOT_IE55 = BrowserVersion.fromFlags("IE6|IE7|FF1|FF2|FF3|OPERA|SAFARI2|SAFARI3|KONQ"); // NOI18N
-    //private static final EnumSet<BrowserVersion> NOT_IE55_OR_6 = BrowserVersion.fromFlags("IE7|FF1|FF2|FF3|OPERA|SAFARI2|SAFARI3|KONQ"); // NOI18N
-    //private static final EnumSet<BrowserVersion> FIREFOX = BrowserVersion.fromFlags("FF1|FF2|FF3"); // NOI18N
-    //private static final EnumSet<BrowserVersion> FF3 = BrowserVersion.fromFlags("FF3"); // NOI18N
-    //private static final EnumSet<BrowserVersion> FF2FF3OPERASAFARI3KONQ = BrowserVersion.fromFlags("FF2|FF3|OPERA|SAFARI3|KONQ"); // NOI18N
-    //private static final EnumSet<BrowserVersion> IE = BrowserVersion.fromFlags("IE55|IE6|IE7"); // NOI18N
+    /*private static final Map<String,EnumSet<BrowserVersion>> COMPAT_MAP = new HashMap<String,EnumSet<BrowserVersion>>(262);
+    private static final EnumSet<BrowserVersion> FF2FF3OPERASAFARI2SAFARI3KONQ = BrowserVersion.fromFlags("FF2|FF3|OPERA|SAFARI2|SAFARI3|KONQ"); // NOI18N
+    private static final EnumSet<BrowserVersion> NOT_IE = BrowserVersion.fromFlags("FF1|FF2|FF3|OPERA|SAFARI2|SAFARI3|KONQ"); // NOI18N
+    private static final EnumSet<BrowserVersion> NOT_IE55 = BrowserVersion.fromFlags("IE6|IE7|FF1|FF2|FF3|OPERA|SAFARI2|SAFARI3|KONQ"); // NOI18N
+    private static final EnumSet<BrowserVersion> NOT_IE55_OR_6 = BrowserVersion.fromFlags("IE7|FF1|FF2|FF3|OPERA|SAFARI2|SAFARI3|KONQ"); // NOI18N
+    private static final EnumSet<BrowserVersion> FIREFOX = BrowserVersion.fromFlags("FF1|FF2|FF3"); // NOI18N
+    private static final EnumSet<BrowserVersion> FF3 = BrowserVersion.fromFlags("FF3"); // NOI18N
+    private static final EnumSet<BrowserVersion> FF2FF3OPERASAFARI3KONQ = BrowserVersion.fromFlags("FF2|FF3|OPERA|SAFARI3|KONQ"); // NOI18N
+    private static final EnumSet<BrowserVersion> IE = BrowserVersion.fromFlags("IE55|IE6|IE7"); // NOI18N*/
     static {
-        //COMPAT_MAP.put("CanvasGradient.addColorStop", FF2FF3OPERASAFARI2SAFARI3KONQ); // NOI18N
-        //COMPAT_MAP.put("CanvasRenderingContext2D.arc", FF2FF3OPERASAFARI2SAFARI3KONQ); // NOI18N
-        //COMPAT_MAP.put("CanvasRenderingContext2D.arcTo", FF2FF3OPERASAFARI2SAFARI3KONQ); // NOI18N
-        //COMPAT_MAP.put("CanvasRenderingContext2D.beginPath", FF2FF3OPERASAFARI2SAFARI3KONQ); // NOI18N
-        //COMPAT_MAP.put("CanvasRenderingContext2D.bezierCurveTo", FF2FF3OPERASAFARI2SAFARI3KONQ); // NOI18N
-        //COMPAT_MAP.put("CanvasRenderingContext2D.clearRect", FF2FF3OPERASAFARI2SAFARI3KONQ); // NOI18N
-        //COMPAT_MAP.put("CanvasRenderingContext2D.clip", FF2FF3OPERASAFARI2SAFARI3KONQ); // NOI18N
-        //COMPAT_MAP.put("CanvasRenderingContext2D.closePath", FF2FF3OPERASAFARI2SAFARI3KONQ); // NOI18N
-        //COMPAT_MAP.put("CanvasRenderingContext2D.createImageData", FF2FF3OPERASAFARI2SAFARI3KONQ); // NOI18N
-        //COMPAT_MAP.put("CanvasRenderingContext2D.createLinearGradient", FF2FF3OPERASAFARI2SAFARI3KONQ); // NOI18N
-        //COMPAT_MAP.put("CanvasRenderingContext2D.createPattern", FF2FF3OPERASAFARI2SAFARI3KONQ); // NOI18N
-        //COMPAT_MAP.put("CanvasRenderingContext2D.createRadialGradient", FF2FF3OPERASAFARI2SAFARI3KONQ); // NOI18N
-        //COMPAT_MAP.put("CanvasRenderingContext2D.drawImage", FF2FF3OPERASAFARI2SAFARI3KONQ); // NOI18N
-        //COMPAT_MAP.put("CanvasRenderingContext2D.fill", FF2FF3OPERASAFARI2SAFARI3KONQ); // NOI18N
-        //COMPAT_MAP.put("CanvasRenderingContext2D.fillRect", FF2FF3OPERASAFARI2SAFARI3KONQ); // NOI18N
-        //COMPAT_MAP.put("CanvasRenderingContext2D.getImageData", FF2FF3OPERASAFARI2SAFARI3KONQ); // NOI18N
-        //COMPAT_MAP.put("CanvasRenderingContext2D.isPointInPath", FF2FF3OPERASAFARI2SAFARI3KONQ); // NOI18N
-        //COMPAT_MAP.put("CanvasRenderingContext2D.lineTo", FF2FF3OPERASAFARI2SAFARI3KONQ); // NOI18N
-        //COMPAT_MAP.put("CanvasRenderingContext2D.load", FF2FF3OPERASAFARI2SAFARI3KONQ); // NOI18N
-        //COMPAT_MAP.put("CanvasRenderingContext2D.moveTo", FF2FF3OPERASAFARI2SAFARI3KONQ); // NOI18N
-        //COMPAT_MAP.put("CanvasRenderingContext2D.putImageData", FF2FF3OPERASAFARI2SAFARI3KONQ); // NOI18N
-        //COMPAT_MAP.put("CanvasRenderingContext2D.quadraticCurveTo", FF2FF3OPERASAFARI2SAFARI3KONQ); // NOI18N
-        //COMPAT_MAP.put("CanvasRenderingContext2D.rect", FF2FF3OPERASAFARI2SAFARI3KONQ); // NOI18N
-        //COMPAT_MAP.put("CanvasRenderingContext2D.rotate", FF2FF3OPERASAFARI2SAFARI3KONQ); // NOI18N
-        //COMPAT_MAP.put("CanvasRenderingContext2D.save", FF2FF3OPERASAFARI2SAFARI3KONQ); // NOI18N
-        //COMPAT_MAP.put("CanvasRenderingContext2D.scale", FF2FF3OPERASAFARI2SAFARI3KONQ); // NOI18N
-        //COMPAT_MAP.put("CanvasRenderingContext2D.setTransform", FF2FF3OPERASAFARI2SAFARI3KONQ); // NOI18N
-        //COMPAT_MAP.put("CanvasRenderingContext2D.stroke", FF2FF3OPERASAFARI2SAFARI3KONQ); // NOI18N
-        //COMPAT_MAP.put("CanvasRenderingContext2D.strokeRect", FF2FF3OPERASAFARI2SAFARI3KONQ); // NOI18N
-        //COMPAT_MAP.put("CanvasRenderingContext2D.transform", FF2FF3OPERASAFARI2SAFARI3KONQ); // NOI18N
-        //COMPAT_MAP.put("CanvasRenderingContext2D.translate", FF2FF3OPERASAFARI2SAFARI3KONQ); // NOI18N
-        //COMPAT_MAP.put("Document.adoptNode", NOT_IE55_OR_6); // NOI18N
-        //COMPAT_MAP.put("Document.createAttributeNS", NOT_IE55_OR_6); // NOI18N
-        //COMPAT_MAP.put("Document.createDocumentFragment", NOT_IE55); // NOI18N
-        //COMPAT_MAP.put("Document.createElementNS", NOT_IE55_OR_6); // NOI18N
-        //COMPAT_MAP.put("Document.getElementsByTagNameNS", NOT_IE55_OR_6); // NOI18N
-        //COMPAT_MAP.put("Document.implementation.createDocument", NOT_IE); // NOI18N
-        //COMPAT_MAP.put("Document.implementation.hasFeature", NOT_IE55); // NOI18N
-        //COMPAT_MAP.put("Document.importNode", NOT_IE55_OR_6); // NOI18N
-        //COMPAT_MAP.put("Document.normalizeDocument", NOT_IE55_OR_6); // NOI18N
-        //COMPAT_MAP.put("Document.renameNode", NOT_IE55_OR_6); // NOI18N
-        //COMPAT_MAP.put("DocumentRange.createRange", NOT_IE); // NOI18N
-        //COMPAT_MAP.put("DocumentTraversal.createNodeIterator", NOT_IE); // NOI18N
-        //COMPAT_MAP.put("DocumentTraversal.createTreeWalker", NOT_IE); // NOI18N
-        //COMPAT_MAP.put("Element.applyElement", IE); // NOI18N
-        //COMPAT_MAP.put("Element.contains", NOT_IE); // NOI18N
-        //COMPAT_MAP.put("Element.createAttribute", NOT_IE55); // NOI18N
-        //COMPAT_MAP.put("Element.getAttributeNS", NOT_IE55_OR_6); // NOI18N
-        //COMPAT_MAP.put("Element.getAttributeNode", NOT_IE55); // NOI18N
-        //COMPAT_MAP.put("Element.getAttributeNodeNS", NOT_IE55_OR_6); // NOI18N
-        //COMPAT_MAP.put("Element.getBoundingClientRect", FF3); // NOI18N
-        //COMPAT_MAP.put("Element.getClientRects", FF3); // NOI18N
-        //COMPAT_MAP.put("Element.getElementsByTagNameNS", NOT_IE55_OR_6); // NOI18N
-//// This one is overridden in prototype... Element.hasAttribute may be referring to it!
-//// For now, don't warn about this one.
-////        COMPAT_MAP.put("Element.hasAttribute", NOT_IE); // NOI18N
-//        COMPAT_MAP.put("Element.hasAttributeNS", NOT_IE55_OR_6); // NOI18N
-//        COMPAT_MAP.put("Element.hasAttributes", NOT_IE); // NOI18N
-//        COMPAT_MAP.put("Element.removeAttributeNS", NOT_IE55_OR_6); // NOI18N
-//        COMPAT_MAP.put("Element.removeAttributeNode", NOT_IE55_OR_6); // NOI18N
-//        COMPAT_MAP.put("Element.setAttributeNS", NOT_IE55_OR_6); // NOI18N
-//        COMPAT_MAP.put("Element.setAttributeNode", NOT_IE55); // NOI18N
-//        COMPAT_MAP.put("Element.setAttributeNodeNS", NOT_IE55_OR_6); // NOI18N
-//        COMPAT_MAP.put("Element.setIdAttribute", NOT_IE55_OR_6); // NOI18N
-//        COMPAT_MAP.put("Element.setIdAttributeNS", NOT_IE55_OR_6); // NOI18N
-//        COMPAT_MAP.put("Element.setIdAttributeNode", NOT_IE55_OR_6); // NOI18N
-//        COMPAT_MAP.put("HTMLCanvasElement.getContext", FF2FF3OPERASAFARI2SAFARI3KONQ); // NOI18N
-//        COMPAT_MAP.put("HTMLCanvasElement.toDataURL", FF2FF3OPERASAFARI2SAFARI3KONQ); // NOI18N
-//        COMPAT_MAP.put("Iterator", FF2FF3OPERASAFARI3KONQ); // NOI18N
-//        COMPAT_MAP.put("Iterator.next", FF2FF3OPERASAFARI3KONQ); // NOI18N
-//        COMPAT_MAP.put("NameList.contains", NOT_IE55_OR_6); // NOI18N
-//        COMPAT_MAP.put("NameList.containsNS", NOT_IE55_OR_6); // NOI18N
-//        COMPAT_MAP.put("NameList.getName", NOT_IE55_OR_6); // NOI18N
-//        COMPAT_MAP.put("NameList.getNamespaceURI", NOT_IE55_OR_6); // NOI18N
-//        COMPAT_MAP.put("NamedNodeMap.getNamedItemNS", NOT_IE55_OR_6); // NOI18N
-//        COMPAT_MAP.put("NamedNodeMap.removeNamedItemNS", NOT_IE55_OR_6); // NOI18N
-//        COMPAT_MAP.put("NamedNodeMap.setNamedItemNS", NOT_IE55_OR_6); // NOI18N
-//        COMPAT_MAP.put("Node.appendData", NOT_IE55); // NOI18N
-//        COMPAT_MAP.put("Node.clearAttributes", IE); // NOI18N
-//        COMPAT_MAP.put("Node.compareDocumentPosition", NOT_IE55_OR_6); // NOI18N
-//        COMPAT_MAP.put("Node.getFeature", NOT_IE55_OR_6); // NOI18N
-//        COMPAT_MAP.put("Node.getUserData", NOT_IE55_OR_6); // NOI18N
-//        COMPAT_MAP.put("Node.hasAttributes", NOT_IE55_OR_6); // NOI18N
-//        COMPAT_MAP.put("Node.insertData", NOT_IE55); // NOI18N
-//        COMPAT_MAP.put("Node.isDefaultNamespace", NOT_IE55_OR_6); // NOI18N
-//        COMPAT_MAP.put("Node.isEqualNode", NOT_IE55_OR_6); // NOI18N
-//        COMPAT_MAP.put("Node.isSameNode", NOT_IE55_OR_6); // NOI18N
-//        COMPAT_MAP.put("Node.isSupported", NOT_IE55_OR_6); // NOI18N
-//        COMPAT_MAP.put("Node.lookupNamespaceURI", NOT_IE55_OR_6); // NOI18N
-//        COMPAT_MAP.put("Node.lookupPrefix", NOT_IE55_OR_6); // NOI18N
-//        COMPAT_MAP.put("Node.mergeAttributes", IE); // NOI18N
-//        COMPAT_MAP.put("Node.normalize", NOT_IE55_OR_6); // NOI18N
-//        COMPAT_MAP.put("Node.removeNode", IE); // NOI18N
-//        COMPAT_MAP.put("Node.replaceData", NOT_IE55); // NOI18N
-//        COMPAT_MAP.put("Node.replaceNode", IE); // NOI18N
-//        COMPAT_MAP.put("Node.setUserData", NOT_IE55_OR_6); // NOI18N
-//        COMPAT_MAP.put("Node.substringData", NOT_IE55); // NOI18N
-//        COMPAT_MAP.put("Node.swapNode", IE); // NOI18N
-//        COMPAT_MAP.put("NodeIterator.detach", NOT_IE); // NOI18N
-//        COMPAT_MAP.put("NodeIterator.nextNode", NOT_IE); // NOI18N
-//        COMPAT_MAP.put("NodeIterator.previousNode", NOT_IE); // NOI18N
-//        COMPAT_MAP.put("Range.cloneContents", NOT_IE); // NOI18N
-//        COMPAT_MAP.put("Range.cloneRange", NOT_IE); // NOI18N
-//        COMPAT_MAP.put("Range.collapse", NOT_IE); // NOI18N
-//        COMPAT_MAP.put("Range.compareBoundaryPoints", NOT_IE); // NOI18N
-//        COMPAT_MAP.put("Range.compareNode", FIREFOX); // NOI18N
-//        COMPAT_MAP.put("Range.comparePoint", FIREFOX); // NOI18N
-//        COMPAT_MAP.put("Range.createContextualFragment", FIREFOX); // NOI18N
-//        COMPAT_MAP.put("Range.deleteContents", NOT_IE); // NOI18N
-//        COMPAT_MAP.put("Range.detach", NOT_IE); // NOI18N
-//        COMPAT_MAP.put("Range.extractContents", NOT_IE); // NOI18N
-//        COMPAT_MAP.put("Range.insertNode", NOT_IE); // NOI18N
-//        COMPAT_MAP.put("Range.intersectsNode", FIREFOX); // NOI18N
-//        COMPAT_MAP.put("Range.isPointInRange", FIREFOX); // NOI18N
-//        COMPAT_MAP.put("Range.selectNode", NOT_IE); // NOI18N
-//        COMPAT_MAP.put("Range.selectNodeContents", NOT_IE); // NOI18N
-//        COMPAT_MAP.put("Range.setEnd", NOT_IE); // NOI18N
-//        COMPAT_MAP.put("Range.setEndAfter", NOT_IE); // NOI18N
-//        COMPAT_MAP.put("Range.setEndBefore", NOT_IE); // NOI18N
-//        COMPAT_MAP.put("Range.setStart", NOT_IE); // NOI18N
-//        COMPAT_MAP.put("Range.setStartAfter", NOT_IE); // NOI18N
-//        COMPAT_MAP.put("Range.setStartBefore", NOT_IE); // NOI18N
-//        COMPAT_MAP.put("Range.surroundContents", NOT_IE); // NOI18N
-//        COMPAT_MAP.put("Text.replaceWholeText", NOT_IE55_OR_6); // NOI18N
-//        COMPAT_MAP.put("TreeWalker.firstChild", NOT_IE); // NOI18N
-//        COMPAT_MAP.put("TreeWalker.lastChild", NOT_IE); // NOI18N
-//        COMPAT_MAP.put("TreeWalker.nextNode", NOT_IE); // NOI18N
-//        COMPAT_MAP.put("TreeWalker.nextSibling", NOT_IE); // NOI18N
-//        COMPAT_MAP.put("TreeWalker.parentNode", NOT_IE); // NOI18N
-//        COMPAT_MAP.put("TreeWalker.previousNode", NOT_IE); // NOI18N
-//        COMPAT_MAP.put("TreeWalker.previousSibling", NOT_IE); // NOI18N
-//        COMPAT_MAP.put("TypeInfo.isDerivedFrom", NOT_IE55_OR_6); // NOI18N
-//        COMPAT_MAP.put("XMLHttpRequest", NOT_IE55_OR_6); // NOI18N
+        /*COMPAT_MAP.put("CanvasGradient.addColorStop", FF2FF3OPERASAFARI2SAFARI3KONQ); // NOI18N
+        COMPAT_MAP.put("CanvasRenderingContext2D.arc", FF2FF3OPERASAFARI2SAFARI3KONQ); // NOI18N
+        COMPAT_MAP.put("CanvasRenderingContext2D.arcTo", FF2FF3OPERASAFARI2SAFARI3KONQ); // NOI18N
+        COMPAT_MAP.put("CanvasRenderingContext2D.beginPath", FF2FF3OPERASAFARI2SAFARI3KONQ); // NOI18N
+        COMPAT_MAP.put("CanvasRenderingContext2D.bezierCurveTo", FF2FF3OPERASAFARI2SAFARI3KONQ); // NOI18N
+        COMPAT_MAP.put("CanvasRenderingContext2D.clearRect", FF2FF3OPERASAFARI2SAFARI3KONQ); // NOI18N
+        COMPAT_MAP.put("CanvasRenderingContext2D.clip", FF2FF3OPERASAFARI2SAFARI3KONQ); // NOI18N
+        COMPAT_MAP.put("CanvasRenderingContext2D.closePath", FF2FF3OPERASAFARI2SAFARI3KONQ); // NOI18N
+        COMPAT_MAP.put("CanvasRenderingContext2D.createImageData", FF2FF3OPERASAFARI2SAFARI3KONQ); // NOI18N
+        COMPAT_MAP.put("CanvasRenderingContext2D.createLinearGradient", FF2FF3OPERASAFARI2SAFARI3KONQ); // NOI18N
+        COMPAT_MAP.put("CanvasRenderingContext2D.createPattern", FF2FF3OPERASAFARI2SAFARI3KONQ); // NOI18N
+        COMPAT_MAP.put("CanvasRenderingContext2D.createRadialGradient", FF2FF3OPERASAFARI2SAFARI3KONQ); // NOI18N
+        COMPAT_MAP.put("CanvasRenderingContext2D.drawImage", FF2FF3OPERASAFARI2SAFARI3KONQ); // NOI18N
+        COMPAT_MAP.put("CanvasRenderingContext2D.fill", FF2FF3OPERASAFARI2SAFARI3KONQ); // NOI18N
+        COMPAT_MAP.put("CanvasRenderingContext2D.fillRect", FF2FF3OPERASAFARI2SAFARI3KONQ); // NOI18N
+        COMPAT_MAP.put("CanvasRenderingContext2D.getImageData", FF2FF3OPERASAFARI2SAFARI3KONQ); // NOI18N
+        COMPAT_MAP.put("CanvasRenderingContext2D.isPointInPath", FF2FF3OPERASAFARI2SAFARI3KONQ); // NOI18N
+        COMPAT_MAP.put("CanvasRenderingContext2D.lineTo", FF2FF3OPERASAFARI2SAFARI3KONQ); // NOI18N
+        COMPAT_MAP.put("CanvasRenderingContext2D.load", FF2FF3OPERASAFARI2SAFARI3KONQ); // NOI18N
+        COMPAT_MAP.put("CanvasRenderingContext2D.moveTo", FF2FF3OPERASAFARI2SAFARI3KONQ); // NOI18N
+        COMPAT_MAP.put("CanvasRenderingContext2D.putImageData", FF2FF3OPERASAFARI2SAFARI3KONQ); // NOI18N
+        COMPAT_MAP.put("CanvasRenderingContext2D.quadraticCurveTo", FF2FF3OPERASAFARI2SAFARI3KONQ); // NOI18N
+        COMPAT_MAP.put("CanvasRenderingContext2D.rect", FF2FF3OPERASAFARI2SAFARI3KONQ); // NOI18N
+        COMPAT_MAP.put("CanvasRenderingContext2D.rotate", FF2FF3OPERASAFARI2SAFARI3KONQ); // NOI18N
+        COMPAT_MAP.put("CanvasRenderingContext2D.save", FF2FF3OPERASAFARI2SAFARI3KONQ); // NOI18N
+        COMPAT_MAP.put("CanvasRenderingContext2D.scale", FF2FF3OPERASAFARI2SAFARI3KONQ); // NOI18N
+        COMPAT_MAP.put("CanvasRenderingContext2D.setTransform", FF2FF3OPERASAFARI2SAFARI3KONQ); // NOI18N
+        COMPAT_MAP.put("CanvasRenderingContext2D.stroke", FF2FF3OPERASAFARI2SAFARI3KONQ); // NOI18N
+        COMPAT_MAP.put("CanvasRenderingContext2D.strokeRect", FF2FF3OPERASAFARI2SAFARI3KONQ); // NOI18N
+        COMPAT_MAP.put("CanvasRenderingContext2D.transform", FF2FF3OPERASAFARI2SAFARI3KONQ); // NOI18N
+        COMPAT_MAP.put("CanvasRenderingContext2D.translate", FF2FF3OPERASAFARI2SAFARI3KONQ); // NOI18N
+        COMPAT_MAP.put("Document.adoptNode", NOT_IE55_OR_6); // NOI18N
+        COMPAT_MAP.put("Document.createAttributeNS", NOT_IE55_OR_6); // NOI18N
+        COMPAT_MAP.put("Document.createDocumentFragment", NOT_IE55); // NOI18N
+        COMPAT_MAP.put("Document.createElementNS", NOT_IE55_OR_6); // NOI18N
+        COMPAT_MAP.put("Document.getElementsByTagNameNS", NOT_IE55_OR_6); // NOI18N
+        COMPAT_MAP.put("Document.implementation.createDocument", NOT_IE); // NOI18N
+        COMPAT_MAP.put("Document.implementation.hasFeature", NOT_IE55); // NOI18N
+        COMPAT_MAP.put("Document.importNode", NOT_IE55_OR_6); // NOI18N
+        COMPAT_MAP.put("Document.normalizeDocument", NOT_IE55_OR_6); // NOI18N
+        COMPAT_MAP.put("Document.renameNode", NOT_IE55_OR_6); // NOI18N
+        COMPAT_MAP.put("DocumentRange.createRange", NOT_IE); // NOI18N
+        COMPAT_MAP.put("DocumentTraversal.createNodeIterator", NOT_IE); // NOI18N
+        COMPAT_MAP.put("DocumentTraversal.createTreeWalker", NOT_IE); // NOI18N
+        COMPAT_MAP.put("Element.applyElement", IE); // NOI18N
+        COMPAT_MAP.put("Element.contains", NOT_IE); // NOI18N
+        COMPAT_MAP.put("Element.createAttribute", NOT_IE55); // NOI18N
+        COMPAT_MAP.put("Element.getAttributeNS", NOT_IE55_OR_6); // NOI18N
+        COMPAT_MAP.put("Element.getAttributeNode", NOT_IE55); // NOI18N
+        COMPAT_MAP.put("Element.getAttributeNodeNS", NOT_IE55_OR_6); // NOI18N
+        COMPAT_MAP.put("Element.getBoundingClientRect", FF3); // NOI18N
+        COMPAT_MAP.put("Element.getClientRects", FF3); // NOI18N
+        COMPAT_MAP.put("Element.getElementsByTagNameNS", NOT_IE55_OR_6); // NOI18N
+// This one is overridden in prototype... Element.hasAttribute may be referring to it!
+// For now, don't warn about this one.
+//        COMPAT_MAP.put("Element.hasAttribute", NOT_IE); // NOI18N
+        COMPAT_MAP.put("Element.hasAttributeNS", NOT_IE55_OR_6); // NOI18N
+        COMPAT_MAP.put("Element.hasAttributes", NOT_IE); // NOI18N
+        COMPAT_MAP.put("Element.removeAttributeNS", NOT_IE55_OR_6); // NOI18N
+        COMPAT_MAP.put("Element.removeAttributeNode", NOT_IE55_OR_6); // NOI18N
+        COMPAT_MAP.put("Element.setAttributeNS", NOT_IE55_OR_6); // NOI18N
+        COMPAT_MAP.put("Element.setAttributeNode", NOT_IE55); // NOI18N
+        COMPAT_MAP.put("Element.setAttributeNodeNS", NOT_IE55_OR_6); // NOI18N
+        COMPAT_MAP.put("Element.setIdAttribute", NOT_IE55_OR_6); // NOI18N
+        COMPAT_MAP.put("Element.setIdAttributeNS", NOT_IE55_OR_6); // NOI18N
+        COMPAT_MAP.put("Element.setIdAttributeNode", NOT_IE55_OR_6); // NOI18N
+        COMPAT_MAP.put("HTMLCanvasElement.getContext", FF2FF3OPERASAFARI2SAFARI3KONQ); // NOI18N
+        COMPAT_MAP.put("HTMLCanvasElement.toDataURL", FF2FF3OPERASAFARI2SAFARI3KONQ); // NOI18N
+        COMPAT_MAP.put("Iterator", FF2FF3OPERASAFARI3KONQ); // NOI18N
+        COMPAT_MAP.put("Iterator.next", FF2FF3OPERASAFARI3KONQ); // NOI18N
+        COMPAT_MAP.put("NameList.contains", NOT_IE55_OR_6); // NOI18N
+        COMPAT_MAP.put("NameList.containsNS", NOT_IE55_OR_6); // NOI18N
+        COMPAT_MAP.put("NameList.getName", NOT_IE55_OR_6); // NOI18N
+        COMPAT_MAP.put("NameList.getNamespaceURI", NOT_IE55_OR_6); // NOI18N
+        COMPAT_MAP.put("NamedNodeMap.getNamedItemNS", NOT_IE55_OR_6); // NOI18N
+        COMPAT_MAP.put("NamedNodeMap.removeNamedItemNS", NOT_IE55_OR_6); // NOI18N
+        COMPAT_MAP.put("NamedNodeMap.setNamedItemNS", NOT_IE55_OR_6); // NOI18N
+        COMPAT_MAP.put("Node.appendData", NOT_IE55); // NOI18N
+        COMPAT_MAP.put("Node.clearAttributes", IE); // NOI18N
+        COMPAT_MAP.put("Node.compareDocumentPosition", NOT_IE55_OR_6); // NOI18N
+        COMPAT_MAP.put("Node.getFeature", NOT_IE55_OR_6); // NOI18N
+        COMPAT_MAP.put("Node.getUserData", NOT_IE55_OR_6); // NOI18N
+        COMPAT_MAP.put("Node.hasAttributes", NOT_IE55_OR_6); // NOI18N
+        COMPAT_MAP.put("Node.insertData", NOT_IE55); // NOI18N
+        COMPAT_MAP.put("Node.isDefaultNamespace", NOT_IE55_OR_6); // NOI18N
+        COMPAT_MAP.put("Node.isEqualNode", NOT_IE55_OR_6); // NOI18N
+        COMPAT_MAP.put("Node.isSameNode", NOT_IE55_OR_6); // NOI18N
+        COMPAT_MAP.put("Node.isSupported", NOT_IE55_OR_6); // NOI18N
+        COMPAT_MAP.put("Node.lookupNamespaceURI", NOT_IE55_OR_6); // NOI18N
+        COMPAT_MAP.put("Node.lookupPrefix", NOT_IE55_OR_6); // NOI18N
+        COMPAT_MAP.put("Node.mergeAttributes", IE); // NOI18N
+        COMPAT_MAP.put("Node.normalize", NOT_IE55_OR_6); // NOI18N
+        COMPAT_MAP.put("Node.removeNode", IE); // NOI18N
+        COMPAT_MAP.put("Node.replaceData", NOT_IE55); // NOI18N
+        COMPAT_MAP.put("Node.replaceNode", IE); // NOI18N
+        COMPAT_MAP.put("Node.setUserData", NOT_IE55_OR_6); // NOI18N
+        COMPAT_MAP.put("Node.substringData", NOT_IE55); // NOI18N
+        COMPAT_MAP.put("Node.swapNode", IE); // NOI18N
+        COMPAT_MAP.put("NodeIterator.detach", NOT_IE); // NOI18N
+        COMPAT_MAP.put("NodeIterator.nextNode", NOT_IE); // NOI18N
+        COMPAT_MAP.put("NodeIterator.previousNode", NOT_IE); // NOI18N
+        COMPAT_MAP.put("Range.cloneContents", NOT_IE); // NOI18N
+        COMPAT_MAP.put("Range.cloneRange", NOT_IE); // NOI18N
+        COMPAT_MAP.put("Range.collapse", NOT_IE); // NOI18N
+        COMPAT_MAP.put("Range.compareBoundaryPoints", NOT_IE); // NOI18N
+        COMPAT_MAP.put("Range.compareNode", FIREFOX); // NOI18N
+        COMPAT_MAP.put("Range.comparePoint", FIREFOX); // NOI18N
+        COMPAT_MAP.put("Range.createContextualFragment", FIREFOX); // NOI18N
+        COMPAT_MAP.put("Range.deleteContents", NOT_IE); // NOI18N
+        COMPAT_MAP.put("Range.detach", NOT_IE); // NOI18N
+        COMPAT_MAP.put("Range.extractContents", NOT_IE); // NOI18N
+        COMPAT_MAP.put("Range.insertNode", NOT_IE); // NOI18N
+        COMPAT_MAP.put("Range.intersectsNode", FIREFOX); // NOI18N
+        COMPAT_MAP.put("Range.isPointInRange", FIREFOX); // NOI18N
+        COMPAT_MAP.put("Range.selectNode", NOT_IE); // NOI18N
+        COMPAT_MAP.put("Range.selectNodeContents", NOT_IE); // NOI18N
+        COMPAT_MAP.put("Range.setEnd", NOT_IE); // NOI18N
+        COMPAT_MAP.put("Range.setEndAfter", NOT_IE); // NOI18N
+        COMPAT_MAP.put("Range.setEndBefore", NOT_IE); // NOI18N
+        COMPAT_MAP.put("Range.setStart", NOT_IE); // NOI18N
+        COMPAT_MAP.put("Range.setStartAfter", NOT_IE); // NOI18N
+        COMPAT_MAP.put("Range.setStartBefore", NOT_IE); // NOI18N
+        COMPAT_MAP.put("Range.surroundContents", NOT_IE); // NOI18N
+        COMPAT_MAP.put("Text.replaceWholeText", NOT_IE55_OR_6); // NOI18N
+        COMPAT_MAP.put("TreeWalker.firstChild", NOT_IE); // NOI18N
+        COMPAT_MAP.put("TreeWalker.lastChild", NOT_IE); // NOI18N
+        COMPAT_MAP.put("TreeWalker.nextNode", NOT_IE); // NOI18N
+        COMPAT_MAP.put("TreeWalker.nextSibling", NOT_IE); // NOI18N
+        COMPAT_MAP.put("TreeWalker.parentNode", NOT_IE); // NOI18N
+        COMPAT_MAP.put("TreeWalker.previousNode", NOT_IE); // NOI18N
+        COMPAT_MAP.put("TreeWalker.previousSibling", NOT_IE); // NOI18N
+        COMPAT_MAP.put("TypeInfo.isDerivedFrom", NOT_IE55_OR_6); // NOI18N
+        COMPAT_MAP.put("XMLHttpRequest", NOT_IE55_OR_6); // NOI18N*/
 
         NAME_SET.add("Iterator"); // NOI18N
         NAME_SET.add("XMLHttpRequest"); // NOI18N

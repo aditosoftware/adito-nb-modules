@@ -100,7 +100,7 @@ public class Call {
     public boolean isStatic() {
         return isStatic;
     }
-
+    
     public int getPrevCallParenPos() {
         return prevCallParenPos;
     }
@@ -140,7 +140,7 @@ public class Call {
     public boolean isMethodExpected() {
         return this.methodExpected;
     }
-
+    
     /**
      * Determine whether the given offset corresponds to a method call on another
      * object. This would happen in these cases:
@@ -265,7 +265,7 @@ public class Call {
             } catch (BadLocationException ble) {
                 Exceptions.printStackTrace(ble);
             }
-
+            
             // Find the beginning of the expression. We'll go past keywords, identifiers
             // and dots or double-colons
     searchBackwards:
@@ -282,7 +282,7 @@ public class Call {
                 if (id == JsTokenId.ANY_KEYWORD) {
                     tokenText = token.text().toString();
                 }
-
+                
 
                 switch (id) {
                     case WHITESPACE:
@@ -338,7 +338,7 @@ public class Call {
                         // We're in an expression, e.g.  x+y.
                         // and here we can stop when we get to the terminator
                         break searchBackwards;
-
+                        
                     case IDENTIFIER:
                     case DOT:
                     case THIS:
@@ -361,8 +361,8 @@ public class Call {
 
                             continue searchBackwards;
                         }
-
-
+                        
+                        
                         // Something else - such as "getFoo().x|" - at this point we don't know the type
                         // so we'll just return unknown
                         return Call.UNKNOWN;
@@ -377,7 +377,7 @@ public class Call {
                     if (lhs.equals("super") || lhs.equals("this")) { // NOI18N
                         return new Call(lhs, lhs, false, true, beginOffset);
                     } else if (Character.isUpperCase(lhs.charAt(0))) {
-
+                        
                         // Detect type references of the form
                         //   Spry.Data.Region.prototype.process
                         // but not "foo.bar"
@@ -398,7 +398,7 @@ public class Call {
                         if (valid && type == null) {
                             type = lhs;
                         }
-
+                        
                         return new Call(type, lhs, true, methodExpected, beginOffset);
                     } else {
                         return new Call(null, lhs, false, methodExpected, beginOffset);
@@ -413,7 +413,7 @@ public class Call {
 
         return Call.LOCAL;
     }
-
+    
     public static String getCallExpression(BaseDocument doc, int offset) throws BadLocationException {
         TokenHierarchy<Document> th = TokenHierarchy.get((Document)doc);
         Call call = getCallType(doc, th, offset);

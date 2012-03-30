@@ -152,12 +152,12 @@ public class StrictWarning extends JsErrorRule {
         if (TRAILING_COMMA.equals(key)) { // NOI18N
             // See if we're targeting the applicable browsers
 
-            //if (!SupportedBrowsers.getInstance().isSupported(BrowserVersion.IE7)) { // If you want IE5.5 you're also affected
-            //    // We don't care about this error anyway
-            //
-            //    setContextRemove(context);
-            //    return;
-            //}
+            /*if (!SupportedBrowsers.getInstance().isSupported(BrowserVersion.IE7)) { // If you want IE5.5 you're also affected
+                // We don't care about this error anyway
+
+                setContextRemove(context);
+                return;
+            }*/
 
             astOffset = (Integer) error.getParameters()[0];
             lexOffset = LexUtilities.getLexerOffset(info, astOffset);

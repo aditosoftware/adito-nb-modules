@@ -357,24 +357,24 @@ public abstract class IndexedElement extends JsElement {
         return null;
     }
     
-    //public EnumSet<BrowserVersion> getCompatibility() {
-    //    if (compatibility == null) {
-    //        int flagIndex = getAttributeSection(BROWSER_INDEX);
-    //        if (flagIndex != -1) {
-    //            int endIndex = attributes.indexOf(';', flagIndex);
-    //            assert endIndex != -1;
-    //            if (endIndex == flagIndex) {
-    //                return BrowserVersion.ALL;
-    //            }
-    //            String compat = attributes.substring(flagIndex, endIndex);
-    //            compatibility = BrowserVersion.fromCompactFlags(compat);
-    //        } else {
-    //            compatibility = BrowserVersion.ALL;
-    //        }
-    //    }
-    //
-    //    return compatibility;
-    //}
+    /*public EnumSet<BrowserVersion> getCompatibility() {
+        if (compatibility == null) {
+            int flagIndex = getAttributeSection(BROWSER_INDEX);
+            if (flagIndex != -1) {
+                int endIndex = attributes.indexOf(';', flagIndex);
+                assert endIndex != -1;
+                if (endIndex == flagIndex) {
+                    return BrowserVersion.ALL;
+                }
+                String compat = attributes.substring(flagIndex, endIndex);
+                compatibility = BrowserVersion.fromCompactFlags(compat);
+            } else {
+                compatibility = BrowserVersion.ALL;
+            }
+        }
+        
+        return compatibility;
+    }*/
 
     public String getType() {
         if (kind == ElementKind.CLASS || kind == ElementKind.PACKAGE) {
@@ -679,14 +679,14 @@ public abstract class IndexedElement extends JsElement {
             lastSlash++;
             if (filename.startsWith("stub_core", lastSlash)) { // NOI18N
                 return "Core JS";
-            //} else if (filename.startsWith("stub_", lastSlash)) { // NOI18N
-            //    return "DOM";
-            //} else if (filename.startsWith("jquery", lastSlash)) { // NOI18N
-            //    return "jQuery";
-            //} else if (filename.startsWith("dojo", lastSlash)) { // NOI18N
-            //    return "dojo";
-            //} else if (filename.startsWith("yui", lastSlash)) { // NOI18N
-            //    return "YUI";
+            /*} else if (filename.startsWith("stub_", lastSlash)) { // NOI18N
+                return "DOM";
+            } else if (filename.startsWith("jquery", lastSlash)) { // NOI18N
+                return "jQuery";
+            } else if (filename.startsWith("dojo", lastSlash)) { // NOI18N
+                return "dojo";
+            } else if (filename.startsWith("yui", lastSlash)) { // NOI18N
+                return "YUI";*/
             } else if (filename.startsWith("stub_adito", lastSlash)) { // NOI18N
               return "ADITO JS";
             }

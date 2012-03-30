@@ -139,8 +139,8 @@ public class IndexedPackage extends IndexedElement {
         return false;
     }
     
-    //@Override
-    //public EnumSet<BrowserVersion> getCompatibility() {
-    //    return BrowserVersion.ALL;
-    //}
+    /*@Override
+    public EnumSet<BrowserVersion> getCompatibility() {
+        return BrowserVersion.ALL;
+    }*/
 }
