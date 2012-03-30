@@ -2,11 +2,6 @@ OpenIDE-Module-Public-Packages: org.netbeans.modules.javascript.editin
  g.*, org.netbeans.modules.javascript.editing.embedding.*, org.netbean
  s.modules.javascript.editing.lexer.*, org.netbeans.modules.javascript
  .editing.spi.*
-OpenIDE-Module-Friends: org.netbeans.modules.html.editor, org.netbeans
- .modules.javascript.hints, org.netbeans.modules.javascript.refactorin
- g, org.netbeans.modules.languages.ejs, org.netbeans.modules.php.prado
- , org.netbeans.modules.php.symfony, org.netbeans.modules.web.client.t
- ools.impl, de.adito.aditoweb.nbm.EditorProvider
 OpenIDE-Module-Module-Dependencies: org.mozilla.rhino.patched/1 > 1.10
  4, org.netbeans.api.annotations.common/1 > 1.0, org.netbeans.api.java
  .classpath/1 > 1.19, org.netbeans.core.multiview/1 > 1.25, org.netbea
