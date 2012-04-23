@@ -41,7 +41,7 @@ public class AComponentInfo
   /**
    * Factory Methode.
    *
-   * @param pModelFile              das FileObject, das die Modelkomponenten repräsentiert.
+   * @param pModelFile              das FileObject, das die Modell-Komponenten repräsentiert.
    * @param pPersistenceManagerInfo APersistenceManagerInfo-Objekt. Hier werden Fehler abgelegt.
    * @return null, wenn über das FileObjekt kein ComponentInfo erstellt werden konnte.
    */
