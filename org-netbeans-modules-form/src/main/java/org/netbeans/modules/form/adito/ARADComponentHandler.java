@@ -62,9 +62,10 @@ public class ARADComponentHandler
       }
     }
 
-    IAditoModelDataProvider dataProvider = NbAditoInterface.lookup(IAditoModelDataProvider.class);
-    deleted = dataProvider.removeDataModel(getModelDataObject());
+    DataFolder modelDataObject = getModelDataObject();
     _deinitialize(true);
+    IAditoModelDataProvider dataProvider = NbAditoInterface.lookup(IAditoModelDataProvider.class);
+    deleted = dataProvider.removeDataModel(modelDataObject);
   }
 
   @NotNull
