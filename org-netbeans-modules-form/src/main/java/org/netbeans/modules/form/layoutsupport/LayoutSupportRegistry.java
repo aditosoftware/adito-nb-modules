@@ -392,13 +392,13 @@ public class LayoutSupportRegistry {
                 "org.netbeans.modules.form.layoutsupport.delegates.MenuFakeSupport"); // NOI18N
             // Adito-Entries
             containerToLayoutDelegate.put(
-                "de.adito.aditoweb.nbm.nbaditointerfaceimpl.form.components.AFrame", // NOI18N
+                "de.adito.aditoweb.nbm.nbaditointerfaceimpl.form.components.frame.AFrame", // NOI18N
                 "org.netbeans.modules.form.adito.layout.AditoLayoutSupport"); // NOI18N
             containerToLayoutDelegate.put(
-                "de.adito.aditoweb.nbm.nbaditointerfaceimpl.form.components.ARegister", // NOI18N
+                "de.adito.aditoweb.nbm.nbaditointerfaceimpl.form.components.frame.ARegister", // NOI18N
                 "org.netbeans.modules.form.adito.layout.AditoRegisterLayoutSupport"); // NOI18N
             containerToLayoutDelegate.put(
-                "de.adito.aditoweb.nbm.nbaditointerfaceimpl.form.components.ARegisterTab", // NOI18N
+                "de.adito.aditoweb.nbm.nbaditointerfaceimpl.form.components.frame.ARegisterTab", // NOI18N
                 "org.netbeans.modules.form.adito.layout.AditoLayoutSupport"); // NOI18N
         }
         return containerToLayoutDelegate;
