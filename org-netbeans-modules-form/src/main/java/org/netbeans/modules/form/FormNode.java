@@ -53,8 +53,10 @@ import javax.swing.Action;
 import org.openide.nodes.*;
 import org.openide.cookies.*;
 import org.openide.actions.*;
+import org.openide.util.Lookup;
 import org.openide.util.actions.SystemAction;
 import org.openide.loaders.DataObject;
+import org.openide.util.lookup.*;
 
 /**
  * A common superclass for nodes used in Form Editor.
@@ -65,13 +67,31 @@ import org.openide.loaders.DataObject;
 public class FormNode extends AbstractNode implements FormCookie {
 
     private FormModel formModel;
+    private InstanceContent instanceContent;
 
     protected Action[] actions;
 
     protected FormNode(Children children, FormModel formModel) {
-        super(children);
-        this.formModel = formModel;
-        getCookieSet().add(this);
+        this(children, formModel, null, new InstanceContent());
+    }
+
+    protected FormNode(Children children, FormModel formModel, Lookup pLookup)
+    {
+      this(children, formModel, pLookup, new InstanceContent());
+    }
+
+    private FormNode(Children children, FormModel pFormModel, Lookup pLookup, InstanceContent pInstanceContent)
+    {
+      super(children, pLookup == null ? new AbstractLookup(pInstanceContent) :
+          new ProxyLookup(new AbstractLookup(pInstanceContent), pLookup));
+      formModel = pFormModel;
+      instanceContent = pInstanceContent;
+      instanceContent.add(this);
+    }
+
+    protected final InstanceContent getInstanceContent()
+    {
+      return instanceContent;
     }
 
     // FormCookie implementation

@@ -67,7 +67,7 @@ class FormOthersNode extends FormNode {
     public FormOthersNode(FormModel formModel) {
         super(new OthersChildren(formModel), formModel);
 
-        getCookieSet().add(new OthersIndex((OthersChildren)getChildren()));
+        getInstanceContent().add(new OthersIndex((OthersChildren)getChildren()));
         setIconBaseWithExtension("org/netbeans/modules/form/resources/formNonVisual.gif"); // NOI18N
         setName("Others Node"); // NOI18N
         setName(FormUtils.getBundleString("CTL_NonVisualComponents")); // NOI18N

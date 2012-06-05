@@ -94,12 +94,12 @@ public class RADComponentNode extends FormNode
     }
 
     public RADComponentNode(Children children, RADComponent component) {
-        super(children, component.getFormModel());
+        super(children, component.getFormModel(), AditoNodeConnect.getLookup(component));
         this.component = component;
         component.setNodeReference(this);
         //        getCookieSet().add(this);
         if (component instanceof ComponentContainer)
-            getCookieSet().add(new ComponentsIndex());
+            getInstanceContent().add(new ComponentsIndex());
         updateName();
 
         // wenn sich die Properties ändern soll das Sheet aktualisiert werden.
@@ -233,11 +233,14 @@ public class RADComponentNode extends FormNode
             List<Action> actions = new ArrayList<Action>(20);
             RADComponent topComp = component.getFormModel().getTopRADComponent();
 
+            // all actions from our own node.
+            actions.addAll(AditoNodeConnect.getActions(component, true));
+
             if (component.isReadOnly()) {
-                if (component == topComp) {
+                /*if (component == topComp) {
                     actions.add(SystemAction.get(TestAction.class));
                     actions.add(null);
-                }
+                }*/
               // STRIPPED
                 /*Event[] events = component.getKnownEvents();
                 for (int i=0; i < events.length; i++) {
@@ -254,12 +257,12 @@ public class RADComponentNode extends FormNode
                     actions.add(SystemAction.get(InPlaceEditAction.class));
                 }
                 if (javax.swing.JTable.class.isAssignableFrom(component.getBeanClass())) {
-                    actions.add(SystemAction.get(CustomizeTableAction.class));
+                    //actions.add(SystemAction.get(CustomizeTableAction.class));
                 }
                 if (component != topComp) {
                     actions.add(SystemAction.get(ChangeVariableNameAction.class));
                 } else {
-                    actions.add(SystemAction.get(TestAction.class));
+                    //actions.add(SystemAction.get(TestAction.class));
                 }
               // STRIPPED
                 /*if (FormEditor.getBindingSupport(component.getFormModel()) != null) {
@@ -325,14 +328,14 @@ public class RADComponentNode extends FormNode
 
     private void addLayoutActions(List<Action> actions) {
         if (component.getParentComponent() instanceof RADVisualContainer) {
-            actions.add(SystemAction.get(AlignAction.class));
+            /*actions.add(SystemAction.get(AlignAction.class));
             actions.add(SystemAction.get(SetAnchoringAction.class));
             actions.add(SystemAction.get(SetResizabilityAction.class));
             actions.add(SystemAction.get(ChooseSameSizeAction.class));
             actions.add(SystemAction.get(DefaultSizeAction.class));
             actions.add(SystemAction.get(CustomizeEmptySpaceAction.class));
             actions.add(SystemAction.get(EncloseAction.class));
-            actions.add(null);
+            actions.add(null);*/
         }
     }
 
