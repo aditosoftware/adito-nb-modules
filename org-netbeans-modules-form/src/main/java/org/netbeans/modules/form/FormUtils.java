@@ -452,7 +452,8 @@ public class FormUtils
         "javax.swing.JOptionPane", // NOI18N
         "javax.swing.JColorChooser", // NOI18N
         "javax.swing.JFileChooser", // NOI18N
-        "javax.swing.Box$Filler" // NOI18N
+        "javax.swing.Box$Filler", // NOI18N
+        "de.adito.aditoweb.nbm.nbide.nbaditointerface.form.component.NoFormContainerPanel"
     };
 
     private static Map<Class<?>, Map<String, DefaultValueDeviation>> defaultValueDeviations;
