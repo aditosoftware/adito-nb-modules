@@ -3,9 +3,10 @@ package org.netbeans.modules.form.adito.components;
 import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.NbAditoInterface;
 import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.sync.*;
 import org.netbeans.modules.form.RADComponent;
-import org.openide.loaders.DataFolder;
-import org.openide.nodes.Sheet;
+import org.openide.loaders.*;
+import org.openide.nodes.*;
 import org.openide.util.Lookup;
+import org.openide.util.lookup.Lookups;
 
 import javax.swing.*;
 import java.awt.*;
@@ -96,7 +97,7 @@ public final class AditoNodeConnect
       @Override
       public Lookup resolve(DataFolder pDataObject)
       {
-        return pDataObject.getLookup();
+        return Lookups.exclude(pDataObject.getLookup(), DataObject.class, Node.class);
       }
     });
   }
