@@ -193,6 +193,9 @@ public class FormEditorSupport extends DataEditorSupport implements EditorSuppor
 
     private static Map<FileSystem,FileStatusListener> fsToStatusListener = new HashMap<FileSystem,FileStatusListener>();
 
+    @SuppressWarnings("FieldCanBeLocal") // must be a class field for retaining a strong reference
+    private final Object listenerSupportStrongReference;
+
     // --------------
     // constructor
 
@@ -204,7 +207,7 @@ public class FormEditorSupport extends DataEditorSupport implements EditorSuppor
         this.formDataObject = formDataObject;
         this.cookies = cookies;
 
-        NbAditoInterface.lookup(IAditoModelDataProvider.class).installUpdateListeners(
+        listenerSupportStrongReference = NbAditoInterface.lookup(IAditoModelDataProvider.class).installUpdateListeners(
             formDataObject, this, getUndoRedo(), new Runnable()
         {
           @Override

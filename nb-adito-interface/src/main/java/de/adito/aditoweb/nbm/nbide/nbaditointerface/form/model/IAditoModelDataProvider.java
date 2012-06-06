@@ -33,7 +33,7 @@ public interface IAditoModelDataProvider
 
   ICookieLookupHelper getContainerLookupHelper(DataObject pDataObject, CookieSet pCookieSet);
 
-  public void installUpdateListeners(final DataObject pDataObject, final DataEditorSupport pDataEditorSupport,
+  public Object installUpdateListeners(final DataObject pDataObject, final DataEditorSupport pDataEditorSupport,
                                      final UndoRedo.Manager pUndoRedoManager, Runnable pOnChange);
 
 }
