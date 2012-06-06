@@ -44,8 +44,7 @@
 
 package org.netbeans.modules.form.actions;
 
-import org.netbeans.modules.form.EditorSupport;
-import org.netbeans.modules.form.FormDataObject;
+import org.netbeans.modules.form.*;
 import org.openide.loaders.DataObject;
 import org.openide.util.HelpCtx;
 import org.openide.util.actions.*;
@@ -93,12 +92,20 @@ public class ReloadAction extends CallableSystemAction {
         if(activeTC==null) {
             return;
         }
-        
-        Object dobj = activeTC.getLookup().lookup(DataObject.class);
+
+        FormNode formNode = activeTC.getLookup().lookup(FormNode.class);
+        if (formNode != null)
+        {
+          FormDataObject formDataObject = formNode.getCookie(FormDataObject.class);
+          if (formDataObject != null)
+            formDataObject.getFormEditorSupport().reloadForm();
+        }
+      //
+        /*Object dobj = activeTC.getLookup().lookup(DataObject.class);
         if (dobj instanceof FormDataObject) {
             FormDataObject formDataObject = (FormDataObject)dobj;
             EditorSupport fes = formDataObject.getFormEditorSupport();
             fes.reloadForm();
-        }   
+        }*/
     }
 }
