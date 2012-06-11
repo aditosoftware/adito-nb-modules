@@ -134,7 +134,7 @@ public class ARADComponentHandler
       try
       {
         IFormComponentInfoProvider compInfoProvider = NbAditoInterface.lookup(IFormComponentInfoProvider.class);
-        IFormComponentInfo componentInfo = compInfoProvider.createModelPropProvider(modelDataObject);
+        IFormComponentInfo componentInfo = compInfoProvider.createComponentInfo(modelDataObject);
         IFormComponentPropertyMapping propertyMapping = compInfoProvider.getFormPropertyMapping(
             radComponent.getBeanClass());
         if (componentInfo != null && propertyMapping != null)

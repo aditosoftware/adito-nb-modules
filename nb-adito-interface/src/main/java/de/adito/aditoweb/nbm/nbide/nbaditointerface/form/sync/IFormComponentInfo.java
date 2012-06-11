@@ -14,6 +14,9 @@ import java.util.List;
 public interface IFormComponentInfo
 {
 
+  public static final String PROP_CHILD_ADDED = "%/propChildAdded";
+  public static final String PROP_CHILD_REMOVED = "%/propChildRemoved";
+
   Sheet createSheet();
 
   Map<String, Object> getInitialValues();

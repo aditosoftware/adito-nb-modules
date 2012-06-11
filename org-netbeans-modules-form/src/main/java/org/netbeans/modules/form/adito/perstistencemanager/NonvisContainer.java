@@ -12,7 +12,7 @@ abstract class NonvisContainer<T extends INonSwingContainer> implements Componen
 {
 
   private final Class<T> childType;
-  private Set<NonvisContainerRADComponent> subComponents;
+  private Set<NonvisContainerRADComponent> subComponents = new LinkedHashSet<NonvisContainerRADComponent>();
   private T beanInstance;
 
 

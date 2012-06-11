@@ -49,8 +49,9 @@ import javax.swing.*;
 import javax.swing.border.Border;
 import java.util.*;
 
-import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.layout.INonSwingContainer;
+import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.sync.EContainerType;
 import org.netbeans.modules.form.adito.DMHelper;
+import org.netbeans.modules.form.adito.components.AditoMetaComponentCreatorSupport;
 import org.netbeans.modules.form.adito.perstistencemanager.*;
 import org.openide.*;
 import org.openide.nodes.Node;
@@ -80,7 +81,7 @@ import org.netbeans.modules.form.project.ClassPathUtils;
 public class MetaComponentCreator {
 
     private enum TargetType {
-        LAYOUT, BORDER, MENU, VISUAL, OTHER
+        LAYOUT, BORDER, MENU, VISUAL, OTHER, VISUAL_CONTAINER_FOR_NON_VISUAL, NON_VISUAL_CONTAINER_FOR_NON_VISUAL
     }
     private enum ComponentType {
         NON_VISUAL, VISUAL, MENU
@@ -595,42 +596,62 @@ public class MetaComponentCreator {
                         }
                     }
                 }
-            } else if (FormUtils.isVisualizableClass(beanClass)) {
-                // visual component
-                if (targetComp != null
-                        && (java.awt.Window.class.isAssignableFrom(beanClass)
-                            || java.applet.Applet.class.isAssignableFrom(beanClass)
-                            || !java.awt.Component.class.isAssignableFrom(beanClass))) {
-                    // visual component that cna't have a parent
-                    if (defaultToOthers) {
-                        targetComp = null; // will go to Other Components
-                    } else {
-                        return null;
-                    }
-                }
+            } else {
+                EContainerType containerType = AditoMetaComponentCreatorSupport.getContainerType(targetComp.getBeanClass());
+                switch (containerType){
+                    case VISUAL:
+                        if (FormUtils.isVisualizableClass(beanClass)) {
+                            // visual component
+                            if (targetComp != null
+                                   && (java.awt.Window.class.isAssignableFrom(beanClass)
+                                       || java.applet.Applet.class.isAssignableFrom(beanClass)
+                                       || !java.awt.Component.class.isAssignableFrom(beanClass))) {
+                               // visual component that cna't have a parent
+                               if (defaultToOthers) {
+                                   targetComp = null; // will go to Other Components
+                               } else {
+                                   return null;
+                               }
+                            }
 
-                RADVisualContainer targetCont = getVisualContainer(targetComp, canUseParent);
-                while (targetCont != null) {
-                    if (targetCont.canAddComponent(beanClass)) {
-                        target.targetType = TargetType.VISUAL;
-                        targetComp = targetCont;
+                            RADVisualContainer targetCont = getVisualContainer(targetComp, canUseParent);
+                            while (targetCont != null) {
+                               if (targetCont.canAddComponent(beanClass)) {
+                                   target.targetType = TargetType.VISUAL;
+                                   targetComp = targetCont;
+                                   break;
+                               } else if (canUseParent) {
+                                   targetCont = targetCont.getParentContainer();
+                               } else {
+                                   targetCont = null;
+                               }
+                            }
+                            if (targetCont == null) {
+                               if (defaultToOthers) {
+                                   targetComp = null; // will go to Other Components
+                               } else {
+                                   return null;
+                               }
+                            }
+                        }
                         break;
-                    } else if (canUseParent) {
-                        targetCont = targetCont.getParentContainer();
-                    } else {
-                        targetCont = null;
-                    }
-                }
-                if (targetCont == null) {
-                    if (defaultToOthers) {
-                        targetComp = null; // will go to Other Components
-                    } else {
-                        return null;
-                    }
+                    case NONVISUAL:
+                      EContainerType beanContainerType = AditoMetaComponentCreatorSupport.getContainerType(beanClass);
+                      if (beanContainerType != EContainerType.NONVISUAL)
+                        throw new IllegalStateException
+                            ("containers for non-visuals can contain non-visuals only but is " + beanContainerType);
+                      if (FormUtils.isVisualizableClass(targetComp.getBeanClass()))
+                            target.targetType = TargetType.VISUAL_CONTAINER_FOR_NON_VISUAL;
+                        else
+                            target.targetType = TargetType.NON_VISUAL_CONTAINER_FOR_NON_VISUAL;
+                        break;
+                    case NONE:
+                        targetComp = null;
+                        break;
+                    default:
+                        throw new IllegalStateException("Unkown containertype: "+ containerType);
                 }
             }
-          else if (INonSwingContainer.class.isAssignableFrom(beanClass)) // TODO
-            target.targetType = TargetType.OTHER;                        // TODO
         }
         if (targetComp == null) {
             target.targetType = TargetType.OTHER;
@@ -889,69 +910,77 @@ public class MetaComponentCreator {
 
     private RADVisualComponent createVisualComponent(Class compClass) {
         RADVisualComponent newMetaComp = null;
-        RADVisualContainer newMetaCont =
-            FormUtils.isContainer(compClass) ? new RADVisualContainer() : null;
 
-        while (newMetaComp == null) {
-            // initialize metacomponent and its bean instance
-            newMetaComp = newMetaCont == null ?
-                new RADVisualComponent() : newMetaCont;
+        EContainerType containerType = AditoMetaComponentCreatorSupport.getContainerType(compClass);
+        if (containerType == EContainerType.NONVISUAL) {
+          newMetaComp = new NonvisContainerRADVisualComponent();
+          newMetaComp.initialize(formModel);
+          if (!initComponentInstance(newMetaComp, compClass))
+              return null; // failure (reported)
+        } else {
+            RADVisualContainer newMetaCont =
+                FormUtils.isContainer(compClass) ? new RADVisualContainer() : null;
 
-            newMetaComp.initialize(formModel);
-            if (!initComponentInstance(newMetaComp, compClass))
-                return null; // failure (reported)
+            while (newMetaComp == null) {
+                // initialize metacomponent and its bean instance
+                newMetaComp = newMetaCont == null ?
+                    new RADVisualComponent() : newMetaCont;
+
+                newMetaComp.initialize(formModel);
+                if (!initComponentInstance(newMetaComp, compClass))
+                    return null; // failure (reported)
 
 
-            if (newMetaCont == null)
-                break; // not a container, the component is done
+                if (newMetaCont == null)
+                    break; // not a container, the component is done
 
-            // prepare layout support (the new component is a container)
-            boolean knownLayout = false;
-            Throwable layoutEx = null;
-            try {
-		newMetaCont.setOldLayoutSupport(true);
-                LayoutSupportManager laysup = newMetaCont.getLayoutSupport();
-                knownLayout = laysup.prepareLayoutDelegate(false);
+                // prepare layout support (the new component is a container)
+                boolean knownLayout = false;
+                Throwable layoutEx = null;
+                try {
+                    newMetaCont.setOldLayoutSupport(true);
+                    LayoutSupportManager laysup = newMetaCont.getLayoutSupport();
+                    knownLayout = laysup.prepareLayoutDelegate(false);
 
-                if ((knownLayout && !laysup.isDedicated() && !laysup.isSpecialLayout() && formModel.isFreeDesignDefaultLayout())
-                    || (!knownLayout && SwingLayoutBuilder.isRelevantContainer(laysup.getPrimaryContainerDelegate())))
-                {   // general containers should use the new layout support when created
-                    newMetaCont.setOldLayoutSupport(false);
-                    FormEditor.updateProjectForNaturalLayout(formModel);
-                    knownLayout = true;
+                    if ((knownLayout && !laysup.isDedicated() && !laysup.isSpecialLayout() && formModel.isFreeDesignDefaultLayout())
+                        || (!knownLayout && SwingLayoutBuilder.isRelevantContainer(laysup.getPrimaryContainerDelegate())))
+                    {   // general containers should use the new layout support when created
+                        newMetaCont.setOldLayoutSupport(false);
+                        FormEditor.updateProjectForNaturalLayout(formModel);
+                        knownLayout = true;
+                    }
                 }
-            }
-            catch (RuntimeException ex) { // silently ignore, try again as non-container
-                ErrorManager.getDefault().notify(ErrorManager.INFORMATIONAL, ex);
-                newMetaComp = null;
-                newMetaCont = null;
-                continue;
-            }
-            catch (Exception ex) {
-                layoutEx = ex;
-            }
-            catch (LinkageError ex) {
-                layoutEx = ex;
-            }
-
-            if (!knownLayout) {
-                if (layoutEx == null) {
-                    // no LayoutSupportDelegate found for the container
-                    System.err.println("[WARNING] No layout support found for "+compClass.getName()); // NOI18N
-                    System.err.println("          Just a limited basic support will be used."); // NOI18N
+                catch (RuntimeException ex) { // silently ignore, try again as non-container
+                    ErrorManager.getDefault().notify(ErrorManager.INFORMATIONAL, ex);
+                    newMetaComp = null;
+                    newMetaCont = null;
+                    continue;
                 }
-                else { // layout support initialization failed
-                    ErrorManager em = ErrorManager.getDefault();
-                    em.annotate(
-                        layoutEx, 
-                        FormUtils.getBundleString("MSG_ERR_LayoutInitFailed2")); // NOI18N
-                    em.notify(layoutEx);
+                catch (Exception ex) {
+                    layoutEx = ex;
+                }
+                catch (LinkageError ex) {
+                    layoutEx = ex;
                 }
 
-                newMetaCont.getLayoutSupport().setUnknownLayoutDelegate();
+                if (!knownLayout) {
+                    if (layoutEx == null) {
+                        // no LayoutSupportDelegate found for the container
+                        System.err.println("[WARNING] No layout support found for "+compClass.getName()); // NOI18N
+                        System.err.println("          Just a limited basic support will be used."); // NOI18N
+                    }
+                    else { // layout support initialization failed
+                        ErrorManager em = ErrorManager.getDefault();
+                        em.annotate(
+                            layoutEx,
+                            FormUtils.getBundleString("MSG_ERR_LayoutInitFailed2")); // NOI18N
+                        em.notify(layoutEx);
+                    }
+
+                    newMetaCont.getLayoutSupport().setUnknownLayoutDelegate();
+                }
             }
         }
-
         newMetaComp.setStoredName(newMetaComp.getARADComponentHandler().getName(compClass));
 
         // for some components, we initialize their properties with some
@@ -1005,7 +1034,12 @@ public class MetaComponentCreator {
     private RADComponent addOtherComponent(Class compClass,
                                            RADComponent targetComp)
     {
-        RADComponent newMetaComp = new RADComponent();
+        EContainerType containerType = AditoMetaComponentCreatorSupport.getContainerType(compClass);
+        RADComponent newMetaComp;
+        if (containerType == EContainerType.NONVISUAL)
+            newMetaComp = new NonvisContainerRADComponent();
+        else
+            newMetaComp = new RADComponent();
         newMetaComp.initialize(formModel);
         if (!initComponentInstance(newMetaComp, compClass))
             return null;

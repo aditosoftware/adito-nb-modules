@@ -58,6 +58,7 @@ import java.util.logging.Logger;
 import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.layout.*;
 import org.netbeans.modules.form.actions.TestAction;
 import org.netbeans.modules.form.adito.components.AditoFormDesignerExtension;
+import org.netbeans.modules.form.adito.perstistencemanager.*;
 import org.netbeans.modules.form.menu.MenuEditLayer;
 import org.netbeans.modules.form.palette.PaletteItem;
 import org.openide.DialogDisplayer;
@@ -2407,7 +2408,9 @@ public class FormDesigner {
                 }
                 else if (type == FormModelEvent.COMPONENT_ADDED) {
                     if ((metacont instanceof RADVisualContainer
-                            || metacont instanceof RADMenuComponent)
+                            || metacont instanceof RADMenuComponent
+                            || metacont instanceof NonvisContainerRADComponent
+                            || metacont instanceof NonvisContainerRADVisualComponent)
                         && (prevType != FormModelEvent.COMPONENT_ADDED
                             || prevContainer != metacont))
                     {

@@ -17,7 +17,6 @@ public class AComponentInfo
 
   private AComponentInfo(Class<?> pComponentClass, String pComponentName, IFormComponentInfo pModelPropProvider)
   {
-
     componentClass = pComponentClass;
     componentName = pComponentName;
     modelPropProvider = pModelPropProvider;
@@ -48,7 +47,7 @@ public class AComponentInfo
   public static AComponentInfo create(FileObject pModelFile, APersistenceManagerInfo pPersistenceManagerInfo)
   {
     IFormComponentInfoProvider propertyInfo = NbAditoInterface.lookup(IFormComponentInfoProvider.class);
-    IFormComponentInfo modelPropProvider = propertyInfo.createModelPropProvider(pModelFile);
+    IFormComponentInfo modelPropProvider = propertyInfo.createComponentInfo(pModelFile);
     IFormComponentPropertyMapping componentPropertyMapping = modelPropProvider.getFormPropertyMapping();
     String compName;
     String className;

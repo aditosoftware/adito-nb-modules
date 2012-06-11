@@ -12,8 +12,6 @@ import org.netbeans.modules.form.adito.perstistencemanager.*;
 import org.netbeans.modules.form.layoutdesign.LayoutModel;
 import org.netbeans.modules.form.layoutsupport.LayoutSupportManager;
 import org.openide.filesystems.FileObject;
-import org.openide.loaders.DataFolder;
-import org.openide.nodes.Node;
 
 import java.awt.*;
 import java.lang.reflect.InvocationTargetException;
@@ -66,7 +64,7 @@ public class AditoPersistenceManager extends PersistenceManager
 
       RADComponent topComp = formModel.getTopRADComponent();
       _loadComponent(pInfo, modelRoot, topComp, null);
-      _copyValues(topComp);
+      AditoFormUtils.copyValuesFromModelToComponent(topComp);
 
       List<RADComponent> list = new ArrayList<RADComponent>();
       List<FileObject> others = NbAditoInterface.lookup(IAditoModelDataProvider.class).getOthers(modelRoot);
@@ -76,7 +74,7 @@ public class AditoPersistenceManager extends PersistenceManager
         if (othersRadComp != null)
         {
           list.add(othersRadComp);
-          _copyValues(othersRadComp);
+          AditoFormUtils.copyValuesFromModelToComponent(othersRadComp);
         }
       }
       RADComponent[] nonVisualComps = new RADComponent[list.size()];
@@ -105,7 +103,7 @@ public class AditoPersistenceManager extends PersistenceManager
                               RADComponent pParentComponent) throws PersistenceException
   {
 
-    // if the loaded component is a visual component in a visual contianer,
+    // if the loaded component is a visual component in a visual container,
     // then load NB 3.1 layout constraints for it
     if (pComponent instanceof RADVisualComponent && pParentComponent instanceof RADVisualContainer /*&&
         pModelComp.getFileObject("x") != null && pModelComp.getFileObject("y") != null &&
@@ -345,23 +343,7 @@ public class AditoPersistenceManager extends PersistenceManager
   private void _copyChildValues(ComponentContainer pContainer) throws InvocationTargetException, IllegalAccessException
   {
     for (RADComponent childComponent : pContainer.getSubBeans())
-      _copyValues(childComponent);
-  }
-
-  private void _copyValues(RADComponent pComponent) throws InvocationTargetException, IllegalAccessException
-  {
-    DataFolder modelDataObject = pComponent.getARADComponentHandler().getModelDataObject();
-    if (modelDataObject == null)
-      throw new IllegalStateException(pComponent.toString());
-
-    IFormComponentInfoProvider compInfoProvider = NbAditoInterface.lookup(IFormComponentInfoProvider.class);
-    IFormComponentInfo componentInfo = compInfoProvider.createModelPropProvider(modelDataObject);
-    for (Map.Entry<String, Object> entry : componentInfo.getInitialValues().entrySet())
-    {
-      Node.Property radProperty = pComponent.getPropertyByName(entry.getKey());
-      if (radProperty != null)
-        radProperty.setValue(entry.getValue());
-    }
+      AditoFormUtils.copyValuesFromModelToComponent(childComponent);
   }
 
   private RADComponent _restoreComponent(APersistenceManagerInfo pInfo, FileObject pChildModel,
@@ -439,7 +421,7 @@ public class AditoPersistenceManager extends PersistenceManager
 
     try
     {
-      LayoutManager layout = _getPropertyInfo().createModelPropProvider(pModelComp).createLayout();
+      LayoutManager layout = _getPropertyInfo().createComponentInfo(pModelComp).createLayout();
       layoutSupport.getPrimaryContainer().setLayout(layout);
     }
     catch (Exception e)
@@ -456,7 +438,7 @@ public class AditoPersistenceManager extends PersistenceManager
     {
       if (pComponent instanceof RADVisualComponent)
       {
-        IFormComponentInfo formModelPropProvider = _getPropertyInfo().createModelPropProvider(pModelComp);
+        IFormComponentInfo formModelPropProvider = _getPropertyInfo().createComponentInfo(pModelComp);
 
         //Class<?> layoutMgrCls = formModelPropProvider.getParentLayoutClass();
         //LayoutSupportRegistry registry = LayoutSupportRegistry.getRegistry(pComponent.getFormModel());

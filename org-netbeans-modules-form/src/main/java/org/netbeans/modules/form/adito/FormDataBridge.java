@@ -1,9 +1,13 @@
 package org.netbeans.modules.form.adito;
 
 import com.google.common.base.*;
+import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.NbAditoInterface;
 import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.sync.*;
 import org.jetbrains.annotations.NotNull;
 import org.netbeans.modules.form.*;
+import org.netbeans.modules.form.project.ClassSource;
+import org.openide.filesystems.FileObject;
+import org.openide.loaders.DataFolder;
 import org.openide.nodes.Node;
 
 import java.beans.*;
@@ -44,6 +48,46 @@ public class FormDataBridge
       RADVisualComponent radVisualComponent = (RADVisualComponent) radComponent;
       _radPropertiesChanged(radVisualComponent.getConstraintsProperties());
     }
+  }
+
+  void registerListeners()
+  {
+    if (aditoPropertyChangeListener == null)
+    {
+      aditoPropertyChangeListener = _createAditoPropertyChangeListener();
+      formPropertyChangeListener = _createFormPropertyChangeListener();
+      componentInfo.addPropertyListener(aditoPropertyChangeListener);
+      for (String aditoPropName : componentInfo.getPropertyNames())
+      {
+        String radPropName = componentPropertyMapping.getRadPropName(aditoPropName);
+        if (!Strings.isNullOrEmpty(radPropName))
+        {
+          FormProperty formProperty = _getFormProperty(radPropName);
+          if (formProperty != null)
+            formProperty.addPropertyChangeListener(formPropertyChangeListener);
+        }
+      }
+    }
+  }
+
+  void unregisterAll()
+  {
+    componentInfo.removePropertyListener(aditoPropertyChangeListener);
+    aditoPropertyChangeListener = null;
+    formPropertyChangeListener = null;
+  }
+
+  private PropertyChangeListener _createFormPropertyChangeListener()
+  {
+    return new PropertyChangeListener()
+    {
+      @Override
+      public void propertyChange(PropertyChangeEvent evt)
+      {
+        Node.Property property = (Node.Property) evt.getSource();
+        _radPropertiesChanged(property);
+      }
+    };
   }
 
   private void _radPropertiesChanged(Node.Property... pProperties)
@@ -94,46 +138,6 @@ public class FormDataBridge
     }
   }
 
-  void registerListeners()
-  {
-    if (aditoPropertyChangeListener == null)
-    {
-      aditoPropertyChangeListener = _createAditoPropertyChangeListener();
-      formPropertyChangeListener = _createFormPropertyChangeListener();
-      componentInfo.addPropertyListener(aditoPropertyChangeListener);
-      for (String aditoPropName : componentInfo.getPropertyNames())
-      {
-        String radPropName = componentPropertyMapping.getRadPropName(aditoPropName);
-        if (!Strings.isNullOrEmpty(radPropName))
-        {
-          FormProperty formProperty = _getFormProperty(radPropName);
-          if (formProperty != null)
-            formProperty.addPropertyChangeListener(formPropertyChangeListener);
-        }
-      }
-    }
-  }
-
-  void unregisterAll()
-  {
-    componentInfo.removePropertyListener(aditoPropertyChangeListener);
-    aditoPropertyChangeListener = null;
-    formPropertyChangeListener = null;
-  }
-
-  private PropertyChangeListener _createFormPropertyChangeListener()
-  {
-    return new PropertyChangeListener()
-    {
-      @Override
-      public void propertyChange(PropertyChangeEvent evt)
-      {
-        Node.Property property = (Node.Property) evt.getSource();
-        _radPropertiesChanged(property);
-      }
-    };
-  }
-
   private PropertyChangeListener _createAditoPropertyChangeListener()
   {
     return new PropertyChangeListener()
@@ -141,31 +145,73 @@ public class FormDataBridge
       @Override
       public void propertyChange(PropertyChangeEvent evt)
       {
-        try
+        if (evt.getPropertyName().equals(IFormComponentInfo.PROP_CHILD_ADDED))
         {
-          String aditoPropName = evt.getPropertyName();
-          String mappedName = componentPropertyMapping.getRadPropName(aditoPropName);
-          if (Strings.isNullOrEmpty(mappedName))
-            return; // not a mapped value
-          Node.Property aditoProperty = componentInfo.getProperty(aditoPropName);
-          FormProperty formProperty = _getFormProperty(mappedName);
-          if (formProperty == null)
+          System.out.println("child added" + evt.getNewValue());
+
+          FileObject created = (FileObject) evt.getNewValue();
+
+          if (radComponent instanceof ComponentContainer)
           {
-            _logInvalidMapping(aditoPropName, mappedName, true);
-            return;
+            ComponentContainer container = (ComponentContainer) radComponent;
+            for (RADComponent childComp : container.getSubBeans())
+            {
+              // Komponente mit dem Namen existiert bereits. Muss nicht synchronisiert werden.
+              if (created.getName().equals(childComp.getName()))
+                return;
+            }
+
+
+            IFormComponentInfoProvider compInfoProvider = NbAditoInterface.lookup(IFormComponentInfoProvider.class);
+            IFormComponentInfo componentInfo = compInfoProvider.createComponentInfo(created);
+            Class<?> createdBean = componentInfo.getFormPropertyMapping().getComponentClass();
+
+            RADComponent component = radComponent.getFormModel().getComponentCreator().createComponent(
+                new ClassSource(createdBean.getCanonicalName()), radComponent, null);
+            component.setStoredName(created.getName());
+            component.getARADComponentHandler().setModelDataObject(DataFolder.findFolder(created));
+            try
+            {
+              AditoFormUtils.copyValuesFromModelToComponent(component);
+            }
+            catch (Exception e)
+            {
+              throw new RuntimeException("can't copy values for: '" + component + "'.", e); // TODO: error-id
+            }
+            System.out.println("created: " + component);
           }
-          Object newValue = aditoProperty.getValue();
-          if (!Objects.equal(newValue, formProperty.getValue()))
-            formProperty.setValue(newValue);
         }
-        catch (IllegalAccessException e)
+        else if (evt.getPropertyName().equals(IFormComponentInfo.PROP_CHILD_REMOVED))
         {
-          throw new RuntimeException(e); // TODO: runtimeEx
+          System.out.println("child removed" + evt.getOldValue());
+          System.out.println("Implement me!!!");
         }
-        catch (InvocationTargetException e)
-        {
-          throw new RuntimeException(e); // TODO: runtimeEx
-        }
+        else
+          try
+          {
+            String aditoPropName = evt.getPropertyName();
+            String mappedName = componentPropertyMapping.getRadPropName(aditoPropName);
+            if (Strings.isNullOrEmpty(mappedName))
+              return; // not a mapped value
+            Node.Property aditoProperty = componentInfo.getProperty(aditoPropName);
+            FormProperty formProperty = _getFormProperty(mappedName);
+            if (formProperty == null)
+            {
+              _logInvalidMapping(aditoPropName, mappedName, true);
+              return;
+            }
+            Object newValue = aditoProperty.getValue();
+            if (!Objects.equal(newValue, formProperty.getValue()))
+              formProperty.setValue(newValue);
+          }
+          catch (IllegalAccessException e)
+          {
+            throw new RuntimeException(e); // TODO: runtimeEx
+          }
+          catch (InvocationTargetException e)
+          {
+            throw new RuntimeException(e); // TODO: runtimeEx
+          }
       }
     };
   }
@@ -185,7 +231,9 @@ public class FormDataBridge
     String prop1 = pAditoToForm ? aditoProp : formProp;
     String prop2 = pAditoToForm ? formProp : aditoProp;
     String compDetail = "component " + radComponent.getBeanClass().getSimpleName();
-    String pathDetail = "path " + radComponent.getARADComponentHandler().getModelDataObject().getPrimaryFile().getPath();
+    DataFolder modelDataObject = radComponent.getARADComponentHandler().getModelDataObject();
+    assert modelDataObject != null;
+    String pathDetail = "path " + modelDataObject.getPrimaryFile().getPath();
     String detail = pAditoToForm ? compDetail + " with " + pathDetail : pathDetail + " with " + compDetail;
     Logger.getLogger(FormDataBridge.class.getSimpleName()).log(
         Level.WARNING,

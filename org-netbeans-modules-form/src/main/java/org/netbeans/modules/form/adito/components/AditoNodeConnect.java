@@ -56,7 +56,7 @@ public final class AditoNodeConnect
       public Sheet resolve(DataFolder pDataObject)
       {
         IFormComponentInfoProvider compInfoProvider = NbAditoInterface.lookup(IFormComponentInfoProvider.class);
-        IFormComponentInfo componentInfo = compInfoProvider.createModelPropProvider(pDataObject);
+        IFormComponentInfo componentInfo = compInfoProvider.createComponentInfo(pDataObject);
         return componentInfo.createSheet();
       }
     });

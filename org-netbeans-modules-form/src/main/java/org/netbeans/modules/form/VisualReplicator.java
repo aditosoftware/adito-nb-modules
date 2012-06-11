@@ -431,6 +431,11 @@ public class VisualReplicator {
             else
                 addToMenu(cont, clone);
         }
+        else if (aditoVisualReplicator.canHandle(metacomp)) {
+            createClone(metacomp);
+            ComponentContainer metacont = (ComponentContainer) metacomp.getParentComponent();
+            aditoVisualReplicator.addComponent(metacomp, metacont);
+        }
     }
 
     public void removeComponent(RADComponent metacomp, ComponentContainer metacont) {

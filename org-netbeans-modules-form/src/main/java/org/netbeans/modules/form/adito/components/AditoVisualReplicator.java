@@ -40,6 +40,12 @@ public abstract class AditoVisualReplicator
     }
   }
 
+  public void addComponent(RADComponent pMetacomp, ComponentContainer pMetacont)
+  {
+    INonSwingContainer instance = _getContainer(pMetacont);
+    instance.addCompNonSwing((INonSwingComponent) getClonedComponent(pMetacomp));
+  }
+
   public void removeComponent(RADComponent pMetacomp, ComponentContainer pMetacont)
   {
     INonSwingContainer instance = _getContainer(pMetacont);

@@ -22,12 +22,12 @@ public interface IFormComponentInfoProvider
    * @param pModelDataObject DataObject das das Model repräsentiert.
    * @return Informationen über die durch das DataObject identifizierte Komponente.
    */
-  IFormComponentInfo createModelPropProvider(DataFolder pModelDataObject);
+  IFormComponentInfo createComponentInfo(DataFolder pModelDataObject);
 
   /**
    * @param pModelFileObject FilObject das das Model repräsentiert.
    * @return Informationen über die durch das FileObject identifizierte Komponente.
    */
-  IFormComponentInfo createModelPropProvider(FileObject pModelFileObject);
+  IFormComponentInfo createComponentInfo(FileObject pModelFileObject);
 
 }
