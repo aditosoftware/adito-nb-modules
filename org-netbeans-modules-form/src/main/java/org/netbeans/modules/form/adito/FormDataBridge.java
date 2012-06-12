@@ -36,11 +36,6 @@ public class FormDataBridge
     componentPropertyMapping = pComponentPropertyMapping;
   }
 
-  IFormComponentInfo getComponentInfo()
-  {
-    return componentInfo;
-  }
-
   void layoutPropertiesChanged()
   {
     if (radComponent instanceof RADVisualComponent)
@@ -48,6 +43,13 @@ public class FormDataBridge
       RADVisualComponent radVisualComponent = (RADVisualComponent) radComponent;
       _radPropertiesChanged(radVisualComponent.getConstraintsProperties());
     }
+  }
+
+  void newComponentAdded()
+  {
+    layoutPropertiesChanged();
+    for (String s : componentInfo.getPropertyNames())
+      _alignFormToAditoProperty(s);
   }
 
   void registerListeners()
@@ -95,7 +97,7 @@ public class FormDataBridge
     try
     {
       for (Node.Property formProperty : pProperties)
-        _alignFormToAditoProp(formProperty);
+        _alignAditoToFormProp(formProperty);
     }
     catch (InvocationTargetException e)
     {
@@ -103,7 +105,7 @@ public class FormDataBridge
     }
   }
 
-  private void _alignFormToAditoProp(Node.Property pFormProperty) throws InvocationTargetException
+  private void _alignAditoToFormProp(Node.Property pFormProperty) throws InvocationTargetException
   {
     try
     {
@@ -121,14 +123,21 @@ public class FormDataBridge
       Object formPropertyValue = pFormProperty.getValue();
       if (!Objects.equal(fieldValue, formPropertyValue))
       {
-        try
+        //try
         {
           if (formPropertyValue != null || !aditoProperty.isDefaultValue())
-            aditoProperty.setValue(formPropertyValue);
+            try
+            {
+              aditoProperty.setValue(formPropertyValue);
+            }
+            catch (Exception e)
+            {
+              //e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            }
         }
-        catch (InvocationTargetException e)
+        //catch (InvocationTargetException e)
         {
-          throw new RuntimeException(e); // TODO: runtimeEx
+          //  throw new RuntimeException(e); // TODO: runtimeEx
         }
       }
     }
@@ -161,7 +170,6 @@ public class FormDataBridge
                 return;
             }
 
-
             IFormComponentInfoProvider compInfoProvider = NbAditoInterface.lookup(IFormComponentInfoProvider.class);
             IFormComponentInfo componentInfo = compInfoProvider.createComponentInfo(created);
             Class<?> createdBean = componentInfo.getFormPropertyMapping().getComponentClass();
@@ -187,33 +195,39 @@ public class FormDataBridge
           System.out.println("Implement me!!!");
         }
         else
-          try
-          {
-            String aditoPropName = evt.getPropertyName();
-            String mappedName = componentPropertyMapping.getRadPropName(aditoPropName);
-            if (Strings.isNullOrEmpty(mappedName))
-              return; // not a mapped value
-            Node.Property aditoProperty = componentInfo.getProperty(aditoPropName);
-            FormProperty formProperty = _getFormProperty(mappedName);
-            if (formProperty == null)
-            {
-              _logInvalidMapping(aditoPropName, mappedName, true);
-              return;
-            }
-            Object newValue = aditoProperty.getValue();
-            if (!Objects.equal(newValue, formProperty.getValue()))
-              formProperty.setValue(newValue);
-          }
-          catch (IllegalAccessException e)
-          {
-            throw new RuntimeException(e); // TODO: runtimeEx
-          }
-          catch (InvocationTargetException e)
-          {
-            throw new RuntimeException(e); // TODO: runtimeEx
-          }
+        {
+          _alignFormToAditoProperty(evt.getPropertyName());
+        }
       }
     };
+  }
+
+  private void _alignFormToAditoProperty(String pAditoPropName)
+  {
+    try
+    {
+      String mappedName = componentPropertyMapping.getRadPropName(pAditoPropName);
+      if (Strings.isNullOrEmpty(mappedName))
+        return; // not a mapped value
+      Node.Property aditoProperty = componentInfo.getProperty(pAditoPropName);
+      FormProperty formProperty = _getFormProperty(mappedName);
+      if (formProperty == null)
+      {
+        _logInvalidMapping(pAditoPropName, mappedName, true);
+        return;
+      }
+      Object newValue = aditoProperty.getValue();
+      if (!Objects.equal(newValue, formProperty.getValue()))
+        formProperty.setValue(newValue);
+    }
+    catch (IllegalAccessException e)
+    {
+      throw new RuntimeException(e); // TODO: runtimeEx
+    }
+    catch (InvocationTargetException e)
+    {
+      throw new RuntimeException(e); // TODO: runtimeEx
+    }
   }
 
   private FormProperty _getFormProperty(String pRadPropName)

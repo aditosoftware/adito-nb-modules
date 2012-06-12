@@ -46,6 +46,8 @@ public class ARADComponentHandler
     radComponent.setName(modelDataObject.getName());
     if (deleted != null)
       deleted = null;
+    else if (formDataBridge != null)
+      formDataBridge.newComponentAdded();
   }
 
   public void delete()

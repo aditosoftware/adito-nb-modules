@@ -38,14 +38,14 @@ public class AditoComponentConstraints extends AbstractComponentConstraints<IAnc
     Integer width = constraints.getValue(type().width());
     Integer height = constraints.getValue(type().height());
     return new Rectangle(x == null ? 0 : x, y == null ? 0 : y,
-                         width == null ? 0 : width, height == null ? 0 : height);
+                         width == null ? -1 : width, height == null ? -1 : height);
   }
 
   public void setBounds(Rectangle pBounds)
   {
     IAditoLayoutConstraints<IAnchorLayoutPropertyTypes> constraints = getConstraintsObject();
-    constraints.setValue(type().x(), pBounds.x);
-    constraints.setValue(type().y(), pBounds.y);
+    constraints.setValue(type().x(), pBounds.x == -1 ? null : pBounds.x);
+    constraints.setValue(type().y(), pBounds.y == -1 ? null : pBounds.y);
     constraints.setValue(type().width(), pBounds.width);
     constraints.setValue(type().height(), pBounds.height);
   }
