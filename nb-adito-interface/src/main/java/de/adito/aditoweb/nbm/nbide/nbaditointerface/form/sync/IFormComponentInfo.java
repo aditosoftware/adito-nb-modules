@@ -23,8 +23,6 @@ public interface IFormComponentInfo
 
   EContainerType getContainerType();
 
-  Class<?> getParentLayoutClass();
-
   Class<?> getLayoutClass();
 
   LayoutManager createLayout();

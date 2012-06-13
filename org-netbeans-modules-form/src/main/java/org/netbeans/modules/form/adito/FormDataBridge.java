@@ -47,7 +47,21 @@ public class FormDataBridge
 
   void newComponentAdded()
   {
-    layoutPropertiesChanged();
+    if (radComponent instanceof RADVisualComponent)
+    {
+      RADVisualComponent radVisualComponent = (RADVisualComponent) radComponent;
+      for (Node.Property property : radVisualComponent.getConstraintsProperties())
+      {
+        try
+        {
+          _alignAditoToFormProp(property);
+        }
+        catch (InvocationTargetException e)
+        {
+          // ungültige Werte werden ignoriert. (z.B. -1 für 'width')
+        }
+      }
+    }
     for (String s : componentInfo.getPropertyNames())
       _alignFormToAditoProperty(s);
   }
@@ -121,24 +135,10 @@ public class FormDataBridge
       }
       Object fieldValue = aditoProperty.getValue();
       Object formPropertyValue = pFormProperty.getValue();
-      if (!Objects.equal(fieldValue, formPropertyValue))
+      if (!Objects.equal(fieldValue, formPropertyValue) &&
+          (formPropertyValue != null || !aditoProperty.isDefaultValue()))
       {
-        //try
-        {
-          if (formPropertyValue != null || !aditoProperty.isDefaultValue())
-            try
-            {
-              aditoProperty.setValue(formPropertyValue);
-            }
-            catch (Exception e)
-            {
-              //e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
-            }
-        }
-        //catch (InvocationTargetException e)
-        {
-          //  throw new RuntimeException(e); // TODO: runtimeEx
-        }
+        aditoProperty.setValue(formPropertyValue);
       }
     }
     catch (IllegalAccessException e)
