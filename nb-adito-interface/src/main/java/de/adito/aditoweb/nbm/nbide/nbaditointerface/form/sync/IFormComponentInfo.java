@@ -5,8 +5,8 @@ import org.openide.nodes.*;
 
 import java.awt.*;
 import java.beans.PropertyChangeListener;
-import java.util.*;
 import java.util.List;
+import java.util.*;
 
 /**
  * @author J. Boesl, 16.05.11
@@ -14,8 +14,9 @@ import java.util.List;
 public interface IFormComponentInfo
 {
 
-  public static final String PROP_CHILD_ADDED = "%/propChildAdded";
-  public static final String PROP_CHILD_REMOVED = "%/propChildRemoved";
+  public static final String PROP_VALUE_CHANGED = "propValueChanged";
+  public static final String PROP_CHILD_ADDED = "propChildAdded";
+  public static final String PROP_CHILD_REMOVED = "propChildRemoved";
 
   Sheet createSheet();
 

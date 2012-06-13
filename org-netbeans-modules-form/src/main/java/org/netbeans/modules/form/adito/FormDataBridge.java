@@ -154,10 +154,9 @@ public class FormDataBridge
       @Override
       public void propertyChange(PropertyChangeEvent evt)
       {
-        if (evt.getPropertyName().equals(IFormComponentInfo.PROP_CHILD_ADDED))
+        String propertyName = evt.getPropertyName();
+        if (propertyName.equals(IFormComponentInfo.PROP_CHILD_ADDED))
         {
-          System.out.println("child added" + evt.getNewValue());
-
           FileObject created = (FileObject) evt.getNewValue();
 
           if (radComponent instanceof ComponentContainer)
@@ -186,18 +185,19 @@ public class FormDataBridge
             {
               throw new RuntimeException("can't copy values for: '" + component + "'.", e); // TODO: error-id
             }
-            System.out.println("created: " + component);
           }
         }
-        else if (evt.getPropertyName().equals(IFormComponentInfo.PROP_CHILD_REMOVED))
+        else if (propertyName.equals(IFormComponentInfo.PROP_CHILD_REMOVED))
         {
           System.out.println("child removed" + evt.getOldValue());
           System.out.println("Implement me!!!");
         }
-        else
+        else if (propertyName.equals(IFormComponentInfo.PROP_VALUE_CHANGED))
         {
-          _alignFormToAditoProperty(evt.getPropertyName());
+          _alignFormToAditoProperty((String) evt.getNewValue());
         }
+        else
+          throw new IllegalStateException(propertyName);
       }
     };
   }
