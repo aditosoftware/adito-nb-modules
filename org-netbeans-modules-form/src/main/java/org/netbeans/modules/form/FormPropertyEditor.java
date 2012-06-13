@@ -244,7 +244,7 @@ public class FormPropertyEditor implements PropertyEditor,
         }
 
         PropertyEditor prEd = property.getCurrentEditor();
-        return prEd != null ? prEd.getAsText() : null;
+        return prEd != null && property.canRead() ? prEd.getAsText() : null;
     }
 
     /**

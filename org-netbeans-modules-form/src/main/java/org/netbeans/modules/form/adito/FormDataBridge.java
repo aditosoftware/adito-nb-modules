@@ -1,6 +1,7 @@
 package org.netbeans.modules.form.adito;
 
 import com.google.common.base.*;
+import com.google.common.collect.Lists;
 import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.NbAditoInterface;
 import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.sync.*;
 import org.jetbrains.annotations.NotNull;
@@ -9,8 +10,10 @@ import org.netbeans.modules.form.project.ClassSource;
 import org.openide.filesystems.FileObject;
 import org.openide.loaders.DataFolder;
 import org.openide.nodes.Node;
+import org.openide.util.NotImplementedException;
 
 import java.beans.*;
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.logging.*;
 
@@ -89,6 +92,16 @@ public class FormDataBridge
   void unregisterAll()
   {
     componentInfo.removePropertyListener(aditoPropertyChangeListener);
+    for (String aditoPropName : componentInfo.getPropertyNames())
+    {
+      String radPropName = componentPropertyMapping.getRadPropName(aditoPropName);
+      if (!Strings.isNullOrEmpty(radPropName))
+      {
+        FormProperty formProperty = _getFormProperty(radPropName);
+        if (formProperty != null)
+          formProperty.removePropertyChangeListener(formPropertyChangeListener);
+      }
+    }
     aditoPropertyChangeListener = null;
     formPropertyChangeListener = null;
   }
@@ -189,15 +202,32 @@ public class FormDataBridge
         }
         else if (propertyName.equals(IFormComponentInfo.PROP_CHILD_REMOVED))
         {
-          System.out.println("child removed" + evt.getOldValue());
-          System.out.println("Implement me!!!");
+          if (radComponent instanceof ComponentContainer)
+          {
+            ComponentContainer container = (ComponentContainer) radComponent;
+            String removedName = ((FileObject) evt.getOldValue()).getNameExt();
+            for (RADComponent component : Lists.newArrayList(container.getSubBeans()))
+            {
+              if (Objects.equal(component.getName(), removedName))
+              {
+                try
+                {
+                  component.getNodeReference().destroy();
+                }
+                catch (IOException e)
+                {
+                  throw new RuntimeException("node could not be destroyed: " + component.getNodeReference(), e);
+                }
+              }
+            }
+          }
         }
         else if (propertyName.equals(IFormComponentInfo.PROP_VALUE_CHANGED))
         {
           _alignFormToAditoProperty((String) evt.getNewValue());
         }
         else
-          throw new IllegalStateException(propertyName);
+          throw new NotImplementedException(propertyName);
       }
     };
   }
