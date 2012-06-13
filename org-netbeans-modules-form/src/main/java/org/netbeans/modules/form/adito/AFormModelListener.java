@@ -43,11 +43,10 @@ public abstract class AFormModelListener implements FormModelListener
             break;
         }
       }
-      catch (Exception e)  // TODO: nur temporär ... testing
+      catch (Exception e)
       {
-        //e.printStackTrace(); // TODO: stacktrace
-        //if (event.isModifying())
-        //  eventComponent.getFormModel().forceUndoOfCompoundEdit();
+        if (event.isModifying())
+          eventComponent.getFormModel().forceUndoOfCompoundEdit();
       }
     }
   }
