@@ -385,9 +385,9 @@ public class FormDesignerTC extends TopComponent implements MultiViewElement {
     private void updateAssistant() {
         if (FormLoaderSettings.getInstance().getAssistantShown()) {
             AssistantModel assistant = FormEditor.getAssistantModel(formDesigner.getFormModel());
-            assistantView = new AssistantView(assistant);
+            //assistantView = new AssistantView(assistant);
             assistant.setContext("select"); // NOI18N
-            add(assistantView, BorderLayout.NORTH);
+            //add(assistantView, BorderLayout.NORTH);
         } else if (assistantView != null) {
             remove(assistantView);
             assistantView = null;
