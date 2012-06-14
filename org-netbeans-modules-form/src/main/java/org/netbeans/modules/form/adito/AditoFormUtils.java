@@ -3,7 +3,7 @@ package org.netbeans.modules.form.adito;
 import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.NbAditoInterface;
 import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.sync.*;
 import org.netbeans.modules.form.RADComponent;
-import org.openide.loaders.DataFolder;
+import org.openide.filesystems.FileObject;
 import org.openide.nodes.Node;
 
 import javax.swing.*;
@@ -41,12 +41,12 @@ public final class AditoFormUtils
   public static void copyValuesFromModelToComponent(RADComponent pComponent)
       throws InvocationTargetException, IllegalAccessException
   {
-    DataFolder modelDataObject = pComponent.getARADComponentHandler().getModelDataObject();
-    if (modelDataObject == null)
+    FileObject modelFileObject = pComponent.getARADComponentHandler().getModelFileObject();
+    if (modelFileObject == null)
       throw new IllegalStateException(pComponent.toString());
 
     IFormComponentInfoProvider compInfoProvider = NbAditoInterface.lookup(IFormComponentInfoProvider.class);
-    IFormComponentInfo componentInfo = compInfoProvider.createComponentInfo(modelDataObject);
+    IFormComponentInfo componentInfo = compInfoProvider.createComponentInfo(modelFileObject);
     for (Map.Entry<String, Object> entry : componentInfo.getInitialValues().entrySet())
     {
       Node.Property radProperty = pComponent.getPropertyByName(entry.getKey());

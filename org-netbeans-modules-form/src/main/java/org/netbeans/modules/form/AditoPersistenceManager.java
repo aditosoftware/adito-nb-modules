@@ -136,7 +136,7 @@ public class AditoPersistenceManager extends PersistenceManager
     // load subcomponents
     RADComponent[] childComponents;
 
-    List<FileObject> childModels = NbAditoInterface.lookup(IAditoModelDataProvider.class).getSubModels(pModelComp);
+    List<FileObject> childModels = NbAditoInterface.lookup(IAditoModelDataProvider.class).getChildModels(pModelComp);
     List<RADComponent> list = new ArrayList<RADComponent>();
     for (FileObject childModel : childModels)
     {

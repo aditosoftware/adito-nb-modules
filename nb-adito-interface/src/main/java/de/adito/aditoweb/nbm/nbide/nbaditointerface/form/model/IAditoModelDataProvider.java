@@ -2,7 +2,7 @@ package de.adito.aditoweb.nbm.nbide.nbaditointerface.form.model;
 
 import org.openide.awt.UndoRedo;
 import org.openide.filesystems.FileObject;
-import org.openide.loaders.*;
+import org.openide.loaders.DataObject;
 import org.openide.nodes.*;
 import org.openide.text.DataEditorSupport;
 
@@ -22,18 +22,20 @@ public interface IAditoModelDataProvider
 
   FileObject loadModel(FileObject pAodFile);
 
-  List<FileObject> getSubModels(FileObject pFileObject);
+  List<FileObject> getChildModels(FileObject pFileObject);
+
+  FileObject getDefaultChildContainer(FileObject pFileObject);
 
   List<FileObject> getOthers(FileObject pFileObject);
 
-  FileObject createOrRestoreDataModel(DataFolder pParentData, Class<?> pComponentClass, String pCreatedName,
+  FileObject createOrRestoreDataModel(FileObject pParentData, Class<?> pComponentClass, String pCreatedName,
                                       FileObject pDeleted);
 
-  FileObject removeDataModel(DataObject pModelDataObject);
+  FileObject removeDataModel(FileObject pModelFileObject);
 
   ICookieLookupHelper getContainerLookupHelper(DataObject pDataObject, CookieSet pCookieSet);
 
   public Object installUpdateListeners(final DataObject pDataObject, final DataEditorSupport pDataEditorSupport,
-                                     final UndoRedo.Manager pUndoRedoManager, Runnable pOnChange);
+                                       final UndoRedo.Manager pUndoRedoManager, Runnable pOnChange);
 
 }

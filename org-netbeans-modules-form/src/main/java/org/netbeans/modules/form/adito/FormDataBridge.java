@@ -8,7 +8,6 @@ import org.jetbrains.annotations.NotNull;
 import org.netbeans.modules.form.*;
 import org.netbeans.modules.form.project.ClassSource;
 import org.openide.filesystems.FileObject;
-import org.openide.loaders.DataFolder;
 import org.openide.nodes.Node;
 import org.openide.util.NotImplementedException;
 
@@ -189,7 +188,7 @@ public class FormDataBridge
             RADComponent component = radComponent.getFormModel().getComponentCreator().createComponent(
                 new ClassSource(createdBean.getCanonicalName()), radComponent, null);
             component.setStoredName(created.getName());
-            component.getARADComponentHandler().setModelDataObject(DataFolder.findFolder(created));
+            component.getARADComponentHandler().setModelFileObject(created);
             try
             {
               AditoFormUtils.copyValuesFromModelToComponent(component);
@@ -202,6 +201,8 @@ public class FormDataBridge
         }
         else if (propertyName.equals(IFormComponentInfo.PROP_CHILD_REMOVED))
         {
+          // Delete ist problematisch: dieses Event wird erst erhalten NACHDEM die Datei gelöscht wurde. Das bedeutet
+          // die Daten für 'undo' können nicht hinterlegt werden und das kann zu Folgefehlern führen.
           if (radComponent instanceof ComponentContainer)
           {
             ComponentContainer container = (ComponentContainer) radComponent;
@@ -275,9 +276,9 @@ public class FormDataBridge
     String prop1 = pAditoToForm ? aditoProp : formProp;
     String prop2 = pAditoToForm ? formProp : aditoProp;
     String compDetail = "component " + radComponent.getBeanClass().getSimpleName();
-    DataFolder modelDataObject = radComponent.getARADComponentHandler().getModelDataObject();
-    assert modelDataObject != null;
-    String pathDetail = "path " + modelDataObject.getPrimaryFile().getPath();
+    FileObject modelFileObject = radComponent.getARADComponentHandler().getModelFileObject();
+    assert modelFileObject != null;
+    String pathDetail = "path " + modelFileObject.getPath();
     String detail = pAditoToForm ? compDetail + " with " + pathDetail : pathDetail + " with " + compDetail;
     Logger.getLogger(FormDataBridge.class.getSimpleName()).log(
         Level.WARNING,

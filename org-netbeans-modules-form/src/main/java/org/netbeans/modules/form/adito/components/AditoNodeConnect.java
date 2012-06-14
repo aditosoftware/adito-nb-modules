@@ -3,6 +3,7 @@ package org.netbeans.modules.form.adito.components;
 import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.NbAditoInterface;
 import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.sync.*;
 import org.netbeans.modules.form.RADComponent;
+import org.openide.filesystems.FileObject;
 import org.openide.loaders.*;
 import org.openide.nodes.*;
 import org.openide.util.Lookup;
@@ -26,37 +27,37 @@ public final class AditoNodeConnect
 
   public static Image getIcon(RADComponent pComponent, final int pType)
   {
-    return _resolve(pComponent, new _C<Image>()
+    return _resolve(pComponent, new _NodeC<Image>()
     {
       @Override
-      public Image resolve(DataFolder pDataObject)
+      public Image resolve(Node pNode)
       {
-        return pDataObject.getNodeDelegate().getIcon(pType);
+        return pNode.getIcon(pType);
       }
     });
   }
 
   public static String getDisplayName(RADComponent pComponent)
   {
-    return _resolve(pComponent, new _C<String>()
+    return _resolve(pComponent, new _NodeC<String>()
     {
       @Override
-      public String resolve(DataFolder pDataObject)
+      public String resolve(Node pNode)
       {
-        return pDataObject.getNodeDelegate().getDisplayName();
+        return pNode.getDisplayName();
       }
     });
   }
 
   public static Sheet getSheet(RADComponent pComponent)
   {
-    return _resolve(pComponent, new _C<Sheet>()
+    return _resolve(pComponent, new _FileObjectC<Sheet>()
     {
       @Override
-      public Sheet resolve(DataFolder pDataObject)
+      public Sheet resolve(FileObject pFileObject)
       {
         IFormComponentInfoProvider compInfoProvider = NbAditoInterface.lookup(IFormComponentInfoProvider.class);
-        IFormComponentInfo componentInfo = compInfoProvider.createComponentInfo(pDataObject);
+        IFormComponentInfo componentInfo = compInfoProvider.createComponentInfo(pFileObject);
         return componentInfo.createSheet();
       }
     });
@@ -64,12 +65,12 @@ public final class AditoNodeConnect
 
   public static void addPropertyChangeListener(RADComponent pComponent, final PropertyChangeListener pListener)
   {
-    _resolve(pComponent, new _C<Void>()
+    _resolve(pComponent, new _NodeC<Void>()
     {
       @Override
-      public Void resolve(DataFolder pDataObject)
+      public Void resolve(Node pNode)
       {
-        pDataObject.getNodeDelegate().addPropertyChangeListener(pListener);
+        pNode.addPropertyChangeListener(pListener);
         return null;
       }
     });
@@ -77,12 +78,12 @@ public final class AditoNodeConnect
 
   public static List<Action> getActions(RADComponent pComponent, final boolean pContext)
   {
-    Action[] actions = _resolve(pComponent, new _C<Action[]>()
+    Action[] actions = _resolve(pComponent, new _NodeC<Action[]>()
     {
       @Override
-      public Action[] resolve(DataFolder pDataObject)
+      public Action[] resolve(Node pNode)
       {
-        return pDataObject.getNodeDelegate().getActions(pContext);
+        return pNode.getActions(pContext);
       }
     });
     if (actions == null)
@@ -92,30 +93,60 @@ public final class AditoNodeConnect
 
   public static Lookup getLookup(RADComponent pComponent)
   {
-    return _resolve(pComponent, new _C<Lookup>()
+    return _resolve(pComponent, new _DataObjectC<Lookup>()
     {
       @Override
-      public Lookup resolve(DataFolder pDataObject)
+      public Lookup resolve(DataObject pDataObject)
       {
         return Lookups.exclude(pDataObject.getLookup(), DataObject.class, Node.class);
       }
     });
   }
 
-  private static <T> T _resolve(RADComponent pComp, _C<T> pC)
+  private static <T> T _resolve(RADComponent pComp, _FileObjectC<T> pC)
   {
-    DataFolder modelDataObject = pComp.getARADComponentHandler().getModelDataObject();
-    if (modelDataObject == null)
+    FileObject modelFileObject = pComp.getARADComponentHandler().getModelFileObject();
+    if (modelFileObject == null)
       return null;
-    return pC.resolve(modelDataObject);
+    return pC.resolve(modelFileObject);
+  }
+
+
+  /**
+   * Ausführungsbeschreibung auf Nodes.
+   */
+  private abstract static class _NodeC<T> extends _DataObjectC<T>
+  {
+    @Override
+    public T resolve(DataObject pDataObject)
+    {
+      return pDataObject != null ? resolve(pDataObject.getNodeDelegate()) : null;
+    }
+
+    public abstract T resolve(Node pNode);
   }
 
   /**
-   * Ausführungsinterface
+   * Ausführungsbeschreibung auf DataObjects.
    */
-  private interface _C<T>
+  private abstract static class _DataObjectC<T> implements _FileObjectC<T>
   {
-    T resolve(DataFolder pDataObject);
+    @Override
+    public final T resolve(FileObject pFileObject)
+    {
+      DataFolder dataFolder = DataFolder.findFolder(pFileObject);
+      return dataFolder != null ? resolve(dataFolder) : null;
+    }
+
+    public abstract T resolve(DataObject pDataObject);
+  }
+
+  /**
+   * Ausführungsbeschreibung auf FileObjects.
+   */
+  private interface _FileObjectC<T>
+  {
+    T resolve(FileObject pFileObject);
   }
 
 }

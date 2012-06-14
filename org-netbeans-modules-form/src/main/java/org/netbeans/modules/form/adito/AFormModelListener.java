@@ -24,11 +24,11 @@ public abstract class AFormModelListener implements FormModelListener
             eventComponent.getARADComponentHandler().layoutPropertiesChanged();
             break;
           case FormModelEvent.COMPONENT_REMOVED:
-            eventComponent.getARADComponentHandler().delete();
+            eventComponent.getARADComponentHandler().deleted();
             clearProperties(eventComponent);
             break;
           case FormModelEvent.COMPONENT_ADDED:
-            eventComponent.getARADComponentHandler().add();
+            eventComponent.getARADComponentHandler().added();
             break;
           case FormModelEvent.FORM_TO_BE_CLOSED:
             Collection<RADComponent> allComponents = event.getFormModel().getAllComponents();
