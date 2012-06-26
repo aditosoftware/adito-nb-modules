@@ -5,7 +5,7 @@ import org.openide.nodes.Node;
 import java.util.Collection;
 
 /**
- * Layoutconstraints für den Formeditor. Liefert die Verfügbaren Properties ({@link #getProperties}) und bietet einen
+ * LayoutConstraints für den FormEditor. Liefert die Verfügbaren Properties ({@link #getProperties}) und bietet einen
  * Weg zum duplizieren des Objekts ({@link #cloneConstraints})
  *
  * @author J. Boesl, 20.05.11
@@ -20,6 +20,12 @@ public interface IAditoLayoutConstraints<TypeInfo>
    */
   Collection<Node.Property> getProperties();
 
+  /**
+   * Liefert ein Property.
+   *
+   * @param pType Beschreibung des Properties.
+   * @return das Property wen gefunden, ansonsten <tt>null</tt>.
+   */
   <T> Node.Property<T> get(IAditoLayoutPropertyType<T> pType);
 
   /**
@@ -48,7 +54,7 @@ public interface IAditoLayoutConstraints<TypeInfo>
   TypeInfo getTypeInfo();
 
   /**
-   * Clont die Constraints. Alle Properties werden auch geklont.
+   * Klont die Constraints. Alle Properties werden auch geklont.
    *
    * @return neue Constraints-Instanz vom gleichen Typ und mit den gleichen Properties.
    */

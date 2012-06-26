@@ -1,5 +1,7 @@
 package org.netbeans.modules.form.adito.layout;
 
+import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.NbAditoInterface;
+import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.layout.IAditoLayoutProvider;
 import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.layout.common.IAditoLayoutConstraints;
 import org.netbeans.modules.form.layoutsupport.LayoutConstraints;
 
@@ -16,7 +18,8 @@ public class AditoRegisterConstraints extends AbstractComponentConstraints
   @Override
   protected IAditoLayoutConstraints createConstraints()
   {
-    return null;
+    IAditoLayoutProvider layoutProvider = NbAditoInterface.lookup(IAditoLayoutProvider.class);
+    return layoutProvider.getRegisterLayout().createLayoutConstraints();
   }
 
   @Override
