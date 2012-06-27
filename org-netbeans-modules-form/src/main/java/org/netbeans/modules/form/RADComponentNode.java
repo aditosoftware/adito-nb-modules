@@ -108,7 +108,11 @@ public class RADComponentNode extends FormNode
           @Override
           public void propertyChange(PropertyChangeEvent evt)
           {
-            firePropertyChange(evt.getPropertyName(), null, null);
+            String propertyName = evt.getPropertyName();
+            if ("name".equals(propertyName))
+              updateName();
+            else
+              firePropertyChange(propertyName, null, null);
           }
         });
     }

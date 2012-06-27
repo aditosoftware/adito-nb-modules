@@ -1,5 +1,6 @@
 package org.netbeans.modules.form.adito;
 
+import com.google.common.base.Objects;
 import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.NbAditoInterface;
 import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.model.IAditoModelDataProvider;
 import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.sync.*;
@@ -51,6 +52,23 @@ public class ARADComponentHandler
     }
     else if (formDataBridge != null)
       formDataBridge.newComponentAdded();
+  }
+
+  public void nameIsAboutToChange(String pOldName, String pNewName) throws IllegalStateException
+  {
+    try
+    {
+      if (Objects.equal(pOldName, pNewName))
+        return;
+      if (radComponent == null || modelFileObject == null)
+        throw new IllegalStateException("oldName: " + pOldName + ", newName: " + pNewName);
+      IAditoModelDataProvider dataProvider = NbAditoInterface.lookup(IAditoModelDataProvider.class);
+      dataProvider.rename(modelFileObject, pOldName, pNewName);
+    }
+    catch (Exception e)
+    {
+      e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+    }
   }
 
   private void _updateChildren()

@@ -1,5 +1,6 @@
 package de.adito.aditoweb.nbm.nbide.nbaditointerface.form.model;
 
+import org.jetbrains.annotations.NotNull;
 import org.openide.awt.UndoRedo;
 import org.openide.filesystems.FileObject;
 import org.openide.loaders.DataObject;
@@ -32,6 +33,15 @@ public interface IAditoModelDataProvider
                                       FileObject pDeleted);
 
   FileObject removeDataModel(FileObject pModelFileObject);
+
+  /**
+   * Versucht die Komponente umzubenennen.
+   *
+   * @param pFileObject das ModelFileObject, das umbenannt werden soll.
+   * @param pOldName    der alte Name.
+   * @param pNewName    der neue Name.
+   */
+  void rename(@NotNull FileObject pFileObject, String pOldName, @NotNull String pNewName);
 
   ICookieLookupHelper getContainerLookupHelper(DataObject pDataObject, CookieSet pCookieSet);
 

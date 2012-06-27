@@ -414,7 +414,7 @@ public class RADComponent {
     public void rename(String name) {
       if (!needsVariableRename(name))
         return;
-      RenameSupport.renameComponent(this, name);
+      //RenameSupport.renameComponent(this, name);
       setStoredName(name);
 
       // STRIPPED
@@ -453,6 +453,9 @@ public class RADComponent {
     }
 
     public void setStoredName(String name) {
+        if (aRADComponentHandler != null)
+          aRADComponentHandler.nameIsAboutToChange(storedName, name);
+
         storedName = name;
         if (getNodeReference() != null)
           getNodeReference().updateName();
