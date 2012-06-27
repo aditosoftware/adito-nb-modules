@@ -132,7 +132,10 @@ public class ARADComponentHandler
       }
       Object displayName = dataObject == null ? null : dataObject.getNodeDelegate().getDisplayName();
       if (displayName != null)
-        return displayName.toString();
+      {
+        assert radComponent != null;
+        return DMHelper.getFreeName(radComponent.getFormModel(), displayName.toString());
+      }
     }
     return UUID.randomUUID().toString();
   }
