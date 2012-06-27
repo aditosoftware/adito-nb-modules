@@ -58,16 +58,16 @@ public class ARADComponentHandler
   {
     try
     {
-      if (Objects.equal(pOldName, pNewName))
+      if (Objects.equal(pOldName, pNewName) || modelFileObject == null)
         return;
-      if (radComponent == null || modelFileObject == null)
+      if (radComponent == null)
         throw new IllegalStateException("oldName: " + pOldName + ", newName: " + pNewName);
       IAditoModelDataProvider dataProvider = NbAditoInterface.lookup(IAditoModelDataProvider.class);
       dataProvider.rename(modelFileObject, pOldName, pNewName);
     }
     catch (Exception e)
     {
-      e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+      e.printStackTrace();  // TODO: notify exception
     }
   }
 

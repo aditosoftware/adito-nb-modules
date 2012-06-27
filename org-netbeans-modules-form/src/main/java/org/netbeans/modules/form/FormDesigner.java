@@ -1693,6 +1693,10 @@ public class FormDesigner {
 
     public void startInPlaceEditing(RADComponent metacomp) {
 
+        // Inplace-Editing vorerst mal disabled, da es in der Form nicht richtig funktioniert und nicht viel bringt.
+        // Könnte evtl. in erweiterter Form wiederhergestellt werden.
+        if (true)
+            return;
         if (formModel.isReadOnly())
             return;
         if (textEditLayer != null && textEditLayer.isVisible())
