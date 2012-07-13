@@ -195,7 +195,7 @@ public class FormDataBridge
             }
             catch (Exception e)
             {
-              throw new RuntimeException("can't copy values for: '" + component + "'.", e); // TODO: error-id
+              throw new RuntimeException("can't copy values for: '" + component + "'.", e);
             }
           }
         }
