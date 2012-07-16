@@ -57,10 +57,10 @@ import javax.swing.text.DefaultEditorKit;
 
 import org.openide.*;
 import org.openide.actions.PasteAction;
+import org.openide.explorer.view.*;
 import org.openide.nodes.*;
 import org.openide.explorer.*;
 import org.openide.awt.UndoRedo;
-import org.openide.explorer.view.BeanTreeView;
 import org.openide.windows.*;
 import org.openide.util.*;
 import org.openide.util.actions.SystemAction;
@@ -102,7 +102,7 @@ public class ComponentInspector extends JPanel
     // construction (ComponentInspector is a singleton)
 
     /** Finds default instance. Use in client code instead of {@link #getDefault()}.
-     * 
+     *
      * @return ComponentInspector singleton.
      */
     public static synchronized ComponentInspector getInstance() {
@@ -136,7 +136,21 @@ public class ComponentInspector extends JPanel
     }
 
     private void createComponents() {
-        treeView = new BeanTreeView();
+        treeView = new BeanTreeView()
+        {
+          @Override
+          protected NodeTreeModel createModel()
+          {
+            return new NodeTreeModel()
+            {
+              @Override
+              public boolean isLeaf(Object node)
+              {
+                return getChildCount(node) == 0;
+              }
+            };
+          }
+        };
         treeView.setDragSource(true);
         treeView.setDropTarget(true);
         treeView.getAccessibleContext().setAccessibleName(
@@ -326,7 +340,7 @@ public class ComponentInspector extends JPanel
 
     // ---------------
     // actions
-    
+
     // fix of issue 42082
     private void updatePasteAction() {
         if(java.awt.EventQueue.isDispatchThread()) {
@@ -457,7 +471,7 @@ public class ComponentInspector extends JPanel
             java.awt.EventQueue.invokeLater(this); // replan to EventQueue thread
         }
 
-        /** Updates activated nodes and actions. It is executed via timer 
+        /** Updates activated nodes and actions. It is executed via timer
          * restarted each time a new selection change appears - if they come
          * quickly e.g. due to the user is holding a cursor key, this
          * (relatively time expensive update) is done only at the end.
@@ -532,7 +546,7 @@ public class ComponentInspector extends JPanel
             }
         }
     }
-    
+
     // performer for CopyAction and CutAction
     private class CopyCutActionPerformer extends javax.swing.AbstractAction
                                          implements ActionPerformer
