@@ -187,7 +187,7 @@ made subject to such option by the copyright holder.
         <folder name="GUIForms">
             <attr name="SystemFileSystem.localizingBundle" stringvalue="org.netbeans.modules.form.resources.Bundle"/>
             <attr name="instantiatingWizardURL" urlvalue="nbresloc:/org/netbeans/modules/form/resources/Forms.html"/>
-            
+
             <attr name="position" intvalue="1000"/>
             <file name="JApplet.java" url="templates/SwingForms/JApplet_java">
                 <attr name="SystemFileSystem.localizingBundle" stringvalue="org.netbeans.modules.form.resources.Bundle"/>
@@ -211,7 +211,7 @@ made subject to such option by the copyright holder.
                 <attr name="SystemFileSystem.localizingBundle" stringvalue="org.netbeans.modules.form.resources.Bundle"/>
                 <attr name="position" intvalue="100"/>
                 <attr name="template" boolvalue="true"/>
-                <attr name="javax.script.ScriptEngine" stringvalue="freemarker"/>                
+                <attr name="javax.script.ScriptEngine" stringvalue="freemarker"/>
                 <attr name="instantiatingWizardURL" urlvalue="nbresloc:/org/netbeans/modules/form/resources/JDialog.html"/>
                 <attr name="SystemFileSystem.icon" urlvalue="nbresloc:/org/netbeans/modules/form/resources/palette/dialog_16.png"/>
                 <attr name="SystemFileSystem.icon32" urlvalue="nbresloc:/org/netbeans/modules/form/resources/palette/dialog_32.png"/>
@@ -220,7 +220,7 @@ made subject to such option by the copyright holder.
                 <attr name="weight" intvalue="100"/>
             </file>
             <file name="JDialog.form" url="templates/SwingForms/JDialog_form">
-                <attr name="template" boolvalue="true"/>                
+                <attr name="template" boolvalue="true"/>
                 <attr name="templateCategory" stringvalue="java-forms"/>
             </file>
 
@@ -228,7 +228,7 @@ made subject to such option by the copyright holder.
                 <attr name="SystemFileSystem.localizingBundle" stringvalue="org.netbeans.modules.form.resources.Bundle"/>
                 <attr name="position" intvalue="200"/>
                 <attr name="template" boolvalue="true"/>
-                <attr name="javax.script.ScriptEngine" stringvalue="freemarker"/>                
+                <attr name="javax.script.ScriptEngine" stringvalue="freemarker"/>
                 <attr name="instantiatingWizardURL" urlvalue="nbresloc:/org/netbeans/modules/form/resources/JFrame.html"/>
                 <attr name="SystemFileSystem.icon" urlvalue="nbresloc:/org/netbeans/modules/form/resources/palette/frame_16.png"/>
                 <attr name="SystemFileSystem.icon32" urlvalue="nbresloc:/org/netbeans/modules/form/resources/palette/frame_32.png"/>
@@ -291,7 +291,7 @@ made subject to such option by the copyright holder.
                 <attr name="template" boolvalue="true"/>
                 <attr name="templateCategory" stringvalue="java-forms"/>
             </file>
-            
+
             <file name="Application.java" url="templates/Dialogs/Application_java">
                 <attr name="SystemFileSystem.localizingBundle" stringvalue="org.netbeans.modules.form.resources.Bundle"/>
                 <attr name="position" intvalue="700"/>
@@ -342,15 +342,15 @@ made subject to such option by the copyright holder.
                 <attr name="template" boolvalue="true"/>
                 <attr name="templateCategory" stringvalue="java-forms"/>
             </file>
-            
-            
-            
+
+
+
         </folder>
         <folder name="AWTForms">
             <attr name="SystemFileSystem.localizingBundle" stringvalue="org.netbeans.modules.form.resources.Bundle"/>
             <attr name="instantiatingWizardURL" urlvalue="nbresloc:/org/netbeans/modules/form/resources/AWTForms.html"/>
 
-            
+
 
             <attr name="position" intvalue="1100"/>
             <file name="Applet.java" url="templates/AWTForms/Applet_java">
@@ -447,26 +447,26 @@ made subject to such option by the copyright holder.
             <folder name="system_with_project"/>
         </folder>
     </folder>
-    <!--<folder name="OptionsDialog">-->
-        <!--<folder name="Advanced">-->
-            <!--<file name="FormEditor.instance">-->
-                <!--<attr name="instanceCreate" methodvalue="org.netbeans.spi.options.AdvancedOption.createSubCategory"/>-->
+    <folder name="OptionsDialog">
+        <folder name="Advanced">
+            <file name="FormEditor.instance">
+                <attr name="instanceCreate" methodvalue="org.netbeans.spi.options.AdvancedOption.createSubCategory"/>
 
-                <!--<attr name="displayName" bundlevalue="org.netbeans.modules.form.Bundle#Form_Editor"/>-->
-                <!--<attr name="toolTip" bundlevalue="org.netbeans.modules.form.Bundle#Form_Editor_Tooltip"/>-->
-                <!--<attr name="controller" newvalue="org.netbeans.modules.form.FormEditorPanelController"/>-->
-                <!--<attr name="keywords" bundlevalue="org.netbeans.modules.form.Bundle#KW_FormOptions"/>-->
-                <!--<attr name="keywordsCategory" stringvalue="Advanced/FormEditor"/>-->
-            <!--</file>-->
-        <!--</folder>-->
-    <!--</folder>-->
+                <attr name="displayName" bundlevalue="org.netbeans.modules.form.Bundle#Form_Editor"/>
+                <attr name="toolTip" bundlevalue="org.netbeans.modules.form.Bundle#Form_Editor_Tooltip"/>
+                <attr name="controller" newvalue="org.netbeans.modules.form.FormEditorPanelController"/>
+                <attr name="keywords" bundlevalue="org.netbeans.modules.form.Bundle#KW_FormOptions"/>
+                <attr name="keywordsCategory" stringvalue="Advanced/FormEditor"/>
+            </file>
+        </folder>
+    </folder>
 
-    <!--<folder name="OptionsExport">-->
-        <!--<folder name="Advanced">-->
-            <!--<file name="Form">-->
-                <!--<attr name="include" stringvalue="config/FormDesignerPalette/.*|config/Services/formsettings[.]settings"/>-->
-                <!--<attr name="displayName" bundlevalue="org.netbeans.modules.form.Bundle#Form.Options.Export.displayName"/>-->
-            <!--</file>-->
-        <!--</folder>-->
-    <!--</folder>-->
+    <folder name="OptionsExport">
+        <folder name="Advanced">
+            <file name="Form">
+                <attr name="include" stringvalue="config/FormDesignerPalette/.*|config/Services/formsettings[.]settings"/>
+                <attr name="displayName" bundlevalue="org.netbeans.modules.form.Bundle#Form.Options.Export.displayName"/>
+            </file>
+        </folder>
+    </folder>
 </filesystem>
