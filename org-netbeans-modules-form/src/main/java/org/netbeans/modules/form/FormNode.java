@@ -82,11 +82,35 @@ public class FormNode extends AbstractNode implements FormCookie {
 
     private FormNode(Children children, FormModel pFormModel, Lookup pLookup, InstanceContent pInstanceContent)
     {
-      super(children, pLookup == null ? new AbstractLookup(pInstanceContent) :
-          new ProxyLookup(new AbstractLookup(pInstanceContent), pLookup));
+      super(children, _createLookup(pFormModel, new AbstractLookup(pInstanceContent), pLookup));
       formModel = pFormModel;
       instanceContent = pInstanceContent;
       instanceContent.add(this);
+    }
+
+    private static Lookup _createLookup(final FormModel pFormModel, Lookup pInstanceContentLookup, Lookup pAdditional)
+    {
+      Lookup formModelDelegateLookup = Lookups.proxy(new Lookup.Provider()
+      {
+        @Override
+        public Lookup getLookup()
+        {
+          return Lookups.proxy(new Lookup.Provider()
+          {
+            @Override
+            public Lookup getLookup()
+            {
+              FormDataObject formDataObject = FormEditor.getFormDataObject(pFormModel);
+              if (formDataObject == null)
+                return Lookup.EMPTY;
+              return formDataObject.getLookup();
+            }
+          });
+        }
+      });
+      if (pAdditional == null)
+        return new ProxyLookup(formModelDelegateLookup, pInstanceContentLookup);
+      return new ProxyLookup(formModelDelegateLookup, pInstanceContentLookup, pAdditional);
     }
 
     protected final InstanceContent getInstanceContent()
@@ -106,7 +130,7 @@ public class FormNode extends AbstractNode implements FormCookie {
         return this;
     }
 
-    @Override
+    /*@Override
     public <T extends Node.Cookie> T getCookie(Class<T> type) {
         T cookie = super.getCookie(type);
         if (cookie == null
@@ -120,7 +144,7 @@ public class FormNode extends AbstractNode implements FormCookie {
                 cookie = fdo.getCookie(type);
         }
         return cookie;
-    }
+    }*/
 
     // because delegating cookies to FormDataObject we have a bit complicated
     // way of updating cookies on node - need fire a change on nodes explicitly
@@ -168,9 +192,9 @@ public class FormNode extends AbstractNode implements FormCookie {
     protected Component createCustomizer() {
         return null;
     }
-    
+
     /** Provides access for firing property changes
-     * 
+     *
      * @param name property name
      * @param oldValue old value of the property
      * @param newValue new value of the property
