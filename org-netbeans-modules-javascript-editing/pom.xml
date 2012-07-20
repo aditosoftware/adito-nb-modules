@@ -235,7 +235,7 @@
                   <targetPath>${project.build.directory}/nbm/netbeans/aditoonline/jsstubs</targetPath>
                 </resource>
                 <resource>
-                  <directory>src/main/nbm/jsstubs</directory>
+                  <directory>${project.basedir}/src/main/nbm/jsstubs</directory>
                   <targetPath>${project.build.directory}/nbm/netbeans/aditoonline/jsstubs</targetPath>
                 </resource>
                 <!-- ~~~~ -->
