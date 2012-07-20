@@ -258,6 +258,15 @@
             </configuration>
           </execution>
         </executions>
+        <dependencies>
+          <!-- ist Abhängig vom Server, weil dort erst die JsStubs beim Kompilieren vom Annotation-Prozessor erzeugt
+          werden müssen. -->
+          <dependency>
+            <groupId>de.adito.aditoweb</groupId>
+            <artifactId>server</artifactId>
+            <version>${project.parent.version}</version>
+          </dependency>
+        </dependencies>
       </plugin>
 
     </plugins>
