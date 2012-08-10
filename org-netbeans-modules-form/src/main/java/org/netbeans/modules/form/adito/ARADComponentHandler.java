@@ -36,6 +36,13 @@ public class ARADComponentHandler
 
   public void added()
   {
+    /**
+     * Wenn modelFileObject und formDataBridge nicht 'null' sind, dann wurde die Komponente im Model hinzugefügt und
+     * und zum FormModel synchronisiert. Muss also nicht mehr weiter behandelt werden.
+     */
+    if (modelFileObject != null && formDataBridge != null)
+      return;
+
     RADComponent parentRadComponent = radComponent.getParentComponent();
     ARADComponentHandler parentRadHandler = parentRadComponent.getARADComponentHandler();
 
