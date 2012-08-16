@@ -90,17 +90,37 @@ public class FormNode extends AbstractNode implements FormCookie {
 
     private static Lookup _createLookup(final FormModel pFormModel, Lookup pInstanceContentLookup, Lookup pAdditional)
     {
-      Lookup formModelDelegateLookup = Lookups.proxy(new Lookup.Provider()
-      {
-        @Override
-        public Lookup getLookup()
-        {
-          FormDataObject formDataObject = FormEditor.getFormDataObject(pFormModel);
-          if (formDataObject == null)
-            return Lookup.EMPTY;
-          return formDataObject.getLookup();
-        }
-      });
+      Lookup formModelDelegateLookup = Lookups.fixed(
+          new Object[]{DataObject.class, SaveCookie.class, CloseCookie.class, PrintCookie.class},
+          new InstanceContent.Convertor<Object, Object>()
+          {
+            @Override
+            public Object convert(Object obj)
+            {
+              FormDataObject formDataObject = FormEditor.getFormDataObject(pFormModel);
+              if (formDataObject == null)
+                return null;
+              return formDataObject.getLookup().lookup((Class<?>) obj);
+            }
+
+            @Override
+            public Class<?> type(Object obj)
+            {
+              return (Class<?>) obj;
+            }
+
+            @Override
+            public String id(Object obj)
+            {
+              return ((Class) obj).getCanonicalName();
+            }
+
+            @Override
+            public String displayName(Object obj)
+            {
+              return ((Class) obj).getName();
+            }
+          });
       if (pAdditional == null)
         return new ProxyLookup(formModelDelegateLookup, pInstanceContentLookup);
       return new ProxyLookup(formModelDelegateLookup, pInstanceContentLookup, pAdditional);
