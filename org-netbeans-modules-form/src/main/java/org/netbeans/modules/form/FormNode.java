@@ -95,17 +95,10 @@ public class FormNode extends AbstractNode implements FormCookie {
         @Override
         public Lookup getLookup()
         {
-          return Lookups.proxy(new Lookup.Provider()
-          {
-            @Override
-            public Lookup getLookup()
-            {
-              FormDataObject formDataObject = FormEditor.getFormDataObject(pFormModel);
-              if (formDataObject == null)
-                return Lookup.EMPTY;
-              return formDataObject.getLookup();
-            }
-          });
+          FormDataObject formDataObject = FormEditor.getFormDataObject(pFormModel);
+          if (formDataObject == null)
+            return Lookup.EMPTY;
+          return formDataObject.getLookup();
         }
       });
       if (pAdditional == null)
