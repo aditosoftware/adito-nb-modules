@@ -1,6 +1,7 @@
 package de.adito.aditoweb.nbm.nbide.nbaditointerface.form.sync;
 
 
+import org.jetbrains.annotations.Nullable;
 import org.openide.nodes.*;
 
 import java.awt.*;
@@ -33,6 +34,7 @@ public interface IFormComponentInfo
   /**
    * @return statische Informationen über die durch das FileObject identifizierte Komponente.
    */
+  @Nullable
   IFormComponentPropertyMapping getFormPropertyMapping();
 
   List<String> getPropertyNames();

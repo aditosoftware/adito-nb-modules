@@ -183,7 +183,10 @@ public class FormDataBridge
 
             IFormComponentInfoProvider compInfoProvider = NbAditoInterface.lookup(IFormComponentInfoProvider.class);
             IFormComponentInfo componentInfo = compInfoProvider.createComponentInfo(created);
-            Class<?> createdBean = componentInfo.getFormPropertyMapping().getComponentClass();
+            IFormComponentPropertyMapping formPropertyMapping = componentInfo.getFormPropertyMapping();
+            if (formPropertyMapping == null)
+              throw new RuntimeException("No 'IFormComponentProvider' available for '" + created.getPath() + "'.");
+            Class<?> createdBean = formPropertyMapping.getComponentClass();
 
             RADComponent component = radComponent.getFormModel().getComponentCreator().createComponent(
                 new ClassSource(createdBean.getCanonicalName()), radComponent, null);

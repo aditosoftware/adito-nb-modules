@@ -347,23 +347,19 @@ public class VisualReplicator {
     }
 
     public void updateAddedComponents(ComponentContainer metacont) {
-        Container container = null;
+        Object container = null;
         if (metacont instanceof RADComponent) {
             Object contClone = getClonedComponent((RADComponent)metacont);
-            if (contClone instanceof Container) {
-                if (metacont instanceof RADVisualContainer) {
-                    RADVisualContainer visualMetaCont = (RADVisualContainer)metacont;
-                    if (visualMetaCont.getLayoutSupport() == null) {
-                        // don't try incremental update with new layout support
-                        updateContainerLayout(visualMetaCont);
-                        // layout is built, but we continue to also add e.g. menu bar
-                    }
-                    container = visualMetaCont.getContainerDelegate(contClone);
+            if (metacont instanceof RADVisualContainer) {
+                RADVisualContainer visualMetaCont = (RADVisualContainer)metacont;
+                if (visualMetaCont.getLayoutSupport() == null) {
+                    // don't try incremental update with new layout support
+                    updateContainerLayout(visualMetaCont);
+                    // layout is built, but we continue to also add e.g. menu bar
                 }
-                else container = (Container)contClone;
-            } else {
-                return;
+                container = visualMetaCont.getContainerDelegate(contClone);
             }
+            else container = contClone;
         }
 
         RADComponent[] subComps = metacont.getSubBeans();
