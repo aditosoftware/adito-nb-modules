@@ -705,9 +705,10 @@ public final class JsIndex {
                         continue;
                     }
                 }*/
-                if (url.endsWith("process/" + imp + "/process.js")) {
+                if (url.endsWith("process/" + imp + "/process.js"))
                     return true;
-                }
+                if (result.getSnapshot().getSource().getFileObject().getPath().endsWith(url))
+                    return true;
             }
         }
 
