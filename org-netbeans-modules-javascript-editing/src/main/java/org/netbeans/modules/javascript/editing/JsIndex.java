@@ -688,9 +688,9 @@ public final class JsIndex {
      *    js file can't include other files)
      */
     public boolean isReachable(JsParseResult result, String url) {
-        if (ALL_REACHABLE) {
+        /*if (ALL_REACHABLE) {
             return true;
-        }
+        }*/
         List<String> imports = result.getStructure().getImports();
         if (imports.size() > 0) {
             // TODO - do some heuristics to deal with relative paths here,
@@ -698,14 +698,14 @@ public final class JsIndex {
 
             for (int i = 0, n = imports.size(); i < n; i++) {
                 String imp = imports.get(i);
-                if (imp.indexOf("../") != -1) { //NOI18N
+                /*if (imp.indexOf("../") != -1) { //NOI18N
                     int lastIndex = imp.lastIndexOf("../"); //NOI18N
                     imp = imp.substring(lastIndex+3);
                     if (imp.length() == 0) {
                         continue;
                     }
-                }
-                if (url.endsWith(imp)) {
+                }*/
+                if (url.endsWith("process/" + imp + "/process.js")) {
                     return true;
                 }
             }

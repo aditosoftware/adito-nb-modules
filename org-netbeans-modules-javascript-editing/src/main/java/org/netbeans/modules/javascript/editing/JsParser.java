@@ -924,7 +924,7 @@ public class JsParser extends Parser {
             if (isJson(context)) {
                 root = parser.parseJson(source, getSourceUri(context.snapshot.getSource()), lineno);
             } else {
-                source = source.replaceAll("import\\(\"", "imporz\\(\"");   // TODO: hack hack hack hack
+                source = source.replaceAll("import\\(\"", JsAnalyzer.ADITO_IMPORT + "\\(\"");   // TODO: hack hack hack hack
                 root = parser.parse(source, getSourceUri(context.snapshot.getSource()), lineno);
             }
         } catch (IllegalStateException ise) {

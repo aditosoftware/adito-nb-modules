@@ -606,7 +606,7 @@ public final class JsEmbeddingProvider extends EmbeddingProvider {
                             }
 
                             // Insert a file link
-                            String insertText = JsAnalyzer.NETBEANS_IMPORT_FILE + "('" + src + "');\n"; // NOI18N
+                            String insertText = JsAnalyzer.ADITO_IMPORT + "('" + src + "');\n"; // NOI18N
                             embeddings.add(snapshot.create(insertText, JsTokenId.JAVASCRIPT_MIME_TYPE));
                         }
                     }

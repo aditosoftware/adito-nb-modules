@@ -75,7 +75,8 @@ import org.openide.util.Exceptions;
  * @author Tor Norbye
  */
 public class JsAnalyzer implements StructureScanner {
-    public static final String NETBEANS_IMPORT_FILE = "__netbeans_import__"; // NOI18N
+    //public static final String NETBEANS_IMPORT_FILE = "__netbeans_import__"; // NOI18N
+    public static final String ADITO_IMPORT = "__po__";
     private static final String DOT_CALL = ".call"; // NOI18N
     
     public List<? extends StructureItem> scan(ParserResult info) {
@@ -409,10 +410,10 @@ public class JsAnalyzer implements StructureScanner {
                     Node child = node.getFirstChild();
                     if (child.getType() == Token.NAME) {
                         String s = child.getString();
-                        if (s.equals(NETBEANS_IMPORT_FILE)) {
+                        if (s.equals(ADITO_IMPORT)) {
                             processImports(child.getNext());
                         }
-                    } else if (child.getType() == Token.GETPROP) {
+                    } /*else if (child.getType() == Token.GETPROP) {
                         // Handle YAHOO.extend(YAHOO.widget.Calendar2up, YAHOO.widget.CalendarGroup);
                         // This is CALL, GETPROP, NAME=YAHOO+STRING=extend
                         Node nameNode = child.getFirstChild();
@@ -432,7 +433,7 @@ public class JsAnalyzer implements StructureScanner {
                                 }
                             }
                         }
-                    }
+                    }*/
                 }
                 
                 break;
@@ -805,7 +806,7 @@ public class JsAnalyzer implements StructureScanner {
             while (node != null) {
                 assert node.getType() == Token.STRING;
                 String path = node.getString();
-                if (path.indexOf(",") != -1) {
+                /*if (path.indexOf(",") != -1) {
                     String[] paths = path.split(",");
                     for (String s : paths) {
                         if (s.startsWith("'") || s.startsWith("\"")) {
@@ -814,7 +815,7 @@ public class JsAnalyzer implements StructureScanner {
                             imports.add(s);
                         }
                     }
-                } else {
+                } else*/ {
                     imports.add(path);
                 }
                 node = node.getNext();

@@ -673,7 +673,7 @@ public class JsCodeCompletion implements CodeCompletionHandler {
                     request.anchor = stringOffset;
 
                     boolean jQuery = false;
-                    if (text.equals("$")) {
+                    /*if (text.equals("$")) {
                         for (String imp : request.result.getStructure().getImports()) {
                             if (imp.indexOf("jquery") != -1) { // NOI18N
                                 jQuery = true;
@@ -682,7 +682,7 @@ public class JsCodeCompletion implements CodeCompletionHandler {
                         if (!jQuery) {
                             jQuery = request.index.getType("jQuery") != null;
                         }
-                    }
+                    }*/
 
                     if ("getElementById".equals(text) || (!jQuery && ("$".equals(text) || "$F".equals(text)))) { // NOI18N
                         addElementIds(proposals, request, prefix);

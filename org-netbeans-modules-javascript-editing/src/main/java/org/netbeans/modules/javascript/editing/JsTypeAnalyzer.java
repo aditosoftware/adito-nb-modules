@@ -320,11 +320,11 @@ public class JsTypeAnalyzer {
                     // Determine if we're using jquery or prototype
                     JsParseResult js = AstUtilities.getParseResult(info);
                     boolean jQuery = false;
-                    for (String imp : js.getStructure().getImports()) {
+                    /*for (String imp : js.getStructure().getImports()) {
                         if (imp.indexOf("jquery") != -1) { // NOI18N
                             jQuery = true;
                         }
-                    }
+                    }*/
                     if (!jQuery && index != null) {
                         jQuery = index.getType("jQuery") != null;
                     }
