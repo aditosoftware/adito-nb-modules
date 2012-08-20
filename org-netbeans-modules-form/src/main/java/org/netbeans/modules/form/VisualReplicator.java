@@ -350,16 +350,20 @@ public class VisualReplicator {
         Object container = null;
         if (metacont instanceof RADComponent) {
             Object contClone = getClonedComponent((RADComponent)metacont);
-            if (metacont instanceof RADVisualContainer) {
-                RADVisualContainer visualMetaCont = (RADVisualContainer)metacont;
-                if (visualMetaCont.getLayoutSupport() == null) {
-                    // don't try incremental update with new layout support
-                    updateContainerLayout(visualMetaCont);
-                    // layout is built, but we continue to also add e.g. menu bar
+            if (contClone != null) {
+                if (metacont instanceof RADVisualContainer) {
+                    RADVisualContainer visualMetaCont = (RADVisualContainer)metacont;
+                    if (visualMetaCont.getLayoutSupport() == null) {
+                        // don't try incremental update with new layout support
+                        updateContainerLayout(visualMetaCont);
+                        // layout is built, but we continue to also add e.g. menu bar
+                    }
+                    container = visualMetaCont.getContainerDelegate(contClone);
                 }
-                container = visualMetaCont.getContainerDelegate(contClone);
+                else container = contClone;
+            } else {
+                return;
             }
-            else container = contClone;
         }
 
         RADComponent[] subComps = metacont.getSubBeans();
@@ -428,6 +432,7 @@ public class VisualReplicator {
                 addToMenu(cont, clone);
         }
         else if (aditoVisualReplicator.canHandle(metacomp)) {
+            // clone has to be created first. '.addComponent(..,..)' uses the createdClone then.
             createClone(metacomp);
             ComponentContainer metacont = (ComponentContainer) metacomp.getParentComponent();
             aditoVisualReplicator.addComponent(metacomp, metacont);
