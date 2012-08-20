@@ -2,7 +2,7 @@ package org.netbeans.modules.form.adito.layout;
 
 import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.NbAditoInterface;
 import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.layout.IAditoLayoutProvider;
-import org.netbeans.modules.form.FormLoaderSettings;
+import org.netbeans.modules.form.*;
 import org.netbeans.modules.form.layoutsupport.*;
 import org.openide.util.ImageUtilities;
 
@@ -120,6 +120,16 @@ public class AditoLayoutSupport extends AbstractLayoutSupport
     g.drawRect(r.x, r.y, w, h);
 
     return true;
+  }
+
+  @Override
+  public void acceptNewComponents(RADVisualComponent[] components, LayoutConstraints[] constraints, int index)
+  {
+    for (RADVisualComponent component : components)
+        {
+          if (component.getBeanClass().getSimpleName().equals("ARegisterTab"))
+            throw new IllegalArgumentException("RegisterTabs can not be added to this component.");
+        }
   }
 
   @Override

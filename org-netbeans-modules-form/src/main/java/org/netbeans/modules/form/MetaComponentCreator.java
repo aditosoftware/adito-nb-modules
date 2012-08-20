@@ -638,8 +638,7 @@ public class MetaComponentCreator {
                     case NONVISUAL:
                       EContainerType beanContainerType = AditoMetaComponentCreatorSupport.getContainerType(beanClass);
                       if (beanContainerType != EContainerType.NONVISUAL)
-                        throw new IllegalStateException
-                            ("containers for non-visuals can contain non-visuals only but is " + beanContainerType);
+                        return null;
                       if (FormUtils.isVisualizableClass(targetComp.getBeanClass()))
                             target.targetType = TargetType.VISUAL_CONTAINER_FOR_NON_VISUAL;
                         else

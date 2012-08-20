@@ -209,7 +209,7 @@ public class AditoRegisterLayoutSupport extends AbstractLayoutSupport
     for (RADVisualComponent component : components)
     {
       if (!_isAllowed(component.getBeanClass()))
-        throw new IllegalArgumentException("Only registertabs can be added to a register component.");
+        throw new IllegalArgumentException("Only registerTabs can be added to a register component.");
     }
   }
 
@@ -236,6 +236,31 @@ public class AditoRegisterLayoutSupport extends AbstractLayoutSupport
       container.add(component);
   }
 
+  @Override
+  public boolean removeComponentFromContainer(Container container, Container containerDelegate, Component component)
+  {
+    JTabbedPane tabbedPane = _getTabbedPane(container);
+    if (tabbedPane == null)
+      return false;
+
+    tabbedPane.remove(component);
+    component.setBounds(0, 0, 0, 0);
+    return true;
+  }
+
+  @Override
+  public boolean clearContainer(Container container, Container containerDelegate)
+  {
+    JTabbedPane tabbedPane = _getTabbedPane(container);
+    if (tabbedPane == null)
+      return false;
+
+    boolean cleared = true;
+    for (Component component : tabbedPane.getComponents())
+      cleared &= removeComponentFromContainer(container, containerDelegate, component);
+    return cleared;
+  }
+
 
   /**
    * This method is called to get a default component layout constraints
@@ -252,7 +277,7 @@ public class AditoRegisterLayoutSupport extends AbstractLayoutSupport
 
   private JTabbedPane _getTabbedPane(Container pContainer)
   {
-    if (pContainer != null)
+    if (pContainer != null && pContainer.getComponentCount() > 0)
     {
       Component component = pContainer.getComponent(0);
       if (component instanceof JTabbedPane)
