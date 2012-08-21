@@ -58,6 +58,7 @@
         <artifactId>nbm-maven-plugin</artifactId>
         <configuration>
           <publicPackages>
+            <publicPackage>de.adito.aditoweb.nbm.nbide.nbaditointerface.*</publicPackage>
             <publicPackage>de.adito.aditoweb.nbm.nbide.nbaditointerface.common.*</publicPackage>
             <publicPackage>de.adito.aditoweb.nbm.nbide.nbaditointerface.form.*</publicPackage>
             <publicPackage>de.adito.aditoweb.nbm.nbide.nbaditointerface.windowsystem.*</publicPackage>

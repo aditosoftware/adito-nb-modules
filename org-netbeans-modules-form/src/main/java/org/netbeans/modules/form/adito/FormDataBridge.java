@@ -2,7 +2,7 @@ package org.netbeans.modules.form.adito;
 
 import com.google.common.base.*;
 import com.google.common.collect.Lists;
-import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.NbAditoInterface;
+import de.adito.aditoweb.nbm.nbide.nbaditointerface.NbAditoInterface;
 import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.sync.*;
 import org.jetbrains.annotations.NotNull;
 import org.netbeans.modules.form.*;

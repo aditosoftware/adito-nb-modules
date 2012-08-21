@@ -81,7 +81,7 @@ import javax.swing.JFrame;
 //import javax.swing.text.EditorKit;
 //import javax.swing.text.Position;
 //import javax.swing.text.StyledDocument;
-import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.NbAditoInterface;
+import de.adito.aditoweb.nbm.nbide.nbaditointerface.NbAditoInterface;
 import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.model.IAditoModelDataProvider;
 //import org.netbeans.api.editor.guards.GuardedSectionManager;
 //import org.netbeans.api.editor.guards.SimpleSection;

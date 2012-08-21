@@ -1,6 +1,6 @@
 package org.netbeans.modules.form.adito.perstistencemanager;
 
-import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.NbAditoInterface;
+import de.adito.aditoweb.nbm.nbide.nbaditointerface.NbAditoInterface;
 import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.sync.*;
 import org.netbeans.modules.form.*;
 import org.openide.filesystems.FileObject;

@@ -1,4 +1,4 @@
-package de.adito.aditoweb.nbm.nbide.nbaditointerface.form;
+package de.adito.aditoweb.nbm.nbide.nbaditointerface;
 
 /**
  * Interface von Netbeans zu Adito (Interface-Sammlung)

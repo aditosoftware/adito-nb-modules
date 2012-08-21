@@ -45,7 +45,7 @@
 
 package org.netbeans.modules.form;
 
-import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.NbAditoInterface;
+import de.adito.aditoweb.nbm.nbide.nbaditointerface.NbAditoInterface;
 import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.model.*;
 import org.openide.cookies.*;
 import org.openide.filesystems.FileObject;

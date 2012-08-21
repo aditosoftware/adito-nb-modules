@@ -1,6 +1,6 @@
 package org.netbeans.modules.form.adito.layout;
 
-import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.NbAditoInterface;
+import de.adito.aditoweb.nbm.nbide.nbaditointerface.NbAditoInterface;
 import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.layout.IAditoLayoutProvider;
 import org.netbeans.modules.form.*;
 import org.netbeans.modules.form.layoutsupport.*;

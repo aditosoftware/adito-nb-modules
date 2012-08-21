@@ -1,4 +1,4 @@
-package de.adito.aditoweb.nbm.nbide.nbaditointerface.form;
+package de.adito.aditoweb.nbm.nbide.nbaditointerface;
 
 import org.openide.util.Lookup;
 
