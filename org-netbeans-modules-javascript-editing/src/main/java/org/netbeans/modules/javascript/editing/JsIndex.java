@@ -705,13 +705,14 @@ public final class JsIndex {
                         continue;
                     }
                 }*/
-              if (url.endsWith("process/" + imp + "/process.js")
-                  || result.getSnapshot().getSource().getFileObject().getPath().endsWith(url)
-                  || url.startsWith("stub_") && url.endsWith(".js") && !url.contains("/"))
+              if (url.endsWith("process/" + imp + "/process.js"))
                 return true;
             }
         }
 
-        return false;
+        // the source itself may autoComplete and the 'stubs_' files are always included.
+        return result.getSnapshot().getSource().getFileObject().getPath().endsWith(url)
+            || url.startsWith("stub_") && url.endsWith(".js") && !url.contains("/");
+
     }
 }
