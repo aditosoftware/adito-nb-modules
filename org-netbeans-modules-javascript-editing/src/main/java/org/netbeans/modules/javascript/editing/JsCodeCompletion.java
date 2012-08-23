@@ -56,6 +56,9 @@ import javax.swing.ImageIcon;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 import javax.swing.text.JTextComponent;
+
+import de.adito.aditoweb.nbm.nbide.nbaditointerface.NbAditoInterface;
+import de.adito.aditoweb.nbm.nbide.nbaditointerface.javascript.IJsDataSupply;
 import org.mozilla.nb.javascript.Node;
 import org.netbeans.modules.csl.api.CodeCompletionHandler;
 import org.netbeans.modules.csl.api.CompletionProposal;
@@ -100,7 +103,7 @@ import org.openide.util.NbBundle;
 
 /**
  * Code completion handler for JavaScript
- * 
+ *
  * @todo Do completion on element id's inside $() calls (prototype.js) and $$() calls for CSS rules.
  *   See http://www.sitepoint.com/article/painless-javascript-prototype
  * @todo Track logical classes and inheritance ("extend")
@@ -131,7 +134,7 @@ import org.openide.util.NbBundle;
  *    filtering Java-style?), and explanations for each parameter
  *  @todo Need preindexing support for unit tests - and separate files
  * @todo Insert semicolon too when you insert methods, in custom templates (unless you're in a call), a var block, etc.
- * 
+ *
  * @author Tor Norbye
  */
 public class JsCodeCompletion implements CodeCompletionHandler {
@@ -390,6 +393,7 @@ public class JsCodeCompletion implements CodeCompletionHandler {
                     return completionResult;
                 } else if (id == JsTokenId.STRING_LITERAL || id == JsTokenId.STRING_END) {
                     completeStrings(proposals, request);
+                    completeAditoSysConstants(proposals, request);
                     completionResult.setFilterable(false);
                     return completionResult;
                 } else if (id == JsTokenId.REGEXP_LITERAL || id == JsTokenId.REGEXP_END) {
@@ -583,6 +587,26 @@ public class JsCodeCompletion implements CodeCompletionHandler {
 
         return caseSensitive ? theString.startsWith(prefix)
                 : theString.toLowerCase().startsWith(prefix.toLowerCase());
+    }
+
+    private void completeAditoSysConstants(List<CompletionProposal> proposals, CompletionRequest request)
+    {
+      IJsDataSupply jsDataSupply = NbAditoInterface.lookup(IJsDataSupply.class);
+      for (String compVar : jsDataSupply.getCompVars(request.fileObject))
+      {
+        if (startsWith(compVar, request.prefix))
+          proposals.add(new GenericItem(compVar, "", request, ElementKind.CONSTANT));
+      }
+      for (String sysVar : jsDataSupply.getSysVars())
+      {
+        if (startsWith(sysVar, request.prefix))
+          proposals.add(new GenericItem(sysVar, "", request, ElementKind.CONSTANT));
+      }
+      for (String localVar : jsDataSupply.getLocalVars())
+      {
+        if (startsWith(localVar, request.prefix))
+          proposals.add(new GenericItem(localVar, "", request, ElementKind.CONSTANT));
+      }
     }
 
     private boolean completeRegexps(List<CompletionProposal> proposals, CompletionRequest request) {
@@ -903,7 +927,7 @@ public class JsCodeCompletion implements CodeCompletionHandler {
                                 htmlResult = (HtmlParserResult) resultIterator.getParserResult();
                             }
                         }
-                        
+
                     }
                     if (htmlResult != null) {
                         Set<SyntaxElement.TagAttribute> elementIds = new HashSet<SyntaxElement.TagAttribute>();
@@ -992,6 +1016,8 @@ public class JsCodeCompletion implements CodeCompletionHandler {
                             id == JsTokenId.STRING_LITERAL || id == JsTokenId.REGEXP_LITERAL ||
                             id == JsTokenId.REGEXP_BEGIN || id == JsTokenId.REGEXP_END) {
                         if (lexOffset > 0) {
+                            if (token.text().toString().startsWith("$"))
+                              return token.text().toString();
                             char prevChar = doc.getText(lexOffset - 1, 1).charAt(0);
                             if (prevChar == '\\') {
                                 return "\\";
@@ -1451,7 +1477,7 @@ public class JsCodeCompletion implements CodeCompletionHandler {
                 }
             }
 
-            // Try just the method call (e.g. across all classes). This is ignoring the 
+            // Try just the method call (e.g. across all classes). This is ignoring the
             // left hand side because we can't resolve it.
             if ((elements.size() == 0) && (prefix.length() > 0 || type == null)) {
 //                if (prefix.length() == 0) {
@@ -1730,7 +1756,7 @@ public class JsCodeCompletion implements CodeCompletionHandler {
         // we have these guys on the class itself, not associated with a method parameter.
         // Shall I take this to be a set of constructor properties?
         // In YUI it's different; many of the properties we want to inherit are NOT marked as @config,
-        // such as "animate" in the Editor. 
+        // such as "animate" in the Editor.
         String fqn = null;
         AstPath path = request.path;
         Node leaf = path.leaf();
@@ -2131,7 +2157,7 @@ public class JsCodeCompletion implements CodeCompletionHandler {
     private static int callLineStart = -1;
     private static IndexedFunction callMethod;
 
-    /** Compute the current method call at the given offset. Returns false if we're not in a method call. 
+    /** Compute the current method call at the given offset. Returns false if we're not in a method call.
      * The argument index is returned in parameterIndexHolder[0] and the method being
      * called in methodHolder[0].
      */
@@ -2265,7 +2291,7 @@ public class JsCodeCompletion implements CodeCompletionHandler {
             }
 
             if (call == null) {
-                // Find the call in around the caret. Beware of 
+                // Find the call in around the caret. Beware of
                 // input sanitization which could have completely
                 // removed the current parameter (e.g. with just
                 // a comma, or something like ", @" or ", :")

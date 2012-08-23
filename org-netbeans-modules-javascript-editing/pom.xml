@@ -19,18 +19,12 @@
 
   <dependencies>
 
-    <!-- eigene Bibliotheken start -->
+    <!-- supplies adito stuff -->
     <dependency>
-      <groupId>de.adito.aditoweb.packages</groupId>
-      <artifactId>lwcore</artifactId>
+      <groupId>de.adito.aditoweb.modules.nb-ide</groupId>
+      <artifactId>nb-adito-interface</artifactId>
       <version>${project.parent.version}</version>
     </dependency>
-    <dependency>
-      <groupId>de.adito.aditoweb.packages</groupId>
-      <artifactId>lwfilesystem</artifactId>
-      <version>${project.parent.version}</version>
-    </dependency>
-    <!-- eigene Bibliotheken stop -->
 
     <dependency>
       <groupId>org.netbeans.api</groupId>
@@ -210,6 +204,14 @@
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>nbm-maven-plugin</artifactId>
+        <configuration>
+          <publicPackages>
+            <publicPackage>org.netbeans.modules.javascript.editing.*</publicPackage>
+            <publicPackage>org.netbeans.modules.javascript.editing.embedding.*</publicPackage>
+            <publicPackage>org.netbeans.modules.javascript.editing.lexer.*</publicPackage>
+            <publicPackage>org.netbeans.modules.javascript.editing.spi.*</publicPackage>
+          </publicPackages>
+        </configuration>
       </plugin>
 
       <!-- kopiert die jsstubs -->
