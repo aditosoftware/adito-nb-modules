@@ -214,14 +214,16 @@ public class FormDataBridge
             {
               if (Objects.equal(component.getName(), removedName))
               {
-                try
-                {
-                  component.getNodeReference().destroy();
-                }
-                catch (IOException e)
-                {
-                  throw new RuntimeException("node could not be destroyed: " + component.getNodeReference(), e);
-                }
+                RADComponentNode nodeReference = component.getNodeReference();
+                if (nodeReference != null)
+                  try
+                  {
+                    nodeReference.destroy();
+                  }
+                  catch (IOException e)
+                  {
+                    throw new RuntimeException("node could not be destroyed: " + nodeReference, e);
+                  }
               }
             }
           }

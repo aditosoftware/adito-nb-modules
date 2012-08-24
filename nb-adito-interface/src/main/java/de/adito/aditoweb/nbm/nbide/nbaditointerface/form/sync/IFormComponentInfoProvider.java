@@ -28,6 +28,6 @@ public interface IFormComponentInfoProvider
    * @param pModelFileObject FilObject das das Model repräsentiert.
    * @return Informationen über die durch das FileObject identifizierte Komponente.
    */
-  IFormComponentInfo createComponentInfo(FileObject pModelFileObject);
+  IFormComponentInfo createComponentInfo(FileObject pModelFileObject) throws IllegalArgumentException;
 
 }

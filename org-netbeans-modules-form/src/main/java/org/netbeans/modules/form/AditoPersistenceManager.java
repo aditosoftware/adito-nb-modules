@@ -56,15 +56,18 @@ public class AditoPersistenceManager extends PersistenceManager
     try
     {
       AComponentInfo componentInfo = AComponentInfo.create(modelRoot, pInfo);
-      Class<?> formBaseClass = componentInfo.getComponentClass();
-      formModel.setFormBaseClass(formBaseClass, DMHelper.getHandler(modelRoot));
-      formModel.setName(componentInfo.getComponentName());
-      // Force creation of the default instance in the correct L&F context
-      BeanSupport.getDefaultInstance(formBaseClass);
+      if (componentInfo != null)
+      {
+        Class<?> formBaseClass = componentInfo.getComponentClass();
+        formModel.setFormBaseClass(formBaseClass, DMHelper.getHandler(modelRoot));
+        formModel.setName(componentInfo.getComponentName());
+        // Force creation of the default instance in the correct L&F context
+        BeanSupport.getDefaultInstance(formBaseClass);
 
-      RADComponent topComp = formModel.getTopRADComponent();
-      _loadComponent(pInfo, modelRoot, topComp, null);
-      AditoFormUtils.copyValuesFromModelToComponent(topComp);
+        RADComponent topComp = formModel.getTopRADComponent();
+        _loadComponent(pInfo, modelRoot, topComp, null);
+        AditoFormUtils.copyValuesFromModelToComponent(topComp);
+      }
 
       List<RADComponent> list = new ArrayList<RADComponent>();
       List<FileObject> others = NbAditoInterface.lookup(IAditoModelDataProvider.class).getOthers(modelRoot);

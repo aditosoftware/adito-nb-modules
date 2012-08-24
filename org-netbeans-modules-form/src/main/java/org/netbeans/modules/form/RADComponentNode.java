@@ -204,7 +204,14 @@ public class RADComponentNode extends FormNode
     @Override
     protected Sheet createSheet()
     {
-      return AditoNodeConnect.getSheet(component);
+      try
+      {
+        return AditoNodeConnect.getSheet(component);
+      }
+      catch (IllegalArgumentException e)
+      {
+        return new Sheet();
+      }
     }
 
     /* List new types that can be created in this node.

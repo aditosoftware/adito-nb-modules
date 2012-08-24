@@ -134,8 +134,15 @@ public final class AditoNodeConnect
     @Override
     public final T resolve(FileObject pFileObject)
     {
-      DataFolder dataFolder = DataFolder.findFolder(pFileObject);
-      return dataFolder != null ? resolve(dataFolder) : null;
+      try
+      {
+        DataFolder dataFolder = DataFolder.findFolder(pFileObject);
+        return dataFolder != null ? resolve(dataFolder) : null;
+      }
+      catch (IllegalArgumentException e)
+      {
+        return null;
+      }
     }
 
     public abstract T resolve(DataObject pDataObject);
