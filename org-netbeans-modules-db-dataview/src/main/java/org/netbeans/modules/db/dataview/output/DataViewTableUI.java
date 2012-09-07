@@ -107,7 +107,10 @@ final class DataViewTableUI extends ResultSetJXTable {
 
     @Override
     public TableCellRenderer getCellRenderer(int row, int column) {
-        if (dView.getUpdatedRowContext().hasUpdates(row, column)) {
+        if (dView.getUpdatedRowContext().hasUpdates(
+                convertRowIndexToModel(row),
+                convertColumnIndexToModel(column)
+        )) {
             return new UpdatedResultSetCellRenderer(dView);
         }
         return super.getCellRenderer(row, column);
@@ -149,19 +152,18 @@ final class DataViewTableUI extends ResultSetJXTable {
         @Override
         public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
             Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-            Object obj = dataView.getDataViewPageContext().getColumnData(row, column);
-            if (value == null) {
-                return c;
-            }
+            Object obj = dataView.getDataViewPageContext().getColumnData(
+                    table.convertRowIndexToModel(row),
+                    table.convertColumnIndexToModel(column));
 
             if (isSelected) {
-                if (obj != null && value.equals(obj)) {
+                if ((obj == null && value == null) || (obj != null && value != null && value.equals(obj))) {
                     c.setForeground(gray);
                 } else {
                     c.setForeground(Color.ORANGE);
                 }
             } else {
-                if (obj != null && value.equals(obj)) {
+                if ((obj == null && value == null) || (obj != null && value != null && value.equals(obj))) {
                     c.setForeground(table.getForeground());
                 } else {
                     c.setForeground(green);
@@ -375,7 +377,8 @@ final class DataViewTableUI extends ResultSetJXTable {
                     int[] rows = getSelectedRows();
                     String insertSQL = "";
                     for (int j = 0; j < rows.length; j++) {
-                        Object[] insertRow = dataView.getDataViewPageContext().getCurrentRows().get(rows[j]);
+                        int modelIndex = convertRowIndexToModel(rows[j]);
+                        Object[] insertRow = dataView.getDataViewPageContext().getCurrentRows().get(modelIndex);
                         String sql = dataView.getSQLStatementGenerator().generateRawInsertStatement(insertRow);
                         insertSQL += sql.replaceAll("\n", "").replaceAll("\t", "") + ";\n"; // NOI18N
                     }
@@ -400,7 +403,8 @@ final class DataViewTableUI extends ResultSetJXTable {
                 String rawDeleteStmt = "";
                 for (int j = 0; j < rows.length; j++) {
                     SQLStatementGenerator generator = dataView.getSQLStatementGenerator();
-                    final String deleteStmt = generator.generateDeleteStatement(rows[j], getModel());
+                    int modelIndex = convertRowIndexToModel(rows[j]);
+                    final String deleteStmt = generator.generateDeleteStatement(modelIndex, getModel());
                     rawDeleteStmt += deleteStmt + ";\n"; // NOI18N
                 }
                 ShowSQLDialog dialog = new ShowSQLDialog();
@@ -540,7 +544,7 @@ final class DataViewTableUI extends ResultSetJXTable {
                             output.append('\t'); //NOI18N
 
                         }
-                        Object o = getColumnModel().getColumn(column).getHeaderValue();
+                        Object o = getColumnModel().getColumn(column).getIdentifier();
                         output.append(o != null ? o.toString() : ""); //NOI18N
 
                     }

@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2008 - 2010 Oracle and/or its affiliates. All rights reserved.
+ * Copyright 2011 Oracle and/or its affiliates. All rights reserved.
  *
  * Oracle and Java are registered trademarks of Oracle and/or its affiliates.
  * Other names may be trademarks of their respective owners.
@@ -23,7 +23,7 @@
  * License Header, with the fields enclosed by brackets [] replaced by
  * your own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
- * 
+ *
  * If you wish your version of this file to be governed by only the CDDL
  * or only the GPL Version 2, indicate your decision by adding
  * "[Contributor] elects to include this software in this distribution
@@ -34,67 +34,77 @@
  * However, if you add GPL Version 2 code and therefore, elected the GPL
  * Version 2 license, then the option applies only if the new code is
  * made subject to such option by the copyright holder.
- * 
+ *
  * Contributor(s):
- * 
- * Portions Copyrighted 2008 - 2009 Sun Microsystems, Inc.
+ *
+ * Portions Copyrighted 2011 Sun Microsystems, Inc.
  */
-package org.netbeans.modules.db.dataview.output;
+package org.netbeans.modules.db.dataview.table.celleditor;
 
-import org.netbeans.modules.db.dataview.table.ResultSetJXTable;
-import java.sql.Types;
-import java.util.Arrays;
-import javax.swing.table.DefaultTableModel;
-import org.jdesktop.swingx.JXTable;
-import org.netbeans.modules.db.dataview.meta.DBColumn;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import org.netbeans.api.progress.ProgressHandle;
+import org.netbeans.api.progress.ProgressRunnable;
+import org.openide.util.Cancellable;
 
-/**
- * @author Shankari
- */
-class InsertRecordTableUI extends ResultSetJXTable {
+class MonitorableStreamTransfer implements ProgressRunnable<Exception>, Cancellable {
 
-    boolean isRowSelectionAllowed = rowSelectionAllowed;
+    private InputStream is;
+    private OutputStream os;
+    private int transfered;
+    private Integer size;
+    private boolean cancel;
 
-    public InsertRecordTableUI(DataView dataView) {
-        super(dataView);
-        if (getRSColumnCount() < 7) {
-            setAutoResizeMode(JXTable.AUTO_RESIZE_SUBSEQUENT_COLUMNS);
-        }
-    }   
-
-    // Must correspond to DataViewUtils#isSQLConstantString!
-    protected Object[] createNewRow() {
-        Object[] row = new Object[getRSColumnCount()];
-        for (int i = 0, I = getRSColumnCount(); i < I; i++) {
-            DBColumn col = getDBColumn(i);
-            if (col.isGenerated()) {
-                row[i] = "<GENERATED>";
-            } else if (col.hasDefault()) {
-                row[i] = "<DEFAULT>";
-            } else if (col.getJdbcType() == Types.TIMESTAMP) {
-                row[i] = "<CURRENT_TIMESTAMP>";
-            } else if (col.getJdbcType() == Types.DATE) {
-                row[i] = "<CURRENT_DATE>";
-            } else if (col.getJdbcType() == Types.TIME) {
-                row[i] = "<CURRENT_TIME>";
-            }
-        }
-        return row;
+    public MonitorableStreamTransfer(InputStream is, OutputStream os, Integer knownsize) {
+        this.is = is;
+        this.os = os;
+        size = knownsize;
     }
 
-    protected void removeRows() {
-        if (isEditing()) {
-            getCellEditor().cancelCellEditing();
+    @Override
+    public Exception run(ProgressHandle handle) {
+        Exception result = null;
+        if (handle != null && size != null) {
+            handle.switchToDeterminate(size);
         }
-        int[] rows = getSelectedRows();
-        if (rows.length == 0) return ;
-        Arrays.sort(rows);
-        DefaultTableModel model = (DefaultTableModel) getModel();
-        for (int i = (rows.length - 1); i >= 0; i--) {
-            model.removeRow(rows[i]);
+        try {
+            int read = 0;
+            byte[] buffer = new byte[256 * 1024];
+            while ((read = is.read(buffer)) > 0 && !cancel) {
+                os.write(buffer, 0, read);
+                transfered += read;
+                if (handle != null && size != null) {
+                    handle.progress(transfered);
+                }
+            }
+        } catch (IOException ex) {
+            try {
+                is.close();
+            } catch (IOException ex2) {
+            }
+            try {
+                os.close();
+            } catch (IOException ex2) {
+            }
+            return ex;
         }
-        if (getRowCount() == 0) {
-            model.addRow(createNewRow());
+        if (handle != null) {
+            handle.finish();
         }
+        return result;
+    }
+
+    @Override
+    public boolean cancel() {
+        if (cancel) {
+            return false;
+        }
+        this.cancel = true;
+        return true;
+    }
+
+    public boolean isCancel() {
+        return cancel;
     }
 }

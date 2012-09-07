@@ -48,6 +48,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Types;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -57,7 +58,7 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.table.TableModel;
-import org.netbeans.api.db.explorer.DatabaseConnection;
+import org.netbeans.modules.db.dataview.meta.DBColumn;
 import org.netbeans.modules.db.dataview.meta.DBConnectionFactory;
 import org.netbeans.modules.db.dataview.meta.DBException;
 import org.netbeans.modules.db.dataview.meta.DBMetaDataFactory;
@@ -87,17 +88,17 @@ class SQLExecutionHelper {
         this.dataView = dataView;
     }
 
-    static void initialDataLoad(DataView dv, DatabaseConnection dbConn, SQLExecutionHelper execHelper) throws SQLException {
+    void initialDataLoad() throws SQLException {
         Statement stmt = null;
         try {
-            Connection conn = DBConnectionFactory.getInstance().getConnection(dbConn);
+            Connection conn = DBConnectionFactory.getInstance().getConnection(dataView.getDatabaseConnection());
             String msg = "";
             if (conn == null) {
                 Throwable ex = DBConnectionFactory.getInstance().getLastException();
                 if (ex != null) {
                     msg = ex.getMessage();
                 } else {
-                    msg = NbBundle.getMessage(SQLExecutionHelper.class, "MSG_connection_failure", dv.getDatabaseConnection());
+                    msg = NbBundle.getMessage(SQLExecutionHelper.class, "MSG_connection_failure", dataView.getDatabaseConnection());
                 }
                 NotifyDescriptor nd = new NotifyDescriptor.Message(msg, NotifyDescriptor.ERROR_MESSAGE);
                 DialogDisplayer.getDefault().notifyLater(nd);
@@ -105,37 +106,41 @@ class SQLExecutionHelper {
             }
 
             DBMetaDataFactory dbMeta = new DBMetaDataFactory(conn);
-            dv.setLimitSupported(dbMeta.supportsLimit());
-            String sql = dv.getSQLString();
-            boolean isSelect = execHelper.isSelectStatement(sql);
+            dataView.setLimitSupported(dbMeta.supportsLimit());
+            String sql = dataView.getSQLString();
+            boolean isSelect = isSelectStatement(sql);
 
-            stmt = execHelper.prepareSQLStatement(conn, sql);
-            execHelper.executeSQLStatement(stmt, sql);
+            stmt = prepareSQLStatement(conn, sql);
+            executeSQLStatement(stmt, sql);
 
-            if (dv.getUpdateCount() != -1) {
+            if (dataView.getUpdateCount() != -1) {
                 if (!conn.getAutoCommit()) {
                     conn.commit();
                 }
                 return;
             }
 
-            ResultSet resultSet = null;
-            try {
-                resultSet = stmt.getResultSet();
-                if (resultSet == null) {
-                    if (!conn.getAutoCommit()) {
-                        conn.commit();
-                    }
-                    return;
-                }
-                Collection<DBTable> tables = dbMeta.generateDBTables(resultSet, sql, isSelect);
-                DataViewDBTable dvTable = new DataViewDBTable(tables);
-                dv.setDataViewDBTable(dvTable);
-                execHelper.loadDataFrom(resultSet);
-            } finally {
-                DataViewUtils.closeResources(resultSet);
+            ResultSet rs = null;
+            if(dataView.hasResultSet()) {
+                rs = stmt.getResultSet();
             }
-            execHelper.getTotalCount(isSelect, sql, stmt);
+
+            if (rs == null) {
+                if (!conn.getAutoCommit()) {
+                    conn.commit();
+                }
+                return;
+            }
+            Collection<DBTable> tables = dbMeta.generateDBTables(rs, sql, isSelect);
+            DataViewDBTable dvTable = new DataViewDBTable(tables);
+            dataView.setDataViewDBTable(dvTable);
+            if (resultSetNeedsReloading()) {
+                executeSQLStatement(stmt, sql);
+                rs = stmt.getResultSet();
+            }
+            loadDataFrom(rs);
+            DataViewUtils.closeResources(rs);
+            getTotalCount(isSelect, sql, stmt);
         } finally {
             DataViewUtils.closeResources(stmt);
         }
@@ -155,7 +160,8 @@ class SQLExecutionHelper {
                         Object val = insertedRow[i];
 
                         // Check for Constant e.g <NULL>, <DEFAULT>, <CURRENT_TIMESTAMP> etc
-                        if (DataViewUtils.isSQLConstantString(val)) {
+                        if (DataViewUtils.isSQLConstantString(val,
+                                dataView.getDataViewDBTable().getColumn(i))) {
                             continue;
                         }
 
@@ -413,7 +419,6 @@ class SQLExecutionHelper {
         String title = NbBundle.getMessage(SQLExecutionHelper.class, "LBL_sql_executequery");
         SQLStatementExecutor executor = new SQLStatementExecutor(dataView, title, dataView.getSQLString()) {
 
-            private ResultSet rs = null;
             private Statement stmt = null;
             boolean lastEditState = dataView.isEditable();
 
@@ -428,8 +433,9 @@ class SQLExecutionHelper {
                 try {
                     executeSQLStatement(stmt, sql);
                     if (dataView.hasResultSet()) {
-                        rs = stmt.getResultSet();
+                        ResultSet rs = stmt.getResultSet();
                         loadDataFrom(rs);
+                        DataViewUtils.closeResources(rs);
                     } else {
                         return;
                     }
@@ -443,9 +449,6 @@ class SQLExecutionHelper {
                         dataView.removeComponents();
                     }
                     throw sqlEx;
-
-                } finally {
-                    DataViewUtils.closeResources(rs);
                 }
 
                 // Get total row count
@@ -603,8 +606,8 @@ class SQLExecutionHelper {
             try {
                 isResultSet = stmt.execute(appendLimitIfRequired(sql));
             } catch (NullPointerException ex) {
-                    LOGGER.log(Level.SEVERE, "Failed to execute SQL Statement [" + sql + "], cause: " + ex);
-                    throw new SQLException(ex);
+                LOGGER.log(Level.SEVERE, "Failed to execute SQL Statement [" + sql + "], cause: " + ex);
+                throw new SQLException(ex);
             } catch (SQLException sqlExc) {
                 if (sqlExc.getErrorCode() == 1064 && sqlExc.getSQLState().equals("37000")) {
                     isResultSet = stmt.execute(sql);
@@ -731,5 +734,32 @@ class SQLExecutionHelper {
         NumberFormat fmt = NumberFormat.getInstance();
         fmt.setMaximumFractionDigits(3);
         return fmt.format(ms / 1000.0);
+    }
+
+    /**
+     * Check whether the result set needs reloading. Some databases close result
+     * streams when reading database metadata (e.g. Oracle DB and
+     * DatabaseMetaData.getPrimaryKeys). If there are some streamed values, the
+     * result set needs to be reloaded after meta data have been read. See
+     * #179959.
+     *
+     * @return True if and only if the result set needs to be reloaded.
+     */
+    private boolean resultSetNeedsReloading() {
+        if (!dataView.getDatabaseConnection().getDriverClass().contains(
+                "oracle")) {                                            //NOI18N
+            return false;
+        }
+        int colCnt = dataView.getDataViewDBTable().getColumnCount();
+        for (int i = 0; i < colCnt; i++) {
+            DBColumn column = dataView.getDataViewDBTable().getColumn(i);
+            int jdbcType = column.getJdbcType();
+            if (jdbcType == Types.LONGVARCHAR || jdbcType == Types.LONGNVARCHAR
+                    || jdbcType == Types.LONGVARBINARY || jdbcType == Types.BLOB
+                    || jdbcType == Types.CLOB || jdbcType == Types.NCLOB) {
+                return true;
+            }
+        }
+        return false;
     }
 }

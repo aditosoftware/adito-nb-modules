@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2010 Oracle and/or its affiliates. All rights reserved.
+ * Copyright 2010-2012 Oracle and/or its affiliates. All rights reserved.
  *
  * Oracle and Java are registered trademarks of Oracle and/or its affiliates.
  * Other names may be trademarks of their respective owners.
@@ -41,16 +41,8 @@
  */
 package org.netbeans.modules.db.dataview.table;
 
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Dimension;
-import java.awt.Graphics;
-import java.awt.GridLayout;
-import java.awt.Point;
-import java.awt.Polygon;
-import java.awt.Rectangle;
+import java.awt.*;
 import java.awt.event.MouseEvent;
-
 import javax.swing.Icon;
 import javax.swing.JComponent;
 import javax.swing.JTable;
@@ -62,7 +54,6 @@ import javax.swing.table.DefaultTableColumnModel;
 import javax.swing.table.JTableHeader;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
-
 import org.jdesktop.swingx.JXTable;
 import org.jdesktop.swingx.border.IconBorder;
 //import org.jdesktop.swingx.decorator.FilterPipeline;
@@ -80,7 +71,7 @@ import org.jdesktop.swingx.table.TableColumnExt;
  * @see javax.swing.JScrollPane
  * @author Ahimanikya Satapathy
  */
-public class JXTableRowHeader extends JComponent {
+public final class JXTableRowHeader extends JComponent {
 
     private static class InternalTableColumnModel extends DefaultTableColumnModel {
 
@@ -89,6 +80,7 @@ public class JXTableRowHeader extends JComponent {
             col.setEditable(false);
             col.setHeaderValue("#");
             col.setToolTipText("Row Number");
+            col.setModelIndex(-1);
             col.setSortable(false);
             addColumn(col);
         }
@@ -103,6 +95,7 @@ public class JXTableRowHeader extends JComponent {
 
     private class HeaderResizeListener implements TableModelListener {
 
+        @Override
         public void tableChanged(TableModelEvent e) {
             // pack before setting preferred width.
             headerTable.packAll();
@@ -118,14 +111,17 @@ public class JXTableRowHeader extends JComponent {
     }
     private static Icon rightArrow = new Icon() {
 
+        @Override
         public int getIconWidth() {
             return 8;
         }
 
+        @Override
         public int getIconHeight() {
             return 8;
         }
 
+        @Override
         public void paintIcon(Component c, Graphics g, int x, int y) {
             g.drawLine(x + 4, y + 4, x + 4, y + 4);
             g.translate(x + 4, y + 4);
@@ -170,7 +166,7 @@ public class JXTableRowHeader extends JComponent {
     public JXTableRowHeader(JTable table) {
         this.table = table;
         this.headerTable = new JXTableDecorator(table.getModel(),
-                new InternalTableColumnModel(), table.getSelectionModel()) {
+                new JXTableRowHeader.InternalTableColumnModel(), table.getSelectionModel()) {
 
             @Override
             public Object getValueAt(int rowIndex, int columnIndex) {
@@ -180,7 +176,7 @@ public class JXTableRowHeader extends JComponent {
 
         setLayout(new GridLayout(1, 1));
 
-        this.headerTable.getModel().addTableModelListener(new HeaderResizeListener());
+        this.headerTable.getModel().addTableModelListener(new JXTableRowHeader.HeaderResizeListener());
         this.headerTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
         this.headerTable.getTableHeader().setReorderingAllowed(false);
         this.headerTable.getTableHeader().setResizingAllowed(false);
@@ -215,6 +211,7 @@ public class JXTableRowHeader extends JComponent {
         });
         /*jxTable.getFilters().addPipelineListener(new PipelineListener() {
 
+            @Override
             public void contentsChanged(PipelineEvent e) {
                 FilterPipeline pipeline = (FilterPipeline) e.getSource();
                 // need to refresh the rows for header table
@@ -235,7 +232,7 @@ public class JXTableRowHeader extends JComponent {
     protected TableCellRenderer createDefaultRenderer() {
         // TODO get a rollover enabled renderer
         //return new ColumnHeaderRenderer();
-        return new RowHeaderColumnRenderer();
+        return new JXTableRowHeader.RowHeaderColumnRenderer();
     }
 
     /**

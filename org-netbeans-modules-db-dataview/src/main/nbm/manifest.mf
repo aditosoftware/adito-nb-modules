@@ -1,6 +1,3 @@
-Manifest-Version: 1.0
-Ant-Version: Apache Ant 1.8.0
-Created-By: 1.6.0_18-b07 (Sun Microsystems Inc.)
 OpenIDE-Module-Public-Packages: org.netbeans.modules.db.dataview.api.*
  , org.netbeans.modules.db.dataview.spi.*
 OpenIDE-Module-Friends: org.netbeans.modules.etl.editor, org.netbeans.
@@ -12,11 +9,11 @@ OpenIDE-Module-Module-Dependencies: org.netbeans.api.progress/1 > 1.11
  enide.text > 6.18, org.openide.util > 8.0, org.openide.util.lookup > 
  8.0, org.openide.windows > 6.20, de.adito.aditoweb.packages.external.lwswingx > 1.6.0
 OpenIDE-Module-Java-Dependencies: Java > 1.6
-OpenIDE-Module-Implementation-Version: 201104080000
+OpenIDE-Module-Implementation-Version: 201207171143
 AutoUpdate-Show-In-Client: false
 OpenIDE-Module: org.netbeans.modules.db.dataview
 OpenIDE-Module-Localizing-Bundle: org/netbeans/modules/db/dataview/Bun
  dle.properties
-OpenIDE-Module-Specification-Version: 1.10.1
+OpenIDE-Module-Specification-Version: 1.15.1
 OpenIDE-Module-Requires: org.openide.modules.ModuleFormat1
 

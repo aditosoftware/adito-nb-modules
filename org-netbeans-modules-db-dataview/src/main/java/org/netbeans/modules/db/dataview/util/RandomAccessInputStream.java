@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2010 Oracle and/or its affiliates. All rights reserved.
+ * Copyright 2011 Oracle and/or its affiliates. All rights reserved.
  *
  * Oracle and Java are registered trademarks of Oracle and/or its affiliates.
  * Other names may be trademarks of their respective owners.
@@ -23,7 +23,7 @@
  * License Header, with the fields enclosed by brackets [] replaced by
  * your own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
- * 
+ *
  * If you wish your version of this file to be governed by only the CDDL
  * or only the GPL Version 2, indicate your decision by adding
  * "[Contributor] elects to include this software in this distribution
@@ -34,47 +34,42 @@
  * However, if you add GPL Version 2 code and therefore, elected the GPL
  * Version 2 license, then the option applies only if the new code is
  * made subject to such option by the copyright holder.
- * 
- * Contributor(s):
- * 
- * Portions Copyrighted 2008 Sun Microsystems, Inc.
- */
-/*package org.netbeans.modules.db.dataview.table;
-
-*//**
  *
- * @author ahimanikya
- *//*
-public class MultiColPatternFilter extends SuperPatternFilter {
+ * Contributor(s):
+ *
+ * Portions Copyrighted 2011 Sun Microsystems, Inc.
+ */
+package org.netbeans.modules.db.dataview.util;
 
-    private final int[] cols;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.RandomAccessFile;
 
-    public MultiColPatternFilter(final int... cols) {
-        super(0);
-        final int numCols = cols.length;
-        this.cols = new int[numCols];
-        System.arraycopy(cols, 0, this.cols, 0, numCols);
+class RandomAccessInputStream extends InputStream {
+
+    private RandomAccessFile raf;
+
+    public RandomAccessInputStream(RandomAccessFile raf) {
+        this.raf = raf;
     }
 
     @Override
-    public boolean test(final int row) {
-        for (int colIdx : cols) {
-            if (adapter.isTestable(colIdx)) {
-                Object val = getInputValue(row, colIdx);
-                if(val == null) {
-                    return false;
-                }
-                final String valueStr = val.toString().trim();
-                final boolean ret = testValue(valueStr);
-                if (ret) {
-                    return true;
-                }
-            } else {
-
-                return false;
-            }
-        }
-        return false;
+    public int read(byte[] b) throws IOException {
+        return raf.read(b);
     }
-}*/
 
+    @Override
+    public int read(byte[] b, int off, int len) throws IOException {
+        return raf.read(b, off, len);
+    }
+
+    @Override
+    public int read() throws IOException {
+        return raf.read();
+    }
+
+    @Override
+    public void close() throws IOException {
+        raf.close();
+    }
+}
