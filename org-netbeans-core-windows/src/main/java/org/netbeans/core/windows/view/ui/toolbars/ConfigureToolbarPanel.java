@@ -54,18 +54,12 @@ import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.swing.Action;
-import javax.swing.BorderFactory;
-import javax.swing.Icon;
-import javax.swing.JButton;
-import javax.swing.JLabel;
-import javax.swing.JScrollPane;
-import javax.swing.JSeparator;
-import javax.swing.SwingUtilities;
+import javax.swing.*;
 import org.openide.DialogDescriptor;
 import org.openide.DialogDisplayer;
 import org.openide.NotifyDescriptor;
 import org.openide.awt.Actions;
+import org.openide.awt.Mnemonics;
 import org.openide.awt.ToolbarPool;
 import org.openide.cookies.InstanceCookie;
 import org.openide.filesystems.FileObject;
@@ -90,7 +84,8 @@ import org.openide.util.datatransfer.ExTransferable;
  * @author  Stanislav Aubrecht
  */
 public class ConfigureToolbarPanel extends javax.swing.JPanel implements Runnable {
-    
+
+    private static final Logger LOG = Logger.getLogger(ConfigureToolbarPanel.class.getName());
     private static WeakReference<Dialog> dialogRef; // is weak reference necessary?
     
     private Node root;
@@ -98,6 +93,10 @@ public class ConfigureToolbarPanel extends javax.swing.JPanel implements Runnabl
     /** Creates new form ConfigureToolbarPanel */
     private ConfigureToolbarPanel() {
         initComponents();
+        
+        if (checkSmallIcons.getText().isEmpty()) {
+            checkSmallIcons.setVisible(false);
+        }
         
         setCursor( Cursor.getPredefinedCursor( Cursor.WAIT_CURSOR ) );
         
@@ -149,7 +148,7 @@ public class ConfigureToolbarPanel extends javax.swing.JPanel implements Runnabl
                 new Object[] { closeButton },
                 closeButton,
                 DialogDescriptor.DEFAULT_ALIGN,
-                null,
+                new HelpCtx( ConfigureToolbarPanel.class ),
                 null);
             dialog = DialogDisplayer.getDefault().createDialog(dd);
             dialogRef = new WeakReference<Dialog>(dialog);
@@ -284,15 +283,22 @@ public class ConfigureToolbarPanel extends javax.swing.JPanel implements Runnabl
     }//GEN-LAST:event_resetToolbars
 
     private void newToolbar(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_newToolbar
-        NotifyDescriptor.InputLine il = new NotifyDescriptor.InputLine
-                                        (NbBundle.getMessage(ConfigureToolbarPanel.class, "PROP_newToolbarLabel"), //NOI18N
-                                         NbBundle.getMessage(ConfigureToolbarPanel.class, "PROP_newToolbarDialog")); //NOI18N
-        il.setInputText(NbBundle.getMessage(ConfigureToolbarPanel.class, "PROP_newToolbar")); //NOI18N
+        JPanel panel = new JPanel( new BorderLayout( 5, 5 ) );
+        JLabel lbl = new JLabel();
+        Mnemonics.setLocalizedText( lbl, NbBundle.getMessage(ConfigureToolbarPanel.class, "PROP_newToolbarLabel") );
+        panel.add( lbl, BorderLayout.WEST );
+        JTextField inputField = new JTextField( NbBundle.getMessage(ConfigureToolbarPanel.class, "PROP_newToolbar") );
+        inputField.setColumns( 25 );
+        panel.add( inputField, BorderLayout.CENTER );
+        panel.setBorder( BorderFactory.createEmptyBorder( 10, 10, 10, 10 ) );
+        DialogDescriptor dd = new DialogDescriptor( panel, NbBundle.getMessage(ConfigureToolbarPanel.class, "PROP_newToolbarDialog"), 
+                true, DialogDescriptor.OK_CANCEL_OPTION, null, DialogDescriptor.DEFAULT_ALIGN, new HelpCtx( ConfigureToolbarPanel.class), null );
 
-        Object ok = org.openide.DialogDisplayer.getDefault ().notify (il);
-        if (ok != NotifyDescriptor.OK_OPTION)
+        Dialog dlg = org.openide.DialogDisplayer.getDefault ().createDialog( dd );
+        dlg.setVisible( true );
+        if (dd.getValue() != NotifyDescriptor.OK_OPTION)
             return;
-        String s = il.getInputText().trim();
+        String s = inputField.getText().trim();
         if( s.length() == 0 )
             return;
 
@@ -386,7 +392,7 @@ public class ConfigureToolbarPanel extends javax.swing.JPanel implements Runnabl
                             }
                         }
                         catch (IOException e) {
-                            Logger.getLogger(ConfigureToolbarPanel.class.getName()).log(Level.WARNING, null, e);
+                            LOG.log(Level.WARNING, null, e);
                         }
                     }
                 });
@@ -482,6 +488,11 @@ public class ConfigureToolbarPanel extends javax.swing.JPanel implements Runnabl
         private InstanceCookie instanceCookie;
         
         public boolean acceptDataObject( DataObject obj ) {
+             boolean a = doAcceptDataObject(obj);
+             LOG.log(Level.FINE, "{0} {1}", new Object[] {a ? '+' : '-', obj.getPrimaryFile().getPath().replace("Actions/", "")});
+             return a;
+        }
+        private boolean doAcceptDataObject(DataObject obj) {
             instanceCookie = obj.getCookie( InstanceCookie.class );
             if( null != instanceCookie ) {
                 try {
@@ -495,6 +506,7 @@ public class ConfigureToolbarPanel extends javax.swing.JPanel implements Runnabl
                             } catch( AssertionError aE ) {
                                 //hack: some action do not allow access outside
                                 //event queue - so let's ignore their assertions
+                                LOG.log(Level.FINE, null, aE);
                             }
                             boolean smallIcon = false;
                             if (noIconBase) {
@@ -504,6 +516,7 @@ public class ConfigureToolbarPanel extends javax.swing.JPanel implements Runnabl
                                 } catch (AssertionError aE) {
                                     //hack: some action do not allow access outside
                                     //event queue - so let's ignore their assertions
+                                    LOG.log(Level.FINE, null, aE);
                                 }
                             }
                             if (noIconBase && !smallIcon) {
@@ -516,9 +529,10 @@ public class ConfigureToolbarPanel extends javax.swing.JPanel implements Runnabl
                 } catch( AssertionError aE ) {
                     //hack: some action do not allow access outside
                     //event queue - so let's ignore their assertions
+                    LOG.log(Level.FINE, null, aE);
                     return false;
                 } catch( Throwable e ) {
-                    Logger.getLogger(ConfigureToolbarPanel.class.getName()).log(Level.WARNING, null, e);
+                    LOG.log(Level.WARNING, null, e);
                 }
                 return true;
             } else {

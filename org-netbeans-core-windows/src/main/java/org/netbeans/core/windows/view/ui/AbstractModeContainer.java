@@ -46,15 +46,13 @@
 package org.netbeans.core.windows.view.ui;
 
 
-import java.lang.reflect.Field;
+import org.netbeans.swing.tabcontrol.customtabs.Tabbed;
 import org.netbeans.core.windows.Constants;
-import org.netbeans.core.windows.ModeImpl;
 import org.netbeans.core.windows.WindowManagerImpl;
 import org.netbeans.core.windows.view.ModeContainer;
 import org.netbeans.core.windows.view.ModeView;
 import org.netbeans.core.windows.view.dnd.TopComponentDroppable;
 import org.netbeans.core.windows.view.dnd.WindowDnDManager;
-import org.openide.util.Utilities;
 import org.openide.windows.TopComponent;
 
 import javax.swing.*;
@@ -166,7 +164,7 @@ public abstract class AbstractModeContainer implements ModeContainer {
         Window newFocusedW = SwingUtilities.getWindowAncestor(selectedTopComponent);
         //#177550: Call requestFocus on selected TC only if TC is in AWT hierarchy
         if (newFocusedW != null) {
-            if (newFocusedW.equals(oldFocusedW)) {
+            if (newFocusedW.equals(oldFocusedW) || null == oldFocusedW) {
                 // focus transfer inside one window or system is not active in OS at all
                 // so requestFocusInWindow call is right and enough
                 selectedTopComponent.requestFocusInWindow();
@@ -209,7 +207,7 @@ public abstract class AbstractModeContainer implements ModeContainer {
     // Support for TopComponentDroppable
     protected Shape getIndicationForLocation(Point location) {
         return tabbedHandler.getIndicationForLocation(location,
-            windowDnDManager.getStartingTransfer(),
+            windowDnDManager.getStartingTransfer().getTopComponent(),
             windowDnDManager.getStartingPoint(),
             isAttachingPossible());
     }

@@ -45,19 +45,12 @@
 package org.netbeans.core.windows.view.ui;
 
 
-import java.awt.BorderLayout;
-import java.awt.Component;
-import java.awt.Dimension;
-import java.awt.FlowLayout;
-import java.awt.Frame;
-import java.awt.Graphics;
-import java.awt.GraphicsConfiguration;
-import java.awt.GraphicsDevice;
-import java.awt.GraphicsEnvironment;
-import java.awt.Rectangle;
+import java.awt.*;
 import java.awt.event.*;
 import java.io.File;
+import java.lang.reflect.Field;
 import java.util.*;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.*;
@@ -68,11 +61,13 @@ import org.netbeans.core.windows.*;
 import org.netbeans.core.windows.view.ui.toolbars.ToolbarConfiguration;
 import org.openide.LifecycleManager;
 import org.openide.awt.*;
+import org.openide.awt.MenuBar;
 import org.openide.cookies.InstanceCookie;
 import org.openide.cookies.SaveCookie;
 import org.openide.filesystems.*;
 import org.openide.loaders.DataObject;
 import org.openide.util.*;
+import org.openide.windows.TopComponent;
 
 /** The MainWindow of IDE. Holds toolbars, main menu and also entire desktop
  * if in MDI user interface. Singleton.
@@ -106,6 +101,8 @@ public final class MainWindow {
 
    private static MainWindow theInstance;
 
+   private static final Logger LOGGER = Logger.getLogger(MainWindow.class.getName());
+
    /** Constructs main window. */
    private MainWindow(JFrame frame) {
        this.frame = frame;
@@ -114,7 +111,7 @@ public final class MainWindow {
    public static MainWindow install( JFrame frame ) {
        synchronized( MainWindow.class ) {
            if( null != theInstance ) {
-               Logger.getLogger(MainWindow.class.getName()).log(Level.INFO, "Installing MainWindow again, existing frame is: " + theInstance.frame); //NOI18N
+               LOGGER.log(Level.INFO, "Installing MainWindow again, existing frame is: " + theInstance.frame); //NOI18N
            }
            theInstance = new MainWindow(frame);
            return theInstance;
@@ -124,7 +121,7 @@ public final class MainWindow {
    public static MainWindow getInstance() {
        synchronized( MainWindow.class ) {
            if( null == theInstance ) {
-               Logger.getLogger(MainWindow.class.getName()).log(Level.INFO, "Accessing uninitialized MainWindow, using dummy JFrame instead." ); //NOI18N
+               LOGGER.log(Level.INFO, "Accessing uninitialized MainWindow, using dummy JFrame instead." ); //NOI18N
                theInstance = new MainWindow(new JFrame());
            }
            return theInstance;
@@ -135,6 +132,36 @@ public final class MainWindow {
        if (mainMenuBar == null) {
            mainMenuBar = createMenuBar();
            ToolbarPool.getDefault().waitFinished();
+           Toolkit toolkit = Toolkit.getDefaultToolkit();
+           Class<?> xtoolkit = toolkit.getClass();
+           //#183739 - provide proper app name on Linux
+           if (xtoolkit.getName().equals("sun.awt.X11.XToolkit")) { //NOI18N
+               try {
+                    final Field awtAppClassName = xtoolkit.getDeclaredField("awtAppClassName"); //NOI18N
+                    awtAppClassName.setAccessible(true);
+                    awtAppClassName.set(null, NbBundle.getMessage(MainWindow.class, "CTL_MainWindow_Title_No_Project", "").trim()); //NOI18N
+               } catch (Exception x) {
+                   LOGGER.log(Level.FINE, null, x);
+               }
+           }
+           //#198639 - workaround for main menu & mouse issues in Gnome 3
+           if ("gnome-shell".equals(System.getenv("DESKTOP_SESSION"))) { //NOI18N
+               try {
+                   Class<?> xwm = Class.forName("sun.awt.X11.XWM"); //NOI18N
+                   Field awt_wmgr = xwm.getDeclaredField("awt_wmgr"); //NOI18N
+                   awt_wmgr.setAccessible(true);
+                   Field other_wm = xwm.getDeclaredField("OTHER_WM"); //NOI18N
+                   other_wm.setAccessible(true);
+                   if (awt_wmgr.get(null).equals(other_wm.get(null))) {
+                       Field metacity_wm = xwm.getDeclaredField("METACITY_WM"); //NOI18N
+                       metacity_wm.setAccessible(true);
+                       awt_wmgr.set(null, metacity_wm.get(null));
+                       LOGGER.info("installed #198639 workaround"); //NOI18N
+                   }
+               } catch (Exception x) {
+                   LOGGER.log(Level.FINE, null, x);
+               }
+           }
        }
    }
 
@@ -149,7 +176,7 @@ public final class MainWindow {
            @Override
            public void paint(Graphics g) {
                super.paint(g);
-               Logger.getLogger(MainWindow.class.getName()).log(Level.FINE,
+               LOGGER.log(Level.FINE,
                        "Paint method of main window invoked normally."); //NOI18N
                // XXX is this only needed by obsolete #24291 hack, or now needed independently?
                WindowManagerImpl.getInstance().mainWindowPainted();
@@ -320,21 +347,33 @@ public final class MainWindow {
        if (c == null || c.isEmpty ()) {
            return null;
        }
-       Iterator<? extends StatusLineElementProvider> it = c.iterator ();
-       JPanel icons = new JPanel (new FlowLayout (FlowLayout.RIGHT, 0, 0));
+       final Iterator<? extends StatusLineElementProvider> it = c.iterator ();
+       final JPanel icons = new JPanel (new FlowLayout (FlowLayout.RIGHT, 0, 0));
        if( isShowCustomBackground() )
            icons.setOpaque( false );
        icons.setBorder (BorderFactory.createEmptyBorder (1, 0, 0, 2));
-       boolean some = false;
-       while (it.hasNext ()) {
-           StatusLineElementProvider o = it.next ();
-           Component comp = o.getStatusLineElement ();
-           if (comp != null) {
-               some = true;
-               icons.add (comp);
-           }
+       final boolean[] some = new boolean[1];
+       some[0] = false;
+       Runnable r = new Runnable() {
+            @Override
+            public void run() {
+               while (it.hasNext ()) {
+                   StatusLineElementProvider o = it.next ();
+                   Component comp = o.getStatusLineElement ();
+                   if (comp != null) {
+                       some[0] = true;
+                       icons.add (comp);
+                   }
+               }
+            }
+       };
+       if( !SwingUtilities.isEventDispatchThread() ) {
+           SwingUtilities.invokeLater( r );
+           return icons;
+       } else {
+           r.run();
        }
-       return some ? icons : null;
+       return some[0] ? icons : null;
    }
 
    protected void initRootPane() {
@@ -376,7 +415,10 @@ public final class MainWindow {
    }
 
    public void setVisible(boolean visible) {
-       frame.setVisible(visible);
+        if ("false".equals(System.getProperty("org.netbeans.core.WindowSystem.show"))) { // NOI18N
+            return;
+        }
+        frame.setVisible(visible);
    }
 
    public int getExtendedState() {
@@ -418,6 +460,9 @@ public final class MainWindow {
    private static final String ICON_32 = "org/netbeans/core/startup/frame32.gif"; // NOI18N
    private static final String ICON_48 = "org/netbeans/core/startup/frame48.gif"; // NOI18N
    static void initFrameIcons(Frame f) {
+       List<Image> currentIcons = f.getIconImages();
+       if( !currentIcons.isEmpty() )
+           return; //do not override icons if they have been already provided elsewhere (JDev)
        f.setIconImages(Arrays.asList(
                ImageUtilities.loadImage(ICON_16, true),
                ImageUtilities.loadImage(ICON_32, true),
@@ -439,6 +484,11 @@ public final class MainWindow {
                }
            }
        );
+   }
+
+   static void preInitMenuAndToolbar() {
+       createMenuBar();
+       ToolbarPool.getDefault();
    }
 
    /** Creates menu bar. */
@@ -647,6 +697,8 @@ public final class MainWindow {
            isUndecorated = frame.isUndecorated();
            windowDecorationStyle = frame.getRootPane().getWindowDecorationStyle();
        }
+       
+       final TopComponent activeTc = TopComponent.getRegistry().getActivated();
 
        GraphicsDevice device = null;
        GraphicsConfiguration conf = frame.getGraphicsConfiguration();
@@ -654,7 +706,12 @@ public final class MainWindow {
            device = conf.getDevice();
            if( isFullScreenMode && device.isFullScreenSupported() && !(Utilities.isMac() || Utilities.isWindows()) ) {
                //#195927 - attempting to prevent NPE on sunray solaris
-               device.setFullScreenWindow( null );
+               try {
+                    device.setFullScreenWindow( null );
+               }catch( IllegalArgumentException iaE ) {
+                   //#206310 - sometimes this make problems on Linux
+                   LOGGER.log( Level.FINE, null, iaE );
+               }
            }
        }
 
@@ -712,6 +769,8 @@ public final class MainWindow {
                    }
                    ToolbarPool.getDefault().setConfiguration( toolbarConfigName );
                    isSwitchingFullScreenMode = false;
+                   if( null != activeTc )
+                       activeTc.requestFocusInWindow();
                }
            });
        } else {
@@ -724,7 +783,9 @@ public final class MainWindow {
                    frame.repaint();
                    ToolbarPool.getDefault().setConfiguration( toolbarConfigName );
                    isSwitchingFullScreenMode = false;
-               }
+                   if( null != activeTc )
+                       activeTc.requestFocusInWindow();
+                }
            });
        }
    }

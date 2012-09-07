@@ -47,6 +47,7 @@ package org.netbeans.core.windows.view.dnd;
 
 
 
+import org.netbeans.swing.tabcontrol.customtabs.Tabbed;
 import java.awt.AWTEvent;
 import java.awt.Color;
 import java.awt.Component;
@@ -273,18 +274,11 @@ implements AWTEventListener, DragSourceListener, DragSourceMotionListener {
         TopComponent tc = null;
         Tabbed tabbed;
 
-        if(srcComp instanceof Tabbed) {
-            tabbed = (Tabbed)srcComp;
+        if(srcComp instanceof Tabbed.Accessor) {
+            tabbed = ((Tabbed.Accessor)srcComp).getTabbed();
         } else {
-            tabbed = (Tabbed)SwingUtilities.getAncestorOfClass(Tabbed.class, srcComp);
-        }
-        if (tabbed == null) {
-            if(srcComp instanceof Tabbed.Accessor) {
-                tabbed = ((Tabbed.Accessor)srcComp).getTabbed();
-            } else {
-                Tabbed.Accessor acc = (Tabbed.Accessor)SwingUtilities.getAncestorOfClass(Tabbed.Accessor.class, srcComp);
-                tabbed = acc != null ? acc.getTabbed() : null;
-            }
+            Tabbed.Accessor acc = (Tabbed.Accessor)SwingUtilities.getAncestorOfClass(Tabbed.Accessor.class, srcComp);
+            tabbed = acc != null ? acc.getTabbed() : null;
         }
         if(tabbed == null) {
             return;
@@ -396,20 +390,18 @@ implements AWTEventListener, DragSourceListener, DragSourceMotionListener {
         addListening();
         hackESC = false;
         
-        Tabbed tabbed = (Tabbed) SwingUtilities.getAncestorOfClass (Tabbed.class,
-            startingComp);
-        if (tabbed == null) {
-            Tabbed.Accessor acc = (Tabbed.Accessor) SwingUtilities.getAncestorOfClass (Tabbed.Accessor.class,
-                                                                                       startingComp);
-            tabbed = acc != null ? acc.getTabbed() : null;
-        }
+        Tabbed tabbed = null;
+        Tabbed.Accessor acc = (Tabbed.Accessor) SwingUtilities.getAncestorOfClass (Tabbed.Accessor.class,
+                                                                                    startingComp);
+        tabbed = acc != null ? acc.getTabbed() : null;
         
         int tabIndex = -1;
         Image img = createDragImage();
         if (tabbed != null) {
             if( transfer.isTopComponentTransfer()
                 && WinSysPrefs.HANDLER.getBoolean(WinSysPrefs.DND_DRAGIMAGE, 
-                    Utilities.getOperatingSystem() != Utilities.OS_SOLARIS)) {
+                    Utilities.getOperatingSystem() != Utilities.OS_SOLARIS)
+                    && !isMacJDK7() ) {
                 tabIndex = tabbed.indexOf(transfer.getTopComponent());
 
                 visualizer = new DragAndDropFeedbackVisualizer( tabbed, tabIndex );
@@ -1009,5 +1001,15 @@ implements AWTEventListener, DragSourceListener, DragSourceMotionListener {
         g.setColor( Color.white );
         g.fillRect(0,0,1,1);
         return res;
+    }
+    
+    private static boolean isMacJDK7() {
+        if( Utilities.isMac() ) {
+            String version = System.getProperty("java.version"); //NOI18N
+            if( null != version && version.startsWith("1.7" ) ) //NOI18N
+                return true;
+        }
+        return false;
+        
     }
 }

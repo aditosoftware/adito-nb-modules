@@ -91,6 +91,7 @@ import javax.swing.SwingUtilities;
 import org.netbeans.core.windows.nativeaccess.NativeWindowSystem;
 import org.openide.awt.Toolbar;
 import org.openide.awt.ToolbarPool;
+import org.openide.filesystems.FileUtil;
 import org.openide.loaders.DataFolder;
 import org.openide.loaders.DataObject;
 import org.openide.loaders.DataShadow;
@@ -469,6 +470,8 @@ final class DnDSupport implements DragSourceListener, DragGestureListener, DropT
         DataObject objUnderCursor = getDataObjectUnderDropCursor( dropIndex-1, dropBefore );
 
         DataShadow shadow = DataShadow.create( backingFolder, dobj );
+        // use some fake position, so getChildren don't complain
+        shadow.getPrimaryFile().setAttribute("position", 100001); // NOI18N
 
         //find the added object
         DataObject newObj = null;
@@ -514,6 +517,8 @@ final class DnDSupport implements DragSourceListener, DragGestureListener, DropT
             int currentIndex = children.indexOf( objToMove );
             if( currentIndex < targetIndex )
                 targetIndex--;
+            targetIndex = Math.max( 0, targetIndex );
+            targetIndex = Math.min( children.size(), targetIndex );
             children.remove( objToMove );
             children.add( targetIndex, objToMove );
         }
@@ -606,7 +611,18 @@ final class DnDSupport implements DragSourceListener, DragGestureListener, DropT
      *
      * @return True if the drop has been successful.
      */
-    private boolean handleDrop( Transferable t ) {
+    private boolean handleDrop( final Transferable t ) {
+        final boolean[] res = { false };
+        FileUtil.runAtomicAction(new Runnable() {
+            @Override
+            public void run() {
+                res[0] = handleDropImpl(t);
+            }
+        });
+        return res[0];
+    }
+    
+    private boolean handleDropImpl(Transferable t) {       
         try {
             Object o;
             if( t.isDataFlavorSupported( actionDataFlavor ) ) {

@@ -1664,6 +1664,19 @@ final class Central implements ControllerHandler {
                 mode, View.CHANGE_TOPCOMPONENT_ICON_CHANGED, null, tc));
         }
     }
+
+    /**
+     * 
+     * @param mode
+     * @param tc
+     * @param busy 
+     * @since 2.45
+     */
+    public void topComponentMakeBusy( ModeImpl mode, TopComponent tc, boolean busy ) {
+        String modeName = getModeName(mode);
+        viewRequestor.scheduleRequest (
+            new ViewRequest(modeName, busy ? View.TOPCOMPONENT_SHOW_BUSY : View.TOPCOMPONENT_HIDE_BUSY, tc, tc));
+    }
     
     public void resetModel() {
         model.reset();
@@ -2049,7 +2062,8 @@ final class Central implements ControllerHandler {
             if( m.getKind() == Constants.MODE_KIND_EDITOR 
                     && !"editor".equals(m.getName()) //NOI18N
                     && !m.getOpenedTopComponentsIDs().isEmpty()
-                    && !m.isPermanent() )
+                    && !m.isPermanent()
+                    && m.getState() != Constants.MODE_STATE_SEPARATED )
                 return m;
         }
         return null;
@@ -2136,7 +2150,11 @@ final class Central implements ControllerHandler {
         if( draggable.isTopComponentTransfer() ) {
             moveTopComponentIntoMode(mode, draggable.getTopComponent());
         } else {
-            dockMode( mode, draggable.getMode() );
+            if( mode.getKind() != draggable.getKind() ) {
+                mergeModes( draggable.getMode(), mode, 0 );
+            } else {
+                dockMode( mode, draggable.getMode() );
+            }
         }
         updateViewAfterDnD(true);
     }
@@ -2169,6 +2187,7 @@ final class Central implements ControllerHandler {
         if( draggable.isTopComponentTransfer() ) {
             ModeImpl newMode = createFloatingMode( bounds, draggable.getKind() );
             moveTopComponentIntoMode( newMode, draggable.getTopComponent() );
+            newMode.setSelectedTopComponent( draggable.getTopComponent() );
         } else {
             userUndockedMode( draggable.getMode(), bounds );
         }
@@ -2503,7 +2522,7 @@ final class Central implements ControllerHandler {
         int dockIndex = model.getModeTopComponentPreviousIndex(source, tcID);
         int modeKind = mode.getKind();
         
-        if ((dockTo == null) || !model.getModes().contains(dockTo)) {
+        if ((dockTo == null) || !model.getModes().contains(dockTo) || dockTo.getState() == Constants.MODE_STATE_SEPARATED) {
             // mode to dock to back isn't valid anymore, try constraints
             SplitConstraint[] constraints = model.getModeTopComponentPreviousConstraints(source, tcID);
             if (constraints != null) {
@@ -2817,6 +2836,9 @@ final class Central implements ControllerHandler {
         } else {
             unSlide( tc, mode );
         }
+        //#207438 - make sure global minimize/dock actions get updated
+        WindowManagerImpl.getInstance().doFirePropertyChange(
+            WindowManager.PROP_MODES, null, null);
     }
 
     boolean isTopComponentMinimized( TopComponent tc ) {

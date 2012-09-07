@@ -42,25 +42,20 @@
  * made subject to such option by the copyright holder.
  */
 
-package org.netbeans.core.windows.view.ui;
+package org.netbeans.core.windows.view.ui.popupswitcher;
 
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.KeyboardFocusManager;
 import java.awt.Rectangle;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.InputEvent;
-import java.awt.event.KeyEvent;
-import java.awt.event.WindowEvent;
-import java.awt.event.WindowFocusListener;
-import javax.swing.AbstractAction;
-import javax.swing.JWindow;
-import javax.swing.SwingUtilities;
-import javax.swing.Timer;
+import java.awt.event.*;
+import java.lang.ref.WeakReference;
+import javax.swing.*;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+import org.netbeans.core.windows.Switches;
 import org.netbeans.core.windows.WindowManagerImpl;
 import org.netbeans.core.windows.actions.RecentViewListAction;
-import org.netbeans.swing.popupswitcher.SwitcherTable;
-import org.netbeans.swing.popupswitcher.SwitcherTableItem;
 import org.openide.awt.StatusDisplayer;
 import org.openide.util.Utilities;
 import org.openide.windows.Mode;
@@ -111,20 +106,13 @@ public final class KeyboardPopupSwitcher implements WindowFocusListener {
      */
     private static int hits;
     
-    /**
-     * Current items to be shown in a popup. It is <code>static</code>, since
-     * there can be only one popup list at time.
-     */
-    private static SwitcherTableItem[] items;
-    
-    private SwitcherTable pTable;
+    private PopupSwitcher switcher;
+    private Table table;
     
     private static int triggerKey; // e.g. TAB
     private static int reverseKey = KeyEvent.VK_SHIFT;
     private static int releaseKey; // e.g. CTRL
-    
-    private int x;
-    private int y;
+    private static boolean documentsOnly = false;
     
     /** Indicates whether an item to be selected is previous or next one. */
     private boolean fwd = true;
@@ -137,7 +125,7 @@ public final class KeyboardPopupSwitcher implements WindowFocusListener {
         WindowManagerImpl wmi = WindowManagerImpl.getInstance();
         // don't perform when focus is dialog
         if (!wmi.getMainWindow().isFocused() &&
-            !wmi.isSeparateWindow(KeyboardFocusManager.getCurrentKeyboardFocusManager().getFocusedWindow())) {
+            !WindowManagerImpl.isSeparateWindow(KeyboardFocusManager.getCurrentKeyboardFocusManager().getFocusedWindow())) {
             return false;
         }
 
@@ -147,7 +135,12 @@ public final class KeyboardPopupSwitcher implements WindowFocusListener {
                 return false;
         }
 
+        return doProcessShortcut( kev );
+    }
 
+    private static WeakReference<Component> lastSource;
+
+    static boolean doProcessShortcut( KeyEvent kev ) {
         boolean isCtrlTab = kev.getKeyCode() == KeyEvent.VK_TAB &&
                 kev.getModifiers() == InputEvent.CTRL_MASK;
         boolean isCtrlShiftTab = kev.getKeyCode() == KeyEvent.VK_TAB &&
@@ -160,9 +153,27 @@ public final class KeyboardPopupSwitcher implements WindowFocusListener {
             return true;
         }
         if ((isCtrlTab || isCtrlShiftTab)) { // && !KeyboardPopupSwitcher.isShown()
+            if( kev.getID() == KeyEvent.KEY_PRESSED ) {
+                lastSource = new WeakReference<Component>(kev.getComponent());
+            }
+            if( !Switches.isCtrlTabWindowSwitchingInJTableEnabled() ) {
+                Component c = KeyboardFocusManager.getCurrentKeyboardFocusManager().getFocusOwner();
+                if( c instanceof JTabbedPane || c instanceof JTable ) {
+                    return false;
+                }
+            }
+
             if (KeyboardPopupSwitcher.isAlive()) {
                 KeyboardPopupSwitcher.processInterruption(kev);
             } else {
+                if( kev.getID() == KeyEvent.KEY_RELEASED ) {
+                    Component currentSource = kev.getComponent();
+                    if( null != currentSource && null != lastSource && !currentSource.equals( lastSource.get() ) ) {
+                        //If the previous Ctrl+Tab event just transfered focus from JTable or JTabbedPane
+                        //the KeyboardFocusManager will resend this event to the new focus owner.
+                        return false;
+                    }
+                }
                 AbstractAction rva = new RecentViewListAction();
                 rva.actionPerformed(new ActionEvent(kev.getSource(),
                         ActionEvent.ACTION_PERFORMED, "C-TAB", kev.getModifiers()));
@@ -194,19 +205,38 @@ public final class KeyboardPopupSwitcher implements WindowFocusListener {
      *
      * A popup appears on <code>x</code>, <code>y</code> coordinates.
      */
-    public static void selectItem(SwitcherTableItem items[], int releaseKey,
-            int triggerKey, boolean forward) {
+    public static void showPopup(boolean documentsOnly, int releaseKey, int triggerKey, boolean forward) {
         // reject multiple invocations
         if (invokerTimerRunning) {
             return;
         }
-        KeyboardPopupSwitcher.items = items;
         KeyboardPopupSwitcher.releaseKey = releaseKey;
         KeyboardPopupSwitcher.triggerKey = triggerKey;
         invokerTimer = new Timer(TIME_TO_SHOW, new PopupInvoker(forward));
         invokerTimer.setRepeats(false);
         invokerTimer.start();
         invokerTimerRunning = true;
+    }
+
+    /**
+     * For (unit) testing only.
+     * @param model
+     * @param releaseKey
+     * @param triggerKey
+     * @param forward
+     */
+    static void showPopup( Model model, int releaseKey, int triggerKey, boolean forward ) {
+        KeyboardPopupSwitcher.releaseKey = releaseKey;
+        KeyboardPopupSwitcher.triggerKey = triggerKey;
+        instance = new KeyboardPopupSwitcher( model, forward );
+        instance.showPopup();
+        shown = true;
+    }
+
+    static void hidePopup() {
+        cleanupInterrupter();
+        if( null != instance )
+            instance.cancelSwitching();
     }
     
     /** Stop invoker timer and detach interrupter listener. */
@@ -226,10 +256,11 @@ public final class KeyboardPopupSwitcher implements WindowFocusListener {
             this.forward = forward;
         }
         /** Timer just hit the specified time_to_show */
+        @Override
         public void actionPerformed(ActionEvent e) {
             if (invokerTimerRunning) {
                 cleanupInterrupter();
-                instance = new KeyboardPopupSwitcher( forward ? hits + 1 : items.length - hits - 1, forward);
+                instance = new KeyboardPopupSwitcher( hits, forward );
                 instance.showPopup();
             }
         }
@@ -255,39 +286,49 @@ public final class KeyboardPopupSwitcher implements WindowFocusListener {
     }
     
     /**
-     * Creates a new instance of KeyboardPopupSwitcher with initial selection
-     * set to <code>initialSelection</code>.
+     * Creates a new instance of KeyboardPopupSwitcher.
      */
-    private KeyboardPopupSwitcher(int initialSelection, boolean forward) {
+    private KeyboardPopupSwitcher(int hits, boolean forward) {
         this.fwd = forward;
-        pTable = new SwitcherTable(items);
-        // Compute coordinates for popup to be displayed in center of screen
-        Dimension popupDim = pTable.getPreferredSize();
-        Rectangle screen = Utilities.getUsableScreenBounds();
-        this.x = screen.x + ((screen.width / 2) - (popupDim.width / 2));
-        this.y = screen.y + ((screen.height / 2) - (popupDim.height / 2));
-        // Set initial selection if there are at least two items in table
-        int cols = pTable.getColumnCount();
-        int rows = pTable.getRowCount();
-        assert cols > 0 : "There aren't any columns in the KeyboardPopupSwitcher's table"; // NOI18N
-        assert rows > 0 : "There aren't any rows in the KeyboardPopupSwitcher's table"; // NOI18N
-        changeTableSelection((rows > initialSelection && initialSelection >= 0) ? initialSelection :
-            initialSelection, 0);
+        switcher = new PopupSwitcher( documentsOnly, hits, forward );
+        table = switcher.getTable();
     }
-    
+
+    /**
+     * For (unit) testing only
+     * @param model
+     */
+    private KeyboardPopupSwitcher(Model model, boolean forward) {
+        this.fwd = true;
+        switcher = new PopupSwitcher( model, 0, forward );
+        table = switcher.getTable();
+    }
+
     private void showPopup() {
         if (!isShown()) {
             // set popup to be always on top to be in front of all
             // floating separate windows
             popup = new JWindow();
             popup.setAlwaysOnTop(true);
-            popup.getContentPane().add(pTable);
+            popup.getContentPane().add(switcher);
+            Dimension popupDim = switcher.getPreferredSize();
+            Rectangle screen = Utilities.getUsableScreenBounds();
+            int x = screen.x + ((screen.width / 2) - (popupDim.width / 2));
+            int y = screen.y + ((screen.height / 2) - (popupDim.height / 2));
             popup.setLocation(x, y);
             popup.pack();
+            MenuSelectionManager.defaultManager().addChangeListener( new ChangeListener() {
+                @Override
+                public void stateChanged( ChangeEvent e ) {
+                    MenuSelectionManager.defaultManager().removeChangeListener( this );
+                    hidePopup();
+                }
+            });
             popup.setVisible(true);
             // #82743 - on JDK 1.5 popup steals focus from main window for a millisecond,
             // so we have to delay attaching of focus listener
             SwingUtilities.invokeLater(new Runnable() {
+                @Override
                 public void run () {
                     WindowManager.getDefault().getMainWindow().
                             addWindowFocusListener( KeyboardPopupSwitcher.this );
@@ -336,69 +377,43 @@ public final class KeyboardPopupSwitcher implements WindowFocusListener {
                 if (code == reverseKey) {
                     fwd = false;
                 } else if (code == triggerKey) {
-                    int lastRowIdx = pTable.getRowCount() - 1;
-                    int lastColIdx = pTable.getColumnCount() - 1;
-                    int selRow = pTable.getSelectedRow();
-                    int selCol = pTable.getSelectedColumn();
-                    int row = selRow;
-                    int col = selCol;
-                    
-                    // MK initial alg.
-                    if (fwd) {
-                        if (selRow >= lastRowIdx) {
-                            row = 0;
-                            col = (selCol >= lastColIdx ? 0 : ++col);
-                        } else {
-                            row++;
-                            if (pTable.getValueAt(row, col) == null) {
-                                row = 0;
-                                col = 0;
-                            }
-                        }
+                    if( fwd ) {
+                        table.nextRow();
                     } else {
-                        if (selRow == 0) {
-                            if (selCol == 0) {
-                                col = lastColIdx;
-                                row = pTable.getLastValidRow();
-                            } else {
-                                col--;
-                                row = lastRowIdx;
-                            }
-                        } else {
-                            row--;
-                        }
+                        table.previousRow();
                     }
-                    if (row >= 0 && col >= 0) {
-                        changeTableSelection(row, col);
+                } else {
+                    switch( code ) {
+                        case KeyEvent.VK_UP:
+                            table.previousRow();
+                            break;
+                        case KeyEvent.VK_DOWN:
+                            table.nextRow();
+                            break;
+                        case KeyEvent.VK_LEFT:
+                            table.previousColumn();
+                            break;
+                        case KeyEvent.VK_RIGHT:
+                            table.nextColumn();
+                            break;
                     }
                 }
                 kev.consume();
                 break;
             case KeyEvent.KEY_RELEASED:
-				code = kev.getKeyCode();
+                code = kev.getKeyCode();
                 if (code == reverseKey) {
                     fwd = true;
                     kev.consume();
                 } else if (code == KeyEvent.VK_ESCAPE) { // XXX see above
                     cancelSwitching();
-                } else if (code == releaseKey) {
-                    performSwitching();
+                } else if (code == releaseKey || code == KeyEvent.VK_ENTER) {
+                    table.performSwitching();
+                    cancelSwitching();
                 }
                 break;
-                }
+            }
         }
-    
-    /** Changes table selection and sets status bar appropriately */
-    private void changeTableSelection(int row, int col) {
-        pTable.changeSelection(row, col, false, false);
-        // #95111: Defense agaist random selection failure
-        SwitcherTableItem item = pTable.getSelectedItem();
-        if (item != null) {
-            String statusText = item.getDescription();
-            StatusDisplayer.getDefault().setStatusText(
-                    statusText != null ? statusText : "");
-        }
-    }
     
     /**
      * Cancels the popup if present, causing it to close without the active
@@ -407,18 +422,6 @@ public final class KeyboardPopupSwitcher implements WindowFocusListener {
     private void cancelSwitching() {
         hideCurrentPopup();
         StatusDisplayer.getDefault().setStatusText("");
-    }
-    
-    /** Switch to the currently selected document and close the popup. */
-    private void performSwitching() {
-        if (popup != null) {
-            // #90007: selection may be null if mouse is involved
-            SwitcherTableItem item = pTable.getSelectedItem();
-            if (item != null) {
-                item.activate();
-            }
-        }
-        cancelSwitching();
     }
     
     private synchronized void hideCurrentPopup() {
@@ -430,9 +433,11 @@ public final class KeyboardPopupSwitcher implements WindowFocusListener {
         }
     }
 
+    @Override
     public void windowGainedFocus(WindowEvent e) {
     }
 
+    @Override
     public void windowLostFocus(WindowEvent e) {
         //remove the switcher when the main window is deactivated, 
         //e.g. user pressed Ctrl+Esc on MS Windows which opens the Start menu
@@ -454,6 +459,7 @@ public final class KeyboardPopupSwitcher implements WindowFocusListener {
             toHide = popup;
         }
         
+        @Override
         public void run() {
             toHide.setVisible(false);
             shown = false;
