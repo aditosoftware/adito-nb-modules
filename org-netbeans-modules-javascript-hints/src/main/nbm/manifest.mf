@@ -12,10 +12,10 @@ OpenIDE-Module-Module-Dependencies: org.mozilla.rhino.patched/1 > 1.10
  6, org.openide.util > 8.0, org.openide.util.lookup > 8.0, org.openide
  .windows > 6.2
 OpenIDE-Module-Java-Dependencies: Java > 1.6
-OpenIDE-Module-Implementation-Version: 201112071828
+OpenIDE-Module-Implementation-Version: 201207171143
 AutoUpdate-Show-In-Client: false
 OpenIDE-Module: org.netbeans.modules.javascript.hints/1
-OpenIDE-Module-Specification-Version: 0.51.1
+OpenIDE-Module-Specification-Version: 0.53.1
 OpenIDE-Module-Localizing-Bundle: org/netbeans/modules/javascript/hint
  s/Bundle.properties
 OpenIDE-Module-Layer: org/netbeans/modules/javascript/hints/layer.xml
