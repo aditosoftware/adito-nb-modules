@@ -74,7 +74,8 @@ import org.netbeans.api.lexer.TokenSequence;
 import org.netbeans.api.lexer.TokenUtilities;
 import org.netbeans.editor.BaseDocument;
 import org.netbeans.editor.Utilities;
-import org.netbeans.editor.ext.html.parser.SyntaxElement;
+import org.netbeans.modules.html.editor.lib.api.elements.Attribute;
+import org.netbeans.modules.html.editor.lib.api.elements.OpenTag;
 import org.netbeans.modules.csl.api.CodeCompletionContext;
 import org.netbeans.modules.csl.api.CodeCompletionResult;
 import org.netbeans.modules.csl.api.OffsetRange;
@@ -82,6 +83,7 @@ import org.netbeans.modules.csl.api.StructureItem;
 import org.netbeans.modules.csl.spi.DefaultCompletionResult;
 import org.netbeans.modules.csl.spi.ParserResult;
 import org.netbeans.modules.html.editor.api.gsf.HtmlParserResult;
+import org.netbeans.modules.html.editor.lib.api.elements.ElementType;
 import org.netbeans.modules.javascript.editing.JsParser.Sanitize;
 import org.netbeans.modules.javascript.editing.lexer.Call;
 import org.netbeans.modules.javascript.editing.lexer.JsCommentLexer;
@@ -103,7 +105,7 @@ import org.openide.util.NbBundle;
 
 /**
  * Code completion handler for JavaScript
- *
+ * 
  * @todo Do completion on element id's inside $() calls (prototype.js) and $$() calls for CSS rules.
  *   See http://www.sitepoint.com/article/painless-javascript-prototype
  * @todo Track logical classes and inheritance ("extend")
@@ -134,7 +136,7 @@ import org.openide.util.NbBundle;
  *    filtering Java-style?), and explanations for each parameter
  *  @todo Need preindexing support for unit tests - and separate files
  * @todo Insert semicolon too when you insert methods, in custom templates (unless you're in a call), a var block, etc.
- *
+ * 
  * @author Tor Norbye
  */
 public class JsCodeCompletion implements CodeCompletionHandler {
@@ -831,18 +833,14 @@ public class JsCodeCompletion implements CodeCompletionHandler {
                     @Override
                     void run(ResultIterator resultIterator) throws Exception {
                         HtmlParserResult htmlResult = (HtmlParserResult) resultIterator.getParserResult();
-                        List<SyntaxElement> elementsList = htmlResult.getSyntaxAnalyzerResult().getElements().items();
+                        Collection<org.netbeans.modules.html.editor.lib.api.elements.Element> elementsList = htmlResult.getSyntaxAnalyzerResult().getElements().items();
                         Set<String> classes = new HashSet<String>();
-                        for (SyntaxElement s : elementsList) {
-                            if (s.type() == SyntaxElement.TYPE_TAG) {
-                                String element = s.text().toString();
-                                int classIdx = element.indexOf("class=\""); // NOI18N
-                                if (classIdx != -1) {
-                                    int classIdxEnd = element.indexOf('"', classIdx + 7);
-                                    if (classIdxEnd != -1 && classIdxEnd > classIdx + 1) {
-                                        String clz = element.substring(classIdx + 7, classIdxEnd);
-                                        classes.add(clz);
-                                    }
+                        for (org.netbeans.modules.html.editor.lib.api.elements.Element s : elementsList) {
+                            if (s.type() == ElementType.OPEN_TAG) {
+                                OpenTag ot = (OpenTag)s;
+                                Attribute classA = ot.getAttribute("class");
+                                if(classA != null) {
+                                    classes.add(classA.unquotedValue().toString());
                                 }
                             }
                         }
@@ -872,18 +870,12 @@ public class JsCodeCompletion implements CodeCompletionHandler {
                     @Override
                     void run(ResultIterator resultIterator) throws Exception {
                         HtmlParserResult htmlResult = (HtmlParserResult) resultIterator.getParserResult();
-                        List<SyntaxElement> elementsList = htmlResult.getSyntaxAnalyzerResult().getElements().items();
+                        Collection<org.netbeans.modules.html.editor.lib.api.elements.Element> elementsList = htmlResult.getSyntaxAnalyzerResult().getElements().items();
                         Set<String> tagNames = new HashSet<String>();
-                        for (SyntaxElement s : elementsList) {
-                            if (s.type() == SyntaxElement.TYPE_TAG) {
-                                String element = s.text().toString();
-                                int start = 1;
-                                int end = element.indexOf(' ');
-                                if (end == -1) {
-                                    end = element.length() - 1;
-                                }
-                                String tag = element.substring(start, end);
-                                tagNames.add(tag);
+                        for (org.netbeans.modules.html.editor.lib.api.elements.Element s : elementsList) {
+                            if (s.type() == ElementType.OPEN_TAG) {
+                                OpenTag ot = (OpenTag)s;
+                                tagNames.add(ot.name().toString());
                             }
                         }
 
@@ -927,30 +919,24 @@ public class JsCodeCompletion implements CodeCompletionHandler {
                                 htmlResult = (HtmlParserResult) resultIterator.getParserResult();
                             }
                         }
-
+                        
                     }
                     if (htmlResult != null) {
-                        Set<SyntaxElement.TagAttribute> elementIds = new HashSet<SyntaxElement.TagAttribute>();
-                        for (SyntaxElement element : htmlResult.getSyntaxAnalyzerResult().getElements().items()) {
-                            if (element.type() == SyntaxElement.TYPE_TAG) {
-                                SyntaxElement.TagAttribute attr = ((SyntaxElement.Tag) element).getAttribute("id"); //NOI18N
+                        Set<Attribute> elementIds = new HashSet<Attribute>();
+                        for (org.netbeans.modules.html.editor.lib.api.elements.Element element : htmlResult.getSyntaxAnalyzerResult().getElements().items()) {
+                            if (element.type() == ElementType.OPEN_TAG) {
+                                OpenTag ot = (OpenTag)element;
+                                Attribute attr = ot.getAttribute("id"); //NOI18N
                                 if (attr != null) {
                                     elementIds.add(attr);
                                 }
                             }
                         }
                         String filename = request.fileObject.getNameExt();
-                        for (SyntaxElement.TagAttribute tag : elementIds) {
-                            String elementId = tag.getValue();
-                            // Strip "'s surrounding value, if any
-                            if (elementId.length() > 2 && elementId.startsWith("\"") && // NOI18N
-                                    elementId.endsWith("\"")) { // NOI18N
-                                elementId = elementId.substring(1, elementId.length() - 1);
-                            }
-
-                            System.out.println("~~~ elementId: '" + elementId + "'");
-                            if (startsWith(elementId, prefix)) {
-                                GenericItem item = new GenericItem(elementId, filename, request, ElementKind.TAG);
+                        for (Attribute tag : elementIds) {
+                            String id = tag.unquotedValue().toString();
+                            if (startsWith(id, prefix)) {
+                                GenericItem item = new GenericItem(id, filename, request, ElementKind.TAG);
                                 proposals.add(item);
                             }
                         }
@@ -1477,7 +1463,7 @@ public class JsCodeCompletion implements CodeCompletionHandler {
                 }
             }
 
-            // Try just the method call (e.g. across all classes). This is ignoring the
+            // Try just the method call (e.g. across all classes). This is ignoring the 
             // left hand side because we can't resolve it.
             if ((elements.size() == 0) && (prefix.length() > 0 || type == null)) {
 //                if (prefix.length() == 0) {
@@ -1756,7 +1742,7 @@ public class JsCodeCompletion implements CodeCompletionHandler {
         // we have these guys on the class itself, not associated with a method parameter.
         // Shall I take this to be a set of constructor properties?
         // In YUI it's different; many of the properties we want to inherit are NOT marked as @config,
-        // such as "animate" in the Editor.
+        // such as "animate" in the Editor. 
         String fqn = null;
         AstPath path = request.path;
         Node leaf = path.leaf();
@@ -2157,7 +2143,7 @@ public class JsCodeCompletion implements CodeCompletionHandler {
     private static int callLineStart = -1;
     private static IndexedFunction callMethod;
 
-    /** Compute the current method call at the given offset. Returns false if we're not in a method call.
+    /** Compute the current method call at the given offset. Returns false if we're not in a method call. 
      * The argument index is returned in parameterIndexHolder[0] and the method being
      * called in methodHolder[0].
      */
@@ -2291,7 +2277,7 @@ public class JsCodeCompletion implements CodeCompletionHandler {
             }
 
             if (call == null) {
-                // Find the call in around the caret. Beware of
+                // Find the call in around the caret. Beware of 
                 // input sanitization which could have completely
                 // removed the current parameter (e.g. with just
                 // a comma, or something like ", @" or ", :")

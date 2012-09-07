@@ -1,5 +1,5 @@
 OpenIDE-Module-Java-Dependencies: Java > 1.6
-OpenIDE-Module-Implementation-Version: 201112071828
+OpenIDE-Module-Implementation-Version: 201207171143
 AutoUpdate-Show-In-Client: false
 OpenIDE-Module: org.netbeans.modules.javascript.editing/1
 OpenIDE-Module-Install: org/netbeans/modules/javascript/editing/Instal
@@ -8,6 +8,6 @@ OpenIDE-Module-Layer: org/netbeans/modules/javascript/editing/layer.xm
  l
 OpenIDE-Module-Localizing-Bundle: org/netbeans/modules/javascript/edit
  ing/Bundle.properties
-OpenIDE-Module-Specification-Version: 0.103.1
+OpenIDE-Module-Specification-Version: 0.107.1
 OpenIDE-Module-Requires: org.openide.modules.ModuleFormat1
 
