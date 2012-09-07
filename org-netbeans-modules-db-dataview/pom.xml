@@ -12,54 +12,54 @@
   <groupId>org.netbeans.modules</groupId>
   <artifactId>org-netbeans-modules-db-dataview</artifactId>
   <packaging>nbm</packaging>
-  <version>RELEASE711</version>
+  <version>RELEASE72</version>
   <name>Netbeans IDE module: org-netbeans-modules-db-dataview</name>
 
   <dependencies>
     <dependency>
       <groupId>org.netbeans.api</groupId>
       <artifactId>org-netbeans-api-progress</artifactId>
-      <version>RELEASE711</version>
+      <version>RELEASE72</version>
     </dependency>
-    <!--<dependency>-->
-    <!--<groupId>org.netbeans.modules</groupId>-->
-    <!--<artifactId>org-netbeans-libs-swingx</artifactId>-->
-    <!--<version>RELEASE711</version>-->
-    <!--</dependency>-->
+    <!--<dependency>
+    <groupId>org.netbeans.modules</groupId>
+    <artifactId>org-netbeans-libs-swingx</artifactId>
+    <version>RELEASE72</version>
+    </dependency>-->
     <dependency>
       <groupId>org.netbeans.api</groupId>
       <artifactId>org-netbeans-modules-db</artifactId>
-      <version>RELEASE711</version>
+      <version>RELEASE72</version>
     </dependency>
     <dependency>
       <groupId>org.netbeans.api</groupId>
       <artifactId>org-openide-awt</artifactId>
-      <version>RELEASE711</version>
+      <version>RELEASE72</version>
     </dependency>
     <dependency>
       <groupId>org.netbeans.api</groupId>
       <artifactId>org-openide-dialogs</artifactId>
-      <version>RELEASE711</version>
+      <version>RELEASE72</version>
     </dependency>
     <dependency>
       <groupId>org.netbeans.api</groupId>
       <artifactId>org-openide-text</artifactId>
-      <version>RELEASE711</version>
+      <version>RELEASE72</version>
     </dependency>
     <dependency>
       <groupId>org.netbeans.api</groupId>
       <artifactId>org-openide-util</artifactId>
-      <version>RELEASE711</version>
+      <version>RELEASE72</version>
     </dependency>
     <dependency>
       <groupId>org.netbeans.api</groupId>
       <artifactId>org-openide-util-lookup</artifactId>
-      <version>RELEASE711</version>
+      <version>RELEASE72</version>
     </dependency>
     <dependency>
       <groupId>org.netbeans.api</groupId>
       <artifactId>org-openide-windows</artifactId>
-      <version>RELEASE711</version>
+      <version>RELEASE72</version>
     </dependency>
 
     <dependency>
