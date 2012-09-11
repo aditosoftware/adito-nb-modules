@@ -211,6 +211,7 @@
             <publicPackage>org.netbeans.modules.javascript.editing.lexer.*</publicPackage>
             <publicPackage>org.netbeans.modules.javascript.editing.spi.*</publicPackage>
           </publicPackages>
+          <codeNameBase>org.netbeans.modules.javascript.editing</codeNameBase>
         </configuration>
       </plugin>
 

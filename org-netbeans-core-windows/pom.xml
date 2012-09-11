@@ -116,6 +116,7 @@
         <artifactId>nbm-maven-plugin</artifactId>
         <configuration>
           <cluster>platform</cluster>
+          <codeNameBase>org.netbeans.core.windows</codeNameBase>
         </configuration>
       </plugin>
     </plugins>

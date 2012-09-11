@@ -78,6 +78,7 @@
         <artifactId>nbm-maven-plugin</artifactId>
         <configuration>
           <cluster>ide</cluster>
+          <codeNameBase>org.netbeans.modules.db.dataview</codeNameBase>
         </configuration>
       </plugin>
     </plugins>

@@ -134,6 +134,9 @@
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>nbm-maven-plugin</artifactId>
+        <configuration>
+          <codeNameBase>org.netbeans.modules.javascript.hints</codeNameBase>
+        </configuration>
       </plugin>
     </plugins>
   </build>
