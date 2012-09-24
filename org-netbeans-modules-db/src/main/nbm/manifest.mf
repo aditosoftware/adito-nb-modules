@@ -1,0 +1,1 @@
+OpenIDE-Module-Install: org/netbeans/modules/db/DatabaseModule.class
