@@ -42,126 +42,115 @@
 
 package org.netbeans.modules.db.explorer.node;
 
-import org.netbeans.api.db.explorer.node.*;
+import org.netbeans.api.db.explorer.node.BaseNode;
+import org.netbeans.api.db.explorer.node.NodeProvider;
 import org.netbeans.modules.db.explorer.DatabaseConnection;
-import org.netbeans.modules.db.metadata.model.api.*;
+import org.netbeans.modules.db.metadata.model.api.Action;
+import org.netbeans.modules.db.metadata.model.api.Metadata;
+import org.netbeans.modules.db.metadata.model.api.MetadataElementHandle;
+import org.netbeans.modules.db.metadata.model.api.MetadataModel;
+import org.netbeans.modules.db.metadata.model.api.IndexColumn;
+import org.netbeans.modules.db.metadata.model.api.MetadataModelException;
+import org.netbeans.modules.db.metadata.model.api.Ordering;
 import org.openide.nodes.PropertySupport;
-import org.openide.util.*;
+import org.openide.util.HelpCtx;
+import org.openide.util.NbBundle;
 
 /**
+ *
  * @author Rob Englander
  */
-public class IndexColumnNode extends BaseNode
-{
-  private static final String ICONDOWN = "org/netbeans/modules/db/resources/indexDown.gif";
-  private static final String ICONUP = "org/netbeans/modules/db/resources/indexUp.gif";
-  private static final String FOLDER = "IndexColumn"; //NOI18N
+public class IndexColumnNode extends BaseNode {
+    private static final String ICONDOWN = "org/netbeans/modules/db/resources/indexDown.gif";
+    private static final String ICONUP = "org/netbeans/modules/db/resources/indexUp.gif";
+    private static final String FOLDER = "IndexColumn"; //NOI18N
 
-  /**
-   * Create an instance of IndexColumnNode.
-   *
-   * @param dataLookup the lookup to use when creating node providers
-   * @return the IndexColumnNode instance
-   */
-  public static IndexColumnNode create(NodeDataLookup dataLookup, NodeProvider provider)
-  {
-    IndexColumnNode node = new IndexColumnNode(dataLookup, provider);
-    node.setup();
-    return node;
-  }
-
-  private String name = ""; // NOI18N
-  private String icon = ""; // NOI18N
-  private int position = 0;
-  private MetadataElementHandle<IndexColumn> indexColumnHandle;
-  private final DatabaseConnection connection;
-
-  @SuppressWarnings("unchecked")
-  private IndexColumnNode(NodeDataLookup lookup, NodeProvider provider)
-  {
-    super(lookup, FOLDER, provider);
-    connection = getLookup().lookup(DatabaseConnection.class);
-    indexColumnHandle = getLookup().lookup(MetadataElementHandle.class);
-  }
-
-  protected void initialize()
-  {
-    boolean connected = !connection.getConnector().isDisconnected();
-    MetadataModel metaDataModel = connection.getMetadataModel();
-    if (connected && metaDataModel != null)
-    {
-      try
-      {
-        metaDataModel.runReadAction(
-            new Action<Metadata>()
-            {
-              public void run(Metadata metaData)
-              {
-                IndexColumn column = indexColumnHandle.resolve(metaData);
-                name = column.getName();
-                if (column.getOrdering() == Ordering.DESCENDING)
-                {
-                  icon = ICONUP;
-                }
-                else
-                {
-                  icon = ICONDOWN;
-                }
-
-                position = column.getPosition();
-
-                updateProperties(column);
-              }
-            }
-        );
-      }
-      catch (MetadataModelException e)
-      {
-        NodeRegistry.handleMetadataModelException(this.getClass(), connection, e, true);
-      }
+    /**
+     * Create an instance of IndexColumnNode.
+     *
+     * @param dataLookup the lookup to use when creating node providers
+     * @return the IndexColumnNode instance
+     */
+    public static IndexColumnNode create(NodeDataLookup dataLookup, NodeProvider provider) {
+        IndexColumnNode node = new IndexColumnNode(dataLookup, provider);
+        node.setup();
+        return node;
     }
-  }
 
-  private void updateProperties(IndexColumn column)
-  {
-    PropertySupport ps = new PropertySupport.Name(this);
-    addProperty(ps);
+    private String name = ""; // NOI18N
+    private String icon = ""; // NOI18N
+    private int position = 0;
+    private MetadataElementHandle<IndexColumn> indexColumnHandle;
+    private final DatabaseConnection connection;
 
-    addProperty(POSITION, POSITIONDESC, Integer.class, false, column.getPosition());
-  }
+    @SuppressWarnings("unchecked")
+    private IndexColumnNode(NodeDataLookup lookup, NodeProvider provider) {
+        super(lookup, FOLDER, provider);
+        connection = getLookup().lookup(DatabaseConnection.class);
+        indexColumnHandle = getLookup().lookup(MetadataElementHandle.class);
+    }
 
-  public int getPosition()
-  {
-    return position;
-  }
+    protected void initialize() {
+        boolean connected = !connection.getConnector().isDisconnected();
+        MetadataModel metaDataModel = connection.getMetadataModel();
+        if (connected && metaDataModel != null) {
+            try {
+                metaDataModel.runReadAction(
+                    new Action<Metadata>() {
+                        public void run(Metadata metaData) {
+                            IndexColumn column = indexColumnHandle.resolve(metaData);
+                            name = column.getName();
+                            if (column.getOrdering() == Ordering.DESCENDING) {
+                                icon = ICONUP;
+                            } else {
+                                icon = ICONDOWN;
+                            }
 
-  @Override
-  public String getName()
-  {
-    return name;
-  }
+                            position = column.getPosition();
 
-  @Override
-  public String getDisplayName()
-  {
-    return getName();
-  }
+                            updateProperties(column);
+                        }
+                    }
+                );
+            } catch (MetadataModelException e) {
+                NodeRegistry.handleMetadataModelException(this.getClass(), connection, e, true);
+            }
+        }
+    }
 
-  @Override
-  public String getIconBase()
-  {
-    return icon;
-  }
+    private void updateProperties(IndexColumn column) {
+        PropertySupport ps = new PropertySupport.Name(this);
+        addProperty(ps);
 
-  @Override
-  public String getShortDescription()
-  {
-    return NbBundle.getMessage(ForeignKeyListNode.class, "ND_Column"); //NOI18N
-  }
+        addProperty(POSITION, POSITIONDESC, Integer.class, false, column.getPosition());
+    }
 
-  @Override
-  public HelpCtx getHelpCtx()
-  {
-    return new HelpCtx(IndexColumnNode.class);
-  }
+    public int getPosition() {
+        return position;
+    }
+
+    @Override
+    public String getName() {
+        return name;
+    }
+
+    @Override
+    public String getDisplayName() {
+        return getName();
+    }
+
+    @Override
+    public String getIconBase() {
+        return icon;
+    }
+
+    @Override
+    public String getShortDescription() {
+        return NbBundle.getMessage (ForeignKeyListNode.class, "ND_Column"); //NOI18N
+    }
+
+    @Override
+    public HelpCtx getHelpCtx() {
+        return new HelpCtx(IndexColumnNode.class);
+    }
 }

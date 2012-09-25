@@ -42,114 +42,104 @@
 
 package org.netbeans.modules.db.explorer.action;
 
-import org.openide.util.*;
-import org.openide.util.lookup.Lookups;
-
-import javax.swing.*;
-import javax.swing.event.*;
-import java.util.*;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.logging.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.swing.Action;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+import org.openide.util.ChangeSupport;
+import org.openide.util.Lookup;
+import org.openide.util.LookupEvent;
+import org.openide.util.LookupListener;
+import org.openide.util.lookup.Lookups;
 
 /**
  * A registry for managing a collection of Actions defined in the layer file.
- *
+ * 
  * @author Rob Englander
  */
-public class ActionRegistry implements ChangeListener
-{
-  private static final Logger LOGGER = Logger.getLogger(ActionRegistry.class.getName());
+public class ActionRegistry implements ChangeListener {
+    private static final Logger LOGGER = Logger.getLogger(ActionRegistry.class.getName());
+    
+    private static final String PATH = "Databases/Explorer/"; //NOI18N
+    private static final String ACTIONS = "/Actions"; //NOI18N
 
-  private static final String PATH = "Databases/Explorer/"; //NOI18N
-  private static final String ACTIONS = "/Actions"; //NOI18N
+    private final ChangeSupport changeSupport;
+    private final List<Action> actions = new CopyOnWriteArrayList<Action>();
+    
+    private Lookup.Result lookupResult;
 
-  private final ChangeSupport changeSupport;
-  private final List<Action> actions = new CopyOnWriteArrayList<Action>();
-
-  private Lookup.Result lookupResult;
-
-  /**
-   * Constructor.
-   *
-   * @param entryName the name of the entry folder in the layer to lookup actions.
-   */
-  public ActionRegistry(String entryName)
-  {
-    changeSupport = new ChangeSupport(this);
-    loadActions(entryName);
-  }
-
-  /**
-   * Loads actions from the xml layer.
-   *
-   * @param entryName the name of the entry in the xml layer where the
-   *                  actions are found.
-   */
-  private void loadActions(String entryName)
-  {
-    Lookup lookup = Lookups.forPath(PATH + entryName + ACTIONS);
-    lookupResult = lookup.lookupResult(Object.class);
-
-    initActions();
-
-    // listen for changes and re-init the actions when the lookup changes
-    lookupResult.addLookupListener(
-        new LookupListener()
-        {
-          public void resultChanged(LookupEvent ev)
-          {
-            initActions();
-            changeSupport.fireChange();
-          }
-        }
-    );
-  }
-
-  private void initActions()
-  {
-    actions.clear();
-    Collection<Object> actionList = (Collection<Object>) lookupResult.allInstances();
-
-    for (Object action : actionList)
-    {
-      if (action instanceof Action)
-      {
-        actions.add((Action) action);
-      }
-      else if (action instanceof javax.swing.JSeparator)
-      {
-        actions.add(null);
-      }
-      else
-      {
-        LOGGER.log(Level.INFO, "Cannot use " + action.getClass() + " instance as DB Explorer Action"); // NOI18N
-      }
+    /**
+     * Constructor.
+     * 
+     * @param entryName the name of the entry folder in the layer to lookup actions.
+     */
+    public ActionRegistry(String entryName) {
+        changeSupport = new ChangeSupport(this);
+        loadActions(entryName);
     }
-  }
+    
+    /**
+     * Loads actions from the xml layer.
+     * 
+     * @param entryName the name of the entry in the xml layer where the
+     * actions are found.
+     */
+    private void loadActions(String entryName) {
+        Lookup lookup = Lookups.forPath(PATH + entryName + ACTIONS);
+        lookupResult = lookup.lookupResult(Object.class);
+        
+        initActions();
 
-  /**
-   * Get the actions.  The order is based on the order that
-   * was defined in the layer file.
-   *
-   * @return the actions
-   */
-  public Collection<Action> getActions()
-  {
-    return Collections.unmodifiableList(actions);
-  }
+        // listen for changes and re-init the actions when the lookup changes
+        lookupResult.addLookupListener(
+            new LookupListener() {
+                public void resultChanged(LookupEvent ev) {
+                    initActions();
+                    changeSupport.fireChange();
+                }
+            }
+        );
+    }
 
-  public void addChangeListener(ChangeListener listener)
-  {
-    changeSupport.addChangeListener(listener);
-  }
+    private void initActions() {
+        actions.clear();
+        Collection<Object> actionList = (Collection<Object>)lookupResult.allInstances();
+        
+        for (Object action : actionList) {
+            if (action instanceof Action) {
+                actions.add((Action)action);
+            } else if (action instanceof javax.swing.JSeparator) {
+                actions.add(null);
+            } else {
+                LOGGER.log(Level.INFO, "Cannot use " + action.getClass() + " instance as DB Explorer Action"); // NOI18N
+            }
+        }
+    }
+    
+    /**
+     * Get the actions.  The order is based on the order that
+     * was defined in the layer file.
+     * 
+     * @return the actions
+     */
+    public Collection<Action> getActions() {
+        return Collections.unmodifiableList(actions);
+    }
+    
+    public void addChangeListener(ChangeListener listener) {
+        changeSupport.addChangeListener(listener);
+    }
+    
+    public void removeChangeListener(ChangeListener listener) {
+        changeSupport.removeChangeListener(listener);
+    }
 
-  public void removeChangeListener(ChangeListener listener)
-  {
-    changeSupport.removeChangeListener(listener);
-  }
-
-  public void stateChanged(ChangeEvent evt)
-  {
-    changeSupport.fireChange();
-  }
+    public void stateChanged(ChangeEvent evt) {
+        changeSupport.fireChange();
+    }
 }

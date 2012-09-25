@@ -42,83 +42,75 @@
 
 package org.netbeans.api.db.explorer.node;
 
+import java.util.Collection;
+import java.util.List;
 import org.netbeans.modules.db.explorer.node.NodeRegistry;
-import org.openide.nodes.*;
+import org.openide.nodes.ChildFactory;
+import org.openide.nodes.Node;
 import org.openide.util.Lookup;
-
-import java.util.*;
 
 /**
  * The ChildNodeFactory is used for getting node instances based on
  * a Lookup instance as the key.  Subclasses of BaseNode that can have
  * children are constructed with an instance of ChildNodeFactory.
- *
+ * 
  * @author Rob Englander
  */
-public class ChildNodeFactory extends ChildFactory<Lookup>
-{
+public class ChildNodeFactory extends ChildFactory<Lookup> {
+    
+    private final Lookup dataLookup;
 
-  private final Lookup dataLookup;
-
-  /**
-   * Constructor.
-   *
-   * @param dataLookup the associated data lookup
-   */
-  public ChildNodeFactory(Lookup lookup)
-  {
-    dataLookup = lookup;
-  }
-
-  /**
-   * Refreshes this factory which causes it to get its
-   * child keys and subsequently its child nodes
-   */
-  public void refresh()
-  {
-    super.refresh(false);
-  }
-
-  /**
-   * Refreshes this factory which causes it to get its
-   * child keys and subsequently its child nodes immeditately.
-   */
-  public void refreshSync()
-  {
-    super.refresh(true);
-  }
-
-  @Override
-  public Node[] createNodesForKey(Lookup key)
-  {
-
-    // the node should be in the lookup
-    Node childNode = key.lookup(Node.class);
-
-    if (childNode == null)
-    {
-      return new Node[]{};
-    }
-    else
-    {
-      return new Node[]{childNode};
-    }
-  }
-
-  @Override
-  protected boolean createKeys(List toPopulate)
-  {
-
-    // the node registry is in the data lookup
-    NodeRegistry registry = dataLookup.lookup(NodeRegistry.class);
-    Collection<? extends Node> nodes = registry.getNodes();
-    for (Node node : nodes)
-    {
-      // the key for each node is its lookup
-      Lookup lookup = node.getLookup();
-      toPopulate.add(lookup);
+    /**
+     * Constructor. 
+     * 
+     * @param dataLookup the associated data lookup
+     */
+    public ChildNodeFactory(Lookup lookup) {
+        dataLookup = lookup;
     }
 
-    return true;
-  }
+    /**
+     * Refreshes this factory which causes it to get its
+     * child keys and subsequently its child nodes 
+     */
+    public void refresh() {
+        super.refresh(false);
+    }
+
+    /**
+     * Refreshes this factory which causes it to get its
+     * child keys and subsequently its child nodes immeditately.
+     */
+    public void refreshSync() {
+        super.refresh(true);
+    }
+
+    @Override
+    public Node[] createNodesForKey(Lookup key) {
+        
+        // the node should be in the lookup
+        Node childNode = key.lookup(Node.class);
+        
+        if (childNode == null) {
+            return new Node[] {  };
+        }
+        else {
+            return new Node[] { childNode };
+        }
+    }
+
+    @Override
+    protected boolean createKeys(List toPopulate) {
+        
+        // the node registry is in the data lookup
+        NodeRegistry registry = dataLookup.lookup(NodeRegistry.class);
+        Collection<? extends Node> nodes = registry.getNodes();
+        for (Node node : nodes) {
+            // the key for each node is its lookup
+            Lookup lookup = node.getLookup();
+            toPopulate.add(lookup);
+        }
+
+        return true;
+    }
 }

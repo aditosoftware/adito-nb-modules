@@ -47,14 +47,14 @@ package org.netbeans.api.db.explorer;
 /**
  * Listener for changes to the list of drivers maintained by JDBCDriverManager.
  *
- * @author Andrei Badea
  * @see JDBCDriverManager
+ *
+ * @author Andrei Badea
  */
-public interface JDBCDriverListener
-{
+public interface JDBCDriverListener {
 
-  /**
-   * Called when the list of drivers has changed.
-   */
-  public void driversChanged();
+    /**
+     * Called when the list of drivers has changed.
+     */
+    public void driversChanged();
 }

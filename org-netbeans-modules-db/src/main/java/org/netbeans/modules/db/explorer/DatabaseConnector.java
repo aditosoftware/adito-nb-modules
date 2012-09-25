@@ -42,335 +42,290 @@
 
 package org.netbeans.modules.db.explorer;
 
+import java.sql.Connection;
+import java.sql.DatabaseMetaData;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.Collection;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.swing.event.ChangeListener;
 import org.netbeans.api.db.explorer.DatabaseException;
 import org.netbeans.lib.ddl.DatabaseProductNotFoundException;
 import org.netbeans.lib.ddl.adaptors.DefaultAdaptor;
-import org.netbeans.lib.ddl.impl.*;
+import org.netbeans.lib.ddl.impl.CreateTable;
+import org.netbeans.lib.ddl.impl.DriverSpecification;
+import org.netbeans.lib.ddl.impl.Specification;
+import org.netbeans.lib.ddl.impl.SpecificationFactory;
+import org.netbeans.lib.ddl.impl.TableColumn;
 import org.netbeans.modules.db.explorer.node.RootNode;
-import org.netbeans.modules.db.metadata.model.api.*;
-import org.openide.util.*;
-
-import javax.swing.event.ChangeListener;
-import java.sql.*;
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.logging.*;
+import org.netbeans.modules.db.metadata.model.api.Catalog;
+import org.netbeans.modules.db.metadata.model.api.Column;
+import org.netbeans.modules.db.metadata.model.api.Index;
+import org.netbeans.modules.db.metadata.model.api.IndexColumn;
+import org.netbeans.modules.db.metadata.model.api.MetadataElementHandle;
+import org.netbeans.modules.db.metadata.model.api.Schema;
+import org.netbeans.modules.db.metadata.model.api.Table;
+import org.openide.util.ChangeSupport;
+import org.openide.util.NbBundle;
 
 /**
+ *
  * @author Rob Englander
  */
-public class DatabaseConnector
-{
+public class DatabaseConnector {
 
-  // Thread-safe, no synchronization
-  private final ChangeSupport changeSupport = new ChangeSupport(this);
+    // Thread-safe, no synchronization
+    private final ChangeSupport changeSupport = new ChangeSupport(this);
 
-  private DatabaseConnection databaseConnection;
-  private Connection connection = null;
-  private Specification spec;
+    private DatabaseConnection databaseConnection;
+    private Connection connection = null;
+    private Specification spec;
 
-  // we maintain a lazy cache of driver specs mapped to the catalog name
-  private ConcurrentHashMap<String, DriverSpecification> driverSpecCache = new ConcurrentHashMap<String, DriverSpecification>();
+    // we maintain a lazy cache of driver specs mapped to the catalog name
+    private ConcurrentHashMap<String, DriverSpecification> driverSpecCache = new ConcurrentHashMap<String, DriverSpecification>();
 
-  private ConcurrentHashMap<String, Object> properties = new ConcurrentHashMap<String, Object>();
+    private ConcurrentHashMap<String, Object> properties = new ConcurrentHashMap<String, Object>();
 
-  public DatabaseConnector(DatabaseConnection conn)
-  {
-    databaseConnection = conn;
-  }
-
-  public DatabaseConnection getDatabaseConnection()
-  {
-    return databaseConnection;
-  }
-
-  public Specification getDatabaseSpecification()
-  {
-    return spec;
-  }
-
-  public DriverSpecification getDriverSpecification(String catName) throws DatabaseException
-  {
-    DriverSpecification dspec = driverSpecCache.get(catName);
-    if (dspec == null)
-    {
-      try
-      {
-        SpecificationFactory factory = RootNode.instance().getSpecificationFactory();
-        dspec = factory.createDriverSpecification(spec.getMetaData().getDriverName().trim());
-        if (spec.getMetaData().getDriverName().trim().equals("jConnect (TM) for JDBC (TM)")) //NOI18N
-          //hack for Sybase ASE - I don't guess why spec.getMetaData doesn't work
-          dspec.setMetaData(connection.getMetaData());
-        else
-          dspec.setMetaData(spec.getMetaData());
-
-        dspec.setCatalog(catName);
-        dspec.setSchema(databaseConnection.getSchema());
-        driverSpecCache.put(catName, dspec);
-      }
-      catch (SQLException e)
-      {
-        throw new DatabaseException(e.getMessage(), e);
-      }
-
+    public DatabaseConnector(DatabaseConnection conn) {
+        databaseConnection = conn;
     }
 
-    return dspec;
-  }
-
-  public void finishConnect(String dbsys, DatabaseConnection con, Connection connection) throws DatabaseException
-  {
-    try
-    {
-      SpecificationFactory factory = RootNode.instance().getSpecificationFactory();
-      int readOnlyFlag = 0;
-      if (dbsys != null)
-      {
-        spec = (Specification) factory.createSpecification(con, dbsys, connection);
-
-        readOnlyFlag = 1;
-      }
-      else
-      {
-        spec = (Specification) factory.createSpecification(con, connection);
-      }
-
-      DatabaseMetaData md = spec.getMetaData();
-      ((DefaultAdaptor) md).setreadOnly(readOnlyFlag);
-
-      String adaname = "org.netbeans.lib.ddl.adaptors.DefaultAdaptor"; // NOI18N
-      if (!spec.getMetaDataAdaptorClassName().equals(adaname))
-      {
-        spec.setMetaDataAdaptorClassName(adaname);
-      }
-
-      setConnection(connection);
+    public DatabaseConnection getDatabaseConnection() {
+        return databaseConnection;
     }
-    catch (DatabaseProductNotFoundException e)
-    {
-      Logger.getLogger(DatabaseConnector.class.getName()).log(Level.FINE, e.getLocalizedMessage(), e);
-      finishConnect("GenericDatabaseSystem", null, connection); // NOI18N
-    }
-    catch (Exception e)
-    {
-      throw new DatabaseException(e.getMessage());
-    }
-  }
 
-  public boolean isDisconnected()
-  {
-    return connection == null;
-  }
+    public Specification getDatabaseSpecification() {
+        return spec;
+    }
 
-  /**
-   * The method performs a disconnect on the associated DatabaseConnection.  This
-   * method gets called by the DatabaseConnection itself, and should not be called
-   * directly by any other object.
-   *
-   * @throws org.netbeans.api.db.explorer.DatabaseException
-   *
-   */
-  public void performDisconnect() throws DatabaseException
-  {
-    if (connection != null)
+    public DriverSpecification getDriverSpecification(String catName) throws DatabaseException {
+        DriverSpecification dspec = driverSpecCache.get(catName);
+        if (dspec == null) {
+            try {
+                SpecificationFactory factory = RootNode.instance().getSpecificationFactory();
+                dspec = factory.createDriverSpecification(spec.getMetaData().getDriverName().trim());
+                if (spec.getMetaData().getDriverName().trim().equals("jConnect (TM) for JDBC (TM)")) //NOI18N
+                    //hack for Sybase ASE - I don't guess why spec.getMetaData doesn't work
+                    dspec.setMetaData(connection.getMetaData());
+                else
+                    dspec.setMetaData(spec.getMetaData());
+
+                dspec.setCatalog(catName);
+                dspec.setSchema(databaseConnection.getSchema());
+                driverSpecCache.put(catName, dspec);
+            } catch (SQLException e) {
+                throw new DatabaseException(e.getMessage(), e);
+            }
+
+        }
+
+        return dspec;
+    }
+    
+    public void finishConnect(String dbsys, DatabaseConnection con, Connection connection) throws DatabaseException {
+        try {
+            SpecificationFactory factory = RootNode.instance().getSpecificationFactory();
+            int readOnlyFlag = 0;
+            if (dbsys != null) {
+                spec = (Specification) factory.createSpecification(con, dbsys, connection);
+
+                readOnlyFlag = 1;
+            } else {
+                spec = (Specification) factory.createSpecification(con, connection);
+            }
+
+            DatabaseMetaData md = spec.getMetaData();
+            ((DefaultAdaptor)md).setreadOnly(readOnlyFlag);
+
+            String adaname = "org.netbeans.lib.ddl.adaptors.DefaultAdaptor"; // NOI18N
+            if (!spec.getMetaDataAdaptorClassName().equals(adaname)) {
+                spec.setMetaDataAdaptorClassName(adaname);
+            }
+
+            setConnection(connection);
+        } catch (DatabaseProductNotFoundException e) {
+            Logger.getLogger(DatabaseConnector.class.getName()).log(Level.FINE, e.getLocalizedMessage(), e);
+            finishConnect("GenericDatabaseSystem", null, connection); // NOI18N
+        } catch (Exception e) {
+            throw new DatabaseException(e.getMessage());
+        }
+    }
+
+    public boolean isDisconnected() {
+        return connection == null;
+    }
+
+    /**
+     * The method performs a disconnect on the associated DatabaseConnection.  This
+     * method gets called by the DatabaseConnection itself, and should not be called
+     * directly by any other object.
+     *
+     * @throws org.netbeans.api.db.explorer.DatabaseException
+     */
+    public void performDisconnect() throws DatabaseException {
+        if (connection != null) {
+            Throwable cause = null;
+            Connection con = connection;
+            try {
+                driverSpecCache.clear();
+                setConnection(null); // fires change
+                con.close();
+            } catch (Exception exc) {
+                // connection is broken, connection state has been changed
+                setConnection(null); // fires change
+            }
+
+            // XXX hack for Derby
+            DerbyConectionEventListener.getDefault().afterDisconnect(getDatabaseConnection(), con);
+
+            if (cause != null) {
+                throw new DatabaseException(
+                            NbBundle.getMessage (DatabaseConnector.class, "EXC_DisconnectError", cause.getMessage()), // NOI18N
+                            cause);
+            }
+        }
+    }
+
+    public Connection getConnection() {
+        return connection;
+    }
+
+    public void setConnection(Connection con) throws DatabaseException
     {
-      Throwable cause = null;
-      Connection con = connection;
-      try
-      {
+        Connection oldval = connection;
+        if (con != null) {
+            if (oldval != null && oldval.equals(con)) return;
+            connection = con;
+        } else {
+            connection = null;
+        }
         driverSpecCache.clear();
-        setConnection(null); // fires change
-        con.close();
-      }
-      catch (Exception exc)
-      {
-        // connection is broken, connection state has been changed
-        setConnection(null); // fires change
-      }
-
-      // XXX hack for Derby
-      DerbyConectionEventListener.getDefault().afterDisconnect(getDatabaseConnection(), con);
-
-      if (cause != null)
-      {
-        throw new DatabaseException(
-            NbBundle.getMessage(DatabaseConnector.class, "EXC_DisconnectError", cause.getMessage()), // NOI18N
-            cause);
-      }
-    }
-  }
-
-  public Connection getConnection()
-  {
-    return connection;
-  }
-
-  public void setConnection(Connection con) throws DatabaseException
-  {
-    Connection oldval = connection;
-    if (con != null)
-    {
-      if (oldval != null && oldval.equals(con)) return;
-      connection = con;
-    }
-    else
-    {
-      connection = null;
-    }
-    driverSpecCache.clear();
-    notifyChange();
-  }
-
-  public static boolean containsColumn(Collection<Column> columnList, Column column)
-  {
-    boolean result = false;
-
-    // this code is currently working around a metadata api bug.  the Column instances
-    // should be the same, but they aren't always.  so for now we create handles
-    // and determine equivalence from there
-    MetadataElementHandle<Column> columnHandle = MetadataElementHandle.create(column);
-    for (Column col : columnList)
-    {
-      MetadataElementHandle<Column> colHandle = MetadataElementHandle.create(col);
-      if (columnHandle.equals(colHandle))
-      {
-        result = true;
-        break;
-      }
+        notifyChange();
     }
 
-    return result;
-  }
+    public static boolean containsColumn(Collection<Column> columnList, Column column) {
+        boolean result = false;
 
-  public static boolean containsIndexColumn(Collection<Index> columnList, Column column)
-  {
-    boolean result = false;
-
-    // this code is currently working around a metadata api bug.  the Column instances
-    // should be the same, but they aren't always.  so for now we create handles
-    // and determine equivalence from there
-    MetadataElementHandle<Column> columnHandle = MetadataElementHandle.create(column);
-    for (Index idx : columnList)
-    {
-      Collection<IndexColumn> cols = idx.getColumns();
-      for (IndexColumn col : cols)
-      {
-        MetadataElementHandle<IndexColumn> colHandle = MetadataElementHandle.create(col);
-        if (columnHandle.equals(colHandle))
-        {
-          result = true;
-          break;
-        }
-      }
-    }
-
-    return result;
-  }
-
-  public TableColumn getColumnSpecification(Table table, Column column) throws DatabaseException
-  {
-    TableColumn col = null;
-
-    try
-    {
-      CreateTable cmd = spec.createCommandCreateTable("DUMMY"); //NOI18N
-
-      // When the metadata api bug fix is available, we can just ask if the
-      // collections contain the column and then eliminate the special methods
-      // we're using
-      if (containsColumn(table.getPrimaryKey().getColumns(), column))
-      {
-        col = cmd.createPrimaryKeyColumn(column.getName());
-      }
-      else if (containsIndexColumn(table.getIndexes(), column))
-      {
-        col = cmd.createUniqueColumn(column.getName());
-      }
-      else
-      {
-        col = cmd.createColumn(column.getName());
-      }
-
-      Schema schema = table.getParent();
-      Catalog catalog = schema.getParent();
-      String catName = catalog.getName();
-      if (catName == null)
-      {
-        catName = schema.getName();
-      }
-
-      DriverSpecification drvSpec = this.getDriverSpecification(catName);
-      if (!schema.isDefault() && schema.getName().length() > 0)
-      {
-        drvSpec.setSchema(schema.getName());
-      }
-      drvSpec.getColumns(table.getName(), column.getName());
-      ResultSet rs = drvSpec.getResultSet();
-      if (rs != null)
-      {
-        boolean ok = rs.next();
-        if (ok)
-        {
-          @SuppressWarnings("unchecked")
-          Map<Integer, String> rset = drvSpec.getRow();
-
-          try
-          {
-            //hack because of MSSQL ODBC problems - see DriverSpecification.getRow() for more info - shouln't be thrown
-            col.setColumnType(Integer.parseInt(rset.get(new Integer(5))));
-            col.setColumnSize(Integer.parseInt(rset.get(new Integer(7))));
-          }
-          catch (NumberFormatException exc)
-          {
-            col.setColumnType(0);
-            col.setColumnSize(0);
-          }
-
-          col.setNullAllowed((rset.get(new Integer(18))).toUpperCase().equals("YES")); //NOI18N
-          col.setDefaultValue(rset.get(new Integer(13)));
-          rset.clear();
-        }
-        else
-        {
-          Logger.getLogger(DatabaseConnector.class.getName()).log(Level.INFO, "Empty ResultSet for {0}.{1} in catalog {2}",
-                                                                  new Object[]{table.getName(), column.getName(), catName});
+        // this code is currently working around a metadata api bug.  the Column instances
+        // should be the same, but they aren't always.  so for now we create handles
+        // and determine equivalence from there
+        MetadataElementHandle<Column> columnHandle = MetadataElementHandle.create(column);
+        for (Column col : columnList) {
+            MetadataElementHandle<Column> colHandle = MetadataElementHandle.create(col);
+            if (columnHandle.equals(colHandle)) {
+                result = true;
+                break;
+            }
         }
 
-        rs.close();
-      }
-    }
-    catch (Exception e)
-    {
-      throw new DatabaseException(e);
+        return result;
     }
 
-    return col;
-  }
+    public static boolean containsIndexColumn(Collection<Index> columnList, Column column) {
+        boolean result = false;
 
-  public boolean supportsCommand(String cmd)
-  {
-    boolean supported = spec.getCommandProperties(cmd) != null;
+        // this code is currently working around a metadata api bug.  the Column instances
+        // should be the same, but they aren't always.  so for now we create handles
+        // and determine equivalence from there
+        MetadataElementHandle<Column> columnHandle = MetadataElementHandle.create(column);
+        for (Index idx : columnList) {
+            Collection<IndexColumn> cols = idx.getColumns();
+            for (IndexColumn col : cols) {
+                MetadataElementHandle<IndexColumn> colHandle = MetadataElementHandle.create(col);
+                if (columnHandle.equals(colHandle)) {
+                    result = true;
+                    break;
+                }
+            }
+        }
 
-    if (supported && spec.getCommandProperties(cmd).containsKey("Supported"))
-    {
-      supported = spec.getCommandProperties(cmd).get("Supported").toString().equals("true");
+        return result;
     }
 
-    return supported;
-  }
+    public TableColumn getColumnSpecification(Table table, Column column) throws DatabaseException {
+        TableColumn col = null;
 
-  public void addChangeListener(ChangeListener listener)
-  {
-    changeSupport.addChangeListener(listener);
-  }
+        try {
+            CreateTable cmd = spec.createCommandCreateTable ("DUMMY"); //NOI18N
 
-  public void removeChangeListener(ChangeListener listener)
-  {
-    changeSupport.removeChangeListener(listener);
-  }
+            // When the metadata api bug fix is available, we can just ask if the
+            // collections contain the column and then eliminate the special methods
+            // we're using
+            if (containsColumn(table.getPrimaryKey().getColumns(), column)) {
+                col = cmd.createPrimaryKeyColumn(column.getName());
+            } else if (containsIndexColumn(table.getIndexes(), column)) {
+                col = cmd.createUniqueColumn(column.getName());
+            } else {
+                col = cmd.createColumn (column.getName ());
+            }
 
-  public void notifyChange()
-  {
-    changeSupport.fireChange();
-  }
+            Schema schema = table.getParent();
+            Catalog catalog = schema.getParent();
+            String catName = catalog.getName();
+            if (catName == null) {
+                catName = schema.getName();
+            }
+
+            DriverSpecification drvSpec = this.getDriverSpecification(catName);
+            if (! schema.isDefault() && schema.getName().length() > 0) {
+                drvSpec.setSchema(schema.getName());
+            }
+            drvSpec.getColumns(table.getName(), column.getName());
+            ResultSet rs = drvSpec.getResultSet();
+            if (rs != null) {
+                boolean ok = rs.next();
+                if (ok) {
+                    @SuppressWarnings("unchecked")
+                    Map<Integer, String> rset = drvSpec.getRow();
+
+                    try {
+                        //hack because of MSSQL ODBC problems - see DriverSpecification.getRow() for more info - shouln't be thrown
+                        col.setColumnType(Integer.parseInt(rset.get(new Integer(5))));
+                        col.setColumnSize(Integer.parseInt(rset.get(new Integer(7))));
+                    } catch (NumberFormatException exc) {
+                        col.setColumnType(0);
+                        col.setColumnSize(0);
+                    }
+
+                    col.setNullAllowed((rset.get(new Integer(18))).toUpperCase().equals("YES")); //NOI18N
+                    col.setDefaultValue(rset.get(new Integer(13)));
+                    rset.clear();
+                } else {
+                    Logger.getLogger(DatabaseConnector.class.getName()).log(Level.INFO, "Empty ResultSet for {0}.{1} in catalog {2}",
+                            new Object[]{table.getName(), column.getName(), catName});
+                }
+
+                rs.close();
+            }
+        } catch (Exception e) {
+            throw new DatabaseException(e);
+        }
+
+        return col;
+    }
+
+    public boolean supportsCommand(String cmd) {
+        boolean supported = spec.getCommandProperties(cmd) != null;
+
+        if (supported && spec.getCommandProperties(cmd).containsKey("Supported")) {
+            supported = spec.getCommandProperties(cmd).get("Supported").toString().equals("true");
+        }
+
+        return supported;
+    }
+
+    public void addChangeListener(ChangeListener listener) {
+        changeSupport.addChangeListener(listener);
+    }
+
+    public void removeChangeListener(ChangeListener listener) {
+        changeSupport.removeChangeListener(listener);
+    }
+
+    public void notifyChange() {
+        changeSupport.fireChange();
+    }
 }

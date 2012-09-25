@@ -44,8 +44,8 @@ Version 2 license, then the option applies only if the new code is
 made subject to such option by the copyright holder.
 -->
 <!DOCTYPE helpctx PUBLIC
-    "-//NetBeans//DTD Help Context 1.0//EN"
-    "http://www.netbeans.org/dtds/helpcontext-1_0.dtd">
+ "-//NetBeans//DTD Help Context 1.0//EN"
+ "http://www.netbeans.org/dtds/helpcontext-1_0.dtd">
 <helpctx id="dbexpovew"/>
 <helpctx id="db_save_password"/>
 <helpctx id="new_db_save_password"/>

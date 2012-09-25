@@ -44,82 +44,73 @@ package org.netbeans.modules.db.explorer.action;
 
 import org.netbeans.api.db.explorer.node.BaseNode;
 import org.netbeans.modules.db.explorer.DatabaseConnection;
-import org.netbeans.modules.db.metadata.model.api.*;
+import org.netbeans.modules.db.metadata.model.api.Action;
+import org.netbeans.modules.db.metadata.model.api.Metadata;
+import org.netbeans.modules.db.metadata.model.api.MetadataModel;
+import org.netbeans.modules.db.metadata.model.api.MetadataModelException;
 import org.openide.nodes.Node;
-import org.openide.util.*;
+import org.openide.util.Exceptions;
+import org.openide.util.HelpCtx;
+import org.openide.util.NbBundle;
+import org.openide.util.RequestProcessor;
 
 /**
+ *
  * @author Rob
  */
-public class RefreshAction extends BaseAction
-{
-  private static final RequestProcessor RP = new RequestProcessor(RefreshAction.class);
-
-  @Override
-  public String getName()
-  {
-    return NbBundle.getMessage(RefreshAction.class, "Refresh"); // NOI18N
-  }
-
-  @Override
-  public HelpCtx getHelpCtx()
-  {
-    return new HelpCtx(RefreshAction.class);
-  }
-
-  @Override
-  protected boolean enable(Node[] activatedNodes)
-  {
-    boolean enabled = false;
-
-    if (activatedNodes.length == 1)
-    {
-      enabled = null != activatedNodes[0].getLookup().lookup(BaseNode.class);
+public class RefreshAction extends BaseAction {
+    private static final RequestProcessor RP = new RequestProcessor(RefreshAction.class);
+    @Override
+    public String getName() {
+        return NbBundle.getMessage (RefreshAction.class, "Refresh"); // NOI18N
     }
 
-    return enabled;
-  }
-
-  @Override
-  public void performAction(Node[] activatedNodes)
-  {
-    if (activatedNodes[0] == null)
-    {
-      return;
+    @Override
+    public HelpCtx getHelpCtx() {
+        return new HelpCtx(RefreshAction.class);
     }
-    final BaseNode baseNode = activatedNodes[0].getLookup().lookup(BaseNode.class);
-    RP.post(
-        new Runnable()
-        {
-          @Override
-          public void run()
-          {
-            MetadataModel model = baseNode.getLookup().lookup(DatabaseConnection.class).getMetadataModel();
-            if (model != null)
-            {
-              try
-              {
-                model.runReadAction(
-                    new Action<Metadata>()
-                    {
-                      @Override
-                      public void run(Metadata metaData)
-                      {
-                        metaData.refresh();
-                      }
-                    }
-                );
-              }
-              catch (MetadataModelException e)
-              {
-                Exceptions.printStackTrace(e);
-              }
-            }
 
-            baseNode.refresh();
-          }
+    @Override
+    protected boolean enable(Node[] activatedNodes) {
+        boolean enabled = false;
+
+        if (activatedNodes.length == 1) {
+            enabled = null != activatedNodes[0].getLookup().lookup(BaseNode.class);
         }
-    );
-  }
+
+        return enabled;
+    }
+
+    @Override
+    public void performAction(Node[] activatedNodes) {
+        if (activatedNodes[0] == null) {
+            return;
+        }
+        final BaseNode baseNode = activatedNodes[0].getLookup().lookup(BaseNode.class);
+        RP.post(
+            new Runnable() {
+                @Override
+                public void run() {
+                    MetadataModel model = baseNode.getLookup().lookup(DatabaseConnection.class).getMetadataModel();
+                    if (model != null) {
+                        try {
+                            model.runReadAction(
+                                new Action<Metadata>() {
+                                    @Override
+                                    public void run(Metadata metaData) {
+                                        metaData.refresh();
+                                    }
+                                }
+                            );
+                        } catch (MetadataModelException e) {
+                            Exceptions.printStackTrace(e);
+                        }
+                    }
+
+                    baseNode.refresh();
+                }
+            }
+        );
+    }
 
 }

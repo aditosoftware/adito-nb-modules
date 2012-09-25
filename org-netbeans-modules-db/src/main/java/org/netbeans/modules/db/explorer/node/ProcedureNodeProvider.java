@@ -42,317 +42,263 @@
 
 package org.netbeans.modules.db.explorer.node;
 
-import org.netbeans.api.db.explorer.node.*;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import org.netbeans.api.db.explorer.node.NodeProvider;
+import org.netbeans.api.db.explorer.node.NodeProviderFactory;
 import org.netbeans.modules.db.DatabaseModule;
 import org.netbeans.modules.db.explorer.DatabaseConnection;
-import org.netbeans.modules.db.metadata.model.api.*;
+import org.netbeans.modules.db.metadata.model.api.Action;
+import org.netbeans.modules.db.metadata.model.api.Metadata;
+import org.netbeans.modules.db.metadata.model.api.MetadataElementHandle;
+import org.netbeans.modules.db.metadata.model.api.MetadataModel;
+import org.netbeans.modules.db.metadata.model.api.MetadataModelException;
+import org.netbeans.modules.db.metadata.model.api.Schema;
+import org.netbeans.modules.db.metadata.model.api.Procedure;
 import org.openide.nodes.Node;
 import org.openide.util.Lookup;
 
-import java.sql.*;
-import java.util.*;
-import java.util.logging.*;
-
 /**
+ *
  * @author Rob Englander, Jiri Rechtacek
  */
-public class ProcedureNodeProvider extends NodeProvider
-{
+public class ProcedureNodeProvider extends NodeProvider {
 
-  // lazy initialization holder class idiom for static fields is used
-  // for retrieving the factory
-  public static NodeProviderFactory getFactory()
-  {
-    return FactoryHolder.FACTORY;
-  }
-
-  private static class FactoryHolder
-  {
-    static final NodeProviderFactory FACTORY = new NodeProviderFactory()
-    {
-      @Override
-      public ProcedureNodeProvider createInstance(Lookup lookup)
-      {
-        ProcedureNodeProvider provider = new ProcedureNodeProvider(lookup);
-        return provider;
-      }
-    };
-  }
-
-  private final DatabaseConnection connection;
-  private MetadataElementHandle<Schema> schemaHandle;
-  private String schemaName;
-
-  @SuppressWarnings("unchecked")
-  private ProcedureNodeProvider(Lookup lookup)
-  {
-    super(lookup, new ProcedureComparator());
-    connection = getLookup().lookup(DatabaseConnection.class);
-    schemaHandle = getLookup().lookup(MetadataElementHandle.class);
-  }
-
-  @Override
-  protected synchronized void initialize()
-  {
-
-    final List<Node> newList = new ArrayList<Node>();
-
-    boolean connected = !connection.getConnector().isDisconnected();
-    MetadataModel metaDataModel = connection.getMetadataModel();
-    if (connected && metaDataModel != null)
-    {
-      try
-      {
-        metaDataModel.runReadAction(
-            new Action<Metadata>()
-            {
-              @Override
-              public void run(Metadata metaData)
-              {
-                Schema schema = schemaHandle.resolve(metaData);
-                if (schema != null)
-                {
-                  schemaName = schema.getName();
-                  Collection<Procedure> procedures = schema.getProcedures();
-                  for (Procedure procedure : procedures)
-                  {
-                    MetadataElementHandle<Procedure> handle = MetadataElementHandle.create(procedure);
-                    Collection<Node> matches = getNodes(handle);
-                    if (matches.size() > 0)
-                    {
-                      newList.addAll(matches);
-                    }
-                    else
-                    {
-                      NodeDataLookup lookup = new NodeDataLookup();
-                      lookup.add(connection);
-                      lookup.add(handle);
-
-                      newList.add(ProcedureNode.create(lookup, ProcedureNodeProvider.this, schema.getName()));
-                    }
-                  }
-                }
-                else
-                {
-                  schemaName = null;
-                }
-              }
-            }
-        );
-        refreshObjects();
-      }
-      catch (MetadataModelException e)
-      {
-        NodeRegistry.handleMetadataModelException(this.getClass(), connection, e, true);
-      }
+    // lazy initialization holder class idiom for static fields is used
+    // for retrieving the factory
+    public static NodeProviderFactory getFactory() {
+        return FactoryHolder.FACTORY;
     }
 
-    setNodes(newList);
-  }
+    private static class FactoryHolder {
+        static final NodeProviderFactory FACTORY = new NodeProviderFactory() {
+            @Override
+            public ProcedureNodeProvider createInstance(Lookup lookup) {
+                ProcedureNodeProvider provider = new ProcedureNodeProvider(lookup);
+                return provider;
+            }
+        };
+    }
 
-  static class ProcedureComparator implements Comparator<Node>
-  {
+    private final DatabaseConnection connection;
+    private MetadataElementHandle<Schema> schemaHandle;
+    private String schemaName;
+
+    @SuppressWarnings("unchecked")
+    private ProcedureNodeProvider(Lookup lookup) {
+        super(lookup, new ProcedureComparator());
+        connection = getLookup().lookup(DatabaseConnection.class);
+        schemaHandle = getLookup().lookup(MetadataElementHandle.class);
+    }
 
     @Override
-    public int compare(Node model1, Node model2)
-    {
-      return model1.getDisplayName().compareTo(model2.getDisplayName());
+    protected synchronized void initialize() {
+
+        final List<Node> newList = new ArrayList<Node>();
+
+        boolean connected = !connection.getConnector().isDisconnected();
+        MetadataModel metaDataModel = connection.getMetadataModel();
+        if (connected && metaDataModel != null) {
+            try {
+                metaDataModel.runReadAction(
+                    new Action<Metadata>() {
+                    @Override
+                        public void run(Metadata metaData) {
+                            Schema schema = schemaHandle.resolve(metaData);
+                            if (schema != null) {
+                                schemaName = schema.getName();
+                                Collection<Procedure> procedures = schema.getProcedures();
+                                for (Procedure procedure : procedures) {
+                                    MetadataElementHandle<Procedure> handle = MetadataElementHandle.create(procedure);
+                                    Collection<Node> matches = getNodes(handle);
+                                    if (matches.size() > 0) {
+                                        newList.addAll(matches);
+                                    } else {
+                                        NodeDataLookup lookup = new NodeDataLookup();
+                                        lookup.add(connection);
+                                        lookup.add(handle);
+
+                                        newList.add(ProcedureNode.create(lookup, ProcedureNodeProvider.this, schema.getName()));
+                                    }
+                                }
+                            } else {
+                                schemaName = null;
+                            }
+                        }
+                    }
+                );
+                refreshObjects();
+            } catch (MetadataModelException e) {
+                NodeRegistry.handleMetadataModelException(this.getClass(), connection, e, true);
+            }
+        }
+
+        setNodes(newList);
     }
 
-  }
+    static class ProcedureComparator implements Comparator<Node> {
 
-  @Override
-  public synchronized void refresh()
-  {
-    super.refresh();
-    refreshObjects();
-  }
+        @Override
+        public int compare(Node model1, Node model2) {
+            return model1.getDisplayName().compareTo(model2.getDisplayName());
+        }
 
-  private Set<String> validObjects = null;
-  private Map<String, ProcedureNode.Type> object2type = null;
+    }
 
-  private synchronized void refreshObjects()
-  {
-    if (connection != null &&
-        DatabaseModule.IDENTIFIER_MYSQL.equalsIgnoreCase(connection.getDriverName()))
-    {
-      // MySQL
-      boolean connected = !connection.getConnector().isDisconnected();
-      MetadataModel metaDataModel = connection.getMetadataModel();
-      if (connected && metaDataModel != null)
-      {
-        try
-        {
-          metaDataModel.runReadAction(
-              new Action<Metadata>()
-              {
-                @Override
-                public void run(Metadata metaData)
-                {
-                  Statement stmt;
-                  object2type = new HashMap<String, ProcedureNode.Type>();
-                  validObjects = new HashSet<String>();
-                  try
-                  {
-                    stmt = connection.getConnection().createStatement();
-                    ResultSet rs = stmt.executeQuery("SELECT NAME, TYPE" // NOI18N
-                                                         + " FROM mysql.proc" // NOI18N
-                                                         + " WHERE TYPE = 'PROCEDURE' OR TYPE = 'FUNCTION'"); // NOI18N
+    @Override
+    public synchronized void refresh() {
+        super.refresh();
+        refreshObjects();
+    }
 
-                    while (rs.next())
-                    {
-                      // name of procedure
-                      String objectName = rs.getString("NAME"); // NOI18N
-                      // type of procedure
-                      String objectType = rs.getString("TYPE"); // NOI18N
-                      if ("PROCEDURE".equals(objectType))
-                      { // NOI18N
-                        object2type.put(objectName, ProcedureNode.Type.Procedure);
-                      }
-                      else if ("FUNCTION".equals(objectType))
-                      { // NOI18N
-                        object2type.put(objectName, ProcedureNode.Type.Function);
-                      }
-                      else
-                      {
-                        assert false : "Unknown type " + objectType;
-                      }
-                      // XXX: all procedurec are valid in MySQL
-                      validObjects.add(objectName);
-                    }
-                  }
-                  catch (SQLException ex)
-                  {
-                    Logger.getLogger(ProcedureNodeProvider.class.getName()).log(Level.INFO, ex + " while refreshStatuses() of procedures in schema " + schemaName);
-                  }
-                  try
-                  {
-                    stmt = connection.getConnection().createStatement();
-                    ResultSet rs = stmt.executeQuery("SELECT TRIGGER_NAME" // NOI18N
-                                                         + " FROM information_schema.triggers"); // NOI18N
+    private Set<String> validObjects = null;
+    private Map<String, ProcedureNode.Type> object2type = null;
 
-                    while (rs.next())
-                    {
-                      // name of procedure
-                      String objectName = rs.getString("TRIGGER_NAME"); // NOI18N
-                      // type of procedure is trigger
-                      object2type.put(objectName, ProcedureNode.Type.Trigger);
-                      // XXX: all triggers are valid in MySQL
-                      validObjects.add(objectName);
-                    }
-                  }
-                  catch (SQLException ex)
-                  {
-                    Logger.getLogger(ProcedureNodeProvider.class.getName()).log(Level.INFO, ex + " while refreshStatuses() of triggers in schema " + schemaName);
-                  }
+    private synchronized void refreshObjects() {
+        if (connection != null &&
+                DatabaseModule.IDENTIFIER_MYSQL.equalsIgnoreCase(connection.getDriverName())) {
+            // MySQL
+            boolean connected = !connection.getConnector().isDisconnected();
+            MetadataModel metaDataModel = connection.getMetadataModel();
+            if (connected && metaDataModel != null) {
+                try {
+                    metaDataModel.runReadAction(
+                        new Action<Metadata>() {
+                            @Override
+                            public void run(Metadata metaData) {
+                                Statement stmt;
+                                object2type = new HashMap<String, ProcedureNode.Type> ();
+                                validObjects = new HashSet<String> ();
+                                try {
+                                    stmt = connection.getConnection().createStatement();
+                                    ResultSet rs = stmt.executeQuery("SELECT NAME, TYPE" // NOI18N
+                                            + " FROM mysql.proc" // NOI18N
+                                            + " WHERE TYPE = 'PROCEDURE' OR TYPE = 'FUNCTION'"); // NOI18N
+
+                                    while(rs.next()) {
+                                        // name of procedure
+                                        String objectName = rs.getString("NAME"); // NOI18N
+                                        // type of procedure
+                                        String objectType = rs.getString("TYPE"); // NOI18N
+                                        if ("PROCEDURE".equals(objectType)) { // NOI18N
+                                            object2type.put(objectName, ProcedureNode.Type.Procedure);
+                                        } else if ("FUNCTION".equals(objectType)) { // NOI18N
+                                            object2type.put(objectName, ProcedureNode.Type.Function);
+                                        } else {
+                                            assert false : "Unknown type " + objectType;
+                                        }
+                                        // XXX: all procedurec are valid in MySQL
+                                        validObjects.add(objectName);
+                                    }
+                                } catch (SQLException ex) {
+                                    Logger.getLogger(ProcedureNodeProvider.class.getName()).log(Level.INFO, ex + " while refreshStatuses() of procedures in schema " + schemaName);
+                                }
+                                try {
+                                    stmt = connection.getConnection().createStatement();
+                                    ResultSet rs = stmt.executeQuery("SELECT TRIGGER_NAME" // NOI18N
+                                            + " FROM information_schema.triggers"); // NOI18N
+
+                                    while(rs.next()) {
+                                        // name of procedure
+                                        String objectName = rs.getString("TRIGGER_NAME"); // NOI18N
+                                        // type of procedure is trigger
+                                        object2type.put(objectName, ProcedureNode.Type.Trigger);
+                                        // XXX: all triggers are valid in MySQL
+                                        validObjects.add(objectName);
+                                    }
+                                } catch (SQLException ex) {
+                                    Logger.getLogger(ProcedureNodeProvider.class.getName()).log(Level.INFO, ex + " while refreshStatuses() of triggers in schema " + schemaName);
+                                }
+                            }
+                        }
+                    );
+                } catch (MetadataModelException e) {
+                    NodeRegistry.handleMetadataModelException(this.getClass(), connection, e, true);
                 }
-              }
-          );
-        }
-        catch (MetadataModelException e)
-        {
-          NodeRegistry.handleMetadataModelException(this.getClass(), connection, e, true);
-        }
-      }
-    }
-    else if (connection != null && connection.getDriverName() != null &&
-        connection.getDriverName().startsWith(DatabaseModule.IDENTIFIER_ORACLE))
-    {
-      // Oracle
-      boolean connected = !connection.getConnector().isDisconnected();
-      MetadataModel metaDataModel = connection.getMetadataModel();
-      if (schemaName == null)
-      {
-        Logger.getLogger(ProcedureNodeProvider.class.getName()).log(Level.INFO, "No schema for " + this);
-        return;
-      }
-      if (connected && metaDataModel != null)
-      {
-        try
-        {
-          metaDataModel.runReadAction(
-              new Action<Metadata>()
-              {
-                @Override
-                public void run(Metadata metaData)
-                {
-                  Statement stmt;
-                  validObjects = new HashSet<String>();
-                  object2type = new HashMap<String, ProcedureNode.Type>();
-                  try
-                  {
-                    stmt = connection.getConnection().createStatement();
-                    ResultSet rs = stmt.executeQuery("SELECT OBJECT_NAME, STATUS, OBJECT_TYPE" // NOI18N
-                                                         + " FROM SYS.ALL_OBJECTS WHERE OWNER='" + schemaName + "'" // NOI18N
-                                                         + " AND ( OBJECT_TYPE = 'PROCEDURE' OR OBJECT_TYPE = 'TRIGGER' OR OBJECT_TYPE = 'FUNCTION' )"); // NOI18N
+            }
+        } else if (connection != null && connection.getDriverName() != null &&
+                connection.getDriverName().startsWith(DatabaseModule.IDENTIFIER_ORACLE)) {
+            // Oracle
+            boolean connected = !connection.getConnector().isDisconnected();
+            MetadataModel metaDataModel = connection.getMetadataModel();
+            if (schemaName == null) {
+                Logger.getLogger(ProcedureNodeProvider.class.getName()).log(Level.INFO, "No schema for " + this);
+                return ;
+            }
+            if (connected && metaDataModel != null) {
+                try {
+                    metaDataModel.runReadAction(
+                        new Action<Metadata>() {
+                            @Override
+                            public void run(Metadata metaData) {
+                                Statement stmt;
+                                validObjects = new HashSet<String> ();
+                                object2type = new HashMap<String, ProcedureNode.Type> ();
+                                try {
+                                    stmt = connection.getConnection().createStatement();
+                                    ResultSet rs = stmt.executeQuery("SELECT OBJECT_NAME, STATUS, OBJECT_TYPE" // NOI18N
+                                            + " FROM SYS.ALL_OBJECTS WHERE OWNER='" + schemaName + "'" // NOI18N
+                                            + " AND ( OBJECT_TYPE = 'PROCEDURE' OR OBJECT_TYPE = 'TRIGGER' OR OBJECT_TYPE = 'FUNCTION' )"); // NOI18N
 
-                    while (rs.next())
-                    {
-                      // name of procedure
-                      String objectName = rs.getString("OBJECT_NAME"); // NOI18N
-                      // valid or invalid
-                      String status = rs.getString("STATUS"); // NOI18N
-                      boolean valid = "VALID".equals(status); // NOI18N
-                      if (valid)
-                      {
-                        validObjects.add(objectName);
-                      }
-                      // type of procedure
-                      String objectType = rs.getString("OBJECT_TYPE"); // NOI18N
-                      if ("PROCEDURE".equals(objectType))
-                      { // NOI18N
-                        object2type.put(objectName, ProcedureNode.Type.Procedure);
-                      }
-                      else if ("FUNCTION".equals(objectType))
-                      { // NOI18N
-                        object2type.put(objectName, ProcedureNode.Type.Function);
-                      }
-                      else if ("TRIGGER".equals(objectType))
-                      { // NOI18N
-                        object2type.put(objectName, ProcedureNode.Type.Trigger);
-                      }
-                      else
-                      {
-                        assert false : "Unknown type " + objectType;
-                      }
-                    }
-                  }
-                  catch (SQLException ex)
-                  {
-                    Logger.getLogger(ProcedureNodeProvider.class.getName()).log(Level.INFO, ex + " while refreshStatuses() of procedures in schema" + schemaName);
-                  }
+                                    while(rs.next()) {
+                                        // name of procedure
+                                        String objectName = rs.getString("OBJECT_NAME"); // NOI18N
+                                        // valid or invalid
+                                        String status = rs.getString("STATUS"); // NOI18N
+                                        boolean valid = "VALID".equals(status); // NOI18N
+                                        if (valid) {
+                                            validObjects.add(objectName);
+                                        }
+                                        // type of procedure
+                                        String objectType = rs.getString("OBJECT_TYPE"); // NOI18N
+                                        if ("PROCEDURE".equals(objectType)) { // NOI18N
+                                            object2type.put(objectName, ProcedureNode.Type.Procedure);
+                                        } else if ("FUNCTION".equals(objectType)) { // NOI18N
+                                            object2type.put(objectName, ProcedureNode.Type.Function);
+                                        } else if ("TRIGGER".equals(objectType)) { // NOI18N
+                                            object2type.put(objectName, ProcedureNode.Type.Trigger);
+                                        } else {
+                                            assert false : "Unknown type " + objectType;
+                                        }                                    
+                                    }
+                                } catch (SQLException ex) {
+                                    Logger.getLogger(ProcedureNodeProvider.class.getName()).log(Level.INFO, ex + " while refreshStatuses() of procedures in schema" + schemaName);
+                                }
+                            }
+                        }
+                    );
+                } catch (MetadataModelException e) {
+                    NodeRegistry.handleMetadataModelException(this.getClass(), connection, e, true);
                 }
-              }
-          );
+            }
+        } else {
+            // others
         }
-        catch (MetadataModelException e)
-        {
-          NodeRegistry.handleMetadataModelException(this.getClass(), connection, e, true);
+    }
+
+    public boolean getStatus(String name) {
+        if (validObjects == null) {
+            refreshObjects();
         }
-      }
+        return validObjects.contains(name);
     }
-    else
-    {
-      // others
-    }
-  }
 
-  public boolean getStatus(String name)
-  {
-    if (validObjects == null)
-    {
-      refreshObjects();
+    public ProcedureNode.Type getType(String name) {
+        if (object2type == null) {
+            refreshObjects();
+        }
+        return object2type.get(name);
     }
-    return validObjects.contains(name);
-  }
-
-  public ProcedureNode.Type getType(String name)
-  {
-    if (object2type == null)
-    {
-      refreshObjects();
-    }
-    return object2type.get(name);
-  }
 
 }

@@ -42,126 +42,111 @@
 
 package org.netbeans.modules.db.explorer.node;
 
-import org.netbeans.api.db.explorer.node.*;
-import org.openide.util.*;
-
-import javax.swing.*;
-import java.awt.*;
+import org.netbeans.api.db.explorer.node.BaseNode;
+import org.netbeans.api.db.explorer.node.ChildNodeFactory;
+import java.awt.Image;
 import java.beans.BeanInfo;
+import javax.swing.Icon;
+import javax.swing.UIManager;
+import org.netbeans.api.db.explorer.node.NodeProvider;
+import org.openide.util.HelpCtx;
+import org.openide.util.ImageUtilities;
+import org.openide.util.NbBundle;
 
 /**
+ *
  * @author Rob Englander
  */
-public class DriverListNode extends BaseNode
-{
-  private static final String NAME = "Drivers";
-  private static final String ICONBASE = "org/netbeans/modules/db/resources/defaultFolder.gif";
-  private static final String FOLDER = "DriverList"; //NOI18N
+public class DriverListNode extends BaseNode {
+    private static final String NAME = "Drivers";
+    private static final String ICONBASE = "org/netbeans/modules/db/resources/defaultFolder.gif";
+    private static final String FOLDER = "DriverList"; //NOI18N
 
-  /**
-   * Create an instance of DriverListNode.
-   *
-   * @param dataLookup the lookup to use when creating node providers
-   * @return the DriverListNode instance
-   */
-  public static DriverListNode create(NodeDataLookup dataLookup, NodeProvider provider)
-  {
-    DriverListNode node = new DriverListNode(dataLookup, provider);
-    node.setup();
-    return node;
-  }
-
-  private DriverListNode(NodeDataLookup lookup, NodeProvider provider)
-  {
-    super(new ChildNodeFactory(lookup), lookup, FOLDER, provider);
-  }
-
-  protected void initialize()
-  {
-  }
-
-  @Override
-  public Image getIcon(int type)
-  {
-    Image result = null;
-    if (type == BeanInfo.ICON_COLOR_16x16)
-    {
-      result = icon2Image("Nb.Explorer.Folder.icon"); // NOI18N
-    }
-    if (result == null)
-    {
-      result = icon2Image("Tree.closedIcon"); // NOI18N
-    }
-    if (result == null)
-    {
-      result = super.getIcon(type);
-    }
-    return result;
-  }
-
-  @Override
-  public Image getOpenedIcon(int type)
-  {
-    Image result = null;
-    if (type == BeanInfo.ICON_COLOR_16x16)
-    {
-      result = icon2Image("Nb.Explorer.Folder.openedIcon"); // NOI18N
-    }
-    if (result == null)
-    {
-      result = icon2Image("Tree.openIcon"); // NOI18N
-    }
-    if (result == null)
-    {
-      result = super.getOpenedIcon(type);
-    }
-    return result;
-  }
-
-  private static Image icon2Image(String key)
-  {
-    Object obj = UIManager.get(key);
-    if (obj instanceof Image)
-    {
-      return (Image) obj;
+    /** 
+     * Create an instance of DriverListNode.
+     * 
+     * @param dataLookup the lookup to use when creating node providers
+     * @return the DriverListNode instance
+     */
+    public static DriverListNode create(NodeDataLookup dataLookup, NodeProvider provider) {
+        DriverListNode node = new DriverListNode(dataLookup, provider);
+        node.setup();
+        return node;
     }
 
-    if (obj instanceof Icon)
-    {
-      Icon icon = (Icon) obj;
-      return ImageUtilities.icon2Image(icon);
+    private DriverListNode(NodeDataLookup lookup, NodeProvider provider) {
+        super(new ChildNodeFactory(lookup), lookup, FOLDER, provider);
+    }
+        
+    protected void initialize() {
+    }
+    
+    @Override
+    public Image getIcon(int type) {
+        Image result = null;
+        if (type == BeanInfo.ICON_COLOR_16x16) {
+            result = icon2Image("Nb.Explorer.Folder.icon"); // NOI18N
+        }
+        if (result == null) {
+            result = icon2Image("Tree.closedIcon"); // NOI18N
+        }
+        if (result == null) {
+            result = super.getIcon(type);
+        }
+        return result;
     }
 
-    return null;
-  }
+    @Override
+    public Image getOpenedIcon(int type) {
+        Image result = null;
+        if (type == BeanInfo.ICON_COLOR_16x16) {
+            result = icon2Image("Nb.Explorer.Folder.openedIcon"); // NOI18N
+        }
+        if (result == null) {
+            result = icon2Image("Tree.openIcon"); // NOI18N
+        }
+        if (result == null) {
+            result = super.getOpenedIcon(type);
+        }
+        return result;
+    }
 
-  @Override
-  public String getName()
-  {
-    return NAME;
-  }
+    private static Image icon2Image(String key) {
+        Object obj = UIManager.get(key);
+        if (obj instanceof Image) {
+            return (Image)obj;
+        }
 
-  @Override
-  public String getDisplayName()
-  {
-    return NbBundle.getMessage(DriverListNode.class, "DriverListNode_DISPLAYNAME"); // NOI18N
-  }
+        if (obj instanceof Icon) {
+            Icon icon = (Icon)obj;
+            return ImageUtilities.icon2Image(icon);
+        }
 
-  @Override
-  public String getIconBase()
-  {
-    return ICONBASE;
-  }
+        return null;
+    }  
 
-  @Override
-  public String getShortDescription()
-  {
-    return NbBundle.getMessage(DriverListNode.class, "ND_DriverList"); //NOI18N
-  }
+    @Override
+    public String getName() {
+        return NAME;
+    }
 
-  @Override
-  public HelpCtx getHelpCtx()
-  {
-    return new HelpCtx(DriverListNode.class);
-  }
+    @Override
+    public String getDisplayName() {
+        return NbBundle.getMessage (DriverListNode.class, "DriverListNode_DISPLAYNAME"); // NOI18N
+    }
+
+    @Override
+    public String getIconBase() {
+        return ICONBASE;
+    }
+
+    @Override
+    public String getShortDescription() {
+        return NbBundle.getMessage (DriverListNode.class, "ND_DriverList"); //NOI18N
+    }
+
+    @Override
+    public HelpCtx getHelpCtx() {
+        return new HelpCtx(DriverListNode.class);
+    }
 }

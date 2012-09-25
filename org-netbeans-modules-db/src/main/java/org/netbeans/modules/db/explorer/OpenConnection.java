@@ -46,32 +46,24 @@ package org.netbeans.modules.db.explorer;
 
 /**
  * Class needed for Java Studio Enterprise feature.
- *
- * @author Administrator
+ * @author  Administrator
  */
-public class OpenConnection implements OpenConnectionInterface
-{
+public class OpenConnection implements OpenConnectionInterface {
 
-  /**
-   * Creates a new instance of OpenConnection
-   */
-  public OpenConnection()
-  {
-  }
+    /** Creates a new instance of OpenConnection */
+    public OpenConnection() {
+    }
 
-  public boolean isFor(String driverName)
-  {
-    return true;
-  }
+    public boolean isFor(String driverName) {
+        return true;
+    }
 
-  public void enable()
-  {
-    // No implementation in open source.
-  }
+    public void enable() {
+        // No implementation in open source.
+    }
 
 
-  public void disable()
-  {
-    // No implementation in open source.
-  }
+    public void disable() {
+        // No implementation in open source.
+    }
 }

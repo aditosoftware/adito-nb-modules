@@ -44,38 +44,31 @@
 
 package org.netbeans.modules.db.explorer.driver;
 
+import java.net.URL;
 import org.netbeans.api.db.explorer.JDBCDriver;
 import org.openide.filesystems.URLMapper;
-
-import java.net.URL;
 
 /**
  * A helper class for working with JDBC Drivers.
  *
  * @author Andrei Badea
  */
-public final class JDBCDriverSupport
-{
+public final class JDBCDriverSupport {
 
-  private JDBCDriverSupport()
-  {
-  }
-
-  /**
-   * Return if the driver file(s) exists and can be loaded.
-   *
-   * @return true if defined driver file(s) exists; otherwise false
-   */
-  public static boolean isAvailable(JDBCDriver driver)
-  {
-    URL[] urls = driver.getURLs();
-    for (int i = 0; i < urls.length; i++)
-    {
-      if (URLMapper.findFileObject(urls[i]) == null)
-      {
-        return false;
-      }
+    private JDBCDriverSupport() {
     }
-    return true;
-  }
+
+    /**
+     * Return if the driver file(s) exists and can be loaded.
+     * @return true if defined driver file(s) exists; otherwise false
+     */
+    public static boolean isAvailable(JDBCDriver driver) {
+        URL[] urls = driver.getURLs();
+        for (int i = 0; i < urls.length; i++) {
+            if (URLMapper.findFileObject(urls[i]) == null) {
+                return false;
+            }
+        }
+        return true;
+    }
 }

@@ -44,36 +44,30 @@
 
 package org.netbeans.modules.db.explorer;
 
+import java.util.Iterator;
 import org.netbeans.api.db.explorer.DatabaseConnection;
 import org.openide.util.Lookup;
 
-import java.util.Iterator;
-
 /**
+ *
  * @author Andrei Badea
  */
-public class DbMetaDataListenerSupport
-{
+public class DbMetaDataListenerSupport {
 
-  private static final Lookup.Result listeners = Lookup.getDefault().lookup(new Lookup.Template(DbMetaDataListener.class));
+    private static final Lookup.Result listeners = Lookup.getDefault().lookup(new Lookup.Template(DbMetaDataListener.class));
 
-  private DbMetaDataListenerSupport()
-  {
-  }
-
-  public static void fireTablesChanged(DatabaseConnection dbconn)
-  {
-    for (Iterator i = listeners.allInstances().iterator(); i.hasNext(); )
-    {
-      ((DbMetaDataListener) i.next()).tablesChanged(dbconn);
+    private DbMetaDataListenerSupport() {
     }
-  }
 
-  public static void fireTableChanged(DatabaseConnection dbconn, String tableName)
-  {
-    for (Iterator i = listeners.allInstances().iterator(); i.hasNext(); )
-    {
-      ((DbMetaDataListener) i.next()).tableChanged(dbconn, tableName);
+    public static void fireTablesChanged(DatabaseConnection dbconn) {
+        for (Iterator i = listeners.allInstances().iterator(); i.hasNext();) {
+            ((DbMetaDataListener)i.next()).tablesChanged(dbconn);
+        }
     }
-  }
+
+    public static void fireTableChanged(DatabaseConnection dbconn, String tableName) {
+        for (Iterator i = listeners.allInstances().iterator(); i.hasNext();) {
+            ((DbMetaDataListener)i.next()).tableChanged(dbconn, tableName);
+        }
+    }
 }

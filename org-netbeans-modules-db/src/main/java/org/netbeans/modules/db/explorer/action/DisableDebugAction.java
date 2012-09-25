@@ -44,34 +44,31 @@ package org.netbeans.modules.db.explorer.action;
 
 import org.netbeans.modules.db.explorer.node.RootNode;
 import org.openide.nodes.Node;
-import org.openide.util.*;
+import org.openide.util.HelpCtx;
+import org.openide.util.NbBundle;
 
 /**
+ *
  * @author Rob Englander
  */
-public class DisableDebugAction extends BaseAction
-{
-  @Override
-  public String getName()
-  {
-    return NbBundle.getMessage(DisableDebugAction.class, "DisableDebug"); // NOI18N
-  }
+public class DisableDebugAction extends BaseAction {
+    @Override
+    public String getName() {
+        return NbBundle.getMessage (DisableDebugAction.class, "DisableDebug"); // NOI18N
+    }
 
-  @Override
-  public HelpCtx getHelpCtx()
-  {
-    return new HelpCtx(DisableDebugAction.class);
-  }
+    @Override
+    public HelpCtx getHelpCtx() {
+        return new HelpCtx(DisableDebugAction.class);
+    }
 
-  protected boolean enable(Node[] activatedNodes)
-  {
-    return RootNode.instance().getSpecificationFactory().isDebugMode();
-  }
+    protected boolean enable(Node[] activatedNodes) {
+        return RootNode.instance().getSpecificationFactory().isDebugMode();
+    }
 
-  @Override
-  protected void performAction(Node[] activatedNodes)
-  {
-    RootNode.instance().getSpecificationFactory().setDebugMode(false);
-  }
+    @Override
+    protected void performAction(Node[] activatedNodes) {
+        RootNode.instance().getSpecificationFactory().setDebugMode(false);
+    }
 
 }

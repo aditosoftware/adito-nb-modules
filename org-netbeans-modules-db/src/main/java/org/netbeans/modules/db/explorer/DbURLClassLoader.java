@@ -44,8 +44,12 @@
 
 package org.netbeans.modules.db.explorer;
 
-import java.net.*;
-import java.security.*;
+import java.net.URL;
+import java.net.URLClassLoader;
+import java.security.AllPermission;
+import java.security.CodeSource;
+import java.security.PermissionCollection;
+import java.security.Permissions;
 import java.util.Arrays;
 
 /**
@@ -53,28 +57,22 @@ import java.util.Arrays;
  * Needed since JDBC drivers can reside in arbitrary locations, which the
  * system class loader does not know about.
  */
-public class DbURLClassLoader extends URLClassLoader
-{
-
-  /**
-   * Creates a new instance of DbURLClassLoader
-   */
-  public DbURLClassLoader(URL[] urls)
-  {
-    super(urls);
-  }
-
-  protected PermissionCollection getPermissions(CodeSource codesource)
-  {
-    Permissions permissions = new Permissions();
-    permissions.add(new AllPermission());
-    permissions.setReadOnly();
-
-    return permissions;
-  }
-
-  public String toString()
-  {
-    return "DbURLClassLoader[urls=" + Arrays.asList(getURLs()) + "]"; // NOI18N
-  }
+public class DbURLClassLoader extends URLClassLoader {
+    
+    /** Creates a new instance of DbURLClassLoader */
+    public DbURLClassLoader(URL[] urls) {
+        super(urls);
+    }
+    
+    protected PermissionCollection getPermissions(CodeSource codesource) {
+        Permissions permissions = new Permissions();
+        permissions.add(new AllPermission());
+        permissions.setReadOnly();
+        
+        return permissions;
+    }
+    
+    public String toString() {
+        return "DbURLClassLoader[urls=" + Arrays.asList(getURLs()) + "]"; // NOI18N
+    }
 }

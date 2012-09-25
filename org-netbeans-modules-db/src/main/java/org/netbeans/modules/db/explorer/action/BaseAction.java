@@ -44,54 +44,52 @@ package org.netbeans.modules.db.explorer.action;
 
 import org.netbeans.modules.db.explorer.DatabaseConnection;
 import org.netbeans.modules.db.explorer.node.NodeRegistry;
-import org.netbeans.modules.db.metadata.model.api.*;
+import org.netbeans.modules.db.metadata.model.api.Action;
+import org.netbeans.modules.db.metadata.model.api.Catalog;
+import org.netbeans.modules.db.metadata.model.api.Metadata;
+import org.netbeans.modules.db.metadata.model.api.MetadataElementHandle;
+import org.netbeans.modules.db.metadata.model.api.MetadataModel;
+import org.netbeans.modules.db.metadata.model.api.MetadataModelException;
+import org.netbeans.modules.db.metadata.model.api.Schema;
 import org.openide.util.Lookup;
 import org.openide.util.actions.NodeAction;
 
 /**
+ *
  * @author Rob Englander
  */
-public abstract class BaseAction extends NodeAction
-{
+public abstract class BaseAction extends NodeAction {
 
-  @Override
-  public boolean asynchronous()
-  {
-    return false;
-  }
-
-  protected static String findSchemaWorkingName(Lookup lookup)
-  {
-    DatabaseConnection conn = lookup.lookup(DatabaseConnection.class);
-    MetadataModel model = conn.getMetadataModel();
-    final MetadataElementHandle handle = lookup.lookup(MetadataElementHandle.class);
-
-    final String[] array = {null};
-
-    try
-    {
-      model.runReadAction(
-          new Action<Metadata>()
-          {
-            public void run(Metadata metaData)
-            {
-              Schema schema = (Schema) handle.resolve(metaData);
-              Catalog catalog = schema.getParent();
-              String schemaName = schema.getName();
-              if (schemaName == null)
-              {
-                schemaName = catalog.getName();
-              }
-              array[0] = schemaName;
-            }
-          }
-      );
+    @Override
+    public boolean asynchronous() {
+        return false;
     }
-    catch (MetadataModelException e)
-    {
-      NodeRegistry.handleMetadataModelException(BaseAction.class, null, e, true);
-    }
+    
+    protected static String findSchemaWorkingName(Lookup lookup) {
+        DatabaseConnection conn = lookup.lookup(DatabaseConnection.class);
+        MetadataModel model = conn.getMetadataModel();
+        final MetadataElementHandle handle = lookup.lookup(MetadataElementHandle.class);
 
-    return array[0];
-  }
+        final String[] array = { null };
+
+        try {
+            model.runReadAction(
+                new Action<Metadata>() {
+                    public void run(Metadata metaData) {
+                        Schema schema = (Schema)handle.resolve(metaData);
+                        Catalog catalog = schema.getParent();
+                        String schemaName = schema.getName();
+                        if (schemaName == null) {
+                            schemaName = catalog.getName();
+                        }
+                        array[0] = schemaName;
+                    }
+                }
+            );
+        } catch (MetadataModelException e) {
+            NodeRegistry.handleMetadataModelException(BaseAction.class, null, e, true);
+        }
+
+        return array[0];
+    }
 }

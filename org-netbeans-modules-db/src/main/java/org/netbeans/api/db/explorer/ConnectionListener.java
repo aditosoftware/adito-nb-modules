@@ -50,14 +50,14 @@ import java.util.EventListener;
  * Listener for changes to ConnectionManager (adding and removing
  * database connection from the DatabaseExplorer).
  *
- * @author Andrei Badea
  * @see ConnectionManager
+ *
+ * @author Andrei Badea
  */
-public interface ConnectionListener extends EventListener
-{
+public interface ConnectionListener extends EventListener {
 
-  /**
-   * Called when the list of connections has changed.
-   */
-  public void connectionsChanged();
+    /**
+     * Called when the list of connections has changed.
+     */
+    public void connectionsChanged();
 }

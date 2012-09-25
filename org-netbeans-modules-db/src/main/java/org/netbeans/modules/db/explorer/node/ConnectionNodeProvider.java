@@ -42,115 +42,97 @@
 
 package org.netbeans.modules.db.explorer.node;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.List;
+import javax.swing.SwingUtilities;
 import org.netbeans.api.db.explorer.ConnectionListener;
-import org.netbeans.api.db.explorer.node.*;
-import org.netbeans.modules.db.explorer.*;
+import org.netbeans.api.db.explorer.node.NodeProvider;
+import org.netbeans.api.db.explorer.node.NodeProviderFactory;
+import org.netbeans.modules.db.explorer.ConnectionList;
+import org.netbeans.modules.db.explorer.DatabaseConnection;
 import org.openide.nodes.Node;
 import org.openide.util.Lookup;
 
-import javax.swing.*;
-import java.util.*;
-
 /**
  * A node provider that provides ConnectionNode instances.
- *
+ * 
  * @author Rob Englander
  */
-public class ConnectionNodeProvider extends NodeProvider
-{
+public class ConnectionNodeProvider extends NodeProvider {
+    
+    // lazy initialization holder class idiom for static fields is used
+    // for retrieving the factory
+    public static NodeProviderFactory getFactory() {
+        return FactoryHolder.FACTORY;
+    }
 
-  // lazy initialization holder class idiom for static fields is used
-  // for retrieving the factory
-  public static NodeProviderFactory getFactory()
-  {
-    return FactoryHolder.FACTORY;
-  }
+    private static class FactoryHolder {
+        static final NodeProviderFactory FACTORY = new NodeProviderFactory() {
+            public ConnectionNodeProvider createInstance(Lookup lookup) {
+                ConnectionNodeProvider provider = new ConnectionNodeProvider(lookup);
+                provider.setup();
+                return provider;
+            }
+        };
+    }
+    
+    private final ConnectionList connectionList;
+    
+    private ConnectionNodeProvider(Lookup lookup) {
+        super(lookup, new ConnectionComparator());
+        connectionList = getLookup().lookup(ConnectionList.class);
+    }
+    
+    private void setup() {
+        connectionList.addConnectionListener(
+            new ConnectionListener() {
+                public void connectionsChanged() {
+                    initialize();
+                }
+            }
+        );
+    }
 
-  private static class FactoryHolder
-  {
-    static final NodeProviderFactory FACTORY = new NodeProviderFactory()
-    {
-      public ConnectionNodeProvider createInstance(Lookup lookup)
-      {
-        ConnectionNodeProvider provider = new ConnectionNodeProvider(lookup);
-        provider.setup();
-        return provider;
-      }
-    };
-  }
-
-  private final ConnectionList connectionList;
-
-  private ConnectionNodeProvider(Lookup lookup)
-  {
-    super(lookup, new ConnectionComparator());
-    connectionList = getLookup().lookup(ConnectionList.class);
-  }
-
-  private void setup()
-  {
-    connectionList.addConnectionListener(
-        new ConnectionListener()
-        {
-          public void connectionsChanged()
-          {
-            initialize();
-          }
+    protected synchronized void initialize() {
+        List<Node> newList = new ArrayList<Node>();
+        DatabaseConnection newConnection = null;
+        DatabaseConnection[] connections = connectionList.getConnections();
+        for (DatabaseConnection connection : connections) {
+            Collection<Node> matches = getNodes(connection);
+            if (matches.size() > 0) {
+                newList.addAll(matches);
+            } else {
+                NodeDataLookup lookup = new NodeDataLookup();
+                lookup.add(connection);
+                newConnection = connection;
+                newList.add(ConnectionNode.create(lookup, this));
+            }
         }
-    );
-  }
 
-  protected synchronized void initialize()
-  {
-    List<Node> newList = new ArrayList<Node>();
-    DatabaseConnection newConnection = null;
-    DatabaseConnection[] connections = connectionList.getConnections();
-    for (DatabaseConnection connection : connections)
-    {
-      Collection<Node> matches = getNodes(connection);
-      if (matches.size() > 0)
-      {
-        newList.addAll(matches);
-      }
-      else
-      {
-        NodeDataLookup lookup = new NodeDataLookup();
-        lookup.add(connection);
-        newConnection = connection;
-        newList.add(ConnectionNode.create(lookup, this));
-      }
+        setNodes(newList);
+        // select added connection in explorer
+        final DatabaseConnection newConnectionFinal = newConnection;
+        if (newConnection != null) {
+            if (!SwingUtilities.isEventDispatchThread()) {
+                SwingUtilities.invokeLater(new Runnable() {
+
+                    public void run() {
+                        newConnectionFinal.selectInExplorer(false);
+                    }
+                });
+            } else {
+                newConnectionFinal.selectInExplorer(false);
+            }
+        }
     }
 
-    setNodes(newList);
-    // select added connection in explorer
-    final DatabaseConnection newConnectionFinal = newConnection;
-    if (newConnection != null)
-    {
-      if (!SwingUtilities.isEventDispatchThread())
-      {
-        SwingUtilities.invokeLater(new Runnable()
-        {
+    static class ConnectionComparator implements Comparator<Node> {
 
-          public void run()
-          {
-            newConnectionFinal.selectInExplorer(false);
-          }
-        });
-      }
-      else
-      {
-        newConnectionFinal.selectInExplorer(false);
-      }
+        public int compare(Node model1, Node model2) {
+            return model1.getDisplayName().compareToIgnoreCase(model2.getDisplayName());
+        }
+        
     }
-  }
-
-  static class ConnectionComparator implements Comparator<Node>
-  {
-
-    public int compare(Node model1, Node model2)
-    {
-      return model1.getDisplayName().compareToIgnoreCase(model2.getDisplayName());
-    }
-
-  }
 }

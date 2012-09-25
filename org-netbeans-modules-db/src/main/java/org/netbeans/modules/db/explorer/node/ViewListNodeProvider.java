@@ -42,42 +42,37 @@
 
 package org.netbeans.modules.db.explorer.node;
 
-import org.netbeans.api.db.explorer.node.*;
+import org.netbeans.api.db.explorer.node.BaseNode;
+import org.netbeans.api.db.explorer.node.NodeProviderFactory;
 import org.openide.util.Lookup;
 
 /**
+ *
  * @author Rob Englander
  */
-public class ViewListNodeProvider extends ConnectedNodeProvider
-{
+public class ViewListNodeProvider extends ConnectedNodeProvider {
 
-  // lazy initialization holder class idiom for static fields is used
-  // for retrieving the factory
-  public static NodeProviderFactory getFactory()
-  {
-    return FactoryHolder.FACTORY;
-  }
+    // lazy initialization holder class idiom for static fields is used
+    // for retrieving the factory
+    public static NodeProviderFactory getFactory() {
+        return FactoryHolder.FACTORY;
+    }
 
-  private static class FactoryHolder
-  {
-    static final NodeProviderFactory FACTORY = new NodeProviderFactory()
-    {
-      public ViewListNodeProvider createInstance(Lookup lookup)
-      {
-        ViewListNodeProvider provider = new ViewListNodeProvider(lookup);
-        return provider;
-      }
-    };
-  }
+    private static class FactoryHolder {
+        static final NodeProviderFactory FACTORY = new NodeProviderFactory() {
+            public ViewListNodeProvider createInstance(Lookup lookup) {
+                ViewListNodeProvider provider = new ViewListNodeProvider(lookup);
+                return provider;
+            }
+        };
+    }
 
-  private ViewListNodeProvider(Lookup lookup)
-  {
-    super(lookup);
-  }
+    private ViewListNodeProvider(Lookup lookup) {
+        super(lookup);
+    }
 
-  @Override
-  protected BaseNode createNode(NodeDataLookup lookup)
-  {
-    return ViewListNode.create(lookup, this);
-  }
+    @Override
+    protected BaseNode createNode(NodeDataLookup lookup) {
+        return ViewListNode.create(lookup, this);
+    }
 }

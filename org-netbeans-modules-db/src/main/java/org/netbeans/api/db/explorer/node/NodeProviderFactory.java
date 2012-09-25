@@ -46,16 +46,15 @@ import org.openide.util.Lookup;
 
 /**
  * This interface is implemented by factories that can create instances
- * of NodeProvider.
- *
+ * of NodeProvider.  
+ * 
  * @author Rob Englander
  */
-public interface NodeProviderFactory
-{
-  /**
-   * Create a new NodeProvider instance.
-   *
-   * @return a Nodeprovider
-   */
-  public NodeProvider createInstance(Lookup lookup);
+public interface NodeProviderFactory {
+    /**
+     * Create a new NodeProvider instance.
+     * 
+     * @return a Nodeprovider
+     */
+    public NodeProvider createInstance(Lookup lookup);
 }

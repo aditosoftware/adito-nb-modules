@@ -41,84 +41,70 @@
  */
 package org.netbeans.modules.db.explorer.action;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.netbeans.modules.db.explorer.DatabaseConnection;
 import org.netbeans.modules.db.explorer.dlg.ViewProcedureDialog;
 import org.netbeans.modules.db.explorer.node.ProcedureNode;
 import org.netbeans.modules.db.explorer.sql.editor.SQLEditorSupport;
 import org.openide.nodes.Node;
-import org.openide.util.*;
-
-import java.util.logging.*;
+import org.openide.util.HelpCtx;
+import org.openide.util.NbBundle;
+import org.openide.util.RequestProcessor;
 
 /**
  * @author Jiri Rechtacek
  */
-public class ViewSourceCodeAction extends BaseAction
-{
+public class ViewSourceCodeAction extends BaseAction {
 
-  @Override
-  public String getName()
-  {
-    return NbBundle.getMessage(ViewSourceCodeAction.class, "LBL_ViewSourceCodeAction_Name");
-  }
-
-  @Override
-  protected void performAction(final Node[] activatedNodes)
-  {
-    final DatabaseConnection connection = activatedNodes[0].getLookup().lookup(DatabaseConnection.class);
-    if (connection != null)
-    {
-      ProcedureNode pn = activatedNodes[0].getLookup().lookup(ProcedureNode.class);
-      ViewProcedureDialog.showProcedure(pn.getName(), pn.getParams(), pn.getBody());
+    @Override
+    public String getName() {
+        return NbBundle.getMessage(ViewSourceCodeAction.class, "LBL_ViewSourceCodeAction_Name");
     }
-  }
-
-  protected void performAction2(final Node[] activatedNodes)
-  {
-    final DatabaseConnection connection = activatedNodes[0].getLookup().lookup(DatabaseConnection.class);
-    if (connection != null)
-    {
-      RequestProcessor.getDefault().post(
-          new Runnable()
-          {
-            @Override
-            public void run()
-            {
-              String expression = null;
-              ProcedureNode pn = activatedNodes[0].getLookup().lookup(ProcedureNode.class);
-              try
-              {
-                expression = pn.getSource();
-                SQLEditorSupport.openSQLEditor(connection.getDatabaseConnection(), expression, false);
-              }
-              catch (Exception exc)
-              {
-                Logger.getLogger(ViewSourceCodeAction.class.getName()).log(Level.INFO, exc.getLocalizedMessage() + " while executing expression " + expression, exc); // NOI18N
-              }
-            }
-          });
+    
+    @Override
+    protected void performAction(final Node[] activatedNodes) {
+        final DatabaseConnection connection = activatedNodes[0].getLookup().lookup(DatabaseConnection.class);
+        if (connection != null) {
+            ProcedureNode pn = activatedNodes[0].getLookup().lookup(ProcedureNode.class);
+            ViewProcedureDialog.showProcedure(pn.getName(), pn.getParams(), pn.getBody());
+        }
     }
-  }
 
-  @Override
-  protected boolean enable(Node[] activatedNodes)
-  {
-    boolean isPN = activatedNodes.length == 1
-        && activatedNodes[0].getLookup().lookup(ProcedureNode.class) != null;
-    if (isPN)
-    {
-      ProcedureNode pn = activatedNodes[0].getLookup().lookup(ProcedureNode.class);
-      return pn.isViewSourceSupported();
+    protected void performAction2(final Node[] activatedNodes) {
+        final DatabaseConnection connection = activatedNodes[0].getLookup().lookup(DatabaseConnection.class);
+        if (connection != null) {
+            RequestProcessor.getDefault().post(
+                    new Runnable() {
+                        @Override
+                        public void run() {
+                            String expression = null;
+                            ProcedureNode pn = activatedNodes[0].getLookup().lookup(ProcedureNode.class);
+                            try {
+                                expression = pn.getSource();
+                                SQLEditorSupport.openSQLEditor(connection.getDatabaseConnection(), expression, false);
+                            } catch (Exception exc) {
+                                Logger.getLogger(ViewSourceCodeAction.class.getName()).log(Level.INFO, exc.getLocalizedMessage() + " while executing expression " + expression, exc); // NOI18N
+                            }
+                        }
+                    });
+        }
     }
-    else
-    {
-      return isPN;
-    }
-  }
 
-  @Override
-  public HelpCtx getHelpCtx()
-  {
-    return new HelpCtx(ViewSourceCodeAction.class);
-  }
+    @Override
+    protected boolean enable(Node[] activatedNodes) {
+        boolean isPN = activatedNodes.length == 1
+                && activatedNodes[0].getLookup().lookup(ProcedureNode.class) != null;
+        if (isPN) {
+            ProcedureNode pn = activatedNodes[0].getLookup().lookup(ProcedureNode.class);
+            return pn.isViewSourceSupported();
+        } else {
+            return isPN;
+        }
+    }
+
+    @Override
+    public HelpCtx getHelpCtx() {
+        return new HelpCtx(ViewSourceCodeAction.class);
+    }
 }

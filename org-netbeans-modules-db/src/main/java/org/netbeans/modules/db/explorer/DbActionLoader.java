@@ -44,23 +44,22 @@
 
 package org.netbeans.modules.db.explorer;
 
-import javax.swing.*;
 import java.util.List;
+import javax.swing.Action;
 
 /**
  * Loads actions registered into the dbapi module.  This provides a new
  * non-public API that allows other modules add actions to the Databases
  * node.
- *
- * For now you can only add actions to the top-level node ("Databases").
+ * 
+ * For now you can only add actions to the top-level node ("Databases").  
  * Future implementations may allow for registering actions at any node level.
- *
+ * 
  * @author David Van Couvering
  */
-public interface DbActionLoader
-{
-  /**
-   * Get all the registered actions
-   */
-  public List<Action> getAllActions();
+public interface DbActionLoader {
+    /**
+     * Get all the registered actions
+     */
+    public List<Action> getAllActions();
 }

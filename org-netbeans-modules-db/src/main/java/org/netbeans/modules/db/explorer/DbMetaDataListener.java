@@ -47,12 +47,12 @@ package org.netbeans.modules.db.explorer;
 import org.netbeans.api.db.explorer.DatabaseConnection;
 
 /**
+ *
  * @author Andrei Badea
  */
-public interface DbMetaDataListener
-{
+public interface DbMetaDataListener {
 
-  void tablesChanged(DatabaseConnection dbconn);
+    void tablesChanged(DatabaseConnection dbconn);
 
-  void tableChanged(DatabaseConnection dbconn, String tableName);
+    void tableChanged(DatabaseConnection dbconn, String tableName);
 }

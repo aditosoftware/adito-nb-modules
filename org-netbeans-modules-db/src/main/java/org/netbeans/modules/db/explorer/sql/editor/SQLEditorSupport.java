@@ -49,17 +49,15 @@ import org.netbeans.modules.db.spi.sql.editor.SQLEditorProvider;
 import org.openide.util.Lookup;
 
 /**
+ *
  * @author Andrei Badea
  */
-public class SQLEditorSupport
-{
+public class SQLEditorSupport {
 
-  public static void openSQLEditor(DatabaseConnection dbconn, String sql, boolean execute)
-  {
-    SQLEditorProvider provider = (SQLEditorProvider) Lookup.getDefault().lookup(SQLEditorProvider.class);
-    if (provider != null)
-    {
-      provider.openSQLEditor(dbconn, sql, execute);
+    public static void openSQLEditor(DatabaseConnection dbconn, String sql, boolean execute) {
+        SQLEditorProvider provider = (SQLEditorProvider)Lookup.getDefault().lookup(SQLEditorProvider.class);
+        if (provider != null) {
+            provider.openSQLEditor(dbconn, sql, execute);
+        }
     }
-  }
 }

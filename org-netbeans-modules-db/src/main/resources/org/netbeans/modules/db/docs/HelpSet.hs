@@ -45,16 +45,16 @@ made subject to such option by the copyright holder.
 -->
 
 <!DOCTYPE helpset
-    PUBLIC "-//Sun Microsystems Inc.//DTD JavaHelp HelpSet Version 2.0//EN"
-    "http://java.sun.com/products/javahelp/helpset_2_0.dtd">
+  PUBLIC "-//Sun Microsystems Inc.//DTD JavaHelp HelpSet Version 2.0//EN"
+         "http://java.sun.com/products/javahelp/helpset_2_0.dtd">
 
 <helpset version="2.0">
 
-  <title>Database Explorer Module Documentation</title>
+ <title>Database Explorer Module Documentation</title>
 
   <maps>
-    <homeID>org.netbeans.modules.db.HOMEID</homeID>
-    <mapref location="Map.jhm"/>
+     <homeID>org.netbeans.modules.db.HOMEID</homeID>
+     <mapref location="Map.jhm" />
   </maps>
   <view>
     <name>TOC</name>
@@ -65,12 +65,12 @@ made subject to such option by the copyright holder.
 
   <view>
     <name>Search</name>
-    <label>Search</label>
-    <type>javax.help.SearchView</type>
-
-    <data engine="com.sun.java.help.search.DefaultSearchEngine">
+   <label>Search</label>
+   <type>javax.help.SearchView</type>
+ 
+  <data engine="com.sun.java.help.search.DefaultSearchEngine">
       JavaHelpSearch
-    </data>
-  </view>
+   </data>
+  </view> 
 
 </helpset>

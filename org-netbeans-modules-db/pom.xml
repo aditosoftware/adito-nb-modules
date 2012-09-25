@@ -30,7 +30,6 @@
       <groupId>org.netbeans.modules</groupId>
       <artifactId>org-netbeans-modules-db-metadata-model</artifactId>
       <version>RELEASE72</version>
-      <scope>runtime</scope>
     </dependency>
     <dependency>
       <groupId>org.netbeans.api</groupId>
@@ -107,11 +106,6 @@
       <artifactId>ddl</artifactId>
       <version>RELEASE72</version>
     </dependency>
-    <dependency>
-      <groupId>org.netbeans.modules</groupId>
-      <artifactId>org-netbeans-modules-db-metadata-model</artifactId>
-      <version>RELEASE72</version>
-    </dependency>
   </dependencies>
 
 
@@ -121,7 +115,7 @@
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>nbm-maven-plugin</artifactId>
         <configuration>
-          <cluster>platform</cluster>
+          <cluster>ide</cluster>
           <codeNameBase>org.netbeans.modules.db</codeNameBase>
           <publicPackages>
             <publicPackage>org.netbeans.api.db.explorer.*</publicPackage>

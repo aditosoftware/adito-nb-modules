@@ -42,78 +42,65 @@
 
 package org.netbeans.modules.db.explorer.action;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.netbeans.modules.db.explorer.DatabaseConnection;
 import org.netbeans.modules.db.explorer.node.ProcedureNode;
 import org.netbeans.modules.db.explorer.sql.editor.SQLEditorSupport;
 import org.openide.nodes.Node;
-import org.openide.util.*;
+import org.openide.util.HelpCtx;
+import org.openide.util.NbBundle;
+import org.openide.util.RequestProcessor;
 import org.openide.util.actions.NodeAction;
-
-import java.util.logging.*;
 
 /**
  * @author Jiri Rechtacek
  */
-public class EditSourceCodeAction extends NodeAction
-{
-
-  @Override
-  public String getName()
-  {
-    return NbBundle.getMessage(EditSourceCodeAction.class, "LBL_EditSourceCodeAction_Name"); // NOI18N
-  }
-
-  @Override
-  protected boolean asynchronous()
-  {
-    return true;
-  }
-
-  @Override
-  protected void performAction(final Node[] activatedNodes)
-  {
-    final DatabaseConnection connection = activatedNodes[0].getLookup().lookup(DatabaseConnection.class);
-    if (connection != null)
-    {
-      RequestProcessor.getDefault().post(
-          new Runnable()
-          {
-            @Override
-            public void run()
-            {
-              ProcedureNode pn = activatedNodes[0].getLookup().lookup(ProcedureNode.class);
-              try
-              {
-                SQLEditorSupport.openSQLEditor(connection.getDatabaseConnection(), pn.getDDL(), false);
-              }
-              catch (Exception exc)
-              {
-                Logger.getLogger(EditSourceCodeAction.class.getName()).log(Level.INFO, exc.getLocalizedMessage() + " while executing expression " + pn.getDDL(), exc); // NOI18N
-              }
-            }
-          });
+public class EditSourceCodeAction extends NodeAction {
+    
+    @Override
+    public String getName() {
+        return NbBundle.getMessage(EditSourceCodeAction.class, "LBL_EditSourceCodeAction_Name"); // NOI18N
     }
-  }
 
-  @Override
-  protected boolean enable(Node[] activatedNodes)
-  {
-    boolean isPN = activatedNodes.length == 1
-        && activatedNodes[0].getLookup().lookup(ProcedureNode.class) != null;
-    if (isPN)
-    {
-      ProcedureNode pn = activatedNodes[0].getLookup().lookup(ProcedureNode.class);
-      return pn.isEditSourceSupported();
+    @Override
+    protected boolean asynchronous() {
+        return true;
     }
-    else
-    {
-      return isPN;
+    
+    @Override
+    protected void performAction(final Node[] activatedNodes) {
+        final DatabaseConnection connection = activatedNodes[0].getLookup().lookup(DatabaseConnection.class);
+        if (connection != null) {
+            RequestProcessor.getDefault().post(
+                    new Runnable() {
+                        @Override
+                        public void run() {
+                            ProcedureNode pn = activatedNodes[0].getLookup().lookup(ProcedureNode.class);
+                            try {
+                                SQLEditorSupport.openSQLEditor(connection.getDatabaseConnection(), pn.getDDL(), false);
+                            } catch (Exception exc) {
+                                Logger.getLogger(EditSourceCodeAction.class.getName()).log(Level.INFO, exc.getLocalizedMessage() + " while executing expression " + pn.getDDL(), exc); // NOI18N
+                            }
+                        }
+                    });
+        }
     }
-  }
 
-  @Override
-  public HelpCtx getHelpCtx()
-  {
-    return new HelpCtx(EditSourceCodeAction.class);
-  }
+    @Override
+    protected boolean enable(Node[] activatedNodes) {
+        boolean isPN = activatedNodes.length == 1
+                && activatedNodes[0].getLookup().lookup(ProcedureNode.class) != null;
+        if (isPN) {
+            ProcedureNode pn = activatedNodes[0].getLookup().lookup(ProcedureNode.class);
+            return pn.isEditSourceSupported();
+        } else {
+            return isPN;
+        }
+    }
+
+    @Override
+    public HelpCtx getHelpCtx() {
+        return new HelpCtx(EditSourceCodeAction.class);
+    }
 }

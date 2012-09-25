@@ -53,17 +53,16 @@ import org.netbeans.api.db.explorer.DatabaseConnection;
  *
  * @author Jim Davidson
  */
-public interface VisualSQLEditorProvider
-{
+public interface VisualSQLEditorProvider {
 
-  /**
-   * Opens a new SQL editor for the specified connection and containing the
-   * specified SQL statments and possibly executes them.
-   *
-   * @param dbconn  the databaseconnection set as active in the SQL editor. The
-   *                statements are also executed against this connection.
-   * @param sql     the SQL statements to be put in the editor
-   * @param execute whether to execute the SQL statements.
-   */
-  public void openVisualSQLEditor(DatabaseConnection dbconn, String sql);
+    /**
+     * Opens a new SQL editor for the specified connection and containing the
+     * specified SQL statments and possibly executes them.
+     *
+     * @param dbconn the databaseconnection set as active in the SQL editor. The
+     *        statements are also executed against this connection.
+     * @param sql the SQL statements to be put in the editor
+     * @param execute whether to execute the SQL statements.
+     */
+    public void openVisualSQLEditor(DatabaseConnection dbconn, String sql);
 }

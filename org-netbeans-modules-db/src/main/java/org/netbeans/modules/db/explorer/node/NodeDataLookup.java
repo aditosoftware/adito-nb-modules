@@ -42,78 +42,70 @@
 
 package org.netbeans.modules.db.explorer.node;
 
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 import org.openide.util.Lookup;
-import org.openide.util.lookup.*;
-
-import java.util.*;
+import org.openide.util.lookup.AbstractLookup;
+import org.openide.util.lookup.InstanceContent;
 
 /**
  * This is a Lookup that allowsdata instances to be easily
  * added and removed.
- *
+ * 
  * @author Rob Englander
  */
-public class NodeDataLookup extends AbstractLookup
-{
+public class NodeDataLookup extends AbstractLookup {
 
-  /**
-   * the data instances held in the lookup
-   */
-  private final Set dataInstances = Collections.synchronizedSet(new HashSet());
+    /** the data instances held in the lookup */
+    private final Set dataInstances = Collections.synchronizedSet(new HashSet());
 
-  /**
-   * the content of the underlying AbstractLookup
-   */
-  private final InstanceContent content;
-
-  /**
-   * Constructor
-   */
-  public NodeDataLookup()
-  {
-    this(new InstanceContent(), null);
-  }
-
-  /**
-   * Constructor
-   */
-  public NodeDataLookup(Lookup lookup)
-  {
-    this(new InstanceContent(), lookup);
-  }
-
-  /**
-   * This private constructor is used by the public constructor
-   * so that the InstanceContent can be captured.
-   *
-   * @param content the InstanceContent to construct the object with
-   */
-  private NodeDataLookup(InstanceContent content, Lookup lookup)
-  {
-    super(content);
-    this.content = content;
-
-    if (lookup != null)
-    {
-      Collection<? extends Object> objects = lookup.lookupAll(Object.class);
-      for (Object obj : objects)
-      {
-        dataInstances.add(obj);
-      }
-
-      content.set(dataInstances, null);
+    /** the content of the underlying AbstractLookup */
+    private final InstanceContent content;
+    
+    /**
+     * Constructor
+     */
+    public NodeDataLookup() {
+        this(new InstanceContent(), null);
     }
-  }
+    
+    /**
+     * Constructor
+     */
+    public NodeDataLookup(Lookup lookup) {
+        this(new InstanceContent(), lookup);
+    }
 
-  /**
-   * Add an object instance to the lookup
-   *
-   * @param data the data instance to be added
-   */
-  public void add(Object data)
-  {
-    dataInstances.add(data);
-    content.set(dataInstances, null);
-  }
+    /**
+     * This private constructor is used by the public constructor
+     * so that the InstanceContent can be captured.
+     * 
+     * @param content the InstanceContent to construct the object with
+     */
+    private NodeDataLookup(InstanceContent content, Lookup lookup) {
+        super(content);
+        this.content = content;
 
+        if (lookup != null) {
+            Collection<? extends Object> objects = lookup.lookupAll(Object.class);
+            for (Object obj : objects) {
+                dataInstances.add(obj);
+            }
+            
+            content.set(dataInstances, null);
+        }
+    }
+    
+    /**
+     * Add an object instance to the lookup
+     * 
+     * @param data the data instance to be added
+     */
+    public void add(Object data) {
+        dataInstances.add(data);
+        content.set(dataInstances, null);
+    }
+    
 }

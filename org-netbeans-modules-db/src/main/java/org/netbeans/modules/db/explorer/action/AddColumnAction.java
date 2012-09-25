@@ -42,71 +42,64 @@
 
 package org.netbeans.modules.db.explorer.action;
 
-import org.netbeans.modules.db.explorer.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import org.netbeans.modules.db.explorer.DatabaseConnection;
+import org.netbeans.modules.db.explorer.DbUtilities;
 import org.netbeans.modules.db.explorer.dlg.AddTableColumnDialog;
 import org.netbeans.modules.db.explorer.node.TableNode;
 import org.openide.nodes.Node;
-import org.openide.util.*;
+import org.openide.util.HelpCtx;
+import org.openide.util.NbBundle;
+import org.openide.util.RequestProcessor;
 import org.openide.util.actions.SystemAction;
 
-import java.util.logging.*;
-
 /**
+ *
  * @author Rob Englander
  */
-public class AddColumnAction extends BaseAction
-{
-  private static final Logger LOGGER = Logger.getLogger(AddColumnAction.class.getName());
+public class AddColumnAction extends BaseAction {
+    private static final Logger LOGGER = Logger.getLogger(AddColumnAction.class.getName());
 
-  @Override
-  public String getName()
-  {
-    return NbBundle.getMessage(AddColumnAction.class, "AddColumn"); // NOI18N
-  }
+    @Override
+    public String getName() {
+        return NbBundle.getMessage (AddColumnAction.class, "AddColumn"); // NOI18N
+    }
 
-  @Override
-  protected boolean enable(Node[] activatedNodes)
-  {
-    boolean result = activatedNodes.length == 1 &&
-        activatedNodes[0].getLookup().lookup(TableNode.class) != null;
+    @Override
+    protected boolean enable(Node[] activatedNodes) {
+        boolean result = activatedNodes.length == 1 &&
+                activatedNodes[0].getLookup().lookup(TableNode.class) != null;
 
-    return result;
-  }
+        return result;
+    }
 
-  @Override
-  protected void performAction(final Node[] activatedNodes)
-  {
-    RequestProcessor.getDefault().post(
-        new Runnable()
-        {
-          @Override
-          public void run()
-          {
-            final TableNode node = activatedNodes[0].getLookup().lookup(TableNode.class);
-            final DatabaseConnection connection = node.getLookup().lookup(DatabaseConnection.class);
+    @Override
+    protected void performAction(final Node[] activatedNodes) {
+        RequestProcessor.getDefault().post(
+            new Runnable() {
+            @Override
+                public void run() {
+                    final TableNode node = activatedNodes[0].getLookup().lookup(TableNode.class);
+                    final DatabaseConnection connection = node.getLookup().lookup(DatabaseConnection.class);
 
-            try
-            {
-              boolean columnAdded = AddTableColumnDialog.showDialogAndCreate(connection.getConnector().getDatabaseSpecification(), node);
-              if (columnAdded)
-              {
-                SystemAction.get(RefreshAction.class).performAction(new Node[]{node});
-              }
+                    try {
+                        boolean columnAdded = AddTableColumnDialog.showDialogAndCreate(connection.getConnector().getDatabaseSpecification(), node);
+                        if (columnAdded) {
+                            SystemAction.get(RefreshAction.class).performAction(new Node[]{node});
+                        }
+                    } catch(Exception exc) {
+                        LOGGER.log(Level.WARNING, exc.getLocalizedMessage(), exc);
+                        DbUtilities.reportError(NbBundle.getMessage (AddColumnAction.class, "ERR_UnableToAddColumn"), exc.getMessage()); // NOI18N
+                    }
+                }
             }
-            catch (Exception exc)
-            {
-              LOGGER.log(Level.WARNING, exc.getLocalizedMessage(), exc);
-              DbUtilities.reportError(NbBundle.getMessage(AddColumnAction.class, "ERR_UnableToAddColumn"), exc.getMessage()); // NOI18N
-            }
-          }
-        }
-    );
-  }
+        );
+    }
 
-  @Override
-  public HelpCtx getHelpCtx()
-  {
-    return new HelpCtx(AddColumnAction.class);
-  }
+    @Override
+    public HelpCtx getHelpCtx() {
+        return new HelpCtx(AddColumnAction.class);
+    }
 
 }

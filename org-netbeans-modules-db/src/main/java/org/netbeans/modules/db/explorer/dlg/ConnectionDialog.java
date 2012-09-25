@@ -44,128 +44,118 @@
 
 package org.netbeans.modules.db.explorer.dlg;
 
-import org.openide.*;
-import org.openide.util.*;
-
-import javax.swing.*;
-import java.awt.*;
+import java.awt.Dialog;
+import java.awt.Window;
 import java.awt.event.ActionListener;
-import java.beans.*;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+import javax.swing.JComponent;
 
-public class ConnectionDialog
-{
+import javax.swing.JPanel;
 
-  private transient ConnectionDialogMediator mediator;
-  private transient Exception storedExp;
 
-  final DialogDescriptor descriptor;
-  final Dialog dialog;
+import org.openide.DialogDescriptor;
+import org.openide.DialogDisplayer;
+import org.openide.util.HelpCtx;
+import org.openide.util.NbBundle;
 
-  public ConnectionDialog(ConnectionDialogMediator mediator, FocusablePanel basePane, String dlgTitle, HelpCtx helpCtx, ActionListener actionListener)
-  {
-    this.mediator = mediator;
-    ConnectionProgressListener progressListener = new ConnectionProgressListener()
-    {
-      @Override
-      public void connectionStarted()
-      {
-        descriptor.setValid(false);
-      }
+public class ConnectionDialog {
 
-      @Override
-      public void connectionStep(String step)
-      {
-      }
+    private transient ConnectionDialogMediator mediator;
+    private transient Exception storedExp;
+    
+    final DialogDescriptor descriptor;
+    final Dialog dialog;
+    
+    public ConnectionDialog(ConnectionDialogMediator mediator, FocusablePanel basePane, String dlgTitle, HelpCtx helpCtx, ActionListener actionListener) {
+        this.mediator = mediator;
+        ConnectionProgressListener progressListener = new ConnectionProgressListener() {
+            @Override
+            public void connectionStarted() {
+                descriptor.setValid(false);
+            }
+            
+            @Override
+            public void connectionStep(String step) {
+            }
 
-      @Override
-      public void connectionFinished()
-      {
-        descriptor.setValid(true);
-      }
+            @Override
+            public void connectionFinished() {
+                descriptor.setValid(true);
+            }
 
-      @Override
-      public void connectionFailed()
-      {
-        descriptor.setValid(true);
-      }
-    };
-    mediator.addConnectionProgressListener(progressListener);
+            @Override
+            public void connectionFailed() {
+                descriptor.setValid(true);
+            }
+        };
+        mediator.addConnectionProgressListener(progressListener);
+        
+        PropertyChangeListener propChangeListener = new PropertyChangeListener() {
+            @Override
+            public void propertyChange(PropertyChangeEvent evt) {
+                String propertyName = evt.getPropertyName();
+                if (propertyName == null || propertyName.equals(ConnectionDialogMediator.PROP_VALID)) {
+                    updateValid();
+                }
+            }
+        };
+        mediator.addPropertyChangeListener(propChangeListener);
 
-    PropertyChangeListener propChangeListener = new PropertyChangeListener()
-    {
-      @Override
-      public void propertyChange(PropertyChangeEvent evt)
-      {
-        String propertyName = evt.getPropertyName();
-        if (propertyName == null || propertyName.equals(ConnectionDialogMediator.PROP_VALID))
-        {
-          updateValid();
-        }
-      }
-    };
-    mediator.addPropertyChangeListener(propChangeListener);
+        basePane.getAccessibleContext().setAccessibleName(NbBundle.getMessage (ConnectionDialog.class, "ACS_ConnectDialogA11yName"));
+        basePane.getAccessibleContext().setAccessibleDescription(NbBundle.getMessage (ConnectionDialog.class, "ACS_ConnectDialogA11yDesc"));
 
-    basePane.getAccessibleContext().setAccessibleName(NbBundle.getMessage(ConnectionDialog.class, "ACS_ConnectDialogA11yName"));
-    basePane.getAccessibleContext().setAccessibleDescription(NbBundle.getMessage(ConnectionDialog.class, "ACS_ConnectDialogA11yDesc"));
-
-    descriptor = new DialogDescriptor(basePane, dlgTitle, true, DialogDescriptor.OK_CANCEL_OPTION,
-                                      DialogDescriptor.OK_OPTION, DialogDescriptor.DEFAULT_ALIGN, helpCtx, actionListener);
-    // inbuilt close of the dialog is only after CANCEL button click
-    // after OK button is dialog closed by hand
-    Object[] closingOptions = {DialogDescriptor.CANCEL_OPTION};
-    descriptor.setClosingOptions(closingOptions);
-    updateValid();
-    dialog = DialogDisplayer.getDefault().createDialog(descriptor);
-    // needed for issue 82787, allows the panel to request the focus
-    // to the password text field
-    basePane.initializeFocus();
-    dialog.setVisible(false);
-  }
-
-  public Window getWindow()
-  {
-    return dialog;
-  }
-
-  public void close()
-  {
-    // dialog is closed after successfully create connection
-    dialog.setVisible(false);
-    dialog.dispose();
-  }
-
-  public void setVisible(boolean mode)
-  {
-    dialog.setVisible(mode);
-  }
-
-  public void setException(Exception e)
-  {
-    storedExp = e;
-  }
-
-  public boolean isException()
-  {
-    return (storedExp != null);
-  }
-
-  private void updateValid()
-  {
-    boolean valid = mediator.getValid();
-    descriptor.setValid(valid);
-  }
-
-  /**
-   * A {@link JPanel} with an {@link #initializeFocus} method whose implementation
-   * can call {@link JComponent#requestFocusInWindow} on a children component.
-   * Needed because <code>requestFocusInWindow</code> must be called
-   * after a component was <code>pack()</code>-ed, but before it is displayed, and
-   * the <code>JPanel</code>, which is displayed using <code>DialogDescriptor</code>
-   * does not know when this happens.
-   */
-  public static abstract class FocusablePanel extends JPanel
-  {
-
-    public abstract void initializeFocus();
-  }
+        descriptor = new DialogDescriptor(basePane, dlgTitle, true, DialogDescriptor.OK_CANCEL_OPTION,
+                     DialogDescriptor.OK_OPTION, DialogDescriptor.DEFAULT_ALIGN, helpCtx, actionListener);
+        // inbuilt close of the dialog is only after CANCEL button click
+        // after OK button is dialog closed by hand
+        Object [] closingOptions = {DialogDescriptor.CANCEL_OPTION};
+        descriptor.setClosingOptions(closingOptions);
+        updateValid();
+        dialog = DialogDisplayer.getDefault().createDialog(descriptor);
+        // needed for issue 82787, allows the panel to request the focus
+        // to the password text field
+        basePane.initializeFocus();
+        dialog.setVisible(false);
+    }
+    
+    public Window getWindow() {
+        return dialog;
+    }
+    
+    public void close() {
+        // dialog is closed after successfully create connection
+        dialog.setVisible(false);
+        dialog.dispose();
+    }
+    
+    public void setVisible(boolean mode) {
+        dialog.setVisible(mode);
+    }
+    
+    public void setException(Exception e) {
+        storedExp = e;
+    }
+    
+    public boolean isException() {
+        return (storedExp != null);
+    }        
+    
+    private void updateValid() {
+        boolean valid = mediator.getValid();
+        descriptor.setValid(valid);
+    }
+    
+    /**
+     * A {@link JPanel} with an {@link #initializeFocus} method whose implementation
+     * can call {@link JComponent#requestFocusInWindow} on a children component.
+     * Needed because <code>requestFocusInWindow</code> must be called 
+     * after a component was <code>pack()</code>-ed, but before it is displayed, and
+     * the <code>JPanel</code>, which is displayed using <code>DialogDescriptor</code>
+     * does not know when this happens.
+     */
+    public static abstract class FocusablePanel extends JPanel {
+        
+        public abstract void initializeFocus();
+    }
 }

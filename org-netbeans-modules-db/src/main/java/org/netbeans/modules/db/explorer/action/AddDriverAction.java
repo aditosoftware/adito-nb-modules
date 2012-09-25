@@ -44,30 +44,26 @@ package org.netbeans.modules.db.explorer.action;
 
 import org.netbeans.modules.db.explorer.dlg.AddDriverDialog;
 import org.openide.nodes.Node;
-import org.openide.util.*;
+import org.openide.util.HelpCtx;
+import org.openide.util.NbBundle;
 
-public class AddDriverAction extends BaseAction
-{
-  @Override
-  public String getName()
-  {
-    return NbBundle.getMessage(AddDriverAction.class, "AddNewDriver"); // NOI18N
-  }
+public class AddDriverAction extends BaseAction {
+    @Override
+    public String getName() {
+        return NbBundle.getMessage (AddDriverAction.class, "AddNewDriver"); // NOI18N
+    }
 
-  protected boolean enable(Node[] activatedNodes)
-  {
-    return activatedNodes.length == 1;
-  }
-
-  @Override
-  public void performAction(Node[] activatedNodes)
-  {
-    AddDriverDialog.showDialog();
-  }
-
-  @Override
-  public HelpCtx getHelpCtx()
-  {
-    return new HelpCtx(AddDriverAction.class);
-  }
+    protected boolean enable(Node[] activatedNodes) {
+        return activatedNodes.length == 1;
+    }
+    
+    @Override
+    public void performAction(Node[] activatedNodes) {
+        AddDriverDialog.showDialog();
+    }
+    
+    @Override
+    public HelpCtx getHelpCtx() {
+        return new HelpCtx(AddDriverAction.class);
+    }
 }

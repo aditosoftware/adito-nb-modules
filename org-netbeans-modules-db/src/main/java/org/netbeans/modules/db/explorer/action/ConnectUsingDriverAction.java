@@ -42,138 +42,133 @@
 
 package org.netbeans.modules.db.explorer.action;
 
-import org.netbeans.api.db.explorer.JDBCDriver;
-import org.netbeans.modules.db.explorer.DatabaseConnection;
-import org.netbeans.modules.db.explorer.dlg.*;
-import org.netbeans.modules.db.explorer.node.DriverNode;
-import org.openide.*;
-import org.openide.nodes.Node;
-import org.openide.util.*;
-import org.openide.util.RequestProcessor.Task;
-
-import java.sql.*;
-import java.util.*;
+import java.sql.Connection;
+import java.sql.DatabaseMetaData;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Logger;
 
-public class ConnectUsingDriverAction extends BaseAction
-{
-  private static final Logger LOGGER = Logger.getLogger(ConnectUsingDriverAction.class.getName());
+import org.netbeans.modules.db.explorer.dlg.ConnectionDialogMediator;
 
-  @Override
-  public String getName()
-  {
-    return NbBundle.getMessage(ConnectUsingDriverAction.class, "ConnectUsing"); // NOI18N
-  }
+import org.openide.DialogDisplayer;
+import org.openide.NotifyDescriptor;
+import org.openide.nodes.Node;
 
-  @Override
-  public HelpCtx getHelpCtx()
-  {
-    return new HelpCtx(ConnectUsingDriverAction.class);
-  }
+import org.netbeans.modules.db.explorer.DatabaseConnection;
 
-  @Override
-  protected boolean enable(Node[] activatedNodes)
-  {
-    return (activatedNodes != null && activatedNodes.length == 1);
-  }
+import org.netbeans.modules.db.explorer.dlg.SchemaPanel;
+import org.netbeans.api.db.explorer.JDBCDriver;
+import org.netbeans.modules.db.explorer.dlg.AddConnectionWizard;
+import org.netbeans.modules.db.explorer.node.DriverNode;
+import org.openide.util.HelpCtx;
+import org.openide.util.Lookup;
+import org.openide.util.NbBundle;
+import org.openide.util.RequestProcessor.Task;
 
-  @Override
-  public void performAction(Node[] activatedNodes)
-  {
-    Lookup lookup = activatedNodes[0].getLookup();
-    DriverNode node = lookup.lookup(DriverNode.class);
+public class ConnectUsingDriverAction extends BaseAction {
+    private static final Logger LOGGER = Logger.getLogger(ConnectUsingDriverAction.class.getName());
 
-    if (node != null)
-    {
-      JDBCDriver driver = node.getDatabaseDriver().getJDBCDriver();
-      new NewConnectionDialogDisplayer().showDialog(driver.getName(), driver.getClassName());
-    }
-  }
-
-  public static final class NewConnectionDialogDisplayer extends ConnectionDialogMediator
-  {
-
-    // the most recent task passed to the RequestProcessor
-    Task activeTask = null;
-
-    private DatabaseConnection cinfo = null;
-
-    public void showDialog(String driverName, String driverClass)
-    {
-      showDialog(driverName, driverClass, null, null, null);
-    }
-
-    public DatabaseConnection showDialog(JDBCDriver driver, String databaseUrl, String user, String password)
-    {
-      String driverName = (driver != null) ? driver.getName() : null;
-      String driverClass = (driver != null) ? driver.getClassName() : null;
-      return showDialog(driverName, driverClass, databaseUrl, user, password);
-    }
-
-    private DatabaseConnection showDialog(String driverName, String driverClass, String databaseUrl, String user, String password)
-    {
-      AddConnectionWizard.showWizard(driverName, driverClass, databaseUrl, user, password);
-      return null;
+    @Override
+    public String getName() {
+        return NbBundle.getMessage (ConnectUsingDriverAction.class, "ConnectUsing"); // NOI18N
     }
 
     @Override
-    public void closeConnection()
-    {
-      if (cinfo != null)
-      {
-        Connection conn = cinfo.getConnection();
-        if (conn != null)
-        {
-          try
-          {
-            conn.close();
-            cinfo.setConnection(null);
-          }
-          catch (SQLException e)
-          {
-            //unable to close db connection
-            cinfo.setConnection(null);
-          }
+    public HelpCtx getHelpCtx() {
+        return new HelpCtx(ConnectUsingDriverAction.class);
+    }
+
+    @Override
+    protected boolean enable(Node[] activatedNodes) {
+        return (activatedNodes != null && activatedNodes.length == 1);
+    }
+
+    @Override
+    public void performAction(Node[] activatedNodes) {
+        Lookup lookup = activatedNodes[0].getLookup();
+        DriverNode node = lookup.lookup(DriverNode.class);
+        
+        if (node != null) {
+            JDBCDriver driver = node.getDatabaseDriver().getJDBCDriver();
+            new NewConnectionDialogDisplayer().showDialog(driver.getName(), driver.getClassName());
         }
-      }
-
-      setConnected(false);
     }
+    
+    public static final class NewConnectionDialogDisplayer extends ConnectionDialogMediator {
+        
+        // the most recent task passed to the RequestProcessor
+        Task activeTask = null;
 
-    @Override
-    protected Task retrieveSchemasAsync(final SchemaPanel schemaPanel, final DatabaseConnection dbcon, final String defaultSchema)
-    {
-      activeTask = super.retrieveSchemasAsync(schemaPanel, dbcon, defaultSchema);
+        private DatabaseConnection cinfo = null;
+        
+        public void showDialog(String driverName, String driverClass) {
+            showDialog(driverName, driverClass, null, null, null);
+        }
+        
+        public DatabaseConnection showDialog(JDBCDriver driver, String databaseUrl, String user, String password) {
+            String driverName = (driver != null) ? driver.getName() : null;
+            String driverClass = (driver != null) ? driver.getClassName() : null;
+            return showDialog(driverName, driverClass, databaseUrl, user, password);
+        }
+        
+        private DatabaseConnection showDialog(String driverName, String driverClass, String databaseUrl, String user, String password) {
+            AddConnectionWizard.showWizard(driverName, driverClass, databaseUrl, user, password);
+            return null;
+        }
 
-      return activeTask;
-    }
-
-    @Override
-    protected boolean retrieveSchemas(SchemaPanel schemaPanel, DatabaseConnection dbcon, String defaultSchema)
-    {
-      fireConnectionStep(NbBundle.getMessage(ConnectUsingDriverAction.class, "ConnectionProgress_Schemas")); // NOI18N
-      List<String> schemas = new ArrayList<String>();
-      try
-      {
-        DatabaseMetaData dbMetaData = dbcon.getConnection().getMetaData();
-        if (dbMetaData.supportsSchemasInTableDefinitions())
+        @Override
+        public void closeConnection()
         {
-          ResultSet rs = dbMetaData.getSchemas();
-          if (rs != null)
-          {
-            while (rs.next())
+            if (cinfo != null)
             {
-              schemas.add(rs.getString(1).trim());
+                Connection conn = cinfo.getConnection();
+                if (conn != null)
+                {
+                    try 
+                    {
+                        conn.close();
+                        cinfo.setConnection(null);
+                    } 
+                    catch (SQLException e) 
+                    {
+                        //unable to close db connection
+                        cinfo.setConnection(null);
+                    }
+                }
             }
-          }
+            
+            setConnected(false);
         }
-      }
-      catch (SQLException exc)
-      {
-        String message = NbBundle.getMessage(ConnectUsingDriverAction.class, "ERR_UnableObtainSchemas", exc.getMessage()); // NOI18N
-        DialogDisplayer.getDefault().notify(new NotifyDescriptor.Message(message, NotifyDescriptor.ERROR_MESSAGE));
-      }
-      return schemaPanel.setSchemas(schemas, defaultSchema);
+        
+        @Override
+        protected Task retrieveSchemasAsync(final SchemaPanel schemaPanel, final DatabaseConnection dbcon, final String defaultSchema)
+        {
+            activeTask = super.retrieveSchemasAsync(schemaPanel, dbcon, defaultSchema);
+            
+            return activeTask;
+        }
+        
+        @Override
+        protected boolean retrieveSchemas(SchemaPanel schemaPanel, DatabaseConnection dbcon, String defaultSchema) {
+            fireConnectionStep(NbBundle.getMessage (ConnectUsingDriverAction.class, "ConnectionProgress_Schemas")); // NOI18N
+            List<String> schemas = new ArrayList<String>();
+            try {
+                DatabaseMetaData dbMetaData = dbcon.getConnection().getMetaData();
+                if (dbMetaData.supportsSchemasInTableDefinitions()) {
+                    ResultSet rs = dbMetaData.getSchemas();
+                    if (rs != null) {
+                        while (rs.next()) {
+                            schemas.add(rs.getString(1).trim());
+                        }
+                    }
+                }
+            } catch (SQLException exc) {
+                String message = NbBundle.getMessage(ConnectUsingDriverAction.class, "ERR_UnableObtainSchemas", exc.getMessage()); // NOI18N
+                DialogDisplayer.getDefault().notify(new NotifyDescriptor.Message(message, NotifyDescriptor.ERROR_MESSAGE));
+            }
+            return schemaPanel.setSchemas(schemas, defaultSchema);
+        }
     }
-  }
 }

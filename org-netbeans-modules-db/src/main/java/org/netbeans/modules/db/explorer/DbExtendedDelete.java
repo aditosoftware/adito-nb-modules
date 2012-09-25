@@ -30,111 +30,92 @@
  */
 package org.netbeans.modules.db.explorer;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import org.netbeans.api.db.explorer.node.BaseNode;
-import org.netbeans.modules.db.explorer.node.*;
-import org.openide.*;
+import org.netbeans.modules.db.explorer.node.ColumnNode;
+import org.netbeans.modules.db.explorer.node.DriverNode;
+import org.netbeans.modules.db.explorer.node.ProcedureNode;
+import org.netbeans.modules.db.explorer.node.TableNode;
+import org.netbeans.modules.db.explorer.node.ViewNode;
+import org.openide.DialogDisplayer;
+import org.openide.NotifyDescriptor;
 import org.openide.explorer.ExtendedDelete;
 import org.openide.nodes.Node;
 import org.openide.util.NbBundle;
 
-import java.io.IOException;
-import java.util.*;
-
 /**
+ *
  * @author Jiri Rechtacek
  */
-@org.openide.util.lookup.ServiceProvider(service = org.openide.explorer.ExtendedDelete.class)
-public class DbExtendedDelete implements ExtendedDelete
-{
-  private static final Class[] GUARDED_OBJECTS = new Class[]{DriverNode.class, TableNode.class, ViewNode.class, ColumnNode.class, ProcedureNode.class};
+@org.openide.util.lookup.ServiceProvider(service=org.openide.explorer.ExtendedDelete.class)
+public class DbExtendedDelete implements ExtendedDelete {
+    private static final Class[] GUARDED_OBJECTS = new Class[] {DriverNode.class, TableNode.class, ViewNode.class, ColumnNode.class, ProcedureNode.class};
 
-  public DbExtendedDelete()
-  {
-  }
+    public DbExtendedDelete() {}
 
-  @Override
-  public final boolean delete(Node[] nodes) throws IOException
-  {
-    if (nodes == null || nodes.length == 0)
-    {
-      return false;
-    }
-    List<String> tables = new ArrayList<String>();
-    List<String> columns = new ArrayList<String>();
-    List<String> others = new ArrayList<String>();
-    List<DriverNode> drivers = new ArrayList<DriverNode>();
-    for (Node n : nodes)
-    {
-      for (Class<? extends BaseNode> c : GUARDED_OBJECTS)
-      {
-        BaseNode bn = n.getLookup().lookup(c);
-        if (bn instanceof TableNode)
-        {
-          // table node
-          tables.add(bn.getDisplayName());
+    @Override
+    public final boolean delete(Node[] nodes) throws IOException {
+        if (nodes == null || nodes.length == 0) {
+            return false;
         }
-        else if (bn instanceof ColumnNode)
-        {
-          columns.add(bn.getDisplayName());
+        List<String> tables = new ArrayList<String> ();
+        List<String> columns = new ArrayList<String> ();
+        List<String> others = new ArrayList<String> ();
+        List<DriverNode> drivers = new ArrayList<DriverNode> ();
+        for (Node n : nodes) {
+            for (Class<? extends BaseNode> c : GUARDED_OBJECTS) {
+                BaseNode bn = n.getLookup().lookup(c);
+                if (bn instanceof TableNode) {
+                    // table node
+                    tables.add(bn.getDisplayName());
+                } else if (bn instanceof ColumnNode) {
+                    columns.add(bn.getDisplayName());
+                } else if (bn instanceof DriverNode) {
+                    // driver node
+                    drivers.add((DriverNode) bn);
+                } else if (bn != null) {
+                    // others
+                    others.add(bn.getDisplayName());
+                }
+            }
         }
-        else if (bn instanceof DriverNode)
-        {
-          // driver node
-          drivers.add((DriverNode) bn);
-        }
-        else if (bn != null)
-        {
-          // others
-          others.add(bn.getDisplayName());
-        }
-      }
-    }
-    if (!tables.isEmpty())
-    {
-      return delete(tables,
+        if (! tables.isEmpty()) {
+            return delete(tables,
                     NbBundle.getMessage(DbExtendedDelete.class, "DbExtendedDelete_ConfirmationMessage_Tables", tables.size()), // NOI18N
                     NbBundle.getMessage(DbExtendedDelete.class, "DbExtendedDelete_ConfirmationTitle_Tables", tables.size())); // NOI18N
-    }
-    else if (!columns.isEmpty())
-    {
-      return delete(columns,
+        } else if (! columns.isEmpty()) {
+            return delete(columns,
                     NbBundle.getMessage(DbExtendedDelete.class, "DbExtendedDelete_ConfirmationMessage_Columns", columns.size()), // NOI18N
                     NbBundle.getMessage(DbExtendedDelete.class, "DbExtendedDelete_ConfirmationTitle_Columns", columns.size())); // NOI18N
-    }
-    else if (!others.isEmpty())
-    {
-      return delete(others,
+        } else if (! others.isEmpty()) {
+            return delete(others,
                     NbBundle.getMessage(DbExtendedDelete.class, "DbExtendedDelete_ConfirmationMessage_Others", others.size()), // NOI18N
                     NbBundle.getMessage(DbExtendedDelete.class, "DbExtendedDelete_ConfirmationTitle_Others", others.size())); // NOI18N
+        } else if (! drivers.isEmpty()) {
+            DriverExtendedDeleteImpl.delete(nodes);
+        }
+        return false;
     }
-    else if (!drivers.isEmpty())
-    {
-      DriverExtendedDeleteImpl.delete(nodes);
-    }
-    return false;
-  }
 
-  private boolean delete(List<String> objects, String type, String title)
-  {
-    // confirmation
-    return DialogDisplayer.getDefault().notify(
-        new NotifyDescriptor.Confirmation(
-            NbBundle.getMessage(DbExtendedDelete.class, "DbExtendedDelete_ConfirmationMessage_DeleteObjects", type, formatNames(objects)), // msg
-            NbBundle.getMessage(DbExtendedDelete.class, "DbExtendedDelete_ConfirmationTitle_DeleteObjects", title), // title
-            NotifyDescriptor.YES_NO_OPTION)) != NotifyDescriptor.YES_OPTION;
-  }
-
-  private static String formatNames(List<String> names)
-  {
-    StringBuilder sb = new StringBuilder();
-    for (String s : names)
-    {
-      if (sb.length() > 0)
-      {
-        sb.append(", "); // NOI18N
-      }
-      sb.append(s);
+    private boolean delete(List<String> objects, String type, String title) {
+        // confirmation
+        return DialogDisplayer.getDefault().notify(
+                new NotifyDescriptor.Confirmation(
+                    NbBundle.getMessage(DbExtendedDelete.class, "DbExtendedDelete_ConfirmationMessage_DeleteObjects", type, formatNames(objects)), // msg
+                    NbBundle.getMessage(DbExtendedDelete.class, "DbExtendedDelete_ConfirmationTitle_DeleteObjects", title), // title
+                    NotifyDescriptor.YES_NO_OPTION)) != NotifyDescriptor.YES_OPTION;
     }
-    return sb.toString();
-  }
+
+    private static String formatNames(List<String> names) {
+        StringBuilder sb = new StringBuilder();
+        for (String s : names) {
+            if (sb.length() > 0) {
+                sb.append(", "); // NOI18N
+            }
+            sb.append(s);
+        }
+        return sb.toString();
+    }
 }

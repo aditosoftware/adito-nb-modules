@@ -42,43 +42,38 @@
 
 package org.netbeans.modules.db.explorer.node;
 
+import java.lang.reflect.InvocationTargetException;
 import org.netbeans.api.db.explorer.node.BaseNode;
 import org.openide.nodes.PropertySupport;
 
-import java.lang.reflect.InvocationTargetException;
-
 /**
+ *
  * @author Rob Englander
  */
-public class NodePropertySupport extends PropertySupport
-{
+public class NodePropertySupport extends PropertySupport {
 
-  private BaseNode node;
-  private String key;
+    private BaseNode node;
+    private String key;
 
-  public NodePropertySupport(BaseNode node, String name, Class type, String displayName, String shortDescription, boolean writable)
-  {
-    super(name, type, displayName, shortDescription, true, writable);
-    key = name;
-    this.node = node;
-  }
-
-  @Override
-  public Object getValue() throws IllegalAccessException, InvocationTargetException
-  {
-    Object result = node.getPropertyValue(key);
-    if (result == null)
-    {
-      result = ""; // NOI18N
+    public NodePropertySupport(BaseNode node, String name, Class type, String displayName, String shortDescription, boolean writable) {
+        super(name, type, displayName, shortDescription, true, writable);
+        key = name;
+        this.node = node;
     }
 
-    return result;
-  }
+    @Override
+    public Object getValue() throws IllegalAccessException, InvocationTargetException {
+        Object result = node.getPropertyValue(key);
+        if (result == null) {
+            result = ""; // NOI18N
+        }
 
-  @Override
-  public void setValue(Object val) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException
-  {
-    node.setPropertyValue(this, val);
-  }
+        return result;
+    }
+
+    @Override
+    public void setValue(Object val) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+        node.setPropertyValue(this, val);
+    }
 
 }

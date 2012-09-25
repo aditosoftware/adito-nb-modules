@@ -43,11 +43,10 @@
 package org.netbeans.modules.db.explorer.node;
 
 /**
+ *
  * @author Rob Englander
  */
-public interface ColumnNameProvider
-{
-  public String getColumnName();
-
-  public String getParentName();
+public interface ColumnNameProvider {
+    public String getColumnName();
+    public String getParentName();
 }

@@ -42,178 +42,153 @@
 
 package org.netbeans.modules.db.explorer.node;
 
-import org.netbeans.api.db.explorer.node.*;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+import org.netbeans.api.db.explorer.node.BaseNode;
+import org.netbeans.api.db.explorer.node.ChildNodeFactory;
+import org.netbeans.api.db.explorer.node.NodeProvider;
 import org.netbeans.modules.db.explorer.DatabaseConnection;
-import org.netbeans.modules.db.metadata.model.api.*;
-import org.openide.util.*;
-
-import java.beans.*;
+import org.netbeans.modules.db.metadata.model.api.Action;
+import org.netbeans.modules.db.metadata.model.api.Metadata;
+import org.netbeans.modules.db.metadata.model.api.MetadataElementHandle;
+import org.netbeans.modules.db.metadata.model.api.MetadataModel;
+import org.netbeans.modules.db.metadata.model.api.MetadataModelException;
+import org.netbeans.modules.db.metadata.model.api.Schema;
+import org.openide.util.HelpCtx;
+import org.openide.util.NbBundle;
 
 /**
+ *
  * @author Rob Englander
  */
-public class SchemaNode extends BaseNode
-{
-  private static final String ICONBASE = "org/netbeans/modules/db/resources/schema.png"; // NOI18N
-  private static final String FOLDER = "Schema"; //NOI18N
+public class SchemaNode extends BaseNode {
+    private static final String ICONBASE = "org/netbeans/modules/db/resources/schema.png"; // NOI18N
+    private static final String FOLDER = "Schema"; //NOI18N
 
-  /**
-   * Create an instance of SchemaNode.
-   *
-   * @param dataLookup the lookup to use when creating node providers
-   * @return the SchemaNode instance
-   */
-  public static SchemaNode create(NodeDataLookup dataLookup, NodeProvider provider)
-  {
-    SchemaNode node = new SchemaNode(dataLookup, provider);
-    node.setup();
-    return node;
-  }
+    /**
+     * Create an instance of SchemaNode.
+     *
+     * @param dataLookup the lookup to use when creating node providers
+     * @return the SchemaNode instance
+     */
+    public static SchemaNode create(NodeDataLookup dataLookup, NodeProvider provider) {
+        SchemaNode node = new SchemaNode(dataLookup, provider);
+        node.setup();
+        return node;
+    }
 
-  private String name = ""; // NOI18N
-  private String htmlName = null;
+    private String name = ""; // NOI18N
+    private String htmlName = null;
 
-  private final MetadataElementHandle<Schema> schemaHandle;
-  private final DatabaseConnection connection;
+    private final MetadataElementHandle<Schema> schemaHandle;
+    private final DatabaseConnection connection;
 
-  @SuppressWarnings("unchecked")
-  private SchemaNode(NodeDataLookup lookup, NodeProvider provider)
-  {
-    super(new ChildNodeFactory(lookup), lookup, FOLDER, provider);
-    connection = getLookup().lookup(DatabaseConnection.class);
-    schemaHandle = getLookup().lookup(MetadataElementHandle.class);
-  }
+    @SuppressWarnings("unchecked")
+    private SchemaNode(NodeDataLookup lookup, NodeProvider provider) {
+        super(new ChildNodeFactory(lookup), lookup, FOLDER, provider);
+        connection = getLookup().lookup(DatabaseConnection.class);
+        schemaHandle = getLookup().lookup(MetadataElementHandle.class);
+    }
 
-  @Override
-  protected void initialize()
-  {
-    setupNames();
+    @Override
+    protected void initialize() {
+        setupNames();
 
-    connection.addPropertyChangeListener(
-        new PropertyChangeListener()
-        {
-          @Override
-          public void propertyChange(PropertyChangeEvent evt)
-          {
-            if (evt.getPropertyName().equals(DatabaseConnection.PROP_DEFSCHEMA))
-            {
-              updateProperties();
-            }
-          }
-        }
-    );
-  }
-
-  private void setupNames()
-  {
-    boolean connected = !connection.getConnector().isDisconnected();
-    MetadataModel metaDataModel = connection.getMetadataModel();
-    if (connected && metaDataModel != null)
-    {
-      try
-      {
-        metaDataModel.runReadAction(
-            new Action<Metadata>()
-            {
-              @Override
-              public void run(Metadata metaData)
-              {
-                Schema schema = schemaHandle.resolve(metaData);
-                renderNames(schema);
-              }
+        connection.addPropertyChangeListener(
+            new PropertyChangeListener() {
+            @Override
+                public void propertyChange(PropertyChangeEvent evt) {
+                    if (evt.getPropertyName().equals(DatabaseConnection.PROP_DEFSCHEMA)) {
+                        updateProperties();
+                    }
+                }
             }
         );
-      }
-      catch (MetadataModelException e)
-      {
-        NodeRegistry.handleMetadataModelException(this.getClass(), connection, e, true);
-      }
-    }
-  }
-
-  @Override
-  protected void updateProperties()
-  {
-    setupNames();
-    super.updateProperties();
-  }
-
-  @Override
-  public String getName()
-  {
-    return name;
-  }
-
-  @Override
-  public String getDisplayName()
-  {
-    return name;
-  }
-
-  private void renderNames(Schema schema)
-  {
-    if (schema == null)
-    {
-      name = "";
-    }
-    else
-    {
-      name = schema.getName();
-    }
-    if (name == null)
-    {
-      name = schema.getParent().getName();
-    }
-    if (name == null)
-    {
-      name = "";
     }
 
-    if (schema != null)
-    {
-      boolean isDefault = false;
-      String def = connection.getDefaultSchema();
-      if (def != null)
-      {
-        isDefault = def.equals(name);
-      }
-      else
-      {
-        isDefault = schema.isDefault();
-      }
-
-      if (isDefault)
-      {
-        htmlName = "<b>" + name + "</b>"; // NOI18N
-      }
-      else
-      {
-        htmlName = null;
-      }
+    private void setupNames() {
+        boolean connected = !connection.getConnector().isDisconnected();
+        MetadataModel metaDataModel = connection.getMetadataModel();
+        if (connected && metaDataModel != null) {
+            try {
+                metaDataModel.runReadAction(
+                    new Action<Metadata>() {
+                    @Override
+                        public void run(Metadata metaData) {
+                            Schema schema = schemaHandle.resolve(metaData);
+                            renderNames(schema);
+                        }
+                    }
+                );
+            } catch (MetadataModelException e) {
+                NodeRegistry.handleMetadataModelException(this.getClass(), connection, e, true);
+            }
+        }
     }
-  }
 
-  @Override
-  public String getHtmlDisplayName()
-  {
-    return htmlName;
-  }
+    @Override
+    protected void updateProperties() {
+        setupNames();
+        super.updateProperties();
+    }
 
-  @Override
-  public String getIconBase()
-  {
-    return ICONBASE;
-  }
+    @Override
+    public String getName() {
+        return name;
+    }
 
-  @Override
-  public String getShortDescription()
-  {
-    return NbBundle.getMessage(SchemaNode.class, "ND_Schema"); //NOI18N
-  }
+    @Override
+    public String getDisplayName() {
+        return name;
+    }
 
-  @Override
-  public HelpCtx getHelpCtx()
-  {
-    return new HelpCtx(SchemaNode.class);
-  }
+    private void renderNames(Schema schema) {
+        if (schema == null) {
+            name = "";
+        } else {
+            name = schema.getName();
+        }
+        if (name == null) {
+            name = schema.getParent().getName();
+        }
+        if (name == null) {
+            name = "";
+        }
+
+        if (schema != null) {
+            boolean isDefault = false;
+            String def = connection.getDefaultSchema();
+            if (def != null) {
+                isDefault = def.equals(name);
+            } else {
+                isDefault = schema.isDefault();
+            }
+
+            if (isDefault) {
+                htmlName = "<b>" + name + "</b>"; // NOI18N
+            } else {
+                htmlName = null;
+            }
+        }
+    }
+
+    @Override
+    public String getHtmlDisplayName() {
+        return htmlName;
+    }
+
+    @Override
+    public String getIconBase() {
+        return ICONBASE;
+    }
+
+    @Override
+    public String getShortDescription() {
+        return NbBundle.getMessage (SchemaNode.class, "ND_Schema"); //NOI18N
+    }
+
+    @Override
+    public HelpCtx getHelpCtx() {
+        return new HelpCtx(SchemaNode.class);
+    }
 }

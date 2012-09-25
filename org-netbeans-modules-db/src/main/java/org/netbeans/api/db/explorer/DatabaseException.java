@@ -52,36 +52,33 @@ package org.netbeans.api.db.explorer;
 public final class DatabaseException extends Exception
 {
 
-  static final long serialVersionUID = 7114326612132815401L;
+    static final long serialVersionUID = 7114326612132815401L;
 
-  /**
-   * Constructs a new exception with a specified message.
-   *
-   * @param message the text describing the exception.
-   */
-  public DatabaseException(String message)
-  {
-    super(message);
-  }
+    /**
+     * Constructs a new exception with a specified message.
+     *
+     * @param message the text describing the exception.
+     */
+    public DatabaseException(String message) {
+        super (message);
+    }
 
-  /**
-   * Constructs a new exception with the specified cause.
-   *
-   * @param cause the cause of the exception.
-   */
-  public DatabaseException(Throwable cause)
-  {
-    super(cause);
-  }
+    /**
+     * Constructs a new exception with the specified cause.
+     *
+     * @param cause the cause of the exception.
+     */
+    public DatabaseException(Throwable cause) {
+        super (cause);
+    }
 
-  /**
-   * Constructs a new exception with the specified cause.
-   *
-   * @param message the text describing the exception.
-   * @param cause   the cause of the exception.
-   */
-  public DatabaseException(String message, Throwable cause)
-  {
-    super(message, cause);
-  }
+    /**
+     * Constructs a new exception with the specified cause.
+     *
+     * @param message the text describing the exception.
+     * @param cause the cause of the exception.
+     */
+    public DatabaseException(String message, Throwable cause) {
+        super(message, cause);
+    }
 }

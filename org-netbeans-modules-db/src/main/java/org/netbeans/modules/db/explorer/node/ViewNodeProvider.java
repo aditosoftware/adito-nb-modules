@@ -42,112 +42,102 @@
 
 package org.netbeans.modules.db.explorer.node;
 
-import org.netbeans.api.db.explorer.node.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.List;
+import org.netbeans.api.db.explorer.node.NodeProvider;
+import org.netbeans.api.db.explorer.node.NodeProviderFactory;
 import org.netbeans.modules.db.explorer.DatabaseConnection;
-import org.netbeans.modules.db.metadata.model.api.*;
+import org.netbeans.modules.db.metadata.model.api.Action;
+import org.netbeans.modules.db.metadata.model.api.Metadata;
+import org.netbeans.modules.db.metadata.model.api.MetadataElementHandle;
+import org.netbeans.modules.db.metadata.model.api.MetadataModel;
+import org.netbeans.modules.db.metadata.model.api.MetadataModelException;
+import org.netbeans.modules.db.metadata.model.api.Schema;
+import org.netbeans.modules.db.metadata.model.api.View;
 import org.openide.nodes.Node;
 import org.openide.util.Lookup;
 
-import java.util.*;
-
 /**
+ *
  * @author Rob Englander
  */
-public class ViewNodeProvider extends NodeProvider
-{
+public class ViewNodeProvider extends NodeProvider {
 
-  // lazy initialization holder class idiom for static fields is used
-  // for retrieving the factory
-  public static NodeProviderFactory getFactory()
-  {
-    return FactoryHolder.FACTORY;
-  }
-
-  private static class FactoryHolder
-  {
-    static final NodeProviderFactory FACTORY = new NodeProviderFactory()
-    {
-      @Override
-      public ViewNodeProvider createInstance(Lookup lookup)
-      {
-        ViewNodeProvider provider = new ViewNodeProvider(lookup);
-        return provider;
-      }
-    };
-  }
-
-  private final DatabaseConnection connection;
-  private final MetadataElementHandle<Schema> schemaHandle;
-
-  @SuppressWarnings("unchecked")
-  private ViewNodeProvider(Lookup lookup)
-  {
-    super(lookup, new ViewComparator());
-    connection = getLookup().lookup(DatabaseConnection.class);
-    schemaHandle = getLookup().lookup(MetadataElementHandle.class);
-  }
-
-  @Override
-  protected synchronized void initialize()
-  {
-
-    final List<Node> newList = new ArrayList<Node>();
-
-    boolean connected = !connection.getConnector().isDisconnected();
-    MetadataModel metaDataModel = connection.getMetadataModel();
-    if (connected && metaDataModel != null)
-    {
-      try
-      {
-        metaDataModel.runReadAction(
-            new Action<Metadata>()
-            {
-              @Override
-              public void run(Metadata metaData)
-              {
-                Schema schema = schemaHandle.resolve(metaData);
-                if (schema != null)
-                {
-                  Collection<View> views = schema.getViews();
-                  for (View view : views)
-                  {
-                    MetadataElementHandle<View> handle = MetadataElementHandle.create(view);
-                    Collection<Node> matches = getNodes(handle);
-                    if (matches.size() > 0)
-                    {
-                      newList.addAll(matches);
-                    }
-                    else
-                    {
-                      NodeDataLookup lookup = new NodeDataLookup();
-                      lookup.add(connection);
-                      lookup.add(handle);
-
-                      newList.add(ViewNode.create(lookup, ViewNodeProvider.this));
-                    }
-                  }
-                }
-              }
-            }
-        );
-      }
-      catch (MetadataModelException e)
-      {
-        NodeRegistry.handleMetadataModelException(this.getClass(), connection, e, true);
-      }
+    // lazy initialization holder class idiom for static fields is used
+    // for retrieving the factory
+    public static NodeProviderFactory getFactory() {
+        return FactoryHolder.FACTORY;
     }
 
-    setNodes(newList);
-  }
+    private static class FactoryHolder {
+        static final NodeProviderFactory FACTORY = new NodeProviderFactory() {
+            @Override
+            public ViewNodeProvider createInstance(Lookup lookup) {
+                ViewNodeProvider provider = new ViewNodeProvider(lookup);
+                return provider;
+            }
+        };
+    }
 
-  static class ViewComparator implements Comparator<Node>
-  {
+    private final DatabaseConnection connection;
+    private final MetadataElementHandle<Schema> schemaHandle;
+
+    @SuppressWarnings("unchecked")
+    private ViewNodeProvider(Lookup lookup) {
+        super(lookup, new ViewComparator());
+        connection = getLookup().lookup(DatabaseConnection.class);
+        schemaHandle = getLookup().lookup(MetadataElementHandle.class);
+    }
 
     @Override
-    public int compare(Node model1, Node model2)
-    {
-      return model1.getDisplayName().compareTo(model2.getDisplayName());
+    protected synchronized void initialize() {
+        
+        final List<Node> newList = new ArrayList<Node>();
+
+        boolean connected = !connection.getConnector().isDisconnected();
+        MetadataModel metaDataModel = connection.getMetadataModel();
+        if (connected && metaDataModel != null) {
+            try {
+                metaDataModel.runReadAction(
+                    new Action<Metadata>() {
+                        @Override
+                        public void run(Metadata metaData) {
+                            Schema schema = schemaHandle.resolve(metaData);
+                            if (schema != null) {
+                                Collection<View> views = schema.getViews();
+                                for (View view : views) {
+                                    MetadataElementHandle<View> handle = MetadataElementHandle.create(view);
+                                    Collection<Node> matches = getNodes(handle);
+                                    if (matches.size() > 0) {
+                                        newList.addAll(matches);
+                                    } else {
+                                        NodeDataLookup lookup = new NodeDataLookup();
+                                        lookup.add(connection);
+                                        lookup.add(handle);
+
+                                        newList.add(ViewNode.create(lookup, ViewNodeProvider.this));
+                                    }
+                                }
+                            }
+                        }
+                    }
+                );
+            } catch (MetadataModelException e) {
+                NodeRegistry.handleMetadataModelException(this.getClass(), connection, e, true);
+            }
+        }
+
+        setNodes(newList);
     }
 
-  }
+    static class ViewComparator implements Comparator<Node> {
+
+        @Override
+        public int compare(Node model1, Node model2) {
+            return model1.getDisplayName().compareTo(model2.getDisplayName());
+        }
+
+    }
 }

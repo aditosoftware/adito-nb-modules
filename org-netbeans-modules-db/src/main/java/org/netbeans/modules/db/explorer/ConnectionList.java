@@ -44,13 +44,18 @@
 
 package org.netbeans.modules.db.explorer;
 
-import org.netbeans.api.db.explorer.*;
-import org.openide.util.*;
-import org.openide.util.lookup.Lookups;
-
 import java.io.IOException;
-import java.util.*;
+import java.util.Collection;
+import java.util.List;
+import java.util.WeakHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
+import org.netbeans.api.db.explorer.ConnectionListener;
+import org.netbeans.api.db.explorer.DatabaseException;
+import org.openide.util.Lookup;
+import org.openide.util.LookupEvent;
+import org.openide.util.LookupListener;
+import org.openide.util.NbBundle;
+import org.openide.util.lookup.Lookups;
 
 
 /**
@@ -64,183 +69,141 @@ import java.util.concurrent.CopyOnWriteArrayList;
  *
  * @author Andrei Badea
  */
-public class ConnectionList
-{
+public class ConnectionList {
 
-  private static ConnectionList DEFAULT;
+    private static ConnectionList DEFAULT;
 
-  private final List<ConnectionListener> listeners = new CopyOnWriteArrayList<ConnectionListener>();
+    private final List<ConnectionListener> listeners = new CopyOnWriteArrayList<ConnectionListener>();
 
-  private Lookup.Result<DatabaseConnection> result = getLookupResult();
+    private Lookup.Result<DatabaseConnection> result = getLookupResult();
 
-  /**
-   * Set of connections that the listeners were notified about. Stored not to
-   * fire change events if the list has not been actually changed.
-   */
-  private WeakHashMap<DatabaseConnection, Boolean> lastKnownConnections =
-      new WeakHashMap<DatabaseConnection, Boolean>();
+    /**
+     * Set of connections that the listeners were notified about. Stored not to
+     * fire change events if the list has not been actually changed.
+     */
+    private WeakHashMap<DatabaseConnection, Boolean> lastKnownConnections =
+            new WeakHashMap<DatabaseConnection, Boolean>();
 
-  public static ConnectionList getDefault(boolean initialize)
-  {
-    if (initialize)
-    {
-      return getDefault();
-    }
-    else
-    {
-      return DEFAULT;
-    }
-  }
-
-  public static synchronized ConnectionList getDefault()
-  {
-    if (DEFAULT == null)
-    {
-      DEFAULT = new ConnectionList();
-    }
-    return DEFAULT;
-  }
-
-  private ConnectionList()
-  {
-    // issue 75204: forces the DataObject's corresponding to the DatabaseConnection's
-    // to be initialized and held strongly so the same DatabaseConnection is
-    // returns as long as it is held strongly
-    result.allInstances();
-
-    result.addLookupListener(new LookupListener()
-    {
-      public void resultChanged(LookupEvent e)
-      {
-        fireListeners();
-      }
-    });
-  }
-
-  public DatabaseConnection[] getConnections()
-  {
-    Collection<? extends DatabaseConnection> dbconns = result.allInstances();
-    return dbconns.toArray(new DatabaseConnection[dbconns.size()]);
-  }
-
-  public DatabaseConnection getConnection(DatabaseConnection impl)
-  {
-    if (impl == null)
-    {
-      throw new NullPointerException();
-    }
-    DatabaseConnection[] dbconns = getConnections();
-    for (int i = 0; i < dbconns.length; i++)
-    {
-      if (impl.equals(dbconns[i]))
-      {
-        return dbconns[i];
-      }
-    }
-    return null;
-  }
-
-  public void add(DatabaseConnection dbconn) throws DatabaseException
-  {
-    if (dbconn == null)
-    {
-      throw new NullPointerException();
-    }
-
-    if (contains(dbconn))
-    {
-      throw new DatabaseException(NbBundle.getMessage(ConnectionList.class, "EXC_ConnectionAlreadyExists")); // NOI18N
-    }
-
-    try
-    {
-      DatabaseConnectionConvertor.create(dbconn);
-    }
-    catch (IOException e)
-    {
-      throw new DatabaseException(e);
-    }
-  }
-
-  public boolean contains(DatabaseConnection dbconn)
-  {
-    return getConnection(dbconn) != null;
-  }
-
-  public void remove(DatabaseConnection dbconn) throws DatabaseException
-  {
-    if (dbconn == null)
-    {
-      throw new NullPointerException();
-    }
-    try
-    {
-      DatabaseConnectionConvertor.remove(dbconn);
-    }
-    catch (IOException e)
-    {
-      throw new DatabaseException(e);
-    }
-  }
-
-  public void addConnectionListener(ConnectionListener listener)
-  {
-    listeners.add(listener);
-  }
-
-  public void removeConnectionListener(ConnectionListener listener)
-  {
-    listeners.remove(listener);
-  }
-
-  /**
-   * Fire change event. Check whether the list of connections has changed
-   * since the last invocation of this method. If it has not changed,
-   * listeners are not notified.
-   */
-  private void fireListeners()
-  {
-    boolean theSame;
-    DatabaseConnection[] connections = getConnections();
-    synchronized (this)
-    {
-      if (connections.length == lastKnownConnections.size())
-      {
-        theSame = true;
-        for (int i = 0; i < connections.length; i++)
-        {
-          if (!lastKnownConnections.containsKey(connections[i]))
-          {
-            theSame = false;
-            break;
-          }
+    public static ConnectionList getDefault(boolean initialize) {
+        if (initialize) {
+            return getDefault();
+        } else {
+            return DEFAULT;
         }
-      }
-      else
-      {
-        theSame = false;
-      }
-      if (theSame)
-      {
-        return;
-      }
-      else
-      {
-        lastKnownConnections.clear();
-        for (DatabaseConnection dc : connections)
-        {
-          lastKnownConnections.put(dc, Boolean.TRUE);
-        }
-      }
     }
-    for (ConnectionListener listener : listeners)
-    {
-      listener.connectionsChanged();
-    }
-  }
 
-  private synchronized Lookup.Result<DatabaseConnection> getLookupResult()
-  {
-    return Lookups.forPath(DatabaseConnectionConvertor.CONNECTIONS_PATH).lookupResult(DatabaseConnection.class);
-  }
+    public static synchronized ConnectionList getDefault() {
+        if (DEFAULT == null) {
+            DEFAULT = new ConnectionList();
+        }
+        return DEFAULT;
+    }
+
+    private ConnectionList() {
+        // issue 75204: forces the DataObject's corresponding to the DatabaseConnection's
+        // to be initialized and held strongly so the same DatabaseConnection is
+        // returns as long as it is held strongly
+        result.allInstances();
+
+        result.addLookupListener(new LookupListener() {
+            public void resultChanged(LookupEvent e) {
+                fireListeners();
+            }
+        });
+    }
+
+    public DatabaseConnection[] getConnections() {
+        Collection<? extends DatabaseConnection> dbconns = result.allInstances();
+        return dbconns.toArray(new DatabaseConnection[dbconns.size()]);
+    }
+
+    public DatabaseConnection getConnection(DatabaseConnection impl) {
+        if (impl == null) {
+            throw new NullPointerException();
+        }
+        DatabaseConnection[] dbconns = getConnections();
+        for (int i = 0; i < dbconns.length; i++) {
+            if (impl.equals(dbconns[i])) {
+                return dbconns[i];
+            }
+        }
+        return null;
+    }
+
+    public void add(DatabaseConnection dbconn) throws DatabaseException {
+        if (dbconn == null) {
+            throw new NullPointerException();
+        }
+
+        if (contains(dbconn)) {
+            throw new DatabaseException(NbBundle.getMessage (ConnectionList.class, "EXC_ConnectionAlreadyExists")); // NOI18N
+        }
+
+        try {
+            DatabaseConnectionConvertor.create(dbconn);
+        } catch (IOException e) {
+            throw new DatabaseException(e);
+        }
+    }
+
+    public boolean contains(DatabaseConnection dbconn) {
+        return getConnection(dbconn) != null;
+    }
+
+    public void remove(DatabaseConnection dbconn) throws DatabaseException {
+        if (dbconn == null) {
+            throw new NullPointerException();
+        }
+        try {
+            DatabaseConnectionConvertor.remove(dbconn);
+        } catch (IOException e) {
+            throw new DatabaseException(e);
+        }
+    }
+
+    public void addConnectionListener(ConnectionListener listener) {
+        listeners.add(listener);
+    }
+
+    public void removeConnectionListener(ConnectionListener listener) {
+        listeners.remove(listener);
+    }
+
+    /**
+     * Fire change event. Check whether the list of connections has changed
+     * since the last invocation of this method. If it has not changed,
+     * listeners are not notified.
+     */
+    private void fireListeners() {
+        boolean theSame;
+        DatabaseConnection[] connections = getConnections();
+        synchronized (this) {
+            if (connections.length == lastKnownConnections.size()) {
+                theSame = true;
+                for (int i = 0; i < connections.length; i++) {
+                    if (!lastKnownConnections.containsKey(connections[i])) {
+                        theSame = false;
+                        break;
+                    }
+                }
+            } else {
+                theSame = false;
+            }
+            if (theSame) {
+                return;
+            } else {
+                lastKnownConnections.clear();
+                for (DatabaseConnection dc : connections) {
+                    lastKnownConnections.put(dc, Boolean.TRUE);
+                }
+            }
+        }
+        for (ConnectionListener listener : listeners) {
+            listener.connectionsChanged();
+        }
+    }
+
+    private synchronized Lookup.Result<DatabaseConnection> getLookupResult() {
+        return Lookups.forPath(DatabaseConnectionConvertor.CONNECTIONS_PATH).lookupResult(DatabaseConnection.class);
+    }
 }

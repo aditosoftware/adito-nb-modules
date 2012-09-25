@@ -44,551 +44,483 @@
 
 package org.netbeans.modules.db.explorer;
 
-import org.openide.cookies.InstanceCookie;
-import org.openide.filesystems.*;
-import org.openide.filesystems.FileSystem;
-import org.openide.loaders.*;
-import org.openide.util.*;
-import org.openide.util.lookup.*;
-import org.openide.xml.*;
-import org.xml.sax.*;
-import org.xml.sax.helpers.DefaultHandler;
-
-import java.beans.*;
-import java.io.*;
-import java.lang.ref.*;
-import java.nio.*;
-import java.nio.charset.*;
-import java.util.*;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
+import java.lang.ref.Reference;
+import java.lang.ref.WeakReference;
+import java.nio.ByteBuffer;
+import java.nio.CharBuffer;
+import java.nio.charset.CharacterCodingException;
+import java.nio.charset.Charset;
+import java.nio.charset.CharsetDecoder;
+import java.nio.charset.CoderResult;
+import java.util.LinkedList;
+import java.util.Map;
+import java.util.WeakHashMap;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.logging.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import org.openide.cookies.InstanceCookie;
+import org.openide.filesystems.FileLock;
+import org.openide.filesystems.FileObject;
+import org.openide.filesystems.FileSystem;
+import org.openide.filesystems.FileUtil;
+import org.openide.loaders.Environment;
+import org.openide.loaders.DataFolder;
+import org.openide.loaders.DataObject;
+import org.openide.loaders.MultiDataObject;
+import org.openide.loaders.XMLDataObject;
+import org.openide.util.RequestProcessor;
+import org.openide.util.Lookup;
+import org.openide.util.WeakListeners;
+import org.openide.util.lookup.AbstractLookup;
+import org.openide.util.lookup.InstanceContent;
+import org.openide.xml.EntityCatalog;
+import org.openide.xml.XMLUtil;
+import org.xml.sax.Attributes;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
+import org.xml.sax.XMLReader;
+import org.xml.sax.helpers.DefaultHandler;
 
 /**
  * Reads and writes the database connection registration format.
  *
  * @author Radko Najman, Andrei Badea, Jiri Rechtacek
  */
-public class DatabaseConnectionConvertor implements Environment.Provider, InstanceCookie.Of
-{
+public class DatabaseConnectionConvertor implements Environment.Provider, InstanceCookie.Of {
+    
+    /**
+     * The path where the connections are registered in the SystemFileSystem.
+     */
+    public static final String CONNECTIONS_PATH = "Databases/Connections"; // NOI18N
+    
+    public static final Logger LOGGER = 
+            Logger.getLogger(DatabaseConnectionConvertor.class.getName());
 
-  /**
-   * The path where the connections are registered in the SystemFileSystem.
-   */
-  public static final String CONNECTIONS_PATH = "Databases/Connections"; // NOI18N
+    private static final RequestProcessor RP = new RequestProcessor(DatabaseConnectionConvertor.class);
+    
+    /**
+     * The delay by which the write of the changes is postponed.
+     */
+    private static final int DELAY = 2000;
+    
+    // Ensures DO's created for newly registered connections cannot be garbage-collected
+    // before they are recognized by FolderLookup. This makes sure the FolderLookup
+    // will return the originally registered connection instance.
+    private static final WeakHashMap<DatabaseConnection, DataObject> newConn2DO = new WeakHashMap<DatabaseConnection, DataObject>();
 
-  public static final Logger LOGGER =
-      Logger.getLogger(DatabaseConnectionConvertor.class.getName());
-
-  private static final RequestProcessor RP = new RequestProcessor(DatabaseConnectionConvertor.class);
-
-  /**
-   * The delay by which the write of the changes is postponed.
-   */
-  private static final int DELAY = 2000;
-
-  // Ensures DO's created for newly registered connections cannot be garbage-collected
-  // before they are recognized by FolderLookup. This makes sure the FolderLookup
-  // will return the originally registered connection instance.
-  private static final WeakHashMap<DatabaseConnection, DataObject> newConn2DO = new WeakHashMap<DatabaseConnection, DataObject>();
-
-  // Helps ensure that when recognizing a new DO for a newly registered connection,
-  // the DO will hold the originally registered connection instance instead of creating a new one.
-  private static final Map<FileObject, DatabaseConnection> newFile2Conn = new ConcurrentHashMap<FileObject, DatabaseConnection>();
-
-  private final Reference<XMLDataObject> holder;
-
-  /**
-   * The lookup provided through Environment.Provider.
-   */
-  private Lookup lookup = null;
-
-  private Reference<DatabaseConnection> refConnection = new WeakReference<DatabaseConnection>(null);
-
-  private PCL listener;
-
-  // a essential method for testing DB Explorer, don't remove it.
-  private static DatabaseConnectionConvertor createProvider()
-  {
-    return new DatabaseConnectionConvertor();
-  }
-
-  private DatabaseConnectionConvertor()
-  {
-    holder = new WeakReference<XMLDataObject>(null);
-  }
-
-  @SuppressWarnings("LeakingThisInConstructor")
-  private DatabaseConnectionConvertor(XMLDataObject object)
-  {
-    holder = new WeakReference<XMLDataObject>(object);
-    InstanceContent cookies = new InstanceContent();
-    cookies.add(this);
-    lookup = new AbstractLookup(cookies);
-  }
-
-  private DatabaseConnectionConvertor(XMLDataObject object, DatabaseConnection existingInstance)
-  {
-    this(object);
-    refConnection = new WeakReference<DatabaseConnection>(existingInstance);
-    attachListener();
-  }
-
-  // Environment.Provider methods
-
-  @Override
-  public Lookup getEnvironment(DataObject obj)
-  {
-    DatabaseConnection existingInstance = newFile2Conn.remove(obj.getPrimaryFile());
-    if (existingInstance != null)
-    {
-      return new DatabaseConnectionConvertor((XMLDataObject) obj, existingInstance).getLookup();
-    }
-    else
-    {
-      return new DatabaseConnectionConvertor((XMLDataObject) obj).getLookup();
-    }
-  }
-
-  // InstanceCookie.Of methods
-
-  @Override
-  public String instanceName()
-  {
-    XMLDataObject obj = getHolder();
-    return obj == null ? "" : obj.getName();
-  }
-
-  @Override
-  public Class<DatabaseConnection> instanceClass()
-  {
-    return DatabaseConnection.class;
-  }
-
-  @Override
-  public boolean instanceOf(Class<?> type)
-  {
-    return (type.isAssignableFrom(DatabaseConnection.class));
-  }
-
-  @Override
-  public Object instanceCreate() throws java.io.IOException, ClassNotFoundException
-  {
-    synchronized (this)
-    {
-      Object o = refConnection.get();
-      if (o != null)
-      {
-        return o;
-      }
-
-      XMLDataObject obj = getHolder();
-      if (obj == null)
-      {
-        return null;
-      }
-      FileObject connectionFO = obj.getPrimaryFile();
-      Handler handler = new Handler(connectionFO.getNameExt());
-      try
-      {
-        XMLReader reader = XMLUtil.createXMLReader();
-        InputSource is = new InputSource(obj.getPrimaryFile().getInputStream());
-        is.setSystemId(connectionFO.getURL().toExternalForm());
-        reader.setContentHandler(handler);
-        reader.setErrorHandler(handler);
-        reader.setEntityResolver(EntityCatalog.getDefault());
-
-        reader.parse(is);
-      }
-      catch (SAXException ex)
-      {
-        Exception x = ex.getException();
-        LOGGER.log(Level.FINE, "Cannot read " + obj + ". Cause: " + ex.getLocalizedMessage(), ex);
-        if (x instanceof java.io.IOException)
-          throw (IOException) x;
-        else
-          throw new java.io.IOException(ex.getMessage());
-      }
-
-      DatabaseConnection inst = createDatabaseConnection(handler);
-      refConnection = new WeakReference<DatabaseConnection>(inst);
-      attachListener();
-      return inst;
-    }
-  }
-
-  private XMLDataObject getHolder()
-  {
-    return holder.get();
-  }
-
-  private void attachListener()
-  {
-    listener = new PCL();
-    DatabaseConnection dbconn = (refConnection.get());
-    dbconn.addPropertyChangeListener(WeakListeners.propertyChange(listener, dbconn));
-  }
-
-  private static DatabaseConnection createDatabaseConnection(Handler handler)
-  {
-    DatabaseConnection dbconn = new DatabaseConnection(
-        handler.driverClass,
-        handler.driverName,
-        handler.connectionUrl,
-        handler.schema,
-        handler.user);
-    dbconn.setConnectionFileName(handler.connectionFileName);
-    if (handler.displayName != null)
-    {
-      dbconn.setDisplayName(handler.displayName);
-    }
-    LOGGER.fine("Created DatabaseConnection[" + dbconn.toString() + "] from file: " + handler.connectionFileName);
-
-    return dbconn;
-  }
-
-  /**
-   * Creates the XML file describing the specified database connection.
-   */
-  public static DataObject create(DatabaseConnection dbconn) throws IOException
-  {
-    FileObject fo = FileUtil.getConfigFile(CONNECTIONS_PATH);
-    DataFolder df = DataFolder.findFolder(fo);
-
-    AtomicWriter writer = new AtomicWriter(dbconn, df, convertToFileName(dbconn.getName()));
-    df.getPrimaryFile().getFileSystem().runAtomicAction(writer);
-    return writer.holder;
-  }
-
-  private static String convertToFileName(String databaseURL)
-  {
-    return databaseURL.substring(0, Math.min(32, databaseURL.length())).replaceAll("[^\\p{Alnum}]", "_"); // NOI18N
-  }
-
-  /**
-   * Removes the file describing the specified database connection.
-   */
-  public static void remove(DatabaseConnection dbconn) throws IOException
-  {
-    String name = dbconn.getName();
-    FileObject fo = FileUtil.getConfigFile(CONNECTIONS_PATH); //NOI18N
-    DataFolder folder = DataFolder.findFolder(fo);
-    DataObject[] objects = folder.getChildren();
-
-    for (int i = 0; i < objects.length; i++)
-    {
-      InstanceCookie ic = objects[i].getCookie(InstanceCookie.class);
-      if (ic != null)
-      {
-        Object obj = null;
-        try
-        {
-          obj = ic.instanceCreate();
-        }
-        catch (ClassNotFoundException e)
-        {
-          continue;
-        }
-        if (obj instanceof DatabaseConnection)
-        {
-          DatabaseConnection connection = (DatabaseConnection) obj;
-          if (connection.getName().equals(name))
-          {
-            objects[i].delete();
-            break;
-          }
-        }
-      }
-    }
-  }
-
-  Lookup getLookup()
-  {
-    return lookup;
-  }
-
-  static String decodePassword(byte[] bytes) throws CharacterCodingException
-  {
-    CharsetDecoder decoder = Charset.forName("UTF-8").newDecoder(); // NOI18N
-    ByteBuffer input = ByteBuffer.wrap(bytes);
-    int outputLength = (int) (bytes.length * (double) decoder.maxCharsPerByte());
-    if (outputLength == 0)
-    {
-      return ""; // NOI18N
-    }
-    char[] chars = new char[outputLength];
-    CharBuffer output = CharBuffer.wrap(chars);
-    CoderResult result = decoder.decode(input, output, true);
-    if (!result.isError() && !result.isOverflow())
-    {
-      result = decoder.flush(output);
-    }
-    if (result.isError() || result.isOverflow())
-    {
-      throw new CharacterCodingException();
-    }
-    else
-    {
-      return new String(chars, 0, output.position());
-    }
-  }
-
-  /**
-   * Atomic writer for writing a changed/new database connection.
-   */
-  private static final class AtomicWriter implements FileSystem.AtomicAction
-  {
-
-    DatabaseConnection instance;
-    MultiDataObject holder;
-    String fileName;
-    DataFolder parent;
+    // Helps ensure that when recognizing a new DO for a newly registered connection,
+    // the DO will hold the originally registered connection instance instead of creating a new one.
+    private static final Map<FileObject, DatabaseConnection> newFile2Conn = new ConcurrentHashMap<FileObject, DatabaseConnection>();
+    
+    private final Reference<XMLDataObject> holder;
 
     /**
-     * Constructor for writing to an existing file.
+     * The lookup provided through Environment.Provider.
      */
-    AtomicWriter(DatabaseConnection instance, MultiDataObject holder)
-    {
-      this.instance = instance;
-      this.holder = holder;
-      this.fileName = holder.getPrimaryFile().getNameExt();
+    private Lookup lookup = null;
+
+    private Reference<DatabaseConnection> refConnection = new WeakReference<DatabaseConnection>(null);
+    
+    private PCL listener;
+
+    // a essential method for testing DB Explorer, don't remove it.
+    private static DatabaseConnectionConvertor createProvider() {
+        return new DatabaseConnectionConvertor();
+    }
+    
+    private DatabaseConnectionConvertor() {
+        holder = new WeakReference<XMLDataObject>(null);
+    }
+
+    @SuppressWarnings("LeakingThisInConstructor")
+    private DatabaseConnectionConvertor(XMLDataObject object) {
+        holder = new WeakReference<XMLDataObject>(object);
+        InstanceContent cookies = new InstanceContent();
+        cookies.add(this);
+        lookup = new AbstractLookup(cookies);
+    }
+    
+    private DatabaseConnectionConvertor(XMLDataObject object, DatabaseConnection existingInstance) {
+        this(object);
+        refConnection = new WeakReference<DatabaseConnection>(existingInstance);
+        attachListener();
+    }
+    
+    // Environment.Provider methods
+    
+    @Override
+    public Lookup getEnvironment(DataObject obj) {
+        DatabaseConnection existingInstance = newFile2Conn.remove(obj.getPrimaryFile());
+        if (existingInstance != null) {
+            return new DatabaseConnectionConvertor((XMLDataObject)obj, existingInstance).getLookup();
+        } else {
+            return new DatabaseConnectionConvertor((XMLDataObject)obj).getLookup();
+        }
+    }
+    
+    // InstanceCookie.Of methods
+
+    @Override
+    public String instanceName() {
+        XMLDataObject obj = getHolder();
+        return obj == null ? "" : obj.getName();
+    }
+    
+    @Override
+    public Class<DatabaseConnection> instanceClass() {
+        return DatabaseConnection.class;
+    }
+    
+    @Override
+    public boolean instanceOf(Class<?> type) {
+        return (type.isAssignableFrom(DatabaseConnection.class));
+    }
+
+    @Override
+    public Object instanceCreate() throws java.io.IOException, ClassNotFoundException {
+        synchronized (this) {
+            Object o = refConnection.get();
+            if (o != null) {
+                return o;
+            }
+
+            XMLDataObject obj = getHolder();
+            if (obj == null) {
+                return null;
+            }
+            FileObject connectionFO = obj.getPrimaryFile();
+            Handler handler = new Handler(connectionFO.getNameExt());
+            try {
+                XMLReader reader = XMLUtil.createXMLReader();
+                InputSource is = new InputSource(obj.getPrimaryFile().getInputStream());
+                is.setSystemId(connectionFO.getURL().toExternalForm());
+                reader.setContentHandler(handler);
+                reader.setErrorHandler(handler);
+                reader.setEntityResolver(EntityCatalog.getDefault());
+
+                reader.parse(is);
+            } catch (SAXException ex) {
+                Exception x = ex.getException();
+                LOGGER.log(Level.FINE, "Cannot read " + obj + ". Cause: " + ex.getLocalizedMessage(), ex);
+                if (x instanceof java.io.IOException)
+                    throw (IOException)x;
+                else
+                    throw new java.io.IOException(ex.getMessage());
+            }
+
+            DatabaseConnection inst = createDatabaseConnection(handler);
+            refConnection = new WeakReference<DatabaseConnection>(inst);
+            attachListener();
+            return inst;
+        }
+    }
+    
+    private XMLDataObject getHolder() {
+        return holder.get();
+    }
+
+    private void attachListener() {
+        listener = new PCL();
+        DatabaseConnection dbconn = (refConnection.get());
+        dbconn.addPropertyChangeListener(WeakListeners.propertyChange(listener, dbconn));
+    }
+
+    private static DatabaseConnection createDatabaseConnection(Handler handler) {
+        DatabaseConnection dbconn = new DatabaseConnection(
+                handler.driverClass, 
+                handler.driverName,
+                handler.connectionUrl,
+                handler.schema,
+                handler.user);
+        dbconn.setConnectionFileName(handler.connectionFileName);
+        if (handler.displayName != null) {
+            dbconn.setDisplayName(handler.displayName);
+        }
+        LOGGER.fine("Created DatabaseConnection[" + dbconn.toString() + "] from file: " + handler.connectionFileName);
+
+        return dbconn;
     }
 
     /**
-     * Constructor for creating a new file.
+     * Creates the XML file describing the specified database connection.
      */
-    AtomicWriter(DatabaseConnection instance, DataFolder parent, String fileName)
-    {
-      this.instance = instance;
-      this.fileName = fileName;
-      this.parent = parent;
+    public static DataObject create(DatabaseConnection dbconn) throws IOException {
+        FileObject fo = FileUtil.getConfigFile(CONNECTIONS_PATH);
+        DataFolder df = DataFolder.findFolder(fo);
+
+        AtomicWriter writer = new AtomicWriter(dbconn, df, convertToFileName(dbconn.getName()));
+        df.getPrimaryFile().getFileSystem().runAtomicAction(writer);
+        return writer.holder;
     }
-
-    @Override
-    public void run() throws java.io.IOException
-    {
-      FileLock lck;
-      FileObject data;
-
-      if (holder != null)
-      {
-        data = holder.getPrimaryEntry().getFile();
-        lck = holder.getPrimaryEntry().takeLock();
-      }
-      else
-      {
-        FileObject folder = parent.getPrimaryFile();
-        String fn = FileUtil.findFreeFileName(folder, fileName, "xml"); //NOI18N
-        data = folder.createData(fn, "xml"); //NOI18N
-        lck = data.lock();
-      }
-
-      try
-      {
-        OutputStream ostm = data.getOutputStream(lck);
-        PrintWriter writer = new PrintWriter(new OutputStreamWriter(ostm, "UTF8")); //NOI18N
-        write(writer, data.getNameExt());
-        writer.flush();
-        writer.close();
-        ostm.close();
-      }
-      finally
-      {
-        lck.releaseLock();
-      }
-
-      if (holder == null)
-      {
-        newFile2Conn.put(data, instance);
-        holder = (MultiDataObject) DataObject.find(data);
-        // ensure the Environment.Provider.getEnvironment() is called for the new DataObject
-        holder.getCookie(InstanceCookie.class);
-        newConn2DO.put(instance, holder);
-      }
+    
+    private static String convertToFileName(String databaseURL) {
+        return databaseURL.substring(0, Math.min(32, databaseURL.length())).replaceAll("[^\\p{Alnum}]", "_"); // NOI18N
     }
-
-    void write(PrintWriter pw, String name) throws IOException
-    {
-      pw.println("<?xml version='1.0'?>"); //NOI18N
-      pw.println("<!DOCTYPE connection PUBLIC '-//NetBeans//DTD Database Connection 1.1//EN' 'http://www.netbeans.org/dtds/connection-1_1.dtd'>"); //NOI18N
-      pw.println("<connection>"); //NOI18N
-      pw.println("  <driver-class value='" + XMLUtil.toAttributeValue(instance.getDriver()) + "'/>"); //NOI18N
-      pw.println("  <driver-name value='" + XMLUtil.toAttributeValue(instance.getDriverName()) + "'/>"); // NOI18N
-      pw.println("  <database-url value='" + XMLUtil.toAttributeValue(instance.getDatabase()) + "'/>"); //NOI18N
-      if (instance.getSchema() != null)
-      {
-        pw.println("  <schema value='" + XMLUtil.toAttributeValue(instance.getSchema()) + "'/>"); //NOI18N
-      }
-      if (instance.getUser() != null)
-      {
-        pw.println("  <user value='" + XMLUtil.toAttributeValue(instance.getUser()) + "'/>"); //NOI18N
-      }
-      if (!instance.getName().equals(instance.getDisplayName()))
-      {
-        pw.println("  <display-name value='" + XMLUtil.toAttributeValue(instance.getDisplayName()) + "'/>"); //NOI18N
-      }
-      if (instance.rememberPassword())
-      {
-        char[] password = instance.getPassword() == null ? new char[0] : instance.getPassword().toCharArray();
-
-        DatabaseConnection.storePassword(name, password);
-      }
-      else
-      {
-        DatabaseConnection.deletePassword(name);
-      }
-      pw.println("</connection>"); //NOI18N
-    }
-  }
-
-  /**
-   * SAX handler for reading the XML file.
-   */
-  private static final class Handler extends DefaultHandler
-  {
-
-    private static final String ELEMENT_DRIVER_CLASS = "driver-class"; // NOI18N
-    private static final String ELEMENT_DRIVER_NAME = "driver-name"; // NOI18N
-    private static final String ELEMENT_DATABASE_URL = "database-url"; // NOI18N
-    private static final String ELEMENT_SCHEMA = "schema"; // NOI18N
-    private static final String ELEMENT_USER = "user"; // NOI18N
-    private static final String ELEMENT_PASSWORD = "password"; // NOI18N
-    private static final String ELEMENT_DISPLAY_NAME = "display-name"; // NOI18N
-    private static final String ATTR_PROPERTY_VALUE = "value"; // NOI18N
-
-    final String connectionFileName;
-
-    String driverClass;
-    String driverName;
-    String connectionUrl;
-    String schema;
-    String user;
-    String displayName;
-
-    public Handler(String connectionFileName)
-    {
-      this.connectionFileName = connectionFileName;
-    }
-
-    @Override
-    public void startDocument() throws SAXException
-    {
-    }
-
-    @Override
-    public void endDocument() throws SAXException
-    {
-    }
-
-    @Override
-    @SuppressWarnings("deprecation") // Backward compatibility
-    public void startElement(String uri, String localName, String qName, Attributes attrs) throws SAXException
-    {
-      String value = attrs.getValue(ATTR_PROPERTY_VALUE);
-      if (ELEMENT_DRIVER_CLASS.equals(qName))
-      {
-        driverClass = value;
-      }
-      else if (ELEMENT_DRIVER_NAME.equals(qName))
-      {
-        driverName = value;
-      }
-      else if (ELEMENT_DATABASE_URL.equals(qName))
-      {
-        connectionUrl = value;
-      }
-      else if (ELEMENT_SCHEMA.equals(qName))
-      {
-        schema = value;
-      }
-      else if (ELEMENT_USER.equals(qName))
-      {
-        user = value;
-      }
-      else if (ELEMENT_DISPLAY_NAME.equals(qName))
-      {
-        displayName = value;
-      }
-      else if (ELEMENT_PASSWORD.equals(qName))
-      {
-        // reading old settings
-        byte[] bytes = null;
-        try
-        {
-          bytes = org.netbeans.modules.db.util.Base64.base64ToByteArray(value);
+    
+    /**
+     * Removes the file describing the specified database connection.
+     */
+    public static void remove(DatabaseConnection dbconn) throws IOException {
+        String name = dbconn.getName();
+        FileObject fo = FileUtil.getConfigFile(CONNECTIONS_PATH); //NOI18N
+        DataFolder folder = DataFolder.findFolder(fo);
+        DataObject[] objects = folder.getChildren();
+        
+        for (int i = 0; i < objects.length; i++) {
+            InstanceCookie ic = objects[i].getCookie(InstanceCookie.class);
+            if (ic != null) {
+                Object obj = null;
+                try {
+                    obj = ic.instanceCreate();
+                } catch (ClassNotFoundException e) {
+                    continue;
+                }
+                if (obj instanceof DatabaseConnection) {
+                    DatabaseConnection connection = (DatabaseConnection)obj;
+                    if (connection.getName().equals(name)) {
+                        objects[i].delete();
+                        break;
+                    }
+                }
+            }
         }
-        catch (IllegalArgumentException e)
-        {
-          LOGGER.log(Level.WARNING,
-                     "Illegal Base 64 string in password for connection "
-                         + connectionFileName + ", cause: " + e); // NOI18N
-
-          // no password stored => this will require the user to re-enter the password
-        }
-        if (bytes != null)
-        {
-          try
-          {
-            LOGGER.log(Level.FINE, "Reading old settings from " + connectionFileName);
-            DatabaseConnection.storePassword(connectionFileName, decodePassword(bytes).toCharArray());
-          }
-          catch (CharacterCodingException e)
-          {
-            LOGGER.log(Level.WARNING,
-                       "Illegal UTF-8 bytes in password for connection "
-                           + connectionFileName + ", cause: " + e); // NOI18N
-            // no password stored => this will require the user to re-enter the password
-          }
-        }
-      }
     }
-  }
+    
+    Lookup getLookup() {
+        return lookup;
+    }
+    
+    static String decodePassword(byte[] bytes) throws CharacterCodingException {
+        CharsetDecoder decoder = Charset.forName("UTF-8").newDecoder(); // NOI18N
+        ByteBuffer input = ByteBuffer.wrap(bytes);
+        int outputLength = (int)(bytes.length * (double)decoder.maxCharsPerByte());
+        if (outputLength == 0) {
+            return ""; // NOI18N
+        }
+        char[] chars = new char[outputLength];
+        CharBuffer output = CharBuffer.wrap(chars);
+        CoderResult result = decoder.decode(input, output, true);
+        if (!result.isError() && !result.isOverflow()) {
+            result = decoder.flush(output);
+        }
+        if (result.isError() || result.isOverflow()) {
+            throw new CharacterCodingException();
+        } else {
+            return new String(chars, 0, output.position());
+        }
+    }
+    
+    /**
+     * Atomic writer for writing a changed/new database connection.
+     */
+    private static final class AtomicWriter implements FileSystem.AtomicAction {
+        
+        DatabaseConnection instance;
+        MultiDataObject holder;
+        String fileName;
+        DataFolder parent;
 
-  private final class PCL implements PropertyChangeListener, Runnable
-  {
+        /**
+         * Constructor for writing to an existing file.
+         */
+        AtomicWriter(DatabaseConnection instance, MultiDataObject holder) {
+            this.instance = instance;
+            this.holder = holder;
+            this.fileName = holder.getPrimaryFile().getNameExt();
+        }
+
+        /**
+         * Constructor for creating a new file.
+         */
+        AtomicWriter(DatabaseConnection instance, DataFolder parent, String fileName) {
+            this.instance = instance;
+            this.fileName = fileName;
+            this.parent = parent;
+        }
+
+        @Override
+        public void run() throws java.io.IOException {
+            FileLock lck;
+            FileObject data;
+
+            if (holder != null) {
+                data = holder.getPrimaryEntry().getFile();
+                lck = holder.getPrimaryEntry().takeLock();
+            } else {
+                FileObject folder = parent.getPrimaryFile();
+                String fn = FileUtil.findFreeFileName(folder, fileName, "xml"); //NOI18N
+                data = folder.createData(fn, "xml"); //NOI18N
+                lck = data.lock();
+            }
+
+            try {
+                OutputStream ostm = data.getOutputStream(lck);
+                PrintWriter writer = new PrintWriter(new OutputStreamWriter(ostm, "UTF8")); //NOI18N
+                write(writer, data.getNameExt());
+                writer.flush();
+                writer.close();
+                ostm.close();
+            } finally {
+                lck.releaseLock();
+            }
+
+            if (holder == null) {
+                newFile2Conn.put(data, instance);
+                holder = (MultiDataObject)DataObject.find(data);
+                // ensure the Environment.Provider.getEnvironment() is called for the new DataObject
+                holder.getCookie(InstanceCookie.class);
+                newConn2DO.put(instance, holder);
+            }
+        }
+
+        void write(PrintWriter pw, String name) throws IOException {
+            pw.println("<?xml version='1.0'?>"); //NOI18N
+            pw.println("<!DOCTYPE connection PUBLIC '-//NetBeans//DTD Database Connection 1.1//EN' 'http://www.netbeans.org/dtds/connection-1_1.dtd'>"); //NOI18N
+            pw.println("<connection>"); //NOI18N
+            pw.println("  <driver-class value='" + XMLUtil.toAttributeValue(instance.getDriver()) + "'/>"); //NOI18N
+            pw.println("  <driver-name value='" + XMLUtil.toAttributeValue(instance.getDriverName()) + "'/>"); // NOI18N
+            pw.println("  <database-url value='" + XMLUtil.toAttributeValue(instance.getDatabase()) + "'/>"); //NOI18N
+            if (instance.getSchema() != null) {
+                pw.println("  <schema value='" + XMLUtil.toAttributeValue(instance.getSchema()) + "'/>"); //NOI18N
+            }
+            if (instance.getUser() != null) {
+                pw.println("  <user value='" + XMLUtil.toAttributeValue(instance.getUser()) + "'/>"); //NOI18N
+            }
+            if (!instance.getName().equals(instance.getDisplayName())) {
+                pw.println("  <display-name value='" + XMLUtil.toAttributeValue(instance.getDisplayName()) + "'/>"); //NOI18N
+            }
+            if (instance.rememberPassword() ) {
+                char[] password = instance.getPassword() == null ? new char[0] : instance.getPassword().toCharArray();
+                
+                DatabaseConnection.storePassword(name, password);
+            } else {
+                DatabaseConnection.deletePassword(name);
+            }
+            pw.println("</connection>"); //NOI18N
+        }        
+    }
 
     /**
-     * The list of PropertyChangeEvent that cause the connections to be saved.
-     * Should probably be a set of DatabaseConnection's instead.
+     * SAX handler for reading the XML file.
      */
-    LinkedList<PropertyChangeEvent> keepAlive = new LinkedList<PropertyChangeEvent>();
+    private static final class Handler extends DefaultHandler {
+        
+        private static final String ELEMENT_DRIVER_CLASS = "driver-class"; // NOI18N
+        private static final String ELEMENT_DRIVER_NAME = "driver-name"; // NOI18N
+        private static final String ELEMENT_DATABASE_URL = "database-url"; // NOI18N
+        private static final String ELEMENT_SCHEMA = "schema"; // NOI18N
+        private static final String ELEMENT_USER = "user"; // NOI18N
+        private static final String ELEMENT_PASSWORD = "password"; // NOI18N
+        private static final String ELEMENT_DISPLAY_NAME = "display-name"; // NOI18N
+        private static final String ATTR_PROPERTY_VALUE = "value"; // NOI18N
+        
+        final String connectionFileName;
+        
+        String driverClass;
+        String driverName;
+        String connectionUrl;
+        String schema;
+        String user;
+        String displayName;
+        
+        public Handler(String connectionFileName) {
+            this.connectionFileName = connectionFileName;
+        }
 
-    RequestProcessor.Task saveTask = null;
+        @Override
+        public void startDocument() throws SAXException {
+        }
 
-    @Override
-    public void propertyChange(PropertyChangeEvent evt)
-    {
-      synchronized (this)
-      {
-        if (saveTask == null)
-          saveTask = RP.create(this);
-        keepAlive.add(evt);
-      }
-      saveTask.schedule(DELAY);
+        @Override
+        public void endDocument() throws SAXException {
+        }
+
+        @Override
+        @SuppressWarnings("deprecation") // Backward compatibility
+        public void startElement(String uri, String localName, String qName, Attributes attrs) throws SAXException {
+            String value = attrs.getValue(ATTR_PROPERTY_VALUE);
+            if (ELEMENT_DRIVER_CLASS.equals(qName)) {
+                driverClass = value;
+            } else if (ELEMENT_DRIVER_NAME.equals(qName)) {
+                driverName = value;
+            } else if (ELEMENT_DATABASE_URL.equals(qName)) {
+                connectionUrl = value;
+            } else if (ELEMENT_SCHEMA.equals(qName)) {
+                schema = value;
+            } else if (ELEMENT_USER.equals(qName)) {
+                user = value;
+            } else if (ELEMENT_DISPLAY_NAME.equals(qName)) {
+                displayName = value;
+            } else if (ELEMENT_PASSWORD.equals(qName)) {
+                // reading old settings
+                byte[] bytes = null;
+                try {
+                    bytes = org.netbeans.modules.db.util.Base64.base64ToByteArray(value);
+                } catch (IllegalArgumentException e) {
+                    LOGGER.log(Level.WARNING,
+                            "Illegal Base 64 string in password for connection " 
+                            + connectionFileName + ", cause: " + e); // NOI18N
+                    
+                        // no password stored => this will require the user to re-enter the password
+                }
+                if (bytes != null) {
+                    try {
+                        LOGGER.log(Level.FINE, "Reading old settings from " + connectionFileName);
+                        DatabaseConnection.storePassword(connectionFileName, decodePassword(bytes).toCharArray());
+                    } catch (CharacterCodingException e) {
+                        LOGGER.log(Level.WARNING,
+                                "Illegal UTF-8 bytes in password for connection " 
+                                + connectionFileName + ", cause: " + e); // NOI18N
+                        // no password stored => this will require the user to re-enter the password
+                    }
+                }
+            }
+        }
     }
+    
+    private final class PCL implements PropertyChangeListener, Runnable {
+        
+        /**
+         * The list of PropertyChangeEvent that cause the connections to be saved.
+         * Should probably be a set of DatabaseConnection's instead.
+         */
+        LinkedList<PropertyChangeEvent> keepAlive = new LinkedList<PropertyChangeEvent>();
+        
+        RequestProcessor.Task saveTask = null;
+        
+        @Override
+        public void propertyChange(PropertyChangeEvent evt) {
+            synchronized (this) {
+                if (saveTask == null)
+                    saveTask = RP.create(this);
+                keepAlive.add(evt);
+            }
+            saveTask.schedule(DELAY);
+        }
+        
+        @Override
+        public void run() {
+            PropertyChangeEvent e;
 
-    @Override
-    public void run()
-    {
-      PropertyChangeEvent e;
-
-      synchronized (this)
-      {
-        e = keepAlive.removeFirst();
-      }
-      DatabaseConnection dbconn = (DatabaseConnection) e.getSource();
-      XMLDataObject obj = getHolder();
-      if (obj == null)
-      {
-        return;
-      }
-      try
-      {
-        obj.getPrimaryFile().getFileSystem().runAtomicAction(new AtomicWriter(dbconn, obj));
-      }
-      catch (IOException ex)
-      {
-        Logger.getLogger("global").log(Level.INFO, null, ex);
-      }
+            synchronized (this) {
+                e = keepAlive.removeFirst();
+            }
+            DatabaseConnection dbconn = (DatabaseConnection)e.getSource();
+            XMLDataObject obj = getHolder();
+            if (obj == null) {
+                return;
+            }
+            try {
+                obj.getPrimaryFile().getFileSystem().runAtomicAction(new AtomicWriter(dbconn, obj));
+            } catch (IOException ex) {
+                Logger.getLogger("global").log(Level.INFO, null, ex);
+            }
+        }
     }
-  }
 }

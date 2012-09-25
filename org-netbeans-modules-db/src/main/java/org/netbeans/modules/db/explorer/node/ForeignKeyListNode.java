@@ -42,67 +42,62 @@
 
 package org.netbeans.modules.db.explorer.node;
 
-import org.netbeans.api.db.explorer.node.*;
-import org.openide.util.*;
+import org.netbeans.api.db.explorer.node.BaseNode;
+import org.netbeans.api.db.explorer.node.ChildNodeFactory;
+import org.netbeans.api.db.explorer.node.NodeProvider;
+import org.openide.util.HelpCtx;
+import org.openide.util.NbBundle;
 
 /**
+ *
  * @author Rob Englander
  */
-public class ForeignKeyListNode extends BaseNode
-{
-  private static final String NAME = "Foreign Keys"; // NOI18N
-  private static final String ICONBASE = "org/netbeans/modules/db/resources/folder.gif";
-  private static final String FOLDER = "ForeignKeyList"; //NOI18N
+public class ForeignKeyListNode extends BaseNode {
+    private static final String NAME = "Foreign Keys"; // NOI18N
+    private static final String ICONBASE = "org/netbeans/modules/db/resources/folder.gif";
+    private static final String FOLDER = "ForeignKeyList"; //NOI18N
 
-  /**
-   * Create an instance of ForeignKeyListNode.
-   *
-   * @param dataLookup the lookup to use when creating node providers
-   * @return the ForeignKeyListNode instance
-   */
-  public static ForeignKeyListNode create(NodeDataLookup dataLookup, NodeProvider provider)
-  {
-    ForeignKeyListNode node = new ForeignKeyListNode(dataLookup, provider);
-    node.setup();
-    return node;
-  }
+    /**
+     * Create an instance of ForeignKeyListNode.
+     *
+     * @param dataLookup the lookup to use when creating node providers
+     * @return the ForeignKeyListNode instance
+     */
+    public static ForeignKeyListNode create(NodeDataLookup dataLookup, NodeProvider provider) {
+        ForeignKeyListNode node = new ForeignKeyListNode(dataLookup, provider);
+        node.setup();
+        return node;
+    }
 
-  private ForeignKeyListNode(NodeDataLookup lookup, NodeProvider provider)
-  {
-    super(new ChildNodeFactory(lookup), lookup, FOLDER, provider);
-  }
+    private ForeignKeyListNode(NodeDataLookup lookup, NodeProvider provider) {
+        super(new ChildNodeFactory(lookup), lookup, FOLDER, provider);
+    }
 
-  protected void initialize()
-  {
-  }
+    protected void initialize() {
+    }
 
-  @Override
-  public String getName()
-  {
-    return NAME;
-  }
+    @Override
+    public String getName() {
+        return NAME;
+    }
 
-  @Override
-  public String getDisplayName()
-  {
-    return NbBundle.getMessage(ForeignKeyListNode.class, "ForeignKeyListNode_DISPLAYNAME"); // NOI18N
-  }
+    @Override
+    public String getDisplayName() {
+        return NbBundle.getMessage (ForeignKeyListNode.class, "ForeignKeyListNode_DISPLAYNAME"); // NOI18N
+    }
 
-  @Override
-  public String getIconBase()
-  {
-    return ICONBASE;
-  }
+    @Override
+    public String getIconBase() {
+        return ICONBASE;
+    }
 
-  @Override
-  public String getShortDescription()
-  {
-    return NbBundle.getMessage(ForeignKeyListNode.class, "ND_ForeignKeyList"); //NOI18N
-  }
+    @Override
+    public String getShortDescription() {
+        return NbBundle.getMessage (ForeignKeyListNode.class, "ND_ForeignKeyList"); //NOI18N
+    }
 
-  @Override
-  public HelpCtx getHelpCtx()
-  {
-    return new HelpCtx(ForeignKeyListNode.class);
-  }
+    @Override
+    public HelpCtx getHelpCtx() {
+        return new HelpCtx(ForeignKeyListNode.class);
+    }
 }

@@ -44,116 +44,106 @@
 
 package org.netbeans.api.db.explorer;
 
-import org.netbeans.modules.db.explorer.DbDriverManager;
-
 import java.net.URL;
-import java.sql.*;
+import java.sql.Driver;
+import java.sql.SQLException;
 import java.util.Arrays;
+import org.netbeans.modules.db.explorer.DbDriverManager;
 
 /**
  * Encapsulates a JDBC driver.
  */
-public final class JDBCDriver
-{
+public final class JDBCDriver {
 
-  private URL[] urls;
-  private String clazz;
-  private String displayName;
-  private String name;
+    private URL[] urls;
+    private String clazz;
+    private String displayName;
+    private String name;
 
-  JDBCDriver(String name, String displayName, String clazz, URL[] urls)
-  {
-    assert name != null && displayName != null && clazz != null && urls != null;
-    this.name = name;
-    this.displayName = displayName;
-    this.clazz = clazz;
-    this.urls = urls;
-  }
-
-  /**
-   * Creates a new JDBCDriver instance.
-   *
-   * @param name        the programmatic name of the driver; must not be null.
-   * @param displayName the display name of the driver (used for example to display the driver in the UI); must not be null.
-   * @param clazz       the JDBC driver class; must not be null.
-   * @param urls        the array of the JDBC driver files URLs; must not be null.
-   * @throws NullPointerException if any of the parameters is null.
-   */
-  public static JDBCDriver create(String name, String displayName, String clazz, URL[] urls)
-  {
-    if (name == null || displayName == null || clazz == null || urls == null)
-    {
-      throw new NullPointerException();
+    JDBCDriver(String name, String displayName, String clazz, URL[] urls) {
+        assert name != null && displayName != null && clazz != null && urls != null;
+        this.name = name;
+        this.displayName = displayName;
+        this.clazz = clazz;
+        this.urls = urls;
     }
-    return new JDBCDriver(name, displayName, clazz, urls);
-  }
 
-  /**
-   * Returns the array of the JDBC driver files URLs.
-   *
-   * @return the non-null array of the JDBC driver files URLs.
-   */
-  public URL[] getURLs()
-  {
-    return urls;
-  }
-
-  /**
-   * Returns the JDBC driver class name.
-   *
-   * @return the JDBC driver class name.
-   */
-  public String getClassName()
-  {
-    return clazz;
-  }
-
-  /**
-   * Returns the display name of the driver (used for example to display the driver in the UI).
-   *
-   * @return the display name of the driver.
-   */
-  public String getDisplayName()
-  {
-    return displayName;
-  }
-
-  /**
-   * Return the programmatic driver name.
-   *
-   * @return the programmatic driver name.
-   */
-  public String getName()
-  {
-    return name;
-  }
-
-  /**
-   * Get a reference to the underlying java.sql.Driver for this JDBCDriver.
-   * This can be useful if you want to use the registered drivers to manage
-   * your own JDBC connections independent of the Database Explorer
-   *
-   * @return an instance of the java.sql.Driver for this JDBCDriver
-   * @throws DatabaseException if there was an error trying to get the driver instance
-   * @since 1.28
-   */
-  public Driver getDriver() throws DatabaseException
-  {
-    try
-    {
-      return DbDriverManager.getDefault().getDriver(this);
+    /**
+     * Creates a new JDBCDriver instance.
+     *
+     * @param name the programmatic name of the driver; must not be null.
+     * @param displayName the display name of the driver (used for example to display the driver in the UI); must not be null.
+     * @param clazz the JDBC driver class; must not be null.
+     * @param urls the array of the JDBC driver files URLs; must not be null.
+     * 
+     * @throws NullPointerException if any of the parameters is null.
+     */
+    public static JDBCDriver create(String name, String displayName, String clazz, URL[] urls) {
+        if (name == null || displayName == null || clazz == null || urls == null) {
+            throw new NullPointerException();
+        }
+        return new JDBCDriver(name, displayName, clazz, urls);
     }
-    catch (SQLException sqle)
-    {
-      throw new DatabaseException(sqle);
+    
+    /**
+     * Returns the array of the JDBC driver files URLs.
+     *
+     * @return the non-null array of the JDBC driver files URLs.
+     */
+    public URL[] getURLs() {
+        return urls;
     }
-  }
+    
+    /**
+     * Returns the JDBC driver class name.
+     *
+     * @return the JDBC driver class name.
+     */
+    public String getClassName() {
+        return clazz;
+    }
+    
+    /**
+     * Returns the display name of the driver (used for example to display the driver in the UI).
+     *
+     * @return the display name of the driver.
+     */
+    public String getDisplayName() {
+        return displayName;
+    }
+    
+    /**
+     * Return the programmatic driver name.
+     *
+     * @return the programmatic driver name.
+     */
+    public String getName() {
+        return name;
+    }
 
-  public String toString()
-  {
-    return "JDBCDriver[name='" + name + // NOI18N
-        "',displayName='" + displayName + // NOI18N
-        "',className='" + clazz + // NOI18N
-        "',urls=" + Arrays.asList(urls) + "]"; // NOI18N
-  }
+    /**
+     * Get a reference to the underlying java.sql.Driver for this JDBCDriver.
+     * This can be useful if you want to use the registered drivers to manage
+     * your own JDBC connections independent of the Database Explorer
+     *
+     * @return an instance of the java.sql.Driver for this JDBCDriver
+     *
+     * @throws DatabaseException if there was an error trying to get the driver instance
+     * 
+     * @since 1.28
+     */
+    public Driver getDriver() throws DatabaseException {
+        try {
+            return DbDriverManager.getDefault().getDriver(this);
+        } catch (SQLException sqle) {
+            throw new DatabaseException(sqle);
+        }
+    }
+    
+    public String toString() {
+        return "JDBCDriver[name='" + name + // NOI18N
+                "',displayName='" + displayName + // NOI18N
+                "',className='" + clazz + // NOI18N
+                "',urls=" + Arrays.asList(urls) + "]"; // NOI18N
+    }
 }

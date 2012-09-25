@@ -44,11 +44,19 @@
 
 package org.netbeans.modules.db.explorer;
 
+import java.sql.Connection;
+import java.sql.Driver;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
+import java.util.WeakHashMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.netbeans.api.db.explorer.JDBCDriver;
-
-import java.sql.*;
-import java.util.*;
-import java.util.logging.*;
 
 /**
  * Class to load drivers and create connections. It can find drivers and connections from
@@ -69,276 +77,221 @@ import java.util.logging.*;
  *
  * @author Andrei Badea
  */
-public class DbDriverManager
-{
-
-  private static final Logger LOGGER = Logger.getLogger("org.netbeans.modules.db.explorer.DbDriverManager"); // NOI18N
-  private static final boolean LOG = LOGGER.isLoggable(Level.FINE);
-
-  private static final DbDriverManager DEFAULT = new DbDriverManager();
-
-  private Set registeredDrivers;
-
-  /**
-   * Maps each connection to the driver used to create that connection.
-   */
-  private Map/*<Connection, Driver>*/ conn2Driver = new WeakHashMap();
-
-  /**
-   * Maps each driver to the class loader for that driver.
-   */
-  private Map/*<JDBCDriver, ClassLoader>*/ driver2Loader = new WeakHashMap();
-
-  private DbDriverManager()
-  {
-  }
-
-  /**
-   * Returns the singleton instance.
-   */
-  public static DbDriverManager getDefault()
-  {
-    return DEFAULT;
-  }
-
-  /**
-   * Gets a connection to databaseURL using jdbcDriver as a fallback.
-   *
-   * @param databaseURL
-   * @param props
-   * @param jdbcDriver  the fallback JDBCDriver; can be null
-   */
-  public Connection getConnection(String databaseURL, Properties props, JDBCDriver jdbcDriver) throws SQLException
-  {
-    if (LOG)
-    {
-      LOGGER.log(Level.FINE, "Attempting to connect to \'" + databaseURL + "\'"); // NOI18N
+public class DbDriverManager {
+    
+    private static final Logger LOGGER = Logger.getLogger("org.netbeans.modules.db.explorer.DbDriverManager"); // NOI18N
+    private static final boolean LOG = LOGGER.isLoggable(Level.FINE);
+    
+    private static final DbDriverManager DEFAULT = new DbDriverManager();
+    
+    private Set registeredDrivers;
+    
+    /**
+     * Maps each connection to the driver used to create that connection.
+     */
+    private Map/*<Connection, Driver>*/ conn2Driver = new WeakHashMap();
+    
+    /**
+     * Maps each driver to the class loader for that driver.
+     */
+    private Map/*<JDBCDriver, ClassLoader>*/ driver2Loader = new WeakHashMap();
+    
+    private DbDriverManager() {
     }
-
-    // try to find a registered driver or use the supplied jdbcDriver
-    // we'll look ourselves in DriverManager, don't look there
-    Driver driver = getDriverInternal(databaseURL, jdbcDriver, false);
-    if (driver != null)
-    {
-      // Issue XXXX - If this is MySQL, set up the connection to be
-      // a Unicode/utf8 connection
-      if (driver.getClass().getName().equals("com.mysql.jdbc.Driver"))
-      { // NOI18N
-        props.put("useUnicode", "true");
-        props.put("characterEncoding", "utf8");
-      }
-      Connection conn = driver.connect(databaseURL, props);
-      if (conn == null)
-      {
-        if (LOG)
-        {
-          LOGGER.log(Level.FINE, driver.getClass().getName() + ".connect() returned null"); // NOI18N
+    
+    /**
+     * Returns the singleton instance.
+     */
+    public static DbDriverManager getDefault() {
+        return DEFAULT;
+    }
+    
+    /**
+     * Gets a connection to databaseURL using jdbcDriver as a fallback.
+     *
+     * @param databaseURL
+     * @param props
+     * @param jdbcDriver the fallback JDBCDriver; can be null
+     */
+    public Connection getConnection(String databaseURL, Properties props, JDBCDriver jdbcDriver) throws SQLException {
+        if (LOG) {
+            LOGGER.log(Level.FINE, "Attempting to connect to \'" + databaseURL + "\'"); // NOI18N
         }
-        throw createDriverNotFoundException();
-      }
-      synchronized (conn2Driver)
-      {
-        conn2Driver.put(conn, driver);
-      }
-      return conn;
-    }
-
-    // try to find a connection using DriverManager
-    try
-    {
-      Connection conn = DriverManager.getConnection(databaseURL, props);
-      synchronized (conn2Driver)
-      {
-        conn2Driver.put(conn, null);
-      }
-      return conn;
-    }
-    catch (SQLException e)
-    {
-      // ignore it, we throw our own exceptions
-    }
-
-    throw createDriverNotFoundException();
-  }
-
-  /**
-   * Returns a connection coming from the same driver as the conn parameter.
-   */
-  public Connection getSameDriverConnection(Connection existingConn, String databaseURL, Properties props) throws SQLException
-  {
-    if (existingConn == null)
-    {
-      throw new NullPointerException();
-    }
-    Driver driver = null;
-    synchronized (conn2Driver)
-    {
-      if (!conn2Driver.containsKey(existingConn))
-      {
-        throw new IllegalArgumentException("A connection not obtained through DbDriverManager was passed."); // NOI18N
-      }
-      driver = (Driver) conn2Driver.get(existingConn);
-    }
-    if (driver != null)
-    {
-      Connection newConn = driver.connect(databaseURL, props);
-      if (newConn == null)
-      {
-        throw new SQLException("Unable to connect using existingConn's original driver", "08001"); // NOI18N
-      }
-      synchronized (conn2Driver)
-      {
-        conn2Driver.put(newConn, driver);
-      }
-      return newConn;
-    }
-    else
-    {
-      return DriverManager.getConnection(databaseURL, props);
-    }
-  }
-
-  /**
-   * Register a new driver.
-   */
-  public synchronized void registerDriver(Driver driver)
-  {
-    if (registeredDrivers == null)
-    {
-      registeredDrivers = new HashSet();
-    }
-    registeredDrivers.add(driver);
-  }
-
-  /**
-   * Deregister a previously registered driver.
-   */
-  public synchronized void deregisterDriver(Driver driver)
-  {
-    if (registeredDrivers == null)
-    {
-      return;
-    }
-    registeredDrivers.remove(driver);
-  }
-
-  /**
-   * Gets a driver which accepts databaseURL using jdbcDriver as a fallback.
-   *
-   * <p>No checks are made as if the driver loaded from jdbcDriver accepts
-   * databaseURL.</p>
-   */
-  public Driver getDriver(String databaseURL, JDBCDriver jdbcDriver) throws SQLException
-  {
-    Driver d = getDriverInternal(databaseURL, jdbcDriver, true);
-    if (d == null)
-    {
-      throw createDriverNotFoundException();
-    }
-    return d;
-  }
-
-  /**
-   * Get the driver for a JDBCDriver.  It only tries to load it using Class.forName() -
-   * there is no URL to work with
-   */
-  public Driver getDriver(JDBCDriver jdbcDriver) throws SQLException
-  {
-    ClassLoader l = getClassLoader(jdbcDriver);
-    try
-    {
-      return (Driver) Class.forName(jdbcDriver.getClassName(), true, l).newInstance();
-    }
-    catch (Exception e)
-    {
-      SQLException sqlex = createDriverNotFoundException();
-      sqlex.initCause(e);
-      throw sqlex;
-    }
-  }
-
-  /**
-   * Gets a driver, but can skip DriverManager and doesn't throw SQLException if a driver can't be found.
-   */
-  private Driver getDriverInternal(String databaseURL, JDBCDriver jdbcDriver, boolean lookInDriverManager) throws SQLException
-  {
-    // try the registered drivers first
-    synchronized (this)
-    {
-      if (registeredDrivers != null)
-      {
-        for (Iterator i = registeredDrivers.iterator(); i.hasNext(); )
-        {
-          Driver d = (Driver) i.next();
-          try
-          {
-            if (d.acceptsURL(databaseURL))
-            {
-              return d;
+        
+        // try to find a registered driver or use the supplied jdbcDriver
+        // we'll look ourselves in DriverManager, don't look there
+        Driver driver = getDriverInternal(databaseURL, jdbcDriver, false);
+        if (driver != null) {
+            // Issue XXXX - If this is MySQL, set up the connection to be
+            // a Unicode/utf8 connection
+            if ( driver.getClass().getName().equals("com.mysql.jdbc.Driver") ) { // NOI18N
+                props.put("useUnicode", "true");
+                props.put("characterEncoding", "utf8");
             }
-          }
-          catch (SQLException e)
-          {
-            // ignore it, we don't want to exit prematurely
-          }
+            Connection conn = driver.connect(databaseURL, props);
+            if (conn == null) {
+                if (LOG) {
+                    LOGGER.log(Level.FINE, driver.getClass().getName() + ".connect() returned null"); // NOI18N
+                }
+                throw createDriverNotFoundException();
+            }
+            synchronized (conn2Driver) {
+                conn2Driver.put(conn, driver);
+            }
+            return conn;
         }
-      }
+        
+        // try to find a connection using DriverManager 
+        try {
+            Connection conn = DriverManager.getConnection(databaseURL, props);
+            synchronized (conn2Driver) {
+                conn2Driver.put(conn, null);
+            }
+            return conn;
+        } catch (SQLException e) {
+            // ignore it, we throw our own exceptions
+        }
+        
+        throw createDriverNotFoundException();
     }
-
-    // didn't find it, try to load it from jdbcDriver, if any
-    if (jdbcDriver != null)
-    {
-      Driver d = getDriver(jdbcDriver);
-      if (d != null)
-      {
+    
+    /**
+     * Returns a connection coming from the same driver as the conn parameter.
+     */
+    public Connection getSameDriverConnection(Connection existingConn, String databaseURL, Properties props) throws SQLException {
+        if (existingConn == null) {
+            throw new NullPointerException();
+        }
+        Driver driver = null;
+        synchronized (conn2Driver) {
+            if (!conn2Driver.containsKey(existingConn)) {
+                throw new IllegalArgumentException("A connection not obtained through DbDriverManager was passed."); // NOI18N
+            }
+            driver = (Driver)conn2Driver.get(existingConn);
+        }
+        if (driver != null) {
+            Connection newConn = driver.connect(databaseURL, props);
+            if (newConn == null) {
+                throw new SQLException("Unable to connect using existingConn's original driver", "08001"); // NOI18N
+            }
+            synchronized (conn2Driver) {
+                conn2Driver.put(newConn, driver);
+            }
+            return newConn;
+        } else {
+            return DriverManager.getConnection(databaseURL, props);
+        }
+    }
+    
+    /**
+     * Register a new driver.
+     */
+    public synchronized void registerDriver(Driver driver) {
+        if (registeredDrivers == null) {
+            registeredDrivers = new HashSet();
+        }
+        registeredDrivers.add(driver);
+    }
+    
+    /**
+     * Deregister a previously registered driver.
+     */
+    public synchronized void deregisterDriver(Driver driver) {
+        if (registeredDrivers == null) {
+            return;
+        }
+        registeredDrivers.remove(driver);
+    }
+    
+    /**
+     * Gets a driver which accepts databaseURL using jdbcDriver as a fallback.
+     * 
+     * <p>No checks are made as if the driver loaded from jdbcDriver accepts
+     * databaseURL.</p>
+     */
+    public Driver getDriver(String databaseURL, JDBCDriver jdbcDriver) throws SQLException {
+        Driver d = getDriverInternal(databaseURL, jdbcDriver, true);
+        if (d == null) {
+            throw createDriverNotFoundException();
+        }
         return d;
-      }
     }
 
-    // still nothing, try DriverManager
-    if (lookInDriverManager)
-    {
-      try
-      {
-        return DriverManager.getDriver(databaseURL);
-      }
-      catch (SQLException e)
-      {
-        // ignore it, we don't throw exceptions
-      }
-    }
-
-    return null;
-  }
-
-  private ClassLoader getClassLoader(JDBCDriver driver)
-  {
-    ClassLoader loader = null;
-    synchronized (driver2Loader)
-    {
-      loader = (ClassLoader) driver2Loader.get(driver);
-      if (loader == null)
-      {
-        loader = new DbURLClassLoader(driver.getURLs());
-        if (LOG)
-        {
-          LOGGER.log(Level.FINE, "Creating " + loader); // NOI18N
+    /**
+     * Get the driver for a JDBCDriver.  It only tries to load it using Class.forName() -
+     * there is no URL to work with
+     */
+    public Driver getDriver(JDBCDriver jdbcDriver) throws SQLException {
+        ClassLoader l = getClassLoader(jdbcDriver);
+        try {
+            return (Driver)Class.forName(jdbcDriver.getClassName(), true, l).newInstance();
+        } catch (Exception e) {
+            SQLException sqlex = createDriverNotFoundException();
+            sqlex.initCause(e);
+            throw sqlex;
         }
-        driver2Loader.put(driver, loader);
-      }
-      else
-      {
-        if (LOG)
-        {
-          LOGGER.log(Level.FINE, "Reusing " + loader); // NOI18N
-        }
-      }
     }
-    return loader;
-  }
-
-  private SQLException createDriverNotFoundException()
-  {
-    return new SQLException("Unable to find a suitable driver", "08001"); // NOI18N
-  }
+    
+    /**
+     * Gets a driver, but can skip DriverManager and doesn't throw SQLException if a driver can't be found.
+     */
+    private Driver getDriverInternal(String databaseURL, JDBCDriver jdbcDriver, boolean lookInDriverManager) throws SQLException {
+        // try the registered drivers first
+        synchronized (this) {
+            if (registeredDrivers != null) {
+                for (Iterator i = registeredDrivers.iterator(); i.hasNext();) {
+                    Driver d = (Driver)i.next();
+                    try {
+                        if (d.acceptsURL(databaseURL)) {
+                            return d;
+                        }
+                    } catch (SQLException e) {
+                        // ignore it, we don't want to exit prematurely
+                    }
+                }
+            }
+        }
+        
+        // didn't find it, try to load it from jdbcDriver, if any
+        if (jdbcDriver != null) {
+            Driver d = getDriver(jdbcDriver);
+            if (d != null) {
+                return d;
+            }
+        }
+        
+        // still nothing, try DriverManager 
+        if (lookInDriverManager) {
+            try {
+                return DriverManager.getDriver(databaseURL);
+            } catch (SQLException e) {
+                // ignore it, we don't throw exceptions
+            }
+        }
+        
+        return null;
+    }
+    
+    private ClassLoader getClassLoader(JDBCDriver driver) {
+        ClassLoader loader = null;
+        synchronized (driver2Loader) {
+            loader = (ClassLoader)driver2Loader.get(driver);
+            if (loader == null) {
+                loader = new DbURLClassLoader(driver.getURLs());
+                if (LOG) {
+                    LOGGER.log(Level.FINE, "Creating " + loader); // NOI18N
+                }
+                driver2Loader.put(driver, loader);
+            } else {
+                if (LOG) {
+                    LOGGER.log(Level.FINE, "Reusing " + loader); // NOI18N
+                }
+            }
+        }
+        return loader;
+    }
+    
+    private SQLException createDriverNotFoundException() {
+        return new SQLException("Unable to find a suitable driver", "08001"); // NOI18N
+    }
 }

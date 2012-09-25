@@ -50,6 +50,6 @@ made subject to such option by the copyright holder.
   <display-name value='JDBC-ODBC Bridge'/>
   <class value='sun.jdbc.odbc.JdbcOdbcDriver'/>
   <urls>
-    <url value='file:/'/>
+  	<url value='file:/'/>
   </urls>
 </driver>

@@ -45,50 +45,44 @@ package org.netbeans.modules.db.explorer.action;
 import org.netbeans.modules.db.explorer.DatabaseConnection;
 import org.netbeans.modules.db.explorer.sql.editor.SQLEditorSupport;
 import org.openide.nodes.Node;
-import org.openide.util.*;
+import org.openide.util.HelpCtx;
+import org.openide.util.NbBundle;
 
 /**
+ *
  * @author Rob Englander
  */
-public class ExecuteCommandAction extends BaseAction
-{
+public class ExecuteCommandAction extends BaseAction {
 
-  protected boolean enable(Node[] activatedNodes)
-  {
-    if (activatedNodes == null || activatedNodes.length != 1)
-    {
-      return false;
+    protected boolean enable(Node[] activatedNodes) {
+        if (activatedNodes == null || activatedNodes.length != 1) {
+            return false;
+        }
+
+        boolean enabled = false;
+        DatabaseConnection dbconn = activatedNodes[0].getLookup().lookup(DatabaseConnection.class);
+
+        if (dbconn != null) {
+            enabled = DatabaseConnection.isVitalConnection(dbconn.getConnection(), dbconn);
+        }
+
+        return enabled;
     }
 
-    boolean enabled = false;
-    DatabaseConnection dbconn = activatedNodes[0].getLookup().lookup(DatabaseConnection.class);
-
-    if (dbconn != null)
-    {
-      enabled = DatabaseConnection.isVitalConnection(dbconn.getConnection(), dbconn);
+    public void performAction (Node[] activatedNodes) {
+        if (activatedNodes != null && activatedNodes.length == 1) {
+            DatabaseConnection dbconn = activatedNodes[0].getLookup().lookup(DatabaseConnection.class);
+            SQLEditorSupport.openSQLEditor(dbconn.getDatabaseConnection(), "", false); // NOI18N
+        }
     }
 
-    return enabled;
-  }
-
-  public void performAction(Node[] activatedNodes)
-  {
-    if (activatedNodes != null && activatedNodes.length == 1)
-    {
-      DatabaseConnection dbconn = activatedNodes[0].getLookup().lookup(DatabaseConnection.class);
-      SQLEditorSupport.openSQLEditor(dbconn.getDatabaseConnection(), "", false); // NOI18N
+    @Override
+    public String getName() {
+        return NbBundle.getMessage (ExecuteCommandAction.class, "ExecuteCommand"); // NOI18N
     }
-  }
 
-  @Override
-  public String getName()
-  {
-    return NbBundle.getMessage(ExecuteCommandAction.class, "ExecuteCommand"); // NOI18N
-  }
-
-  @Override
-  public HelpCtx getHelpCtx()
-  {
-    return new HelpCtx(ExecuteCommandAction.class);
-  }
+    @Override
+    public HelpCtx getHelpCtx() {
+        return new HelpCtx(ExecuteCommandAction.class);
+    }
 }

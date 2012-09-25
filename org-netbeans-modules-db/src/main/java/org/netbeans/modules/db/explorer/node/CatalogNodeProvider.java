@@ -42,129 +42,112 @@
 
 package org.netbeans.modules.db.explorer.node;
 
-import org.netbeans.api.db.explorer.node.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.List;
+import org.netbeans.api.db.explorer.node.NodeProvider;
+import org.netbeans.api.db.explorer.node.NodeProviderFactory;
 import org.netbeans.modules.db.explorer.DatabaseConnection;
-import org.netbeans.modules.db.metadata.model.api.*;
+import org.netbeans.modules.db.metadata.model.api.Action;
+import org.netbeans.modules.db.metadata.model.api.Catalog;
+import org.netbeans.modules.db.metadata.model.api.Metadata;
+import org.netbeans.modules.db.metadata.model.api.MetadataElementHandle;
+import org.netbeans.modules.db.metadata.model.api.MetadataModel;
+import org.netbeans.modules.db.metadata.model.api.MetadataModelException;
 import org.openide.nodes.Node;
 import org.openide.util.Lookup;
 
-import java.util.*;
-
 /**
+ *
  * @author Rob Englander
  */
-public class CatalogNodeProvider extends NodeProvider
-{
+public class CatalogNodeProvider extends NodeProvider {
 
-  // lazy initialization holder class idiom for static fields is used
-  // for retrieving the factory
-  public static NodeProviderFactory getFactory()
-  {
-    return FactoryHolder.FACTORY;
-  }
+    // lazy initialization holder class idiom for static fields is used
+    // for retrieving the factory
+    public static NodeProviderFactory getFactory() {
+        return FactoryHolder.FACTORY;
+    }
 
-  private static class FactoryHolder
-  {
-    static final NodeProviderFactory FACTORY = new NodeProviderFactory()
-    {
-      public CatalogNodeProvider createInstance(Lookup lookup)
-      {
-        CatalogNodeProvider provider = new CatalogNodeProvider(lookup);
-        return provider;
-      }
-    };
-  }
-
-  private final DatabaseConnection connection;
-
-  private CatalogNodeProvider(Lookup lookup)
-  {
-    super(lookup, new CatalogComparator());
-    connection = getLookup().lookup(DatabaseConnection.class);
-  }
-
-  @Override
-  protected synchronized void initialize()
-  {
-    final List<Node> newList = new ArrayList<Node>();
-
-    MetadataModel metaDataModel = connection.getMetadataModel();
-    boolean isConnected = !connection.getConnector().isDisconnected();
-
-    if (isConnected && metaDataModel != null)
-    {
-      try
-      {
-        metaDataModel.runReadAction(
-            new Action<Metadata>()
-            {
-              public void run(Metadata metaData)
-              {
-                Collection<Catalog> catalogs = metaData.getCatalogs();
-
-                String defaultCatalog = metaData.getDefaultCatalog().getName();
-
-                for (Catalog catalog : catalogs)
-                {
-                  boolean oneCatalog = catalogs.size() == 1;
-                  if (catalog.getName() != null || oneCatalog)
-                  {
-
-                    boolean use = true;
-                    //if (defaultCatalog != null) {
-                    //    use = defaultCatalog.equals(catalog.getName());
-                    //}
-
-                    if (use)
-                    {
-                      MetadataElementHandle<Catalog> catalogHandle = MetadataElementHandle.create(catalog);
-                      Collection<Node> matches = getNodes(catalogHandle);
-                      if (matches.size() > 0)
-                      {
-                        newList.addAll(matches);
-                      }
-                      else
-                      {
-                        NodeDataLookup lookup = new NodeDataLookup();
-                        lookup.add(connection);
-                        lookup.add(catalogHandle);
-                        newList.add(CatalogNode.create(lookup, CatalogNodeProvider.this));
-                      }
-                    }
-                  }
-                }
-
-                if (newList.size() == 1)
-                {
-                  setProxyNodes(newList);
-                }
-                else
-                {
-                  setNodes(newList);
-                }
-              }
+    private static class FactoryHolder {
+        static final NodeProviderFactory FACTORY = new NodeProviderFactory() {
+            public CatalogNodeProvider createInstance(Lookup lookup) {
+                CatalogNodeProvider provider = new CatalogNodeProvider(lookup);
+                return provider;
             }
-        );
-      }
-      catch (MetadataModelException e)
-      {
-        NodeRegistry.handleMetadataModelException(this.getClass(), connection, e, true);
-      }
-    }
-    else if (!isConnected)
-    {
-      setNodes(newList);
+        };
     }
 
-  }
+    private final DatabaseConnection connection;
 
-  static class CatalogComparator implements Comparator<Node>
-  {
-
-    public int compare(Node node1, Node node2)
-    {
-      return node1.getDisplayName().compareToIgnoreCase(node2.getDisplayName());
+    private CatalogNodeProvider(Lookup lookup) {
+        super(lookup, new CatalogComparator());
+        connection = getLookup().lookup(DatabaseConnection.class);
     }
 
-  }
+    @Override
+    protected synchronized void initialize() {
+        final List<Node> newList = new ArrayList<Node>();
+
+        MetadataModel metaDataModel = connection.getMetadataModel();
+        boolean isConnected = !connection.getConnector().isDisconnected();
+
+        if (isConnected && metaDataModel != null) {
+            try {
+                metaDataModel.runReadAction(
+                    new Action<Metadata>() {
+                        public void run(Metadata metaData) {
+                            Collection<Catalog> catalogs = metaData.getCatalogs();
+
+                            String defaultCatalog = metaData.getDefaultCatalog().getName();
+
+                            for (Catalog catalog : catalogs) {
+                                boolean oneCatalog = catalogs.size() == 1;
+                                if (catalog.getName() != null || oneCatalog) {
+
+                                    boolean use = true;
+                                    //if (defaultCatalog != null) {
+                                    //    use = defaultCatalog.equals(catalog.getName());
+                                    //}
+
+                                    if (use) {
+                                        MetadataElementHandle<Catalog> catalogHandle = MetadataElementHandle.create(catalog);
+                                        Collection<Node> matches = getNodes(catalogHandle);
+                                        if (matches.size() > 0) {
+                                            newList.addAll(matches);
+                                        } else {
+                                            NodeDataLookup lookup = new NodeDataLookup();
+                                            lookup.add(connection);
+                                            lookup.add(catalogHandle);
+                                            newList.add(CatalogNode.create(lookup, CatalogNodeProvider.this));
+                                        }
+                                    }
+                                }
+                            }
+
+                            if (newList.size() == 1) {
+                                setProxyNodes(newList);
+                            } else {
+                                setNodes(newList);
+                            }
+                        }
+                    }
+                );
+            } catch (MetadataModelException e) {
+                NodeRegistry.handleMetadataModelException(this.getClass(), connection, e, true);
+            }
+        } else if (!isConnected) {
+           setNodes(newList);
+        }
+
+    }
+
+    static class CatalogComparator implements Comparator<Node> {
+
+        public int compare(Node node1, Node node2) {
+            return node1.getDisplayName().compareToIgnoreCase(node2.getDisplayName());
+        }
+
+    }
 }

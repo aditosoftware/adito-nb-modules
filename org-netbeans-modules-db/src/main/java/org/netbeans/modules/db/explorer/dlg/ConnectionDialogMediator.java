@@ -44,135 +44,120 @@
 
 package org.netbeans.modules.db.explorer.dlg;
 
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 import org.netbeans.modules.db.explorer.DatabaseConnection;
 import org.openide.util.RequestProcessor;
 import org.openide.util.RequestProcessor.Task;
-
-import java.beans.*;
-import java.util.*;
 
 /**
  * Base class for the connection dialogs.
  *
  * @author Andrei Badea
  */
-public abstract class ConnectionDialogMediator
-{
-
-  public static final String PROP_VALID = "valid"; // NOI18N
-
-  private final List<ConnectionProgressListener> connProgressListeners = new ArrayList<ConnectionProgressListener>();
-  private final PropertyChangeSupport propChangeSupport = new PropertyChangeSupport(this);
-
-  private boolean valid = true;
-  private boolean connected = false;
-
-  public void addConnectionProgressListener(ConnectionProgressListener listener)
-  {
-    synchronized (connProgressListeners)
-    {
-      connProgressListeners.add(listener);
+public abstract class ConnectionDialogMediator {
+    
+    public static final String PROP_VALID = "valid"; // NOI18N
+    
+    private final List<ConnectionProgressListener> connProgressListeners = new ArrayList<ConnectionProgressListener>();
+    private final PropertyChangeSupport propChangeSupport = new PropertyChangeSupport(this);
+    
+    private boolean valid = true;
+    private boolean connected = false;
+    
+    public void addConnectionProgressListener(ConnectionProgressListener listener) {
+        synchronized (connProgressListeners) {
+            connProgressListeners.add(listener);
+        }
     }
-  }
-
-  public void addPropertyChangeListener(PropertyChangeListener listener)
-  {
-    propChangeSupport.addPropertyChangeListener(listener);
-  }
-
-  public void closeConnection()
-  {
-  }
-
-  protected abstract boolean retrieveSchemas(SchemaPanel schemaPanel, DatabaseConnection dbcon, String defaultSchema);
-
-  /**
-   * An async version of retrieveSchemas.
-   *
-   * @param schemaPanel   the schema panel
-   * @param dbcon         the db connection
-   * @param defaultSchema the name of the default schema
-   * @return the Task instance passed to the Requestprocessor
-   */
-  protected Task retrieveSchemasAsync(final SchemaPanel schemaPanel, final DatabaseConnection dbcon, final String defaultSchema)
-  {
-    fireConnectionStarted();
-
-    Task task = RequestProcessor.getDefault().post(new Runnable()
-    {
-      @Override
-      public void run()
-      {
-        retrieveSchemas(schemaPanel, dbcon, defaultSchema);
-        fireConnectionFinished();
-      }
-    });
-
-    return task;
-  }
-
-
-  protected void fireConnectionStarted()
-  {
-    for (Iterator<ConnectionProgressListener> i = connProgressListenersCopy(); i.hasNext(); )
-    {
-      i.next().connectionStarted();
+    
+    public void addPropertyChangeListener(PropertyChangeListener listener) {
+        propChangeSupport.addPropertyChangeListener(listener);
     }
-  }
-
-  protected void fireConnectionStep(String step)
-  {
-    for (Iterator<ConnectionProgressListener> i = connProgressListenersCopy(); i.hasNext(); )
+    
+    public void closeConnection()
     {
-      i.next().connectionStep(step);
     }
-  }
+    
+    protected abstract boolean retrieveSchemas(SchemaPanel schemaPanel, DatabaseConnection dbcon, String defaultSchema);
 
-  protected void fireConnectionFinished()
-  {
-    for (Iterator<ConnectionProgressListener> i = connProgressListenersCopy(); i.hasNext(); )
+    /**
+     * An async version of retrieveSchemas.
+     * 
+     * @param schemaPanel the schema panel
+     * @param dbcon the db connection
+     * @param defaultSchema the name of the default schema
+     * 
+     * @return the Task instance passed to the Requestprocessor
+     */
+    protected Task retrieveSchemasAsync(final SchemaPanel schemaPanel, final DatabaseConnection dbcon, final String defaultSchema)
     {
-      i.next().connectionFinished();
-    }
-  }
+        fireConnectionStarted();
+        
+        Task task = RequestProcessor.getDefault().post(new Runnable() {
+            @Override
+            public void run() {
+                retrieveSchemas(schemaPanel, dbcon, defaultSchema);
+                fireConnectionFinished();
+            }
+        });
 
-  protected void fireConnectionFailed()
-  {
-    for (Iterator<ConnectionProgressListener> i = connProgressListenersCopy(); i.hasNext(); )
+        return task;
+    }
+
+    
+    protected void fireConnectionStarted() {
+        for (Iterator<ConnectionProgressListener> i = connProgressListenersCopy(); i.hasNext();) {
+            i.next().connectionStarted();
+        }
+    }
+    
+    protected void fireConnectionStep(String step) {
+        for (Iterator<ConnectionProgressListener> i = connProgressListenersCopy(); i.hasNext();) {
+            i.next().connectionStep(step);
+        }
+    }
+    
+    protected void fireConnectionFinished() {
+        for (Iterator<ConnectionProgressListener> i = connProgressListenersCopy(); i.hasNext();) {
+            i.next().connectionFinished();
+        }
+    }
+
+    protected void fireConnectionFailed() {
+        for (Iterator<ConnectionProgressListener> i = connProgressListenersCopy(); i.hasNext();) {
+            i.next().connectionFailed();
+        }
+    }
+    
+    private Iterator<ConnectionProgressListener> connProgressListenersCopy() {
+        List<ConnectionProgressListener> listenersCopy = null;
+        synchronized (connProgressListeners) {
+            listenersCopy = new ArrayList<ConnectionProgressListener>(connProgressListeners);
+        }
+        return listenersCopy.iterator();
+    }
+    
+    public void setConnected(boolean conn)
     {
-      i.next().connectionFailed();
+        connected = conn;
+        propChangeSupport.firePropertyChange(PROP_VALID, null, null);
     }
-  }
-
-  private Iterator<ConnectionProgressListener> connProgressListenersCopy()
-  {
-    List<ConnectionProgressListener> listenersCopy = null;
-    synchronized (connProgressListeners)
+    
+    public boolean isConnected()
     {
-      listenersCopy = new ArrayList<ConnectionProgressListener>(connProgressListeners);
+        return connected;
     }
-    return listenersCopy.iterator();
-  }
-
-  public void setConnected(boolean conn)
-  {
-    connected = conn;
-    propChangeSupport.firePropertyChange(PROP_VALID, null, null);
-  }
-
-  public boolean isConnected()
-  {
-    return connected;
-  }
-
-  public void setValid(boolean valid)
-  {
-    this.valid = valid;
-    propChangeSupport.firePropertyChange(PROP_VALID, null, null);
-  }
-
-  public boolean getValid()
-  {
-    return valid;
-  }
+    
+    public void setValid(boolean valid) {
+        this.valid = valid;
+        propChangeSupport.firePropertyChange(PROP_VALID, null, null);
+    }
+    
+    public boolean getValid() {
+        return valid;
+    }
 }

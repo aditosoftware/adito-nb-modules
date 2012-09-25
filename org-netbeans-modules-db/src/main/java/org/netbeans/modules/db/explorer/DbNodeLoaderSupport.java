@@ -44,28 +44,24 @@
 
 package org.netbeans.modules.db.explorer;
 
-import org.openide.util.Lookup;
-
 import java.util.Collection;
+import org.openide.util.Lookup;
 
 /**
  * Supporting methods to work with the registered implementation of NodeLoader
- *
+ * 
  * @author David Van Couvering
  */
-public class DbNodeLoaderSupport
-{
+public class DbNodeLoaderSupport {
 
-  private DbNodeLoaderSupport()
-  {
-  }
+    private DbNodeLoaderSupport() {
+    }
 
-  // Unchecked cast from generic collection to a typed collection
-  @SuppressWarnings("unchecked")
-  public static Collection<DbNodeLoader> getLoaders()
-  {
-    Collection loaders = Lookup.getDefault().lookupAll(DbNodeLoader.class);
-    return loaders;
-  }
-
+    // Unchecked cast from generic collection to a typed collection
+    @SuppressWarnings("unchecked")
+    public static Collection<DbNodeLoader> getLoaders() {
+        Collection loaders = Lookup.getDefault().lookupAll(DbNodeLoader.class);
+        return loaders;
+    }
+    
 }

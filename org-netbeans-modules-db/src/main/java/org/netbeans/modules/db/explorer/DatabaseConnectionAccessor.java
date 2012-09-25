@@ -48,25 +48,21 @@ package org.netbeans.modules.db.explorer;
  * Provides access to the api.DatabaseConnection constructor by the
  * {@link #createDatabaseConnection} method.
  *
+ *
  * @author Andrei Badea
  */
-public abstract class DatabaseConnectionAccessor
-{
+public abstract class DatabaseConnectionAccessor {
 
-  public static DatabaseConnectionAccessor DEFAULT;
+    public static DatabaseConnectionAccessor DEFAULT;
 
-  static
-  {
-    Class c = org.netbeans.api.db.explorer.DatabaseConnection.class;
-    try
-    {
-      Class.forName(c.getName(), true, c.getClassLoader());
+    static {
+        Class c = org.netbeans.api.db.explorer.DatabaseConnection.class;
+        try {
+            Class.forName(c.getName(), true, c.getClassLoader());
+        } catch (ClassNotFoundException e) {
+            assert false : e;
+        }
     }
-    catch (ClassNotFoundException e)
-    {
-      assert false : e;
-    }
-  }
-
-  public abstract org.netbeans.api.db.explorer.DatabaseConnection createDatabaseConnection(DatabaseConnection conn);
+    
+    public abstract org.netbeans.api.db.explorer.DatabaseConnection createDatabaseConnection(DatabaseConnection conn);
 }

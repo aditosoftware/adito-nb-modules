@@ -44,33 +44,31 @@
 
 package org.netbeans.modules.db.explorer;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
+import javax.swing.Action;
 import org.openide.util.Lookup;
-
-import javax.swing.*;
-import java.util.*;
 
 /**
  * Supporting methods to work with the registered implementation of ActionLoader
- *
+ * 
  * @author David Van Couvering
  */
-public class DbActionLoaderSupport
-{
+public class DbActionLoaderSupport {
 
-  private DbActionLoaderSupport()
-  {
-  }
-
-  public static List<Action> getAllActions()
-  {
-    List<Action> actions = new ArrayList<Action>();
-    Collection loaders = Lookup.getDefault().lookupAll(DbActionLoader.class);
-    for (Iterator i = loaders.iterator(); i.hasNext(); )
-    {
-      actions.addAll(((DbActionLoader) i.next()).getAllActions());
+    private DbActionLoaderSupport() {
     }
 
-    return actions;
-  }
+    public static List<Action> getAllActions() {
+        List<Action> actions = new ArrayList<Action>();
+        Collection loaders = Lookup.getDefault().lookupAll(DbActionLoader.class);
+        for (Iterator i = loaders.iterator(); i.hasNext();) {
+            actions.addAll(((DbActionLoader)i.next()).getAllActions());
+        }
+        
+        return actions;
+    }
 
 }

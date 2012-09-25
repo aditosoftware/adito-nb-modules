@@ -30,27 +30,26 @@
  */
 package org.netbeans.modules.db.explorer.dlg;
 
-import org.netbeans.lib.ddl.impl.*;
+import org.netbeans.lib.ddl.impl.CreateView;
+import org.netbeans.lib.ddl.impl.Specification;
 
 /**
  * Factor out DDL logic for adding a view
  *
  * @author <a href="david@vancouvering.com">David Van Couvering</a>
  */
-public class AddViewDDL
-{
-  public static boolean addView(
-      Specification spec,
-      String schema,
-      String viewName,
-      String query) throws Exception
-  {
-    CreateView cmd = spec.createCommandCreateView(viewName);
-    cmd.setQuery(query);
-    cmd.setObjectOwner(schema);
-    cmd.execute();
-
-    return cmd.wasException();
-  }
+public class AddViewDDL {
+    public static boolean addView(
+            Specification spec,
+            String schema,
+            String viewName,
+            String query) throws Exception {
+        CreateView cmd = spec.createCommandCreateView(viewName);
+        cmd.setQuery(query);
+        cmd.setObjectOwner(schema);
+        cmd.execute();
+        
+        return cmd.wasException();
+    }
 
 }

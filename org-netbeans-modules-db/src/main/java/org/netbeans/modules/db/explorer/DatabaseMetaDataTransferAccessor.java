@@ -45,47 +45,46 @@
 package org.netbeans.modules.db.explorer;
 
 import org.netbeans.api.db.explorer.DatabaseConnection;
-import org.netbeans.api.db.explorer.DatabaseMetaDataTransfer.*;
-import org.netbeans.api.db.explorer.*;
+import org.netbeans.api.db.explorer.DatabaseMetaDataTransfer.Column;
+import org.netbeans.api.db.explorer.DatabaseMetaDataTransfer.Connection;
+import org.netbeans.api.db.explorer.DatabaseMetaDataTransfer.Table;
+import org.netbeans.api.db.explorer.DatabaseMetaDataTransfer.View;
+import org.netbeans.api.db.explorer.JDBCDriver;
 
 /**
+ * 
  * @author Andrei Badea
  */
-public abstract class DatabaseMetaDataTransferAccessor
-{
-
-  public static DatabaseMetaDataTransferAccessor DEFAULT;
-
-  static
-  {
-    Class c = DatabaseMetaDataTransferAccessor.class;
-    try
-    {
-      Class.forName(c.getName(), true, c.getClassLoader());
+public abstract class DatabaseMetaDataTransferAccessor {
+    
+    public static DatabaseMetaDataTransferAccessor DEFAULT;
+    
+    static {
+        Class c = DatabaseMetaDataTransferAccessor.class;
+        try {
+            Class.forName(c.getName(), true, c.getClassLoader());
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
     }
-    catch (Exception ex)
-    {
-      ex.printStackTrace();
-    }
-  }
 
-  /**
-   * Returns an object which encapsulates a database connection.
-   */
-  public abstract Connection createConnectionData(DatabaseConnection dbconn, JDBCDriver jdbcDriver);
-
-  /**
-   * Returns an object which encapsulates a database table.
-   */
-  public abstract Table createTableData(DatabaseConnection dbconn, JDBCDriver jdbcDriver, String tableName);
-
-  /**
-   * Returns an object which encapsulates a database view.
-   */
-  public abstract View createViewData(DatabaseConnection dbconn, JDBCDriver jdbcDriver, String viewName);
-
-  /**
-   * Returns an object which encapsulates a column of a database table.
-   */
-  public abstract Column createColumnData(DatabaseConnection dbconn, JDBCDriver jdbcDriver, String tableName, String columnName);
+    /**
+     * Returns an object which encapsulates a database connection.
+     */
+    public abstract Connection createConnectionData(DatabaseConnection dbconn, JDBCDriver jdbcDriver);
+    
+    /**
+     * Returns an object which encapsulates a database table.
+     */
+    public abstract Table createTableData(DatabaseConnection dbconn, JDBCDriver jdbcDriver, String tableName);
+    
+    /**
+     * Returns an object which encapsulates a database view.
+     */
+    public abstract View createViewData(DatabaseConnection dbconn, JDBCDriver jdbcDriver, String viewName);
+    
+    /**
+     * Returns an object which encapsulates a column of a database table.
+     */
+    public abstract Column createColumnData(DatabaseConnection dbconn, JDBCDriver jdbcDriver, String tableName, String columnName);
 }

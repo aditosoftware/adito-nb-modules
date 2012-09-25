@@ -45,35 +45,31 @@ package org.netbeans.modules.db.explorer.action;
 import org.netbeans.modules.db.explorer.dlg.AddDriverDialog;
 import org.netbeans.modules.db.explorer.node.DriverNode;
 import org.openide.nodes.Node;
-import org.openide.util.*;
+import org.openide.util.HelpCtx;
+import org.openide.util.Lookup;
+import org.openide.util.NbBundle;
 
-public class CustomizeDriverAction extends BaseAction
-{
-
-  @Override
-  public String getName()
-  {
-    return NbBundle.getMessage(CustomizeDriverAction.class, "Customize"); // NOI18N
-  }
-
-  @Override
-  public HelpCtx getHelpCtx()
-  {
-    return new HelpCtx(CustomizeDriverAction.class);
-  }
-
-  protected boolean enable(Node[] activatedNodes)
-  {
-    return activatedNodes.length == 1;
-  }
-
-  public void performAction(Node[] activatedNodes)
-  {
-    Lookup lookup = activatedNodes[0].getLookup();
-    final DriverNode node = lookup.lookup(DriverNode.class);
-    if (node != null)
-    {
-      AddDriverDialog.showDialog(node);
+public class CustomizeDriverAction extends BaseAction {
+    
+    @Override
+    public String getName() {
+        return NbBundle.getMessage (CustomizeDriverAction.class, "Customize"); // NOI18N
     }
-  }
+
+    @Override
+    public HelpCtx getHelpCtx() {
+        return new HelpCtx(CustomizeDriverAction.class);
+    }
+    
+    protected boolean enable(Node[] activatedNodes) {
+        return activatedNodes.length == 1;
+    }
+    
+    public void performAction(Node[] activatedNodes) {
+        Lookup lookup = activatedNodes[0].getLookup();
+        final DriverNode node = lookup.lookup(DriverNode.class);
+        if (node != null) {
+            AddDriverDialog.showDialog(node);
+        }
+    }
 }

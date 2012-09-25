@@ -46,14 +46,10 @@ package org.netbeans.modules.db.explorer;
 
 /**
  * Class needed for Java Studio Enterprise feature.
- *
- * @author Administrator
+ * @author  Administrator
  */
-public interface OpenConnectionInterface
-{
-  public boolean isFor(String driverName);
-
-  public void enable();
-
-  public void disable();
+public interface OpenConnectionInterface {
+    public boolean isFor(String driverName);
+    public void enable();
+    public void disable();
 }

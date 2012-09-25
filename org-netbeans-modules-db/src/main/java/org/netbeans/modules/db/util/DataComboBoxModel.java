@@ -44,44 +44,43 @@
 
 package org.netbeans.modules.db.util;
 
-import javax.swing.*;
+import javax.swing.ComboBoxModel;
 
 /**
  * Serves as a model for {@link DataComboBoxSupport}.
  *
  * @author Andrei Badea
  */
-public interface DataComboBoxModel
-{
+public interface DataComboBoxModel {
 
-  /**
-   * Returns the combo box model; cannot be null.
-   */
-  ComboBoxModel getListModel();
+    /**
+     * Returns the combo box model; cannot be null.
+     */
+    ComboBoxModel getListModel();
 
-  /**
-   * Returns the display name for the given item. The given item
-   * is one of the items in the model returned by {@link #getListModel}.
-   */
-  String getItemDisplayName(Object item);
+    /**
+     * Returns the display name for the given item. The given item
+     * is one of the items in the model returned by {@link #getListModel}.
+     */
+    String getItemDisplayName(Object item);
 
-  /**
-   * Returns the tooltip text for the given item. The given item
-   * is one of the items in the model returned by {@link #getListModel}.
-   */
-  String getItemTooltipText(Object item);
+    /**
+     * Returns the tooltip text for the given item. The given item
+     * is one of the items in the model returned by {@link #getListModel}.
+     */
+    String getItemTooltipText(Object item);
 
-  /**
-   * Returns the text for the "Add item" item (used to add new items
-   * to the combo box).
-   */
-  String getNewItemDisplayName();
+    /**
+     * Returns the text for the "Add item" item (used to add new items 
+     * to the combo box).
+     */
+    String getNewItemDisplayName();
 
-  /**
-   * Invoked when the "Add item" is selected. This method should do
-   * whatever is necessary to retrieve the new item to be added (e.g.
-   * by prompting the user) and add the new item to {@link #getListModel},
-   * firing a contentsChanged event.
-   */
-  void newItemActionPerformed();
+    /**
+     * Invoked when the "Add item" is selected. This method should do 
+     * whatever is necessary to retrieve the new item to be added (e.g.
+     * by prompting the user) and add the new item to {@link #getListModel},
+     * firing a contentsChanged event.
+     */
+    void newItemActionPerformed();
 }

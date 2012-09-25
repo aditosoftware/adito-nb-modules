@@ -44,10 +44,9 @@
 
 package org.netbeans.modules.db.explorer;
 
-import org.netbeans.api.db.explorer.DatabaseConnection;
-import org.netbeans.api.db.explorer.*;
-
 import java.awt.datatransfer.DataFlavor;
+import org.netbeans.api.db.explorer.DatabaseConnection;
+import org.netbeans.api.db.explorer.JDBCDriver;
 
 /**
  * This interface is a means to communicate with the db/dbapi module, which
@@ -56,46 +55,45 @@ import java.awt.datatransfer.DataFlavor;
  *
  * @author Andrei Badea
  */
-public interface DbMetaDataTransferProvider
-{
+public interface DbMetaDataTransferProvider {
 
-  /**
-   * Returns the data flavor representing database connections.
-   */
-  DataFlavor getConnectionDataFlavor();
+    /**
+     * Returns the data flavor representing database connections.
+     */
+    DataFlavor getConnectionDataFlavor();
 
-  /**
-   * Returns the data flavor representing database tables.
-   */
-  DataFlavor getTableDataFlavor();
+    /**
+     * Returns the data flavor representing database tables.
+     */
+    DataFlavor getTableDataFlavor();
+    
+    /**
+     * Returns the data flavor representing database views.
+     */
+    DataFlavor getViewDataFlavor();
 
-  /**
-   * Returns the data flavor representing database views.
-   */
-  DataFlavor getViewDataFlavor();
+    /**
+     * Returns the data flavor representing columns of database tables.
+     */
+    DataFlavor getColumnDataFlavor();
 
-  /**
-   * Returns the data flavor representing columns of database tables.
-   */
-  DataFlavor getColumnDataFlavor();
-
-  /**
-   * Returns an object which encapsulates a database connection.
-   */
-  Object createConnectionData(DatabaseConnection dbconn, JDBCDriver jdbcDriver);
-
-  /**
-   * Returns an object which encapsulates a database table.
-   */
-  Object createTableData(DatabaseConnection dbconn, JDBCDriver jdbcDriver, String tableName);
-
-  /**
-   * Returns an object which encapsulates a database view.
-   */
-  Object createViewData(DatabaseConnection dbconn, JDBCDriver jdbcDriver, String viewName);
-
-  /**
-   * Returns an object which encapsulates a column of a database table.
-   */
-  Object createColumnData(DatabaseConnection dbconn, JDBCDriver jdbcDriver, String tableName, String columnName);
+    /**
+     * Returns an object which encapsulates a database connection.
+     */
+    Object createConnectionData(DatabaseConnection dbconn, JDBCDriver jdbcDriver);
+    
+    /**
+     * Returns an object which encapsulates a database table.
+     */
+    Object createTableData(DatabaseConnection dbconn, JDBCDriver jdbcDriver, String tableName);
+    
+    /**
+     * Returns an object which encapsulates a database view.
+     */
+    Object createViewData(DatabaseConnection dbconn, JDBCDriver jdbcDriver, String viewName);
+    
+    /**
+     * Returns an object which encapsulates a column of a database table.
+     */
+    Object createColumnData(DatabaseConnection dbconn, JDBCDriver jdbcDriver, String tableName, String columnName);
 }

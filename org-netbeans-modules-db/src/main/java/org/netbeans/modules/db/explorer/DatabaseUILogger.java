@@ -44,38 +44,35 @@
 
 package org.netbeans.modules.db.explorer;
 
-import java.util.logging.*;
+import java.util.logging.Level;
+import java.util.logging.LogRecord;
+import java.util.logging.Logger;
 
 /**
+ *
  * @author Andrei Badea
  */
-public class DatabaseUILogger
-{
+public class DatabaseUILogger {
 
-  private static final Logger LOGGER = Logger.getLogger("org.netbeans.ui.db.explorer"); // NOI18N
-  private static final Logger LOGGER_USG = Logger.getLogger("org.netbeans.ui.metrics.db.explorer"); // NOI18N
+    private static final Logger LOGGER = Logger.getLogger("org.netbeans.ui.db.explorer"); // NOI18N
+    private static final Logger LOGGER_USG = Logger.getLogger("org.netbeans.ui.metrics.db.explorer"); // NOI18N
 
-  private DatabaseUILogger()
-  {
-  }
+    private DatabaseUILogger() {}
 
-  public static void logConnection(String driverClass)
-  {
-    log("UI_CONNECT_DB", driverClass); // NOI18N
-    logUsage("USG_DB_CONNECT", driverClass); // NOI18N
-  }
+    public static void logConnection(String driverClass) {
+        log("UI_CONNECT_DB", driverClass); // NOI18N
+        logUsage("USG_DB_CONNECT", driverClass); // NOI18N
+    }
 
-  private static void log(String message, Object parameter)
-  {
-    LogRecord record = new LogRecord(Level.INFO, message);
-    record.setParameters(new Object[]{parameter});
-    LOGGER.log(record);
-  }
+    private static void log(String message, Object parameter) {
+        LogRecord record = new LogRecord(Level.INFO, message);
+        record.setParameters(new Object[] { parameter });
+        LOGGER.log(record);
+    }
 
-  private static void logUsage(String message, Object parameter)
-  {
-    LogRecord record = new LogRecord(Level.INFO, message);
-    record.setParameters(new Object[]{parameter});
-    LOGGER_USG.log(record);
-  }
+    private static void logUsage(String message, Object parameter) {
+        LogRecord record = new LogRecord(Level.INFO, message);
+        record.setParameters(new Object[] { parameter });
+        LOGGER_USG.log(record);
+    }
 }

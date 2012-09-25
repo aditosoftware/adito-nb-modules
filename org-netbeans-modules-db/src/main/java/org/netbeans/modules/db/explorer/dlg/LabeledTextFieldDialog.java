@@ -44,224 +44,215 @@
 
 package org.netbeans.modules.db.explorer.dlg;
 
-import org.openide.*;
+import java.awt.Dialog;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.util.MissingResourceException;
+import org.openide.DialogDescriptor;
+import org.openide.DialogDisplayer;
 import org.openide.awt.Mnemonics;
 import org.openide.util.NbBundle;
 
-import java.awt.*;
-import java.awt.event.*;
-import java.util.MissingResourceException;
-
 /**
- * @author Rob Englander
+ *
+ * @author  Rob Englander
  */
-public class LabeledTextFieldDialog extends javax.swing.JPanel
-{
-
-  /**
-   * Creates new form LabeledTextFieldDialog
-   */
-  public LabeledTextFieldDialog(String notes)
-  {
-    String title = NbBundle.getMessage(LabeledTextFieldDialog.class, "RecreateTableRenameTable"); // NOI18N
-    String lab = NbBundle.getMessage(LabeledTextFieldDialog.class, "RecreateTableNewName"); // NOI18N
-    original_notes = notes;
-
-    initComponents();
-
-    try
+public class LabeledTextFieldDialog extends javax.swing.JPanel {
+    
+    /** Creates new form LabeledTextFieldDialog */
+    public LabeledTextFieldDialog(String notes) 
     {
-      Mnemonics.setLocalizedText(titleLabel, lab);
-      titleLabel.getAccessibleContext().setAccessibleDescription(NbBundle.getMessage(LabeledTextFieldDialog.class, "ACS_RecreateTableNewNameA11yDesc"));  // NOI18N
+        String title = NbBundle.getMessage (LabeledTextFieldDialog.class, "RecreateTableRenameTable"); // NOI18N
+        String lab = NbBundle.getMessage (LabeledTextFieldDialog.class, "RecreateTableNewName"); // NOI18N
+        original_notes = notes;
 
-      Mnemonics.setLocalizedText(descLabel, NbBundle.getMessage(LabeledTextFieldDialog.class, "RecreateTableRenameNotes")); // NOI18N
-      descLabel.getAccessibleContext().setAccessibleDescription(NbBundle.getMessage(LabeledTextFieldDialog.class, "ACS_RecreateTableRenameNotesA11yDesc"));  // NOI18N
-      Mnemonics.setLocalizedText(editButton, NbBundle.getMessage(LabeledTextFieldDialog.class, "EditCommand")); // NOI18N
-      editButton.setToolTipText(NbBundle.getMessage(LabeledTextFieldDialog.class, "ACS_EditCommandA11yDesc"));  // NOI18N
-
-      updateState();
-
-      ActionListener listener = new ActionListener()
-      {
-        public void actionPerformed(ActionEvent event)
+        initComponents();
+        
+        try
         {
-          result = event.getSource() == DialogDescriptor.OK_OPTION;
+            Mnemonics.setLocalizedText(titleLabel, lab);
+            titleLabel.getAccessibleContext().setAccessibleDescription(NbBundle.getMessage (LabeledTextFieldDialog.class, "ACS_RecreateTableNewNameA11yDesc"));  // NOI18N
+
+            Mnemonics.setLocalizedText(descLabel, NbBundle.getMessage (LabeledTextFieldDialog.class, "RecreateTableRenameNotes")); // NOI18N
+            descLabel.getAccessibleContext().setAccessibleDescription(NbBundle.getMessage (LabeledTextFieldDialog.class, "ACS_RecreateTableRenameNotesA11yDesc"));  // NOI18N
+            Mnemonics.setLocalizedText(editButton, NbBundle.getMessage (LabeledTextFieldDialog.class, "EditCommand")); // NOI18N
+            editButton.setToolTipText(NbBundle.getMessage (LabeledTextFieldDialog.class, "ACS_EditCommandA11yDesc"));  // NOI18N
+
+            updateState();
+
+            ActionListener listener = new ActionListener() 
+            {
+                public void actionPerformed(ActionEvent event) 
+                {
+                    result = event.getSource() == DialogDescriptor.OK_OPTION;
+                }
+            };
+
+            getAccessibleContext().setAccessibleDescription(NbBundle.getMessage (LabeledTextFieldDialog.class, "ACS_RecreateTableDialogA11yDesc")); // NOI18N
+
+            DialogDescriptor descriptor = new DialogDescriptor(this, title, true, listener);
+            dialog = DialogDisplayer.getDefault().createDialog(descriptor);
+            dialog.setResizable(true);
         }
-      };
+        catch (MissingResourceException e)
+        {
+            e.printStackTrace();
+        }
 
-      getAccessibleContext().setAccessibleDescription(NbBundle.getMessage(LabeledTextFieldDialog.class, "ACS_RecreateTableDialogA11yDesc")); // NOI18N
-
-      DialogDescriptor descriptor = new DialogDescriptor(this, title, true, listener);
-      dialog = DialogDisplayer.getDefault().createDialog(descriptor);
-      dialog.setResizable(true);
     }
-    catch (MissingResourceException e)
+    
+    public boolean run() 
     {
-      e.printStackTrace();
+        if (dialog != null)
+        {
+            dialog.setVisible(true);
+        }
+        
+        return result;
     }
 
-  }
-
-  public boolean run()
-  {
-    if (dialog != null)
+    public String getStringValue() 
     {
-      dialog.setVisible(true);
+        return textField.getText();
     }
 
-    return result;
-  }
-
-  public String getStringValue()
-  {
-    return textField.getText();
-  }
-
-  public String getEditedCommand()
-  {
-    return notesArea.getText();
-  }
-
-  public boolean isEditable()
-  {
-    return notesArea.isEditable();
-  }
-
-  public void setStringValue(String val)
-  {
-    textField.setText(val);
-  }
-
-  private void updateState()
-  {
-    isEditMode = !isEditMode;
-
-    if (isEditMode)
-    { // NOI18N
-      Mnemonics.setLocalizedText(editButton, NbBundle.getMessage(LabeledTextFieldDialog.class, "ReloadCommand")); // NOI18N
-      editButton.setToolTipText(NbBundle.getMessage(LabeledTextFieldDialog.class, "ACS_ReloadCommandA11yDesc"));  // NOI18N
-      notesArea.setEditable(true);
-      notesArea.setEnabled(true);
-      notesArea.setBackground(textField.getBackground()); // white
-      notesArea.requestFocus();
-      textField.setEditable(false);
-      textField.setBackground(titleLabel.getBackground()); // grey
-    }
-    else
+    public String getEditedCommand() 
     {
-      // reload script from file
-      Mnemonics.setLocalizedText(editButton, NbBundle.getMessage(LabeledTextFieldDialog.class, "EditCommand")); // NOI18N
-      editButton.setToolTipText(NbBundle.getMessage(LabeledTextFieldDialog.class, "ACS_EditCommandA11yDesc"));  // NOI18N
-      notesArea.setText(original_notes);
-      notesArea.setEditable(false);
-      notesArea.setEnabled(false);
-      notesArea.setDisabledTextColor(javax.swing.UIManager.getColor("Label.foreground")); // NOI18N
-      textField.setEditable(true);
-      textField.setBackground(notesArea.getBackground()); // grey
-      notesArea.setBackground(titleLabel.getBackground()); // white
-      textField.requestFocus();
+        return notesArea.getText();
     }
-  }
 
-  /**
-   * This method is called from within the constructor to
-   * initialize the form.
-   * WARNING: Do NOT modify this code. The content of this method is
-   * always regenerated by the Form Editor.
-   */
-  // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
-  private void initComponents()
-  {
-
-    titleLabel = new javax.swing.JLabel();
-    textField = new javax.swing.JTextField();
-    descLabel = new javax.swing.JLabel();
-    notesAreaScrollPane = new javax.swing.JScrollPane();
-    notesArea = new javax.swing.JTextArea();
-    editButton = new javax.swing.JButton();
-
-    titleLabel.setLabelFor(textField);
-    titleLabel.setText(org.openide.util.NbBundle.getMessage(LabeledTextFieldDialog.class, "LabeledTextFieldDialog.titleLabel.text")); // NOI18N
-
-    textField.setText(org.openide.util.NbBundle.getMessage(LabeledTextFieldDialog.class, "LabeledTextFieldDialog.textField.text")); // NOI18N
-
-    descLabel.setLabelFor(notesArea);
-    descLabel.setText(org.openide.util.NbBundle.getMessage(LabeledTextFieldDialog.class, "LabeledTextFieldDialog.descLabel.text")); // NOI18N
-
-    notesArea.setColumns(20);
-    notesArea.setEditable(false);
-    notesArea.setLineWrap(true);
-    notesArea.setRows(5);
-    notesArea.setWrapStyleWord(true);
-    notesArea.setEnabled(false);
-    notesAreaScrollPane.setViewportView(notesArea);
-    notesArea.getAccessibleContext().setAccessibleName(org.openide.util.NbBundle.getMessage(LabeledTextFieldDialog.class, "ACS_RecreateTableTableScriptTextAreaA11yName")); // NOI18N
-    notesArea.getAccessibleContext().setAccessibleDescription(org.openide.util.NbBundle.getMessage(LabeledTextFieldDialog.class, "ACS_RecreateTableTableScriptTextAreaA11yDesc")); // NOI18N
-
-    editButton.setText(org.openide.util.NbBundle.getMessage(LabeledTextFieldDialog.class, "LabeledTextFieldDialog.editButton.text")); // NOI18N
-    editButton.addActionListener(new java.awt.event.ActionListener()
+    public boolean isEditable() 
     {
-      public void actionPerformed(java.awt.event.ActionEvent evt)
-      {
-        editButtonActionPerformed(evt);
-      }
-    });
+        return notesArea.isEditable();
+    }
 
-    javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
-    this.setLayout(layout);
-    layout.setHorizontalGroup(
-        layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+    public void setStringValue(String val) 
+    {
+        textField.setText(val);
+    }
+
+    private void updateState()
+    {
+        isEditMode = !isEditMode;
+        
+        if (isEditMode) { // NOI18N
+            Mnemonics.setLocalizedText(editButton, NbBundle.getMessage (LabeledTextFieldDialog.class, "ReloadCommand")); // NOI18N
+            editButton.setToolTipText(NbBundle.getMessage (LabeledTextFieldDialog.class, "ACS_ReloadCommandA11yDesc"));  // NOI18N
+            notesArea.setEditable( true );
+            notesArea.setEnabled(true);
+            notesArea.setBackground(textField.getBackground()); // white
+            notesArea.requestFocus();
+            textField.setEditable( false );
+            textField.setBackground(titleLabel.getBackground()); // grey
+        } else {
+            // reload script from file
+            Mnemonics.setLocalizedText(editButton, NbBundle.getMessage (LabeledTextFieldDialog.class, "EditCommand")); // NOI18N
+            editButton.setToolTipText(NbBundle.getMessage (LabeledTextFieldDialog.class, "ACS_EditCommandA11yDesc"));  // NOI18N
+            notesArea.setText(original_notes);
+            notesArea.setEditable( false );
+            notesArea.setEnabled(false);
+            notesArea.setDisabledTextColor(javax.swing.UIManager.getColor("Label.foreground")); // NOI18N
+            textField.setEditable( true );
+            textField.setBackground(notesArea.getBackground()); // grey
+            notesArea.setBackground(titleLabel.getBackground()); // white
+            textField.requestFocus();
+        }
+    }
+    
+    /** This method is called from within the constructor to
+     * initialize the form.
+     * WARNING: Do NOT modify this code. The content of this method is
+     * always regenerated by the Form Editor.
+     */
+    // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
+    private void initComponents() {
+
+        titleLabel = new javax.swing.JLabel();
+        textField = new javax.swing.JTextField();
+        descLabel = new javax.swing.JLabel();
+        notesAreaScrollPane = new javax.swing.JScrollPane();
+        notesArea = new javax.swing.JTextArea();
+        editButton = new javax.swing.JButton();
+
+        titleLabel.setLabelFor(textField);
+        titleLabel.setText(org.openide.util.NbBundle.getMessage(LabeledTextFieldDialog.class, "LabeledTextFieldDialog.titleLabel.text")); // NOI18N
+
+        textField.setText(org.openide.util.NbBundle.getMessage(LabeledTextFieldDialog.class, "LabeledTextFieldDialog.textField.text")); // NOI18N
+
+        descLabel.setLabelFor(notesArea);
+        descLabel.setText(org.openide.util.NbBundle.getMessage(LabeledTextFieldDialog.class, "LabeledTextFieldDialog.descLabel.text")); // NOI18N
+
+        notesArea.setColumns(20);
+        notesArea.setEditable(false);
+        notesArea.setLineWrap(true);
+        notesArea.setRows(5);
+        notesArea.setWrapStyleWord(true);
+        notesArea.setEnabled(false);
+        notesAreaScrollPane.setViewportView(notesArea);
+        notesArea.getAccessibleContext().setAccessibleName(org.openide.util.NbBundle.getMessage(LabeledTextFieldDialog.class, "ACS_RecreateTableTableScriptTextAreaA11yName")); // NOI18N
+        notesArea.getAccessibleContext().setAccessibleDescription(org.openide.util.NbBundle.getMessage(LabeledTextFieldDialog.class, "ACS_RecreateTableTableScriptTextAreaA11yDesc")); // NOI18N
+
+        editButton.setText(org.openide.util.NbBundle.getMessage(LabeledTextFieldDialog.class, "LabeledTextFieldDialog.editButton.text")); // NOI18N
+        editButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                editButtonActionPerformed(evt);
+            }
+        });
+
+        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
+        this.setLayout(layout);
+        layout.setHorizontalGroup(
+            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                              .addComponent(notesAreaScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 548, Short.MAX_VALUE)
-                              .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
-                                  .addComponent(titleLabel)
-                                  .addGap(18, 18, 18)
-                                  .addComponent(textField, javax.swing.GroupLayout.DEFAULT_SIZE, 495, Short.MAX_VALUE))
-                              .addComponent(descLabel, javax.swing.GroupLayout.Alignment.LEADING)
-                              .addComponent(editButton, javax.swing.GroupLayout.Alignment.LEADING))
+                    .addComponent(notesAreaScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 548, Short.MAX_VALUE)
+                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
+                        .addComponent(titleLabel)
+                        .addGap(18, 18, 18)
+                        .addComponent(textField, javax.swing.GroupLayout.DEFAULT_SIZE, 495, Short.MAX_VALUE))
+                    .addComponent(descLabel, javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(editButton, javax.swing.GroupLayout.Alignment.LEADING))
                 .addContainerGap())
-    );
-    layout.setVerticalGroup(
-        layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+        );
+        layout.setVerticalGroup(
+            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                          .addContainerGap()
-                          .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                                        .addComponent(titleLabel)
-                                        .addComponent(textField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                          .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                          .addComponent(descLabel)
-                          .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                          .addComponent(notesAreaScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 218, Short.MAX_VALUE)
-                          .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                          .addComponent(editButton)
-                          .addContainerGap())
-    );
+                .addContainerGap()
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(titleLabel)
+                    .addComponent(textField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(descLabel)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(notesAreaScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 218, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(editButton)
+                .addContainerGap())
+        );
 
-    textField.getAccessibleContext().setAccessibleName(org.openide.util.NbBundle.getMessage(LabeledTextFieldDialog.class, "ACS_RecreateTableNewNameTextFieldA11yName")); // NOI18N
-    textField.getAccessibleContext().setAccessibleDescription(org.openide.util.NbBundle.getMessage(LabeledTextFieldDialog.class, "ACS_RecreateTableNewNameTextFieldA11yDesc")); // NOI18N
-  }// </editor-fold>//GEN-END:initComponents
+        textField.getAccessibleContext().setAccessibleName(org.openide.util.NbBundle.getMessage(LabeledTextFieldDialog.class, "ACS_RecreateTableNewNameTextFieldA11yName")); // NOI18N
+        textField.getAccessibleContext().setAccessibleDescription(org.openide.util.NbBundle.getMessage(LabeledTextFieldDialog.class, "ACS_RecreateTableNewNameTextFieldA11yDesc")); // NOI18N
+    }// </editor-fold>//GEN-END:initComponents
 
-  private void editButtonActionPerformed(java.awt.event.ActionEvent evt)
-  {
-    updateState();
-  }
-
-  // init edit mode to true so that the first call to
-  // updateState will toggle into read mode
-  boolean isEditMode = true;
-  boolean result = false;
-  Dialog dialog = null;
-  private String original_notes;
-
-  // Variables declaration - do not modify//GEN-BEGIN:variables
-  private javax.swing.JLabel descLabel;
-  private javax.swing.JButton editButton;
-  private javax.swing.JTextArea notesArea;
-  private javax.swing.JScrollPane notesAreaScrollPane;
-  private javax.swing.JTextField textField;
-  private javax.swing.JLabel titleLabel;
-  // End of variables declaration//GEN-END:variables
-
+    private void editButtonActionPerformed(java.awt.event.ActionEvent evt) {                                           
+        updateState();
+}                                          
+    
+    // init edit mode to true so that the first call to
+    // updateState will toggle into read mode
+    boolean isEditMode = true;
+    boolean result = false;
+    Dialog dialog = null;
+    private String original_notes;
+    
+    // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JLabel descLabel;
+    private javax.swing.JButton editButton;
+    private javax.swing.JTextArea notesArea;
+    private javax.swing.JScrollPane notesAreaScrollPane;
+    private javax.swing.JTextField textField;
+    private javax.swing.JLabel titleLabel;
+    // End of variables declaration//GEN-END:variables
+    
 }

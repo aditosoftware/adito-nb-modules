@@ -42,135 +42,125 @@
 
 package org.netbeans.modules.db.explorer.action;
 
-import org.netbeans.lib.ddl.impl.*;
-import org.netbeans.modules.db.explorer.*;
+import java.sql.ResultSet;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import org.netbeans.lib.ddl.impl.DriverSpecification;
+import org.netbeans.lib.ddl.impl.Specification;
+import org.netbeans.modules.db.explorer.DatabaseConnection;
+import org.netbeans.modules.db.explorer.DatabaseConnector;
+import org.netbeans.modules.db.explorer.DbUtilities;
 import org.netbeans.modules.db.explorer.dlg.AddIndexDialog;
 import org.netbeans.modules.db.explorer.node.IndexListNode;
 import org.openide.nodes.Node;
-import org.openide.util.*;
+import org.openide.util.HelpCtx;
+import org.openide.util.NbBundle;
+import org.openide.util.RequestProcessor;
 import org.openide.util.actions.SystemAction;
 
-import java.sql.ResultSet;
-import java.util.*;
-import java.util.logging.*;
-
 /**
+ *
  * @author Rob Englander
  */
-public class AddIndexAction extends BaseAction
-{
-  private static final Logger LOGGER = Logger.getLogger(AddIndexAction.class.getName());
+public class AddIndexAction extends BaseAction {
+    private static final Logger LOGGER = Logger.getLogger(AddIndexAction.class.getName());
 
-  @Override
-  public String getName()
-  {
-    return NbBundle.getMessage(AddIndexAction.class, "AddIndex"); // NOI18N
-  }
-
-
-  @Override
-  protected boolean enable(Node[] activatedNodes)
-  {
-    boolean enabled = false;
-
-    if (activatedNodes.length == 1)
-    {
-      IndexListNode node = activatedNodes[0].getLookup().lookup(IndexListNode.class);
-      enabled = node != null;
+    @Override
+    public String getName() {
+        return NbBundle.getMessage (AddIndexAction.class, "AddIndex"); // NOI18N
     }
 
-    return enabled;
-  }
 
-  @Override
-  protected void performAction(Node[] activatedNodes)
-  {
-    final IndexListNode node = activatedNodes[0].getLookup().lookup(IndexListNode.class);
-    RequestProcessor.getDefault().post(
-        new Runnable()
-        {
-          @Override
-          public void run()
-          {
-            perform(node);
-          }
+    @Override
+    protected boolean enable(Node[] activatedNodes) {
+        boolean enabled = false;
+
+        if (activatedNodes.length == 1) {
+            IndexListNode node = activatedNodes[0].getLookup().lookup(IndexListNode.class);
+            enabled = node != null;
         }
-    );
-  }
 
-  private void perform(final IndexListNode node)
-  {
-    try
-    {
-      DatabaseConnection dbConn = node.getLookup().lookup(DatabaseConnection.class);
-      DatabaseConnector connector = dbConn.getConnector();
+        return enabled;
+    }
 
-      final String tablename = node.getTableName();
-      String schemaName = node.getSchemaName();
-      String catalogName = node.getCatalogName();
+    @Override
+    protected void performAction(Node[] activatedNodes) {
+        final IndexListNode node = activatedNodes[0].getLookup().lookup(IndexListNode.class);
+        RequestProcessor.getDefault().post(
+            new Runnable() {
+            @Override
+                public void run() {
+                    perform(node);
+                }
+            }
+        );
+    }
 
-      if (schemaName == null)
-      {
-        schemaName = catalogName;
-      }
+    private void perform(final IndexListNode node) {
+        try {
+            DatabaseConnection dbConn = node.getLookup().lookup(DatabaseConnection.class);
+            DatabaseConnector connector = dbConn.getConnector();
 
-      if (catalogName == null)
-      {
-        catalogName = schemaName;
-      }
+            final String tablename = node.getTableName();
+            String schemaName = node.getSchemaName();
+            String catalogName = node.getCatalogName();
 
-      Specification spec = connector.getDatabaseSpecification();
-
-      final DriverSpecification drvSpec = connector.getDriverSpecification(catalogName);
-
-      // List columns not present in current index
-      List<String> cols = new ArrayList<String>(5);
-
-      drvSpec.getColumns(tablename, "%");
-      ResultSet rs = drvSpec.getResultSet();
-      Map<Integer, String> rset = new HashMap<Integer, String>();
-      while (rs.next())
-      {
-        rset = drvSpec.getRow();
-        cols.add(rset.get(new Integer(4)));
-        rset.clear();
-      }
-      rs.close();
-
-      if (cols.isEmpty())
-        throw new Exception(NbBundle.getMessage(AddIndexAction.class, "EXC_NoUsableColumnInPlace")); // NOI18N
-
-      // Create and execute command
-      final AddIndexDialog dlg = new AddIndexDialog(cols, spec, tablename, schemaName);
-      dlg.setIndexName(tablename + "_idx"); // NOI18N
-      if (dlg.run())
-      {
-        RequestProcessor.getDefault().post(new Runnable()
-        {
-          @Override
-          public void run()
-          {
-            Node refreshNode = node.getParentNode();
-            if (refreshNode == null)
-            {
-              refreshNode = node;
+            if (schemaName == null) {
+                schemaName = catalogName;
             }
 
-            SystemAction.get(RefreshAction.class).performAction(new Node[]{refreshNode});
-          }
-        });
-      }
-    }
-    catch (Exception exc)
-    {
-      LOGGER.log(Level.INFO, exc.getLocalizedMessage(), exc);
-      DbUtilities.reportError(NbBundle.getMessage(AddIndexAction.class, "ERR_UnableToAddIndex"), exc.getMessage()); // NOI18N
-    }
-  }
+            if (catalogName == null) {
+                catalogName = schemaName;
+            }
 
-  @Override
-  public HelpCtx getHelpCtx()
-  {
-    return new HelpCtx(AddIndexAction.class);
-  }
+            Specification spec = connector.getDatabaseSpecification();
+
+            final DriverSpecification drvSpec = connector.getDriverSpecification(catalogName);
+
+            // List columns not present in current index
+            List<String> cols = new ArrayList<String> (5);
+
+            drvSpec.getColumns(tablename, "%");
+            ResultSet rs = drvSpec.getResultSet();
+            Map<Integer, String> rset = new HashMap<Integer, String>();
+            while (rs.next()) {
+                rset = drvSpec.getRow();
+                cols.add(rset.get(new Integer(4)));
+                rset.clear();
+            }
+            rs.close();
+
+            if (cols.isEmpty())
+                throw new Exception(NbBundle.getMessage (AddIndexAction.class, "EXC_NoUsableColumnInPlace")); // NOI18N
+
+            // Create and execute command
+            final AddIndexDialog dlg = new AddIndexDialog(cols, spec, tablename, schemaName);
+            dlg.setIndexName(tablename + "_idx"); // NOI18N
+            if (dlg.run()) {
+                RequestProcessor.getDefault().post(new Runnable() {
+                    @Override
+                    public void run() {
+                        Node refreshNode = node.getParentNode();
+                        if (refreshNode == null) {
+                            refreshNode = node;
+                        }
+
+                        SystemAction.get(RefreshAction.class).performAction(new Node[] { refreshNode } );
+                    }
+                });
+            }
+        } catch(Exception exc) {
+            LOGGER.log(Level.INFO, exc.getLocalizedMessage(), exc);
+            DbUtilities.reportError(NbBundle.getMessage (AddIndexAction.class, "ERR_UnableToAddIndex"), exc.getMessage()); // NOI18N
+        }
+    }
+
+    @Override
+    public HelpCtx getHelpCtx() {
+        return new HelpCtx(AddIndexAction.class);
+    }
 }

@@ -49,17 +49,15 @@ import org.netbeans.modules.db.spi.sql.visualeditor.VisualSQLEditorProvider;
 import org.openide.util.Lookup;
 
 /**
+ *
  * @author Jim Davidson
  */
-public class VisualSQLEditorSupport
-{
+public class VisualSQLEditorSupport {
 
-  public static void openVisualSQLEditor(DatabaseConnection dbconn, String sql)
-  {
-    VisualSQLEditorProvider provider = (VisualSQLEditorProvider) Lookup.getDefault().lookup(VisualSQLEditorProvider.class);
-    if (provider != null)
-    {
-      provider.openVisualSQLEditor(dbconn, sql);
+    public static void openVisualSQLEditor(DatabaseConnection dbconn, String sql) {
+        VisualSQLEditorProvider provider = (VisualSQLEditorProvider)Lookup.getDefault().lookup(VisualSQLEditorProvider.class);
+        if (provider != null) {
+            provider.openVisualSQLEditor(dbconn, sql);
+        }
     }
-  }
 }

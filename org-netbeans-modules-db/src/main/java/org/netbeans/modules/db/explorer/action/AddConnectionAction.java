@@ -43,32 +43,28 @@
 package org.netbeans.modules.db.explorer.action;
 
 import org.openide.nodes.Node;
-import org.openide.util.*;
+import org.openide.util.HelpCtx;
+import org.openide.util.NbBundle;
 
-public class AddConnectionAction extends BaseAction
-{
+public class AddConnectionAction extends BaseAction {
 
-  @Override
-  public String getName()
-  {
-    return NbBundle.getMessage(AddConnectionAction.class, "AddConnection"); // NOI18N
-  }
+    @Override
+    public String getName() {
+        return NbBundle.getMessage (AddConnectionAction.class, "AddConnection"); // NOI18N
+    }
 
-  @Override
-  protected boolean enable(Node[] activatedNodes)
-  {
-    return activatedNodes.length == 1;
-  }
+    @Override
+    protected boolean enable(Node[] activatedNodes) {
+        return activatedNodes.length == 1;
+    }
 
-  @Override
-  public void performAction(Node[] activatedNodes)
-  {
-    new ConnectUsingDriverAction.NewConnectionDialogDisplayer().showDialog(null, null);
-  }
+    @Override
+    public void performAction(Node[] activatedNodes) {
+        new ConnectUsingDriverAction.NewConnectionDialogDisplayer().showDialog(null, null);
+    }
 
-  @Override
-  public HelpCtx getHelpCtx()
-  {
-    return new HelpCtx(AddConnectionAction.class);
-  }
+    @Override
+    public HelpCtx getHelpCtx() {
+        return new HelpCtx(AddConnectionAction.class);
+    }
 }

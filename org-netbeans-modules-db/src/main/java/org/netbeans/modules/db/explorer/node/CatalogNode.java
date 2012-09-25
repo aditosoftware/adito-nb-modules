@@ -42,170 +42,146 @@
 
 package org.netbeans.modules.db.explorer.node;
 
-import org.netbeans.api.db.explorer.node.*;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+import org.netbeans.api.db.explorer.node.BaseNode;
+import org.netbeans.api.db.explorer.node.ChildNodeFactory;
+import org.netbeans.api.db.explorer.node.NodeProvider;
 import org.netbeans.modules.db.explorer.DatabaseConnection;
-import org.netbeans.modules.db.metadata.model.api.*;
-import org.openide.util.*;
-
-import java.beans.*;
+import org.netbeans.modules.db.metadata.model.api.Action;
+import org.netbeans.modules.db.metadata.model.api.Catalog;
+import org.netbeans.modules.db.metadata.model.api.Metadata;
+import org.netbeans.modules.db.metadata.model.api.MetadataElementHandle;
+import org.netbeans.modules.db.metadata.model.api.MetadataModel;
+import org.netbeans.modules.db.metadata.model.api.MetadataModelException;
+import org.openide.util.HelpCtx;
+import org.openide.util.NbBundle;
 
 /**
+ *
  * @author Rob Englander
  */
-public class CatalogNode extends BaseNode
-{
-  private static final String ICONBASE = "org/netbeans/modules/db/resources/database.gif";
-  private static final String FOLDER = "Catalog"; //NOI18N
+public class CatalogNode extends BaseNode {
+    private static final String ICONBASE = "org/netbeans/modules/db/resources/database.gif";
+    private static final String FOLDER = "Catalog"; //NOI18N
 
-  /**
-   * Create an instance of CatalogNode.
-   *
-   * @param dataLookup the lookup to use when creating node providers
-   * @return the CatalogNode instance
-   */
-  public static CatalogNode create(NodeDataLookup dataLookup, NodeProvider provider)
-  {
-    CatalogNode node = new CatalogNode(dataLookup, provider);
-    node.setup();
-    return node;
-  }
+    /**
+     * Create an instance of CatalogNode.
+     *
+     * @param dataLookup the lookup to use when creating node providers
+     * @return the CatalogNode instance
+     */
+    public static CatalogNode create(NodeDataLookup dataLookup, NodeProvider provider) {
+        CatalogNode node = new CatalogNode(dataLookup, provider);
+        node.setup();
+        return node;
+    }
 
-  private String name = ""; // NOI18N
-  private String htmlName = null;
-  private final DatabaseConnection connection;
-  private final MetadataElementHandle<Catalog> catalogHandle;
+    private String name = ""; // NOI18N
+    private String htmlName = null;
+    private final DatabaseConnection connection;
+    private final MetadataElementHandle<Catalog> catalogHandle;
 
-  @SuppressWarnings("unchecked")
-  private CatalogNode(NodeDataLookup lookup, NodeProvider provider)
-  {
-    super(new ChildNodeFactory(lookup), lookup, FOLDER, provider);
-    connection = getLookup().lookup(DatabaseConnection.class);
-    catalogHandle = getLookup().lookup(MetadataElementHandle.class);
-  }
+    @SuppressWarnings("unchecked")
+    private CatalogNode(NodeDataLookup lookup, NodeProvider provider) {
+        super(new ChildNodeFactory(lookup), lookup, FOLDER, provider);
+        connection = getLookup().lookup(DatabaseConnection.class);
+        catalogHandle = getLookup().lookup(MetadataElementHandle.class);
+    }
 
-  protected void initialize()
-  {
-    setupNames();
+    protected void initialize() {
+        setupNames();
 
-    connection.addPropertyChangeListener(
-        new PropertyChangeListener()
-        {
-          public void propertyChange(PropertyChangeEvent evt)
-          {
-            if (evt.getPropertyName().equals(DatabaseConnection.PROP_DEFCATALOG))
-            {
-              updateProperties();
-            }
-          }
-        }
-    );
-  }
-
-  private void setupNames()
-  {
-    MetadataModel metaDataModel = connection.getMetadataModel();
-    boolean connected = !connection.getConnector().isDisconnected();
-    if (connected && metaDataModel != null)
-    {
-      try
-      {
-        metaDataModel.runReadAction(
-            new Action<Metadata>()
-            {
-              public void run(Metadata metaData)
-              {
-                Catalog catalog = catalogHandle.resolve(metaData);
-                renderNames(catalog);
-              }
+        connection.addPropertyChangeListener(
+            new PropertyChangeListener() {
+                public void propertyChange(PropertyChangeEvent evt) {
+                    if (evt.getPropertyName().equals(DatabaseConnection.PROP_DEFCATALOG)) {
+                        updateProperties();
+                    }
+                }
             }
         );
-      }
-      catch (MetadataModelException e)
-      {
-        NodeRegistry.handleMetadataModelException(this.getClass(), connection, e, true);
-      }
-    }
-  }
-
-  @Override
-  protected void updateProperties()
-  {
-    setupNames();
-    super.updateProperties();
-  }
-
-  @Override
-  public String getName()
-  {
-    return name;
-  }
-
-  @Override
-  public String getDisplayName()
-  {
-    return name;
-  }
-
-  @Override
-  public String getHtmlDisplayName()
-  {
-    return htmlName;
-  }
-
-  private void renderNames(Catalog catalog)
-  {
-    if (catalog == null)
-    {
-      name = "";
-    }
-    else
-    {
-      name = catalog.getName();
-      if (name == null)
-      {
-        name = "Default"; // NOI18N
-      }
     }
 
-    if (catalog != null)
-    {
-      boolean isDefault = false;
-      String def = connection.getDefaultCatalog();
-      if (def != null)
-      {
-        isDefault = def.equals(name);
-      }
-      else
-      {
-        isDefault = catalog.isDefault();
-      }
-
-      if (isDefault)
-      {
-        htmlName = "<b>" + name + "</b>"; // NOI18N
-      }
-      else
-      {
-        htmlName = null;
-      }
+    private void setupNames() {
+        MetadataModel metaDataModel = connection.getMetadataModel();
+        boolean connected = !connection.getConnector().isDisconnected();
+        if (connected && metaDataModel != null) {
+            try {
+                metaDataModel.runReadAction(
+                    new Action<Metadata>() {
+                        public void run(Metadata metaData) {
+                            Catalog catalog = catalogHandle.resolve(metaData);
+                            renderNames(catalog);
+                        }
+                    }
+                );
+            } catch (MetadataModelException e) {
+                NodeRegistry.handleMetadataModelException(this.getClass(), connection, e, true);
+            }
+        }
     }
-  }
 
-  @Override
-  public String getIconBase()
-  {
-    return ICONBASE;
-  }
+    @Override
+    protected void updateProperties() {
+        setupNames();
+        super.updateProperties();
+    }
 
-  @Override
-  public String getShortDescription()
-  {
-    return NbBundle.getMessage(CatalogNode.class, "ND_Catalog"); //NOI18N
-  }
+    @Override
+    public String getName() {
+        return name;
+    }
 
-  @Override
-  public HelpCtx getHelpCtx()
-  {
-    return new HelpCtx(CatalogNode.class);
-  }
+    @Override
+    public String getDisplayName() {
+        return name;
+    }
+
+    @Override
+    public String getHtmlDisplayName() {
+        return htmlName;
+    }
+
+    private void renderNames(Catalog catalog) {
+        if (catalog == null) {
+            name = "";
+        } else {
+            name = catalog.getName();
+            if (name == null) {
+                name = "Default"; // NOI18N
+            }
+        }
+
+        if (catalog != null) {
+            boolean isDefault = false;
+            String def = connection.getDefaultCatalog();
+            if (def != null) {
+                isDefault = def.equals(name);
+            } else {
+                isDefault = catalog.isDefault();
+            }
+
+            if (isDefault) {
+                htmlName = "<b>" + name + "</b>"; // NOI18N
+            } else {
+                htmlName = null;
+            }
+        }
+    }
+
+    @Override
+    public String getIconBase() {
+        return ICONBASE;
+    }
+
+    @Override
+    public String getShortDescription() {
+        return NbBundle.getMessage (CatalogNode.class, "ND_Catalog"); //NOI18N
+    }
+
+    @Override
+    public HelpCtx getHelpCtx() {
+        return new HelpCtx(CatalogNode.class);
+    }
 }

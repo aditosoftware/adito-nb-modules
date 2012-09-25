@@ -43,11 +43,10 @@
 package org.netbeans.modules.db.explorer.node;
 
 /**
+ *
  * @author Rob Englander
  */
-public interface SchemaNameProvider
-{
-  public String getSchemaName();
-
-  public String getCatalogName();
+public interface SchemaNameProvider {
+    public String getSchemaName();
+    public String getCatalogName();
 }

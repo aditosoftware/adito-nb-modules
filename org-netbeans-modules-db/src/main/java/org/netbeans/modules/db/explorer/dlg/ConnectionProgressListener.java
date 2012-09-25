@@ -47,16 +47,16 @@ package org.netbeans.modules.db.explorer.dlg;
 import java.util.EventListener;
 
 /**
+ *
  * @author Andrei Badea
  */
-public interface ConnectionProgressListener extends EventListener
-{
+public interface ConnectionProgressListener extends EventListener {
 
-  public void connectionStarted();
+    public void connectionStarted();
 
-  public void connectionStep(String step);
+    public void connectionStep(String step);
 
-  public void connectionFinished();
+    public void connectionFinished();
 
-  public void connectionFailed();
+    public void connectionFailed();
 }

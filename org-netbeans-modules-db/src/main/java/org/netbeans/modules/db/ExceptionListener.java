@@ -44,7 +44,6 @@
 
 package org.netbeans.modules.db;
 
-public interface ExceptionListener
-{
-  public void exceptionOccurred(Exception exc);
+public interface ExceptionListener {
+    public void exceptionOccurred(Exception exc);
 }

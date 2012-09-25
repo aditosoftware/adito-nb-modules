@@ -30,78 +30,72 @@
  */
 package org.netbeans.modules.db.explorer.dlg;
 
-import org.netbeans.lib.ddl.impl.*;
+import org.netbeans.lib.ddl.impl.AddColumn;
+import org.netbeans.lib.ddl.impl.CreateIndex;
+import org.netbeans.lib.ddl.impl.Specification;
+import org.netbeans.lib.ddl.impl.TableColumn;
 import org.netbeans.lib.ddl.util.CommandBuffer;
 
 /**
  * This class factors out the logic of actually adding a column to
  * the database.  It is responsible for interacting with the DDL package.
- *
+ * 
  * This refactoring is done to both separate the view from the underlying
  * logic, and also to make it more possible to unit test this logic
  */
-public class AddTableColumnDDL
-{
-  private Specification spec;
-  private String schema;
-  private String tablename;
+public class AddTableColumnDDL {
+    private Specification       spec;
+    private String              schema;
+    private String              tablename;
+    
 
-
-  public AddTableColumnDDL(
-      Specification spec,
-      String schema,
-      String tablename)
-  {
-    this.spec = spec;
-    this.schema = schema;
-    this.tablename = tablename;
-  }
-
-  public boolean execute(String colname, ColumnItem citem) throws Exception
-  {
-    assert citem != null;
-    assert colname != null;
-
-    CommandBuffer cbuff = new CommandBuffer();
-
-    AddColumn cmd = spec.createCommandAddColumn(tablename);
-    cmd.setObjectOwner(schema);
-    org.netbeans.lib.ddl.impl.TableColumn col = null;
-    if (citem.isPrimaryKey())
-    {
-      col = cmd.createPrimaryKeyColumn(colname);
+    public AddTableColumnDDL(
+            Specification spec, 
+            String schema,
+            String tablename) {
+        this.spec       = spec;
+        this.schema     = schema;
+        this.tablename  = tablename;
     }
-    else if (citem.isUnique())
-    {
-      col = cmd.createUniqueColumn(colname);
+        
+    public boolean execute(String colname, ColumnItem citem) throws Exception {
+        assert citem != null;
+        assert colname != null;
+        
+        CommandBuffer cbuff = new CommandBuffer();
+
+        AddColumn cmd = spec.createCommandAddColumn(tablename);
+        cmd.setObjectOwner(schema);
+        org.netbeans.lib.ddl.impl.TableColumn col = null;
+        if (citem.isPrimaryKey()) {
+          col = cmd.createPrimaryKeyColumn(colname);
+        } else if (citem.isUnique()) {
+          col = cmd.createUniqueColumn(colname);
+        } else col = (TableColumn)cmd.createColumn(colname);
+        col.setColumnType(Specification.getType(citem.getType().getType()));
+        col.setColumnSize(citem.getSize());
+        col.setDecimalSize(citem.getScale());
+        col.setNullAllowed(citem.allowsNull());
+        if (citem.hasDefaultValue()) col.setDefaultValue(citem.getDefaultValue());
+
+        if (citem.hasCheckConstraint()) {
+            // add COLUMN constraint (without constraint name)
+            col.setCheckCondition(citem.getCheckConstraint());
+        }
+
+        cbuff.add(cmd);
+
+        if (citem.isIndexed() && !citem.isPrimaryKey() && !citem.isUnique()) {
+            CreateIndex xcmd = spec.createCommandCreateIndex(tablename);
+            xcmd.setIndexName(tablename + "_" + colname + "_idx"); // NOI18N
+            xcmd.setIndexType(new String());
+            xcmd.setObjectOwner(schema);
+            xcmd.specifyNewColumn(colname);
+            cbuff.add(xcmd);
+        }
+
+        cbuff.execute();
+
+        return cbuff.wasException();
     }
-    else col = (TableColumn) cmd.createColumn(colname);
-    col.setColumnType(Specification.getType(citem.getType().getType()));
-    col.setColumnSize(citem.getSize());
-    col.setDecimalSize(citem.getScale());
-    col.setNullAllowed(citem.allowsNull());
-    if (citem.hasDefaultValue()) col.setDefaultValue(citem.getDefaultValue());
-
-    if (citem.hasCheckConstraint())
-    {
-      // add COLUMN constraint (without constraint name)
-      col.setCheckCondition(citem.getCheckConstraint());
-    }
-
-    cbuff.add(cmd);
-
-    if (citem.isIndexed() && !citem.isPrimaryKey() && !citem.isUnique())
-    {
-      CreateIndex xcmd = spec.createCommandCreateIndex(tablename);
-      xcmd.setIndexName(tablename + "_" + colname + "_idx"); // NOI18N
-      xcmd.setIndexType(new String());
-      xcmd.setObjectOwner(schema);
-      xcmd.specifyNewColumn(colname);
-      cbuff.add(xcmd);
-    }
-
-    cbuff.execute();
-
-    return cbuff.wasException();
-  }
 }

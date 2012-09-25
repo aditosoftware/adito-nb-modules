@@ -42,99 +42,89 @@
 
 package org.netbeans.modules.db.explorer.action;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.netbeans.api.db.explorer.node.BaseNode;
 import org.netbeans.lib.ddl.impl.Specification;
-import org.netbeans.modules.db.explorer.*;
+import org.netbeans.modules.db.explorer.DatabaseConnection;
+import org.netbeans.modules.db.explorer.DbUtilities;
 import org.netbeans.modules.db.explorer.dlg.AddViewDialog;
-import org.openide.*;
+import org.openide.DialogDisplayer;
+import org.openide.NotifyDescriptor;
 import org.openide.nodes.Node;
-import org.openide.util.*;
+import org.openide.util.HelpCtx;
+import org.openide.util.NbBundle;
+import org.openide.util.RequestProcessor;
 import org.openide.util.actions.SystemAction;
 
-import java.util.logging.*;
-
 /**
+ *
  * @author Rob Englander
  */
-public class CreateViewAction extends BaseAction
-{
+public class CreateViewAction extends BaseAction {
 
-  @Override
-  protected boolean enable(Node[] activatedNodes)
-  {
-    if (activatedNodes == null || activatedNodes.length != 1)
-    {
-      return false;
-    }
-
-    boolean enabled = false;
-    DatabaseConnection dbconn = activatedNodes[0].getLookup().lookup(DatabaseConnection.class);
-
-    if (dbconn != null)
-    {
-      enabled = DatabaseConnection.isVitalConnection(dbconn.getConnection(), dbconn);
-    }
-
-    return enabled;
-  }
-
-  @Override
-  public HelpCtx getHelpCtx()
-  {
-    return new HelpCtx(CreateViewAction.class);
-  }
-
-  @Override
-  public void performAction(Node[] activatedNodes)
-  {
-    final BaseNode node = activatedNodes[0].getLookup().lookup(BaseNode.class);
-    RequestProcessor.getDefault().post(
-        new Runnable()
-        {
-          @Override
-          public void run()
-          {
-            perform(node);
-          }
+    @Override
+    protected boolean enable(Node[] activatedNodes) {
+        if (activatedNodes == null || activatedNodes.length != 1) {
+            return false;
         }
-    );
-  }
 
-  private void perform(final BaseNode node)
-  {
-    DatabaseConnection connection = node.getLookup().lookup(DatabaseConnection.class);
+        boolean enabled = false;
+        DatabaseConnection dbconn = activatedNodes[0].getLookup().lookup(DatabaseConnection.class);
 
-    String schemaName = findSchemaWorkingName(node.getLookup());
+        if (dbconn != null) {
+            enabled = DatabaseConnection.isVitalConnection(dbconn.getConnection(), dbconn);
+        }
 
-    try
-    {
-      boolean viewsSupported = connection.getConnector().getDriverSpecification(schemaName).areViewsSupported();
-      if (!viewsSupported)
-      {
-        String message = NbBundle.getMessage(CreateViewAction.class, "MSG_ViewsAreNotSupported", // NOI18N
-                                             connection.getConnection().getMetaData().getDatabaseProductName().trim());
-        DialogDisplayer.getDefault().notify(new NotifyDescriptor.Message(message, NotifyDescriptor.INFORMATION_MESSAGE));
-        return;
-      }
-
-      Specification spec = connection.getConnector().getDatabaseSpecification();
-
-      boolean viewAdded = AddViewDialog.showDialogAndCreate(spec, schemaName);
-      if (viewAdded)
-      {
-        SystemAction.get(RefreshAction.class).performAction(new Node[]{node});
-      }
+        return enabled;
     }
-    catch (Exception exc)
-    {
-      Logger.getLogger(CreateViewAction.class.getName()).log(Level.INFO, exc.getLocalizedMessage(), exc);
-      DbUtilities.reportError(NbBundle.getMessage(CreateViewAction.class, "ERR_UnableToCreateView"), exc.getMessage()); // NOI18N
-    }
-  }
 
-  @Override
-  public String getName()
-  {
-    return NbBundle.getMessage(CreateViewAction.class, "AddView"); // NOI18N
-  }
+    @Override
+    public HelpCtx getHelpCtx() {
+        return new HelpCtx(CreateViewAction.class);
+    }
+
+    @Override
+    public void performAction (Node[] activatedNodes) {
+        final BaseNode node = activatedNodes[0].getLookup().lookup(BaseNode.class);
+        RequestProcessor.getDefault().post(
+            new Runnable() {
+            @Override
+                public void run() {
+                    perform(node);
+                }
+            }
+        );
+    }
+
+    private void perform(final BaseNode node) {
+        DatabaseConnection connection = node.getLookup().lookup(DatabaseConnection.class);
+
+        String schemaName = findSchemaWorkingName(node.getLookup());
+
+        try {
+            boolean viewsSupported = connection.getConnector().getDriverSpecification(schemaName).areViewsSupported();
+            if (!viewsSupported) {
+                String message = NbBundle.getMessage (CreateViewAction.class, "MSG_ViewsAreNotSupported", // NOI18N
+                        connection.getConnection().getMetaData().getDatabaseProductName().trim());
+                DialogDisplayer.getDefault().notify(new NotifyDescriptor.Message(message, NotifyDescriptor.INFORMATION_MESSAGE));
+                return;
+            }
+
+            Specification spec = connection.getConnector().getDatabaseSpecification();
+
+            boolean viewAdded = AddViewDialog.showDialogAndCreate(spec, schemaName);
+            if (viewAdded) {
+                SystemAction.get(RefreshAction.class).performAction(new Node[]{node});
+            }
+        } catch(Exception exc) {
+            Logger.getLogger(CreateViewAction.class.getName()).log(Level.INFO, exc.getLocalizedMessage(), exc);
+            DbUtilities.reportError(NbBundle.getMessage (CreateViewAction.class, "ERR_UnableToCreateView"), exc.getMessage()); // NOI18N
+        }
+     }
+
+    @Override
+    public String getName() {
+        return NbBundle.getMessage (CreateViewAction.class, "AddView"); // NOI18N
+    }
 }

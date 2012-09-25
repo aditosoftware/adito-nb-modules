@@ -41,116 +41,101 @@
  */
 package org.netbeans.modules.db.explorer.dlg;
 
+import java.awt.Component;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
+import javax.swing.JComponent;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import org.netbeans.api.db.explorer.JDBCDriver;
 import org.openide.WizardDescriptor;
 import org.openide.util.HelpCtx;
 
-import javax.swing.*;
-import javax.swing.event.*;
-import java.awt.*;
-import java.util.*;
+public class ChoosingDriverPanel implements AddConnectionWizard.Panel {
 
-public class ChoosingDriverPanel implements AddConnectionWizard.Panel
-{
+    private AddConnectionWizard pw;
 
-  private AddConnectionWizard pw;
-
-  public ChoosingDriverPanel(JDBCDriver driver)
-  {
-    this.driver = driver;
-  }
-
-  /**
-   * The visual component that displays this panel. If you need to access the
-   * component from this class, just use getComponent().
-   */
-  private ChoosingDriverUI component;
-  private JDBCDriver driver;
-
-  // Get the visual component for the panel. In this template, the component
-  // is kept separate. This can be more efficient: if the wizard is created
-  // but never displayed, or not all panels are displayed, it is better to
-  // create only those which really need to be visible.
-  @Override
-  public Component getComponent()
-  {
-    if (component == null)
-    {
-      if (pw == null)
-      {
-        return null;
-      }
-      component = new ChoosingDriverUI(this, driver, pw);
-      JComponent jc = (JComponent) component;
-      jc.putClientProperty(WizardDescriptor.PROP_CONTENT_SELECTED_INDEX, 0);
-      jc.putClientProperty(WizardDescriptor.PROP_CONTENT_DATA, pw.getSteps());
-      jc.putClientProperty(WizardDescriptor.PROP_AUTO_WIZARD_STYLE, Boolean.TRUE);
-      jc.putClientProperty(WizardDescriptor.PROP_CONTENT_DISPLAYED, Boolean.FALSE);
-      jc.putClientProperty(WizardDescriptor.PROP_CONTENT_NUMBERED, Boolean.FALSE);
+    public ChoosingDriverPanel(JDBCDriver driver) {
+        this.driver = driver;
     }
-    return component;
-  }
 
-  @Override
-  public HelpCtx getHelp()
-  {
-    return AddDriverDialog.getHelpCtx();
-  }
+    /**
+     * The visual component that displays this panel. If you need to access the
+     * component from this class, just use getComponent().
+     */
+    private ChoosingDriverUI component;
+    private JDBCDriver driver;
 
-  @Override
-  public boolean isValid()
-  {
-    return component != null && component.driverFound();
-  }
-
-  private final Set<ChangeListener> listeners = new HashSet<ChangeListener>(1);
-
-  @Override
-  public final void addChangeListener(ChangeListener l)
-  {
-    synchronized (listeners)
-    {
-      listeners.add(l);
+    // Get the visual component for the panel. In this template, the component
+    // is kept separate. This can be more efficient: if the wizard is created
+    // but never displayed, or not all panels are displayed, it is better to
+    // create only those which really need to be visible.
+    @Override
+    public Component getComponent() {
+        if (component == null) {
+            if (pw == null) {
+                return null;
+            }
+            component = new ChoosingDriverUI(this, driver, pw);
+            JComponent jc = (JComponent) component;
+            jc.putClientProperty(WizardDescriptor.PROP_CONTENT_SELECTED_INDEX, 0);
+            jc.putClientProperty(WizardDescriptor.PROP_CONTENT_DATA, pw.getSteps());
+            jc.putClientProperty(WizardDescriptor.PROP_AUTO_WIZARD_STYLE, Boolean.TRUE);
+            jc.putClientProperty(WizardDescriptor.PROP_CONTENT_DISPLAYED, Boolean.FALSE);
+            jc.putClientProperty(WizardDescriptor.PROP_CONTENT_NUMBERED, Boolean.FALSE);
+        }
+        return component;
     }
-  }
 
-  @Override
-  public final void removeChangeListener(ChangeListener l)
-  {
-    synchronized (listeners)
-    {
-      listeners.remove(l);
+    @Override
+    public HelpCtx getHelp() {
+        return AddDriverDialog.getHelpCtx();
     }
-  }
 
-  protected final void fireChangeEvent()
-  {
-    Iterator<ChangeListener> it;
-    synchronized (listeners)
-    {
-      it = new HashSet<ChangeListener>(listeners).iterator();
+    @Override
+    public boolean isValid() {
+        return component != null && component.driverFound();
     }
-    ChangeEvent ev = new ChangeEvent(this);
-    while (it.hasNext())
-    {
-      it.next().stateChanged(ev);
+    
+    private final Set<ChangeListener> listeners = new HashSet<ChangeListener>(1);
+
+    @Override
+    public final void addChangeListener(ChangeListener l) {
+        synchronized (listeners) {
+            listeners.add(l);
+        }
     }
-  }
 
-  @Override
-  public void readSettings(AddConnectionWizard settings)
-  {
-    this.pw = settings;
-  }
+    @Override
+    public final void removeChangeListener(ChangeListener l) {
+        synchronized (listeners) {
+            listeners.remove(l);
+        }
+    }
 
-  @Override
-  public void storeSettings(AddConnectionWizard settings)
-  {
-    settings.setDriver(component.getDriver());
-  }
+    protected final void fireChangeEvent() {
+        Iterator<ChangeListener> it;
+        synchronized (listeners) {
+            it = new HashSet<ChangeListener>(listeners).iterator();
+        }
+        ChangeEvent ev = new ChangeEvent(this);
+        while (it.hasNext()) {
+            it.next().stateChanged(ev);
+        }
+    }
 
-  JDBCDriver getDriver()
-  {
-    return component.getDriver();
-  }
+    @Override
+    public void readSettings(AddConnectionWizard settings) {
+        this.pw = settings;
+    }
+
+    @Override
+    public void storeSettings(AddConnectionWizard settings) {
+        settings.setDriver(component.getDriver());
+    }
+
+    JDBCDriver getDriver() {
+        return component.getDriver();
+    }
 }

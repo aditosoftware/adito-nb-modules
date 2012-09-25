@@ -42,13 +42,15 @@
 
 package org.netbeans.modules.db.explorer.node;
 
-import org.netbeans.api.db.explorer.node.*;
+import java.util.ArrayList;
+import java.util.List;
+import org.netbeans.api.db.explorer.node.BaseNode;
+import org.netbeans.api.db.explorer.node.NodeProvider;
 import org.netbeans.modules.db.explorer.DatabaseConnection;
-import org.netbeans.modules.db.metadata.model.api.*;
+import org.netbeans.modules.db.metadata.model.api.MetadataElementHandle;
+import org.netbeans.modules.db.metadata.model.api.Schema;
 import org.openide.nodes.Node;
 import org.openide.util.Lookup;
-
-import java.util.*;
 
 /**
  * ConnectedNodeprovider serves as a base class for all node providers
@@ -56,53 +58,45 @@ import java.util.*;
  *
  * @author Rob Englander
  */
-public abstract class ConnectedNodeProvider extends NodeProvider
-{
+public abstract class ConnectedNodeProvider  extends NodeProvider {
 
-  private final DatabaseConnection connection;
-  private boolean setup = false;
+    private final DatabaseConnection connection;
+    private boolean setup = false;
 
-  protected ConnectedNodeProvider(Lookup lookup)
-  {
-    super(lookup);
-    connection = getLookup().lookup(DatabaseConnection.class);
-  }
-
-  /**
-   * Create a BaseNode instance.
-   *
-   * @param lookup the lookup to use to create the node
-   * @return the created baseNode
-   */
-  protected abstract BaseNode createNode(NodeDataLookup lookup);
-
-  protected synchronized void initialize()
-  {
-    if (connection.getConnector().isDisconnected())
-    {
-      removeAllNodes();
-      setup = false;
+    protected ConnectedNodeProvider(Lookup lookup) {
+        super(lookup);
+        connection = getLookup().lookup(DatabaseConnection.class);
     }
-    else
-    {
-      if (!setup)
-      {
-        NodeDataLookup lookup = new NodeDataLookup();
-        lookup.add(connection);
 
-        MetadataElementHandle<Schema> schemaHandle = getLookup().lookup(MetadataElementHandle.class);
-        if (schemaHandle != null)
-        {
-          lookup.add(schemaHandle);
+    /**
+     * Create a BaseNode instance.
+     *
+     * @param lookup the lookup to use to create the node
+     * @return the created baseNode
+     */
+    protected abstract BaseNode createNode(NodeDataLookup lookup);
+
+    protected synchronized void initialize() {
+        if (connection.getConnector().isDisconnected()) {
+            removeAllNodes();
+            setup = false;
+        } else {
+            if (!setup) {
+                NodeDataLookup lookup = new NodeDataLookup();
+                lookup.add(connection);
+
+                MetadataElementHandle<Schema> schemaHandle = getLookup().lookup(MetadataElementHandle.class);
+                if (schemaHandle != null) {
+                    lookup.add(schemaHandle);
+                }
+
+                List<Node> newList = new ArrayList<Node>();
+
+                newList.add(createNode(lookup));
+
+                setNodes(newList);
+                setup = true;
+            }
         }
-
-        List<Node> newList = new ArrayList<Node>();
-
-        newList.add(createNode(lookup));
-
-        setNodes(newList);
-        setup = true;
-      }
     }
-  }
 }
