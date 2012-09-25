@@ -44,49 +44,44 @@
 
 package org.netbeans.modules.db.explorer.dlg;
 
-import java.awt.*;
-import java.awt.event.*;
-import java.util.*;
-import javax.swing.*;
-import org.netbeans.lib.ddl.*;
-import org.netbeans.modules.db.explorer.*;
-
 /**
-* xxx
-*
-* @author Slavek Psenicka
-*/
+ * xxx
+ *
+ * @author Slavek Psenicka
+ */
 
-class TypeElement
+public class TypeElement
 {
-    private String tstr, tname;
+  private String tstr, tname;
 
-    public TypeElement(String typestr, String name)
+  public TypeElement(String typestr, String name)
+  {
+    tstr = typestr;
+    tname = name;
+  }
+
+  public String getType()
+  {
+    return tstr;
+  }
+
+  public String getName()
+  {
+    return tname;
+  }
+
+  public String toString()
+  {
+    return tname;
+  }
+
+  @Override
+  public boolean equals(Object anObject)
+  {
+    if (anObject instanceof TypeElement)
     {
-        tstr = typestr;
-        tname = name;
+      return tstr.equals(((TypeElement) anObject).tstr);
     }
-
-    public String getType()
-    {
-        return tstr;
-    }
-
-    public String getName()
-    {
-        return tname;
-    }
-
-    public String toString()
-    {
-        return tname;
-    }
-
-    @Override
-    public boolean equals(Object anObject) {
-        if (anObject instanceof TypeElement) {
-            return tstr.equals(((TypeElement) anObject).tstr);
-        }
-        return false;
-    }
+    return false;
+  }
 }
