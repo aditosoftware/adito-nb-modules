@@ -52,7 +52,7 @@ import javax.swing.Action;
 // STRIPPED
 /*import org.netbeans.api.java.loaders.JavaDataSupport;
 import org.netbeans.modules.form.EditorSupport;
-import org.netbeans.modules.form.FormDataObject;*/
+import org.netbeans.modules.form.DataObject;*/
 import org.openide.actions.EditAction;
 import org.openide.actions.OpenAction;
 import org.openide.filesystems.FileObject;
@@ -78,7 +78,7 @@ public class FormDataNode extends FilterNode {
      *
      * @param fdo form data object
      */
-    public FormDataNode(FormDataObject fdo) {
+    public FormDataNode(DataObject fdo) {
         this(_getNode(fdo.getPrimaryFile()));
     }
 

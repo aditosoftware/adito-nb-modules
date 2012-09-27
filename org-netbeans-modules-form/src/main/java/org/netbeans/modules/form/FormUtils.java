@@ -59,6 +59,7 @@ import javax.swing.plaf.ComponentUI;
 import javax.swing.tree.DefaultTreeModel;
 
 import org.openide.ErrorManager;
+import org.openide.loaders.DataObject;
 import org.openide.util.*;
 import org.openide.nodes.Node;
 import org.openide.filesystems.FileObject;
@@ -1453,8 +1454,8 @@ public class FormUtils
     public static Class loadClass(String name, FormModel form)
         throws ClassNotFoundException
     {
-        FormDataObject dobj = FormEditor.getFormDataObject(form);
-        return dobj != null ? loadClass(name, dobj.getFormFile()) :
+        DataObject dobj = FormEditor.getFormDataObject(form);
+        return dobj != null ? loadClass(name, dobj.getPrimaryFile()) :
                               loadSystemClass(name); // layout test may have no data object
     }
 

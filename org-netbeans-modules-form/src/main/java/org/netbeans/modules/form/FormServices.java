@@ -42,7 +42,7 @@ import javax.swing.JEditorPane;
 import org.netbeans.modules.form.project.ClassSource;
 import org.netbeans.spi.palette.PaletteActions;
 import org.openide.filesystems.FileObject;
-import org.openide.loaders.MultiDataObject;
+import org.openide.loaders.*;
 import org.openide.nodes.Node;
 
 /**
@@ -57,8 +57,7 @@ public interface FormServices {
     void setupCodeEditorPane(JEditorPane editor, FileObject srcFile, int ccPosition);
     PaletteActions createPaletteActions();
     ClassSource getCopiedBeanClassSource(Transferable transferable);
-    Node createFormDataNode(FormDataObject formDataObject);
-    MultiDataObject.Entry createPrimaryEntry(MultiDataObject obj, FileObject primaryFile);
+    Node createFormDataNode(DataObject formDataObject);
     boolean isLayoutExtensionsLibrarySupported();
-    EditorSupport createEditorSupport(FormDataObject formDataObject);
+    EditorSupport createEditorSupport(DataObject formDataObject);
 }

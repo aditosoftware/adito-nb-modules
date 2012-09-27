@@ -169,7 +169,7 @@ public class FormEditorSupport extends DataEditorSupport implements EditorSuppor
             "org/netbeans/modules/form/resources/form.gif"; // NOI18N
 
     /** The DataObject of the form */
-    private FormDataObject formDataObject;
+    private DataObject formDataObject;
 
     /** The embracing multiview TopComponent (holds the form designer and
      * java editor) - we remeber the last active TopComponent (not all clones) */
@@ -193,41 +193,16 @@ public class FormEditorSupport extends DataEditorSupport implements EditorSuppor
 
     private static Map<FileSystem,FileStatusListener> fsToStatusListener = new HashMap<FileSystem,FileStatusListener>();
 
-    @SuppressWarnings("FieldCanBeLocal") // must be a class field for retaining a strong reference
-    private final Object listenerSupportStrongReference;
-
     // --------------
     // constructor
 
-    public FormEditorSupport(MultiDataObject.Entry javaEntry,
-            FormDataObject formDataObject,
-            CookieSet cookies) {
+    public FormEditorSupport(
+            DataObject formDataObject/*,
+            CookieSet cookies*/) {
         super(formDataObject, new Environment(formDataObject));
         setMIMEType("text/aod+xml"); // NOI18N
         this.formDataObject = formDataObject;
-        this.cookies = cookies;
-
-        listenerSupportStrongReference = NbAditoInterface.lookup(IAditoModelDataProvider.class).installUpdateListeners(
-            formDataObject, this, getUndoRedo(), new Runnable()
-        {
-          @Override
-          public void run()
-          {
-            java.awt.EventQueue.invokeLater(new Runnable()
-            {
-              @Override
-              public void run()
-              {
-                FormDesignerTC designerTC = getFormDesignerTC();
-                if (designerTC != null)
-                {
-                  formEditor.closeForm();
-                  designerTC.resetDesigner(true); // will trigger loading
-                }
-              }
-            });
-          }
-        });
+        //this.cookies = cookies;
     }
 
     // ----------
@@ -300,7 +275,7 @@ public class FormEditorSupport extends DataEditorSupport implements EditorSuppor
         StatusDisplayer.getDefault().setStatusText(
             FormUtils.getFormattedBundleString(
                 fmtMessage, // NOI18N
-                new Object[] { formDataObject.getFormFile().getName() }));
+                new Object[] { formDataObject.getPrimaryFile().getName() }));
         javax.swing.RepaintManager.currentManager(mainWin).paintDirtyRegions();
     }
 
@@ -324,7 +299,7 @@ public class FormEditorSupport extends DataEditorSupport implements EditorSuppor
                         while (iter.hasNext()) {
                             FormEditorSupport fes = iter.next();
                             if (ev.hasChanged(fes.getFormDataObject().getPrimaryFile())
-                                    || ev.hasChanged(fes.getFormDataObject().getFormFile())) {
+                                    || ev.hasChanged(fes.getFormDataObject().getPrimaryFile())) {
                                 fes.updateMVTCDisplayName();
                             }
                         }
@@ -572,7 +547,7 @@ public class FormEditorSupport extends DataEditorSupport implements EditorSuppor
     // other interface methods
 
     /** @return data object representing the form */
-    public final FormDataObject getFormDataObject() {
+    public final DataObject getFormDataObject() {
         return formDataObject;
     }
 
@@ -618,6 +593,11 @@ public class FormEditorSupport extends DataEditorSupport implements EditorSuppor
     public void discardEditorUndoableEdits() {
         if (editorUndoManager != null)
             editorUndoManager.discardAllEdits();
+    }
+
+    public UndoRedo.Manager getUndoRedoManager()
+    {
+      return getUndoRedo();
     }
 
     // -----------
@@ -758,12 +738,12 @@ public class FormEditorSupport extends DataEditorSupport implements EditorSuppor
         boolean alreadyModified = isModified();
         boolean retVal = super.notifyModified();
 
-        if (retVal) { // java source modification
+        /*if (retVal) { // java source modification
             addSaveCookie();
-        }
+        }*/
 
         if (!alreadyModified) {
-            FileObject formFile = formDataObject.getFormFile();
+            FileObject formFile = formDataObject.getPrimaryFile();
             if (!formFile.canWrite()) { // Issue 74092
                 FileLock lock = null;
                 try {
@@ -804,7 +784,7 @@ public class FormEditorSupport extends DataEditorSupport implements EditorSuppor
     protected void notifyUnmodified () {
         super.notifyUnmodified();
          // java source modification
-        removeSaveCookie();
+        //removeSaveCookie();
         updateMVTCDisplayName();
     }
 
@@ -987,13 +967,13 @@ public class FormEditorSupport extends DataEditorSupport implements EditorSuppor
         return (CloneableEditorSupport.Pane)mvtc;
     }
 
-    private static boolean readOnly(FormDataObject formDataObject) {
+    private static boolean readOnly(DataObject formDataObject) {
         if (!formDataObject.getPrimaryFile().canWrite()) {
             return true;
         }
         TopComponent active = TopComponent.getRegistry().getActivated();
         if (active != null && getSelectedElementType(active) == FORM_ELEMENT_INDEX) {
-            FormEditorSupport fes = (FormEditorSupport)formDataObject.getFormEditorSupport();
+            FormEditorSupport fes = formDataObject.getLookup().lookup(FormEditorSupport.class);
             if (fes != null) {
                 FormModel fm = fes.getFormModel();
                 if (fm != null) {
@@ -1004,7 +984,7 @@ public class FormEditorSupport extends DataEditorSupport implements EditorSuppor
         return false;
     }
 
-    private static String getMVTCToolTipText(FormDataObject formDataObject) {
+    private static String getMVTCToolTipText(DataObject formDataObject) {
         return DataEditorSupport.toolTip(formDataObject.getPrimaryFile(), formDataObject.isModified(), readOnly(formDataObject));
     }
 
@@ -1016,7 +996,7 @@ public class FormEditorSupport extends DataEditorSupport implements EditorSuppor
      * @param formDataObject form data object representing the multiview tc.
      * @return display names of the MVTC. The second item can be <code>null</code>.
      */
-    private static String[] getMVTCDisplayName(FormDataObject formDataObject) {
+    private static String[] getMVTCDisplayName(DataObject formDataObject) {
         Node node = formDataObject.getNodeDelegate();
         String title = node.getDisplayName();
         String htmlTitle = node.getHtmlDisplayName();
@@ -1027,7 +1007,7 @@ public class FormEditorSupport extends DataEditorSupport implements EditorSuppor
                 htmlTitle = "???";
             }
         }
-        FormEditorSupport fes = (FormEditorSupport)formDataObject.getFormEditorSupport();
+        FormEditorSupport fes = formDataObject.getLookup().lookup(FormEditorSupport.class);
         if (fes != null) {
             FormDesignerTC designerTC = fes.getFormDesignerTC();
             if (designerTC != null && designerTC.isShowing()) {
@@ -1199,9 +1179,9 @@ public class FormEditorSupport extends DataEditorSupport implements EditorSuppor
     public static FormEditorSupport getFormEditor(TopComponent tc) {
         Object dobj = tc.getLookup().lookup(DataObject.class);
         FormEditorSupport fes = null;
-        if (dobj instanceof FormDataObject) {
-            FormDataObject formDataObject = (FormDataObject)dobj;
-            fes = (FormEditorSupport)formDataObject.getFormEditorSupport();
+        if (dobj instanceof DataObject) {
+            DataObject formDataObject = (DataObject)dobj;
+            fes = formDataObject.getLookup().lookup(FormEditorSupport.class);
         }
         return fes;
     }
@@ -1457,11 +1437,11 @@ public class FormEditorSupport extends DataEditorSupport implements EditorSuppor
             multiViewObserver = callback;
 
             // needed for deserialization...
-            if (((DataEditorSupport) cloneableEditorSupport ()).getDataObject() instanceof FormDataObject) { // [obj is from EditorSupport.Editor]
+            if (((DataEditorSupport) cloneableEditorSupport ()).getDataObject() instanceof DataObject) { // [obj is from EditorSupport.Editor]
                 // this is used (or misused?) to obtain the deserialized
                 // multiview topcomponent and set it to FormEditorSupport
                 DataEditorSupport des = (DataEditorSupport)cloneableEditorSupport();
-                FormDataObject formDataObject = (FormDataObject)des.getDataObject();
+                DataObject formDataObject = (DataObject)des.getDataObject();
                 FormEditorSupport fes = (FormEditorSupport)formDataObject.getFormEditorSupport();
                 fes.setTopComponent(callback.getTopComponent());
             }
@@ -1509,14 +1489,14 @@ public class FormEditorSupport extends DataEditorSupport implements EditorSuppor
                     }
                 }
             }
-            
+
         }
-        
+
         @Override
         public void componentHidden() {
             super.componentHidden();
         }
-        
+
         @Override
         public void componentOpened() {
             super.componentOpened();
@@ -1527,7 +1507,7 @@ public class FormEditorSupport extends DataEditorSupport implements EditorSuppor
                 ec.open();
             }
         }
-        
+
         @Override
         public void updateName() {
             super.updateName();
@@ -1538,12 +1518,12 @@ public class FormEditorSupport extends DataEditorSupport implements EditorSuppor
                 setHtmlDisplayName(titles[1]);
             }
         }
-        
+
         @Override
         protected boolean closeLast() {
             return true;
         }
-        
+
         @Override
         public CloseOperationState canCloseElement() {
             if (javaEditor == null) {
@@ -1551,21 +1531,21 @@ public class FormEditorSupport extends DataEditorSupport implements EditorSuppor
             }
             return javaEditor.canCloseElement(multiViewObserver.getTopComponent());
         }
-        
+
         protected boolean isActiveTC() {
             TopComponent selected = getRegistry().getActivated();
-            
+
             if (selected == null)
                 return false;
             if (selected == this)
                 return true;
-            
+
             MultiViewHandler handler = MultiViews.findMultiViewHandler(selected);
             if (handler != null
                     && MV_JAVA_ID.equals(handler.getSelectedPerspective()
                     .preferredID()))
                 return true;
-            
+
             return false;
         }
     }*/
@@ -1585,7 +1565,7 @@ public class FormEditorSupport extends DataEditorSupport implements EditorSuppor
 
         @Override
         protected FileLock takeLock() throws java.io.IOException {
-            return ((FormDataObject) getDataObject()).getPrimaryEntry().takeLock();
+            return ((MultiDataObject) getDataObject()).getPrimaryEntry().takeLock();
         }
 
         @Override
@@ -1631,7 +1611,7 @@ public class FormEditorSupport extends DataEditorSupport implements EditorSuppor
         }
     };
 
-    private final CookieSet cookies;
+    /*private final CookieSet cookies;
 
     public void addSaveCookie() {
         DataObject javaData = this.getDataObject();
@@ -1647,6 +1627,6 @@ public class FormEditorSupport extends DataEditorSupport implements EditorSuppor
             cookies.remove(saveCookie);
             javaData.setModified(false);
         }
-    }
+    }*/
 
 }

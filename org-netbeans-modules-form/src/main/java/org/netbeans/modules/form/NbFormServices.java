@@ -43,7 +43,6 @@ import javax.swing.JEditorPane;
 import javax.swing.text.Document;
 import org.netbeans.api.editor.DialogBinding;
 import org.netbeans.modules.form.EditorSupport;
-import org.netbeans.modules.form.FormDataObject;
 import org.netbeans.modules.form.FormServices;
 import org.netbeans.modules.form.FormUtils;
 import org.netbeans.modules.form.palette.*;
@@ -77,12 +76,7 @@ public class NbFormServices implements FormServices {
         } catch (DataObjectNotFoundException dnfex) {
             FormUtils.LOGGER.log(Level.INFO, dnfex.getMessage(), dnfex);
         }
-        if (!(dob instanceof FormDataObject)) {
-            FormUtils.LOGGER.log(Level.INFO, "Unable to find FormDataObject for {0}", srcFile); // NOI18N
-            return;
-        }
-        FormDataObject formDob = (FormDataObject)dob;
-        Document document = formDob.getFormEditorSupport().getDocument();
+        Document document = dob.getLookup().lookup(FormEditorSupport.class).getDocument();
         DialogBinding.bindComponentToDocument(document, ccPosition, 0, editor);
 
         // do not highlight current row
@@ -116,14 +110,9 @@ public class NbFormServices implements FormServices {
     }
 
     @Override
-    public Node createFormDataNode(FormDataObject formDataObject) {
+    public Node createFormDataNode(DataObject formDataObject) {
         FormDataNode node = new FormDataNode(formDataObject);
         return node;
-    }
-
-    @Override
-    public Entry createPrimaryEntry(MultiDataObject obj, FileObject primaryFile) {
-        return new FileEntry(obj, primaryFile);
     }
 
     @Override
@@ -132,8 +121,8 @@ public class NbFormServices implements FormServices {
     }
 
     @Override
-    public EditorSupport createEditorSupport(FormDataObject formDataObject) {
-        return new FormEditorSupport(formDataObject.getPrimaryEntry(), formDataObject, formDataObject.getCookies());
+    public EditorSupport createEditorSupport(DataObject formDataObject) {
+        return new FormEditorSupport(formDataObject);
     }
     
 }

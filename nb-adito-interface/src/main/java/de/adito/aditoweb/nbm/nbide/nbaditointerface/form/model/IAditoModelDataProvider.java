@@ -1,11 +1,9 @@
 package de.adito.aditoweb.nbm.nbide.nbaditointerface.form.model;
 
 import org.jetbrains.annotations.NotNull;
-import org.openide.awt.UndoRedo;
 import org.openide.filesystems.FileObject;
-import org.openide.loaders.DataObject;
-import org.openide.nodes.*;
-import org.openide.text.DataEditorSupport;
+import org.openide.loaders.*;
+import org.openide.nodes.Node;
 
 import java.util.List;
 
@@ -42,10 +40,5 @@ public interface IAditoModelDataProvider
    * @param pNewName    der neue Name.
    */
   void rename(@NotNull FileObject pFileObject, String pOldName, @NotNull String pNewName);
-
-  ICookieLookupHelper getContainerLookupHelper(DataObject pDataObject, CookieSet pCookieSet);
-
-  public Object installUpdateListeners(final DataObject pDataObject, final DataEditorSupport pDataEditorSupport,
-                                       final UndoRedo.Manager pUndoRedoManager, Runnable pOnChange);
 
 }

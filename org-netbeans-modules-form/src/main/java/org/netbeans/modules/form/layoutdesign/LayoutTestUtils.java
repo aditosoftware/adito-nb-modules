@@ -56,7 +56,6 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import org.netbeans.modules.form.FormDataObject;
 import org.netbeans.modules.form.FormDesigner;
 import org.openide.awt.StatusDisplayer;
 import org.openide.filesystems.FileLock;
@@ -199,8 +198,8 @@ public class LayoutTestUtils implements LayoutConstants {
 	return targetFolder;
     }
     
-    public static void writeTest(FormDesigner fd, FormDataObject formDO, Map<String,String> idToNameMap, LayoutModel lm) {
-	FileObject formFO = formDO.getFormFile();
+    public static void writeTest(FormDesigner fd, DataObject formDO, Map<String,String> idToNameMap, LayoutModel lm) {
+	FileObject formFO = formDO.getPrimaryFile();
 
 	fd.getLayoutDesigner().dumpTestcode(formDO);
 

@@ -1364,7 +1364,7 @@ public class MetaComponentCreator {
     
     Class prepareClass(final ClassSource classSource) {
         Throwable error = null;
-        final FileObject formFile = FormEditor.getFormDataObject(formModel).getFormFile();
+        final FileObject formFile = FormEditor.getFormDataObject(formModel).getPrimaryFile();
         final String className = classSource.getClassName();
         Class loadedClass = null;
         try {

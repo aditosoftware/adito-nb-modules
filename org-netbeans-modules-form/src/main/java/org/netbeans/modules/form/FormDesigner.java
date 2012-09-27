@@ -63,6 +63,7 @@ import org.netbeans.modules.form.menu.MenuEditLayer;
 import org.netbeans.modules.form.palette.PaletteItem;
 import org.openide.DialogDisplayer;
 import org.openide.NotifyDescriptor;
+import org.openide.loaders.DataObject;
 import org.openide.windows.TopComponent;
 import org.openide.nodes.Node;
 import org.openide.util.*;
@@ -368,7 +369,7 @@ public class FormDesigner {
             });
             plainContentLookup = new AbstractLookup(lookupContent);
 
-            final FormDataObject formDataObject = formEditor.getFormDataObject();
+            final DataObject formDataObject = formEditor.getFormDataObject();
             paletteLookup = PaletteUtils.getPaletteLookup(formDataObject.getPrimaryFile());
 
             saveCookieLookup = new Lookup() {
@@ -409,7 +410,7 @@ public class FormDesigner {
         }
 
         if (dataObjectLookup == null || (dataObjectLookup == Lookup.EMPTY && !initialized)) {
-            FormDataObject formDataObject = formEditor.getFormDataObject();
+            DataObject formDataObject = formEditor.getFormDataObject();
             dataObjectLookup = formDataObject.getNodeDelegate().getLookup();
         }
 
@@ -655,7 +656,7 @@ public class FormDesigner {
     {
         Container result = null;
         FormModel formModel = metacomp.getFormModel();
-        FileObject formFile = FormEditor.getFormDataObject(formModel).getFormFile();
+        FileObject formFile = FormEditor.getFormDataObject(formModel).getPrimaryFile();
         final ClassLoader classLoader = ClassPathUtils.getProjectClassLoader(formFile);
         Locale defaultLocale = switchToDesignLocale(formModel);
         try {
@@ -1137,7 +1138,7 @@ public class FormDesigner {
 //                // Lazy synchronization of already closed form - issue 129877
 //                return;
 //            }
-//            FormDataObject fdo = formEditor.getFormDataObject();
+//            DataObject fdo = formEditor.getFormDataObject();
 //            if (!fdo.isValid()) {
 //                return; // Issue 130637
 //            }
@@ -1153,7 +1154,7 @@ public class FormDesigner {
             if (ExplorerManager.PROP_SELECTED_NODES.equals(evt.getPropertyName())) {
                 syncComponentsFromNodes();
                 Node[] selectedNodes = getSelectedNodes();
-                // if no form node, select data node (of FormDataObject) in lookup
+                // if no form node, select data node (of DataObject) in lookup
                 switchNodeInLookup(selectedNodes.length == 0);
                 firePropertyChange(ExplorerManager.PROP_SELECTED_NODES, evt.getOldValue(), evt.getNewValue());
                 // specially handle node selection in connection mode

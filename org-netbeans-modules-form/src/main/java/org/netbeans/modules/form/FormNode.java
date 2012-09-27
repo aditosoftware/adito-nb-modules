@@ -97,7 +97,7 @@ public class FormNode extends AbstractNode implements FormCookie {
             @Override
             public Object convert(Object obj)
             {
-              FormDataObject formDataObject = FormEditor.getFormDataObject(pFormModel);
+              DataObject formDataObject = FormEditor.getFormDataObject(pFormModel);
               if (formDataObject == null)
                 return null;
               return formDataObject.getLookup().lookup((Class<?>) obj);

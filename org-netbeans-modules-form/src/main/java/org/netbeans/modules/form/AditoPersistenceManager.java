@@ -12,6 +12,7 @@ import org.netbeans.modules.form.adito.perstistencemanager.*;
 import org.netbeans.modules.form.layoutdesign.LayoutModel;
 import org.netbeans.modules.form.layoutsupport.LayoutSupportManager;
 import org.openide.filesystems.FileObject;
+import org.openide.loaders.DataObject;
 
 import java.awt.*;
 import java.lang.reflect.InvocationTargetException;
@@ -30,20 +31,20 @@ public class AditoPersistenceManager extends PersistenceManager
 
 
   @Override
-  public boolean canLoadForm(FormDataObject formObject) throws PersistenceException
+  public boolean canLoadForm(DataObject formObject) throws PersistenceException
   {
     return true;
   }
 
   @Override
-  public synchronized void loadForm(FormDataObject formObject, FormModel formModel, List<Throwable> nonfatalErrors)
+  public synchronized void loadForm(DataObject formObject, FormModel formModel, List<Throwable> nonfatalErrors)
       throws PersistenceException
   {
     _loadForm(new APersistenceManagerInfo(formObject, formModel == null ? new FormModel() : formModel, nonfatalErrors));
   }
 
   @Override
-  public void saveForm(FormDataObject pFormObject, FormModel pFormModel, List<Throwable> pNonfatalErrors)
+  public void saveForm(DataObject pFormObject, FormModel pFormModel, List<Throwable> pNonfatalErrors)
       throws PersistenceException
   {
     // Save gibt es hier nicht. Das Model wird sowieso synchronisiert.

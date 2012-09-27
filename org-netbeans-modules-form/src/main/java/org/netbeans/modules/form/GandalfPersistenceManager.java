@@ -264,7 +264,7 @@
 //     *            prevents loading the form
 //     */
 //    @Override
-//    public synchronized void loadForm(FormDataObject formObject,
+//    public synchronized void loadForm(DataObject formObject,
 //                         FormModel formModel,
 //                         List<Throwable> nonfatalErrors)
 //        throws PersistenceException
@@ -3093,7 +3093,7 @@
 //    // -----------
 //
 //    /** This method saves the form to given data object.
-//     * @param formObject FormDataObject representing the form files
+//     * @param formObject DataObject representing the form files
 //     * @param formModel FormModel to be saved
 //     * @param nonfatalErrors List to be filled with errors occurred during
 //     *        saving which are not fatal (but should be reported)
@@ -3101,7 +3101,7 @@
 //     *            prevents saving the form
 //     */
 //    @Override
-//    public synchronized void saveForm(FormDataObject formObject,
+//    public synchronized void saveForm(DataObject formObject,
 //                         FormModel formModel,
 //                         List<Throwable> nonfatalErrors)
 //        throws PersistenceException

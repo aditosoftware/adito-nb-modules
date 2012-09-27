@@ -46,6 +46,7 @@ package org.netbeans.modules.form;
 
 import java.util.*;
 import org.openide.*;
+import org.openide.loaders.DataObject;
 import org.openide.util.Lookup;
 
 /**
@@ -71,7 +72,7 @@ public abstract class PersistenceManager {
      * @return true if this persistence manager can load the form
      * @exception PersistenceException if any unexpected problem occurred
      */
-    public abstract boolean canLoadForm(FormDataObject formObject)
+    public abstract boolean canLoadForm(DataObject formObject)
         throws PersistenceException;
 
     /** This method loads the form from given data object.
@@ -82,7 +83,7 @@ public abstract class PersistenceManager {
      * @exception PersistenceException if some fatal problem occurred which
      *            prevents loading the form
      */
-    public abstract void loadForm(FormDataObject formObject,
+    public abstract void loadForm(DataObject formObject,
                                   FormModel formModel,
                                   List<Throwable> nonfatalErrors)
         throws PersistenceException;
@@ -95,7 +96,7 @@ public abstract class PersistenceManager {
      * @exception PersistenceException if some fatal problem occurred which
      *            prevents saving the form
      */
-    public abstract void saveForm(FormDataObject formObject,
+    public abstract void saveForm(DataObject formObject,
                                   FormModel formModel,
                                   List<Throwable> nonfatalErrors)
         throws PersistenceException;

@@ -96,9 +96,9 @@ public class ReloadAction extends CallableSystemAction {
         FormNode formNode = activeTC.getLookup().lookup(FormNode.class);
         if (formNode != null)
         {
-          FormDataObject formDataObject = formNode.getCookie(FormDataObject.class);
+          DataObject formDataObject = formNode.getCookie(DataObject.class);
           if (formDataObject != null)
-            formDataObject.getFormEditorSupport().reloadForm();
+            formDataObject.getLookup().lookup(FormEditorSupport.class).reloadForm();
         }
       //
         /*Object dobj = activeTC.getLookup().lookup(DataObject.class);

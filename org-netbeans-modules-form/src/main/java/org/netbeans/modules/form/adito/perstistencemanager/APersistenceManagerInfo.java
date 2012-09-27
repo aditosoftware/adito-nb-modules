@@ -4,6 +4,7 @@ import de.adito.aditoweb.nbm.nbide.nbaditointerface.NbAditoInterface;
 import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.model.IAditoModelDataProvider;
 import org.netbeans.modules.form.*;
 import org.openide.filesystems.FileObject;
+import org.openide.loaders.DataObject;
 
 import java.util.*;
 
@@ -12,7 +13,7 @@ import java.util.*;
  */
 public class APersistenceManagerInfo
 {
-  private FormDataObject formObject;
+  private DataObject formObject;
   private FormModel formModel;
   private List<Throwable> nonfatalErrors;
   private FileObject modelRoot;
@@ -20,14 +21,14 @@ public class APersistenceManagerInfo
   private Map<String, RADComponent> loadedComponents;
 
 
-  public APersistenceManagerInfo(FormDataObject pFormObject, FormModel pFormModel, List<Throwable> pNonfatalErrors)
+  public APersistenceManagerInfo(DataObject pFormObject, FormModel pFormModel, List<Throwable> pNonfatalErrors)
   {
     formObject = pFormObject;
     formModel = pFormModel;
     nonfatalErrors = pNonfatalErrors;
   }
 
-  public FormDataObject getFormObject()
+  public DataObject getFormObject()
   {
     return formObject;
   }

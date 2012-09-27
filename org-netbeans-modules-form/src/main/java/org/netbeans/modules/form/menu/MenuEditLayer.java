@@ -399,7 +399,7 @@ public class MenuEditLayer extends JPanel {
                     }     
                 }
             };
-            paletteContext = formDesigner.getFormEditor().getFormDataObject().getFormFile();
+            paletteContext = formDesigner.getFormEditor().getFormDataObject().getPrimaryFile();
             PaletteUtils.addPaletteListener(paletteListener, paletteContext);
         }
     }    

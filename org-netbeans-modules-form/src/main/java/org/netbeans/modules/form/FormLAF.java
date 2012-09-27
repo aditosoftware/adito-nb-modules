@@ -425,7 +425,7 @@ public class FormLAF {
             classLoaderDefaults.putAll(newDefaults);
             defaults.putAll(lastDefaults);
         } else {
-            FileObject formFile = FormEditor.getFormDataObject(formModel).getFormFile();
+            FileObject formFile = FormEditor.getFormDataObject(formModel).getPrimaryFile();
             classLoader = ClassPathUtils.getProjectClassLoader(formFile);
             classLoaderDefaults = classLoaderToDefaults.get(classLoader);
             if (classLoaderDefaults == null) {

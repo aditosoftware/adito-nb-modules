@@ -174,7 +174,7 @@ public class TestAction extends CallableSystemAction implements Runnable {
             }
 
             // Dispose the previous preview (if it exists)
-            FileObject formFile = FormEditor.getFormDataObject(formModel).getFormFile();
+            FileObject formFile = FormEditor.getFormDataObject(formModel).getPrimaryFile();
             Map<String,Frame> map = previews.get(formFile.getPath());
             if (map == null) {
                 map = new HashMap<String,Frame>();

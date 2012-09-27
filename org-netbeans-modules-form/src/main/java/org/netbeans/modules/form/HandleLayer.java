@@ -66,6 +66,7 @@ import org.openide.NotifyDescriptor;
 import org.openide.awt.StatusDisplayer;
 import org.openide.cookies.SaveCookie;
 import org.openide.filesystems.FileObject;
+import org.openide.loaders.DataObject;
 import org.openide.util.ImageUtilities;
 import org.openide.windows.TopComponent;
 import org.openide.nodes.Node;
@@ -862,7 +863,7 @@ public class HandleLayer extends JPanel implements MouseListener, MouseMotionLis
                     for (RADComponent comp : formModel.getAllComponents()) {
                         idToNameMap.put(comp.getId(), comp.getName());
                     }
-                    FormDataObject formDO = formDesigner.getFormEditor().getFormDataObject();
+                    DataObject formDO = formDesigner.getFormEditor().getFormDataObject();
                     LayoutTestUtils.writeTest(formDesigner, formDO, idToNameMap, layoutModel);
                     LayoutDesigner ld = formDesigner.getLayoutDesigner();
                     ld.setModelCounter(ld.getModelCounter() + 1);
@@ -871,8 +872,8 @@ public class HandleLayer extends JPanel implements MouseListener, MouseMotionLis
         } else if (((keyCode == KeyEvent.VK_S)) && e.isAltDown() && e.isControlDown() && (e.getID() == KeyEvent.KEY_PRESSED)) {
             // start layout test recording
             if (LayoutDesigner.testMode()) {
-                FormDataObject formDO = formDesigner.getFormEditor().getFormDataObject();
-                FileObject formFile = formDO.getFormFile();
+                DataObject formDO = formDesigner.getFormEditor().getFormDataObject();
+                FileObject formFile = formDO.getPrimaryFile();
                 SaveCookie saveCookie = formDO.getCookie(SaveCookie.class);
                 try {
                     if (saveCookie != null)

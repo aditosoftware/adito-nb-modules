@@ -130,7 +130,7 @@ public class FormEditor {
     private List<java.awt.Window> floatingWindows;
     
     /** The DataObject of the form */
-    private FormDataObject formDataObject;
+    private DataObject formDataObject;
     private PropertyChangeListener dataObjectListener;
     private static PreferenceChangeListener settingsListener;
     private PropertyChangeListener paletteListener;
@@ -148,7 +148,7 @@ public class FormEditor {
 
     // -----
 
-    public FormEditor(FormDataObject formDataObject, EditorSupport sourceEditor) {
+    public FormEditor(DataObject formDataObject, EditorSupport sourceEditor) {
         this.formDataObject = formDataObject;
         this.editorSupport = sourceEditor;
     }
@@ -168,7 +168,7 @@ public class FormEditor {
         return formModel;
     }
     
-    public final FormDataObject getFormDataObject() {
+    public final DataObject getFormDataObject() {
         return formDataObject;
     }
 
@@ -324,7 +324,7 @@ public class FormEditor {
         // create and register new FormModel instance
         formModel = new FormModel();
         formModel.setName(formDataObject.getName());        
-        formModel.setReadOnly(formDataObject.isReadOnly());
+        formModel.setReadOnly(!formDataObject.getPrimaryFile().canWrite());
 	      //formModel.getCodeStructure().setFormJavaSource(getFormJavaSource(true)); // STRIPPED
 
         openForms.put(formModel, this);
@@ -409,7 +409,7 @@ public class FormEditor {
     }*/
 
   void saveFormData() throws PersistenceException {
-        if (formLoaded && !formDataObject.formFileReadOnly() && !formModel.isReadOnly()) {
+        if (formLoaded && formDataObject.getPrimaryFile().canWrite() && !formModel.isReadOnly()) {
             formModel.fireFormToBeSaved();
 
             resetPersistenceErrorLog();
@@ -437,7 +437,7 @@ public class FormEditor {
     
     /** Finds PersistenceManager that can load and save the form.
      */
-    private PersistenceManager recognizeForm(FormDataObject formDO)
+    private PersistenceManager recognizeForm(DataObject formDO)
         throws PersistenceException
     {
         Iterator<PersistenceManager> it = PersistenceManager.getManagers();
@@ -728,7 +728,7 @@ public class FormEditor {
     }
 
     private void attachFormListener() {
-        if (formListener != null || formDataObject.isReadOnly() || formModel.isReadOnly())
+        if (formListener != null || !formDataObject.getPrimaryFile().canWrite() || formModel.isReadOnly())
             return;
 
         // this listener ensures necessary updates of nodes according to
@@ -1095,7 +1095,7 @@ public class FormEditor {
      * 
      * @param formModel form model.
      * @return FormDataObject of given form */
-    public static FormDataObject getFormDataObject(FormModel formModel) {
+    public static DataObject getFormDataObject(FormModel formModel) {
         FormEditor formEditor = openForms.get(formModel);
         return formEditor != null ? formEditor.getFormDataObject() : null;
     }
@@ -1197,11 +1197,11 @@ public class FormEditor {
         FormEditor formEditor = getFormEditor(formModel);
         if (formEditor != null
                 //&& formModel.getSettings().getLayoutCodeTarget() != JavaCodeGenerator.LAYOUT_CODE_JDK6
-                && !ClassPathUtils.isOnClassPath(formEditor.getFormDataObject().getFormFile(), "org.jdesktop.layout.GroupLayout")) { // NOI18N
+                && !ClassPathUtils.isOnClassPath(formEditor.getFormDataObject().getPrimaryFile(), "org.jdesktop.layout.GroupLayout")) { // NOI18N
             try {
                 ClassSource cs = new ClassSource("", // class name is not needed // NOI18N
                         ClassSource.unpickle("library", "swing-layout")); // NOI18N // Hack
-                return Boolean.TRUE == ClassPathUtils.updateProject(formEditor.getFormDataObject().getFormFile(), cs, true);
+                return Boolean.TRUE == ClassPathUtils.updateProject(formEditor.getFormDataObject().getPrimaryFile(), cs, true);
             }
             catch (IOException ex) {
                 ErrorManager.getDefault().notify(ErrorManager.INFORMATIONAL, ex);
