@@ -7,7 +7,9 @@ OpenIDE-Module-Localizing-Bundle: org/netbeans/modules/form/Bundle2.pr
 OpenIDE-Module-Implementation-Version: 4
 OpenIDE-Module-Install: org/netbeans/modules/form/FormEditorModule.cla
  ss
-OpenIDE-Module-Needs: javax.script.ScriptEngine.freemarker
+OpenIDE-Module-Needs: javax.script.ScriptEngine.freemarker,
+ de.adito.aditoweb.nbm.nbide.nbaditointerface.INetbeansAditoInterface
 OpenIDE-Module-Layer: org/netbeans/modules/form/resources/layer.xml
+OpenIDE-Module-Provides: de.adito.aditoweb.nbm.nbide.nbaditointerface.form.dataobject.IAditoFormDataObjectDataProvider
 OpenIDE-Module-Requires: org.openide.modules.InstalledFileLocator, org.openide.modules.ModuleFormat1
 
