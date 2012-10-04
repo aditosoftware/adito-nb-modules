@@ -16,19 +16,32 @@ public abstract class AFormModelListener implements FormModelListener
     for (FormModelEvent event : events)
     {
       RADComponent eventComponent = event.getComponent();
+      if (eventComponent == null)
+      {
+        ComponentContainer container = event.getContainer();
+        if (container instanceof RADComponent)
+          eventComponent = (RADComponent) container;
+      }
       try
       {
         switch (event.getChangeType())
         {
           case FormModelEvent.COMPONENT_LAYOUT_CHANGED:
-            eventComponent.getARADComponentHandler().layoutPropertiesChanged();
+            if (eventComponent != null)
+              eventComponent.getARADComponentHandler().layoutPropertiesChanged();
             break;
           case FormModelEvent.COMPONENT_REMOVED:
-            eventComponent.getARADComponentHandler().deleted();
+            if (eventComponent != null)
+              eventComponent.getARADComponentHandler().deleted();
             clearProperties(eventComponent);
             break;
+          case FormModelEvent.COMPONENTS_REORDERED:
+            if (eventComponent != null)
+              eventComponent.getARADComponentHandler().reordered();
+            break;
           case FormModelEvent.COMPONENT_ADDED:
-            eventComponent.getARADComponentHandler().added();
+            if (eventComponent != null)
+              eventComponent.getARADComponentHandler().added();
             break;
           case FormModelEvent.FORM_TO_BE_CLOSED:
             Collection<RADComponent> allComponents = event.getFormModel().getAllComponents();
@@ -45,8 +58,15 @@ public abstract class AFormModelListener implements FormModelListener
       }
       catch (Exception e)
       {
+        e.printStackTrace(); // TODO
         if (event.isModifying())
-          eventComponent.getFormModel().forceUndoOfCompoundEdit();
+        {
+          FormModel formModel = event.getFormModel();
+          if (formModel == null && eventComponent != null)
+            formModel = eventComponent.getFormModel();
+          if (formModel != null)
+            formModel.forceUndoOfCompoundEdit();
+        }
       }
     }
   }

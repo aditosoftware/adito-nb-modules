@@ -10,7 +10,8 @@ import org.openide.filesystems.*;
 import org.openide.loaders.*;
 import org.openide.windows.CloneableOpenSupport;
 
-import java.util.UUID;
+import java.io.IOException;
+import java.util.*;
 
 /**
  * @author J. Boesl, 17.02.11
@@ -117,6 +118,42 @@ public class ARADComponentHandler
     _deinitialize(true);
     IAditoModelDataProvider dataProvider = NbAditoInterface.lookup(IAditoModelDataProvider.class);
     deleted = dataProvider.removeDataModel(modelFo);
+  }
+
+  public void reordered()
+  {
+    if (!(radComponent instanceof ComponentContainer) && modelFileObject != null)
+      return;
+    ComponentContainer container = (ComponentContainer) radComponent;
+    IAditoModelDataProvider modelDataProvider = NbAditoInterface.lookup(IAditoModelDataProvider.class);
+    FileObject defaultChildContainer = modelDataProvider.getDefaultChildContainer(modelFileObject);
+    if (defaultChildContainer != null)
+    {
+      final Map<String, Integer> namePositionMap = new HashMap<String, Integer>();
+      RADComponent[] subBeans = container.getSubBeans();
+      for (int i = 0; i < subBeans.length; i++)
+        namePositionMap.put(subBeans[i].getName(), i);
+
+      List<FileObject> childModels = modelDataProvider.getChildModels(modelFileObject);
+      Collections.sort(childModels, new Comparator<FileObject>()
+      {
+        @Override
+        public int compare(FileObject o1, FileObject o2)
+        {
+          Integer pos1 = namePositionMap.get(o1.getNameExt());
+          Integer pos2 = namePositionMap.get(o2.getNameExt());
+          return pos1 - pos2;
+        }
+      });
+      try
+      {
+        FileUtil.setOrder(childModels);
+      }
+      catch (IOException e)
+      {
+        throw new RuntimeException(e);
+      }
+    }
   }
 
   @NotNull
