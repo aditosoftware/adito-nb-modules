@@ -58,6 +58,7 @@ import javax.swing.event.TreeModelListener;
 import javax.swing.plaf.ComponentUI;
 import javax.swing.tree.DefaultTreeModel;
 
+import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.component.INoFormContainer;
 import org.openide.ErrorManager;
 import org.openide.loaders.DataObject;
 import org.openide.util.*;
@@ -453,8 +454,7 @@ public class FormUtils
         "javax.swing.JOptionPane", // NOI18N
         "javax.swing.JColorChooser", // NOI18N
         "javax.swing.JFileChooser", // NOI18N
-        "javax.swing.Box$Filler", // NOI18N
-        "de.adito.aditoweb.nbm.nbide.nbaditointerface.form.component.NoFormContainerPanel"
+        "javax.swing.Box$Filler" // NOI18N
     };
 
     private static Map<Class<?>, Map<String, DefaultValueDeviation>> defaultValueDeviations;
@@ -986,6 +986,9 @@ public class FormUtils
 //            return ((Boolean)registered).booleanValue();
 
         // not registered
+        if (INoFormContainer.class.isAssignableFrom(beanClass))
+          return false;
+
         int containerStatus = canBeContainer(beanClass);
         if (containerStatus == -1) { // "isContainer" attribute not specified
             containerStatus = 1;
