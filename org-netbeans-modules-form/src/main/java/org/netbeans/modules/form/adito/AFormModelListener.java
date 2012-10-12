@@ -37,7 +37,7 @@ public abstract class AFormModelListener implements FormModelListener
             break;
           case FormModelEvent.COMPONENTS_REORDERED:
             if (eventComponent != null)
-              eventComponent.getARADComponentHandler().reordered();
+              eventComponent.getARADComponentHandler().childrenReordered();
             break;
           case FormModelEvent.COMPONENT_ADDED:
             if (eventComponent != null)

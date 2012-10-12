@@ -413,18 +413,19 @@ class CopySupport {
             try {
                 // copy or move the components
                 for (RADComponent sourceComp : sourceComponents) {
-                    RADComponent copiedComp;
+                    //RADComponent copiedComp;
                     if (!move) {
-                        copiedComp = targetForm.getComponentCreator().copyComponent(sourceComp, targetComponent);
-                        if (copiedComp == null) {
+                      targetComponent.getARADComponentHandler().addChild(sourceComp);
+                        //copiedComp = targetForm.getComponentCreator().copyComponent(sourceComp, targetComponent);
+                        /*if (copiedComp == null) {
                             return null; // copy failed...
-                        }
+                        }*/
                     } else { // move within the same form
                         targetForm.getComponentCreator().moveComponent(sourceComp, targetComponent);
-                        copiedComp = sourceComp;
+                        //copiedComp = sourceComp;
                     }
 
-                    if (copiedComp instanceof RADVisualComponent
+                    /*if (copiedComp instanceof RADVisualComponent
                             && !((RADVisualComponent)copiedComp).isMenuComponent()
                             && sourceComp instanceof RADVisualComponent) { // might be even a LayoutManager componen...
                         // for visual components we must care about the layout model (new layout)
@@ -457,7 +458,7 @@ class CopySupport {
                             // new-to-old layout copy, need to remove layout component from source
                             getLayoutDesigner().removeComponentsFromParent(sourceComp.getId());
                         } // old-to-old layout copy is fully handled by MetaComponentCreator
-                    } // also copying menu component needs no additional treatment
+                    } // also copying menu component needs no additional treatment*/
                 }
 
                 // copy the layout for all visual components together
