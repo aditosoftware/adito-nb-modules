@@ -81,8 +81,6 @@ import javax.swing.JFrame;
 //import javax.swing.text.EditorKit;
 //import javax.swing.text.Position;
 //import javax.swing.text.StyledDocument;
-import de.adito.aditoweb.nbm.nbide.nbaditointerface.NbAditoInterface;
-import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.model.IAditoModelDataProvider;
 //import org.netbeans.api.editor.guards.GuardedSectionManager;
 //import org.netbeans.api.editor.guards.SimpleSection;
 //import org.netbeans.api.java.classpath.ClassPath;
@@ -619,7 +617,13 @@ public class FormEditorSupport extends DataEditorSupport implements EditorSuppor
         if (saving) // workaround for bug 75225
             return docLoadTask;
 
-        java.awt.EventQueue.invokeLater(new Runnable() {
+        resetFormEditor();
+
+        return docLoadTask;
+    }
+
+    public void resetFormEditor() {
+        EventQueue.invokeLater(new Runnable() {
             @Override
             public void run() {
                 FormDesignerTC designerTC = getFormDesignerTC();
@@ -629,8 +633,6 @@ public class FormEditorSupport extends DataEditorSupport implements EditorSuppor
                 }
             }
         });
-
-        return docLoadTask;
     }
 
     ///**

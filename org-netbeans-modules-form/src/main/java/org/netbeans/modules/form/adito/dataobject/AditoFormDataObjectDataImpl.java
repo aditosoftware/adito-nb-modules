@@ -51,4 +51,9 @@ public class AditoFormDataObjectDataImpl implements IAditoFormDataObjectData
     return getFormEditorSupport().getUndoRedoManager();
   }
 
+  public void resetForm()
+  {
+    getFormEditorSupport().resetFormEditor();
+  }
+
 }

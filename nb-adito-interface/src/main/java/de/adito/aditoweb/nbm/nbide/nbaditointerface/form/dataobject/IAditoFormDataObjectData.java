@@ -16,4 +16,6 @@ public interface IAditoFormDataObjectData
 
   UndoRedo.Manager getUndoRedoManager();
 
+  void resetForm();
+
 }
