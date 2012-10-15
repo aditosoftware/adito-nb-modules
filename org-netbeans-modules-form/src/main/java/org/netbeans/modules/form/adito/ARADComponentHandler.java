@@ -122,7 +122,7 @@ public class ARADComponentHandler
 
   public void childrenReordered()
   {
-    if (!(radComponent instanceof ComponentContainer) && modelFileObject != null)
+    if (!(radComponent instanceof ComponentContainer) || modelFileObject == null)
       return;
     ComponentContainer container = (ComponentContainer) radComponent;
     IAditoModelDataProvider modelDataProvider = NbAditoInterface.lookup(IAditoModelDataProvider.class);
@@ -132,25 +132,14 @@ public class ARADComponentHandler
     for (int i = 0; i < subBeans.length; i++)
       namePositionMap.put(subBeans[i].getName(), i);
 
-    List<FileObject> childModels = modelDataProvider.getChildModels(modelFileObject);
-    Collections.sort(childModels, new Comparator<FileObject>()
+    modelDataProvider.reorder(modelFileObject, new Comparator<String>()
     {
       @Override
-      public int compare(FileObject o1, FileObject o2)
+      public int compare(String o1, String o2)
       {
-        Integer pos1 = namePositionMap.get(o1.getNameExt());
-        Integer pos2 = namePositionMap.get(o2.getNameExt());
-        return pos1 - pos2;
+        return namePositionMap.get(o1) - namePositionMap.get(o2);
       }
     });
-    try
-    {
-      FileUtil.setOrder(childModels);
-    }
-    catch (IOException e)
-    {
-      throw new RuntimeException(e);
-    }
   }
 
   public void addChild(RADComponent pToCopy)

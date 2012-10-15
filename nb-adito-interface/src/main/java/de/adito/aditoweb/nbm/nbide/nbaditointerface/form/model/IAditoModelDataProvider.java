@@ -2,10 +2,10 @@ package de.adito.aditoweb.nbm.nbide.nbaditointerface.form.model;
 
 import org.jetbrains.annotations.NotNull;
 import org.openide.filesystems.FileObject;
-import org.openide.loaders.*;
+import org.openide.loaders.DataObject;
 import org.openide.nodes.Node;
 
-import java.util.List;
+import java.util.*;
 
 /**
  * Stellt Daten über Modelle zur Verfügung.
@@ -31,6 +31,8 @@ public interface IAditoModelDataProvider
                                       FileObject pDeleted);
 
   FileObject removeDataModel(FileObject pModelFileObject);
+
+  void reorder(FileObject pModelFo, Comparator<String> pChildComparator);
 
   /**
    * Versucht die Komponente umzubenennen.
