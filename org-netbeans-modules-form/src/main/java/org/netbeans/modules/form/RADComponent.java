@@ -417,6 +417,19 @@ public class RADComponent {
       //RenameSupport.renameComponent(this, name);
       setStoredName(name);
 
+      Node.Property<String> nameProperty = getPropertyByName("name");
+      if (nameProperty != null)
+      {
+        try
+        {
+          nameProperty.setValue(name);
+        }
+        catch (Exception e)
+        {
+          throw new RuntimeException(e);
+        }
+      }
+
       // STRIPPED
         /*if (!org.openide.util.Utilities.isJavaIdentifier(name)) {
             IllegalArgumentException iae =
