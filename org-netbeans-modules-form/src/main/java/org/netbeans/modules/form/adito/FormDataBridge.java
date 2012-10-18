@@ -148,7 +148,7 @@ public class FormDataBridge
       Object fieldValue = aditoProperty.getValue();
       Object formPropertyValue = pFormProperty.getValue();
       if (!Objects.equal(fieldValue, formPropertyValue) &&
-          (formPropertyValue != null || !aditoProperty.isDefaultValue()))
+          !(formPropertyValue == null && aditoProperty.isDefaultValue()))
       {
         aditoProperty.setValue(formPropertyValue);
       }

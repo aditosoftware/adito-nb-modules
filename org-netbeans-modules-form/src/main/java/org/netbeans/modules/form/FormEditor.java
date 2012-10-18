@@ -1140,9 +1140,9 @@ public class FormEditor {
         return openForms.get(formModel);
     }
     
-    UndoRedo.Manager getFormUndoRedoManager() {
+    /*UndoRedo.Manager getFormUndoRedoManager() {
         return formModel != null ? formModel.getUndoRedoManager() : null;
-    }
+    }*/
     
     public void registerFloatingWindow(java.awt.Window window) {
         if (floatingWindows == null)

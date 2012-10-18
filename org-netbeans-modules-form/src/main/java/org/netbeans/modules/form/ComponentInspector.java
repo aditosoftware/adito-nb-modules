@@ -175,13 +175,16 @@ public class ComponentInspector extends JPanel
     @Override
     public UndoRedo getUndoRedo() {
         if (formDesigner != null) {
-            FormModel formModel = formDesigner.getFormModel();
+          UndoRedo.Provider undoRedo = formDesigner.getLookup().lookup(UndoRedo.Provider.class);
+          if (undoRedo != null)
+            return undoRedo.getUndoRedo();
+          /*FormModel formModel = formDesigner.getFormModel();
             if (formModel != null) {
                 UndoRedo ur = formModel.getUndoRedoManager();
                 if (ur != null) {
                     return ur;
                 }
-            }
+            }*/
         }
         return UndoRedo.NONE;
     }

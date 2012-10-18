@@ -242,13 +242,14 @@ public class FormDesigner {
 
         explorerManager.setRootContext(formEditor.getFormRootNode());
 
-        undoRedoProvider = new UndoRedo.Provider() {
+        undoRedoProvider = formEditor.getFormDataObject().getLookup().lookup(UndoRedo.Provider.class);
+        /*undoRedoProvider = new UndoRedo.Provider() {
             @Override
             public UndoRedo getUndoRedo() {
                 UndoRedo ur = formModel != null ? formModel.getUndoRedoManager() : null;
                 return ur != null ? ur : UndoRedo.NONE;
             }
-        };
+        };*/
         lookupContent.add(undoRedoProvider);
 
         initLookup();

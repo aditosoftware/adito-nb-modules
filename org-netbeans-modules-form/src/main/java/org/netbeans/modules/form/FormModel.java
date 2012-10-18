@@ -826,7 +826,7 @@ public class FormModel
 //            undoRedoManager.discardAllEdits();
         if (!readOnly && !Boolean.getBoolean("netbeans.form.no_undo")) { // NOI18N
             undoRedoManager = new UndoRedoManager();
-            undoRedoManager.setLimit(50);
+            undoRedoManager.setLimit(1); // JB: just for undoing failures.
             setUndoRedoRecording(true);
             if (layoutModel != null)
                 layoutModel.setChangeRecording(true);
