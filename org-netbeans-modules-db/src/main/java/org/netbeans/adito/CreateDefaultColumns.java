@@ -20,7 +20,7 @@ public class CreateDefaultColumns
 
   public CreateDefaultColumns()
   {
-    columnItems.add(new ColumnModel(CHAR, "ID", "36", "0", Boolean.TRUE, Boolean.TRUE));
+    columnItems.add(new ColumnModel(CHAR, "ID", "36", "0", Boolean.FALSE, Boolean.TRUE));
     columnItems.add(new ColumnModel(TIMESTAMP, "DATE_EDIT", "26", "6", Boolean.TRUE, Boolean.FALSE));
     columnItems.add(new ColumnModel(TIMESTAMP, "DATE_NEW", "26", "6", Boolean.TRUE, Boolean.FALSE));
     columnItems.add(new ColumnModel(VARCHAR, "USER_EDIT", "30", "0", Boolean.TRUE, Boolean.FALSE));
@@ -39,6 +39,8 @@ public class CreateDefaultColumns
       columnItem.setProperty(ColumnItem.SCALE, model.getColumnScale());
       columnItem.setProperty(ColumnItem.NULLABLE, model.isColumnNullable());
       columnItem.setProperty(ColumnItem.PRIMARY_KEY, model.isColumnPrimaryKey());
+      columnItem.setProperty(ColumnItem.INDEX, model.isColumnPrimaryKey());
+      columnItem.setProperty(ColumnItem.UNIQUE, model.isColumnPrimaryKey());
 
       pDataModel.addRow(columnItem);
 
