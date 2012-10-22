@@ -25,8 +25,6 @@ public class ARADComponentHandler
   private FileObject modelFileObject;
   @Nullable
   private FormDataBridge formDataBridge;
-  @Nullable
-  private FileObject deleted;
 
 
   public void setRadComponent(@NotNull RADComponent pRadComponent)
@@ -50,15 +48,11 @@ public class ARADComponentHandler
     IAditoModelDataProvider dataProvider = NbAditoInterface.lookup(IAditoModelDataProvider.class);
     FileObject createdOrRestored = dataProvider.createOrRestoreDataModel(parentRadHandler.getModelFileObject(),
                                                                          radComponent.getBeanClass(),
-                                                                         radComponent.getName(), deleted);
+                                                                         radComponent.getName(), null);
     setModelFileObject(createdOrRestored);
     radComponent.setName(modelFileObject.getName());
-    if (deleted != null)
-    {
-      _updateChildren();
-      deleted = null;
-    }
-    else if (formDataBridge != null)
+
+    if (formDataBridge != null)
       formDataBridge.newComponentAdded();
   }
 
@@ -116,8 +110,11 @@ public class ARADComponentHandler
 
     FileObject modelFo = getModelFileObject();
     _deinitialize(true);
-    IAditoModelDataProvider dataProvider = NbAditoInterface.lookup(IAditoModelDataProvider.class);
-    deleted = dataProvider.removeDataModel(modelFo);
+    if (modelFo != null && modelFo.isValid())
+    {
+      IAditoModelDataProvider dataProvider = NbAditoInterface.lookup(IAditoModelDataProvider.class);
+      dataProvider.removeDataModel(modelFo);
+    }
   }
 
   public void childrenReordered()
