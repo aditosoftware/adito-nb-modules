@@ -28,7 +28,7 @@ public abstract class AFormModelListener implements FormModelListener
         {
           case FormModelEvent.COMPONENT_LAYOUT_CHANGED:
             if (eventComponent != null)
-              eventComponent.getARADComponentHandler().layoutPropertiesChanged();
+              eventComponent.getARADComponentHandler().layoutPropertiesChanged(event.getPropertyName());
             break;
           case FormModelEvent.COMPONENT_REMOVED:
             if (eventComponent != null)

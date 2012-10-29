@@ -196,10 +196,10 @@ public class ARADComponentHandler
     tryInit();
   }
 
-  public void layoutPropertiesChanged()
+  public void layoutPropertiesChanged(String pPropertyName)
   {
     if (formDataBridge != null)
-      formDataBridge.layoutPropertiesChanged();
+      formDataBridge.layoutPropertiesChanged(pPropertyName);
   }
 
   public void deinitialize()

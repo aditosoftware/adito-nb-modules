@@ -1,5 +1,6 @@
 package org.netbeans.modules.form.adito;
 
+import com.google.common.base.Objects;
 import com.google.common.base.*;
 import com.google.common.collect.Lists;
 import de.adito.aditoweb.nbm.nbide.nbaditointerface.NbAditoInterface;
@@ -14,6 +15,7 @@ import org.openide.util.NotImplementedException;
 import java.beans.*;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.util.*;
 import java.util.logging.*;
 
 /**
@@ -29,6 +31,9 @@ public class FormDataBridge
   private PropertyChangeListener aditoPropertyChangeListener;
   private PropertyChangeListener formPropertyChangeListener;
 
+  // undo/redo macht ohne diesem Hilfs-Deque Probleme.
+  private Deque<String> fromDataModel;
+
 
   public FormDataBridge(@NotNull RADComponent pRadComponent, @NotNull IFormComponentInfo pComponentInfo,
                         @NotNull IFormComponentPropertyMapping pComponentPropertyMapping)
@@ -36,14 +41,29 @@ public class FormDataBridge
     radComponent = pRadComponent;
     componentInfo = pComponentInfo;
     componentPropertyMapping = pComponentPropertyMapping;
+    fromDataModel = new ArrayDeque<>();
   }
 
-  void layoutPropertiesChanged()
+  void layoutPropertiesChanged(String pPropertyName)
   {
     if (radComponent instanceof RADVisualComponent)
     {
-      RADVisualComponent radVisualComponent = (RADVisualComponent) radComponent;
-      _radPropertiesChanged(radVisualComponent.getConstraintsProperties());
+      if (pPropertyName == null)
+      {
+        RADVisualComponent radVisualComponent = (RADVisualComponent) radComponent;
+        _radPropertiesChanged(radVisualComponent.getConstraintsProperties());
+      }
+      else
+      {
+        try
+        {
+          _alignAditoToFormProp(radComponent.getPropertyByName(pPropertyName));
+        }
+        catch (InvocationTargetException e)
+        {
+          radComponent.getFormModel().forceUndoOfCompoundEdit(); // TODO: Fehler dem User mitteilen (output)
+        }
+      }
     }
   }
 
@@ -145,11 +165,20 @@ public class FormDataBridge
         _logInvalidMapping(aditoPropName, formPropName, false);
         return;
       }
+
+      if (Objects.equal(fromDataModel.pollFirst(), formPropName))
+      {
+        // Der Wert wurde gerade von '_alignFormToAditoProperty' aktualisiert und soll nicht wieder zurück
+        // synchronisiert werden.
+        return;
+      }
+
       Object fieldValue = aditoProperty.getValue();
       Object formPropertyValue = pFormProperty.getValue();
       if (!Objects.equal(fieldValue, formPropertyValue) &&
           !(formPropertyValue == null && aditoProperty.isDefaultValue()))
       {
+        //noinspection unchecked
         aditoProperty.setValue(formPropertyValue);
       }
     }
@@ -167,73 +196,73 @@ public class FormDataBridge
       public void propertyChange(PropertyChangeEvent evt)
       {
         String propertyName = evt.getPropertyName();
-        if (propertyName.equals(IFormComponentInfo.PROP_CHILD_ADDED))
+        switch (propertyName)
         {
-          FileObject created = (FileObject) evt.getNewValue();
+          case IFormComponentInfo.PROP_CHILD_ADDED:
+            FileObject created = (FileObject) evt.getNewValue();
 
-          if (radComponent instanceof ComponentContainer)
-          {
-            ComponentContainer container = (ComponentContainer) radComponent;
-            for (RADComponent childComp : container.getSubBeans())
+            if (radComponent instanceof ComponentContainer)
             {
-              // Komponente mit dem Namen existiert bereits. Muss nicht synchronisiert werden.
-              if (created.getName().equals(childComp.getName()))
-                return;
-            }
-
-            IFormComponentInfoProvider compInfoProvider = NbAditoInterface.lookup(IFormComponentInfoProvider.class);
-            IFormComponentInfo componentInfo = compInfoProvider.createComponentInfo(created);
-            IFormComponentPropertyMapping formPropertyMapping = componentInfo.getFormPropertyMapping();
-            if (formPropertyMapping == null)
-              throw new RuntimeException("No 'IFormComponentProvider' available for '" + created.getPath() + "'.");
-            Class<?> createdBean = formPropertyMapping.getComponentClass();
-
-            RADComponent component = radComponent.getFormModel().getComponentCreator().createComponent(
-                new ClassSource(createdBean.getCanonicalName()), radComponent, null);
-            component.setStoredName(created.getName());
-            component.getARADComponentHandler().setModelFileObject(created);
-            try
-            {
-              AditoFormUtils.copyValuesFromModelToComponent(component);
-            }
-            catch (Exception e)
-            {
-              throw new RuntimeException("can't copy values for: '" + component + "'.", e);
-            }
-          }
-        }
-        else if (propertyName.equals(IFormComponentInfo.PROP_CHILD_REMOVED))
-        {
-          // Delete ist problematisch: dieses Event wird erst erhalten NACHDEM die Datei gelöscht wurde. Das bedeutet
-          // die Daten für 'undo' können nicht hinterlegt werden und das kann zu Folgefehlern führen.
-          if (radComponent instanceof ComponentContainer)
-          {
-            ComponentContainer container = (ComponentContainer) radComponent;
-            String removedName = ((FileObject) evt.getOldValue()).getNameExt();
-            for (RADComponent component : Lists.newArrayList(container.getSubBeans()))
-            {
-              if (Objects.equal(component.getName(), removedName))
+              ComponentContainer container = (ComponentContainer) radComponent;
+              for (RADComponent childComp : container.getSubBeans())
               {
-                RADComponentNode nodeReference = component.getNodeReference();
-                if (nodeReference != null)
-                  try
-                  {
-                    nodeReference.destroy();
-                  }
-                  catch (IOException e)
-                  {
-                    throw new RuntimeException("node could not be destroyed: " + nodeReference, e);
-                  }
+                // Komponente mit dem Namen existiert bereits. Muss nicht synchronisiert werden.
+                if (created.getName().equals(childComp.getName()))
+                  return;
+              }
+
+              IFormComponentInfoProvider compInfoProvider = NbAditoInterface.lookup(IFormComponentInfoProvider.class);
+              IFormComponentInfo componentInfo = compInfoProvider.createComponentInfo(created);
+              IFormComponentPropertyMapping formPropertyMapping = componentInfo.getFormPropertyMapping();
+              if (formPropertyMapping == null)
+                throw new RuntimeException("No 'IFormComponentProvider' available for '" + created.getPath() + "'.");
+              Class<?> createdBean = formPropertyMapping.getComponentClass();
+
+              RADComponent component = radComponent.getFormModel().getComponentCreator().createComponent(
+                  new ClassSource(createdBean.getCanonicalName()), radComponent, null);
+              component.setStoredName(created.getName());
+              component.getARADComponentHandler().setModelFileObject(created);
+              try
+              {
+                AditoFormUtils.copyValuesFromModelToComponent(component);
+              }
+              catch (Exception e)
+              {
+                throw new RuntimeException("can't copy values for: '" + component + "'.", e);
               }
             }
-          }
+            break;
+          case IFormComponentInfo.PROP_CHILD_REMOVED:
+            // Delete ist problematisch: dieses Event wird erst erhalten NACHDEM die Datei gelöscht wurde. Das bedeutet
+            // die Daten für 'undo' können nicht hinterlegt werden und das kann zu Folgefehlern führen.
+            if (radComponent instanceof ComponentContainer)
+            {
+              ComponentContainer container = (ComponentContainer) radComponent;
+              String removedName = ((FileObject) evt.getOldValue()).getNameExt();
+              for (RADComponent component : Lists.newArrayList(container.getSubBeans()))
+              {
+                if (Objects.equal(component.getName(), removedName))
+                {
+                  RADComponentNode nodeReference = component.getNodeReference();
+                  if (nodeReference != null)
+                    try
+                    {
+                      nodeReference.destroy();
+                    }
+                    catch (IOException e)
+                    {
+                      throw new RuntimeException("node could not be destroyed: " + nodeReference, e);
+                    }
+                }
+              }
+            }
+            break;
+          case IFormComponentInfo.PROP_VALUE_CHANGED:
+            _alignFormToAditoProperty((String) evt.getNewValue());
+            break;
+          default:
+            throw new NotImplementedException(propertyName);
         }
-        else if (propertyName.equals(IFormComponentInfo.PROP_VALUE_CHANGED))
-        {
-          _alignFormToAditoProperty((String) evt.getNewValue());
-        }
-        else
-          throw new NotImplementedException(propertyName);
       }
     };
   }
@@ -254,13 +283,12 @@ public class FormDataBridge
       }
       Object newValue = aditoProperty.getValue();
       if (!Objects.equal(newValue, formProperty.getValue()))
+      {
+        fromDataModel.addLast(mappedName);
         formProperty.setValue(newValue);
+      }
     }
-    catch (IllegalAccessException e)
-    {
-      throw new RuntimeException(e); // TODO: runtimeEx
-    }
-    catch (InvocationTargetException e)
+    catch (IllegalAccessException | InvocationTargetException e)
     {
       throw new RuntimeException(e); // TODO: runtimeEx
     }
