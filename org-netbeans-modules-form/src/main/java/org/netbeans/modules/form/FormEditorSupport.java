@@ -132,11 +132,9 @@ import org.openide.text.CloneableEditorSupport;
 import org.openide.text.DataEditorSupport;
 //import org.openide.text.NbDocument;
 //import org.openide.text.PositionRef;
-import org.openide.util.Exceptions;
+import org.openide.util.*;
 //import org.openide.util.Lookup;
-import org.openide.util.Mutex;
 import org.openide.util.NbBundle.Messages;
-import org.openide.util.UserQuestionException;
 import org.openide.windows.CloneableOpenSupport;
 import org.openide.windows.CloneableTopComponent;
 import org.openide.windows.Mode;
@@ -618,7 +616,7 @@ public class FormEditorSupport extends DataEditorSupport implements EditorSuppor
             return docLoadTask;
 
         //resetFormEditor();
-        formEditor.closeForm();
+        closeFormEditor();
 
         return docLoadTask;
     }
@@ -1109,16 +1107,35 @@ public class FormEditorSupport extends DataEditorSupport implements EditorSuppor
         }
     }*/
 
-    @Messages({
+  @Override
+  protected boolean canClose()
+  {
+    if (isModified())
+      try
+      {
+        saveDocument();
+        notifyUnmodified();
+      }
+      catch (IOException e)
+      {
+        Exceptions.printStackTrace(e);
+      }
+    return true;
+  }
+
+  /*@Messages({
         "MSG_MODIFIED=File {0} is modified. Save?"
-    })
+    })*/
     final CloseOperationState canCloseElement(TopComponent tc) {
         // if this is not the last cloned java editor component, closing is OK
         if (!FormEditorSupport.isLastView(tc)) {
             return CloseOperationState.STATE_OK;
         }
 
-        if (!isModified()) {
+        canClose();
+        return CloseOperationState.STATE_OK;
+
+        /*if (!isModified()) {
             return CloseOperationState.STATE_OK;
         }
 
@@ -1140,7 +1157,7 @@ public class FormEditorSupport extends DataEditorSupport implements EditorSuppor
         return MultiViewFactory.createUnsafeCloseState(
                 "ID_FORM_CLOSING", // NOI18N
                 save,
-                MultiViewFactory.NOOP_CLOSE_ACTION);
+                MultiViewFactory.NOOP_CLOSE_ACTION);*/
     }
 
     static boolean isLastView(TopComponent tc) {
