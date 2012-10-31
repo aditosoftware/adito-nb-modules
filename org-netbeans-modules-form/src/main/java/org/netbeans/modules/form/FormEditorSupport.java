@@ -617,7 +617,8 @@ public class FormEditorSupport extends DataEditorSupport implements EditorSuppor
         if (saving) // workaround for bug 75225
             return docLoadTask;
 
-        resetFormEditor();
+        //resetFormEditor();
+        formEditor.closeForm();
 
         return docLoadTask;
     }
