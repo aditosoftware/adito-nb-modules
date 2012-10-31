@@ -415,7 +415,7 @@ public class FormLAF {
     private static Map<Object,Object> classLoaderDefaults;
 
     static void setUseDesignerDefaults(FormModel formModel) {
-        ClassLoader classLoader = null;
+        /*ClassLoader classLoader = null;
         UIDefaults defaults = UIManager.getDefaults();
         if (formModel == null) {
             // Determine new user defaults add add them to classLoaderDefaults
@@ -436,7 +436,7 @@ public class FormLAF {
             copyMultiUIDefaults(defaults, lastDefaults);
             defaults.putAll(classLoaderDefaults);
         }
-        delDefaults.setDelegating(classLoader);
+        delDefaults.setDelegating(classLoader);*/
     }
 
     static String oldNoXP;
