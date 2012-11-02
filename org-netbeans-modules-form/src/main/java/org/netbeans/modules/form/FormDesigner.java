@@ -46,6 +46,7 @@ package org.netbeans.modules.form;
 
 import java.awt.*;
 import java.awt.event.*;
+import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 import java.util.List;
 import javax.swing.*;
@@ -912,7 +913,21 @@ public class FormDesigner {
                 size = formCont.getDesignerSize();
             }
             if (size == null) {
-                size = (Dimension) topDesignComponent.getAuxValue(PROP_DESIGNER_SIZE);
+                Node.Property width = topDesignComponent.getPropertyByName("width");
+                Node.Property height = topDesignComponent.getPropertyByName("height");
+                if (width != null && height != null)
+                {
+                    try
+                    {
+                        size = new Dimension((Integer) width.getValue(), (Integer) height.getValue());
+                    }
+                    catch (IllegalAccessException | InvocationTargetException e)
+                    {
+                        // wird ignoriert.
+                    }
+                }
+                else
+                    size = (Dimension) topDesignComponent.getAuxValue(PROP_DESIGNER_SIZE);
             }
             if (size != null) {
                 designerSizeExplictlySet = true;
