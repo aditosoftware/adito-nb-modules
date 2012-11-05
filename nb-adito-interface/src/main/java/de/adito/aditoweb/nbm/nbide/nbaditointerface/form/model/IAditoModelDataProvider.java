@@ -27,8 +27,7 @@ public interface IAditoModelDataProvider
 
   List<FileObject> getOthers(FileObject pFileObject);
 
-  FileObject createOrRestoreDataModel(FileObject pParentData, Class<?> pComponentClass, String pCreatedName,
-                                      FileObject pDeleted);
+  FileObject createDataModel(FileObject pParentData, Class<?> pComponentClass, String pCreatedName);
 
   FileObject removeDataModel(FileObject pModelFileObject);
 

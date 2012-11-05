@@ -42,14 +42,16 @@ public class ARADComponentHandler
     if (modelFileObject != null && formDataBridge != null)
       return;
 
+    assert radComponent != null;
     RADComponent parentRadComponent = radComponent.getParentComponent();
     ARADComponentHandler parentRadHandler = parentRadComponent.getARADComponentHandler();
 
     IAditoModelDataProvider dataProvider = NbAditoInterface.lookup(IAditoModelDataProvider.class);
-    FileObject createdOrRestored = dataProvider.createOrRestoreDataModel(parentRadHandler.getModelFileObject(),
-                                                                         radComponent.getBeanClass(),
-                                                                         radComponent.getName(), null);
+    FileObject createdOrRestored = dataProvider.createDataModel(parentRadHandler.getModelFileObject(),
+                                                                radComponent.getBeanClass(),
+                                                                radComponent.getName());
     setModelFileObject(createdOrRestored);
+    assert modelFileObject != null;
     radComponent.setName(modelFileObject.getName());
 
     if (formDataBridge != null)
@@ -64,35 +66,15 @@ public class ARADComponentHandler
         return;
       if (radComponent == null)
         throw new IllegalStateException("oldName: " + pOldName + ", newName: " + pNewName);
-      IAditoModelDataProvider dataProvider = NbAditoInterface.lookup(IAditoModelDataProvider.class);
-      dataProvider.rename(modelFileObject, pOldName, pNewName);
+      DataFolder.findFolder(modelFileObject).rename(pNewName);
+    }
+    catch (IOException e)
+    {
+      throw new IllegalArgumentException(e); // TODO: add details
     }
     catch (Exception e)
     {
       e.printStackTrace();  // TODO: notify exception
-    }
-  }
-
-  private void _updateChildren()
-  {
-    if (!(radComponent instanceof ComponentContainer) && modelFileObject != null)
-      return;
-    ComponentContainer container = (ComponentContainer) radComponent;
-    IAditoModelDataProvider modelDataProvider = NbAditoInterface.lookup(IAditoModelDataProvider.class);
-    FileObject defaultChildContainer = modelDataProvider.getDefaultChildContainer(modelFileObject);
-    if (defaultChildContainer != null)
-    {
-      for (RADComponent radChild : container.getSubBeans())
-      {
-        String childName = radChild.getName();
-        FileObject childModelFo = defaultChildContainer.getFileObject(childName);
-        if (childModelFo != null && childModelFo.getNameExt().equals(childName))
-        {
-          ARADComponentHandler childCompHandler = radChild.getARADComponentHandler();
-          childCompHandler.setModelFileObject(childModelFo);
-          childCompHandler._updateChildren();
-        }
-      }
     }
   }
 
@@ -112,8 +94,14 @@ public class ARADComponentHandler
     _deinitialize(true);
     if (modelFo != null && modelFo.isValid())
     {
-      IAditoModelDataProvider dataProvider = NbAditoInterface.lookup(IAditoModelDataProvider.class);
-      dataProvider.removeDataModel(modelFo);
+      try
+      {
+        modelFo.delete();
+      }
+      catch (IOException e)
+      {
+        e.printStackTrace(); // TODO: exceptionHandling
+      }
     }
   }
 
@@ -124,7 +112,7 @@ public class ARADComponentHandler
     ComponentContainer container = (ComponentContainer) radComponent;
     IAditoModelDataProvider modelDataProvider = NbAditoInterface.lookup(IAditoModelDataProvider.class);
 
-    final Map<String, Integer> namePositionMap = new HashMap<String, Integer>();
+    final Map<String, Integer> namePositionMap = new HashMap<>();
     RADComponent[] subBeans = container.getSubBeans();
     for (int i = 0; i < subBeans.length; i++)
       namePositionMap.put(subBeans[i].getName(), i);
@@ -149,6 +137,21 @@ public class ARADComponentHandler
       DataFolder target = DataFolder.findFolder(defaultChildContainer);
       DataObject source = DataObject.find(pToCopy.getARADComponentHandler().getModelFileObject());
       source.copy(target);
+    }
+    catch (IOException e)
+    {
+      e.printStackTrace();  // TODO: exceptionHandling
+    }
+  }
+
+  public void move(RADComponent pTarget)
+  {
+    IAditoModelDataProvider modelDataProvider = NbAditoInterface.lookup(IAditoModelDataProvider.class);
+    FileObject defaultChildContainer = modelDataProvider.getDefaultChildContainer(
+        pTarget.getARADComponentHandler().getModelFileObject());
+    try
+    {
+      DataFolder.findFolder(modelFileObject).move(DataFolder.findFolder(defaultChildContainer));
     }
     catch (IOException e)
     {

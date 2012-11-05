@@ -415,13 +415,14 @@ class CopySupport {
                 for (RADComponent sourceComp : sourceComponents) {
                     //RADComponent copiedComp;
                     if (!move) {
-                      targetComponent.getARADComponentHandler().addChild(sourceComp);
+                        targetComponent.getARADComponentHandler().addChild(sourceComp);
                         //copiedComp = targetForm.getComponentCreator().copyComponent(sourceComp, targetComponent);
                         /*if (copiedComp == null) {
                             return null; // copy failed...
                         }*/
                     } else { // move within the same form
-                        targetForm.getComponentCreator().moveComponent(sourceComp, targetComponent);
+                      sourceComp.getARADComponentHandler().move(targetComponent);
+                        //targetForm.getComponentCreator().moveComponent(sourceComp, targetComponent);
                         //copiedComp = sourceComp;
                     }
 
