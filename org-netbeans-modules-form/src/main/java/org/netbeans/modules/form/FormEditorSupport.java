@@ -44,67 +44,27 @@
 
 package org.netbeans.modules.form;
 
-//import com.sun.source.tree.AnnotationTree;
-//import com.sun.source.tree.ClassTree;
-//import com.sun.source.tree.CompilationUnitTree;
-//import com.sun.source.tree.MethodTree;
-//import com.sun.source.tree.ModifiersTree;
-//import com.sun.source.tree.Tree;
-//import com.sun.source.util.SourcePositions;
 import java.awt.Cursor;
 import java.awt.EventQueue;
-import java.awt.event.ActionEvent;
 import java.beans.BeanInfo;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.CharConversionException;
 import java.io.IOException;
-//import java.io.InputStream;
-//import java.io.OutputStream;
-//import java.io.Reader;
-//import java.io.Writer;
 import java.lang.reflect.InvocationTargetException;
-//import java.nio.charset.Charset;
 import java.text.MessageFormat;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.swing.AbstractAction;
-import javax.swing.Action;
 import javax.swing.JButton;
-//import javax.swing.JComponent;
 import javax.swing.JEditorPane;
 import javax.swing.JFrame;
-//import javax.swing.JPanel;
-//import javax.swing.text.BadLocationException;
-//import javax.swing.text.Document;
-//import javax.swing.text.EditorKit;
-//import javax.swing.text.Position;
-//import javax.swing.text.StyledDocument;
-//import org.netbeans.api.editor.guards.GuardedSectionManager;
-//import org.netbeans.api.editor.guards.SimpleSection;
-//import org.netbeans.api.java.classpath.ClassPath;
-//import org.netbeans.api.java.queries.SourceLevelQuery;
-//import org.netbeans.api.java.source.CancellableTask;
-//import org.netbeans.api.java.source.JavaSource;
-//import org.netbeans.api.java.source.TreeUtilities;
-//import org.netbeans.api.java.source.WorkingCopy;
 import org.netbeans.api.project.libraries.Library;
 import org.netbeans.api.project.libraries.LibraryManager;
-//import org.netbeans.api.queries.FileEncodingQuery;
 import org.netbeans.core.api.multiview.MultiViewHandler;
 import org.netbeans.core.api.multiview.MultiViews;
 import org.netbeans.core.spi.multiview.CloseOperationState;
-//import org.netbeans.core.spi.multiview.MultiViewElement;
-//import org.netbeans.core.spi.multiview.MultiViewElementCallback;
-import org.netbeans.core.spi.multiview.MultiViewFactory;
-//import org.netbeans.modules.form.*;
-//import org.netbeans.modules.form.CodeGenerator;
 import org.netbeans.modules.form.project.*;
-//import org.netbeans.modules.nbform.project.ClassSourceResolver;
-//import org.netbeans.spi.editor.guards.GuardedEditorSupport;
-//import org.netbeans.spi.editor.guards.GuardedSectionsFactory;
-//import org.netbeans.spi.editor.guards.GuardedSectionsProvider;
 import org.openide.DialogDisplayer;
 import org.openide.ErrorManager;
 import org.openide.NotifyDescriptor;
@@ -123,18 +83,12 @@ import org.openide.filesystems.FileStatusListener;
 import org.openide.filesystems.FileSystem;
 import org.openide.loaders.DataObject;
 import org.openide.loaders.MultiDataObject;
-import org.openide.nodes.CookieSet;
 import org.openide.nodes.Node;
 import org.openide.nodes.NodeAdapter;
 import org.openide.nodes.NodeListener;
-//import org.openide.text.CloneableEditor;
 import org.openide.text.CloneableEditorSupport;
 import org.openide.text.DataEditorSupport;
-//import org.openide.text.NbDocument;
-//import org.openide.text.PositionRef;
 import org.openide.util.*;
-//import org.openide.util.Lookup;
-import org.openide.util.NbBundle.Messages;
 import org.openide.windows.CloneableOpenSupport;
 import org.openide.windows.CloneableTopComponent;
 import org.openide.windows.Mode;
@@ -1628,6 +1582,11 @@ public class FormEditorSupport extends DataEditorSupport implements EditorSuppor
             } catch (IOException ex) {
                 Logger.getLogger(FormEditorSupport.class.getName()).log(Level.INFO, "", ex); // NOI18N
             }
+        }
+
+        @Override
+        public String toString() {
+            return getDataObject().getName();
         }
     };
 
