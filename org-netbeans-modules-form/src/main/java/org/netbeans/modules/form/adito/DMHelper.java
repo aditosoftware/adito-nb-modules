@@ -29,13 +29,13 @@ public class DMHelper
 
   static String getFreeName(FormModel pFormModel, String pName)
   {
-    Set<String> names = new HashSet<String>();
+    Set<String> names = new HashSet<>();
     for (RADComponent radComponent : pFormModel.getAllComponents())
     {
       boolean isNewName = names.add(radComponent.getName());
       if (!isNewName)
         throw new IllegalStateException("A component with name '" + radComponent.getName() + "' exists more often " +
-                                            "then once. This is illegal.");
+                                            "than once. This is illegal.");
     }
     return _getFreeName(names, pName, 1);
   }
