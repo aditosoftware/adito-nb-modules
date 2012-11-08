@@ -11,11 +11,11 @@ import java.util.ArrayList;
  */
 public class CreateDefaultColumns
 {
-  private TypeElement VARCHAR = new TypeElement("java.sql.Types.VARCHAR", "VARCHAR");
-  private TypeElement CHAR = new TypeElement("java.sql.Types.CHAR", "CHAR");
-  private TypeElement TIMESTAMP = new TypeElement("java.sql.Types.TIMESTAMP", "TIMESTAMP");
+  private static final TypeElement VARCHAR = new TypeElement("java.sql.Types.VARCHAR", "VARCHAR");
+  private static final TypeElement CHAR = new TypeElement("java.sql.Types.CHAR", "CHAR");
+  private static final TypeElement TIMESTAMP = new TypeElement("java.sql.Types.TIMESTAMP", "TIMESTAMP");
 
-  ArrayList<ColumnModel> columnItems = new ArrayList<ColumnModel>();
+  ArrayList<ColumnModel> columnItems = new ArrayList<>();
 
 
   public CreateDefaultColumns()
