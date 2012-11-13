@@ -44,35 +44,30 @@
 
 package org.netbeans.modules.form;
 
-import java.awt.Component;
-import java.awt.EventQueue;
-import java.awt.Image;
-import java.awt.datatransfer.*;
-import java.text.MessageFormat;
-import java.util.*;
-import java.beans.*;
-import java.lang.reflect.InvocationTargetException;
-import java.security.*;
-import java.util.logging.Level;
-import javax.swing.Action;
-
+import de.adito.aditoweb.nbm.nbide.nbaditointerface.common.IAditoNetbeansTranslations;
+import org.netbeans.modules.form.actions.*;
 import org.netbeans.modules.form.adito.components.AditoNodeConnect;
+import org.netbeans.modules.form.layoutsupport.LayoutNode;
+import org.netbeans.modules.form.menu.*;
+import org.netbeans.modules.form.palette.PaletteUtils;
 import org.openide.ErrorManager;
 import org.openide.actions.*;
+import org.openide.explorer.propertysheet.editors.NodeCustomizer;
 import org.openide.nodes.*;
 import org.openide.util.*;
 import org.openide.util.actions.SystemAction;
-import org.openide.util.datatransfer.NewType;
-import org.openide.explorer.propertysheet.editors.NodeCustomizer;
+import org.openide.util.datatransfer.*;
 
-import org.netbeans.modules.form.actions.*;
-import org.netbeans.modules.form.layoutsupport.*;
+import javax.swing.*;
+import java.awt.*;
+import java.awt.datatransfer.Transferable;
+import java.beans.*;
+import java.security.*;
+import java.text.MessageFormat;
+import java.util.*;
+import java.util.List;
+
 //import org.netbeans.modules.form.editors.TableCustomizer; // STRIPPED
-import org.netbeans.modules.form.menu.AddSubItemAction;
-import org.netbeans.modules.form.menu.InsertMenuAction;
-import org.netbeans.modules.form.menu.MenuEditLayer;
-import org.netbeans.modules.form.palette.PaletteUtils;
-import org.openide.util.datatransfer.PasteType;
 
 public class RADComponentNode extends FormNode
         implements RADComponentCookie, FormPropertyCookie {
@@ -238,8 +233,64 @@ public class RADComponentNode extends FormNode
         return null;
     }
 
-    @Override
-    public Action[] getActions(boolean context) {
+  @Override
+  public Action[] getActions(boolean context)
+  {
+    if (actions == null) {
+      List<Action> actions = new ArrayList<Action>(20);
+      RADComponent topComp = component.getFormModel().getTopRADComponent();
+
+      if (component != topComp) {
+        actions.add(SystemAction.get(CutAction.class));
+      }
+
+      actions.add(SystemAction.get(CopyAction.class));
+      addSeparator(actions);
+
+      if (component != topComp) {
+        actions.add(SystemAction.get(DeleteAction.class));
+      }
+
+      if (component != topComp) {
+        actions.add(SystemAction.get(ChangeVariableNameAction.class));
+      } else {
+        //actions.add(SystemAction.get(TestAction.class));
+      }
+
+      // all actions from our own node.
+      actions.addAll(AditoNodeConnect.getActions(component, true));
+
+      for (Action action : actions)
+      {
+        if (action instanceof ToolsAction)
+          actions.remove(action);
+      }
+
+
+
+      if (component instanceof ComponentContainer) {
+        actions.add(SystemAction.get(PasteAction.class));
+      }
+
+
+
+
+
+
+      javax.swing.Action[] superActions = super.getActions(context);//Liefert Eigenschaften
+      for (int i=0; i < superActions.length; i++)
+        actions.add(superActions[i]);
+
+      this.actions = new Action[actions.size()];
+      actions.toArray(this.actions);
+
+
+
+    }
+    return actions;
+  }
+
+  public Action[] getActionsALT(boolean context) {
         if (actions == null) {
             List<Action> actions = new ArrayList<Action>(20);
             RADComponent topComp = component.getFormModel().getTopRADComponent();
@@ -732,7 +783,8 @@ public class RADComponentNode extends FormNode
     private static final class ChangeVariableNameAction extends RenameAction {
         @Override
         public String getName() {
-            return NbBundle.getMessage(ChangeVariableNameAction.class, "ChangeVariableNameAction"); // NOI18N
+            return Lookup.getDefault().lookup(IAditoNetbeansTranslations.class).getRenameAction();
+            //return NbBundle.getMessage(ChangeVariableNameAction.class, "ChangeVariableNameAction"); // NOI18N
         }
     }
 
