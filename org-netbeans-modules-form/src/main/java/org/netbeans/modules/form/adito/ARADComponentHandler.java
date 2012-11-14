@@ -8,8 +8,10 @@ import org.jetbrains.annotations.*;
 import org.netbeans.modules.form.*;
 import org.openide.filesystems.*;
 import org.openide.loaders.*;
+import org.openide.nodes.Node;
 
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 
 /**
@@ -129,9 +131,26 @@ public class ARADComponentHandler
 
   public void move(RADComponent pTarget)
   {
+    move(pTarget, null);
+  }
+
+  public void move(RADComponent pTarget, Node.Property[] pProperties)
+  {
     IAditoModelDataProvider dataProvider = NbAditoInterface.lookup(IAditoModelDataProvider.class);
     FileObject defaultChildContainer = dataProvider.getDefaultChildContainer(
         pTarget.getARADComponentHandler().getModelFileObject());
+    if (pProperties != null)
+    {
+      for (Node.Property property : pProperties)
+        try
+        {
+          formDataBridge.alignAditoToFormProp(property);
+        }
+        catch (InvocationTargetException e)
+        {
+          // skip
+        }
+    }
     dataProvider.moveDataModel(modelFileObject, defaultChildContainer);
   }
 

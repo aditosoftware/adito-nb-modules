@@ -57,7 +57,7 @@ public class FormDataBridge
       {
         try
         {
-          _alignAditoToFormProp(radComponent.getPropertyByName(pPropertyName));
+          alignAditoToFormProp(radComponent.getPropertyByName(pPropertyName));
         }
         catch (InvocationTargetException e)
         {
@@ -76,7 +76,7 @@ public class FormDataBridge
       {
         try
         {
-          _alignAditoToFormProp(property);
+          alignAditoToFormProp(property);
         }
         catch (InvocationTargetException e)
         {
@@ -143,7 +143,7 @@ public class FormDataBridge
     try
     {
       for (Node.Property formProperty : pProperties)
-        _alignAditoToFormProp(formProperty);
+        alignAditoToFormProp(formProperty);
     }
     catch (InvocationTargetException e)
     {
@@ -151,7 +151,7 @@ public class FormDataBridge
     }
   }
 
-  private void _alignAditoToFormProp(Node.Property pFormProperty) throws InvocationTargetException
+  void alignAditoToFormProp(Node.Property pFormProperty) throws InvocationTargetException
   {
     try
     {

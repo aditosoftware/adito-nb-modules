@@ -132,6 +132,14 @@ class ComponentDragger
         mousePosition = p;
     }
 
+    List<LayoutConstraints> getComputedConstraints(Point p)
+    {
+      List<LayoutConstraints> constraints = new ArrayList<>(selectedComponents.length);
+      List<Integer> indices = new ArrayList<>(selectedComponents.length);
+      computeConstraints(mousePosition, constraints, indices);
+      return constraints;
+    }
+
     void paintDragFeedback(Graphics2D g) {
         Stroke oldStroke = g.getStroke();
         g.setStroke(dashedStroke1);
