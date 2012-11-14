@@ -8,7 +8,6 @@ import org.jetbrains.annotations.*;
 import org.netbeans.modules.form.*;
 import org.openide.filesystems.*;
 import org.openide.loaders.*;
-import org.openide.windows.CloneableOpenSupport;
 
 import java.io.IOException;
 import java.util.*;
@@ -80,28 +79,12 @@ public class ARADComponentHandler
 
   public void deleted()
   {
-    for (DataObject dataObject : DataObject.getRegistry().getModifiedSet())
-    {
-      if (FileUtil.isParentOf(modelFileObject, dataObject.getPrimaryFile()))
-      {
-        CloneableOpenSupport openSupport = dataObject.getLookup().lookup(CloneableOpenSupport.class);
-        if (!openSupport.close())
-          throw new RuntimeException("user canceled"); // TODO
-      }
-    }
-
     FileObject modelFo = getModelFileObject();
     _deinitialize(true);
     if (modelFo != null && modelFo.isValid())
     {
-      try
-      {
-        modelFo.delete();
-      }
-      catch (IOException e)
-      {
-        e.printStackTrace(); // TODO: exceptionHandling
-      }
+      IAditoModelDataProvider dataProvider = NbAditoInterface.lookup(IAditoModelDataProvider.class);
+      dataProvider.removeDataModel(modelFo);
     }
   }
 
@@ -146,17 +129,10 @@ public class ARADComponentHandler
 
   public void move(RADComponent pTarget)
   {
-    IAditoModelDataProvider modelDataProvider = NbAditoInterface.lookup(IAditoModelDataProvider.class);
-    FileObject defaultChildContainer = modelDataProvider.getDefaultChildContainer(
+    IAditoModelDataProvider dataProvider = NbAditoInterface.lookup(IAditoModelDataProvider.class);
+    FileObject defaultChildContainer = dataProvider.getDefaultChildContainer(
         pTarget.getARADComponentHandler().getModelFileObject());
-    try
-    {
-      DataFolder.findFolder(modelFileObject).move(DataFolder.findFolder(defaultChildContainer));
-    }
-    catch (IOException e)
-    {
-      e.printStackTrace();  // TODO: exceptionHandling
-    }
+    dataProvider.moveDataModel(modelFileObject, defaultChildContainer);
   }
 
   @NotNull

@@ -29,7 +29,9 @@ public interface IAditoModelDataProvider
 
   FileObject createDataModel(FileObject pParentData, Class<?> pComponentClass, String pCreatedName);
 
-  FileObject removeDataModel(FileObject pModelFileObject);
+  void removeDataModel(FileObject pModelFileObject);
+
+  void moveDataModel(FileObject pSource, FileObject pTarget);
 
   void reorder(FileObject pModelFo, Comparator<String> pChildComparator);
 
