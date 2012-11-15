@@ -233,12 +233,14 @@ public class RADComponentNode extends FormNode
         return null;
     }
 
-  @Override
-  public Action[] getActions(boolean context)
-  {
-    if (actions == null) {
-      List<Action> actions = new ArrayList<Action>(20);
-      RADComponent topComp = component.getFormModel().getTopRADComponent();
+    @Override
+    public Action[] getActions(boolean context){
+        if (actions == null) {
+            List<Action> actions = new ArrayList<Action>(20);
+            RADComponent topComp = component.getFormModel().getTopRADComponent();
+
+            // all actions from our own node.
+            actions.addAll(AditoNodeConnect.getActions(component, true));
 
       if (component != topComp) {
         actions.add(SystemAction.get(CutAction.class));
@@ -266,16 +268,9 @@ public class RADComponentNode extends FormNode
           actions.remove(action);
       }
 
-
-
       if (component instanceof ComponentContainer) {
         actions.add(SystemAction.get(PasteAction.class));
       }
-
-
-
-
-
 
       javax.swing.Action[] superActions = super.getActions(context);//Liefert Eigenschaften
       for (int i=0; i < superActions.length; i++)
@@ -283,14 +278,12 @@ public class RADComponentNode extends FormNode
 
       this.actions = new Action[actions.size()];
       actions.toArray(this.actions);
-
-
-
     }
     return actions;
   }
 
-  public Action[] getActionsALT(boolean context) {
+  /*@Override
+  public Action[] getActions(boolean context) {
         if (actions == null) {
             List<Action> actions = new ArrayList<Action>(20);
             RADComponent topComp = component.getFormModel().getTopRADComponent();
@@ -299,19 +292,19 @@ public class RADComponentNode extends FormNode
             actions.addAll(AditoNodeConnect.getActions(component, true));
 
             if (component.isReadOnly()) {
-                /*if (component == topComp) {
+                if (component == topComp) {
                     actions.add(SystemAction.get(TestAction.class));
                     actions.add(null);
-                }*/
-              // STRIPPED
-                /*Event[] events = component.getKnownEvents();
+                }
+
+                Event[] events = component.getKnownEvents();
                 for (int i=0; i < events.length; i++) {
                     if (events[i].hasEventHandlers()) {
                         actions.add(SystemAction.get(EventsAction.class));
                         actions.add(null);
                         break;
                     }
-                }*/
+                }
 
                 actions.add(SystemAction.get(CopyAction.class));
             } else {
@@ -326,11 +319,11 @@ public class RADComponentNode extends FormNode
                 } else {
                     //actions.add(SystemAction.get(TestAction.class));
                 }
-              // STRIPPED
-                /*if (FormEditor.getBindingSupport(component.getFormModel()) != null) {
+
+                if (FormEditor.getBindingSupport(component.getFormModel()) != null) {
                     actions.add(SystemAction.get(BindAction.class));
                 }
-                actions.add(SystemAction.get(EventsAction.class));*/
+                actions.add(SystemAction.get(EventsAction.class));
                 actions.add(null);
 
                 java.util.List actionProps = component.getActionProperties();
@@ -373,7 +366,7 @@ public class RADComponentNode extends FormNode
                 }
 
                 actions.add(null);
-                //actions.add(SystemAction.get(CustomCodeAction.class)); // STRIPPED
+                actions.add(SystemAction.get(CustomCodeAction.class));
             }
             actions.add(null);
 
@@ -386,7 +379,7 @@ public class RADComponentNode extends FormNode
         }
 
         return actions;
-    }
+    }*/
 
     private void addLayoutActions(List<Action> actions) {
         if (component.getParentComponent() instanceof RADVisualContainer) {
