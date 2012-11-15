@@ -63,8 +63,6 @@ import org.openide.util.Lookup;
 import org.openide.util.NbBundle;
 import org.openide.util.datatransfer.NewType;
 
-//import org.netbeans.modules.form.codestructure.*; // STRIPPED
-import org.openide.filesystems.FileObject;
 import org.openide.util.Utilities;
 
 /**

@@ -4,6 +4,7 @@ import com.google.common.base.Objects;
 import com.google.common.base.*;
 import com.google.common.collect.Lists;
 import de.adito.aditoweb.nbm.nbide.nbaditointerface.NbAditoInterface;
+import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.model.IAditoModelDataProvider;
 import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.sync.*;
 import org.jetbrains.annotations.NotNull;
 import org.netbeans.modules.form.*;
@@ -12,13 +13,17 @@ import org.openide.filesystems.FileObject;
 import org.openide.nodes.Node;
 import org.openide.util.NotImplementedException;
 
+import java.awt.*;
 import java.beans.*;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
+import java.util.List;
 import java.util.logging.*;
 
 /**
+ * Synchronisiert das Adito-Datenmodell mit dem Form-Datenmodell.
+ *
  * @author J. Boesl, 31.03.11
  */
 public class FormDataBridge
@@ -256,6 +261,47 @@ public class FormDataBridge
                 }
               }
             }
+            break;
+          case IFormComponentInfo.PROP_POSITION_CHANGED:
+            // per 'invokeLater', da das Event gefeuert wurde, bevor der Wert im FileSystem steht.
+            EventQueue.invokeLater(new Runnable()
+            {
+              public void run()
+              {
+                ComponentContainer cont = (ComponentContainer) radComponent;
+
+                IAditoModelDataProvider modelDataProvider = NbAditoInterface.lookup(IAditoModelDataProvider.class);
+                List<FileObject> childModels = modelDataProvider.getChildModels(
+                    radComponent.getARADComponentHandler().getModelFileObject());
+                RADComponent[] subBeans = cont.getSubBeans();
+                int[] perm = new int[subBeans.length];
+                if (childModels.size() != subBeans.length)
+                {
+                  throw new IllegalStateException("Size of subBeans and childModels not equal.");
+                }
+                for (int i = 0; i < subBeans.length; i++)
+                {
+                  RADComponent subBean = subBeans[i];
+                  int index = -1;
+                  for (int j = 0; j < childModels.size(); j++)
+                  {
+                    FileObject childModel = childModels.get(j);
+                    if (subBean.getName().equals(childModel.getNameExt()))
+                    {
+                      index = j;
+                      break;
+                    }
+                  }
+                  if (index == -1)
+                  {
+                    throw new IllegalStateException("SubBean '" + subBean.getName() + "' could not be found in dataModels.");
+                  }
+                  perm[i] = index;
+                }
+                cont.reorderSubComponents(perm);
+                radComponent.getFormModel().fireComponentsReordered(cont, perm);
+              }
+            });
             break;
           case IFormComponentInfo.PROP_VALUE_CHANGED:
             _alignFormToAditoProperty((String) evt.getNewValue());

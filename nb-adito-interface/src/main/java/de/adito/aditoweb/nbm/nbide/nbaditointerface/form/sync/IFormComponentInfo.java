@@ -10,6 +10,8 @@ import java.util.List;
 import java.util.*;
 
 /**
+ * Bietet Informationen für Form-Komponenten über Adito-Objekte an.
+ *
  * @author J. Boesl, 16.05.11
  */
 public interface IFormComponentInfo
@@ -18,6 +20,7 @@ public interface IFormComponentInfo
   public static final String PROP_VALUE_CHANGED = "propValueChanged";
   public static final String PROP_CHILD_ADDED = "propChildAdded";
   public static final String PROP_CHILD_REMOVED = "propChildRemoved";
+  public static final String PROP_POSITION_CHANGED = "propPositionChanged";
 
   Sheet createSheet();
 
