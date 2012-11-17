@@ -228,10 +228,6 @@ public class AditoRegisterLayoutSupport extends AbstractLayoutSupport
                                        Component[] components,
                                        int index)
   {
-    JTabbedPane tabbedPane = _getTabbedPane(container);
-    if (tabbedPane == null)
-      return;
-
     for (Component component : components)
       container.add(component);
   }
@@ -239,11 +235,7 @@ public class AditoRegisterLayoutSupport extends AbstractLayoutSupport
   @Override
   public boolean removeComponentFromContainer(Container container, Container containerDelegate, Component component)
   {
-    JTabbedPane tabbedPane = _getTabbedPane(container);
-    if (tabbedPane == null)
-      return false;
-
-    tabbedPane.remove(component);
+    container.remove(component);
     component.setBounds(0, 0, 0, 0);
     return true;
   }
