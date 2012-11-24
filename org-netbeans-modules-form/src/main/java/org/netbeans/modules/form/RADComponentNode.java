@@ -235,49 +235,47 @@ public class RADComponentNode extends FormNode
 
     @Override
     public Action[] getActions(boolean context){
-        if (actions == null) {
-            List<Action> actions = new ArrayList<Action>(20);
-            RADComponent topComp = component.getFormModel().getTopRADComponent();
+      if (actions == null) {
+        List<Action> actions = new ArrayList<>();
+        RADComponent topComp = component.getFormModel().getTopRADComponent();
 
-            // all actions from our own node.
-            actions.addAll(AditoNodeConnect.getActions(component, true));
+        // all actions from our own node.
+        actions.addAll(AditoNodeConnect.getActions(component, true));
 
-      if (component != topComp) {
-        actions.add(SystemAction.get(CutAction.class));
-      }
+        addSeparator(actions);
 
-      actions.add(SystemAction.get(CopyAction.class));
-      addSeparator(actions);
+        if (component != topComp) {
+          actions.add(SystemAction.get(CutAction.class));
+          actions.add(SystemAction.get(CopyAction.class));
+        }
+        if (component instanceof ComponentContainer) {
+          actions.add(SystemAction.get(PasteAction.class));
+        }
 
-      if (component != topComp) {
-        actions.add(SystemAction.get(DeleteAction.class));
-      }
+        addSeparator(actions);
 
-      if (component != topComp) {
-        actions.add(SystemAction.get(ChangeVariableNameAction.class));
-      } else {
-        //actions.add(SystemAction.get(TestAction.class));
-      }
+        if (component != topComp) {
+          actions.add(SystemAction.get(DeleteAction.class));
+          actions.add(SystemAction.get(ChangeVariableNameAction.class));
+        }
 
-      // all actions from our own node.
-      actions.addAll(AditoNodeConnect.getActions(component, true));
+        addSeparator(actions);
 
-      for (Action action : actions)
-      {
-        if (action instanceof ToolsAction)
-          actions.remove(action);
-      }
+        if (component != topComp) {
+          actions.add(SystemAction.get(MoveUpAction.class));
+          actions.add(SystemAction.get(MoveDownAction.class));
+        }
+        if (component instanceof ComponentContainer) {
+          actions.add(SystemAction.get(ReorderAction.class));
+        }
 
-      if (component instanceof ComponentContainer) {
-        actions.add(SystemAction.get(PasteAction.class));
-      }
+        addSeparator(actions);
 
-      javax.swing.Action[] superActions = super.getActions(context);//Liefert Eigenschaften
-      for (int i=0; i < superActions.length; i++)
-        actions.add(superActions[i]);
+        Action[] superActions = super.getActions(context); // Liefert Eigenschaften
+        Collections.addAll(actions, superActions);
 
-      this.actions = new Action[actions.size()];
-      actions.toArray(this.actions);
+        this.actions = new Action[actions.size()];
+        actions.toArray(this.actions);
     }
     return actions;
   }
