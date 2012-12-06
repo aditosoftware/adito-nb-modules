@@ -30,8 +30,7 @@ public class FireWorkflowEventMethodHint
     Node node = context.node;
     JsParseResult info = AstUtilities.getParseResult(context.parserResult);
 
-    // --------------------
-    //  CHECKING ALL I NEED
+    // -- best way with String manipulation? // or using ast?
     // method source
     String source = info.getSource().substring(node.getSourceStart(), node.getSourceEnd());
     // only apply if 2 parameters
@@ -43,21 +42,23 @@ public class FireWorkflowEventMethodHint
     if (!eventIdentifier.contains("\""))
       return;
     eventIdentifier = eventIdentifier.substring(eventIdentifier.indexOf("\"") + 1, eventIdentifier.lastIndexOf("\"")).trim();
-    // ------------------
-
-    System.out.println("Apply Rule. eventIdentifier: " + eventIdentifier);
 
 
+    // already in properties defined?
+    String[] definedEvents = hintSupply.getAditoProperty(info.getSnapshot().getSource().getFileObject().getParent(), "workflowEvents", String[].class);
+    if (definedEvents != null)
+      for (String event : definedEvents)
+        if (event.equals(eventIdentifier))
+          return;
+
+    // not defined, show hint
     int start = node.getSourceStart() + source.indexOf(eventIdentifier);
     OffsetRange range = new OffsetRange(start, start + eventIdentifier.length());
-    List<HintFix> fixList = new ArrayList<>();
-    fixList.add(new FireWorkflowEventMethodHintFix());
-
+    List<HintFix> fixList = Collections.<HintFix>singletonList(new FireWorkflowEventMethodHintFix(context, eventIdentifier));
     Hint desc = new Hint(this, getDisplayName(),
                          info.getSnapshot().getSource().getFileObject(),
                          range, fixList, 1500);
     result.add(desc);
-
   }
 
   // TODO DOCU

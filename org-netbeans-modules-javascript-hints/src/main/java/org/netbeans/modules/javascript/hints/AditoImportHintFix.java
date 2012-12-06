@@ -1,53 +1,47 @@
 package org.netbeans.modules.javascript.hints;
 
-import org.netbeans.modules.javascript.editing.JsParseResult;
+import org.netbeans.editor.BaseDocument;
+import org.netbeans.modules.csl.api.*;
+import org.netbeans.modules.javascript.hints.infrastructure.JsRuleContext;
 
 /**
  * @author d.poellath, 06.12.12
  */
 public class AditoImportHintFix
     extends AbstractAditoHintFix
+    implements PreviewableFix
 {
+  private final JsRuleContext context;
   private String importStatement = null;
-  private JsParseResult info = null;
 
-  public AditoImportHintFix(JsParseResult pInfo, String pImportStatement)
+  public AditoImportHintFix(JsRuleContext pContext, String pImportStatement)
   {
     super();
+    context = pContext;
     importStatement = pImportStatement;
-    info = pInfo;
   }
 
   public void implement() throws Exception
   {
     // TODO #4023 - need to be implemented
-    //if (info == null)
-    //  return;
-    //Snapshot snapshot = info.getSnapshot();
-    //final Document doc = snapshot.getSource().getDocument(false);
-    //if (doc == null)
-    //  return;
-    //SwingUtilities.invokeLater(new Runnable()
-    //{
-    //  public void run()
-    //  {
-    //    final NbEditorDocument nbdoc = (NbEditorDocument) doc;
-    //    nbdoc.runAtomic(new Runnable()
-    //    {
-    //
-    //      public void run()
-    //      {
-    //        MutableTextInput mti = (MutableTextInput) doc.getProperty(MutableTextInput.class);
-    //        if (mti != null)
-    //        {
-    //          mti.tokenHierarchyControl().rebuild();
-    //        }
-    //      }
-    //    });
-    //  }
-    //});
+    if (context == null)
+      return;
+    EditList edits = getEditList();
+    edits.apply();
   }
 
+  public EditList getEditList() throws Exception
+  {
+    BaseDocument doc = context.doc;
+    EditList edits = new EditList(doc);
+    edits.replace(0, 0, importStatement, false, 0);
+    return edits;
+  }
+
+  public boolean canPreview()
+  {
+    return true;
+  }
 
   public boolean isSafe()
   {
@@ -56,6 +50,6 @@ public class AditoImportHintFix
 
   public boolean isInteractive()
   {
-    return true;
+    return false;
   }
 }

@@ -41,7 +41,7 @@ public class AditoImportHint
       if (source.contains(importStatement))
         return;
       fixList = new ArrayList<>();
-      fixList.add(new AditoImportHintFix(info, importStatement));
+      fixList.add(new AditoImportHintFix(context, importStatement + ";\n"));
     }
 
     // hinweis anzeigen
@@ -54,6 +54,7 @@ public class AditoImportHint
   private boolean isMethodKnown(JsRuleContext pContext, JsParseResult pInfo, Node pNode, String pCallName)
   {
     // Context: pJavaScriptFileObject
+    System.out.println("Prüfe: " + pCallName);
     return pCallName.contains(".")
         || pCallName.startsWith("import")
         || hintSupply.isMethodDeclaredInAditoProcess(pInfo.getSnapshot().getSource().getFileObject(), pCallName);
