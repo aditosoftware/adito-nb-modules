@@ -81,6 +81,8 @@ public class RADComponentNode extends FormNode
     private RADComponent component;
     private boolean highlightDisplayName;
     private Map<Integer,Image> img = new HashMap<Integer,Image>();
+    @SuppressWarnings("FieldCanBeLocal")
+    private final PropertyChangeListener  propertyChangeListenerReference; // strong reference for weak listener
 
     public RADComponentNode(RADComponent component) {
         this(component instanceof ComponentContainer ?
@@ -88,7 +90,7 @@ public class RADComponentNode extends FormNode
             component);
     }
 
-    public RADComponentNode(Children children, RADComponent component) {
+    public RADComponentNode(Children children, final RADComponent component) {
         super(children, component.getFormModel(), AditoNodeConnect.getLookup(component));
         this.component = component;
         component.setNodeReference(this);
@@ -97,8 +99,7 @@ public class RADComponentNode extends FormNode
             getInstanceContent().add(new ComponentsIndex());
         updateName();
 
-        // wenn sich die Properties ändern soll das Sheet aktualisiert werden.
-        AditoNodeConnect.addPropertyChangeListener(component, new PropertyChangeListener()
+        propertyChangeListenerReference = new PropertyChangeListener()
         {
           @Override
           public void propertyChange(PropertyChangeEvent evt)
@@ -109,7 +110,18 @@ public class RADComponentNode extends FormNode
             else
               firePropertyChange(propertyName, null, null);
           }
-        });
+        };
+        // wenn sich die Properties ändern soll das Sheet aktualisiert werden.
+      AditoNodeConnect.addPropertyChangeListener(
+          component, WeakListeners.propertyChange(propertyChangeListenerReference, new Object()
+      {
+        // wird per Reflection von 'WeakListeners.propertyChange' aufgerufen.
+        @SuppressWarnings("UnusedDeclaration")
+        public void removePropertyChangeListener(PropertyChangeListener pPropertyChangeListener)
+        {
+          AditoNodeConnect.removePropertyChangeListener(component, pPropertyChangeListener);
+        }
+      }));
     }
 
     void updateName() {
