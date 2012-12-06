@@ -1,16 +1,4 @@
 OpenIDE-Module-Public-Packages: -
-OpenIDE-Module-Module-Dependencies: org.mozilla.rhino.patched/1 > 1.10
- 2, org.netbeans.modules.csl.api/2 > 2.1, org.netbeans.modules.diff/1
-  > 1.16, org.netbeans.modules.editor.lib/3 > 3.1, org.netbeans.modules
- .editor.lib2/1 > 1.4, org.netbeans.modules.javascript.editing/1 > 0.5
- 0.0, org.netbeans.modules.lexer/2 > 1.12, org.netbeans.modules.option
- s.api/1 > 1.5, org.netbeans.modules.parsing.api/1 > 1.26, org.netbean
- s.modules.projectapi/1 > 1.3, org.netbeans.modules.refactoring.api >
-  1.0, org.netbeans.spi.editor.hints/0-1 > 1.7, org.openide.awt > 6.11,
-  org.openide.dialogs > 7.0, org.openide.filesystems > 7.0, org.openid
- e.loaders > 5.11, org.openide.nodes > 6.9.0.1, org.openide.text > 6.1
- 6, org.openide.util > 8.0, org.openide.util.lookup > 8.0, org.openide
- .windows > 6.2
 OpenIDE-Module-Java-Dependencies: Java > 1.6
 OpenIDE-Module-Implementation-Version: 201207171143
 AutoUpdate-Show-In-Client: false

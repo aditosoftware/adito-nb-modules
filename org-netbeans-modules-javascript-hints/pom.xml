@@ -19,7 +19,12 @@
 
 
   <dependencies>
-
+    <!-- supplies adito stuff -->
+    <dependency>
+      <groupId>de.adito.aditoweb.modules.nb-ide</groupId>
+      <artifactId>nb-adito-interface</artifactId>
+      <version>${project.parent.version}</version>
+    </dependency>
 
     <dependency>
       <groupId>org.netbeans.api</groupId>
