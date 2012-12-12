@@ -7,6 +7,8 @@ import org.openide.cookies.OpenCookie;
 import org.openide.loaders.DataObject;
 import org.openide.util.Lookup;
 
+import javax.swing.*;
+
 /**
  * @author J. Boesl, 27.08.12
  */
@@ -40,7 +42,13 @@ public class AditoFormDataObjectDataImpl implements IAditoFormDataObjectData
       @Override
       public void open()
       {
-        getFormEditorSupport().openDesign();
+        SwingUtilities.invokeLater(new Runnable()
+        {
+          public void run()
+          {
+            getFormEditorSupport().openDesign();
+          }
+        });
       }
     };
   }
