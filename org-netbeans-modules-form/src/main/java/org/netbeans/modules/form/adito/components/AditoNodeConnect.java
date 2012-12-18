@@ -76,6 +76,19 @@ public final class AditoNodeConnect
     });
   }
 
+  public static void removePropertyChangeListener(RADComponent pComponent, final PropertyChangeListener pListener)
+  {
+    _resolve(pComponent, new _NodeC<Void>()
+    {
+      @Override
+      public Void resolve(Node pNode)
+      {
+        pNode.removePropertyChangeListener(pListener);
+        return null;
+      }
+    });
+  }
+
   public static List<Action> getActions(RADComponent pComponent, final boolean pContext)
   {
     Action[] actions = _resolve(pComponent, new _NodeC<Action[]>()
