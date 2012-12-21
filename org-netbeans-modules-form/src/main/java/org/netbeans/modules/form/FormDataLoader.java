@@ -99,7 +99,7 @@
 //          return null;
 //        String ext = fo.getExt();
 //
-//        if (ADITO_EXTENSION.equals(ext) && NbAditoInterface.lookup(IAditoModelDataProvider.class).isFrameModel(fo))
+//        if (ADITO_EXTENSION.equals(ext) && NbAditoInterface.lookup(IAditoModelDataProvider.class).isFormModel(fo))
 //          return fo;
 //        return null;
 //    }
