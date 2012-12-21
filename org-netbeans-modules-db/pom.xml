@@ -106,6 +106,12 @@
       <artifactId>ddl</artifactId>
       <version>RELEASE721</version>
     </dependency>
+
+    <dependency>
+      <groupId>de.adito.aditoweb.modules.nb-ide</groupId>
+      <artifactId>nb-adito-interface</artifactId>
+      <version>4.0.0</version>
+    </dependency>
   </dependencies>
 
 
@@ -118,11 +124,15 @@
           <cluster>ide</cluster>
           <codeNameBase>org.netbeans.modules.db</codeNameBase>
           <publicPackages>
+            <publicPackage>org.netbeans.adito.*</publicPackage>
             <publicPackage>org.netbeans.api.db.explorer.*</publicPackage>
             <publicPackage>org.netbeans.api.db.explorer.node.*</publicPackage>
             <publicPackage>org.netbeans.api.db.explorer.support.*</publicPackage>
             <publicPackage>org.netbeans.api.db.sql.support.*</publicPackage>
             <publicPackage>org.netbeans.spi.db.explorer.*</publicPackage>
+            <publicPackage>org.netbeans.modules.db.explorer.*</publicPackage>
+            <publicPackage>org.netbeans.modules.db.explorer.dlg.*</publicPackage>
+            <publicPackage>org.netbeans.modules.db.explorer.action.*</publicPackage>
           </publicPackages>
         </configuration>
       </plugin>

@@ -43,67 +43,79 @@
 package org.netbeans.modules.db.explorer.action;
 
 import org.netbeans.api.db.explorer.node.BaseNode;
-import org.netbeans.modules.db.explorer.DatabaseConnection;
-import org.netbeans.modules.db.explorer.dlg.CreateTableDialog;
+import org.netbeans.modules.db.explorer.*;
+import org.netbeans.modules.db.explorer.dlg.*;
 import org.openide.nodes.Node;
-import org.openide.util.HelpCtx;
-import org.openide.util.NbBundle;
-import org.openide.util.RequestProcessor;
+import org.openide.util.*;
 import org.openide.util.actions.SystemAction;
 
+import java.util.List;
+
 /**
- *
  * @author Rob Englander
  */
-public class CreateTableAction extends BaseAction {
+public class CreateTableAction extends BaseAction
+{
 
-    @Override
-    protected boolean enable(Node[] activatedNodes) {
-        if (activatedNodes == null || activatedNodes.length != 1) {
-            return false;
+  @Override
+  protected boolean enable(Node[] activatedNodes)
+  {
+    if (activatedNodes == null || activatedNodes.length != 1)
+{
+      return false;
+    }
+
+    boolean enabled = false;
+    DatabaseConnection dbconn = activatedNodes[0].getLookup().lookup(DatabaseConnection.class);
+
+    if (dbconn != null)
+    {
+      enabled = DatabaseConnection.isVitalConnection(dbconn.getConnection(), dbconn);
+    }
+
+    return enabled;
+  }
+
+  @Override
+  public HelpCtx getHelpCtx()
+  {
+    return new HelpCtx(CreateTableAction.class);
+  }
+
+  @Override
+  public void performAction(Node[] activatedNodes)
+  {
+    final BaseNode node = activatedNodes[0].getLookup().lookup(BaseNode.class);
+    RequestProcessor.getDefault().post(
+        new Runnable()
+        {
+          @Override
+          public void run()
+          {
+            perform(node);
+          }
         }
+    );
+  }
 
-        boolean enabled = false;
-        DatabaseConnection dbconn = activatedNodes[0].getLookup().lookup(DatabaseConnection.class);
+  private void perform(final BaseNode node)
+  {
+    DatabaseConnection connection = node.getLookup().lookup(DatabaseConnection.class);
 
-        if (dbconn != null) {
-            enabled = DatabaseConnection.isVitalConnection(dbconn.getConnection(), dbconn);
-        }
-
-        return enabled;
+    String schema = findSchemaWorkingName(node.getLookup());
+    IDefaultTableColumns defaultTableColumns = Lookup.getDefault().lookup(IDefaultTableColumns.class);
+    List<ColumnItem> items = defaultTableColumns != null ? defaultTableColumns.get() : null;
+    boolean tableCreated = CreateTableDialog.showDialogAndCreate(connection.getConnector().getDatabaseSpecification(),
+                                                                 schema, items, null);
+    if (tableCreated)
+    {
+      SystemAction.get(RefreshAction.class).performAction(new Node[]{node});
     }
+  }
 
-    @Override
-    public HelpCtx getHelpCtx() {
-        return new HelpCtx(CreateTableAction.class);
-    }
-
-    @Override
-    public void performAction (Node[] activatedNodes) {
-        final BaseNode node = activatedNodes[0].getLookup().lookup(BaseNode.class);
-        RequestProcessor.getDefault().post(
-            new Runnable() {
-            @Override
-                public void run() {
-                    perform(node);
-                }
-            }
-        );
-    }
-
-    private void perform(final BaseNode node) {
-        DatabaseConnection connection = node.getLookup().lookup(DatabaseConnection.class);
-
-        String schema = findSchemaWorkingName(node.getLookup());
-        boolean tableCreated = CreateTableDialog.showDialogAndCreate(connection.getConnector().getDatabaseSpecification(), schema);
-        if (tableCreated) {
-            SystemAction.get(RefreshAction.class).performAction(new Node[] { node });
-        }
-    }
-
-    @Override
-    public String getName() {
-        return NbBundle.getMessage (CreateTableAction.class, "CreateTable"); // NOI18N
-    }
-
+  @Override
+  public String getName()
+  {
+    return NbBundle.getMessage(CreateTableAction.class, "CreateTable"); // NOI18N
+  }
 }
