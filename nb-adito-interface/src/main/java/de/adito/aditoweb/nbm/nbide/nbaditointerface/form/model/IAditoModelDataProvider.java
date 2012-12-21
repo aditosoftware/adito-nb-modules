@@ -1,6 +1,5 @@
 package de.adito.aditoweb.nbm.nbide.nbaditointerface.form.model;
 
-import org.jetbrains.annotations.NotNull;
 import org.openide.filesystems.FileObject;
 import org.openide.loaders.DataObject;
 import org.openide.nodes.Node;
@@ -34,14 +33,5 @@ public interface IAditoModelDataProvider
   void moveDataModel(FileObject pSource, FileObject pTarget);
 
   void reorder(FileObject pModelFo, Comparator<String> pChildComparator);
-
-  /**
-   * Versucht die Komponente umzubenennen.
-   *
-   * @param pFileObject das ModelFileObject, das umbenannt werden soll.
-   * @param pOldName    der alte Name.
-   * @param pNewName    der neue Name.
-   */
-  void rename(@NotNull FileObject pFileObject, String pOldName, @NotNull String pNewName);
 
 }
