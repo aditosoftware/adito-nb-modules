@@ -47,7 +47,7 @@ import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.util.Arrays;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.prefs.PreferenceChangeEvent;
@@ -59,7 +59,6 @@ import javax.swing.JScrollPane;
 import org.netbeans.core.spi.multiview.CloseOperationState;
 import org.netbeans.core.spi.multiview.MultiViewElement;
 import org.netbeans.core.spi.multiview.MultiViewElementCallback;
-import org.netbeans.modules.form.*;
 import org.netbeans.modules.form.assistant.AssistantModel;
 import org.netbeans.modules.form.assistant.AssistantView;
 import org.openide.actions.FileSystemAction;
@@ -95,7 +94,7 @@ public class FormDesignerTC extends TopComponent implements MultiViewElement {
 
     private PreLoadTask preLoadTask;
 
-    private static String iconURL =
+    private static final String ICON_URL =
         "org/netbeans/modules/form/resources/formDesigner.gif"; // NOI18N
 
     public FormDesignerTC(Lookup lkp) {
@@ -107,7 +106,7 @@ public class FormDesignerTC extends TopComponent implements MultiViewElement {
         lookup = new FormDesignerLookup();
         createDesigner();
         associateLookup(lookup);
-        setIcon(ImageUtilities.loadImage(iconURL));
+        setIcon(ImageUtilities.loadImage(ICON_URL));
         setLayout(new BorderLayout());
         setMinimumSize(new Dimension(10, 10));
     }
@@ -130,7 +129,14 @@ public class FormDesignerTC extends TopComponent implements MultiViewElement {
 
     @Override
     protected String preferredID() {
+      try
+      {
         return formEditorSupport.getFormDataObject().getName();
+      }
+      catch (Exception e)
+      {
+        return "FormDesignerTC";
+      }
     }
 
     // only MultiViewDescriptor is stored, not MultiViewElement

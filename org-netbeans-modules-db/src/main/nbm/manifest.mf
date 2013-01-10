@@ -1,13 +1,4 @@
 Manifest-Version: 1.0
-OpenIDE-Module-Module-Dependencies: org.netbeans.api.progress/1 > 1.0,
-  org.netbeans.core.ide/1 > 1.15, org.netbeans.modules.db.metadata.mod
- el/0-1 > 0.3, org.netbeans.modules.javahelp/1 > 2.20, org.netbeans.mo
- dules.keyring > 1.10, org.netbeans.modules.project.libraries/1 > 1.26
- , org.openide.awt > 6.8, org.openide.dialogs > 6.2, org.openide.explo
- rer > 6.8, org.openide.filesystems > 7.19, org.openide.io > 1.19, org
- .openide.loaders > 4.11, org.openide.modules > 6.2, org.openide.nodes
-  > 7.9, org.openide.util > 8.0, org.openide.util.lookup > 8.0, org.op
- enide.windows > 6.2
 OpenIDE-Module-Build-Version: 201207171143
 OpenIDE-Module-Requires: org.openide.modules.ModuleFormat1
 OpenIDE-Module: org.netbeans.modules.db/1
@@ -16,23 +7,6 @@ OpenIDE-Module-Localizing-Bundle: org/netbeans/modules/db/resources/Bu
 OpenIDE-Module-Layer: org/netbeans/modules/db/resources/mf-layer.xml
 OpenIDE-Module-Java-Dependencies: Java > 1.6
 OpenIDE-Module-Implementation-Version: 30
-Maven-Class-Path: org.netbeans.api:org-netbeans-api-progress:RELEASE72
-  org.netbeans.api:org-netbeans-core-ide:RELEASE72 org.netbeans.module
- s:org-netbeans-modules-db-metadata-model:RELEASE72 org.netbeans.api:o
- rg-netbeans-modules-javahelp:RELEASE72 org.netbeans.api:org-netbeans-
- modules-keyring:RELEASE72 org.netbeans.api:org-netbeans-modules-proje
- ct-libraries:RELEASE72 org.netbeans.api:org-openide-awt:RELEASE72 org
- .netbeans.api:org-openide-dialogs:RELEASE72 org.netbeans.api:org-open
- ide-explorer:RELEASE72 org.netbeans.api:org-openide-filesystems:RELEA
- SE72 org.netbeans.api:org-openide-io:RELEASE72 org.netbeans.api:org-o
- penide-loaders:RELEASE72 org.netbeans.api:org-openide-modules:RELEASE
- 72 org.netbeans.api:org-openide-nodes:RELEASE72 org.netbeans.api:org-
- openide-util:RELEASE72 org.netbeans.api:org-openide-util-lookup:RELEA
- SE72 org.netbeans.api:org-openide-windows:RELEASE72 org.netbeans.exte
- rnal:ddl:RELEASE72
 OpenIDE-Module-Specification-Version: 1.48.1.30
-OpenIDE-Module-Public-Packages: org.netbeans.api.db.explorer.*, org.ne
- tbeans.api.db.explorer.node.*, org.netbeans.api.db.explorer.support.*
- , org.netbeans.api.db.sql.support.*, org.netbeans.spi.db.explorer.*
 OpenIDE-Module-Install: org/netbeans/modules/db/DatabaseModule.class
 AutoUpdate-Show-In-Client: false
