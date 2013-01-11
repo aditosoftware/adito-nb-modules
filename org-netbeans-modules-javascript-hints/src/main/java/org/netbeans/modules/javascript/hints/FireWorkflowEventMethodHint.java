@@ -61,13 +61,12 @@ public class FireWorkflowEventMethodHint
     result.add(desc);
   }
 
-  // TODO DOCU
-  //public String getDescription()
-  //{
-  //  return getClass().getSimpleName();
-  //}
-  //public String getDisplayName()
-  //{
-  //  return getClass().getSimpleName();
-  //}
+  public String getDescription()
+  {
+    return "Event nicht registriert";
+  }
+  public String getDisplayName()
+  {
+    return "FireWorkflowEvent";
+  }
 }

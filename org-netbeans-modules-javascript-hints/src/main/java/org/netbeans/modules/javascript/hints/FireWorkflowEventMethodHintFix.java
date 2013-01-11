@@ -64,4 +64,9 @@ public class FireWorkflowEventMethodHintFix
   {
     return false;
   }
+
+  public String getDescription()
+  {
+    return "Diesen Event registrieren.";
+  }
 }
