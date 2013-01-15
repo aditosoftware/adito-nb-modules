@@ -42,8 +42,9 @@
 
 package org.netbeans.modules.db.explorer.action;
 
+import org.netbeans.adito.ColumnItemCreator;
 import org.netbeans.api.db.explorer.node.BaseNode;
-import org.netbeans.modules.db.explorer.*;
+import org.netbeans.modules.db.explorer.DatabaseConnection;
 import org.netbeans.modules.db.explorer.dlg.*;
 import org.openide.nodes.Node;
 import org.openide.util.*;
@@ -61,7 +62,7 @@ public class CreateTableAction extends BaseAction
   protected boolean enable(Node[] activatedNodes)
   {
     if (activatedNodes == null || activatedNodes.length != 1)
-{
+    {
       return false;
     }
 
@@ -103,8 +104,7 @@ public class CreateTableAction extends BaseAction
     DatabaseConnection connection = node.getLookup().lookup(DatabaseConnection.class);
 
     String schema = findSchemaWorkingName(node.getLookup());
-    IDefaultTableColumns defaultTableColumns = Lookup.getDefault().lookup(IDefaultTableColumns.class);
-    List<ColumnItem> items = defaultTableColumns != null ? defaultTableColumns.get() : null;
+    List<ColumnItem> items = ColumnItemCreator.getDefaultSystemColumnItems();
     boolean tableCreated = CreateTableDialog.showDialogAndCreate(connection.getConnector().getDatabaseSpecification(),
                                                                  schema, items, null);
     if (tableCreated)
@@ -118,4 +118,5 @@ public class CreateTableAction extends BaseAction
   {
     return NbBundle.getMessage(CreateTableAction.class, "CreateTable"); // NOI18N
   }
+
 }

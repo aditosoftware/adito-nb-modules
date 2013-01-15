@@ -1,6 +1,8 @@
 package org.netbeans.adito;
 
+import de.adito.aditoweb.nbm.nbide.nbaditointerface.NbAditoInterface;
 import de.adito.aditoweb.nbm.nbide.nbaditointerface.common.IAditoNetbeansTranslations;
+import de.adito.aditoweb.nbm.nbide.nbaditointerface.database.*;
 import org.netbeans.lib.ddl.impl.Specification;
 import org.netbeans.modules.db.explorer.*;
 import org.netbeans.modules.db.explorer.action.*;
@@ -22,11 +24,12 @@ import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Aktion die das Anlegen der Systemtabellen ermöglicht.
+ *
  * @author Thomas Tasior 11.12.12, 09:41
  */
 public class CreateSystemTablesAction extends BaseAction
 {
-  private IAditoNetbeansTranslations trans = Lookup.getDefault().lookup(IAditoNetbeansTranslations.class);
+  private IAditoNetbeansTranslations trans = NbAditoInterface.lookup(IAditoNetbeansTranslations.class);
   private String create = trans.create();
   private String config = trans.config();
   private String cancel = trans.cancel();
@@ -35,10 +38,9 @@ public class CreateSystemTablesAction extends BaseAction
   protected void performAction(Node[] activatedNodes)
   {
     final AtomicReference<Node> nodeHolder = new AtomicReference<>(null);
-    for (int i = 0; i < activatedNodes.length; i++)
+    for (Node theNode : activatedNodes)
     {
       //Suche nach einem Node mit einer DatabaseConnection
-      Node theNode = activatedNodes[i];
       if (theNode.getLookup().lookup(DatabaseConnection.class) != null)
       {
         nodeHolder.set(theNode);
@@ -65,18 +67,19 @@ public class CreateSystemTablesAction extends BaseAction
 
   /**
    * Legt die vorher im Dialog selektierten Tabellen an
-   * @param pNode enthält Informationen über die Datenbank die zum Anlegen benötigt werden.
+   *
+   * @param pNode      enthält Informationen über die Datenbank die zum Anlegen benötigt werden.
    * @param pSelection die ausgewählten Tabellen.
    */
-  private void perform(final Node pNode, final List<ESystemTable> pSelection)
+  private void perform(final Node pNode, final List<String> pSelection)
   {
     try
     {
-      DatabaseConnection connection = pNode.getLookup().lookup(DatabaseConnection.class);
+      final DatabaseConnection connection = pNode.getLookup().lookup(DatabaseConnection.class);
       final Specification spec = connection.getConnector().getDatabaseSpecification();
       final String schema = findSchemaWorkingName(pNode.getLookup());
-      final ISystemTableProvider provider = Lookup.getDefault().lookup(ISystemTableProvider.class);
-      final ISystemTables tables = provider.get(connection.getDriverName());
+
+      final IAditoDbInfo dbInfo = NbAditoInterface.lookup(IAditoDbInfo.class);
       DbUtilities.doWithProgress(null, new Callable<Void>()
       {
         @Override
@@ -85,14 +88,14 @@ public class CreateSystemTablesAction extends BaseAction
           int count = 0;
           for (; count < pSelection.size(); count++)
           {
-            ESystemTable systemTable = pSelection.get(count);
-            TableModel table = tables.getTable(systemTable);
+            String systemTable = pSelection.get(count);
+            IAditoDbTable table = dbInfo.getTable(connection.getDriverName(), systemTable);
 
             CreateTableDDL ddl = new CreateTableDDL(spec, schema, table.getName());
-            ddl.execute(table.getColumns(), null);
+            ddl.execute(ColumnItemCreator.toColumnItems(table.getColumns()), null);
           }
           SystemAction.get(RefreshAction.class).performAction(new Node[]{pNode});
-          provider.notify("Create System tables: " + count + " table(s) were created.");// TODO: I18N
+          dbInfo.notify("Create System tables: " + count + " table(s) were created.");// TODO: I18N
 
           return null;
         }
@@ -108,12 +111,13 @@ public class CreateSystemTablesAction extends BaseAction
   @Override
   protected boolean enable(Node[] activatedNodes)
   {
-    for (int i = 0; i < activatedNodes.length; i++)
+    for (Node n : activatedNodes)
     {
-      Node n = activatedNodes[i];
       DatabaseConnection connection = n.getLookup().lookup(DatabaseConnection.class);
       if (connection != null)
+      {
         return true;
+      }
     }
     return false;
   }
@@ -121,7 +125,7 @@ public class CreateSystemTablesAction extends BaseAction
   @Override
   public String getName()
   {
-    return Lookup.getDefault().lookup(IAditoNetbeansTranslations.class).getCreateSystemTablesAction();
+    return trans.getCreateSystemTablesAction();
   }
 
   @Override
@@ -150,7 +154,7 @@ public class CreateSystemTablesAction extends BaseAction
     public void actionPerformed(ActionEvent e)
     {
       dialog.dispose();
-      final List<ESystemTable> selection = panel.getSelection();
+      final List<String> selection = panel.getSelection();
       String cmd = e.getActionCommand();
       if (cmd.equals(create) & (selection.size() > 0))//Nur anlegen
       {
@@ -174,13 +178,14 @@ public class CreateSystemTablesAction extends BaseAction
             {
               DatabaseConnection connection = node.getLookup().lookup(DatabaseConnection.class);
 
-              final Specification spec = connection.getConnector().getDatabaseSpecification();
-              ISystemTableProvider provider = Lookup.getDefault().lookup(ISystemTableProvider.class);
-              final ISystemTables tables = provider.get(connection.getDriverName());
-              for (ESystemTable systemTable : selection)
+              Specification spec = connection.getConnector().getDatabaseSpecification();
+              IAditoDbInfo dbInfo = NbAditoInterface.lookup(IAditoDbInfo.class);
+              for (String systemTable : selection)
               {
-                TableModel table = tables.getTable(systemTable);
-                CreateTableDialog.showDialogAndCreate(spec, findSchemaWorkingName(node.getLookup()), table.getColumns(), table.getName());
+                IAditoDbTable table = dbInfo.getTable(connection.getDriverName(), systemTable);
+                CreateTableDialog.showDialogAndCreate(spec, findSchemaWorkingName(node.getLookup()),
+                                                      ColumnItemCreator.toColumnItems(table.getColumns()),
+                                                      table.getName());
               }
             }
             catch (Exception e1)
@@ -228,9 +233,10 @@ public class CreateSystemTablesAction extends BaseAction
 
     /**
      * Liefert die Selektion zurück.
+     *
      * @return die Konstanten der seklektierten Tabellen.
      */
-    public List<ESystemTable> getSelection()
+    public List<String> getSelection()
     {
       return model.getSelection();
     }
@@ -254,11 +260,8 @@ public class CreateSystemTablesAction extends BaseAction
       columnClasses[TABLENAME] = String.class;
 
       data = new ArrayList<>();
-      ESystemTable[] values = ESystemTable.values();
-      for (int i = 0; i < values.length; i++)
-      {
-        data.add(new Row(values[i]));
-      }
+      for (String value : NbAditoInterface.lookup(IAditoDbInfo.class).getSystemTableNames())
+        data.add(new Row(value));
     }
 
     @Override
@@ -320,9 +323,9 @@ public class CreateSystemTablesAction extends BaseAction
       return null;
     }
 
-    public List<ESystemTable> getSelection()
+    public List<String> getSelection()
     {
-      List<ESystemTable> helper = new ArrayList<>();
+      List<String> helper = new ArrayList<>();
       for (Row row : data)
       {
         if (row.mustCreate())
@@ -335,16 +338,16 @@ public class CreateSystemTablesAction extends BaseAction
   private class Row
   {
     Object create = Boolean.FALSE;
-    private final ESystemTable table;
+    private final String table;
 
-    public Row(ESystemTable pTable)
+    public Row(String pTable)
     {
       table = pTable;
     }
 
     public boolean mustCreate()
     {
-      return ((Boolean) create).booleanValue();
+      return Boolean.TRUE.equals(create);
     }
 
 
@@ -355,7 +358,7 @@ public class CreateSystemTablesAction extends BaseAction
 
     public String getTableName()
     {
-      return table.name();
+      return table;
     }
   }
 

@@ -44,6 +44,7 @@
 
 package org.netbeans.modules.form;
 
+import de.adito.aditoweb.nbm.nbide.nbaditointerface.NbAditoInterface;
 import de.adito.aditoweb.nbm.nbide.nbaditointerface.common.IAditoNetbeansTranslations;
 import org.netbeans.modules.form.actions.*;
 import org.netbeans.modules.form.adito.components.AditoNodeConnect;
@@ -786,7 +787,7 @@ public class RADComponentNode extends FormNode
     private static final class ChangeVariableNameAction extends RenameAction {
         @Override
         public String getName() {
-            return Lookup.getDefault().lookup(IAditoNetbeansTranslations.class).getRenameAction();
+            return NbAditoInterface.lookup(IAditoNetbeansTranslations.class).getRenameAction();
             //return NbBundle.getMessage(ChangeVariableNameAction.class, "ChangeVariableNameAction"); // NOI18N
         }
     }

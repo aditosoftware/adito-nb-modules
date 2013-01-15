@@ -8,7 +8,13 @@ import org.openide.util.Lookup;
 public class NbAditoInterface
 {
 
-  private static INetbeansAditoInterface provider;
+  private static final INetbeansAditoInterface PROVIDER;
+
+  static
+  {
+    INetbeansAditoInterface prov = Lookup.getDefault().lookup(INetbeansAditoInterface.class);
+    PROVIDER = prov == null ? new _NetbeansAditoInterfaceProvider() : prov;
+  }
 
   private NbAditoInterface()
   {
@@ -16,18 +22,15 @@ public class NbAditoInterface
 
   private static INetbeansAditoInterface getDefault()
   {
-    if (provider == null)
-    {
-      provider = Lookup.getDefault().lookup(INetbeansAditoInterface.class);
-      if (provider == null)
-        provider = new _NetbeansAditoInterfaceProvider();
-    }
-    return provider;
+    return PROVIDER;
   }
 
   public static <T> T lookup(Class<? extends T> pClass)
   {
-    return getDefault().lookup(pClass);
+    T l = getDefault().lookup(pClass);
+    if (l == null)
+      throw new RuntimeException("could not lookup '" + pClass + "'.");
+    return l;
   }
 
   private static class _NetbeansAditoInterfaceProvider implements INetbeansAditoInterface
