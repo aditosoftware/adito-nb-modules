@@ -3,7 +3,7 @@ package de.adito.aditoweb.nbm.nbide.nbaditointerface.database;
 import java.util.List;
 
 /**
- * Interface für
+ * Interface für spezifische Daten die im NetBeans-Modul nicht bezogen werden können.
  *
  * @author J. Boesl, 14.01.13
  */
@@ -20,7 +20,7 @@ public interface IAditoDbInfo
    *
    * @param pDriverName      Name des Treibers.
    * @param pSystemTableName Name der Systemtabelle.
-   * @return
+   * @return IAditoDbTable
    */
   IAditoDbTable getTable(String pDriverName, String pSystemTableName);
 
@@ -31,6 +31,9 @@ public interface IAditoDbInfo
    */
   void notify(String pMessage);
 
+  /**
+   * @return die Standardspalten die in Tabellen vorhanden sein sollen.
+   */
   List<IAditoDbColumn> createDefaultSystemColumns();
 
 }
