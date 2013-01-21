@@ -31,12 +31,7 @@ public class DMHelper
   {
     Set<String> names = new HashSet<>();
     for (RADComponent radComponent : pFormModel.getAllComponents())
-    {
-      boolean isNewName = names.add(radComponent.getName());
-      if (!isNewName)
-        throw new IllegalStateException("A component with name '" + radComponent.getName() + "' exists more often " +
-                                            "than once. This is illegal.");
-    }
+      names.add(radComponent.getName());
     return _getFreeName(names, pName, 1);
   }
 
