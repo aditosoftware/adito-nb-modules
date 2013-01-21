@@ -254,7 +254,7 @@ public class CreateSystemTablesAction extends BaseAction
 
     private SelectionModel()
     {
-      columnNames = new String[]{" ", "--Tabellenname"};
+      columnNames = new String[]{" ", trans.tableName()};
       columnClasses = new Class[columnNames.length];
       columnClasses[CREATE] = Boolean.class;
       columnClasses[TABLENAME] = String.class;

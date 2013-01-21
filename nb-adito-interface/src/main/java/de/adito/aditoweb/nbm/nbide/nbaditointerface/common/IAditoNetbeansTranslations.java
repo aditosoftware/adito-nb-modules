@@ -15,5 +15,7 @@ public interface IAditoNetbeansTranslations
 
   String config();
 
+  String tableName();
+
   String cancel();
 }
