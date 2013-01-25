@@ -1,7 +1,7 @@
 package de.adito.aditoweb.nbm.nbide.nbaditointerface.form.dataobject;
 
+import org.netbeans.api.actions.Openable;
 import org.openide.awt.UndoRedo;
-import org.openide.cookies.OpenCookie;
 import org.openide.text.DataEditorSupport;
 
 /**
@@ -12,7 +12,7 @@ public interface IAditoFormDataObjectData
 
   DataEditorSupport getFormEditorSupport();
 
-  OpenCookie getOpenCookie();
+  Openable getOpenable();
 
   UndoRedo.Manager getUndoRedoManager();
 

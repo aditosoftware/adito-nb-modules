@@ -1,9 +1,9 @@
 package org.netbeans.modules.form.adito.dataobject;
 
 import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.dataobject.IAditoFormDataObjectData;
+import org.netbeans.api.actions.Openable;
 import org.netbeans.modules.form.*;
 import org.openide.awt.UndoRedo;
-import org.openide.cookies.OpenCookie;
 import org.openide.loaders.DataObject;
 import org.openide.util.Lookup;
 
@@ -35,9 +35,9 @@ public class AditoFormDataObjectDataImpl implements IAditoFormDataObjectData
   }
 
   @Override
-  public OpenCookie getOpenCookie()
+  public Openable getOpenable()
   {
-    return new OpenCookie()
+    return new Openable()
     {
       @Override
       public void open()
