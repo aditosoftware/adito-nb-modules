@@ -208,6 +208,7 @@ public class FormDesigner {
                 new NonVisualTray(explorerManager, formEditor.getOthersContainerNode()) : null;
 
         JPanel designPanel = new JPanel(new BorderLayout());
+        designPanel.setMinimumSize(new Dimension(32, 32));
         designPanel.add(componentLayer, BorderLayout.CENTER);
         if (nonVisualTray != null) {
             designPanel.add(nonVisualTray, BorderLayout.SOUTH);
