@@ -914,19 +914,21 @@ public class FormDesigner {
                 size = formCont.getDesignerSize();
             }
             if (size == null) {
-                Node.Property width = topDesignComponent.getPropertyByName("width");
-                Node.Property height = topDesignComponent.getPropertyByName("height");
-                if (width != null && height != null)
+                Node.Property propWidth = topDesignComponent.getPropertyByName("width");
+                Node.Property propHeight = topDesignComponent.getPropertyByName("height");
+                int width = 0;
+                int height = 0;
+                try
                 {
-                    try
-                    {
-                        size = new Dimension((Integer) width.getValue(), (Integer) height.getValue());
-                    }
-                    catch (IllegalAccessException | InvocationTargetException e)
-                    {
-                        // wird ignoriert.
-                    }
+                    width = propWidth == null ? 0 : ((Integer) propWidth.getValue());
+                    height = propHeight == null ? 0 : ((Integer) propHeight.getValue());
                 }
+                catch (Exception e)
+                {
+                    // wird ignoriert - dann ist beides '0'.
+                }
+                if (width != 0 && height != 0)
+                    size = new Dimension(width, height);
                 else
                     size = (Dimension) topDesignComponent.getAuxValue(PROP_DESIGNER_SIZE);
             }
