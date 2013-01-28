@@ -49,7 +49,8 @@ public abstract class AditoVisualReplicator
   public void removeComponent(RADComponent pMetacomp, ComponentContainer pMetacont)
   {
     INonSwingContainer instance = _getContainer(pMetacont);
-    instance.removeCompNonSwing((INonSwingComponent) getClonedComponent(pMetacomp));
+    if (instance != null)
+      instance.removeCompNonSwing((INonSwingComponent) getClonedComponent(pMetacomp));
   }
 
   public void reorder(ComponentContainer pCompContainer)
@@ -70,7 +71,8 @@ public abstract class AditoVisualReplicator
 
   private boolean _canHandle(Object pMetacomp)
   {
-    return pMetacomp instanceof NonvisContainerRADVisualComponent || pMetacomp instanceof NonvisContainerRADComponent;
+    return (pMetacomp instanceof NonvisContainerRADVisualComponent || pMetacomp instanceof NonvisContainerRADComponent)
+        && getClonedComponent((RADComponent) pMetacomp) != null;
   }
 
 
