@@ -129,6 +129,14 @@ public class ARADComponentHandler
     }
   }
 
+  public boolean canMove(RADComponent pTarget)
+  {
+    IAditoModelDataProvider dataProvider = NbAditoInterface.lookup(IAditoModelDataProvider.class);
+    FileObject defaultChildContainer = dataProvider.getDefaultChildContainer(
+        pTarget.getARADComponentHandler().getModelFileObject());
+    return dataProvider.canMove(modelFileObject, defaultChildContainer);
+  }
+
   public void move(RADComponent pTarget)
   {
     move(pTarget, null);

@@ -58,7 +58,7 @@ import java.util.List;
 import java.util.logging.Level;
 import javax.swing.undo.UndoableEdit;
 
-import com.google.common.base.Predicates;
+import com.google.common.base.*;
 import com.google.common.collect.*;
 import org.netbeans.modules.form.actions.DuplicateAction;
 import org.netbeans.modules.form.adito.components.AditoHandleLayer;
@@ -2813,7 +2813,15 @@ public class HandleLayer extends JPanel implements MouseListener, MouseMotionLis
             if (p != null) {
                 List<LayoutConstraints> computedConstraints = oldDragger.getComputedConstraints(p);
                 if (targetContainer == null || computedConstraints == null ||
-                    Iterables.any(computedConstraints, Predicates.isNull()))
+                    Iterables.any(computedConstraints, Predicates.isNull()) ||
+                    Iterables.any(Lists.newArrayList(movingComponents),new Predicate<RADVisualComponent>()
+                    {
+                      @Override
+                      public boolean apply(RADVisualComponent pComp)
+                      {
+                        return !pComp.getARADComponentHandler().canMove(targetContainer);
+                      }
+                    }))
                 {
                     formDesigner.getLayoutDesigner().endMoving(false);
                     formDesigner.updateContainerLayout(originalCont);

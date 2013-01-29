@@ -30,7 +30,20 @@ public interface IAditoModelDataProvider
 
   void removeDataModel(FileObject pModelFileObject);
 
+  /**
+   * Verschiebt ein Datenmodell.
+   *
+   * @param pSource das Datenmodell.
+   * @param pTarget das Ziel.
+   */
   void moveDataModel(FileObject pSource, FileObject pTarget);
+
+  /**
+   * @param pSource das Datenmodell.
+   * @param pTarget das Ziel.
+   * @return ob ein Datenmodell verschoben werden kann.
+   */
+  public boolean canMove(FileObject pSource, FileObject pTarget);
 
   void reorder(FileObject pModelFo, Comparator<String> pChildComparator);
 
