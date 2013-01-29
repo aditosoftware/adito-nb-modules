@@ -57,6 +57,9 @@ import java.text.MessageFormat;
 import java.util.List;
 import java.util.logging.Level;
 import javax.swing.undo.UndoableEdit;
+
+import com.google.common.base.Predicates;
+import com.google.common.collect.*;
 import org.netbeans.modules.form.actions.DuplicateAction;
 import org.netbeans.modules.form.adito.components.AditoHandleLayer;
 import org.netbeans.modules.form.assistant.AssistantModel;
@@ -2809,25 +2812,16 @@ public class HandleLayer extends JPanel implements MouseListener, MouseMotionLis
             }
             if (p != null) {
                 List<LayoutConstraints> computedConstraints = oldDragger.getComputedConstraints(p);
+                if (targetContainer == null || computedConstraints == null ||
+                    Iterables.any(computedConstraints, Predicates.isNull()))
+                {
+                    formDesigner.getLayoutDesigner().endMoving(false);
+                    formDesigner.updateContainerLayout(originalCont);
+                    return true;
+                }
                 for (int i=0; i < movingComponents.length; i++) {
                     RADVisualComponent movingComponent = movingComponents[i];
                     Node.Property[] computedProperties = computedConstraints.get(i).getProperties();
-                    Integer x = null;
-                    Integer y = null;
-                    for (Node.Property property : computedProperties)
-                    {
-                        try
-                        {
-                            if (property.getName().equals("xADITO_LAYOUT"))
-                                x = (Integer) property.getValue();
-                            else if (property.getName().equals("yADITO_LAYOUT"))
-                                y = (Integer) property.getValue();
-                        }
-                        catch (Exception e)
-                        {
-                            e.printStackTrace();
-                        }
-                    }
                     movingComponent.getARADComponentHandler().move(targetContainer, computedProperties);
                 }
                 /*if (targetContainer == null || targetContainer.getLayoutSupport() != null) {

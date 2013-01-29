@@ -151,7 +151,8 @@ public class ARADComponentHandler
           // skip
         }
     }
-    dataProvider.moveDataModel(modelFileObject, defaultChildContainer);
+    if (defaultChildContainer != null)
+      dataProvider.moveDataModel(modelFileObject, defaultChildContainer);
   }
 
   @NotNull
