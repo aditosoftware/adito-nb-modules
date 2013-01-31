@@ -434,7 +434,7 @@ public class FormDesigner {
         int index = lookups.length - 1;
         boolean dataNodeLookup = (lookups[index] != Lookup.EMPTY);
         if (includeDataNodeLookup != dataNodeLookup) {
-            lookups[index] = includeDataNodeLookup
+            lookups[index] = includeDataNodeLookup && formEditor.getFormDataObject().isValid()
                     ? formEditor.getFormDataObject().getNodeDelegate().getLookup()
                     : Lookup.EMPTY;
             try {
