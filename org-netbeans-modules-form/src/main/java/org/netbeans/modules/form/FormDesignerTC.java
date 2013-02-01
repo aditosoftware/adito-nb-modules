@@ -322,8 +322,9 @@ public class FormDesignerTC extends TopComponent implements MultiViewElement {
     }
 
     @Override
-    public CloseOperationState canCloseElement() {
-        return formEditorSupport.canCloseElement(multiViewObserver.getTopComponent());
+        public CloseOperationState canCloseElement() {
+        return formEditorSupport == null ? CloseOperationState.STATE_OK :
+                formEditorSupport.canCloseElement(multiViewObserver.getTopComponent());
     }
 
     @Override
