@@ -18,4 +18,6 @@ public interface IAditoNetbeansTranslations
   String tableName();
 
   String cancel();
+
+  String tooltipTableWereCreated();
 }

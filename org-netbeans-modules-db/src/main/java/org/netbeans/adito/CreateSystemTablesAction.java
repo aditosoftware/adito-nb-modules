@@ -17,6 +17,7 @@ import javax.swing.*;
 import javax.swing.table.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.text.MessageFormat;
 import java.util.*;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -95,7 +96,7 @@ public class CreateSystemTablesAction extends BaseAction
             ddl.execute(ColumnItemCreator.toColumnItems(table.getColumns(), spec), null);
           }
           SystemAction.get(RefreshAction.class).performAction(new Node[]{pNode});
-          dbInfo.notify("Create System tables: " + count + " table(s) were created.");// TODO: I18N
+          dbInfo.notify(MessageFormat.format(trans.tooltipTableWereCreated(), count));
 
           return null;
         }
