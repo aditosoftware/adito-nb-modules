@@ -44,6 +44,7 @@ package org.netbeans.modules.db.explorer.action;
 
 import org.netbeans.adito.ColumnItemCreator;
 import org.netbeans.api.db.explorer.node.BaseNode;
+import org.netbeans.lib.ddl.impl.Specification;
 import org.netbeans.modules.db.explorer.DatabaseConnection;
 import org.netbeans.modules.db.explorer.dlg.*;
 import org.openide.nodes.Node;
@@ -102,9 +103,11 @@ public class CreateTableAction extends BaseAction
   private void perform(final BaseNode node)
   {
     DatabaseConnection connection = node.getLookup().lookup(DatabaseConnection.class);
+    Specification spec = connection.getConnector().getDatabaseSpecification();
 
     String schema = findSchemaWorkingName(node.getLookup());
-    List<ColumnItem> items = ColumnItemCreator.getDefaultSystemColumnItems();
+
+    List<ColumnItem> items = ColumnItemCreator.getDefaultSystemColumnItems(connection.getDriverName(), spec);
     boolean tableCreated = CreateTableDialog.showDialogAndCreate(connection.getConnector().getDatabaseSpecification(),
                                                                  schema, items, null);
     if (tableCreated)

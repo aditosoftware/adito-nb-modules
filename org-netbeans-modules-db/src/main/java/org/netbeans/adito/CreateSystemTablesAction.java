@@ -92,7 +92,7 @@ public class CreateSystemTablesAction extends BaseAction
             IAditoDbTable table = dbInfo.getTable(connection.getDriverName(), systemTable);
 
             CreateTableDDL ddl = new CreateTableDDL(spec, schema, table.getName());
-            ddl.execute(ColumnItemCreator.toColumnItems(table.getColumns()), null);
+            ddl.execute(ColumnItemCreator.toColumnItems(table.getColumns(), spec), null);
           }
           SystemAction.get(RefreshAction.class).performAction(new Node[]{pNode});
           dbInfo.notify("Create System tables: " + count + " table(s) were created.");// TODO: I18N
@@ -184,7 +184,7 @@ public class CreateSystemTablesAction extends BaseAction
               {
                 IAditoDbTable table = dbInfo.getTable(connection.getDriverName(), systemTable);
                 CreateTableDialog.showDialogAndCreate(spec, findSchemaWorkingName(node.getLookup()),
-                                                      ColumnItemCreator.toColumnItems(table.getColumns()),
+                                                      ColumnItemCreator.toColumnItems(table.getColumns(), spec),
                                                       table.getName());
               }
             }

@@ -2,6 +2,7 @@ package org.netbeans.adito;
 
 import de.adito.aditoweb.nbm.nbide.nbaditointerface.NbAditoInterface;
 import de.adito.aditoweb.nbm.nbide.nbaditointerface.database.*;
+import org.netbeans.lib.ddl.impl.Specification;
 import org.netbeans.modules.db.explorer.dlg.*;
 
 import java.lang.reflect.Field;
@@ -20,14 +21,15 @@ public class ColumnItemCreator
   {
   }
 
-  public static List<ColumnItem> getDefaultSystemColumnItems()
+  public static List<ColumnItem> getDefaultSystemColumnItems(String pDriverName, Specification pSpecification)
   {
-    List<IAditoDbColumn> defaultSystemColumns = NbAditoInterface.lookup(IAditoDbInfo.class).createDefaultSystemColumns();
-    return toColumnItems(defaultSystemColumns);
+
+    List<IAditoDbColumn> defaultSystemColumns = NbAditoInterface.lookup(IAditoDbInfo.class).createDefaultSystemColumns(pDriverName);
+    return toColumnItems(defaultSystemColumns, pSpecification);
   }
 
 
-  public static List<ColumnItem> toColumnItems(Iterable<IAditoDbColumn> pCols)
+  public static List<ColumnItem> toColumnItems(Iterable<IAditoDbColumn> pCols, Specification pSpecification)
   {
     List<ColumnItem> columnItemList = new ArrayList<>();
     for (IAditoDbColumn col : pCols)
@@ -38,7 +40,7 @@ public class ColumnItemCreator
       columnItem.setProperty(ColumnItem.PRIMARY_KEY, col.isPrimaryKey());
       columnItem.setProperty(ColumnItem.SCALE, col.getScale());
       columnItem.setProperty(ColumnItem.SIZE, col.getSize());
-      columnItem.setProperty(ColumnItem.TYPE, _create(col.getType()));
+      columnItem.setProperty(ColumnItem.TYPE, _create(col.getType(), pSpecification));
       columnItem.setProperty(ColumnItem.UNIQUE, col.isUnique());
       columnItem.setProperty(ColumnItem.INDEX, col.isIndex());
       String defVal = col.getDefVal();
@@ -51,24 +53,28 @@ public class ColumnItemCreator
   /**
    * Erstellt ein TypeElement.
    *
-   * @param pSqlType eine Konstante aus java.sql.Types.
+   * @param pSqlType       eine Konstante aus java.sql.Types.
+   * @param pSpecification liefert das DB spezifische Mapping der Datentypen.
    * @return das erstellte Objekt.
    * @see java.sql.Types
    */
-  private static TypeElement _create(int pSqlType)
+  private static TypeElement _create(int pSqlType, Specification pSpecification)
   {
-    Integer param = pSqlType;
+    Integer sqlType = pSqlType;
     TypeElement typeElement = null;
     Field[] fields = Types.class.getFields();
+    Map<String, String> tmap = pSpecification.getTypeMap();
     for (Field field : fields)
     {
       try
       {
-        if (param.equals(field.get(null)))
+        if (sqlType.equals(field.get(null)))
         {
-          String name = field.getName();
           String className = Types.class.getName();
-          typeElement = new TypeElement(className + "." + name, name);
+          String fullName = className + "." + field.getName();
+
+          String mapping = tmap.get(fullName);
+          typeElement = new TypeElement(fullName, mapping);
         }
       }
       catch (IllegalAccessException e)
@@ -78,5 +84,4 @@ public class ColumnItemCreator
     }
     return typeElement;
   }
-
 }

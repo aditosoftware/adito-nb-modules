@@ -34,6 +34,6 @@ public interface IAditoDbInfo
   /**
    * @return die Standardspalten die in Tabellen vorhanden sein sollen.
    */
-  List<IAditoDbColumn> createDefaultSystemColumns();
+  List<IAditoDbColumn> createDefaultSystemColumns(String pDriverName);
 
 }
