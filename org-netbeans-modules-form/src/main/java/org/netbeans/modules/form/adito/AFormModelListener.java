@@ -58,15 +58,15 @@ public abstract class AFormModelListener implements FormModelListener
       }
       catch (Exception e)
       {
-        e.printStackTrace(); // TODO
-        if (event.isModifying())
-        {
-          FormModel formModel = event.getFormModel();
-          if (formModel == null && eventComponent != null)
-            formModel = eventComponent.getFormModel();
-          if (formModel != null)
-            formModel.forceUndoOfCompoundEdit();
-        }
+        //e.printStackTrace(); // TODO
+        //if (event.isModifying())
+        //{
+        //  FormModel formModel = event.getFormModel();
+        //  if (formModel == null && eventComponent != null)
+        //    formModel = eventComponent.getFormModel();
+        //  if (formModel != null)
+        //    formModel.forceUndoOfCompoundEdit();
+        //}
       }
     }
   }
