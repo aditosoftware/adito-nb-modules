@@ -44,12 +44,11 @@
 
 package org.netbeans.modules.form;
 
+import com.google.common.collect.Lists;
 import de.adito.aditoweb.nbm.nbide.nbaditointerface.NbAditoInterface;
 import de.adito.aditoweb.nbm.nbide.nbaditointerface.common.IAditoNetbeansTranslations;
-import org.netbeans.modules.form.actions.*;
 import org.netbeans.modules.form.adito.components.AditoNodeConnect;
 import org.netbeans.modules.form.layoutsupport.LayoutNode;
-import org.netbeans.modules.form.menu.*;
 import org.netbeans.modules.form.palette.PaletteUtils;
 import org.openide.ErrorManager;
 import org.openide.actions.*;
@@ -68,7 +67,6 @@ import java.text.MessageFormat;
 import java.util.*;
 import java.util.List;
 
-//import org.netbeans.modules.form.editors.TableCustomizer; // STRIPPED
 
 public class RADComponentNode extends FormNode
         implements RADComponentCookie, FormPropertyCookie {
@@ -249,46 +247,65 @@ public class RADComponentNode extends FormNode
     @Override
     public Action[] getActions(boolean context){
       if (actions == null) {
-        List<Action> actions = new ArrayList<>();
+        Map<Integer, Action> actions = new LinkedHashMap<>();
         RADComponent topComp = component.getFormModel().getTopRADComponent();
 
         // all actions from our own node.
-        actions.addAll(AditoNodeConnect.getActions(component, true));
+        for (Action action : AditoNodeConnect.getActions(component, true))
+        {
+          Object position = action.getValue("position");
+          if (position instanceof Integer)
+            actions.put((Integer) position, action);
+          else
+            actions.put(Integer.MAX_VALUE, action);
+        }
 
-        addSeparator(actions);
+        actions.put(100, null);
 
         if (component != topComp) {
-          actions.add(SystemAction.get(CutAction.class));
-          actions.add(SystemAction.get(CopyAction.class));
+          actions.put(200, SystemAction.get(CutAction.class));
+          actions.put(300, SystemAction.get(CopyAction.class));
         }
         if (component instanceof ComponentContainer) {
-          actions.add(SystemAction.get(PasteAction.class));
+          actions.put(400, SystemAction.get(PasteAction.class));
         }
 
-        addSeparator(actions);
+        actions.put(500, null);
 
         if (component != topComp) {
-          actions.add(SystemAction.get(DeleteAction.class));
-          actions.add(SystemAction.get(ChangeVariableNameAction.class));
+          actions.put(600, SystemAction.get(DeleteAction.class));
+          actions.put(700, SystemAction.get(ChangeVariableNameAction.class));
         }
 
-        addSeparator(actions);
+        actions.put(800, null);
 
         if (component != topComp) {
-          actions.add(SystemAction.get(MoveUpAction.class));
-          actions.add(SystemAction.get(MoveDownAction.class));
+          actions.put(900, SystemAction.get(MoveUpAction.class));
+          actions.put(1000, SystemAction.get(MoveDownAction.class));
         }
         if (component instanceof ComponentContainer) {
-          actions.add(SystemAction.get(ReorderAction.class));
+          actions.put(1100, SystemAction.get(ReorderAction.class));
         }
 
-        addSeparator(actions);
+        actions.put(1200, null);
 
-        Action[] superActions = super.getActions(context); // Liefert Eigenschaften
-        Collections.addAll(actions, superActions);
+        // Liefert Eigenschaften
+        Action[] superActions = super.getActions(context);
+        for (int i = 0; i < superActions.length; i++)
+          actions.put(i*100+2000, superActions[i]);
 
-        this.actions = new Action[actions.size()];
-        actions.toArray(this.actions);
+        ArrayList<Map.Entry<Integer, Action>> entries = Lists.newArrayList(actions.entrySet());
+        Collections.sort(entries, new Comparator<Map.Entry<Integer, Action>>()
+        {
+          @Override
+          public int compare(Map.Entry<Integer, Action> o1, Map.Entry<Integer, Action> o2)
+          {
+            return o1.getKey().compareTo(o2.getKey());
+          }
+        });
+        this.actions = new Action[entries.size()];
+        for (int i = 0; i < this.actions.length; i++)
+          this.actions[i] = entries.get(i).getValue();
     }
     return actions;
   }
@@ -390,18 +407,18 @@ public class RADComponentNode extends FormNode
         }
 
         return actions;
-    }*/
+    }
 
     private void addLayoutActions(List<Action> actions) {
         if (component.getParentComponent() instanceof RADVisualContainer) {
-            /*actions.add(SystemAction.get(AlignAction.class));
+            actions.add(SystemAction.get(AlignAction.class));
             actions.add(SystemAction.get(SetAnchoringAction.class));
             actions.add(SystemAction.get(SetResizabilityAction.class));
             actions.add(SystemAction.get(ChooseSameSizeAction.class));
             actions.add(SystemAction.get(DefaultSizeAction.class));
             actions.add(SystemAction.get(CustomizeEmptySpaceAction.class));
             actions.add(SystemAction.get(EncloseAction.class));
-            actions.add(null);*/
+            actions.add(null);
         }
     }
 
@@ -441,7 +458,7 @@ public class RADComponentNode extends FormNode
         if (n > 0 && actions.get(n-1) != null) {
             actions.add(null);
         }
-    }
+    }*/
 
     @Override
     public String getName() {
