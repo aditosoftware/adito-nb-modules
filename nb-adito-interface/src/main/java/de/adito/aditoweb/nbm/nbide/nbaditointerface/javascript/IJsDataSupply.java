@@ -2,7 +2,7 @@ package de.adito.aditoweb.nbm.nbide.nbaditointerface.javascript;
 
 import org.openide.filesystems.FileObject;
 
-import java.util.List;
+import java.util.*;
 
 /**
  * Stellt für JavaScript Daten über Adito bereit.
@@ -26,6 +26,6 @@ public interface IJsDataSupply
    * @param pCompletionFile die Datei, in der gerade 'Auto-Vervollständigt' werden soll.
    * @return die <tt>$comp.</tt>-Variablen.
    */
-  List<String> getCompVars(FileObject pCompletionFile);
+  Collection<String> getCompVars(FileObject pCompletionFile);
 
 }
