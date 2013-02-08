@@ -32,6 +32,13 @@ public interface IAditoDbInfo
   void notify(String pMessage);
 
   /**
+   * Registriert einen Fehler.
+   *
+   * @param pThrowable der Fehler.
+   */
+  void notifyException(Throwable pThrowable);
+
+  /**
    * @return die Standardspalten die in Tabellen vorhanden sein sollen.
    */
   List<IAditoDbColumn> createDefaultSystemColumns(String pDriverName);

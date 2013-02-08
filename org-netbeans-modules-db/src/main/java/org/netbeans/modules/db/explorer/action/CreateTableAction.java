@@ -107,7 +107,7 @@ public class CreateTableAction extends BaseAction
 
     String schema = findSchemaWorkingName(node.getLookup());
 
-    List<ColumnItem> items = ColumnItemCreator.getDefaultSystemColumnItems(connection.getDriverName(), spec);
+    List<ColumnItem> items = ColumnItemCreator.getDefaultSystemColumnItems(connection.getDriver(), spec);
     boolean tableCreated = CreateTableDialog.showDialogAndCreate(connection.getConnector().getDatabaseSpecification(),
                                                                  schema, items, null);
     if (tableCreated)

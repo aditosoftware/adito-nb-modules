@@ -4,7 +4,7 @@ import de.adito.aditoweb.nbm.nbide.nbaditointerface.NbAditoInterface;
 import de.adito.aditoweb.nbm.nbide.nbaditointerface.common.IAditoNetbeansTranslations;
 import de.adito.aditoweb.nbm.nbide.nbaditointerface.database.*;
 import org.netbeans.lib.ddl.impl.Specification;
-import org.netbeans.modules.db.explorer.*;
+import org.netbeans.modules.db.explorer.DatabaseConnection;
 import org.netbeans.modules.db.explorer.action.*;
 import org.netbeans.modules.db.explorer.dlg.*;
 import org.openide.*;
@@ -20,7 +20,6 @@ import java.awt.event.*;
 import java.text.MessageFormat;
 import java.util.*;
 import java.util.List;
-import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
@@ -81,30 +80,22 @@ public class CreateSystemTablesAction extends BaseAction
       final String schema = findSchemaWorkingName(pNode.getLookup());
 
       final IAditoDbInfo dbInfo = NbAditoInterface.lookup(IAditoDbInfo.class);
-      DbUtilities.doWithProgress(null, new Callable<Void>()
+
+      int count = 0;
+      for (; count < pSelection.size(); count++)
       {
-        @Override
-        public Void call() throws Exception
-        {
-          int count = 0;
-          for (; count < pSelection.size(); count++)
-          {
-            String systemTable = pSelection.get(count);
-            IAditoDbTable table = dbInfo.getTable(connection.getDriverName(), systemTable);
+        String systemTable = pSelection.get(count);
+        IAditoDbTable table = dbInfo.getTable(connection.getDriver(), systemTable);
 
-            CreateTableDDL ddl = new CreateTableDDL(spec, schema, table.getName());
-            ddl.execute(ColumnItemCreator.toColumnItems(table.getColumns(), spec), null);
-          }
-          SystemAction.get(RefreshAction.class).performAction(new Node[]{pNode});
-          dbInfo.notify(MessageFormat.format(trans.tooltipTableWereCreated(), count));
-
-          return null;
-        }
-      });
+        CreateTableDDL ddl = new CreateTableDDL(spec, schema, table.getName());
+        ddl.execute(ColumnItemCreator.toColumnItems(table.getColumns(), spec), null);
+      }
+      SystemAction.get(RefreshAction.class).performAction(new Node[]{pNode});
+      dbInfo.notify(MessageFormat.format(trans.tooltipTableWereCreated(), count));
     }
     catch (Exception e)
     {
-      DbUtilities.reportError("", e.getMessage());
+      NbAditoInterface.lookup(IAditoDbInfo.class).notifyException(e);
     }
   }
 
@@ -183,7 +174,7 @@ public class CreateSystemTablesAction extends BaseAction
               IAditoDbInfo dbInfo = NbAditoInterface.lookup(IAditoDbInfo.class);
               for (String systemTable : selection)
               {
-                IAditoDbTable table = dbInfo.getTable(connection.getDriverName(), systemTable);
+                IAditoDbTable table = dbInfo.getTable(connection.getDriver(), systemTable);
                 CreateTableDialog.showDialogAndCreate(spec, findSchemaWorkingName(node.getLookup()),
                                                       ColumnItemCreator.toColumnItems(table.getColumns(), spec),
                                                       table.getName());
@@ -191,7 +182,7 @@ public class CreateSystemTablesAction extends BaseAction
             }
             catch (Exception e1)
             {
-              DbUtilities.reportError("", e1.getMessage());
+              NbAditoInterface.lookup(IAditoDbInfo.class).notifyException(e1);
             }
             SystemAction.get(RefreshAction.class).performAction(new Node[]{node});
           }
