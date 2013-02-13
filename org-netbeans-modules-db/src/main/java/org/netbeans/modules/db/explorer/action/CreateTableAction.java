@@ -42,7 +42,7 @@
 
 package org.netbeans.modules.db.explorer.action;
 
-import org.netbeans.adito.ColumnItemCreator;
+import org.netbeans.adito.db.ColumnItemCreator;
 import org.netbeans.api.db.explorer.node.BaseNode;
 import org.netbeans.lib.ddl.impl.Specification;
 import org.netbeans.modules.db.explorer.DatabaseConnection;

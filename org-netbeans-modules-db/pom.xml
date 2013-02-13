@@ -124,7 +124,7 @@
           <cluster>ide</cluster>
           <codeNameBase>org.netbeans.modules.db</codeNameBase>
           <publicPackages>
-            <publicPackage>org.netbeans.adito.*</publicPackage>
+            <publicPackage>org.netbeans.adito.db.*</publicPackage>
             <publicPackage>org.netbeans.api.db.explorer.*</publicPackage>
             <publicPackage>org.netbeans.api.db.explorer.node.*</publicPackage>
             <publicPackage>org.netbeans.api.db.explorer.support.*</publicPackage>

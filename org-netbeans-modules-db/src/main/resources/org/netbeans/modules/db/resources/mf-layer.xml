@@ -222,11 +222,10 @@ made subject to such option by the copyright holder.
                         <attr name="position" intvalue="150"/>
                     </file>
 
-
-                          <file name="org-netbeans-adito-CreateSystemTablesAction.instance">
-                            <attr name="position" intvalue="160"/>
-                          </file>
-
+                    <!-- adito entry -->
+                    <file name="org-netbeans-adito-db-CreateSystemTablesAction.instance">
+                      <attr name="position" intvalue="160"/>
+                    </file>
 
                     <file name="Separator1.instance">
                         <attr name="instanceClass" stringvalue="javax.swing.JSeparator"/>

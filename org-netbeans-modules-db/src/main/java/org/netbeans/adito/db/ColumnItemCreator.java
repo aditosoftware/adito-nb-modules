@@ -1,4 +1,4 @@
-package org.netbeans.adito;
+package org.netbeans.adito.db;
 
 import de.adito.aditoweb.nbm.nbide.nbaditointerface.NbAditoInterface;
 import de.adito.aditoweb.nbm.nbide.nbaditointerface.database.*;
@@ -58,17 +58,17 @@ public class ColumnItemCreator
    * @return das erstellte Objekt.
    * @see java.sql.Types
    */
-  private static TypeElement _create(int pSqlType, Specification pSpecification)
+  private static TypeElement _create(Integer pSqlType, Specification pSpecification)
   {
-    Integer sqlType = pSqlType;
     TypeElement typeElement = null;
     Field[] fields = Types.class.getFields();
+    @SuppressWarnings("unchecked")
     Map<String, String> tmap = pSpecification.getTypeMap();
     for (Field field : fields)
     {
       try
       {
-        if (sqlType.equals(field.get(null)))
+        if (pSqlType.equals(field.get(null)))
         {
           String className = Types.class.getName();
           String fullName = className + "." + field.getName();

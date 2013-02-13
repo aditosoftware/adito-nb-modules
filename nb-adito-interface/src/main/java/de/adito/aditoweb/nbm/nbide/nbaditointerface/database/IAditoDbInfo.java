@@ -13,7 +13,7 @@ public interface IAditoDbInfo
   /**
    * @return die Namen aller SystemTabellen.
    */
-  String[] getSystemTableNames();
+  List<String> getSystemTableNames();
 
   /**
    * Liefert anhand der Namen von Treiber und Tabelle eine Beschreibung für diese Tabelle.

@@ -1,4 +1,4 @@
-package org.netbeans.adito;
+package org.netbeans.adito.db;
 
 import de.adito.aditoweb.nbm.nbide.nbaditointerface.NbAditoInterface;
 import de.adito.aditoweb.nbm.nbide.nbaditointerface.common.IAditoNetbeansTranslations;
@@ -75,20 +75,17 @@ public class CreateSystemTablesAction extends BaseAction
   {
     try
     {
-      final DatabaseConnection connection = pNode.getLookup().lookup(DatabaseConnection.class);
-      final Specification spec = connection.getConnector().getDatabaseSpecification();
-      final String schema = findSchemaWorkingName(pNode.getLookup());
+      DatabaseConnection connection = pNode.getLookup().lookup(DatabaseConnection.class);
+      String schema = findSchemaWorkingName(pNode.getLookup());
 
-      final IAditoDbInfo dbInfo = NbAditoInterface.lookup(IAditoDbInfo.class);
+      IAditoDbInfo dbInfo = NbAditoInterface.lookup(IAditoDbInfo.class);
 
       int count = 0;
       for (; count < pSelection.size(); count++)
       {
         String systemTable = pSelection.get(count);
         IAditoDbTable table = dbInfo.getTable(connection.getDriver(), systemTable);
-
-        CreateTableDDL ddl = new CreateTableDDL(spec, schema, table.getName());
-        ddl.execute(ColumnItemCreator.toColumnItems(table.getColumns(), spec), null);
+        AditoDbTableCreator.createTable(connection, schema, table);
       }
       SystemAction.get(RefreshAction.class).performAction(new Node[]{pNode});
       dbInfo.notify(MessageFormat.format(trans.tooltipTableWereCreated(), count));
@@ -169,15 +166,17 @@ public class CreateSystemTablesAction extends BaseAction
             try
             {
               DatabaseConnection connection = node.getLookup().lookup(DatabaseConnection.class);
-
+              String schema = findSchemaWorkingName(node.getLookup());
               Specification spec = connection.getConnector().getDatabaseSpecification();
               IAditoDbInfo dbInfo = NbAditoInterface.lookup(IAditoDbInfo.class);
+
               for (String systemTable : selection)
               {
                 IAditoDbTable table = dbInfo.getTable(connection.getDriver(), systemTable);
-                CreateTableDialog.showDialogAndCreate(spec, findSchemaWorkingName(node.getLookup()),
-                                                      ColumnItemCreator.toColumnItems(table.getColumns(), spec),
-                                                      table.getName());
+                List<ColumnItem> columnItems = ColumnItemCreator.toColumnItems(table.getColumns(), spec);
+
+                CreateTableDialog.showDialogAndCreate(spec, schema, columnItems, table.getName());
+                AditoDbTableCreator.checkAndCreateSysDbVersionEntry(connection, schema, table.getName());
               }
             }
             catch (Exception e1)
@@ -252,7 +251,9 @@ public class CreateSystemTablesAction extends BaseAction
       columnClasses[TABLENAME] = String.class;
 
       data = new ArrayList<>();
-      for (String value : NbAditoInterface.lookup(IAditoDbInfo.class).getSystemTableNames())
+      List<String> systemTableNames = NbAditoInterface.lookup(IAditoDbInfo.class).getSystemTableNames();
+      Collections.sort(systemTableNames);
+      for (String value : systemTableNames)
         data.add(new Row(value));
     }
 
