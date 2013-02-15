@@ -200,7 +200,6 @@
 
   <build>
     <plugins>
-
       <!-- NetBeans module plugin. Muss explizit für packaging 'nbm' angegeben werden. -->
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
@@ -215,67 +214,76 @@
           <codeNameBase>org.netbeans.modules.javascript.editing</codeNameBase>
         </configuration>
       </plugin>
-
-      <!-- kopiert die jsstubs -->
-      <plugin>
-        <groupId>com.github.goldin</groupId>
-        <artifactId>copy-maven-plugin</artifactId>
-        <version>0.2.5</version>
-        <executions>
-          <execution>
-            <id>create-archive</id>
-            <phase>prepare-package</phase>
-            <goals>
-              <goal>copy</goal>
-            </goals>
-            <configuration>
-              <resources>
-                <!-- ~~~~ -->
-                <!-- Copy -->
-                <!-- ~~~~ -->
-                <resource>
-                  <directory>${project.parent.parent.parent.basedir}/library/server/target/classes/generated/js/stubs</directory>
-                  <include>stub_adito_A.js</include>
-                  <targetPath>${project.build.directory}/nbm/netbeans/aditoonline/jsstubs</targetPath>
-                </resource>
-                <resource>
-                  <directory>${project.basedir}/src/main/nbm/jsstubs</directory>
-                  <targetPath>${project.build.directory}/nbm/netbeans/aditoonline/jsstubs</targetPath>
-                </resource>
-                <!-- ~~~~ -->
-                <!-- Pack -->
-                <!-- ~~~~ -->
-                <resource>
-                  <directory>${project.build.directory}/nbm/netbeans/aditoonline/jsstubs</directory>
-                  <targetPath>${project.build.directory}/nbm/netbeans/aditoonline/jsstubs/allstubs.zip</targetPath>
-                  <pack>true</pack>
-                </resource>
-                <!-- ~~~~~ -->
-                <!-- Clean -->
-                <!-- ~~~~~ -->
-                <resource>
-                  <directory>${project.build.directory}/nbm/netbeans/aditoonline/jsstubs</directory>
-                  <exclude>allstubs.zip</exclude>
-                  <clean>true</clean>
-                </resource>
-              </resources>
-              <verbose>false</verbose>
-            </configuration>
-          </execution>
-        </executions>
-        <dependencies>
-          <!-- ist Abhängig vom Server, weil dort erst die JsStubs beim Kompilieren vom Annotation-Prozessor erzeugt
-          werden müssen. -->
-          <dependency>
-            <groupId>de.adito.aditoweb</groupId>
-            <artifactId>server</artifactId>
-            <version>${project.parent.version}</version>
-          </dependency>
-        </dependencies>
-      </plugin>
-
     </plugins>
   </build>
+
+
+  <profiles>
+    <profile>
+      <id>adito.maven.resources</id>
+      <build>
+        <plugins>
+          <!-- Kopiert die JsStubs. Wird nur im 'Resources'-Profil ausgeführt. -->
+          <plugin>
+            <groupId>com.github.goldin</groupId>
+            <artifactId>copy-maven-plugin</artifactId>
+            <version>0.2.5</version>
+            <executions>
+              <execution>
+                <id>create-archive</id>
+                <phase>prepare-package</phase>
+                <goals>
+                  <goal>copy</goal>
+                </goals>
+                <configuration>
+                  <resources>
+                    <!-- ~~~~ -->
+                    <!-- Copy -->
+                    <!-- ~~~~ -->
+                    <resource>
+                      <directory>${project.parent.parent.parent.basedir}/library/server/target/generated-sources/annotations/jsStubs</directory>
+                      <include>stub_adito_A.js</include>
+                      <targetPath>${project.build.directory}/nbm/netbeans/aditoonline/jsstubs</targetPath>
+                    </resource>
+                    <resource>
+                      <directory>${project.basedir}/src/main/nbm/jsstubs</directory>
+                      <targetPath>${project.build.directory}/nbm/netbeans/aditoonline/jsstubs</targetPath>
+                    </resource>
+                    <!-- ~~~~ -->
+                    <!-- Pack -->
+                    <!-- ~~~~ -->
+                    <resource>
+                      <directory>${project.build.directory}/nbm/netbeans/aditoonline/jsstubs</directory>
+                      <targetPath>${project.build.directory}/nbm/netbeans/aditoonline/jsstubs/allstubs.zip</targetPath>
+                      <pack>true</pack>
+                    </resource>
+                    <!-- ~~~~~ -->
+                    <!-- Clean -->
+                    <!-- ~~~~~ -->
+                    <resource>
+                      <directory>${project.build.directory}/nbm/netbeans/aditoonline/jsstubs</directory>
+                      <exclude>allstubs.zip</exclude>
+                      <clean>true</clean>
+                    </resource>
+                  </resources>
+                  <verbose>false</verbose>
+                </configuration>
+              </execution>
+            </executions>
+            <dependencies>
+              <!-- ist Abhängig vom Server, weil dort erst die JsStubs beim Kompilieren vom Annotation-Prozessor erzeugt
+              werden müssen. -->
+              <dependency>
+                <groupId>de.adito.aditoweb</groupId>
+                <artifactId>server</artifactId>
+                <version>${project.parent.version}</version>
+              </dependency>
+            </dependencies>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
 
 
 </project>
