@@ -63,13 +63,13 @@ import org.openide.util.Lookup;
  *
  * @author Petr Hejl
  */
-@OptionsPanelController.SubRegistration(
-    id="JavaScript",
-    displayName="#JsOptions.displayName",
-    keywords="#KW_JavaScriptOptions",
-    keywordsCategory="Advanced/JavaScript"
+//@OptionsPanelController.SubRegistration(
+//    id="JavaScript",
+//    displayName="#JsOptions.displayName",
+//    keywords="#KW_JavaScriptOptions",
+//    keywordsCategory="Advanced/JavaScript"
 //    toolTip="#JsOptions.tooltip"
-)
+//)
 public class JsOptionsController extends OptionsPanelController {
 
     private final PropertyChangeSupport propertySupport = new PropertyChangeSupport(this);
