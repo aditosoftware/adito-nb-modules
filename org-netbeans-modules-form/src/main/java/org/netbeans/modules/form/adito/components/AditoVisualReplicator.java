@@ -16,14 +16,14 @@ public abstract class AditoVisualReplicator
   {
   }
 
-  public boolean canHandle(ComponentContainer pMetacomp)
+  public boolean canHandle(RADComponent pMetacomp)
   {
     return _canHandle(pMetacomp);
   }
 
-  public boolean canHandle(RADComponent pMetacomp)
+  public boolean canHandleReorder(ComponentContainer pMetacomp)
   {
-    return _canHandle(pMetacomp);
+    return _canHandle(pMetacomp) && getClonedComponent((RADComponent) pMetacomp) != null;
   }
 
   public void cloneComponent(RADComponent pMetacomp, Object pCompClone, List<RADProperty> relativeProperties)
@@ -71,10 +71,8 @@ public abstract class AditoVisualReplicator
 
   private boolean _canHandle(Object pMetacomp)
   {
-    return (pMetacomp instanceof NonvisContainerRADVisualComponent || pMetacomp instanceof NonvisContainerRADComponent)
-        && getClonedComponent((RADComponent) pMetacomp) != null;
+    return (pMetacomp instanceof NonvisContainerRADVisualComponent || pMetacomp instanceof NonvisContainerRADComponent);
   }
-
 
   protected abstract Object cloneComponent(RADComponent metacomp, List<RADProperty> relativeProperties) throws Exception;
 

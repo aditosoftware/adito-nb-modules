@@ -240,7 +240,7 @@ public class VisualReplicator {
     }
 
     public void reorderComponents(ComponentContainer metacont) {
-        if (aditoVisualReplicator.canHandle(metacont))
+        if (aditoVisualReplicator.canHandleReorder(metacont))
             aditoVisualReplicator.reorder(metacont);
         else if (metacont instanceof RADVisualContainer) {
             updateContainerLayout((RADVisualContainer) metacont);
@@ -739,7 +739,7 @@ public class VisualReplicator {
             ((java.beans.DesignMode)compClone).setDesignTime(getDesignRestrictions());
         }
 
-        // Extrabehandlung fuer Container die nicht-sichtbare Komponenten enthalten.
+        // Extrabehandlung für Container die nicht-sichtbare Komponenten enthalten.
         if (aditoVisualReplicator.canHandle(metacomp))
         {
             aditoVisualReplicator.cloneComponent(metacomp, compClone, relativeProperties);
