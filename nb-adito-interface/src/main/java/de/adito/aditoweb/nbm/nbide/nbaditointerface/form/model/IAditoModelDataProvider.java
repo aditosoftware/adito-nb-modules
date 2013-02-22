@@ -16,7 +16,7 @@ public interface IAditoModelDataProvider
 
   Node getBaseNode(DataObject pFormDataObject);
 
-  boolean isFormModel(FileObject pAodFile);
+  EModelFormType getModelFormType(FileObject pAodFile);
 
   FileObject loadModel(FileObject pAodFile);
 
