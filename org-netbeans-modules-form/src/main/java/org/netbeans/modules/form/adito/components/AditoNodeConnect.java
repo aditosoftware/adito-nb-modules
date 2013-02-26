@@ -116,6 +116,44 @@ public final class AditoNodeConnect
     });
   }
 
+  public static INodePrivileges getPriveleges(RADComponent pComponent)
+  {
+    return _resolve(pComponent, new _DataObjectC<INodePrivileges>()
+    {
+      @Override
+      public INodePrivileges resolve(final DataObject pDataObject)
+      {
+        return new INodePrivileges()
+        {
+          @Override
+          public boolean canDelete()
+          {
+            return pDataObject.isDeleteAllowed();
+          }
+
+          @Override
+          public boolean canCopy()
+          {
+            return pDataObject.isCopyAllowed();
+          }
+
+          @Override
+          public boolean canMove()
+          {
+            return pDataObject.isMoveAllowed();
+          }
+
+          @Override
+          public boolean canRename()
+          {
+            return pDataObject.isRenameAllowed();
+          }
+        };
+      }
+    });
+  }
+
+
   private static <T> T _resolve(RADComponent pComp, _FileObjectC<T> pC)
   {
     FileObject modelFileObject = pComp.getARADComponentHandler().getModelFileObject();

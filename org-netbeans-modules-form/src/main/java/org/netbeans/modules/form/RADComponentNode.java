@@ -47,7 +47,7 @@ package org.netbeans.modules.form;
 import com.google.common.collect.Lists;
 import de.adito.aditoweb.nbm.nbide.nbaditointerface.NbAditoInterface;
 import de.adito.aditoweb.nbm.nbide.nbaditointerface.common.IAditoNetbeansTranslations;
-import org.netbeans.modules.form.adito.components.AditoNodeConnect;
+import org.netbeans.modules.form.adito.components.*;
 import org.netbeans.modules.form.layoutsupport.LayoutNode;
 import org.netbeans.modules.form.palette.PaletteUtils;
 import org.openide.ErrorManager;
@@ -263,8 +263,10 @@ public class RADComponentNode extends FormNode
         actions.put(100, null);
 
         if (component != topComp) {
-          actions.put(200, SystemAction.get(CutAction.class));
-          actions.put(300, SystemAction.get(CopyAction.class));
+          if (canCut())
+            actions.put(200, SystemAction.get(CutAction.class));
+          if (canCopy())
+            actions.put(300, SystemAction.get(CopyAction.class));
         }
         if (component instanceof ComponentContainer) {
           actions.put(400, SystemAction.get(PasteAction.class));
@@ -273,18 +275,22 @@ public class RADComponentNode extends FormNode
         actions.put(500, null);
 
         if (component != topComp) {
-          actions.put(600, SystemAction.get(DeleteAction.class));
-          actions.put(700, SystemAction.get(ChangeVariableNameAction.class));
+          if (canDestroy())
+            actions.put(600, SystemAction.get(DeleteAction.class));
+          if (canRename())
+            actions.put(700, SystemAction.get(ChangeVariableNameAction.class));
         }
 
         actions.put(800, null);
 
-        if (component != topComp) {
-          actions.put(900, SystemAction.get(MoveUpAction.class));
-          actions.put(1000, SystemAction.get(MoveDownAction.class));
-        }
-        if (component instanceof ComponentContainer) {
-          actions.put(1100, SystemAction.get(ReorderAction.class));
+        if (canRename() || canCut()) {
+          if (component != topComp) {
+            actions.put(900, SystemAction.get(MoveUpAction.class));
+            actions.put(1000, SystemAction.get(MoveDownAction.class));
+          }
+          if (component instanceof ComponentContainer) {
+            actions.put(1100, SystemAction.get(ReorderAction.class));
+          }
         }
 
         actions.put(1200, null);
@@ -481,7 +487,8 @@ public class RADComponentNode extends FormNode
     @Override
     public boolean canRename() {
         return !component.isReadOnly()
-                && component != component.getFormModel().getTopRADComponent();
+                && component != component.getFormModel().getTopRADComponent()
+            && AditoNodeConnect.getPriveleges(component).canRename();
     }
 
     /** Can this node be destroyed?
@@ -490,7 +497,8 @@ public class RADComponentNode extends FormNode
     @Override
     public boolean canDestroy() {
         return !component.isReadOnly()
-                && component != component.getFormModel().getTopRADComponent();
+                && component != component.getFormModel().getTopRADComponent()
+            && AditoNodeConnect.getPriveleges(component).canDelete();
     }
 
     /** Remove the node from its parent and deletes it.
@@ -645,7 +653,7 @@ public class RADComponentNode extends FormNode
      */
     @Override
     public boolean canCopy() {
-        return true;
+        return AditoNodeConnect.getPriveleges(component).canCopy();
     }
 
     /** Test whether this node can be cut.
@@ -655,7 +663,8 @@ public class RADComponentNode extends FormNode
     @Override
     public boolean canCut() {
         return !component.isReadOnly()
-                && component != component.getFormModel().getTopRADComponent();
+                && component != component.getFormModel().getTopRADComponent()
+            && AditoNodeConnect.getPriveleges(component).canMove();
     }
 
     /** Copy this node to the clipboard.
