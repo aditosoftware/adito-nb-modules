@@ -51,7 +51,10 @@ import java.util.logging.Logger;
 import javax.swing.event.UndoableEditEvent;
 import javax.swing.undo.*;
 
+import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.sync.EContainerType;
 import org.netbeans.modules.form.adito.ARADComponentHandler;
+import org.netbeans.modules.form.adito.components.AditoMetaComponentCreatorSupport;
+import org.netbeans.modules.form.adito.perstistencemanager.*;
 import org.openide.awt.UndoRedo;
 import org.openide.util.Mutex;
 import org.openide.util.MutexException;
@@ -145,26 +148,37 @@ public class FormModel
         if (formBaseClass != null)
             throw new IllegalStateException("Form type already initialized."); // NOI18N
 
+        EContainerType containerType = AditoMetaComponentCreatorSupport.getContainerType(formClass);
         RADComponent topComp;
-        if (FormUtils.isVisualizableClass(formClass)) {
-            if (FormUtils.isContainer(formClass)) {
-                topComp = new RADVisualFormContainer();
+        if (containerType == EContainerType.VISUAL || containerType == EContainerType.NONE) {
+            if (FormUtils.isVisualizableClass(formClass)) {
+                if (FormUtils.isContainer(formClass)) {
+                    topComp = new RADVisualFormContainer();
+                }
+                else {
+                    topComp = new RADVisualComponent() {
+                        // top-level component does not have a variable
+                        @Override
+                        public String getName() {
+                            return FormUtils.getBundleString("CTL_FormTopContainerName"); // NOI18N
+                        }
+                        @Override
+                        public void setName(String value) {}
+                    };
+                }
             }
-            else {
-                topComp = new RADVisualComponent() {
-                    // top-level component does not have a variable
-                    @Override
-                    public String getName() {
-                        return FormUtils.getBundleString("CTL_FormTopContainerName"); // NOI18N
-                    }
-                    @Override
-                    public void setName(String value) {}
-                };
-            }
+            else if (java.lang.Object.class != formClass)
+                topComp = new RADFormContainer();
+            else topComp = null;
         }
-        else if (java.lang.Object.class != formClass)
-            topComp = new RADFormContainer();
-        else topComp = null;
+        else if (containerType == EContainerType.NONVISUAL) {
+            if (FormUtils.isVisualizableClass(formClass))
+                topComp = new NonvisContainerRADVisualComponent();
+            else
+                topComp = new NonvisContainerRADComponent();
+        }
+        else
+            topComp = null;
 
         if (topComp != null) {
             topRADComponent = topComp;
