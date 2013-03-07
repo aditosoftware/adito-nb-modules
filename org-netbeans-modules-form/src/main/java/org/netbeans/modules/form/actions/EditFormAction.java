@@ -44,11 +44,11 @@
 
 package org.netbeans.modules.form.actions;
 
-import org.openide.nodes.Node;
-import org.openide.util.actions.*;
-import org.openide.util.*;
-
 import org.netbeans.modules.form.*;
+import org.openide.actions.CloseViewAction;
+import org.openide.nodes.Node;
+import org.openide.util.*;
+import org.openide.util.actions.*;
 
 
 /**
@@ -57,81 +57,99 @@ import org.netbeans.modules.form.*;
  * This action is not presented visually anywhere, it is used as one of the
  * component default actions ensuring that when a designed container is double
  * clicked, the whole form is brought back to design.
- * 
+ *
  * @author Tomas Pavek
  */
-public class EditFormAction extends NodeAction {
+public class EditFormAction extends NodeAction
+{
 
-    @Override
-    protected boolean enable(Node[] nodes) {
-        boolean ret = false;
-        if (nodes != null && nodes.length == 1) {
-            RADComponentCookie radCookie = nodes[0].getCookie(RADComponentCookie.class);
-            RADComponent comp = (radCookie != null) ? radCookie.getRADComponent() : null;
-            if (comp != null) {
-                RADComponent topComp = comp.getFormModel().getTopRADComponent();
-                if (comp != topComp && EditContainerAction.isEditableComponent(topComp)) {
-                    FormDesigner designer = getDesigner(comp);
-                    if (designer != null && comp == designer.getTopDesignComponent()) {
-                        ret = true;
-                    }
-                }
-            }
+  @Override
+  protected boolean enable(Node[] nodes)
+  {
+    boolean ret = false;
+    if (nodes != null && nodes.length == 1)
+    {
+      RADComponentCookie radCookie = nodes[0].getCookie(RADComponentCookie.class);
+      RADComponent comp = (radCookie != null) ? radCookie.getRADComponent() : null;
+      if (comp != null)
+      {
+        RADComponent topComp = comp.getFormModel().getTopRADComponent();
+        if (comp != topComp && EditContainerAction.isEditableComponent(topComp))
+        {
+          FormDesigner designer = getDesigner(comp);
+          if (designer != null && comp == designer.getTopDesignComponent())
+          {
+            ret = true;
+          }
         }
-        return ret;
+      }
     }
+    return ret;
+  }
 
-    static void reenable(Node[] nodes) {
-        SystemAction.get(EditFormAction.class).reenable0(nodes);
-    }
+  static void reenable(Node[] nodes)
+  {
+    SystemAction.get(EditFormAction.class).reenable0(nodes);
+  }
 
-    private void reenable0(Node[] nodes) {
-        setEnabled(enable(nodes));
-    }
+  private void reenable0(Node[] nodes)
+  {
+    setEnabled(enable(nodes));
+  }
 
-    @Override
-    protected void performAction(Node[] nodes) {
-        if (nodes != null && nodes.length == 1) {
-            RADComponentCookie radCookie = nodes[0].getCookie(RADComponentCookie.class);
-            RADComponent comp = (radCookie != null) ? radCookie.getRADComponent() : null;
-            if (comp != null) {
-                RADComponent topComp = comp.getFormModel().getTopRADComponent();
-                if (topComp != comp && EditContainerAction.isEditableComponent(topComp)) {
-                    FormDesigner designer = getDesigner(topComp);
-                    if (designer != null && topComp != designer.getTopDesignComponent()) {
-                        designer.setTopDesignComponent((RADVisualComponent)topComp, true);
-                        designer.requestActive();
+  @Override
+  protected void performAction(Node[] nodes)
+  {
+    if (nodes != null && nodes.length == 1)
+    {
+      RADComponentCookie radCookie = nodes[0].getCookie(RADComponentCookie.class);
+      RADComponent comp = (radCookie != null) ? radCookie.getRADComponent() : null;
+      if (comp != null)
+      {
+        RADComponent topComp = comp.getFormModel().getTopRADComponent();
+        if (topComp != comp && EditContainerAction.isEditableComponent(topComp))
+        {
+          FormDesigner designer = getDesigner(topComp);
+          if (designer != null && topComp != designer.getTopDesignComponent())
+          {
+            designer.setTopDesignComponent((RADVisualComponent) topComp, true);
+            designer.requestActive();
 
-                        // NodeAction is quite unreliable in enabling, do it ourselves for sure
-                        Node[] n = new Node[] { topComp.getNodeReference() };
-                        if (n[0] != null) {
-                            EditContainerAction.reenable(n);
-                            DesignParentAction.reenable(n);
-                            EditFormAction.reenable(n);
-                        }
-                    }
-                }
+            // NodeAction is quite unreliable in enabling, do it ourselves for sure
+            Node[] n = new Node[]{topComp.getNodeReference()};
+            if (n[0] != null)
+            {
+              EditContainerAction.reenable(n);
+              DesignParentAction.reenable(n);
+              EditFormAction.reenable(n);
             }
+          }
         }
+      }
     }
+  }
 
-    private static FormDesigner getDesigner(RADComponent comp) {
-        return FormEditor.getFormDesigner(comp.getFormModel());
-    }
+  private static FormDesigner getDesigner(RADComponent comp)
+  {
+    return FormEditor.getFormDesigner(comp.getFormModel());
+  }
 
-    @Override
-    protected boolean asynchronous() {
-        return false;
-    }
+  @Override
+  protected boolean asynchronous()
+  {
+    return false;
+  }
 
-    @Override
-    public String getName() {
-        return ""; // NOI18N
-    }
+  @Override
+  public String getName()
+  {
+    return NbBundle.getMessage(CloseViewAction.class, "CloseView");
+  }
 
-    @Override
-    public HelpCtx getHelpCtx() {
-        return HelpCtx.DEFAULT_HELP;
-    }
+  @Override
+  public HelpCtx getHelpCtx()
+  {
+    return HelpCtx.DEFAULT_HELP;
+  }
 
 }

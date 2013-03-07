@@ -44,19 +44,18 @@
 
 package org.netbeans.modules.form;
 
-import java.awt.Component;
-import java.awt.Window;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
-import javax.swing.Action;
-
-import org.openide.nodes.*;
+import org.netbeans.modules.form.adito.actions.*;
+import org.openide.actions.PropertiesAction;
 import org.openide.cookies.*;
-import org.openide.actions.*;
+import org.openide.loaders.DataObject;
+import org.openide.nodes.*;
 import org.openide.util.Lookup;
 import org.openide.util.actions.SystemAction;
-import org.openide.loaders.DataObject;
 import org.openide.util.lookup.*;
+
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.*;
 
 /**
  * A common superclass for nodes used in Form Editor.
@@ -64,84 +63,102 @@ import org.openide.util.lookup.*;
  * @author Tomas Pavek
  */
 
-public class FormNode extends AbstractNode implements FormCookie {
+public class FormNode extends AbstractNode implements FormCookie
+{
 
-    private FormModel formModel;
-    private InstanceContent instanceContent;
+  private FormModel formModel;
+  private InstanceContent instanceContent;
 
-    protected Action[] actions;
+  protected AditoSortedActionList actions;
 
-    protected FormNode(Children children, FormModel formModel) {
-        this(children, formModel, null, new InstanceContent());
-    }
+  protected FormNode(Children children, FormModel formModel)
+  {
+    this(children, formModel, null, new InstanceContent());
+  }
 
-    protected FormNode(Children children, FormModel formModel, Lookup pLookup)
+  protected FormNode(Children children, FormModel formModel, Lookup pLookup)
+  {
+    this(children, formModel, pLookup, new InstanceContent());
+  }
+
+  private FormNode(Children children, FormModel pFormModel, Lookup pLookup, InstanceContent pInstanceContent)
+  {
+    super(children, _createLookup(pFormModel, new AbstractLookup(pInstanceContent), pLookup));
+    formModel = pFormModel;
+    instanceContent = pInstanceContent;
+    instanceContent.add(this);
+  }
+
+  /*@Override
+  public void open()
+  {
+    SwingUtilities.invokeLater(new Runnable()
     {
-      this(children, formModel, pLookup, new InstanceContent());
-    }
+      public void run()
+      {
+        FormEditorSupport supp = (FormEditorSupport)getCookie(EditorSupport.class);
+        supp.openFormEditor(false);
+      }
+    });
+  }    */
 
-    private FormNode(Children children, FormModel pFormModel, Lookup pLookup, InstanceContent pInstanceContent)
-    {
-      super(children, _createLookup(pFormModel, new AbstractLookup(pInstanceContent), pLookup));
-      formModel = pFormModel;
-      instanceContent = pInstanceContent;
-      instanceContent.add(this);
-    }
-
-    private static Lookup _createLookup(final FormModel pFormModel, Lookup pInstanceContentLookup, Lookup pAdditional)
-    {
-      Lookup formModelDelegateLookup = Lookups.fixed(
-          new Object[]{DataObject.class, SaveCookie.class, CloseCookie.class, PrintCookie.class},
-          new InstanceContent.Convertor<Object, Object>()
+  private static Lookup _createLookup(final FormModel pFormModel, Lookup pInstanceContentLookup, Lookup pAdditional)
+  {
+    Lookup formModelDelegateLookup = Lookups.fixed(
+        new Object[]{DataObject.class, SaveCookie.class, CloseCookie.class, PrintCookie.class},
+        new InstanceContent.Convertor<Object, Object>()
+        {
+          @Override
+          public Object convert(Object obj)
           {
-            @Override
-            public Object convert(Object obj)
-            {
-              DataObject formDataObject = FormEditor.getFormDataObject(pFormModel);
-              if (formDataObject == null)
-                return null;
-              return formDataObject.getLookup().lookup((Class<?>) obj);
-            }
+            DataObject formDataObject = FormEditor.getFormDataObject(pFormModel);
+            if (formDataObject == null)
+              return null;
+            return formDataObject.getLookup().lookup((Class<?>) obj);
+          }
 
-            @Override
-            public Class<?> type(Object obj)
-            {
-              return (Class<?>) obj;
-            }
+          @Override
+          public Class<?> type(Object obj)
+          {
+            return (Class<?>) obj;
+          }
 
-            @Override
-            public String id(Object obj)
-            {
-              return ((Class) obj).getCanonicalName();
-            }
+          @Override
+          public String id(Object obj)
+          {
+            return ((Class) obj).getCanonicalName();
+          }
 
-            @Override
-            public String displayName(Object obj)
-            {
-              return ((Class) obj).getName();
-            }
-          });
-      if (pAdditional == null)
-        return new ProxyLookup(formModelDelegateLookup, pInstanceContentLookup);
-      return new ProxyLookup(formModelDelegateLookup, pInstanceContentLookup, pAdditional);
-    }
+          @Override
+          public String displayName(Object obj)
+          {
+            return ((Class) obj).getName();
+          }
+        });
+    if (pAdditional == null)
+      return new ProxyLookup(formModelDelegateLookup, pInstanceContentLookup);
+    return new ProxyLookup(formModelDelegateLookup, pInstanceContentLookup, pAdditional);
+  }
 
-    protected final InstanceContent getInstanceContent()
-    {
-      return instanceContent;
-    }
+  protected final InstanceContent getInstanceContent()
+  {
+    return instanceContent;
+  }
 
-    // FormCookie implementation
-    @Override
-    public final FormModel getFormModel() {
-        return formModel;
-    }
+  // FormCookie implementation
+  @Override
+  public final FormModel getFormModel()
+  {
+    return formModel;
+  }
 
-    // FormCookie implementation
-    @Override
-    public final Node getOriginalNode() {
-        return this;
-    }
+  // FormCookie implementation
+  @Override
+  public final Node getOriginalNode()
+  {
+    return this;
+  }
+
 
     /*@Override
     public <T extends Node.Cookie> T getCookie(Class<T> type) {
@@ -159,117 +176,157 @@ public class FormNode extends AbstractNode implements FormCookie {
         return cookie;
     }*/
 
-    // because delegating cookies to FormDataObject we have a bit complicated
-    // way of updating cookies on node - need fire a change on nodes explicitly
-    void updateCookies() {
-        super.fireCookieChange();
-    }
+  // because delegating cookies to FormDataObject we have a bit complicated
+  // way of updating cookies on node - need fire a change on nodes explicitly
+  void updateCookies()
+  {
+    super.fireCookieChange();
+  }
 
-    @Override
-    public javax.swing.Action[] getActions(boolean context) {
-        if (actions == null) {
-            actions = new Action[] { SystemAction.get(PropertiesAction.class) };
-        }
-        return actions;
-    }
+  @Override
+  public javax.swing.Action[] getActions(boolean context)
+  {
 
-    @Override
-    public Component getCustomizer() {
-        Component customizer = createCustomizer();
-        if (customizer instanceof Window) {
-            // register the customizer window (probably a dialog) to be closed
-            // automatically when the form is closed
-            FormEditor formEditor = FormEditor.getFormEditor(formModel);
-            if (formEditor != null) {
-                Window customizerWindow = (Window) customizer;
-                formEditor.registerFloatingWindow(customizerWindow);
-                // attach a listener to unregister the window when it is closed
-                customizerWindow.addWindowListener(new WindowAdapter() {
-                    @Override
-                    public void windowClosing(WindowEvent e) {
-                        if (e.getSource() instanceof Window) {
-                            Window window = (Window) e.getSource();
-                            FormEditor formEditor = FormEditor.getFormEditor(formModel);
-                            if (formEditor != null)
-                                formEditor.unregisterFloatingWindow(window);
-                            window.removeWindowListener(this);
-                        }
-                    }
-                });
+    actions = new AditoSortedActionList();
+    Action a = getPreferredAction(); // OpenAction
+    if (a != null)
+    {
+      actions.add(new AditoActionObject(a, 3));  // add OpenAction
+      actions.add(new AditoActionObject(null, 4));
+    }
+    actions.add(new AditoActionObject(SystemAction.get(PropertiesAction.class), 9999));
+
+    return actions.toActionArray();
+  }
+
+  public AditoSortedActionList getSortedActionList()
+  {
+    return actions;
+  }
+
+
+  @Override
+  public Component getCustomizer()
+  {
+    Component customizer = createCustomizer();
+    if (customizer instanceof Window)
+    {
+      // register the customizer window (probably a dialog) to be closed
+      // automatically when the form is closed
+      FormEditor formEditor = FormEditor.getFormEditor(formModel);
+      if (formEditor != null)
+      {
+        Window customizerWindow = (Window) customizer;
+        formEditor.registerFloatingWindow(customizerWindow);
+        // attach a listener to unregister the window when it is closed
+        customizerWindow.addWindowListener(new WindowAdapter()
+        {
+          @Override
+          public void windowClosing(WindowEvent e)
+          {
+            if (e.getSource() instanceof Window)
+            {
+              Window window = (Window) e.getSource();
+              FormEditor formEditor = FormEditor.getFormEditor(formModel);
+              if (formEditor != null)
+                formEditor.unregisterFloatingWindow(window);
+              window.removeWindowListener(this);
             }
-        }
-        return customizer;
+          }
+        });
+      }
     }
+    return customizer;
+  }
 
-    // to be implemented in FormNode descendants (instead of getCustomizer)
-    protected Component createCustomizer() {
-        return null;
+  // to be implemented in FormNode descendants (instead of getCustomizer)
+  protected Component createCustomizer()
+  {
+    return null;
+  }
+
+  /**
+   * Provides access for firing property changes
+   *
+   * @param name     property name
+   * @param oldValue old value of the property
+   * @param newValue new value of the property
+   */
+  public void firePropertyChangeHelper(String name,
+                                       Object oldValue, Object newValue)
+  {
+    // doesn't have to be fired - properties are synchronized anyways.
+    //super.firePropertyChange(name, oldValue, newValue);
+  }
+
+  // ----------
+  // automatic children updates
+
+  void updateChildren()
+  {
+    Children children = getChildren();
+    if (children instanceof FormNodeChildren)
+      ((FormNodeChildren) children).updateKeys();
+  }
+
+  // Special children class - to be implemented in FormNode descendants (if
+  // they know their set of children nodes and can update them).
+  protected abstract static class FormNodeChildren extends Children.Keys<Object>
+  {
+    protected void updateKeys()
+    {
     }
+  }
 
-    /** Provides access for firing property changes
-     *
-     * @param name property name
-     * @param oldValue old value of the property
-     * @param newValue new value of the property
-     */
-    public void firePropertyChangeHelper(String name,
-                                         Object oldValue, Object newValue) {
-      // doesn't have to be fired - properties are synchronized anyways.
-        //super.firePropertyChange(name, oldValue, newValue);
-    }
+  // ----------
+  // Persistence hacks - for the case the node is selected in some
+  // (standalone) properties window when IDE exits. We don't restore the
+  // original node after IDE restarts (would require to load the form), but
+  // provide a fake node which destroys itself immediately - closing the
+  // properties window. [Would be nice to find some better solution...]
 
-    // ----------
-    // automatic children updates
+  @Override
+  public Node.Handle getHandle()
+  {
+    return new Handle();
+  }
 
-    void updateChildren() {
-        Children children = getChildren();
-        if (children instanceof FormNodeChildren)
-            ((FormNodeChildren)children).updateKeys();
-    }
-
-    // Special children class - to be implemented in FormNode descendants (if
-    // they know their set of children nodes and can update them).
-    protected abstract static class FormNodeChildren extends Children.Keys<Object> {
-        protected void updateKeys() {}
-    }
-
-    // ----------
-    // Persistence hacks - for the case the node is selected in some
-    // (standalone) properties window when IDE exits. We don't restore the
-    // original node after IDE restarts (would require to load the form), but
-    // provide a fake node which destroys itself immediately - closing the
-    // properties window. [Would be nice to find some better solution...]
+  static class Handle implements Node.Handle
+  {
+    static final long serialVersionUID = 1;
 
     @Override
-    public Node.Handle getHandle() {
-        return new Handle();
+    public Node getNode() throws java.io.IOException
+    {
+      return new ClosingNode();
+    }
+  }
+
+  static class ClosingNode extends AbstractNode implements Runnable
+  {
+    ClosingNode()
+    {
+      super(Children.LEAF);
     }
 
-    static class Handle implements Node.Handle {
-        static final long serialVersionUID = 1;
-        @Override
-        public Node getNode() throws java.io.IOException {
-            return new ClosingNode();
-        }
+    @Override
+    public String getName()
+    {
+      java.awt.EventQueue.invokeLater(this);
+      return super.getName();
     }
 
-    static class ClosingNode extends AbstractNode implements Runnable {
-        ClosingNode() {
-            super(Children.LEAF);
-        }
-        @Override
-        public String getName() {
-            java.awt.EventQueue.invokeLater(this);
-            return super.getName();
-        }
-        @Override
-        public Node.PropertySet[] getPropertySets() {
-            java.awt.EventQueue.invokeLater(this);
-            return super.getPropertySets();
-        }
-        @Override
-        public void run() {
-            this.fireNodeDestroyed();
-        }
+    @Override
+    public Node.PropertySet[] getPropertySets()
+    {
+      java.awt.EventQueue.invokeLater(this);
+      return super.getPropertySets();
     }
+
+    @Override
+    public void run()
+    {
+      this.fireNodeDestroyed();
+    }
+  }
 }

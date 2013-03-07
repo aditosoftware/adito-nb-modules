@@ -40,7 +40,8 @@
  * However, if you add GPL Version 2 code and therefore, elected the GPL
  * Version 2 license, then the option applies only if the new code is
  * made subject to such option by the copyright holder.
- */
+ *//*
+
 
 package org.netbeans.modules.form;
 
@@ -48,41 +49,51 @@ import org.openide.nodes.*;
 import org.openide.util.HelpCtx;
 import org.openide.util.actions.CookieAction;
 
+*/
 /** This action installs new bean into the system.
  *
  * @author Ian Formanek
- */
+ *//*
+
 
 public class DefaultRADAction extends CookieAction {
 
-    /** Human presentable name of the action. This should be
-     * presented as an item in a menu.
-     * @return the name of the action
-     */
+    */
+/** Human presentable name of the action. This should be
+ * presented as an item in a menu.
+ * @return the name of the action
+ *//*
+
     @Override
     public String getName() {
         return "DefaultRADAction"; // NOI18N
     }
 
-    /** Get a help context for the action.
-     * @return the help context for this action
-     */
+    */
+/** Get a help context for the action.
+ * @return the help context for this action
+ *//*
+
     @Override
     public HelpCtx getHelpCtx() {
         return new HelpCtx(DefaultRADAction.class);
     }
 
-    /** @return the mode of action. Possible values are disjunctions of MODE_XXX
-     * constants. */
+    */
+/** @return the mode of action. Possible values are disjunctions of MODE_XXX
+ * constants. *//*
+
     @Override
     protected int mode() {
         return MODE_EXACTLY_ONE;
     }
 
-    /** Creates new set of classes that are tested by the cookie.
-     *
-     * @return list of classes the that the cookie tests
-     */
+    */
+/** Creates new set of classes that are tested by the cookie.
+ *
+ * @return list of classes the that the cookie tests
+ *//*
+
     @Override
     protected Class[] cookieClasses() {
         return new Class[] { RADComponentCookie.class };
@@ -93,14 +104,16 @@ public class DefaultRADAction extends CookieAction {
         return false;
     }
 
-    /** Test for enablement based on the cookies of selected nodes.
-     * Generally subclasses should not override this except for strange
-     * purposes, and then only calling the super method and adding a check.
-     * Just use {@link #cookieClasses} and {@link #mode} to specify
-     * the enablement logic.
-     * @param activatedNodes the set of activated nodes
-     * @return <code>true</code> to enable
-     */
+    */
+/** Test for enablement based on the cookies of selected nodes.
+ * Generally subclasses should not override this except for strange
+ * purposes, and then only calling the super method and adding a check.
+ * Just use {@link #cookieClasses} and {@link #mode} to specify
+ * the enablement logic.
+ * @param activatedNodes the set of activated nodes
+ * @return <code>true</code> to enable
+ *//*
+
     @Override
     protected boolean enable(Node[] activatedNodes) {
         if (activatedNodes != null && activatedNodes.length == 1) {
@@ -112,11 +125,13 @@ public class DefaultRADAction extends CookieAction {
         return false;
     }
 
-    /**
-     * Standard perform action extended by actually activated nodes.
-     *
-     * @param activatedNodes gives array of actually activated nodes.
-     */
+    */
+/**
+ * Standard perform action extended by actually activated nodes.
+ *
+ * @param activatedNodes gives array of actually activated nodes.
+ *//*
+
     @Override
     protected void performAction(Node[] activatedNodes) {
 //        if (activatedNodes != null && activatedNodes.length == 1) {
@@ -127,3 +142,4 @@ public class DefaultRADAction extends CookieAction {
 //        }
     }
 }
+*/
