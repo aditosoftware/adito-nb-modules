@@ -497,7 +497,8 @@ public class RADComponentNode extends FormNode
   @Override
   public void setName(String s)
   {
-    component.rename(s);
+    component.rename(s.trim());
+
   }
 
   /**
