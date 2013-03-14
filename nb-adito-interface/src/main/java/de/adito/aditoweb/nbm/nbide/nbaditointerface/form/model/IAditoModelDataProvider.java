@@ -60,6 +60,15 @@ public interface IAditoModelDataProvider
    */
   public boolean canMove(FileObject pSource, FileObject pTarget);
 
+  /**
+   * Prüft ob ein Objekt vom Typ <tt>pSource</tt> unter <tt>pTarget</tt> erstellt werden kann.
+   *
+   * @param pTarget das Ziel.
+   * @param pSource die Quelle.
+   * @return ob 'add' möglich ist.
+   */
+  public boolean canAdd(FileObject pTarget, Class pSource);
+
   void reorder(FileObject pModelFo, Comparator<String> pChildComparator);
 
 }
