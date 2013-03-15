@@ -30,6 +30,12 @@ public class AditoImportHintFix
     edits.apply();
   }
 
+  @Override
+  public String getDescription()
+  {
+    return importStatement.replaceAll(";", "");
+  }
+
   public EditList getEditList() throws Exception
   {
     BaseDocument doc = context.doc;
@@ -40,7 +46,7 @@ public class AditoImportHintFix
 
   public boolean canPreview()
   {
-    return true;
+    return false;
   }
 
   public boolean isSafe()
@@ -52,4 +58,5 @@ public class AditoImportHintFix
   {
     return false;
   }
+
 }

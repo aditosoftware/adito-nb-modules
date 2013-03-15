@@ -45,60 +45,58 @@ Version 2 license, then the option applies only if the new code is
 made subject to such option by the copyright holder.
 -->
 <filesystem>
-    <folder name="csl-hints">
-        <folder name="text">
-            <folder name="javascript">
-                <folder name="errors">
-                    <file name="org-netbeans-modules-javascript-hints-AccidentalAssignment.instance"/>
-                    <file name="org-netbeans-modules-javascript-hints-OldLanguageRule.instance"/>
-                </folder>
-                <folder name="hints">
-                    <folder name="general">
-                        <attr name="position" intvalue="100"/>
-                        <attr name="SystemFileSystem.localizingBundle" stringvalue="org.netbeans.modules.javascript.hints.Bundle"/>
-                        <file name="org-netbeans-modules-javascript-hints-UnicodeConvert.instance"/>
-                        <file name="org-netbeans-modules-javascript-hints-UnsupportedCalls.instance"/>
-                        <file name="org-netbeans-modules-javascript-hints-WrongJsDoc.instance"/>
-                      <file name="org-netbeans-modules-javascript-hints-DuplicateLabelHint.instance"/>
-                      <file name="org-netbeans-modules-javascript-hints-FireWorkflowEventMethodHint.instance"/>
-                      <!-- TODO: NOT READY -->
-                      <!--<file name="org-netbeans-modules-javascript-hints-AditoImportHint.instance"/>-->
-                    </folder>
-                </folder>    
-            </folder>
+  <folder name="csl-hints">
+    <folder name="text">
+      <folder name="javascript">
+        <folder name="errors">
+          <file name="org-netbeans-modules-javascript-hints-AccidentalAssignment.instance"/>
+          <file name="org-netbeans-modules-javascript-hints-OldLanguageRule.instance"/>
         </folder>
+        <folder name="hints">
+          <folder name="general">
+            <attr name="position" intvalue="100"/>
+            <attr name="SystemFileSystem.localizingBundle" stringvalue="org.netbeans.modules.javascript.hints.Bundle"/>
+            <file name="org-netbeans-modules-javascript-hints-UnicodeConvert.instance"/>
+            <file name="org-netbeans-modules-javascript-hints-UnsupportedCalls.instance"/>
+            <file name="org-netbeans-modules-javascript-hints-WrongJsDoc.instance"/>
+            <file name="org-netbeans-modules-javascript-hints-DuplicateLabelHint.instance"/>
+            <file name="org-netbeans-modules-javascript-hints-FireWorkflowEventMethodHint.instance"/>
+            <file name="org-netbeans-modules-javascript-hints-AditoImportHint.instance"/>
+          </folder>
+        </folder>
+      </folder>
     </folder>
-    
-    <!-- TODO: Some of these hints, such as the ones to create classes and methods, 
-        should also add actions into the Actions folder such that they can be bound
-        to custom keyboard shortcuts; and also possibly registered into Menu/Refactoring -->
-    
+  </folder>
 
-        
-    <!-- **Infrastructure, nothing hint-specific, below this point** -->
-    <folder name="OptionsDialog">
-        <folder name="Editor">
-            <folder name="Hints">
-                <attr name="position" intvalue="0"/>
-                <folder name="text">
-                    <folder name="javascript">
-                        <file name="JsHints.instance">
-                            <attr name="instanceOf" stringvalue="org.netbeans.spi.options.OptionsPanelController"/>
-                            <attr name="instanceCreate" methodvalue="org.netbeans.modules.javascript.hints.infrastructure.HintsAdvancedOption.createStatic"/>
-                        </file>
-                    </folder>
-                </folder>
-            </folder>
-        </folder>
-    </folder>
-    
-    <folder name="CslPlugins">
+  <!-- TODO: Some of these hints, such as the ones to create classes and methods,
+      should also add actions into the Actions folder such that they can be bound
+      to custom keyboard shortcuts; and also possibly registered into Menu/Refactoring -->
+
+
+  <!-- **Infrastructure, nothing hint-specific, below this point** -->
+  <folder name="OptionsDialog">
+    <folder name="Editor">
+      <folder name="Hints">
+        <attr name="position" intvalue="0"/>
         <folder name="text">
-            <folder name="javascript">
-                <file name="hints.instance">
-                    <attr name="instanceClass" stringvalue="org.netbeans.modules.javascript.hints.infrastructure.JsHintsProvider"/>
-                </file>
-            </folder>
+          <folder name="javascript">
+            <file name="JsHints.instance">
+              <attr name="instanceOf" stringvalue="org.netbeans.spi.options.OptionsPanelController"/>
+              <attr name="instanceCreate" methodvalue="org.netbeans.modules.javascript.hints.infrastructure.HintsAdvancedOption.createStatic"/>
+            </file>
+          </folder>
         </folder>
+      </folder>
     </folder>
+  </folder>
+
+  <folder name="CslPlugins">
+    <folder name="text">
+      <folder name="javascript">
+        <file name="hints.instance">
+          <attr name="instanceClass" stringvalue="org.netbeans.modules.javascript.hints.infrastructure.JsHintsProvider"/>
+        </file>
+      </folder>
+    </folder>
+  </folder>
 </filesystem>
