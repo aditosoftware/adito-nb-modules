@@ -42,6 +42,8 @@ public class AditoImportHint
       {
         JsParseResult jsParseResult = (JsParseResult) parserResult;
         ScriptOrFnNode root = (ScriptOrFnNode) jsParseResult.getRootNode();
+        if (root == null)
+          return;
         Node child = root.getFirstChild();
         while (root != null)
         {
@@ -57,7 +59,6 @@ public class AditoImportHint
         }
       }
     }
-
 
     // nicht gefunden --> ggf. trotzdem warnen, ohne fix?
     if (process.size() == 0)
@@ -92,6 +93,6 @@ public class AditoImportHint
     return pCallName.contains(".")
         || pCallName.startsWith("import")
         || pCallName.startsWith("__po__")
-        || hintSupply.isMethodDeclaredInAditoProcess(pInfo.getSnapshot().getSource().getFileObject(), pCallName);
+        || hintSupply.isMethodDeclaredInAditoProcess(pInfo.getSnapshot().getText().toString(), pCallName);
   }
 }

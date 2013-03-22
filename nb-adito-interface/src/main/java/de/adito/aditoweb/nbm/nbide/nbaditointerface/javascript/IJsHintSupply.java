@@ -19,6 +19,6 @@ public interface IJsHintSupply
 
   public String getAditoLibName(FileObject pFileObject);
 
-  public boolean isMethodDeclaredInAditoProcess(FileObject pJavaScriptFileObject, String pCallName);
+  public boolean isMethodDeclaredInAditoProcess(String pParseSource, String pCallName);   //FileObject pJavaScriptFileObject
 
 }
