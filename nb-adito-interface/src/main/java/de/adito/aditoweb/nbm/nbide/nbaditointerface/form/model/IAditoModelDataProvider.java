@@ -31,6 +31,21 @@ public interface IAditoModelDataProvider
   void removeDataModel(FileObject pModelFileObject);
 
   /**
+   * Positioniert die übergebenen Komponenten im linken oberen Bereich
+   * des Containers.
+   * @param pChildren Komponenten die mit CTRL + V eingefügt werden.
+   */
+  void calcDropLocation(List<DataObject> pChildren);
+
+  /**
+   * Organisiert die interne Auflistung so um, dass die übergebenen
+   * Komponenten über den anderen im gleichen Container gezeichnet werden.
+   * @param pParent der Container
+   * @param pChildren Komponenten die in den Vordergrund kommen sollen.
+   */
+  void toFront(FileObject pParent, List<DataObject> pChildren);
+
+  /**
    * Verschiebt ein Datenmodell.
    *
    * @param pSource das Datenmodell.

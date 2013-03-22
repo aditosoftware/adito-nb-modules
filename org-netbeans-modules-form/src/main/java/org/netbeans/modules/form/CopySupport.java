@@ -44,29 +44,20 @@
 
 package org.netbeans.modules.form;
 
-import java.awt.Component;
-import java.awt.Dimension;
-import java.awt.Rectangle;
-import java.io.IOException;
-import java.awt.datatransfer.*;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import javax.swing.undo.UndoableEdit;
-import org.openide.*;
-import org.openide.nodes.*;
-import org.openide.util.Mutex;
-import org.openide.util.MutexException;
-import org.openide.util.datatransfer.PasteType;
-import org.openide.util.datatransfer.ExTransferable;
-import org.openide.util.datatransfer.MultiTransferObject;
-import org.openide.ErrorManager;
-import org.netbeans.modules.form.project.*;
 import org.netbeans.modules.form.layoutdesign.*;
 import org.netbeans.modules.form.layoutsupport.LayoutSupportManager;
-import org.openide.util.Lookup;
+import org.netbeans.modules.form.project.ClassSource;
+import org.openide.*;
+import org.openide.nodes.Node;
+import org.openide.util.*;
+import org.openide.util.datatransfer.*;
+
+import javax.swing.undo.UndoableEdit;
+import java.awt.*;
+import java.awt.datatransfer.*;
+import java.io.IOException;
+import java.util.*;
+import java.util.List;
 
 /**
  * Support class for copy/cut/paste operations in form editor.
@@ -411,17 +402,23 @@ class CopySupport {
             }
 
             try {
+
+              if (!move)
+                targetComponent.getARADComponentHandler().addChildren(sourceComponents);
+              else
+                targetComponent.getARADComponentHandler().reInsert(sourceComponents);
+
                 // copy or move the components
                 for (RADComponent sourceComp : sourceComponents) {
                     //RADComponent copiedComp;
                     if (!move) {
-                        targetComponent.getARADComponentHandler().addChild(sourceComp);
+                        //targetComponent.getARADComponentHandler().addChild(sourceComp);
                         //copiedComp = targetForm.getComponentCreator().copyComponent(sourceComp, targetComponent);
                         /*if (copiedComp == null) {
                             return null; // copy failed...
                         }*/
                     } else { // move within the same form
-                      sourceComp.getARADComponentHandler().move(targetComponent);
+                      //sourceComp.getARADComponentHandler().move(targetComponent);
                         //targetForm.getComponentCreator().moveComponent(sourceComp, targetComponent);
                         //copiedComp = sourceComp;
                     }

@@ -112,20 +112,60 @@ public class ARADComponentHandler
     });
   }
 
-  public void addChild(RADComponent pToCopy)
+  public DataObject addChild(RADComponent pToCopy)
   {
     try
     {
       IAditoModelDataProvider modelDataProvider = NbAditoInterface.lookup(IAditoModelDataProvider.class);
       FileObject defaultChildContainer = modelDataProvider.getDefaultChildContainer(modelFileObject);
+      if (defaultChildContainer == null)
+      {
+        FileObject fo = modelFileObject;
+        while (!fo.isRoot() & defaultChildContainer == null)
+        {
+          fo = fo.getParent();
+          defaultChildContainer = modelDataProvider.getDefaultChildContainer(fo);
+        }
 
+      }
       DataFolder target = DataFolder.findFolder(defaultChildContainer);
       DataObject source = DataObject.find(pToCopy.getARADComponentHandler().getModelFileObject());
-      source.copy(target);
+      return source.copy(target);
     }
     catch (IOException e)
     {
       e.printStackTrace();  // TODO: exceptionHandling
+    }
+    return null;
+  }
+
+  /**
+   * Fügt mehrere Komponenten dem Besitzer dieses Handlers hinzu.
+   *
+   * @param pComponents Liste mit Komponenten die einem Container hinzugefügt werden sollen.
+   */
+  public void addChildren(final List<RADComponent> pComponents)
+  {
+    try
+    {
+      modelFileObject.getFileSystem().runAtomicAction(new FileSystem.AtomicAction()
+      {
+        @Override
+        public void run() throws IOException
+        {
+          List<DataObject> dataObjects = new ArrayList<>();
+          for (RADComponent c : pComponents)
+          {
+            dataObjects.add(addChild(c));
+          }
+          IAditoModelDataProvider dataProvider = NbAditoInterface.lookup(IAditoModelDataProvider.class);
+          dataProvider.calcDropLocation(dataObjects);
+        }
+      });
+    }
+    catch (IOException e)
+    {
+      e.printStackTrace();
     }
   }
 
@@ -161,6 +201,57 @@ public class ARADComponentHandler
     }
     if (defaultChildContainer != null)
       dataProvider.moveDataModel(modelFileObject, defaultChildContainer);
+  }
+
+  /**
+   * Fügt Komponenten einem Frame hinzu aus dem sie vorher ausgeschnitten wurden.
+   *
+   * @param pComponents Komponenten die dem selben Frame wieder hinzugefügt werden.
+   */
+  public void reInsert(final List<RADComponent> pComponents)
+  {
+    try
+    {
+      modelFileObject.getFileSystem().runAtomicAction(new FileSystem.AtomicAction()
+      {
+        @Override
+        public void run() throws IOException
+        {
+          List<String> names = new ArrayList<>();
+          for (RADComponent c : pComponents)
+          {
+            ARADComponentHandler handler = c.getARADComponentHandler();
+            handler.move(radComponent);
+            names.add(handler.getModelFileObject().getName());
+          }
+
+          IAditoModelDataProvider dataProvider = NbAditoInterface.lookup(IAditoModelDataProvider.class);
+          FileObject defaultChildContainer = dataProvider.getDefaultChildContainer(getModelFileObject());
+          if (defaultChildContainer != null)
+          {
+            List<DataObject> dataObjects = new ArrayList<>();
+            for (FileObject fo : defaultChildContainer.getChildren())
+            {
+              try
+              {
+                if (names.contains(fo.getName()))
+                  dataObjects.add(DataObject.find(fo));
+              }
+              catch (DataObjectNotFoundException e)
+              {
+                e.printStackTrace();
+              }
+            }
+            dataProvider.calcDropLocation(dataObjects);
+            dataProvider.toFront(getModelFileObject(), dataObjects);
+          }
+        }
+      });
+    }
+    catch (IOException e)
+    {
+      e.printStackTrace();
+    }
   }
 
   @NotNull

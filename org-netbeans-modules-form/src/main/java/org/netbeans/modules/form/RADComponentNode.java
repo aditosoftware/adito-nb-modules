@@ -47,7 +47,7 @@ package org.netbeans.modules.form;
 import de.adito.aditoweb.nbm.nbide.nbaditointerface.NbAditoInterface;
 import de.adito.aditoweb.nbm.nbide.nbaditointerface.common.IAditoNetbeansTranslations;
 import org.netbeans.modules.form.adito.actions.AditoActionObject;
-import org.netbeans.modules.form.adito.components.AditoNodeConnect;
+import org.netbeans.modules.form.adito.components.*;
 import org.netbeans.modules.form.layoutsupport.LayoutNode;
 import org.netbeans.modules.form.palette.PaletteUtils;
 import org.openide.ErrorManager;
@@ -522,9 +522,10 @@ public class RADComponentNode extends FormNode
   @Override
   public boolean canDestroy()
   {
+    INodePrivileges priveleges = AditoNodeConnect.getPriveleges(component);
     return !component.isReadOnly()
         && component != component.getFormModel().getTopRADComponent()
-        && AditoNodeConnect.getPriveleges(component).canDelete();
+        && priveleges != null && priveleges.canDelete();
   }
 
   /**
@@ -710,7 +711,8 @@ public class RADComponentNode extends FormNode
   @Override
   public boolean canCopy()
   {
-    return AditoNodeConnect.getPriveleges(component).canCopy();
+    INodePrivileges priveleges = AditoNodeConnect.getPriveleges(component);
+    return priveleges != null && priveleges.canCopy();
   }
 
   /**
@@ -722,9 +724,10 @@ public class RADComponentNode extends FormNode
   @Override
   public boolean canCut()
   {
+    INodePrivileges priveleges = AditoNodeConnect.getPriveleges(component);
     return !component.isReadOnly()
         && component != component.getFormModel().getTopRADComponent()
-        && AditoNodeConnect.getPriveleges(component).canMove();
+        && priveleges != null && priveleges.canMove();
   }
 
   /**
