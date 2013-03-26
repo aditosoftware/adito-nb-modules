@@ -26,9 +26,9 @@
     </dependency>
 
     <dependency>
-      <groupId>de.adito.aditoweb.packages</groupId>
-      <artifactId>lwguava</artifactId>
-      <version>12.0</version>
+      <groupId>com.google.guava</groupId>
+      <artifactId>guava</artifactId>
+      <version>14.0.1</version>
     </dependency>
 
     <!-- Netbeans dependencies -->
