@@ -80,7 +80,10 @@ public final class JsClassPathProvider implements ClassPathProvider {
           if (prj == null)
             return null;
             //throw new UnsupportedOperationException("can't proceed: " + file + " doesn't belong to a project.");
-          return prj.getLookup().lookup(ClassPathProvider.class).findClassPath(prj.getProjectDirectory(), type);
+
+          ClassPathProvider classPathProvider = prj.getLookup().lookup(ClassPathProvider.class);
+          if (classPathProvider != null)
+            return classPathProvider.findClassPath(prj.getProjectDirectory(), type);
         }
         return null;
     }
