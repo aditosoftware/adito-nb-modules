@@ -2235,7 +2235,13 @@ public class HandleLayer extends JPanel implements MouseListener, MouseMotionLis
                 }
 
                 if (intersects && comp instanceof Container)
+                {
                     subContainers.add(comp);
+                    // Selektion nur innerhalb des ersten Containers (#4264).
+                    if (selRect.union(bounds).equals(bounds) && ((Container) comp).getComponentCount() > 0
+                        && toSelect.size() == 1)
+                      break;
+                }
             }
 
             if (toSelect.size() > 1
