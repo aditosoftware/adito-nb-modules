@@ -1,10 +1,11 @@
 package org.netbeans.modules.form.adito.components;
 
-import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.layout.INonSwingComponent;
+import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.layout.*;
 import org.netbeans.modules.form.*;
 import org.netbeans.modules.form.adito.perstistencemanager.NonvisContainerRADComponent;
 
 import java.awt.*;
+import java.awt.event.MouseEvent;
 import java.awt.geom.Area;
 
 /**
@@ -46,6 +47,17 @@ public final class AditoHandleLayer
     Rectangle visRect = AditoAccess.visibleRect(pFormDesigner, parentComponent);
     _layerPaint(pG, translationPoint, visRect, nonSwingComponent);
   }
+
+  public static void mouseClick(FormDesigner pFormDesigner, RADComponent pMetacomp, MouseEvent e)
+  {
+
+    Object comp = pMetacomp == null ? null : pFormDesigner.getComponent(pMetacomp);
+    if (comp instanceof INonSwingContainer)
+    {
+      ((INonSwingContainer) comp).executeMouseClick(e);
+    }
+  }
+
 
   private static void _layerPaint(Graphics2D pG, Point pTranslationPoint, Rectangle pVisibleRect,
                                   INonSwingComponent pNonSwingComponent)
