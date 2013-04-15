@@ -350,7 +350,7 @@ public class FormLAF {
                 Logger.getLogger(FormLAF.class.getName()).log(Level.INFO, ex.getMessage(), ex);
             }
         }
-        UIDefaults defaults = UIManager.getDefaults();
+        /*UIDefaults defaults = UIManager.getDefaults();
         netbeansDefaults.clear();
         copyMultiUIDefaults(defaults, netbeansDefaults);
         netbeansDefaults.keySet().removeAll(userDefaults.keySet());
@@ -360,11 +360,11 @@ public class FormLAF {
             setUseDesignerDefaults(formModel);
         } else if (MetalLookAndFeel.class.isAssignableFrom(previewLaf)) {
             MetalLookAndFeel.setCurrentTheme(lafToTheme.get(previewLaf));
-        }
+        }*/
     }
 
     private static void useIDELookAndFeel() {
-        userDefaults.clear();
+        /*userDefaults.clear();
         copyMultiUIDefaults(UIManager.getDefaults(), userDefaults);
 
         if (!preview) {
@@ -375,7 +375,7 @@ public class FormLAF {
             }
         }
 
-        UIManager.getDefaults().putAll(netbeansDefaults);
+        UIManager.getDefaults().putAll(netbeansDefaults);*/
     }
 
     private static void copyMultiUIDefaults(UIDefaults what, Map where) {
