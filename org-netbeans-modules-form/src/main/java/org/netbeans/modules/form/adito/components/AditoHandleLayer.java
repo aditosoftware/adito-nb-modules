@@ -75,15 +75,35 @@ public final class AditoHandleLayer
       {
         compName = ((INonSwingContainer) comp).getSubComponentName(e);
       }
-
-      if (compName != null)
+      if (compName != null && pComp.getName().equals("ribbon"))  // Unterkomponenten des Ribbons
+      {
+        for (int i = 0; i < subComponents.length; i++)
+          for (NonvisContainerRADComponent sub : subComponents[i].getSubBeans())
+          {
+            for (NonvisContainerRADComponent child : sub.getSubBeans())
+            {
+              if (child.getName().equals(compName.substring(0, compName.indexOf("/\\"))) &&
+                  child.getParentComponent().getName().equals(compName.substring(compName.indexOf("/\\") + 2)))
+              {
+                component = child;
+                break;
+              }
+            }
+            if (sub.getName().equals(compName.substring(0, compName.indexOf("/\\"))) &&
+                sub.getParentComponent().getName().equals(compName.substring(compName.indexOf("/\\") + 2)))
+            {
+              component = sub;
+              break;
+            }
+          }
+      }
+      else if (compName != null && pComp.getName().equals("tbl_subAttr")) // Unterkomponenten einer Tabelle
       {
         for (NonvisContainerRADComponent a : subComponents)
         {
           for (Node.PropertySet propertySet : a.getProperties())
             for (Node.Property property : propertySet.getProperties())
             {
-
               if (property.getName().equals("columnName"))
               {
                 String value = "";
@@ -102,15 +122,11 @@ public final class AditoHandleLayer
 
                 if (value.equals(compName))
                   component = a;
-
               }
             }
-
         }
       }
     }
-
-
     return component;
   }
 
