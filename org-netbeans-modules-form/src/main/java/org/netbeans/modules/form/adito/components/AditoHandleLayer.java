@@ -2,11 +2,13 @@ package org.netbeans.modules.form.adito.components;
 
 import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.layout.*;
 import org.netbeans.modules.form.*;
-import org.netbeans.modules.form.adito.perstistencemanager.NonvisContainerRADComponent;
+import org.netbeans.modules.form.adito.perstistencemanager.*;
+import org.openide.nodes.Node;
 
 import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Area;
+import java.lang.reflect.InvocationTargetException;
 
 /**
  * Funktionen die über die Klasse HandleLayer angeboten werden, aber Erweiterungen von Adito sind.
@@ -58,6 +60,59 @@ public final class AditoHandleLayer
     }
   }
 
+  public static NonvisContainerRADComponent getSubComponent(RADComponent pComp, FormDesigner pFormDesigner, MouseEvent e)
+  {
+
+    String compName = null;
+    NonvisContainerRADComponent component = null;
+
+    if (pComp instanceof NonvisContainerRADVisualComponent)
+    {
+      NonvisContainerRADComponent[] subComponents = ((NonvisContainerRADVisualComponent) pComp).getSubBeans();
+
+      Object comp = pComp == null ? null : pFormDesigner.getComponent(pComp);
+      if (comp instanceof INonSwingContainer)
+      {
+        compName = ((INonSwingContainer) comp).getSubComponentName(e);
+      }
+
+      if (compName != null)
+      {
+        for (NonvisContainerRADComponent a : subComponents)
+        {
+          for (Node.PropertySet propertySet : a.getProperties())
+            for (Node.Property property : propertySet.getProperties())
+            {
+
+              if (property.getName().equals("columnName"))
+              {
+                String value = "";
+                try
+                {
+                  value = property.getValue().toString();
+                }
+                catch (IllegalAccessException e1)
+                {
+                  e1.printStackTrace();
+                }
+                catch (InvocationTargetException e1)
+                {
+                  e1.printStackTrace();
+                }
+
+                if (value.equals(compName))
+                  component = a;
+
+              }
+            }
+
+        }
+      }
+    }
+
+
+    return component;
+  }
 
   private static void _layerPaint(Graphics2D pG, Point pTranslationPoint, Rectangle pVisibleRect,
                                   INonSwingComponent pNonSwingComponent)

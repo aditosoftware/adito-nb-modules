@@ -48,6 +48,7 @@ import com.google.common.base.*;
 import com.google.common.collect.*;
 import org.netbeans.modules.form.actions.DuplicateAction;
 import org.netbeans.modules.form.adito.components.AditoHandleLayer;
+import org.netbeans.modules.form.adito.perstistencemanager.NonvisContainerRADComponent;
 import org.netbeans.modules.form.assistant.AssistantModel;
 import org.netbeans.modules.form.fakepeer.FakePeerSupport;
 import org.netbeans.modules.form.layoutdesign.*;
@@ -1244,6 +1245,15 @@ public class HandleLayer extends JPanel implements MouseListener, MouseMotionLis
     int selMode = !e.isAltDown() ? COMP_DEEPEST :
         (!e.isShiftDown() ? COMP_ABOVE_SELECTED : COMP_UNDER_SELECTED);
     hitMetaComp = getMetaComponentAt(e.getPoint(), selMode);
+
+    if (hitMetaComp != null)
+    {
+      NonvisContainerRADComponent comp = null;
+      comp = AditoHandleLayer.getSubComponent(hitMetaComp, formDesigner, e);
+
+      if (comp != null)
+        hitMetaComp = comp;
+    }
 
     // Help with selecting a component in scroll pane (e.g. JTable of zero size).
     // Prefer selcting the component rather than the scrollpane if the view port

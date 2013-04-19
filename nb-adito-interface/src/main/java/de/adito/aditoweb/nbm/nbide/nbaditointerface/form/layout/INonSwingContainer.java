@@ -13,6 +13,8 @@ public interface INonSwingContainer
 
   void executeMouseClick(MouseEvent e);
 
+  String getSubComponentName(MouseEvent e);
+
   boolean addCompNonSwing(INonSwingComponent pComp);
 
   boolean removeCompNonSwing(INonSwingComponent pComp);
