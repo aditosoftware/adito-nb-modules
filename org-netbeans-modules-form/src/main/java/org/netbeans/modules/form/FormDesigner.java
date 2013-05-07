@@ -556,7 +556,7 @@ public class FormDesigner
     formToolBar = new FormToolBar(this, toolbar);
   }
 
-  public JToolBar getToolBar()
+  public JComponent getToolBar()
   {
     return getFormToolBar().getToolBar();
   }

@@ -53,11 +53,11 @@ import java.beans.BeanInfo;
 import java.util.*;
 
 import org.openide.nodes.*;
-import org.openide.util.HelpCtx;
-import org.openide.util.actions.SystemAction;
+//import org.openide.util.HelpCtx;
+//import org.openide.util.actions.SystemAction;
 
 import org.netbeans.modules.form.palette.*;
-import org.netbeans.modules.form.actions.TestAction;
+//import org.netbeans.modules.form.actions.TestAction;
 
 /**
  * ToolBar in the FormDesigner - by default it holds buttons for selection and
@@ -71,6 +71,7 @@ final class FormToolBar {
 
     private FormDesigner formDesigner;
 
+    private final JPanel emptyToolbar = new JPanel();
     private JToolBar toolbar;
     private JToggleButton selectionButton;
     private JToggleButton connectionButton;
@@ -178,8 +179,8 @@ final class FormToolBar {
         }*/
     }
 
-    JToolBar getToolBar() {
-        return toolbar;
+    JComponent getToolBar() {
+        return emptyToolbar; //toolbar;
     }
 
     void installDesignerActions() {
