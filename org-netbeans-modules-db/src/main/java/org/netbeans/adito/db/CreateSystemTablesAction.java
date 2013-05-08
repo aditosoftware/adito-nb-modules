@@ -175,8 +175,8 @@ public class CreateSystemTablesAction extends BaseAction
                 IAditoDbTable table = dbInfo.getTable(connection.getDriver(), systemTable);
                 List<ColumnItem> columnItems = ColumnItemCreator.toColumnItems(table.getColumns(), spec);
 
-                CreateTableDialog.showDialogAndCreate(spec, schema, columnItems, table.getName());
-                AditoDbTableCreator.checkAndCreateSysDbVersionEntry(connection, schema, table.getName());
+                if (CreateTableDialog.showDialogAndCreate(spec, schema, columnItems, table.getName()))
+                  AditoDbTableCreator.checkAndCreateSysDbVersionEntry(connection, schema, table.getName());
               }
             }
             catch (Exception e1)

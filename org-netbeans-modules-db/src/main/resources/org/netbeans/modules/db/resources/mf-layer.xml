@@ -222,7 +222,7 @@ made subject to such option by the copyright holder.
                         <attr name="position" intvalue="150"/>
                     </file>
 
-                    <!-- adito entry -->
+                    <!-- org.netbeans.adito.db.CreateSystemTablesAction -->
                     <file name="org-netbeans-adito-db-CreateSystemTablesAction.instance">
                       <attr name="position" intvalue="160"/>
                     </file>
