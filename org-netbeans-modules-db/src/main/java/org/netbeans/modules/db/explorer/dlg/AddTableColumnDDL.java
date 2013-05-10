@@ -30,6 +30,7 @@
  */
 package org.netbeans.modules.db.explorer.dlg;
 
+import org.netbeans.adito.db.OracleTableColumnHack;
 import org.netbeans.lib.ddl.impl.AddColumn;
 import org.netbeans.lib.ddl.impl.CreateIndex;
 import org.netbeans.lib.ddl.impl.Specification;
@@ -69,8 +70,10 @@ public class AddTableColumnDDL {
         org.netbeans.lib.ddl.impl.TableColumn col = null;
         if (citem.isPrimaryKey()) {
           col = cmd.createPrimaryKeyColumn(colname);
+          OracleTableColumnHack.fixPrimaryKeyColumn(spec, col, tablename, colname);
         } else if (citem.isUnique()) {
           col = cmd.createUniqueColumn(colname);
+          OracleTableColumnHack.fixUniqueColumn(spec, col, tablename, colname);
         } else col = (TableColumn)cmd.createColumn(colname);
         col.setColumnType(Specification.getType(citem.getType().getType()));
         col.setColumnSize(citem.getSize());

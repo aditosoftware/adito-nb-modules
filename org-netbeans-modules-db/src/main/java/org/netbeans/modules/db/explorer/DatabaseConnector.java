@@ -52,6 +52,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.event.ChangeListener;
+
+import org.netbeans.adito.db.OracleTableColumnHack;
 import org.netbeans.api.db.explorer.DatabaseException;
 import org.netbeans.lib.ddl.DatabaseProductNotFoundException;
 import org.netbeans.lib.ddl.adaptors.DefaultAdaptor;
@@ -256,8 +258,10 @@ public class DatabaseConnector {
             // we're using
             if (containsColumn(table.getPrimaryKey().getColumns(), column)) {
                 col = cmd.createPrimaryKeyColumn(column.getName());
+                OracleTableColumnHack.fixPrimaryKeyColumn(spec, col, table.getName(), column.getName());
             } else if (containsIndexColumn(table.getIndexes(), column)) {
                 col = cmd.createUniqueColumn(column.getName());
+                OracleTableColumnHack.fixUniqueColumn(spec, col, table.getName(), column.getName());
             } else {
                 col = cmd.createColumn (column.getName ());
             }
