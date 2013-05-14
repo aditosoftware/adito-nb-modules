@@ -44,32 +44,58 @@
 
 package org.netbeans.modules.db.explorer.dlg;
 
+import java.awt.Dialog;
+import java.awt.Dimension;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.GridLayout;
+import java.awt.Insets;
+import java.awt.Toolkit;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.io.InputStream;
+import java.lang.reflect.InvocationTargetException;
+import java.util.*;
+import java.util.concurrent.Callable;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.swing.JButton;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JSeparator;
+import javax.swing.JTable;
+import javax.swing.JTextField;
+import javax.swing.border.BevelBorder;
+import javax.swing.border.EmptyBorder;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
+import javax.swing.event.TableModelEvent;
+import javax.swing.event.TableModelListener;
+import javax.swing.table.TableColumn;
+import javax.swing.table.TableColumnModel;
+import javax.swing.table.TableModel;
 import org.netbeans.lib.ddl.DDLException;
+import org.openide.DialogDescriptor;
+import org.openide.DialogDisplayer;
+import org.openide.NotifyDescriptor;
+import org.openide.util.NbBundle;
 import org.netbeans.lib.ddl.impl.Specification;
 import org.netbeans.lib.ddl.util.PListReader;
 import org.netbeans.modules.db.explorer.DbUtilities;
-import org.openide.*;
+import org.openide.NotificationLineSupport;
 import org.openide.awt.Mnemonics;
-import org.openide.util.*;
-
-import javax.swing.*;
-import javax.swing.border.*;
-import javax.swing.event.*;
-import javax.swing.table.*;
-import java.awt.*;
-import java.awt.event.*;
-import java.io.InputStream;
-import java.lang.reflect.InvocationTargetException;
-import java.util.List;
-import java.util.*;
-import java.util.concurrent.Callable;
-import java.util.logging.*;
+import org.openide.util.HelpCtx;
 
 public class CreateTableDialog {
     Dialog dialog = null;
     JTextField dbnamefield, dbownerfield;
     JTable table;
-    JButton addbtn, delbtn, editBtn;
+    JButton addbtn, delbtn, editBtn, upBtn, downBtn;
     Specification spec;
     private DialogDescriptor descriptor = null;
     private NotificationLineSupport statusLine;
@@ -99,7 +125,7 @@ public class CreateTableDialog {
         return dlgtab;
     }
 
-    public CreateTableDialog(final Specification spe, final String schema,List<ColumnItem> pItems,String pTableName) {
+    public CreateTableDialog(final Specification spe, final String schema, List<ColumnItem> pItems, String pTableName) {
         spec = spe;
         try {
             JLabel label;
@@ -109,7 +135,7 @@ public class CreateTableDialog {
             GridBagConstraints constr = new GridBagConstraints();
             pane.setLayout(layout);
             pane.setMinimumSize(new Dimension(200,100));
-
+     
             // Table name field
 
             label = new JLabel();
@@ -210,7 +236,7 @@ public class CreateTableDialog {
             constr.gridy = 1;
             constr.insets = new java.awt.Insets (2, 8, 2, 2);
             JPanel btnpane = new JPanel();
-            GridLayout btnlay = new GridLayout(3,1,0,5);
+            GridLayout btnlay = new GridLayout(5,1,0,5);
             btnpane.setLayout(btnlay);
             layout.setConstraints(btnpane, constr);
             pane.add(btnpane);
@@ -272,6 +298,46 @@ public class CreateTableDialog {
                 }
             });
 
+            // Button to move row up
+            upBtn = new JButton();
+            Mnemonics.setLocalizedText(upBtn, NbBundle.getMessage(CreateTableDialog.class, "CreateTableUpButtonTitle")); // NOI18N
+            upBtn.setToolTipText(NbBundle.getMessage(CreateTableDialog.class, "ACS_CreateTableUpButtonTitleA11yDesc")); // NOI18N
+            btnpane.add(upBtn);
+            upBtn.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent event) {
+                    int idx = table.getSelectedRow();
+                    if (idx > 0) {
+                        DataModel dm = (DataModel) table.getModel();
+                        ColumnItem ci = dm.getRow(idx);
+                        dm.removeRow(idx);
+                        dm.insertRow(idx - 1, ci);
+                        table.getSelectionModel().setSelectionInterval(
+                                idx - 1, idx - 1);
+                    }
+                }
+            });
+
+            // Button to move row down
+            downBtn = new JButton();
+            Mnemonics.setLocalizedText(downBtn, NbBundle.getMessage(CreateTableDialog.class, "CreateTableDownButtonTitle")); // NOI18N
+            downBtn.setToolTipText(NbBundle.getMessage(CreateTableDialog.class, "ACS_CreateTableDownButtonTitleA11yDesc")); // NOI18N
+            btnpane.add(downBtn);
+            downBtn.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent event) {
+                    int idx = table.getSelectedRow();
+                    if (idx < table.getRowCount() - 1) {
+                        DataModel dm = (DataModel) table.getModel();
+                        ColumnItem ci = dm.getRow(idx);
+                        dm.removeRow(idx);
+                        dm.insertRow(idx + 1, ci);
+                        table.getSelectionModel().setSelectionInterval(
+                                idx + 1, idx + 1);
+                    }
+                }
+            });
+
             ActionListener listener = new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent event) {
@@ -329,18 +395,18 @@ public class CreateTableDialog {
             LOGGER.log(Level.SEVERE, ex.getLocalizedMessage(), ex);
         }
 
-      String tableName = Objects.toString(pTableName, "").trim();
-      if (tableName.length() > 0)
-        dbnamefield.setText(tableName);
+        String tableName = Objects.toString(pTableName, "").trim();
+        if (tableName.length() > 0)
+          dbnamefield.setText(tableName);
 
-      if ((pItems != null) && (pItems.size() > 0))
-      {
-        DataModel model = (DataModel) table.getModel();
-        for (ColumnItem item : pItems)
+        if ((pItems != null) && (pItems.size() > 0))
         {
-          model.addRow(item);
+          DataModel model = (DataModel) table.getModel();
+          for (ColumnItem item : pItems)
+          {
+            model.addRow(item);
+          }
         }
-      }
 
     }
 
@@ -350,8 +416,8 @@ public class CreateTableDialog {
      * @param schema DB schema to create table in
      * @return true if new table successfully created, false if cancelled
      */
-    public static boolean showDialogAndCreate(final Specification spec, final String schema,List<ColumnItem> pItems,String pTableName) {
-        final CreateTableDialog dlg = new CreateTableDialog(spec, schema,pItems,pTableName);
+    public static boolean showDialogAndCreate(final Specification spec, final String schema, List<ColumnItem> pItems, String pTableName) {
+        final CreateTableDialog dlg = new CreateTableDialog(spec, schema, pItems, pTableName);
         dlg.dialog.setVisible(true);
         if (dlg.descriptor.getValue() == DialogDescriptor.OK_OPTION) {
             return true;
@@ -367,9 +433,13 @@ public class CreateTableDialog {
     private void validate() {
         assert statusLine != null : "Notification status line not available";  //NOI18N
 
+        int selectedIndex = table.getSelectedRow();
         boolean oneRowSelected = table.getSelectedRowCount() == 1;
         editBtn.setEnabled(oneRowSelected);
         delbtn.setEnabled(oneRowSelected);
+        upBtn.setEnabled(oneRowSelected && selectedIndex > 0);
+        downBtn.setEnabled(oneRowSelected
+                && selectedIndex < table.getRowCount() - 1);
 
         String tname = getTableName();
         if (tname == null || tname.length() < 1) {

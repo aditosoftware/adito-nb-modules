@@ -48,78 +48,70 @@ import org.netbeans.lib.ddl.impl.Specification;
 import org.netbeans.modules.db.explorer.DatabaseConnection;
 import org.netbeans.modules.db.explorer.dlg.*;
 import org.openide.nodes.Node;
-import org.openide.util.*;
+import org.openide.util.HelpCtx;
+import org.openide.util.NbBundle;
+import org.openide.util.RequestProcessor;
 import org.openide.util.actions.SystemAction;
 
 import java.util.List;
 
 /**
+ *
  * @author Rob Englander
  */
-public class CreateTableAction extends BaseAction
-{
+public class CreateTableAction extends BaseAction {
 
-  @Override
-  protected boolean enable(Node[] activatedNodes)
-  {
-    if (activatedNodes == null || activatedNodes.length != 1)
-    {
-      return false;
-    }
-
-    boolean enabled = false;
-    DatabaseConnection dbconn = activatedNodes[0].getLookup().lookup(DatabaseConnection.class);
-
-    if (dbconn != null)
-    {
-      enabled = DatabaseConnection.isVitalConnection(dbconn.getConnection(), dbconn);
-    }
-
-    return enabled;
-  }
-
-  @Override
-  public HelpCtx getHelpCtx()
-  {
-    return new HelpCtx(CreateTableAction.class);
-  }
-
-  @Override
-  public void performAction(Node[] activatedNodes)
-  {
-    final BaseNode node = activatedNodes[0].getLookup().lookup(BaseNode.class);
-    RequestProcessor.getDefault().post(
-        new Runnable()
-        {
-          @Override
-          public void run()
-          {
-            perform(node);
-          }
+    @Override
+    protected boolean enable(Node[] activatedNodes) {
+        if (activatedNodes == null || activatedNodes.length != 1) {
+            return false;
         }
-    );
-  }
 
-  private void perform(final BaseNode node)
-  {
-    DatabaseConnection connection = node.getLookup().lookup(DatabaseConnection.class);
-    Specification spec = connection.getConnector().getDatabaseSpecification();
+        boolean enabled = false;
+        DatabaseConnection dbconn = activatedNodes[0].getLookup().lookup(DatabaseConnection.class);
 
-    String schema = findSchemaWorkingName(node.getLookup());
+        if (dbconn != null) {
+            enabled = DatabaseConnection.isVitalConnection(dbconn.getConnection(), dbconn);
+        }
 
-    List<ColumnItem> items = ColumnItemCreator.getDefaultSystemColumnItems(connection.getDriver(), spec);
-    boolean tableCreated = CreateTableDialog.showDialogAndCreate(connection.getConnector().getDatabaseSpecification(),
-                                                                 schema, items, null);
-    if (tableCreated)
-    {
-      SystemAction.get(RefreshAction.class).performAction(new Node[]{node});
+        return enabled;
     }
-  }
 
-  @Override
-  public String getName()
-  {
-    return NbBundle.getMessage(CreateTableAction.class, "CreateTable"); // NOI18N
-  }
+    @Override
+    public HelpCtx getHelpCtx() {
+        return new HelpCtx(CreateTableAction.class);
+    }
+
+    @Override
+    public void performAction (Node[] activatedNodes) {
+        final BaseNode node = activatedNodes[0].getLookup().lookup(BaseNode.class);
+        RequestProcessor.getDefault().post(
+            new Runnable() {
+            @Override
+                public void run() {
+                    perform(node);
+                }
+            }
+        );
+    }
+
+    private void perform(final BaseNode node) {
+        DatabaseConnection connection = node.getLookup().lookup(DatabaseConnection.class);
+        Specification spec = connection.getConnector().getDatabaseSpecification();
+
+        String schema = findSchemaWorkingName(node.getLookup());
+
+        List<ColumnItem> items = ColumnItemCreator.getDefaultSystemColumnItems(connection.getDriver(), spec);
+        boolean tableCreated = CreateTableDialog.showDialogAndCreate(connection.getConnector().getDatabaseSpecification(),
+                                                                     schema, items, null);
+        if (tableCreated) {
+            SystemAction.get(RefreshAction.class).performAction(new Node[] { node });
+        }
+    }
+
+    @Override
+    public String getName() {
+        return NbBundle.getMessage (CreateTableAction.class, "CreateTable"); // NOI18N
+    }
 
 }

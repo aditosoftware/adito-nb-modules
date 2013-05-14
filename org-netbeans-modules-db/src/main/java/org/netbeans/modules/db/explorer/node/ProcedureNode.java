@@ -306,26 +306,7 @@ public class ProcedureNode extends BaseNode {
         @Override
         protected void initialize() {
             super.initialize();
-            updateProcedureProperties();
-        }
-        
-        private void updateProcedureProperties() {
-            PropertySupport.Name ps = new PropertySupport.Name(this);
-            addProperty(ps);
-            
-            switch (provider.getType(getName())) {
-                case Function:
-                    addProperty(TYPE, TYPEDESC, String.class, false, NbBundle.getMessage (ProcedureNode.class, "StoredFunction")); // NOI18N
-                    break;
-                case Procedure:
-                    addProperty(TYPE, TYPEDESC, String.class, false, NbBundle.getMessage (ProcedureNode.class, "StoredProcedure")); // NOI18N
-                    break;
-                case Trigger:
-                    addProperty(TYPE, TYPEDESC, String.class, false, NbBundle.getMessage (ProcedureNode.class, "StoredTrigger")); // NOI18N
-                    break;
-                default:
-                    assert false : "Unknown type " + provider.getType(getName());
-            }
+            updateProcedureProperties(this, provider);
         }
 
         @Override
@@ -392,6 +373,8 @@ public class ProcedureNode extends BaseNode {
                                     '(' + params + ")" + '\n' + // NOI18N
                                     body;
                         }
+                        rs.close();
+                        stat.close();
                         break;
                     case Trigger:
                         /*
@@ -422,6 +405,8 @@ public class ProcedureNode extends BaseNode {
                                     "FOR EACH ROW" + '\n' + // NOI18N
                                     trigger_body;
                         }
+                        rs2.close();
+                        stat2.close();
                         break;
                     default:
                         assert false : "Unknown type" + getType();
@@ -444,6 +429,8 @@ public class ProcedureNode extends BaseNode {
                         while(rs.next()) {
                             params = rs.getString("param_list"); // NOI18N
                         }
+                        rs.close();
+                        stat.close();
                         break;
                     case Trigger:
                         Statement stat2 = connection.getConnection().createStatement();
@@ -459,6 +446,8 @@ public class ProcedureNode extends BaseNode {
                             params = trigger_time + ' ' + trigger_event + " ON " + tbl_name + '\n' +
                                     "FOR EACH ROW" + '\n'; // NOI18N
                         }
+                        rs2.close();
+                        stat2.close();
                         break;
                     default:
                         assert false : "Unknown type " + getType();
@@ -481,6 +470,8 @@ public class ProcedureNode extends BaseNode {
                         while(rs.next()) {
                             body = rs.getString("body"); // NOI18N
                         }
+                        rs.close();
+                        stat.close();
                         break;
                     case Trigger:
                         Statement stat2 = connection.getConnection().createStatement();
@@ -488,6 +479,8 @@ public class ProcedureNode extends BaseNode {
                         while(rs2.next()) {
                             body = rs2.getString("ACTION_STATEMENT"); // NOI18N
                         }
+                        rs2.close();
+                        stat2.close();
                         break;
                     default:
                         assert false : "Unknown type" + getType();
@@ -537,26 +530,7 @@ public class ProcedureNode extends BaseNode {
         @Override
         protected void initialize() {
             super.initialize();
-            updateProcedureProperties();
-        }
-        
-        private void updateProcedureProperties() {
-            PropertySupport.Name ps = new PropertySupport.Name(this);
-            addProperty(ps);
-            
-            switch (provider.getType(getName())) {
-                case Function:
-                    addProperty(TYPE, TYPEDESC, String.class, false, NbBundle.getMessage (ProcedureNode.class, "StoredFunction")); // NOI18N
-                    break;
-                case Procedure:
-                    addProperty(TYPE, TYPEDESC, String.class, false, NbBundle.getMessage (ProcedureNode.class, "StoredProcedure")); // NOI18N
-                    break;
-                case Trigger:
-                    addProperty(TYPE, TYPEDESC, String.class, false, NbBundle.getMessage (ProcedureNode.class, "StoredTrigger")); // NOI18N
-                    break;
-                default:
-                    assert false : "Unknown type " + provider.getType(getName());
-            }
+            updateProcedureProperties(this, provider);
         }
 
         @Override
@@ -639,6 +613,8 @@ public class ProcedureNode extends BaseNode {
                     sb.append(rs.getString("text")); // NOI18N
                     owner = rs.getString("owner"); // NOI18N
                 }
+                rs.close();
+                stat.close();
             } catch (SQLException ex) {
                 Logger.getLogger(ProcedureNode.class.getName()).log(Level.INFO, ex + " while get source of " + getTypeName(getType()) + " " + getName());
             }
@@ -699,5 +675,37 @@ public class ProcedureNode extends BaseNode {
                 assert false : "Unknown type " + t;
         }
         return name;
+    }
+
+    private static void updateProcedureProperties(ProcedureNode node,
+            ProcedureNodeProvider provider) {
+        PropertySupport.Name ps = new PropertySupport.Name(node);
+        node.addProperty(ps);
+        Type type = provider.getType(node.getName());
+        if (type == null) {
+            Logger.getLogger(ProcedureNode.class.getName()).log(
+                    Level.WARNING, "Unknown type of object " //NOI18N
+                    + node.getName(), new Exception());
+            return;
+        }
+        switch (type) {
+            case Function:
+                setTypeProperty(node, "StoredFunction");                //NOI18N
+                break;
+            case Procedure:
+                setTypeProperty(node, "StoredProcedure");               //NOI18N
+                break;
+            case Trigger:
+                setTypeProperty(node, "StoredTrigger");                 //NOI18N
+                break;
+            default:
+                assert false : "Unknown type " //NOI18N
+                        + provider.getType(node.getName());
+        }
+    }
+
+    private static void setTypeProperty(ProcedureNode node, String bundleKey) {
+        node.addProperty(TYPE, TYPEDESC, String.class, false,
+                NbBundle.getMessage(ProcedureNode.class, bundleKey));
     }
 }

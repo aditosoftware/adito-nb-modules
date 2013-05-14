@@ -56,6 +56,11 @@ import java.sql.SQLException;
 import java.sql.SQLWarning;
 import java.text.MessageFormat;
 import java.util.*;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.netbeans.api.db.explorer.DatabaseException;
@@ -120,6 +125,10 @@ public final class DatabaseConnection implements DBConnection {
     /** The default schema */
     private String defaultSchema = null;
 
+    private Set<String> importantSchemas = null;
+
+    private Set<String> importantCatalogs = null;
+
     /** Schema name */
     private String schema;
 
@@ -151,6 +160,10 @@ public final class DatabaseConnection implements DBConnection {
      */
     private MetadataModel metadataModel = null;
 
+    /** Properties for connection
+     */
+    private Properties connectionProperties = new Properties();
+
     /**
      * The API DatabaseConnection (delegates to this instance)
      */
@@ -168,6 +181,7 @@ public final class DatabaseConnection implements DBConnection {
     public static final String PROP_DRIVERNAME = "drivername"; //NOI18N
     public static final String PROP_NAME = "name"; //NOI18N
     public static final String PROP_DISPLAY_NAME = "displayName"; //NOI18N
+    public static final String PROP_CONNECTIONPROPERTIES = "connectionProperties";
     public static final String DRIVER_CLASS_NET = "org.apache.derby.jdbc.ClientDriver"; // NOI18N
     public static final int DERBY_UNICODE_ERROR_CODE = 20000;
     private OpenConnectionInterface openConnection = null;
@@ -205,22 +219,34 @@ public final class DatabaseConnection implements DBConnection {
      * @param password User password
      */
     public DatabaseConnection(String driver, String database, String user, String password) {
-        this(driver, null, database, null, user, password, null);
+        this(driver, null, database, null, user, password, null, null);
     }
 
     public DatabaseConnection(String driver, String driverName, String database,
             String theschema, String user, String password) {
-        this(driver, driverName, database, theschema, user, password, null);
+        this(driver, driverName, database, theschema, user, password, null, null);
     }
 
     public DatabaseConnection(String driver, String driverName, String database, 
             String theschema, String user) {
-        this(driver, driverName, database, theschema, user, null, null);
+        this(driver, driverName, database, theschema, user, null, null, null);
+    }
+
+    public DatabaseConnection(String driver, String driverName, String database,
+            String theschema, String user, Properties connectionProperties) {
+        this(driver, driverName, database, theschema, user, null, null, connectionProperties);
     }
 
     public DatabaseConnection(String driver, String driverName, String database,
             String theschema, String user, String password,
             Boolean rememberPassword) {
+        this(driver, driverName, database, theschema, user, password,
+                rememberPassword, null);
+    }
+
+    public DatabaseConnection(String driver, String driverName, String database,
+            String theschema, String user, String password,
+            Boolean rememberPassword, Properties connectionProperties) {
         this();
         drv = driver;
         drvname = driverName;
@@ -230,6 +256,7 @@ public final class DatabaseConnection implements DBConnection {
         rpwd = rememberPassword == null ? null : Boolean.valueOf(rememberPassword);
         schema = theschema;
         name = getName();
+        setConnectionProperties(connectionProperties);
     }
 
     public JDBCDriver findJDBCDriver() {
@@ -288,7 +315,7 @@ public final class DatabaseConnection implements DBConnection {
             if (LOGGER.isLoggable(Level.FINE) && warnings != null) {
                 LOGGER.log(Level.FINE, "Warnings while trying vitality of connection: " + warnings);
             }
-            return ! conn.isClosed();
+            return !checkClosedWithTimeout(conn);
         } catch (Exception ex) {
             if (dbconn != null) {
                 try {
@@ -302,6 +329,36 @@ public final class DatabaseConnection implements DBConnection {
         }
     }
     
+    /**
+     * Check whether a connection is closed, using a reasonable timeout. See bug
+     * #221602.
+     */
+    private static boolean checkClosedWithTimeout(final Connection connection) {
+        Callable<Boolean> task = new Callable<Boolean>() {
+            @Override
+            public Boolean call() {
+                try {
+                    return connection.isClosed();
+                } catch (SQLException ex) {
+                    LOGGER.log(Level.FINE,
+                            "While trying vitality of connection: " //NOI18N
+                            + ex.getLocalizedMessage(), ex);
+                    return false;
+                }
+            }
+        };
+        Future<Boolean> future = RP.submit(task);
+        try {
+            return future.get(1, TimeUnit.SECONDS);
+        } catch (TimeoutException e) {
+            return false;
+        } catch (InterruptedException e) {
+            return false;
+        } catch (ExecutionException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     public static boolean test(Connection conn, String connectionName) {
         try {
             if (! isVitalConnection(conn, null)) {
@@ -513,6 +570,22 @@ public final class DatabaseConnection implements DBConnection {
         }
     }
 
+    @Override
+    public Properties getConnectionProperties() {
+        return (Properties) connectionProperties.clone();
+    }
+
+    @Override
+    public void setConnectionProperties(Properties connectionProperties) {
+        Properties old = this.connectionProperties;
+        if (connectionProperties == null) {
+            this.connectionProperties = new Properties();
+        } else {
+            this.connectionProperties = (Properties) connectionProperties.clone();
+        }
+        propertySupport.firePropertyChange(PROP_CONNECTIONPROPERTIES, old, connectionProperties);
+    }
+
     /** Returns user schema name */
     @Override
     public String getSchema() {
@@ -697,9 +770,16 @@ public final class DatabaseConnection implements DBConnection {
             throw new DDLException(NbBundle.getMessage(DatabaseConnection.class, "EXC_InsufficientConnInfo")); // NOI18N
         }
 
-        Properties dbprops = new Properties();
+        Properties dbprops;
+        if (connectionProperties != null) {
+            dbprops = getConnectionProperties();
+        } else {
+            dbprops = new Properties();
+        }
         if ((usr != null) && (usr.length() > 0)) {
             dbprops.put("user", usr); //NOI18N
+        }
+        if ((pwd != null) && (pwd.length() > 0)) {
             dbprops.put("password", pwd); //NOI18N
         }
 
@@ -777,11 +857,16 @@ public final class DatabaseConnection implements DBConnection {
             sendException(new DDLException(NbBundle.getMessage(DatabaseConnection.class, "EXC_InsufficientConnInfo")));
         }
 
-        Properties dbprops = new Properties();
-        if ( usr.length() > 0 ) {
+        Properties dbprops;
+        if (connectionProperties != null) {
+            dbprops = getConnectionProperties();
+        } else {
+            dbprops = new Properties();
+        }
+        if ((usr != null) && (usr.length() > 0)) {
             dbprops.put("user", usr); //NOI18N
         }
-        if ((pwd != null && pwd.length() > 0)) {
+        if ((pwd != null) && (pwd.length() > 0)) {
             dbprops.put("password", pwd); //NOI18N
         }
 
@@ -970,9 +1055,17 @@ public final class DatabaseConnection implements DBConnection {
      */
     @Override
     public boolean equals(Object obj) {
-        if (obj instanceof DBConnection) {
-            DBConnection conn = (DBConnection) obj;
-            return toString().equals(conn.toString());
+        if (obj instanceof DatabaseConnection) {
+            DatabaseConnection conn = (DatabaseConnection) obj;
+            if (toString().equals(conn.toString())) {
+                if ((connectionProperties == null
+                        && conn.getConnectionProperties() == null)) {
+                    return true;
+                } else if (connectionProperties != null) {
+                    return connectionProperties.equals(
+                            conn.getConnectionProperties());
+        }
+            }
         }
 
         return false;
@@ -993,6 +1086,11 @@ public final class DatabaseConnection implements DBConnection {
         } catch (Exception exc) {
             //IGNORE - drvname not stored in 3.6 and earlier
             //IGNORE - displayName not stored in 6.7 and earlier
+        }
+        try {
+            connectionProperties = (Properties) in.readObject();
+        } catch (Exception ex) {
+            //IGNORE - connectionProperties not stored in 7.3 and earlier
         }
 
         // boston setting/pilsen setting?
@@ -1017,6 +1115,7 @@ public final class DatabaseConnection implements DBConnection {
         out.writeObject(DatabaseConnection.SUPPORT);
         out.writeObject(drvname);
         out.writeObject(displayName);
+        out.writeObject(connectionProperties);
     }
 
     @Override
@@ -1179,4 +1278,61 @@ public final class DatabaseConnection implements DBConnection {
         return this;
     }
 
+    public Set<String> getImportantSchemas() {
+        if (importantSchemas == null) {
+            return Collections.emptySet();
+        } else {
+            return Collections.unmodifiableSet(importantSchemas);
+        }
+    }
+
+    public void addImportantSchema(String schema) {
+        if (importantSchemas == null) {
+            importantSchemas = new HashSet<String>();
+        }
+        List<String> oldList = new ArrayList<String>(importantSchemas);
+        importantSchemas.add(schema);
+        propertySupport.firePropertyChange("importantSchemas", oldList, importantSchemas); //NOI18N
+    }
+
+    public void removeImportantSchema(String schema) {
+        if (importantSchemas != null) {
+            List<String> oldList = new ArrayList<String>(importantSchemas);
+            importantSchemas.remove(schema);
+            propertySupport.firePropertyChange("importantSchemas", oldList, importantSchemas); //NOI18N
+        }
+    }
+
+    public boolean isImportantSchema(String schema) {
+        return importantSchemas != null && importantSchemas.contains(schema);
+    }
+
+    public Set<String> getImportantCatalogs() {
+        if (importantCatalogs == null) {
+            return Collections.emptySet();
+        } else {
+            return Collections.unmodifiableSet(importantCatalogs);
+        }
+    }
+
+    public void addImportantCatalog(String database) {
+        if (importantCatalogs == null) {
+            importantCatalogs = new HashSet<String>();
+        }
+        List<String> oldList = new ArrayList<String>(importantCatalogs);
+        importantCatalogs.add(database);
+        propertySupport.firePropertyChange("importantCatalogs", oldList, importantCatalogs); //NOI18N
+    }
+
+    public void removeImportantCatalog(String database) {
+        if (importantCatalogs != null) {
+            List<String> oldList = new ArrayList<String>(importantCatalogs);
+            importantCatalogs.remove(database);
+            propertySupport.firePropertyChange("importantCatalogs", oldList, importantCatalogs); //NOI18N
+        }
+    }
+
+    public boolean isImportantCatalog(String database) {
+        return importantCatalogs != null && importantCatalogs.contains(database);
+    }
 }
