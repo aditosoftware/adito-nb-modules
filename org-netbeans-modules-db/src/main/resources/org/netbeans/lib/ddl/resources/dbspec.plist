@@ -601,6 +601,7 @@
     TypeMap = {
       java.sql.Types.BIGINT = BIGINT;
       java.sql.Types.BLOB = BLOB;  //JDBC 2.0 A type representing an SQL Binary Large Object
+	    java.sql.Types.CLOB = CLOB;
       java.sql.Types.CHAR = CHAR;
       java.sql.Types.DECIMAL = DECIMAL;
       java.sql.Types.DATE = DATE;
@@ -622,7 +623,7 @@
       UPDATE = UPDATE;
       DELETE = DELETE;
     };
-    SizelessTypes = (BIGINT,BLOB,DATE,INT,INTEGER,REAL,SMALLINT);
+    SizelessTypes = (BIGINT,BLOB,CLOB,DATE,INT,INTEGER,REAL,SMALLINT);
     DecimalTypes = (DECIMAL,FLOAT,NUMERIC);
     CharacterTypes = (CHAR,VARCHAR2);
 
@@ -914,10 +915,6 @@
       Format = "{column.name} {column.type}[({column.size}[,{column.decsize}])][ {column.type.suffix}][ default {default.value}][ {column.notnull}not null] check ({check.condition})";
     };
 
-    RemoveColumnCommand = {
-      Supported = false;
-    };
-
     SetDefaultSchemaCommand = {
       Class = org.netbeans.lib.ddl.impl.SetDefaultSchema;
       Format = "set schema {schemaName}";
@@ -940,7 +937,8 @@
       java.sql.Types.BIT = BIT;
       java.sql.Types.BLOB = IMAGE;
       java.sql.Types.CHAR = CHAR;
-      java.sql.Types.DATE = DATETIME;
+	    java.sql.Types.CLOB = TEXT;
+      java.sql.Types.DATE = DATE;
       java.sql.Types.DECIMAL = DECIMAL;
       java.sql.Types.DOUBLE = "DOUBLE PRECISION";
       java.sql.Types.FLOAT = FLOAT;
@@ -948,12 +946,12 @@
       java.sql.Types.NUMERIC = NUMERIC;
       java.sql.Types.REAL = REAL;
       java.sql.Types.SMALLINT = SMALLINT;
-      java.sql.Types.TIMESTAMP = TIMESTAMP;
+      java.sql.Types.TIMESTAMP = DATETIME;
       java.sql.Types.TINYINT = TINYINT;
       java.sql.Types.VARBINARY = VARBINARY;
       java.sql.Types.VARCHAR = VARCHAR;
     };
-    SizelessTypes = (BINARY,BIT,IMAGE,DATETIME,"DOUBLE PRECISION",INT,REAL,SMALLINT,TIMESTAMP,TINYINT,VARBINARY);
+    SizelessTypes = (BINARY,BIT,IMAGE,DATETIME,"DOUBLE PRECISION",INT,REAL,SMALLINT,TEXT,TINYINT,VARBINARY);
     DecimalTypes = (DECIMAL,FLOAT,NUMERIC);
     CharacterTypes = (CHAR,VARCHAR);
 
@@ -1385,6 +1383,7 @@
       java.sql.Types.BIGINT = BIGINT;
       java.sql.Types.BLOB = BLOB;  //JDBC 2.0 A type representing an SQL Binary Large Object
       java.sql.Types.CHAR = CHAR;
+	    java.sql.Types.CLOB = CLOB;
       java.sql.Types.DECIMAL = DECIMAL;
       java.sql.Types.DATE = DATE;
       java.sql.Types.FLOAT = FLOAT;
@@ -1405,7 +1404,7 @@
       UPDATE = UPDATE;
       DELETE = DELETE;
     };
-    SizelessTypes = (BIGINT,BLOB,DATE,INT,INTEGER,REAL,SMALLINT);
+    SizelessTypes = (BIGINT,BLOB,CLOB,DATE,INT,INTEGER,REAL,SMALLINT);
     DecimalTypes = (DECIMAL,FLOAT,NUMERIC);
     CharacterTypes = (CHAR,VARCHAR2);
 
@@ -1578,6 +1577,7 @@
     TypeMap = {
       java.sql.Types.BIGINT = BIGINT;
       java.sql.Types.BLOB = BLOB;  //JDBC 2.0 A type representing an SQL Binary Large Object
+	    java.sql.Types.CLOB = CLOB;
       java.sql.Types.CHAR = CHAR;
       java.sql.Types.DECIMAL = DECIMAL;
       java.sql.Types.DATE = DATE;
@@ -1599,7 +1599,7 @@
       UPDATE = UPDATE;
       DELETE = DELETE;
     };
-    SizelessTypes = (BIGINT,BLOB,DATE,INT,INTEGER,REAL,SMALLINT);
+    SizelessTypes = (BIGINT,BLOB,CLOB,DATE,INT,INTEGER,REAL,SMALLINT);
     DecimalTypes = (DECIMAL,FLOAT,NUMERIC);
     CharacterTypes = (CHAR,VARCHAR2);
 
@@ -1770,6 +1770,8 @@
     TypeMap = {
       java.sql.Types.BIT = BOOL;
       java.sql.Types.CHAR = CHAR;
+	    java.sql.Types.BLOB = BYTEA;
+	    java.sql.Types.CLOB = TEXT;
       java.sql.Types.DATE = DATE;
       java.sql.Types.DECIMAL = DECIMAL;
       java.sql.Types.DOUBLE = FLOAT8;
@@ -1781,7 +1783,7 @@
       java.sql.Types.TIMESTAMP = TIMESTAMP;
       java.sql.Types.VARCHAR = VARCHAR;
     };
-    SizelessTypes = (BOOL,DATE,FLOAT8,FLOAT4,INT4,INT2,TIME,TIMESTAMP);
+    SizelessTypes = (BOOL,BYTEA,DATE,FLOAT8,FLOAT4,INT4,INT2,TEXT,TIME,TIMESTAMP);
     DecimalTypes = (DECIMAL,NUMERIC);
     CharacterTypes = (CHAR,VARCHAR);
 
@@ -2133,8 +2135,9 @@
   "Firebird something == notyet impelemented" = {
     DatabaseProductName = "Firebird something == notyet impelemented";
     TypeMap = {
-      java.sql.Types.BLOB = BLOB;  //JDBC 2.0 A type representing an SQL Binary Large Object
+      java.sql.Types.BLOB = "BLOB SUB_TYPE 0";  //JDBC 2.0 A type representing an SQL Binary Large Object
       java.sql.Types.CHAR = CHAR;
+	    java.sql.Types.CLOB = "BLOB SUB_TYPE TEXT";
       java.sql.Types.DATE = DATE;
       java.sql.Types.DECIMAL = DECIMAL;
       java.sql.Types.DOUBLE = "DOUBLE PRECISION";
@@ -2146,7 +2149,7 @@
       java.sql.Types.TIMESTAMP = TIMESTAMP;
       java.sql.Types.VARCHAR = VARCHAR;
     };
-    SizelessTypes = (BLOB,DATE,"DOUBLE PRECISION",INTEGER,SMALLINT);
+    SizelessTypes = ("BLOB SUB_TYPE 0","BLOB SUB_TYPE TEXT",DATE,"DOUBLE PRECISION",INTEGER,SMALLINT);
     DecimalTypes = (DECIMAL,FLOAT,NUMERIC);
     CharacterTypes = (CHAR,VARCHAR);
   };
