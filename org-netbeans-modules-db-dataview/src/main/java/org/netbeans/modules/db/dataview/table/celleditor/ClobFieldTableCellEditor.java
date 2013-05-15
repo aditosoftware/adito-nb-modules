@@ -41,8 +41,7 @@
  */
 package org.netbeans.modules.db.dataview.table.celleditor;
 
-import java.awt.Component;
-import java.awt.Font;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
@@ -51,14 +50,15 @@ import java.nio.charset.Charset;
 import java.sql.Clob;
 import java.sql.SQLException;
 import java.util.*;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.*;
 import javax.swing.table.TableCellEditor;
 import org.netbeans.api.progress.ProgressUtils;
 import org.netbeans.modules.db.dataview.util.FileBackedClob;
-import org.openide.DialogDisplayer;
-import org.openide.NotifyDescriptor;
+import org.openide.*;
+import org.openide.text.CloneableEditorSupport;
 import org.openide.util.Exceptions;
 import org.openide.util.NbBundle;
 import org.openide.windows.WindowManager;
@@ -349,28 +349,34 @@ public class ClobFieldTableCellEditor extends AbstractCellEditor
                 stringVal = currentValue.getSubString(1, (int) currentValue.length());
             } catch (SQLException ex) {
             }
-            
         }
-        
-        JTextArea textArea = new JTextArea(10, 50);
-        textArea.setText(stringVal);
-        textArea.setCaretPosition(0);
-        textArea.setEditable(table.isCellEditable(currentRow, currentColumn));
-        
-        JScrollPane pane = new JScrollPane(textArea);
-        Component parent = WindowManager.getDefault().getMainWindow();
-        
-        if (table.isCellEditable(currentRow, currentColumn)) {
-            int result = JOptionPane.showOptionDialog(parent, pane, table.getColumnName(currentColumn), JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, null, null, null);
-            if (result == JOptionPane.OK_OPTION) {
+
+        boolean isEditable = table.isCellEditable(currentRow, currentColumn);
+        String dialogName = table.getColumnName(currentColumn);
+
+        JEditorPane textPane = new JEditorPane();
+        textPane.setEditorKit(CloneableEditorSupport.getEditorKit("text/xml"));
+        textPane.setText(stringVal);
+        textPane.setCaretPosition(0);
+        textPane.setEditable(isEditable);
+
+        JScrollPane pane = new JScrollPane(textPane);
+        pane.setPreferredSize(new Dimension(640, 480));
+
+        if (isEditable) {
+            DialogDescriptor dialogDescriptor = new DialogDescriptor(
+                pane, dialogName, true, JOptionPane.OK_CANCEL_OPTION, JOptionPane.OK_OPTION, null);
+            Object result = DialogDisplayer.getDefault().notify(dialogDescriptor);
+            if (Objects.equals(JOptionPane.OK_OPTION, result)) {
                 try {
-                    table.setValueAt(new FileBackedClob(textArea.getText()), currentRow, currentColumn);
+                    table.setValueAt(new FileBackedClob(textPane.getText()), currentRow, currentColumn);
                 } catch (SQLException ex) {
                     Exceptions.printStackTrace(ex);
                 }
             }
         } else {
-            JOptionPane.showMessageDialog(parent, pane, table.getColumnName(currentColumn), JOptionPane.PLAIN_MESSAGE, null);
+            DialogDescriptor dialogDescriptor = new DialogDescriptor(pane, dialogName, false, new Object[0], null, 0, null, null);
+            DialogDisplayer.getDefault().notify(dialogDescriptor);
         }
     }
 }
