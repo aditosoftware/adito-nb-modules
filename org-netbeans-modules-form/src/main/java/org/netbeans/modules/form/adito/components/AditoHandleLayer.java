@@ -1,5 +1,6 @@
 package org.netbeans.modules.form.adito.components;
 
+import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.component.*;
 import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.layout.*;
 import org.netbeans.modules.form.*;
 import org.netbeans.modules.form.adito.perstistencemanager.*;
@@ -75,7 +76,8 @@ public final class AditoHandleLayer
       {
         compName = ((INonSwingContainer) comp).getSubComponentName(e);
       }
-      if (compName != null && pComp.getName().equals("ribbon"))  // Unterkomponenten des Ribbons
+
+      if (compName != null && pComp.getBeanInstance() instanceof IARibbonMarker)  // Unterkomponenten des Ribbons
       {
         for (int i = 0; i < subComponents.length; i++)
           for (NonvisContainerRADComponent sub : subComponents[i].getSubBeans())
@@ -97,7 +99,8 @@ public final class AditoHandleLayer
             }
           }
       }
-      else if (compName != null && pComp.getName().equals("tbl_subAttr")) // Unterkomponenten einer Tabelle
+
+      else if (compName != null && pComp.getBeanInstance() instanceof IATableMarker) // Unterkomponenten einer Tabelle
       {
         for (NonvisContainerRADComponent a : subComponents)
         {
