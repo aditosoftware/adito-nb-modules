@@ -20,6 +20,7 @@
 
   <modules>
     <module>nb-adito-interface</module>
+    <module>org-netbeans-core-output2</module>
     <module>org-netbeans-core-windows</module>
     <module>org-netbeans-modules-db</module>
     <module>org-netbeans-modules-db-dataview</module>

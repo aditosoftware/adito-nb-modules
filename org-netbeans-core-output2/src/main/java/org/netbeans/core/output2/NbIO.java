@@ -44,6 +44,7 @@
 
 package org.netbeans.core.output2;
 
+import java.beans.*;
 import java.util.Set;
 import org.openide.windows.InputOutput;
 import org.openide.windows.OutputListener;
@@ -70,7 +71,8 @@ import org.openide.windows.IOTab;
  *
  * @author  Tim Boudreau
  */
-class NbIO implements InputOutput, Lookup.Provider {
+class NbIO extends InputOutputExt implements Lookup.Provider
+{
 
     private Boolean focusTaken = null;
     private boolean closed = false;
@@ -83,6 +85,8 @@ class NbIO implements InputOutput, Lookup.Provider {
     private Lookup lookup;
     private IOTabImpl ioTab;
     private IOColorsImpl ioColors;
+
+    private PropertyChangeSupport changes = new PropertyChangeSupport( this );
 
     /** Creates a new instance of NbIO 
      * @param name The name of the IO
@@ -108,8 +112,18 @@ class NbIO implements InputOutput, Lookup.Provider {
         }
         post (this, IOEvent.CMD_CLOSE, true);
     }
-    
-    String getName() {
+
+  public void addPropertyChangeListener( PropertyChangeListener l )
+  {
+    changes.addPropertyChangeListener( l );
+  }
+
+  public void removePropertyChangeListener( PropertyChangeListener l )
+  {
+    changes.removePropertyChangeListener( l );
+  }
+
+  String getName() {
         return name;
     }
 
@@ -156,7 +170,10 @@ class NbIO implements InputOutput, Lookup.Provider {
     }
 
     void setClosed (boolean val) {
-        closed = val;
+
+      boolean oldName = this.closed;
+      this.closed = val;
+      changes.firePropertyChange( "closed", oldName, closed );
     }
 
     public boolean isClosed() {
