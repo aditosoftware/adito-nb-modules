@@ -43,24 +43,12 @@
  */
 package org.netbeans.modules.db.dataview.meta;
 
-import java.sql.Connection;
-import java.sql.DatabaseMetaData;
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.StringTokenizer;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.netbeans.api.db.sql.support.SQLIdentifiers;
 import org.netbeans.modules.db.dataview.util.DataViewUtils;
+
+import java.sql.*;
+import java.util.*;
+import java.util.logging.*;
 
 /**
  * Extracts database metadata information (table names and constraints, their
@@ -176,8 +164,14 @@ public final class DBMetaDataFactory {
         // get table column information
         ResultSetMetaData rsMeta = rs.getMetaData();
         for (int i = 1; i <= rsMeta.getColumnCount(); i++) {
-            // #153219 - workaround 
+
             String tableName = rsMeta.getTableName(i);
+
+          //4458
+            if (tableName == "")
+              tableName = _calculateTableName(sql);
+
+            // #153219 - workaround
             if (tableName == null) {
                 tableName = noTableName;
             }
@@ -356,6 +350,36 @@ public final class DBMetaDataFactory {
         } else if (splitByDot.length == 1) {
             table.setName(unQuoteIfNeeded(splitByDot[0]));
         }
+    }
+
+    private String _calculateTableName(String sql)
+    {
+      String tableName = "";
+      if (sql.toUpperCase().contains("FROM")) { // NOI18N
+        // User may type "FROM" in either lower, upper or mixed case
+        String[] splitByFrom = sql.toUpperCase().split("FROM"); // NOI18N
+        String fromsql = sql.substring(sql.length() - splitByFrom[1].length());
+        if (fromsql.toUpperCase().contains("WHERE")) { // NOI18N
+          splitByFrom = fromsql.toUpperCase().split("WHERE"); // NOI18N
+          fromsql = fromsql.substring(0, splitByFrom[0].length());
+        } else if (fromsql.toUpperCase().contains("ORDER BY")) { // NOI18N
+          splitByFrom = fromsql.toUpperCase().split("ORDER BY"); // NOI18N
+          fromsql = fromsql.substring(0, splitByFrom[0].length());
+        }
+        if (!sql.toUpperCase().contains("JOIN")) { // NOI18N
+          StringTokenizer t = new StringTokenizer(fromsql, ","); // NOI18N
+
+          if (t.hasMoreTokens()) {
+            tableName = t.nextToken().trim();
+          }
+
+          if (t.hasMoreTokens()) {
+            tableName = "";
+          }
+        }
+      }
+
+      return tableName;
     }
 
     private String unQuoteIfNeeded(String id) {
