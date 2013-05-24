@@ -46,17 +46,23 @@ package org.netbeans.modules.form;
 
 import de.adito.aditoweb.nbm.nbide.nbaditointerface.NbAditoInterface;
 import de.adito.aditoweb.nbm.nbide.nbaditointerface.common.IAditoNetbeansTranslations;
+import org.netbeans.api.search.*;
+import org.netbeans.api.search.provider.SearchListener;
 import org.netbeans.modules.form.adito.actions.AditoActionObject;
 import org.netbeans.modules.form.adito.components.*;
 import org.netbeans.modules.form.layoutsupport.LayoutNode;
 import org.netbeans.modules.form.palette.PaletteUtils;
+import org.netbeans.spi.search.SearchInfoDefinition;
 import org.openide.ErrorManager;
 import org.openide.actions.*;
 import org.openide.explorer.propertysheet.editors.NodeCustomizer;
+import org.openide.filesystems.FileObject;
+import org.openide.loaders.DataObject;
 import org.openide.nodes.*;
 import org.openide.util.*;
 import org.openide.util.actions.SystemAction;
 import org.openide.util.datatransfer.*;
+import org.openide.util.lookup.Lookups;
 
 import javax.swing.*;
 import java.awt.*;
@@ -93,7 +99,8 @@ public class RADComponentNode extends FormNode
 
   public RADComponentNode(Children children, final RADComponent component)
   {
-    super(children, component.getFormModel(), AditoNodeConnect.getLookup(component));
+    super(children, component.getFormModel(),
+          Lookups.exclude(AditoNodeConnect.getLookup(component), DataObject.class, Node.class));
     this.component = component;
     component.setNodeReference(this);
     //        getCookieSet().add(this);
@@ -124,6 +131,17 @@ public class RADComponentNode extends FormNode
         AditoNodeConnect.removePropertyChangeListener(component, pPropertyChangeListener);
       }
     }));
+
+
+    Node node = AditoNodeConnect.getLookup(getRADComponent()).lookup(Node.class);
+
+    if(node != null)
+    {
+      SearchInfoDefinition searchDef = node.getLookup().lookup(SearchInfoDefinition.class);
+      if (searchDef != null)
+        getInstanceContent().add(searchDef);
+    }
+
   }
 
   void updateName()

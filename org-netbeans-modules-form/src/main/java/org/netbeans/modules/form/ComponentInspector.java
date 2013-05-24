@@ -50,14 +50,13 @@ import java.beans.*;
 import java.awt.datatransfer.*;
 import java.util.ArrayList;
 import java.util.List;
-import javax.swing.ActionMap;
-import javax.swing.JComponent;
-import javax.swing.JPanel;
+import javax.swing.*;
 import javax.swing.text.DefaultEditorKit;
 
 import org.openide.*;
-import org.openide.actions.PasteAction;
+import org.openide.actions.*;
 import org.openide.explorer.view.*;
+import org.openide.filesystems.FileUtil;
 import org.openide.nodes.*;
 import org.openide.explorer.*;
 import org.openide.awt.UndoRedo;
@@ -131,6 +130,9 @@ public class ComponentInspector extends JPanel
         map.put(DefaultEditorKit.cutAction, cutActionPerformer);
         //map.put(DefaultEditorKit.pasteAction, ExplorerUtils.actionPaste(explorerManager));
         map.put("delete", deleteActionPerformer); // NOI18N
+        map.put("org.openide.actions.FindAction", FileUtil.getConfigObject(
+            "Actions/Edit/org-netbeans-modules-search-FindInFilesAction.instance", Action.class));
+
 
         return map;
     }

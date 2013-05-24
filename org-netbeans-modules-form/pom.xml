@@ -31,6 +31,14 @@
       <version>14.0.1</version>
     </dependency>
 
+
+    <!-- für Suche auf Nodes -->
+    <dependency>
+      <groupId>org.netbeans.api</groupId>
+      <artifactId>org-netbeans-api-search</artifactId>
+      <version>RELEASE721</version>
+    </dependency>
+
     <!-- Netbeans dependencies -->
 
     <!--<dependency>-->

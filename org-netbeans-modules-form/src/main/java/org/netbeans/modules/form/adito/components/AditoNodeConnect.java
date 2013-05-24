@@ -7,7 +7,6 @@ import org.openide.filesystems.FileObject;
 import org.openide.loaders.*;
 import org.openide.nodes.*;
 import org.openide.util.Lookup;
-import org.openide.util.lookup.Lookups;
 
 import javax.swing.*;
 import java.awt.*;
@@ -111,7 +110,7 @@ public final class AditoNodeConnect
       @Override
       public Lookup resolve(DataObject pDataObject)
       {
-        return Lookups.exclude(pDataObject.getLookup(), DataObject.class, Node.class);
+        return pDataObject.getLookup();
       }
     });
   }
