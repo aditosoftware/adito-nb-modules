@@ -46,7 +46,7 @@ public class AditoFormDataObjectDataImpl implements IAditoFormDataObjectData
         {
           public void run()
           {
-            getFormEditorSupport().openDesign();
+            getFormEditorSupport().open();
           }
         });
       }
