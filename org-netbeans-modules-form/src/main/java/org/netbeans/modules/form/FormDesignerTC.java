@@ -294,6 +294,8 @@ public class FormDesignerTC extends TopComponent implements MultiViewElement {
     @Override
     public void componentActivated() {
         formDesigner.componentActivated();
+        // Adito #4469
+        formEditorSupport.getDataObject().getPrimaryFile().refresh();
     }
 
     @Override
