@@ -48,6 +48,18 @@ public final class AditoNodeConnect
     });
   }
 
+  public static String getName(RADComponent pComponent)
+  {
+    return _resolve(pComponent, new _NodeC<String>()
+    {
+      @Override
+      public String resolve(Node pNode)
+      {
+        return pNode.getName();
+      }
+    });
+  }
+
   public static Sheet getSheet(RADComponent pComponent)
   {
     return _resolve(pComponent, new _FileObjectC<Sheet>()

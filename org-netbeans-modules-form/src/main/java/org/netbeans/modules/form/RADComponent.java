@@ -460,7 +460,7 @@ public class RADComponent {
     }
 
     private boolean needsVariableRename(String name) {
-        return !(storedName == null || storedName.equals(name));
+        return (storedName == null || !storedName.equals(name));
     }
 
     public void setStoredName(String name) {

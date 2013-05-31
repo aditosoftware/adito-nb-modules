@@ -147,11 +147,22 @@ public class RADComponentNode extends FormNode
   void updateName()
   {
     String displayName = AditoNodeConnect.getDisplayName(component);
+    String name = AditoNodeConnect.getName(component);
+
     if (displayName != null)
     {
       setDisplayName(displayName);
+
+      if (getName() == null)
+      {
+        if(name != null)
+          setName(name);
+        else
+          setName(displayName);
+      }
       return;
     }
+
     String compClassName = Utilities.getShortClassName(
         component.getBeanClass());
     if (component == component.getFormModel().getTopRADComponent())
@@ -160,6 +171,14 @@ public class RADComponentNode extends FormNode
     else
       setDisplayName(nodeNameFormat.format(
           new Object[]{getName(), compClassName}));
+
+    if (getName() == null)
+    {
+      if(name != null)
+        setName(name);
+      else
+        setName(nodeNoNameFormat.format(new Object[]{compClassName}));
+    }
   }
 
   public void fireComponentPropertiesChange()
