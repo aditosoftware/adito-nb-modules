@@ -56,9 +56,8 @@ import java.text.MessageFormat;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.swing.JButton;
-import javax.swing.JEditorPane;
-import javax.swing.JFrame;
+import javax.swing.*;
+
 import org.netbeans.api.project.libraries.Library;
 import org.netbeans.api.project.libraries.LibraryManager;
 import org.netbeans.core.api.multiview.MultiViewHandler;
@@ -793,10 +792,18 @@ public class FormEditorSupport extends DataEditorSupport implements EditorSuppor
                     .removePropertyChangeListener(topcompsListener);
             topcompsListener = null;
 
-            TopComponentGroup group = WindowManager.getDefault()
-                    .findTopComponentGroup("form"); // NOI18N
-            if (group != null)
+          SwingUtilities.invokeLater(new Runnable()
+          {
+            public void run()
+            {
+              TopComponentGroup group = WindowManager.getDefault()
+                  .findTopComponentGroup("form"); // NOI18N
+              if (group != null)
+              {
                 group.close();
+              }
+            }
+          });
         }
     }
 
