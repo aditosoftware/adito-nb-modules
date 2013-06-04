@@ -44,9 +44,9 @@
 
 package org.netbeans.modules.form;
 
+import org.netbeans.api.actions.*;
 import org.netbeans.modules.form.adito.actions.*;
 import org.openide.actions.PropertiesAction;
-import org.openide.cookies.*;
 import org.openide.loaders.DataObject;
 import org.openide.nodes.*;
 import org.openide.util.Lookup;
@@ -105,7 +105,7 @@ public class FormNode extends AbstractNode implements FormCookie
   private static Lookup _createLookup(final FormModel pFormModel, Lookup pInstanceContentLookup, Lookup pAdditional)
   {
     Lookup formModelDelegateLookup = Lookups.fixed(
-        new Object[]{DataObject.class, SaveCookie.class, CloseCookie.class, PrintCookie.class},
+        new Object[]{DataObject.class, Closable.class, Printable.class},
         new InstanceContent.Convertor<Object, Object>()
         {
           @Override
@@ -126,13 +126,13 @@ public class FormNode extends AbstractNode implements FormCookie
           @Override
           public String id(Object obj)
           {
-            return ((Class) obj).getCanonicalName();
+            return "FormNode#" + ((Class) obj).getCanonicalName();
           }
 
           @Override
           public String displayName(Object obj)
           {
-            return ((Class) obj).getName();
+            return "FormNode#" + ((Class) obj).getName();
           }
         });
     if (pAdditional == null)

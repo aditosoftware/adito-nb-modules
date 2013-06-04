@@ -47,6 +47,7 @@ package org.netbeans.modules.form;
 import de.adito.aditoweb.nbm.nbide.nbaditointerface.NbAditoInterface;
 import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.layout.*;
 import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.model.*;
+import org.netbeans.api.actions.Savable;
 import org.netbeans.modules.form.actions.TestAction;
 import org.netbeans.modules.form.adito.components.AditoFormDesignerExtension;
 import org.netbeans.modules.form.adito.perstistencemanager.*;
@@ -60,7 +61,6 @@ import org.netbeans.modules.form.project.ClassPathUtils;
 import org.netbeans.spi.navigator.*;
 import org.openide.*;
 import org.openide.awt.UndoRedo;
-import org.openide.cookies.SaveCookie;
 import org.openide.explorer.*;
 import org.openide.filesystems.FileObject;
 import org.openide.loaders.DataObject;
@@ -399,7 +399,7 @@ public class FormDesigner
         @Override
         public <T> T lookup(final Class<T> clazz)
         {
-          if (clazz.isAssignableFrom(SaveCookie.class))
+          if (clazz.isAssignableFrom(Savable.class))
           {
             return formDataObject.getLookup().lookup(clazz);
           }
@@ -412,7 +412,7 @@ public class FormDesigner
         @Override
         public <T> Result<T> lookup(Template<T> template)
         {
-          if (template.getType().isAssignableFrom(SaveCookie.class))
+          if (template.getType().isAssignableFrom(Savable.class))
           {
             return formDataObject.getLookup().lookup(template);
           }
