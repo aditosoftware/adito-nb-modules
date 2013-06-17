@@ -4,6 +4,7 @@ import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.dataobject.IAditoFormDa
 import org.netbeans.api.actions.Openable;
 import org.netbeans.modules.form.*;
 import org.openide.awt.UndoRedo;
+import org.openide.cookies.EditorCookie;
 import org.openide.loaders.DataObject;
 import org.openide.util.Lookup;
 
@@ -32,6 +33,12 @@ public class AditoFormDataObjectDataImpl implements IAditoFormDataObjectData
       formEditor = (FormEditorSupport) services.createEditorSupport(dataObject);
     }
     return formEditor;
+  }
+
+  @Override
+  public EditorCookie.Observable getObservableEditorCookie()
+  {
+    return getFormEditorSupport();
   }
 
   @Override
