@@ -6,7 +6,9 @@ import de.adito.aditoweb.nbm.nbide.nbaditointerface.database.*;
 import org.jetbrains.annotations.*;
 import org.netbeans.lib.ddl.impl.Specification;
 import org.netbeans.modules.db.explorer.*;
-import org.netbeans.modules.db.explorer.dlg.CreateTableDDL;
+import org.netbeans.modules.db.explorer.dlg.*;
+
+import java.util.List;
 
 /**
  * Zum Erstellen von Tabellen in einer Datenbank.
@@ -61,7 +63,12 @@ public class AditoDbTableCreator
 
     try
     {
-      ddl.execute(ColumnItemCreator.toColumnItems(pTableToCreate.getColumns(), spec), null);
+      List<ColumnItem> primaries = null;
+      List<IAditoDbColumn> primaryC = pTableToCreate.getPrimaryKeyColumns();
+      if (primaryC.size() > 1)
+        primaries = ColumnItemCreator.toColumnItems(primaryC, spec);
+
+      ddl.execute(ColumnItemCreator.toColumnItems(pTableToCreate.getColumns(), spec), primaries);
     }
     catch (Exception e)
     {
