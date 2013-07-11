@@ -1,6 +1,6 @@
 package de.adito.aditoweb.nbm.nbide.nbaditointerface.database;
 
-import java.util.List;
+import java.util.*;
 
 /**
  * Interface für spezifische Daten die im NetBeans-Modul nicht bezogen werden können.
@@ -9,11 +9,26 @@ import java.util.List;
  */
 public interface IAditoDbInfo
 {
+  //Gruppennamen
+  public final String OTHER = "OTHER";
+  public final String CALENDAR = "CALENDAR";
+  public final String FARM = "FARM";
+  public final String MAILREPOSIT = "MAILREPOSIT";
+  public final String WORKFLOW = "WORKFLOW";
 
   /**
    * @return die Namen aller SystemTabellen.
    */
   List<String> getSystemTableNames();
+
+  /**
+   * Liefert die Namen der Systemtabellen in Gruppen aufgeteilt.
+   * Die Schlüssel der Map sind die Gruppennamen, die in diesem Interface definiert sind.
+   * Die Liste enthält die Tabellennamen.
+   *
+   * @return Tabellennamen nach Gruppen geordnet.
+   */
+  Map<String, List<String>> getSystemTableNamesGrouped();
 
   /**
    * Liefert anhand der Namen von Treiber und Tabelle eine Beschreibung für diese Tabelle.

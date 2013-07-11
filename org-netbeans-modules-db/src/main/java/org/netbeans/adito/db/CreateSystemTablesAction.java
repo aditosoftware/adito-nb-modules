@@ -1,5 +1,6 @@
 package org.netbeans.adito.db;
 
+import com.jidesoft.swing.*;
 import de.adito.aditoweb.nbm.nbide.nbaditointerface.NbAditoInterface;
 import de.adito.aditoweb.nbm.nbide.nbaditointerface.common.IAditoNetbeansTranslations;
 import de.adito.aditoweb.nbm.nbide.nbaditointerface.database.*;
@@ -14,7 +15,7 @@ import org.openide.util.actions.SystemAction;
 import org.openide.windows.WindowManager;
 
 import javax.swing.*;
-import javax.swing.table.*;
+import javax.swing.tree.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.text.MessageFormat;
@@ -191,35 +192,94 @@ public class CreateSystemTablesAction extends BaseAction
   }
 
   /**
-   * Panel mit der Tabelle die die Namen der Systemtabellen anzeigt.
+   * Panel mit dem Baum der die Namen der Systemtabellen anzeigt.
    */
   private class TableSelectionPanel extends JPanel
   {
-    private SelectionModel model;
+    private final String ROOT = "ROOT";
+    private CheckBoxTreeSelectionModel cbModel;
 
     private TableSelectionPanel()
     {
       super(new BorderLayout());
-      add(_createTable());
+      add(_createTree());
+      setPreferredSize(new Dimension(350, 820));
     }
 
-    private JScrollPane _createTable()
+    private JScrollPane _createTree()
     {
-      model = new SelectionModel();
-      JTable table = new JTable(model);
-      table.setFillsViewportHeight(true);
+      final CheckBoxTree tree = new CheckBoxTree(buildTreeModel());
 
-      TableColumnModel tcm = table.getColumnModel();
-      TableColumn tc = tcm.getColumn(0);
+      DefaultTreeCellRenderer r = new DefaultTreeCellRenderer();
+      r.setIconTextGap(5);
+      //Ein Icon ohne Inhalt
+      ImageIcon i = new ImageIcon("R0lGODdhAQABAIABANQAI////ywAAAAAAQABAAACAkQBADs=".getBytes());
+      r.setIcon(i);
+      r.setLeafIcon(i);
+      r.setOpenIcon(i);
+      r.setClosedIcon(i);
+      tree.setCellRenderer(r);
 
-      int w = 26;
-      tc.setPreferredWidth(w);
-      tc.setMaxWidth(w);
-      tc.setResizable(false);
+      tree.setRootVisible(false);
+      tree.setRowHeight(17);
+      cbModel = tree.getCheckBoxTreeSelectionModel();
+      _expand(tree);
+      return new JScrollPane(tree);
+    }
 
-      table.getTableHeader().setReorderingAllowed(false);
+    /**
+     * Expandiert den Baum
+     */
+    private void _expand(JTree pTree)
+    {
+      TreeNode root = (TreeNode) pTree.getModel().getRoot();
+      if (root != null)
+      {
+        // Traverse tree from root
+        expandPath(pTree, new TreePath(root));
+      }
+    }
 
-      return new JScrollPane(table);
+    /**
+     * Expandiert oder kollabiert den Pfad parent.
+     * Der Methodenname entspricht nicht mehr dem Original im Javaalmanac.
+     *
+     * @param tree   Der Baum auf dem die Methode angewendet werden soll.
+     * @param parent Der Pfad der manipuliert werden soll.
+     */
+    private void expandPath(JTree tree, TreePath parent)
+    {
+      // Traverse children
+      TreeNode node = (TreeNode) parent.getLastPathComponent();
+      if (node.getChildCount() >= 0)
+      {
+        for (Enumeration e = node.children(); e.hasMoreElements(); )
+        {
+          TreeNode n = (TreeNode) e.nextElement();
+          TreePath path = parent.pathByAddingChild(n);
+          expandPath(tree, path);
+        }
+      }
+      tree.expandPath(parent);
+    }
+
+    protected TreeModel buildTreeModel()
+    {
+      DefaultMutableTreeNode root = new DefaultMutableTreeNode(ROOT);
+      DefaultMutableTreeNode parent;
+
+      Map<String, List<String>> map = NbAditoInterface.lookup(IAditoDbInfo.class).getSystemTableNamesGrouped();
+      for (String group : map.keySet())
+      {
+        parent = new DefaultMutableTreeNode(group);
+        root.add(parent);
+        List<String> tables = map.get(group);
+        for (String table : tables)
+        {
+          parent.add(new DefaultMutableTreeNode(table));
+        }
+      }
+      return new DefaultTreeModel(root);
     }
 
     /**
@@ -229,131 +289,44 @@ public class CreateSystemTablesAction extends BaseAction
      */
     public List<String> getSelection()
     {
-      return model.getSelection();
+      Set<String> groups = new HashSet<>();
+      Collections.addAll(groups, IAditoDbInfo.OTHER,
+                         IAditoDbInfo.CALENDAR,
+                         IAditoDbInfo.FARM,
+                         IAditoDbInfo.MAILREPOSIT,
+                         IAditoDbInfo.WORKFLOW);
+      List<String> tableNames = new ArrayList<>();
+      TreePath[] paths = cbModel.getSelectionPaths();
+
+      for (TreePath path : paths)
+      {
+        DefaultMutableTreeNode n = (DefaultMutableTreeNode) path.getLastPathComponent();
+        String s = n.toString();
+        if (s.equals(ROOT))
+          _fetchGroups(n, tableNames);
+        else if (groups.contains(s))
+          _fetchChildren(n, tableNames);
+        else
+          tableNames.add(s);
+      }
+
+      return tableNames;
     }
   }
 
-
-  private class SelectionModel extends AbstractTableModel
+  private void _fetchGroups(DefaultMutableTreeNode pRoot, List<String> pTableNames)
   {
-    final int CREATE = 0;
-    final int TABLENAME = 1;
-
-    private String[] columnNames;
-    private Class[] columnClasses;
-    private List<Row> data;
-
-    private SelectionModel()
+    for (int i = 0; i < pRoot.getChildCount(); i++)
     {
-      columnNames = new String[]{" ", trans.tableName()};
-      columnClasses = new Class[columnNames.length];
-      columnClasses[CREATE] = Boolean.class;
-      columnClasses[TABLENAME] = String.class;
-
-      data = new ArrayList<>();
-      List<String> systemTableNames = NbAditoInterface.lookup(IAditoDbInfo.class).getSystemTableNames();
-      Collections.sort(systemTableNames);
-      for (String value : systemTableNames)
-        data.add(new Row(value));
-    }
-
-    @Override
-    public String getColumnName(int column)
-    {
-      return columnNames[column];
-    }
-
-    @Override
-    public Class<?> getColumnClass(int columnIndex)
-    {
-      return columnClasses[columnIndex];
-    }
-
-    @Override
-    public boolean isCellEditable(int rowIndex, int columnIndex)
-    {
-      return columnIndex == CREATE;
-    }
-
-    @Override
-    public int getRowCount()
-    {
-      return data.size();
-    }
-
-    @Override
-    public int getColumnCount()
-    {
-      return columnNames.length;
-    }
-
-    @Override
-    public void setValueAt(Object aValue, int rowIndex, int columnIndex)
-    {
-      Row row = data.get(rowIndex);
-      switch (columnIndex)
-      {
-        case CREATE:
-          row.create(aValue);
-          fireTableDataChanged();
-          break;
-      }
-    }
-
-    @Override
-    public Object getValueAt(int rowIndex, int columnIndex)
-    {
-      Row row = data.get(rowIndex);
-      switch (columnIndex)
-      {
-        case CREATE:
-          return row.mustCreate();
-
-        case TABLENAME:
-          return row.getTableName();
-
-      }
-      return null;
-    }
-
-    public List<String> getSelection()
-    {
-      List<String> helper = new ArrayList<>();
-      for (Row row : data)
-      {
-        if (row.mustCreate())
-          helper.add(row.table);
-      }
-      return helper;
+      _fetchChildren((DefaultMutableTreeNode) pRoot.getChildAt(i), pTableNames);
     }
   }
 
-  private class Row
+  private void _fetchChildren(DefaultMutableTreeNode pParent, List<String> pTableNames)
   {
-    Object create = Boolean.FALSE;
-    private final String table;
-
-    public Row(String pTable)
+    for (int i = 0; i < pParent.getChildCount(); i++)
     {
-      table = pTable;
-    }
-
-    public boolean mustCreate()
-    {
-      return Boolean.TRUE.equals(create);
-    }
-
-
-    public void create(Object pCreate)
-    {
-      create = pCreate;
-    }
-
-    public String getTableName()
-    {
-      return table;
+      pTableNames.add(pParent.getChildAt(i).toString());
     }
   }
-
-
 }
