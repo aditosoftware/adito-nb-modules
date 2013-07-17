@@ -79,7 +79,7 @@ class NbWriter extends OutputWriter {
     /**
      * Replaces the wrapped OutWriter.
      *
-     * @throws java.io.IOException
+     * @throws IOException
      */
     public synchronized void reset() throws IOException {
         if (!out().isDisposed() && out().isEmpty()) {

@@ -71,14 +71,14 @@ class ErrWriter extends OutputWriter {
         closed = true;
     }
 
-    public void println(String s, OutputListener l) throws IOException {
+    public void println(String s, OutputListener l) throws java.io.IOException {
         println(s, l, false);
     }
 
     @Override
-    public void println(String s, OutputListener l, boolean important) throws IOException {
+    public void println(String s, OutputListener l, boolean important) throws java.io.IOException {
         closed = false;
-        wrapped.print(s, l, important, null, true, true);
+        wrapped.print(s, l, important, null, null, true, true);
     }
 
     public void reset() throws IOException {
@@ -208,6 +208,6 @@ class ErrWriter extends OutputWriter {
 
     private void print(CharSequence s, boolean addLineSep) {
         closed = false;
-        wrapped.print(s, null, false, null, true, addLineSep);
+        wrapped.print(s, null, false, null, null, true, addLineSep);
     }
 }

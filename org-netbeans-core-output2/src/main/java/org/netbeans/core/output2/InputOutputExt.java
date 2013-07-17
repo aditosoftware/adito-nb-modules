@@ -8,7 +8,7 @@ import org.openide.windows.*;
  *
  * @author T. Feldmann, 03.05.13
  */
-public abstract class InputOutputExt implements InputOutput
+public interface InputOutputExt extends InputOutput
 {
   /*
    Listener auf ein InputOutput-Fenster

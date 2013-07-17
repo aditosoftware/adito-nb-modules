@@ -67,9 +67,9 @@ interface Storage {
      * @param start The start byte
      * @param length How many bytes
      * @return A byte buffer
-     * @throws java.io.IOException if there is a problem reading or allocating the buffer
+     * @throws IOException if there is a problem reading or allocating the buffer
      */
-    public BufferResource<ByteBuffer> getReadBuffer(int start, int length) throws IOException;
+    public BufferResource<ByteBuffer> getReadBuffer (int start, int length) throws IOException;
     /**
      * Get a buffer for <strong>appending</strong> <code>length</code> bytes to the stored data.  Note that
      * writing into the returned buffer does not automatically write to the file - the returned buffer should
@@ -77,9 +77,9 @@ interface Storage {
      *
      * @param length The number of bytes to write
      * @return
-     * @throws java.io.IOException
+     * @throws IOException
      */
-    public ByteBuffer getWriteBuffer(int length) throws IOException;
+    public ByteBuffer getWriteBuffer (int length) throws IOException;
     /**
      * Write a ByteBuffer (presumably obtained from getWriteBuffer()) to persistent storage.  The buffer
      * may be underfilled; data will be written to the <code>limit</code> of the ByteBuffer, disregarding any
@@ -87,16 +87,16 @@ interface Storage {
      *
      * @param buf A ByteBuffer with data to write
      * @return The byte position of the <strong>start</strong> of data written
-     * @throws java.io.IOException if there is a problem writing the data
+     * @throws IOException if there is a problem writing the data
      */
-    public int write(ByteBuffer buf) throws IOException;
+    public int write (ByteBuffer buf) throws IOException;
 
     /**
      * Dispose of this storage, deleting all associated resources, files, data storage, etc.  This should only
      * be called after it is absolutely certain that nothing will try to write further data to the storage.
      *
      */
-    public void dispose();
+    public void dispose ();
 
     /**
      * The number of bytes currently occupied by written data
@@ -108,7 +108,7 @@ interface Storage {
     /**
      * For storages that implement a lazy writing scheme, force any pending data to be written to the storage.
      *
-     * @throws java.io.IOException If there is a problem writing the data
+     * @throws IOException If there is a problem writing the data
      */
     public void flush() throws IOException;
 
@@ -117,7 +117,7 @@ interface Storage {
      * but leaving it in a state where it may be read, calling <code>flush()</code> if necessary.  Subsequent calls
      * to write methods may reopen the storage for writing as needed.
      *
-     * @throws java.io.IOException If there is a problem writing to the persistent storage
+     * @throws IOException If there is a problem writing to the persistent storage
      */
     public void close() throws IOException;
 
