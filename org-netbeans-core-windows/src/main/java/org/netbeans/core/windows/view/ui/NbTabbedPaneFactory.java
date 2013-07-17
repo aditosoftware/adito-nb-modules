@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 1997-2010 Oracle and/or its affiliates. All rights reserved.
+ * Copyright 2012 Oracle and/or its affiliates. All rights reserved.
  *
  * Oracle and Java are registered trademarks of Oracle and/or its affiliates.
  * Other names may be trademarks of their respective owners.
@@ -24,12 +24,6 @@
  * your own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
  *
- * Contributor(s):
- *
- * The Original Software is NetBeans. The Initial Developer of the Original
- * Software is Sun Microsystems, Inc. Portions Copyright 1997-2006 Sun
- * Microsystems, Inc. All Rights Reserved.
- *
  * If you wish your version of this file to be governed by only the CDDL
  * or only the GPL Version 2, indicate your decision by adding
  * "[Contributor] elects to include this software in this distribution
@@ -40,56 +34,28 @@
  * However, if you add GPL Version 2 code and therefore, elected the GPL
  * Version 2 license, then the option applies only if the new code is
  * made subject to such option by the copyright holder.
- */
-
-package org.netbeans.core.windows.actions;
-
-import java.awt.EventQueue;
-import org.netbeans.core.windows.view.ui.toolbars.ToolbarConfiguration;
-import org.openide.awt.Mnemonics;
-import org.openide.awt.ToolbarPool;
-import org.openide.util.NbBundle;
-import org.openide.util.Utilities;
-import org.openide.util.actions.Presenter;
-
-import javax.swing.*;
-
-
-/** Action that lists toolbars of current toolbar config in a submenu, the
- * same like a popup menu on toolbars area.
  *
- * @author Dafe Simonek
+ * Contributor(s):
+ *
+ * Portions Copyrighted 2012 Sun Microsystems, Inc.
  */
-public class ToolbarsListAction extends AbstractAction
-                                implements Presenter.Menu {
-    
-    public ToolbarsListAction() {
-        putValue(NAME,NbBundle.getMessage(ToolbarsListAction.class, "CTL_ToolbarsListAction"));
-        putValue("noIconInMenu", Boolean.TRUE); // NOI18N
-    }
-    
-    /** Perform the action. Tries the performer and then scans the ActionMap
-     * of selected topcomponent.
-     */
-    public void actionPerformed(java.awt.event.ActionEvent ev) {
-        // no operation
-    }
-    
-    public JMenuItem getMenuPresenter() {
-        String label = NbBundle.getMessage(ToolbarsListAction.class, "CTL_ToolbarsListAction");
-        final JMenu menu = new JMenu(label);
-        Mnemonics.setLocalizedText(menu, label);
-        if (EventQueue.isDispatchThread()) {
-            return ToolbarConfiguration.getToolbarsMenu(menu);
-        } else {
-            SwingUtilities.invokeLater(new Runnable() {
-                public void run() {
-                    ToolbarConfiguration.getToolbarsMenu(menu);
-                }
-            });
-            return menu;
-        }
-    }
+package org.netbeans.core.windows.view.ui;
 
+import javax.swing.JTabbedPane;
+import org.openide.awt.TabbedPaneFactory;
+import org.openide.util.lookup.ServiceProvider;
+
+/**
+ * Factory to create tabbed panes with a small 'close' button in each tab.
+ *
+ * @author S. Aubrecht
+ * @since 2.52
+ */
+@ServiceProvider(service=TabbedPaneFactory.class)
+public class NbTabbedPaneFactory extends TabbedPaneFactory {
+
+    @Override
+    public JTabbedPane createTabbedPane() {
+        return new CloseButtonTabbedPane();
+    }
 }
-

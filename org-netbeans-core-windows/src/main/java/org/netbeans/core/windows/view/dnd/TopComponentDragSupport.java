@@ -446,8 +446,8 @@ implements AWTEventListener, DragSourceListener, DragSourceMotionListener {
             public void eventDispatched(AWTEvent event) {
                 KeyEvent keyevent = (KeyEvent)event;
                 
-                if (keyevent.getID() == KeyEvent.KEY_RELEASED && 
-                    keyevent.getKeyCode() == KeyEvent.VK_ESCAPE) {
+                if ((keyevent.getID() == KeyEvent.KEY_PRESSED || keyevent.getID() == KeyEvent.KEY_RELEASED)
+                        && keyevent.getKeyCode() == KeyEvent.VK_ESCAPE) {
                     hackESC = true;
                 }                
             }
@@ -601,7 +601,7 @@ implements AWTEventListener, DragSourceListener, DragSourceMotionListener {
                     SwingUtilities.invokeLater(createDropIntoFreeAreaTask(
                             evt, evt.getLocation(), floatingFrames));
                 }},
-                250 // XXX #21918, Neccessary to skip after possible ESC key event.
+                350 // XXX #21918, Neccessary to skip after possible ESC key event.
             );
         } finally {
             windowDnDManager.dragFinishedEx();
@@ -641,11 +641,11 @@ implements AWTEventListener, DragSourceListener, DragSourceMotionListener {
         return new Runnable() {
             @Override
             public void run() {
+                removeListening();
                 // XXX #21918. Don't move the check sooner
                 // (before the enclosing blocks), it would be invalid.
                 if(hackESC) {
                     windowDnDManager.dragFinished();
-                    removeListening();
                     return;
                 }
 
@@ -678,8 +678,9 @@ implements AWTEventListener, DragSourceListener, DragSourceMotionListener {
      * It plays its role. Sets the cursor from 'no-drop' state
      * to its 'drop' state sibling.
      * @param freeArea true when mouse pointer in free screen area
+     * @param mixedDragDrop true when document and non-document top components are about to be mixed
      * @see #dragEnter */
-    void setSuccessCursor (boolean freeArea) {
+    void setSuccessCursor (boolean freeArea, boolean mixedDragDrop) {
         int dropAction = hackUserDropAction;
         DragSourceContext ctx = dragContextWRef.get();
         
@@ -688,7 +689,7 @@ implements AWTEventListener, DragSourceListener, DragSourceMotionListener {
         }
         
         if( null != visualizer )
-            visualizer.setDropFeedback( true );
+            visualizer.setDropFeedback( true, mixedDragDrop );
 
         dropFailed = false;
 
@@ -720,8 +721,9 @@ implements AWTEventListener, DragSourceListener, DragSourceMotionListener {
     /** Hacks problems with <code>dragExit</code> wrong method calls.
      * It plays its role. Sets the cursor from 'drop' state
      * to its 'no-drop' state sibling.
+     * @param mixedDragDrop true when document and non-document top components are about to be mixed
      * @see #dragExit */
-    void setUnsuccessCursor() {
+    void setUnsuccessCursor(boolean mixedDragDrop) {
         DragSourceContext ctx = dragContextWRef.get();
         
         if(ctx == null) {
@@ -729,7 +731,7 @@ implements AWTEventListener, DragSourceListener, DragSourceMotionListener {
         }
         
         if( null != visualizer )
-            visualizer.setDropFeedback( false );
+            visualizer.setDropFeedback( false, mixedDragDrop );
         
         String name = ctx.getCursor().getName();
         

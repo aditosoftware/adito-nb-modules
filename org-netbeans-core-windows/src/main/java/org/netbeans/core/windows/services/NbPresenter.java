@@ -53,12 +53,14 @@ import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.FlowLayout;
 import java.awt.Frame;
+import java.awt.GraphicsDevice;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.KeyboardFocusManager;
 import java.awt.Rectangle;
 import java.awt.Toolkit;
+import java.awt.Window;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
 import java.awt.event.ActionEvent;
@@ -1098,8 +1100,23 @@ implements PropertyChangeListener, WindowListener, Mutex.Action<Void>, Comparato
     }
     
     private void doShow () {
+        //#206802 - dialog windows are hidden behind full screen window
+        Window fullScreenWindow = null;
+        if( Utilities.isUnix() ) {
+            GraphicsDevice gd = getGraphicsConfiguration().getDevice();
+            if( gd.isFullScreenSupported() ) {
+                fullScreenWindow = gd.getFullScreenWindow();
+                if( null != fullScreenWindow )
+                    gd.setFullScreenWindow( null );
+            }
+        }
         NbPresenter prev = null;
-        MenuSelectionManager.defaultManager().clearSelectedPath();
+        try {
+            MenuSelectionManager.defaultManager().clearSelectedPath();
+        } catch( NullPointerException npE ) {
+            //#216184
+            LOG.log( Level.FINE, null, npE );
+        }
         if (isModal()) {
             prev = currentModalDialog;
             currentModalDialog = this;
@@ -1107,6 +1124,9 @@ implements PropertyChangeListener, WindowListener, Mutex.Action<Void>, Comparato
         }
         
         superShow();
+
+        if( null != fullScreenWindow )
+            getGraphicsConfiguration().getDevice().setFullScreenWindow( fullScreenWindow );
         
         if (currentModalDialog != prev) {
             currentModalDialog = prev;

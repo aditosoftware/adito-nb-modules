@@ -146,7 +146,7 @@ public final class MainWindow {
            }
            //#198639 - workaround for main menu & mouse issues in Gnome 3
            String session = System.getenv("DESKTOP_SESSION"); //NOI18N
-           if ("gnome-shell".equals(session) || "gnome".equals(session)) { //NOI18N
+           if ("gnome-shell".equals(session) || "gnome".equals(session) || "mate".equals(session)) { //NOI18N
                try {
                    Class<?> xwm = Class.forName("sun.awt.X11.XWM"); //NOI18N
                    Field awt_wmgr = xwm.getDeclaredField("awt_wmgr"); //NOI18N
@@ -298,11 +298,13 @@ public final class MainWindow {
                            switch (count) {
                                case 1 :
                                    DataObject dob = allItems.iterator().next().getInstance();
-                                   FileObject file = dob.getPrimaryFile();
-                                   File f = FileUtil.toFile(file);
-                                   if (f != null) {
-                                       frame.getRootPane().putClientProperty("Window.documentFile", f); //NOI18N
-                                       break;
+                                   if( null != dob ) {
+                                    FileObject file = dob.getPrimaryFile();
+                                    File f = FileUtil.toFile(file);
+                                    if (f != null) {
+                                        frame.getRootPane().putClientProperty("Window.documentFile", f); //NOI18N
+                                        break;
+                                    }
                                    }
                                    //Fall through
                                case 0 :
@@ -475,13 +477,6 @@ public final class MainWindow {
                @Override
                public void windowClosing(WindowEvent evt) {
                    LifecycleManager.getDefault().exit();
-               }
-
-               @Override
-               public void windowActivated (WindowEvent evt) {
-                  // #19685. Cancel foreigner popup when
-                  // activated main window.
-                  org.netbeans.core.windows.RegistryImpl.cancelMenu(frame);
                }
            }
        );
