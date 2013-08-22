@@ -44,27 +44,26 @@
 
 package org.netbeans.modules.form;
 
-import java.awt.*;
-import java.beans.*;
-import java.io.*;
-import java.util.*;
-import java.lang.reflect.*;
-import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.component.INoFormContainer;
+import org.netbeans.modules.form.project.ClassPathUtils;
+import org.openide.ErrorManager;
+import org.openide.filesystems.FileObject;
+import org.openide.loaders.DataObject;
+import org.openide.nodes.Node;
+import org.openide.util.*;
+
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.TreeModelListener;
 import javax.swing.plaf.ComponentUI;
 import javax.swing.tree.DefaultTreeModel;
-
-import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.component.INoFormContainer;
-import org.openide.ErrorManager;
-import org.openide.loaders.DataObject;
-import org.openide.util.*;
-import org.openide.nodes.Node;
-import org.openide.filesystems.FileObject;
-import org.netbeans.modules.form.project.ClassPathUtils;
+import java.awt.*;
+import java.beans.*;
+import java.io.*;
+import java.lang.reflect.*;
+import java.util.*;
+import java.util.List;
+import java.util.logging.*;
 
 /**
  * A class that contains utility methods for the formeditor.
@@ -479,7 +478,7 @@ public class FormUtils
     /** Utility method that tries to clone an object. Objects of explicitly
      * specified types are constructed directly, other are serialized and
      * deserialized (if not serializable exception is thrown).
-     * 
+     *
      * @param o object to clone.
      * @param formModel form model.
      * @return cloned of the given object.
@@ -555,6 +554,9 @@ public class FormUtils
             }
             return clone;
         }
+        if (o instanceof Throwable)
+            return o;
+
         // for TableModel we use TableModelEditor.NbTableModel which takes care of its serialization
 
         if (o instanceof Serializable) {
@@ -568,7 +570,7 @@ public class FormUtils
      * First - if it is serializable, then it is copied using serialization.
      * If not serializable, then all properties (taken from BeanInfo) are
      * copied (property values cloned recursively).
-     * 
+     *
      * @param bean bean to clone.
      * @param bInfo bean info.
      * @param formModel form model.
@@ -590,7 +592,7 @@ public class FormUtils
                 oos.close();
 
                 ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
-                return new OIS(bais, bean.getClass().getClassLoader(), formModel).readObject();                
+                return new OIS(bais, bean.getClass().getClassLoader(), formModel).readObject();
             } catch (Exception ex) {
                 LOGGER.log(Level.INFO, "Cannot clone "+bean.getClass().getName(), ex); // NOI18N
                 throw new CloneNotSupportedException();
@@ -683,7 +685,7 @@ public class FormUtils
          * If a marker was serialized, it means the component's client properties
          * serialization was at least started - which is done after installing
          * the ComponentUI back after serializing the component itself (see
-         * JComponent.writeObject). If the marker was not serialized, it is 
+         * JComponent.writeObject). If the marker was not serialized, it is
          * likely that the ComponentUI was left uninstalled (from
          * JComponent.compWriteObjectNotify).
          */
@@ -757,7 +759,7 @@ public class FormUtils
      * DISABLE_CHANGE_FIRING (to disable firing of changes in target properties),
      * PASS_DESIGN_VALUES (to pass the same FormDesignValue instances if they
      *                     cannot or should not be copied),
-     * 
+     *
      * @param sourceProperties properties to copy values from.
      * @param targetProperties properties to copy values to.
      * @param mode see the description above.
@@ -797,13 +799,13 @@ public class FormUtils
                 Object copiedValue = propertyValue;
                 if ((mode & DONT_CLONE_VALUES) == 0) {
                     if (!(propertyValue instanceof FormDesignValue)) {
-                        try { // clone common property value                        
-                            FormModel formModel = (sfProp == null) ? null : sfProp.getPropertyContext().getFormModel();                        
+                        try { // clone common property value
+                            FormModel formModel = (sfProp == null) ? null : sfProp.getPropertyContext().getFormModel();
                             copiedValue = FormUtils.cloneObject(propertyValue, formModel);
                         }
                         catch (CloneNotSupportedException ex) {} // ignore, don't report
                     }
-                    else { // handle FormDesignValue                    
+                    else { // handle FormDesignValue
                         Object val = ((FormDesignValue)propertyValue).copy(tfProp);
                         if (val != null)
                             copiedValue = val;
@@ -932,7 +934,7 @@ public class FormUtils
             && !method.getDeclaringClass().isAssignableFrom(targetClass)) {
             // try to use find the same method in the target class
             try {
-                method = targetClass.getMethod(method.getName(), 
+                method = targetClass.getMethod(method.getName(),
                                                method.getParameterTypes());
             } catch (Exception ex) { // ignore
                 method = null;
@@ -1022,7 +1024,7 @@ public class FormUtils
 
     /**
      * Determines whether instances of the given class can serve as containers.
-     * 
+     *
      * @param beanClass class to check.
      * @return 1 if the class is explicitly specified as container in BeanInfo;
      *          0 if the class is explicitly enumerated in forbiddenContainers
@@ -1201,7 +1203,7 @@ public class FormUtils
      * Finds out if given property can hold text with <html> prefix. Basically
      * it must be a text property of a Swing component. Used by String property
      * editor.
-     * 
+     *
      * @param property property to check.
      * @return true if the property can hold <html> text
      */
@@ -1327,15 +1329,15 @@ public class FormUtils
 
     /**
      * Utility method that returns name of the method.
-     * 
+     *
      * @param desc descriptor of the method.
      * @return a formatted name of specified method
      */
-    public static String getMethodName(MethodDescriptor desc) {                
+    public static String getMethodName(MethodDescriptor desc) {
         return getMethodName(desc.getName(), desc.getMethod().getParameterTypes());
     }
-    
-    public static String getMethodName(String name, Class[] params) {        
+
+    public static String getMethodName(String name, Class[] params) {
 	StringBuilder sb = new StringBuilder(name);
         if ((params == null) ||(params.length == 0)) {
             sb.append("()"); // NOI18N
@@ -1361,7 +1363,7 @@ public class FormUtils
             }
         });
     }
-    
+
     static void reorderProperties(Class beanClass, RADProperty[] properties) {
         sortProperties(properties);
         Object[] order = collectPropertiesOrder(beanClass, propertyOrder);
@@ -1369,7 +1371,7 @@ public class FormUtils
             updatePropertiesOrder(properties, (String)order[2*i], (String)order[2*i+1]);
         }
     }
-    
+
     private static void updatePropertiesOrder(RADProperty[] properties,
         String firstProp, String secondProp) {
         int firstIndex = findPropertyIndex(properties, firstProp);
@@ -1383,7 +1385,7 @@ public class FormUtils
             properties[secondIndex] = first;
         }
     }
-    
+
     private static int findPropertyIndex(RADProperty[] properties, String property) {
         int index = -1;
         for (int i=0; i<properties.length; i++) {
@@ -1394,7 +1396,7 @@ public class FormUtils
         }
         return index;
     }
-    
+
     private static Object[] collectPropertiesOrder(Class beanClass, Object[][] table) {
         // Set of names of super classes of the bean and interfaces implemented by the bean.
         Set<String> superClasses = superClasses(beanClass);
@@ -1442,7 +1444,7 @@ public class FormUtils
      * editor. The class might be either a support class being part of the IDE,
      * or a user class defined externally (by a project classpath).
      * There are also separate loadSystemClass for loading a module class only.
-     * 
+     *
      * @param name String name of the class
      * @param formFile FileObject representing the form file as part of a project
      * @return loaded class.
@@ -1464,7 +1466,7 @@ public class FormUtils
 
     /** Loads a class using IDE system class loader. Usable for form module
      * support classes, property editors, etc.
-     * 
+     *
      * @param name name of the class to load.
      * @return loaded class.
      * @throws java.lang.ClassNotFoundException if there is a problem with class loading.
@@ -1496,7 +1498,7 @@ public class FormUtils
             String name = streamCls.getName();
             return loadClass(name);
         }
-        
+
         private Class loadClass(String name) throws ClassNotFoundException {
             if (classLoader != null) {
                 try {
@@ -1505,7 +1507,7 @@ public class FormUtils
             }
             return FormUtils.loadClass(name, formModel);
         }
-        
+
     }
 
     public static List<RADComponent> getSelectedLayoutComponents(Node[] nodes) {
@@ -1549,7 +1551,7 @@ public class FormUtils
         }
         return false;
     }
-    
+
     private static Set<String> superClasses(Class beanClass) {
         Set<String> superClasses = new HashSet<String>();
         Class[] infaces = beanClass.getInterfaces();
@@ -1798,7 +1800,7 @@ public class FormUtils
         }
         return buf.toString();
     }
- 
+
     /*
      * Calls Introspector.getBeanInfo() more safely to handle 3rd party BeanInfos
      * that may be broken or malformed. This is a replacement for Introspector.getBeanInfo().
@@ -1854,7 +1856,7 @@ public class FormUtils
         computeVisibleRect(comp, rect);
         return rect;
     }
-    
+
     private static void computeVisibleRect(Component c, Rectangle visibleRect) {
         Container p = c.getParent();
         Rectangle bounds = c.getBounds();

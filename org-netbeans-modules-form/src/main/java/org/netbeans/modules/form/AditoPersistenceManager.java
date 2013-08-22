@@ -70,7 +70,7 @@ public class AditoPersistenceManager extends PersistenceManager
         AditoFormUtils.copyValuesFromModelToComponent(topComp);
       }
 
-      List<RADComponent> list = new ArrayList<RADComponent>();
+      List<RADComponent> list = new ArrayList<>();
       List<FileObject> others = NbAditoInterface.lookup(IAditoModelDataProvider.class).getOthers(modelRoot);
       for (FileObject other : others)
       {
@@ -141,7 +141,7 @@ public class AditoPersistenceManager extends PersistenceManager
     RADComponent[] childComponents;
 
     List<FileObject> childModels = NbAditoInterface.lookup(IAditoModelDataProvider.class).getChildModels(pModelComp);
-    List<RADComponent> list = new ArrayList<RADComponent>();
+    List<RADComponent> list = new ArrayList<>();
     for (FileObject childModel : childModels)
     {
       RADComponent newComp = _restoreComponent(pInfo, childModel, pComponent);
@@ -161,7 +161,7 @@ public class AditoPersistenceManager extends PersistenceManager
       if (convIndex == LAYOUT_NATURAL)
       {
         LayoutModel layoutModel = pInfo.getFormModel().getLayoutModel();
-        Map<String, String> nameToIdMap = new HashMap<String, String>();
+        Map<String, String> nameToIdMap = new HashMap<>();
         for (RADComponent comp : childComponents)
           nameToIdMap.put(comp.getName(), comp.getId());
         try
