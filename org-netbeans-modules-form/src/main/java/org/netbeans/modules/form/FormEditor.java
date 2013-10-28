@@ -653,10 +653,11 @@ public class FormEditor
 
       if (checkNonFatalLoadingErrors && persistManager != null)
       {
+        Logger.getLogger(FormEditor.class.getName()).log(Level.WARNING, t.getLocalizedMessage(), t);
         // creating report about problems while loading components,
         // setting props of components, ...
         //userErrorMsgs.append(persistManager.getExceptionAnnotation(t)); // TODO: evtl. provide errors
-        userErrorMsgs.append("\n\n");  // NOI18N
+        //userErrorMsgs.append("\n\n");  // NOI18N
       }
       else
       { // fatal error
