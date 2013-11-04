@@ -46,8 +46,6 @@ package org.netbeans.modules.form;
 
 import de.adito.aditoweb.nbm.nbide.nbaditointerface.NbAditoInterface;
 import de.adito.aditoweb.nbm.nbide.nbaditointerface.common.IAditoNetbeansTranslations;
-import org.netbeans.api.search.*;
-import org.netbeans.api.search.provider.SearchListener;
 import org.netbeans.modules.form.adito.actions.AditoActionObject;
 import org.netbeans.modules.form.adito.components.*;
 import org.netbeans.modules.form.layoutsupport.LayoutNode;
@@ -56,7 +54,6 @@ import org.netbeans.spi.search.SearchInfoDefinition;
 import org.openide.ErrorManager;
 import org.openide.actions.*;
 import org.openide.explorer.propertysheet.editors.NodeCustomizer;
-import org.openide.filesystems.FileObject;
 import org.openide.loaders.DataObject;
 import org.openide.nodes.*;
 import org.openide.util.*;
@@ -135,7 +132,7 @@ public class RADComponentNode extends FormNode
 
     Node node = AditoNodeConnect.getLookup(getRADComponent()).lookup(Node.class);
 
-    if(node != null)
+    if (node != null)
     {
       SearchInfoDefinition searchDef = node.getLookup().lookup(SearchInfoDefinition.class);
       if (searchDef != null)
@@ -149,35 +146,21 @@ public class RADComponentNode extends FormNode
     String displayName = AditoNodeConnect.getDisplayName(component);
     String name = AditoNodeConnect.getName(component);
 
+    if (name != null)
+      setName(name);
+
     if (displayName != null)
-    {
       setDisplayName(displayName);
-
-      if (getName() == null)
-      {
-        if(name != null)
-          setName(name);
-        else
-          setName(displayName);
-      }
-      return;
-    }
-
-    String compClassName = Utilities.getShortClassName(
-        component.getBeanClass());
-    if (component == component.getFormModel().getTopRADComponent())
-      setDisplayName(nodeNoNameFormat.format(
-          new Object[]{compClassName}));
     else
-      setDisplayName(nodeNameFormat.format(
-          new Object[]{getName(), compClassName}));
-
-    if (getName() == null)
     {
-      if(name != null)
-        setName(name);
+      String compClassName = Utilities.getShortClassName(
+          component.getBeanClass());
+      if (component == component.getFormModel().getTopRADComponent())
+        setDisplayName(nodeNoNameFormat.format(
+            new Object[]{compClassName}));
       else
-        setName(nodeNoNameFormat.format(new Object[]{compClassName}));
+        setDisplayName(nodeNameFormat.format(
+            new Object[]{getName(), compClassName}));
     }
   }
 
