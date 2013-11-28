@@ -8,6 +8,7 @@ public enum EModelFormType
 
   FRAME,
   REPORT,
+  APPLICATION,
   OTHER
 
 }
