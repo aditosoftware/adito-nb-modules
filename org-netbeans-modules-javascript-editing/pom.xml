@@ -276,6 +276,13 @@
                 <groupId>de.adito.aditoweb</groupId>
                 <artifactId>server</artifactId>
                 <version>${project.parent.version}</version>
+                <exclusions>
+                  <!-- Abhängigkeiten vom Server bringen das 'copy-maven-plugin' durcheinander. -->
+                  <exclusion>
+                    <groupId>*</groupId>
+                    <artifactId>*</artifactId>
+                  </exclusion>
+                </exclusions>
               </dependency>
             </dependencies>
           </plugin>
