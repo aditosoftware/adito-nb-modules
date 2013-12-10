@@ -276,6 +276,13 @@
                 <groupId>de.adito.aditoweb</groupId>
                 <artifactId>server</artifactId>
                 <version>${project.parent.version}</version>
+                <exclusions>
+                  <!-- 'copy-maven-plugin' benötigt eine andere guava Version. -->
+                  <exclusion>
+                    <groupId>com.google.guava</groupId>
+                    <artifactId>guava</artifactId>
+                  </exclusion>
+                </exclusions>
               </dependency>
             </dependencies>
           </plugin>
