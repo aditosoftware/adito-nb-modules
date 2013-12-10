@@ -277,10 +277,10 @@
                 <artifactId>server</artifactId>
                 <version>${project.parent.version}</version>
                 <exclusions>
-                  <!-- Abhängigkeiten vom Server bringen das 'copy-maven-plugin' durcheinander. -->
+                  <!-- 'copy-maven-plugin' benötigt eine andere guava Version. -->
                   <exclusion>
-                    <groupId>*</groupId>
-                    <artifactId>*</artifactId>
+                    <groupId>com.google.guava</groupId>
+                    <artifactId>guava</artifactId>
                   </exclusion>
                 </exclusions>
               </dependency>
