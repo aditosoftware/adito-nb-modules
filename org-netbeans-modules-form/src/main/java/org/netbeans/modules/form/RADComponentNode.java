@@ -111,10 +111,9 @@ public class RADComponentNode extends FormNode
       public void propertyChange(PropertyChangeEvent evt)
       {
         String propertyName = evt.getPropertyName();
-        if ("name".equals(propertyName))
-          updateName();
-        else
+        if (!"name".equals(propertyName))
           firePropertyChange(propertyName, null, null);
+        updateName();
       }
     };
     // wenn sich die Properties ändern soll das Sheet aktualisiert werden.
