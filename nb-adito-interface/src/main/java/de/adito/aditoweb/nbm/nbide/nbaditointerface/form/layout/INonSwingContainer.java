@@ -1,5 +1,7 @@
 package de.adito.aditoweb.nbm.nbide.nbaditointerface.form.layout;
 
+import org.jetbrains.annotations.Nullable;
+
 import java.awt.*;
 import java.awt.event.MouseEvent;
 
@@ -9,10 +11,12 @@ import java.awt.event.MouseEvent;
 public interface INonSwingContainer
 {
 
+  @Nullable
   Rectangle getBoundsNonSwing();
 
   void executeMouseClick(MouseEvent e);
 
+  @Nullable
   String getSubComponentName(MouseEvent e);
 
   boolean addCompNonSwing(INonSwingComponent pComp);
