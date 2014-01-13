@@ -104,6 +104,7 @@ public class RADComponentNode extends FormNode
     if (component instanceof ComponentContainer)
       getInstanceContent().add(new ComponentsIndex());
     updateName();
+    updateDisplayName();
 
     propertyChangeListenerReference = new PropertyChangeListener()
     {
@@ -114,6 +115,7 @@ public class RADComponentNode extends FormNode
         if (!"name".equals(propertyName))
           firePropertyChange(propertyName, null, null);
         updateName();
+        updateDisplayName();
       }
     };
     // wenn sich die Properties ändern soll das Sheet aktualisiert werden.
@@ -142,11 +144,14 @@ public class RADComponentNode extends FormNode
 
   void updateName()
   {
-    String displayName = AditoNodeConnect.getDisplayName(component);
     String name = AditoNodeConnect.getName(component);
-
     if (name != null)
       setName(name);
+  }
+
+  void updateDisplayName()
+  {
+    String displayName = AditoNodeConnect.getDisplayName(component);
 
     if (displayName != null)
       setDisplayName(displayName);

@@ -44,26 +44,20 @@
 
 package org.netbeans.modules.form;
 
-import java.awt.*;
-import java.beans.*;
-import java.lang.reflect.*;
-import java.util.*;
-import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javax.accessibility.Accessible;
-import javax.accessibility.AccessibleContext;
-import javax.swing.*;
-
 import org.netbeans.modules.form.RADProperty.FakePropertyDescriptor;
-
 import org.netbeans.modules.form.adito.ARADComponentHandler;
-import org.openide.nodes.*;
-import org.openide.util.Lookup;
-import org.openide.util.NbBundle;
+import org.openide.nodes.Node;
+import org.openide.util.*;
 import org.openide.util.datatransfer.NewType;
 
-import org.openide.util.Utilities;
+import javax.accessibility.*;
+import javax.swing.*;
+import java.awt.*;
+import java.beans.*;
+import java.lang.reflect.InvocationTargetException;
+import java.util.*;
+import java.util.List;
+import java.util.logging.*;
 
 /**
  *
@@ -129,9 +123,12 @@ public class RADComponent {
 
     private String storedName; // component name preserved e.g. for remove undo
 
-    private boolean valid = true;
+  //flag, um zu vermerken, dass in einer Methode zu einem späternen Zeitpunkt der storedName noch gesetzt wird
+  private boolean storedNameAlreadySet = false;
 
-    private ARADComponentHandler aRADComponentHandler;
+  private boolean valid = true;
+
+  private ARADComponentHandler aRADComponentHandler;
 
     // -----------------------------------------------------------------------------
     // Constructors & Initialization
@@ -460,17 +457,23 @@ public class RADComponent {
     }
 
     private boolean needsVariableRename(String name) {
-        return (storedName == null || !storedName.equals(name));
+      return (!storedNameAlreadySet && (storedName == null || !storedName.equals(name)));
     }
 
-    public void setStoredName(String name) {
-        if (aRADComponentHandler != null)
-          aRADComponentHandler.nameIsAboutToChange(storedName, name);
+  private void _renameNode(String name)
+  {
+    if (aRADComponentHandler != null)
+      aRADComponentHandler.nameIsAboutToChange(storedName, name);
+  }
 
-        storedName = name;
-        if (getNodeReference() != null)
-          getNodeReference().updateName();
-    }
+  public void setStoredName(String name)
+  {
+    storedNameAlreadySet = true;
+    //Benennt Node um -> Dadurch PropertyListener-Aufruf, der DisplayName ändert
+    _renameNode(name);
+    storedName = name;
+    storedNameAlreadySet = false;
+  }
 
   // STRIPPED
     /*private void renameDefaultEventHandlers(String oldComponentName,
