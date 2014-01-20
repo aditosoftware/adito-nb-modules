@@ -216,6 +216,13 @@ public class FormDataBridge
                   return;
               }
 
+              IAditoModelDataProvider modelDataProvider = NbAditoInterface.lookup(IAditoModelDataProvider.class);
+              List<FileObject> childModels = modelDataProvider.getChildModels(
+                  radComponent.getARADComponentHandler().getModelFileObject());
+              // wenn das erstellte Objekt nicht bei den 'childModels' dabei ist muss es für die GUI nicht erzeugt werden.
+              if (!childModels.contains(created))
+                return;
+
               IFormComponentInfoProvider compInfoProvider = NbAditoInterface.lookup(IFormComponentInfoProvider.class);
               IFormComponentInfo componentInfo = compInfoProvider.createComponentInfo(created);
               IFormComponentPropertyMapping formPropertyMapping = componentInfo.getFormPropertyMapping();
