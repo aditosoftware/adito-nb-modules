@@ -22,7 +22,7 @@ public interface IAditoModelDataProvider
 
   List<FileObject> getChildModels(FileObject pFileObject);
 
-  FileObject getDefaultChildContainer(FileObject pFileObject);
+  IFormComponentChildContainer getChildContainer(FileObject pFileObject);
 
   List<FileObject> getOthers(FileObject pFileObject);
 
@@ -44,21 +44,6 @@ public interface IAditoModelDataProvider
    * @param pChildren Komponenten die in den Vordergrund kommen sollen.
    */
   void toFront(FileObject pParent, List<DataObject> pChildren);
-
-  /**
-   * Verschiebt ein Datenmodell.
-   *
-   * @param pSource das Datenmodell.
-   * @param pTarget das Ziel.
-   */
-  void moveDataModel(FileObject pSource, FileObject pTarget);
-
-  /**
-   * @param pSource das Datenmodell.
-   * @param pTarget das Ziel.
-   * @return ob ein Datenmodell verschoben werden kann.
-   */
-  public boolean canMove(FileObject pSource, FileObject pTarget);
 
   /**
    * Prüft ob ein Objekt vom Typ <tt>pSource</tt> unter <tt>pTarget</tt> erstellt werden kann.

@@ -2,7 +2,7 @@ package org.netbeans.modules.form.adito;
 
 import com.google.common.base.Objects;
 import de.adito.aditoweb.nbm.nbide.nbaditointerface.NbAditoInterface;
-import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.model.IAditoModelDataProvider;
+import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.model.*;
 import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.sync.*;
 import org.jetbrains.annotations.*;
 import org.netbeans.modules.form.*;
@@ -117,20 +117,20 @@ public class ARADComponentHandler
     try
     {
       IAditoModelDataProvider modelDataProvider = NbAditoInterface.lookup(IAditoModelDataProvider.class);
-      FileObject defaultChildContainer = modelDataProvider.getDefaultChildContainer(modelFileObject);
+      IFormComponentChildContainer defaultChildContainer = modelDataProvider.getChildContainer(modelFileObject);
       if (defaultChildContainer == null)
       {
         FileObject fo = modelFileObject;
         while (!fo.isRoot() & defaultChildContainer == null)
         {
           fo = fo.getParent();
-          defaultChildContainer = modelDataProvider.getDefaultChildContainer(fo);
+          defaultChildContainer = modelDataProvider.getChildContainer(fo);
         }
-
       }
-      DataFolder target = DataFolder.findFolder(defaultChildContainer);
-      DataObject source = DataObject.find(pToCopy.getARADComponentHandler().getModelFileObject());
-      return source.copy(target);
+      if (defaultChildContainer != null)
+        return defaultChildContainer.copy(pToCopy.getARADComponentHandler().getModelFileObject());
+      else
+        throw new RuntimeException(); // TODO: exceptionHandling
     }
     catch (IOException e)
     {
@@ -172,9 +172,9 @@ public class ARADComponentHandler
   public boolean canMove(RADComponent pTarget)
   {
     IAditoModelDataProvider dataProvider = NbAditoInterface.lookup(IAditoModelDataProvider.class);
-    FileObject defaultChildContainer = dataProvider.getDefaultChildContainer(
+    IFormComponentChildContainer childContainer = dataProvider.getChildContainer(
         pTarget.getARADComponentHandler().getModelFileObject());
-    return dataProvider.canMove(modelFileObject, defaultChildContainer);
+    return childContainer.canMove(modelFileObject);
   }
 
   public boolean canAdd(Class pCls)
@@ -191,8 +191,8 @@ public class ARADComponentHandler
   public void move(RADComponent pTarget, Node.Property[] pProperties)
   {
     IAditoModelDataProvider dataProvider = NbAditoInterface.lookup(IAditoModelDataProvider.class);
-    FileObject defaultChildContainer = dataProvider.getDefaultChildContainer(
-        pTarget.getARADComponentHandler().getModelFileObject());
+    IFormComponentChildContainer childContainer =
+        dataProvider.getChildContainer(pTarget.getARADComponentHandler().getModelFileObject());
     if (pProperties != null)
     {
       for (Node.Property property : pProperties)
@@ -205,8 +205,8 @@ public class ARADComponentHandler
           // skip
         }
     }
-    if (defaultChildContainer != null)
-      dataProvider.moveDataModel(modelFileObject, defaultChildContainer);
+    if (childContainer != null)
+      childContainer.moveDataModel(modelFileObject);
   }
 
   /**
@@ -232,11 +232,11 @@ public class ARADComponentHandler
           }
 
           IAditoModelDataProvider dataProvider = NbAditoInterface.lookup(IAditoModelDataProvider.class);
-          FileObject defaultChildContainer = dataProvider.getDefaultChildContainer(getModelFileObject());
-          if (defaultChildContainer != null)
+          IFormComponentChildContainer childContainer = dataProvider.getChildContainer(getModelFileObject());
+          if (childContainer != null)
           {
             List<DataObject> dataObjects = new ArrayList<>();
-            for (FileObject fo : defaultChildContainer.getChildren())
+            for (FileObject fo : childContainer.getAllChildren())
             {
               try
               {
