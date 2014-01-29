@@ -232,7 +232,7 @@ public class VisualReplicator {
             }*/
         }
         catch (Exception ex) {
-            ErrorManager.getDefault().notify(ErrorManager.INFORMATIONAL, ex);
+            ErrorManager.getDefault().notify(ErrorManager.WARNING, ex);
             clone = null;
         }
 
