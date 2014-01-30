@@ -725,6 +725,7 @@ public class MetaComponentCreator
       else
       {
         if (!targetComp.getARADComponentHandler().canAdd(beanClass))
+          //throw new RuntimeException("canAdd(" + beanClass + ") for '" + targetComp + "' returns 'false'.");
           return null;
         EContainerType containerType = AditoMetaComponentCreatorSupport.getContainerType(targetComp.getBeanClass());
         switch (containerType)
