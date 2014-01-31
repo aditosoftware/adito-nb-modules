@@ -95,13 +95,13 @@ public class ARADComponentHandler
     if (!(radComponent instanceof ComponentContainer) || modelFileObject == null)
       return;
     ComponentContainer container = (ComponentContainer) radComponent;
-    IAditoModelDataProvider modelDataProvider = NbAditoInterface.lookup(IAditoModelDataProvider.class);
 
     final Map<String, Integer> namePositionMap = new HashMap<>();
     RADComponent[] subBeans = container.getSubBeans();
     for (int i = 0; i < subBeans.length; i++)
       namePositionMap.put(subBeans[i].getName(), i);
 
+    IAditoModelDataProvider modelDataProvider = NbAditoInterface.lookup(IAditoModelDataProvider.class);
     boolean hasToReorder = modelDataProvider.reorder(modelFileObject, new Comparator<String>()
     {
       @Override

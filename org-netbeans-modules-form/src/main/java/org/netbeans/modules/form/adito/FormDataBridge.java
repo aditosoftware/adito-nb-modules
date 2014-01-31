@@ -233,11 +233,10 @@ public class FormDataBridge
               RADComponent component = radComponent.getFormModel().getComponentCreator().createComponent(
                   new ClassSource(createdBean.getCanonicalName()), radComponent, null);
               if (component == null)
-                throw new RuntimeException("component could nto be created! (Internal Error)");
+                throw new RuntimeException("component could not be created! (Internal Error)");
               component.setStoredName(created.getName());
               component.getARADComponentHandler().setModelFileObject(created);
 
-              syncChildren();
               try
               {
                 AditoFormUtils.copyValuesFromModelToComponent(component);
