@@ -58,7 +58,7 @@ public abstract class AFormModelListener implements FormModelListener
       }
       catch (Exception e)
       {
-        //e.printStackTrace(); // TODO
+        e.printStackTrace(); // TODO
         //if (event.isModifying())
         //{
         //  FormModel formModel = event.getFormModel();

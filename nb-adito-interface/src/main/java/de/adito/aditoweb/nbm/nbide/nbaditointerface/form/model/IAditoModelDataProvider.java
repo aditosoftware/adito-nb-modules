@@ -54,6 +54,5 @@ public interface IAditoModelDataProvider
    */
   public boolean canAdd(FileObject pTarget, Class pSource);
 
-  void reorder(FileObject pModelFo, Comparator<String> pChildComparator);
-
+  boolean reorder(FileObject pModelFo, Comparator<String> pChildComparator);
 }

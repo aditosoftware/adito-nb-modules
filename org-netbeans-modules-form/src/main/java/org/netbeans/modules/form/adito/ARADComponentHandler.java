@@ -102,7 +102,7 @@ public class ARADComponentHandler
     for (int i = 0; i < subBeans.length; i++)
       namePositionMap.put(subBeans[i].getName(), i);
 
-    modelDataProvider.reorder(modelFileObject, new Comparator<String>()
+    boolean hasToReorder = modelDataProvider.reorder(modelFileObject, new Comparator<String>()
     {
       @Override
       public int compare(String o1, String o2)
@@ -110,6 +110,9 @@ public class ARADComponentHandler
         return namePositionMap.get(o1) - namePositionMap.get(o2);
       }
     });
+
+    if (formDataBridge != null && hasToReorder)
+      formDataBridge.syncChildren();
   }
 
   public DataObject addChild(RADComponent pToCopy)

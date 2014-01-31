@@ -19,7 +19,7 @@ public interface IFormComponentChildContainer
 
   boolean canAdd(Class pSource);
 
-  void reorder(Comparator<String> pChildComparator);
+  boolean reorder(Comparator<String> pChildComparator);
 
   FileObject createDataModel(Class<?> pComponentClass, String pCreatedName);
 

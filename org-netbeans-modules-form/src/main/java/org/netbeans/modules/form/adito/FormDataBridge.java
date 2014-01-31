@@ -232,10 +232,12 @@ public class FormDataBridge
 
               RADComponent component = radComponent.getFormModel().getComponentCreator().createComponent(
                   new ClassSource(createdBean.getCanonicalName()), radComponent, null);
-              if(component == null)
+              if (component == null)
                 throw new RuntimeException("component could nto be created! (Internal Error)");
               component.setStoredName(created.getName());
               component.getARADComponentHandler().setModelFileObject(created);
+
+              syncChildren();
               try
               {
                 AditoFormUtils.copyValuesFromModelToComponent(component);
@@ -277,38 +279,7 @@ public class FormDataBridge
             {
               public void run()
               {
-                ComponentContainer cont = (ComponentContainer) radComponent;
-
-                IAditoModelDataProvider modelDataProvider = NbAditoInterface.lookup(IAditoModelDataProvider.class);
-                List<FileObject> childModels = modelDataProvider.getChildModels(
-                    radComponent.getARADComponentHandler().getModelFileObject());
-                RADComponent[] subBeans = cont.getSubBeans();
-                int[] perm = new int[subBeans.length];
-                if (childModels.size() != subBeans.length)
-                {
-                  throw new IllegalStateException("Size of subBeans and childModels not equal.");
-                }
-                for (int i = 0; i < subBeans.length; i++)
-                {
-                  RADComponent subBean = subBeans[i];
-                  int index = -1;
-                  for (int j = 0; j < childModels.size(); j++)
-                  {
-                    FileObject childModel = childModels.get(j);
-                    if (subBean.getName().equals(childModel.getNameExt()))
-                    {
-                      index = j;
-                      break;
-                    }
-                  }
-                  if (index == -1)
-                  {
-                    throw new IllegalStateException("SubBean '" + subBean.getName() + "' could not be found in dataModels.");
-                  }
-                  perm[i] = index;
-                }
-                cont.reorderSubComponents(perm);
-                radComponent.getFormModel().fireComponentsReordered(cont, perm);
+                syncChildren();
               }
             });
             break;
@@ -320,6 +291,42 @@ public class FormDataBridge
         }
       }
     };
+  }
+
+  void syncChildren()
+  {
+    ComponentContainer cont = (ComponentContainer) radComponent;
+
+    IAditoModelDataProvider modelDataProvider = NbAditoInterface.lookup(IAditoModelDataProvider.class);
+    List<FileObject> childModels = modelDataProvider.getChildModels(
+        radComponent.getARADComponentHandler().getModelFileObject());
+    RADComponent[] subBeans = cont.getSubBeans();
+    int[] perm = new int[subBeans.length];
+    if (childModels.size() != subBeans.length)
+    {
+      throw new IllegalStateException("Size of subBeans and childModels not equal.");
+    }
+    for (int i = 0; i < subBeans.length; i++)
+    {
+      RADComponent subBean = subBeans[i];
+      int index = -1;
+      for (int j = 0; j < childModels.size(); j++)
+      {
+        FileObject childModel = childModels.get(j);
+        if (subBean.getName().equals(childModel.getNameExt()))
+        {
+          index = j;
+          break;
+        }
+      }
+      if (index == -1)
+      {
+        throw new IllegalStateException("SubBean '" + subBean.getName() + "' could not be found in dataModels.");
+      }
+      perm[i] = index;
+    }
+    cont.reorderSubComponents(perm);
+    radComponent.getFormModel().fireComponentsReordered(cont, perm);
   }
 
   private void _alignFormToAditoProperty(String pAditoPropName)
