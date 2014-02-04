@@ -1,5 +1,6 @@
 package de.adito.aditoweb.nbm.nbide.nbaditointerface.form.model;
 
+import org.jetbrains.annotations.Nullable;
 import org.openide.filesystems.FileObject;
 import org.openide.loaders.DataObject;
 import org.openide.nodes.Node;
@@ -22,6 +23,7 @@ public interface IAditoModelDataProvider
 
   List<FileObject> getChildModels(FileObject pFileObject);
 
+  @Nullable
   IFormComponentChildContainer getChildContainer(FileObject pFileObject);
 
   List<FileObject> getOthers(FileObject pFileObject);

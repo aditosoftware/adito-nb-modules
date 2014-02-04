@@ -177,7 +177,7 @@ public class ARADComponentHandler
     IAditoModelDataProvider dataProvider = NbAditoInterface.lookup(IAditoModelDataProvider.class);
     IFormComponentChildContainer childContainer = dataProvider.getChildContainer(
         pTarget.getARADComponentHandler().getModelFileObject());
-    return childContainer.canMove(modelFileObject);
+    return childContainer != null && childContainer.canMove(modelFileObject);
   }
 
   public boolean canAdd(Class pCls)
