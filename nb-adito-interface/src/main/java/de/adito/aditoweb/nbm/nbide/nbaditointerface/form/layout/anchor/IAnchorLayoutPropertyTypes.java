@@ -40,4 +40,6 @@ public interface IAnchorLayoutPropertyTypes
 
   IAditoLayoutPropertyType<Integer> labelAnchor();
 
+  IAditoLayoutPropertyType<String> onDoubleClick();
+
 }

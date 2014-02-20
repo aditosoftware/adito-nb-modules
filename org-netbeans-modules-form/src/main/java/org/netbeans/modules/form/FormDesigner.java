@@ -2239,11 +2239,22 @@ public class FormDesigner
       setSelectedDesigner(this, true);
       ComponentInspector.getInstance().attachActions();
       getToolBar().putClientProperty("isActive", Boolean.TRUE); // for JDev // NOI18N
+
+      if (componentLayer != null)
+        _onEach(componentLayer);
     }
     if (formModel != null && (textEditLayer == null || !textEditLayer.isVisible()))
     {
       handleLayer.requestFocus();
     }
+  }
+
+  private void _onEach(Component pComponent)
+  {
+    pComponent.revalidate();
+    if (pComponent instanceof Container)
+      for (Component component : ((Container)pComponent).getComponents())
+        _onEach(component);
   }
 
   public void componentDeactivated()
