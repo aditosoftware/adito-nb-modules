@@ -19,7 +19,7 @@ public interface INonSwingContainer
   @Nullable
   String getSubComponentName(MouseEvent e);
 
-  boolean addCompNonSwing(INonSwingComponent pComp);
+  boolean addCompNonSwing(INonSwingComponent pComp, String componentName);
 
   boolean removeCompNonSwing(INonSwingComponent pComp);
 

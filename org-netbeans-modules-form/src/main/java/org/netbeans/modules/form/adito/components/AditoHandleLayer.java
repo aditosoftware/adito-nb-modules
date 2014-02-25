@@ -104,29 +104,11 @@ public final class AditoHandleLayer
       {
         for (NonvisContainerRADComponent a : subComponents)
         {
-          for (Node.PropertySet propertySet : a.getProperties())
-            for (Node.Property property : propertySet.getProperties())
-            {
-              if (property.getName().equals("columnName"))
-              {
-                String value = "";
-                try
+                if (a.getName().equals(compName))
                 {
-                  value = property.getValue().toString();
-                }
-                catch (IllegalAccessException e1)
-                {
-                  e1.printStackTrace();
-                }
-                catch (InvocationTargetException e1)
-                {
-                  e1.printStackTrace();
-                }
-
-                if (value.equals(compName))
                   component = a;
-              }
-            }
+                  break;
+                }
         }
       }
     }

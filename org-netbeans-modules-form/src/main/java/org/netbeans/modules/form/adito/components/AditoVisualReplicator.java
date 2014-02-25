@@ -36,14 +36,14 @@ public abstract class AditoVisualReplicator
       Object subClone = getClonedComponent(sub);
       if (subClone == null)
         subClone = cloneComponent(sub, relativeProperties);
-      nonVisLayoutCompClone.addCompNonSwing((INonSwingComponent) subClone);
+      nonVisLayoutCompClone.addCompNonSwing((INonSwingComponent) subClone, sub.getName());
     }
   }
 
   public void addComponent(RADComponent pMetacomp, ComponentContainer pMetacont)
   {
     INonSwingContainer instance = _getContainer(pMetacont);
-    instance.addCompNonSwing((INonSwingComponent) getClonedComponent(pMetacomp));
+    instance.addCompNonSwing((INonSwingComponent) getClonedComponent(pMetacomp), pMetacomp.getName());
   }
 
   public void removeComponent(RADComponent pMetacomp, ComponentContainer pMetacont)
@@ -60,7 +60,7 @@ public abstract class AditoVisualReplicator
     for (RADComponent radComponent : subBeans)
       removeComponent(radComponent, pCompContainer);
     for (RADComponent radComponent : subBeans)
-      nonSwingContainer.addCompNonSwing((INonSwingComponent) getClonedComponent(radComponent));
+      nonSwingContainer.addCompNonSwing((INonSwingComponent) getClonedComponent(radComponent), radComponent.getName());
   }
 
   private INonSwingContainer _getContainer(ComponentContainer pContainer)
