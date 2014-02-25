@@ -40,7 +40,7 @@ public class ARADComponentHandler
      * Wenn modelFileObject und formDataBridge nicht 'null' sind, dann wurde die Komponente im Model hinzugefügt und
      * zum FormModel synchronisiert. Muss also nicht mehr weiter behandelt werden.
      */
-    if (modelFileObject != null && formDataBridge != null)
+    if (_isBridgeValid())
       return;
 
     assert radComponent != null;
@@ -55,7 +55,7 @@ public class ARADComponentHandler
     assert modelFileObject != null;
     radComponent.setName(modelFileObject.getName());
 
-    if (formDataBridge != null)
+    if (_isBridgeValid())
       formDataBridge.newComponentAdded();
   }
 
@@ -111,7 +111,7 @@ public class ARADComponentHandler
       }
     });
 
-    if (formDataBridge != null && hasToReorder)
+    if (_isBridgeValid() && hasToReorder)
       formDataBridge.syncChildren();
   }
 
@@ -305,7 +305,7 @@ public class ARADComponentHandler
 
   public void layoutPropertiesChanged(String pPropertyName)
   {
-    if (formDataBridge != null)
+    if (_isBridgeValid())
       formDataBridge.layoutPropertiesChanged(pPropertyName);
   }
 
@@ -322,6 +322,11 @@ public class ARADComponentHandler
       radComponent = null;
     modelFileObject = null;
     formDataBridge = null;
+  }
+
+  private boolean _isBridgeValid()
+  {
+    return formDataBridge != null && modelFileObject != null && modelFileObject.isValid();
   }
 
   private void tryInit()
