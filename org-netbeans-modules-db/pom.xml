@@ -136,6 +136,15 @@
             <publicPackage>org.netbeans.modules.db.explorer.dlg.*</publicPackage>
             <publicPackage>org.netbeans.modules.db.explorer.action.*</publicPackage>
           </publicPackages>
+
+          <moduleDependencies>
+            <dependency>
+              <id>org.netbeans.modules:org-netbeans-modules-db-metadata-model</id>
+              <type>impl</type>
+              <explicitValue>org.netbeans.modules.db.metadata.model/0 = 201306052037</explicitValue>
+            </dependency>
+          </moduleDependencies>
+
         </configuration>
       </plugin>
     </plugins>
