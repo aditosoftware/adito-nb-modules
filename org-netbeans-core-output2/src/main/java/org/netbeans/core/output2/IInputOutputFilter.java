@@ -1,0 +1,11 @@
+package org.netbeans.core.output2;
+
+import org.openide.windows.InputOutput;
+
+/**
+ * Created by c.einsiedler on 11.03.14.
+ */
+public interface IInputOutputFilter  extends InputOutput
+{
+  void setFilterDescription(IOutputTabFilterDescription pFilterDescription);
+}

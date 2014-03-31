@@ -190,7 +190,7 @@ final class OutputTab extends AbstractOutputTab implements IOContainer.CallBacks
 
     public void reset() {
         if (origPane != null) {
-            setFilter(null, false, false);
+            setFilter(null);
         }
         // get new OutWriter
         outWriter = io.out();
@@ -705,8 +705,8 @@ final class OutputTab extends AbstractOutputTab implements IOContainer.CallBacks
     FilteredOutput filtOut;
     AbstractOutputPane origPane;
 
-    private void setFilter(String pattern, boolean regExp, boolean matchCase) {
-        if (pattern == null) {
+    private void setFilter(IOutputTabFilterDescription pFilterDescription) {
+        if (pFilterDescription == null) {
             assert origPane != null;
             setOutputPane(origPane);
             origPane = null;
@@ -715,7 +715,7 @@ final class OutputTab extends AbstractOutputTab implements IOContainer.CallBacks
         } else {
             assert origPane == null;
             origPane = getOutputPane();
-            filtOut = new FilteredOutput(pattern, regExp, matchCase);
+            filtOut = new FilteredOutput(pFilterDescription);
             setOutputPane(filtOut.getPane());
             try {
                 waitCursor(true);
@@ -905,7 +905,7 @@ final class OutputTab extends AbstractOutputTab implements IOContainer.CallBacks
          * <li>A name for the action matching the passed key</li>
          * <li>An accelerator for the action matching [key].accel</li>
          * </ul>
-         * @param id An action ID
+         * @param action An action
          * @param bundleKey A key for the bundle associated with the Controller class
          * @see org.openide.util.Utilities#stringToKey
          */
@@ -935,7 +935,7 @@ final class OutputTab extends AbstractOutputTab implements IOContainer.CallBacks
          * Create a ControllerAction with the specified ID, name and keystroke.  Actions created
          * using this constructor will not be added to the popup menu of the component.
          *
-         * @param id The ID
+         * @param action The action
          * @param name A programmatic name for the item
          * @param stroke An accelerator keystroke
          */
@@ -1130,12 +1130,45 @@ final class OutputTab extends AbstractOutputTab implements IOContainer.CallBacks
                     break;
                 case FILTER:
                     if (origPane != null) {
-                        setFilter(null, false, false);
+                        setFilter(null);
                     } else {
-                        String pattern = getFindDlgResult(getOutputPane().getSelectedText(),
-                                "LBL_Filter_Title", "LBL_Filter_What", "BTN_Filter"); //NOI18N
-                        if (pattern != null) {
-                            setFilter(pattern, FindDialogPanel.regExp(), FindDialogPanel.matchCase());
+                        IOutputTabFilterDescription filterOutputDescription = io.getFilterOutputDescription();
+                        if (filterOutputDescription != null)
+                            setFilter(filterOutputDescription);
+                        else
+                        {
+                          final String pattern = getFindDlgResult(getOutputPane().getSelectedText(),
+                                  "LBL_Filter_Title", "LBL_Filter_What", "BTN_Filter"); //NOI18N
+                          if (pattern != null) {
+                            final boolean regExp = FindDialogPanel.regExp();
+                            final boolean matchCase = FindDialogPanel.matchCase();
+                            final String finalPattern = (regExp || matchCase) ? pattern : pattern.toLowerCase();
+                            IOutputTabFilterDescription filterDescription = new IOutputTabFilterDescription()
+                            {
+                              private Pattern compPattern;
+
+                              @Override
+                              public void setup() { }
+
+                              @Override
+                              public boolean accepts(String pStr)
+                              {
+                                if (regExp)
+                                {
+                                  if (compPattern == null)
+                                  {
+                                    compPattern = matchCase ? Pattern.compile(finalPattern) : Pattern.compile(finalPattern, Pattern.CASE_INSENSITIVE);
+                                  }
+                                  return compPattern.matcher(pStr).find();
+                                }
+                                else
+                                {
+                                  return matchCase ? pStr.contains(finalPattern) : pStr.toLowerCase().contains(finalPattern);
+                                }
+                              }
+                            };
+                            setFilter(filterDescription);
+                          }
                         }
                     }
                     break;
@@ -1258,19 +1291,14 @@ final class OutputTab extends AbstractOutputTab implements IOContainer.CallBacks
     }
 
     private class FilteredOutput {
-        String pattern;
         OutWriter out;
         OutputPane pane;
         OutputDocument doc;
         int readCount;
-        Pattern compPattern;
-        boolean regExp;
-        boolean matchCase;
+        IOutputTabFilterDescription filterDescription;
 
-        public FilteredOutput(String pattern, boolean regExp, boolean matchCase) {
-            this.pattern = (regExp || matchCase) ? pattern : pattern.toLowerCase();
-            this.regExp = regExp;
-            this.matchCase = matchCase;
+        public FilteredOutput(IOutputTabFilterDescription pFilterDescription) {
+            filterDescription = pFilterDescription;
             out = new OutWriter();
             pane = new OutputPane(OutputTab.this);
             doc = new OutputDocument(out);
@@ -1278,14 +1306,7 @@ final class OutputTab extends AbstractOutputTab implements IOContainer.CallBacks
         }
 
         boolean passFilter(String str) {
-            if (regExp) {
-                if (compPattern == null) {
-                    compPattern = matchCase ? Pattern.compile(pattern) : Pattern.compile(pattern, Pattern.CASE_INSENSITIVE);
-                }
-                return compPattern.matcher(str).find();
-            } else {
-                return matchCase ? str.contains(pattern) : str.toLowerCase().contains(pattern);
-            }
+           return filterDescription.accepts(str);
         }
 
         OutputPane getPane() {

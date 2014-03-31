@@ -72,7 +72,7 @@ import org.openide.windows.IOTab;
  *
  * @author  Tim Boudreau
  */
-class NbIO implements InputOutputExt, Lookup.Provider {
+class NbIO implements InputOutputExt, IInputOutputFilter, Lookup.Provider {
 
     private Boolean focusTaken = null;
     private volatile boolean closed = false;
@@ -87,12 +87,14 @@ class NbIO implements InputOutputExt, Lookup.Provider {
     private IOTabImpl ioTab;
     private IOColorsImpl ioColors;
 
+    private IOutputTabFilterDescription filterOutputDescription;
+
     private PropertyChangeSupport changes = new PropertyChangeSupport( this );
 
     /** Creates a new instance of NbIO
      * @param name The name of the IO
      * @param toolbarActions an optional set of toolbar actions
-     * @param iowin parent container accessor (null for default)
+     * @param ioContainer parent container accessor (null for default)
      */
     NbIO(String name, Action[] toolbarActions, IOContainer ioContainer) {
         this(name);
@@ -131,7 +133,20 @@ class NbIO implements InputOutputExt, Lookup.Provider {
         changes.removePropertyChangeListener(l);
     }
 
-    String getName() {
+    @Override
+    public void setFilterDescription(IOutputTabFilterDescription pFilterDescription)
+    {
+      filterOutputDescription = pFilterDescription;
+    }
+
+    public IOutputTabFilterDescription getFilterOutputDescription()
+    {
+      if (filterOutputDescription != null)
+        filterOutputDescription.setup();
+      return filterOutputDescription;
+    }
+
+  String getName() {
         return name;
     }
 
