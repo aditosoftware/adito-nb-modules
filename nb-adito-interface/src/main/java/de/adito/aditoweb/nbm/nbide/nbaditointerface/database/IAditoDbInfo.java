@@ -15,6 +15,7 @@ public interface IAditoDbInfo
   public final String FARM = "FARM";
   public final String MAILREPOSIT = "MAILREPOSIT";
   public final String WORKFLOW = "WORKFLOW";
+  public final String XMPP = "XMPP";
 
   /**
    * @return die Namen aller SystemTabellen.

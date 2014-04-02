@@ -203,7 +203,7 @@ public class CreateSystemTablesAction extends BaseAction
     {
       super(new BorderLayout());
       add(_createTree());
-      setPreferredSize(new Dimension(350, 820));
+      setPreferredSize(new Dimension(350, 860));
     }
 
     private JScrollPane _createTree()
@@ -294,7 +294,8 @@ public class CreateSystemTablesAction extends BaseAction
                          IAditoDbInfo.CALENDAR,
                          IAditoDbInfo.FARM,
                          IAditoDbInfo.MAILREPOSIT,
-                         IAditoDbInfo.WORKFLOW);
+                         IAditoDbInfo.WORKFLOW,
+                         IAditoDbInfo.XMPP);
       List<String> tableNames = new ArrayList<>();
       TreePath[] paths = cbModel.getSelectionPaths();
 
