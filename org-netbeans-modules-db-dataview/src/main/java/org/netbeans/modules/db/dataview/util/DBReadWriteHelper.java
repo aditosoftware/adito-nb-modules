@@ -46,6 +46,7 @@ package org.netbeans.modules.db.dataview.util;
 
 import java.io.InputStream;
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.sql.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -58,7 +59,9 @@ import org.openide.util.NbBundle;
  * @author Ahimanikya Satapathy
  */
 public class DBReadWriteHelper {
-
+    private static final BigInteger maxUnsignedLong = new BigInteger("18446744073709551615");
+    private static final BigInteger maxLong = BigInteger.valueOf(Long.MAX_VALUE);
+    private static final BigInteger minLong = BigInteger.valueOf(Long.MIN_VALUE);
     private static final long maxUnsignedInt = 4294967295L;
     private static final int maxUnsignedShort = 65535;
     private static final short maxUnsignedByte = 255;
@@ -117,11 +120,23 @@ public class DBReadWriteHelper {
                 }
             }
             case Types.BIGINT: {
-                long ldata = rs.getLong(index);
-                if (rs.wasNull()) {
-                    return null;
-                } else {
-                    return new Long(ldata);
+                try {
+                    long ldata = rs.getLong(index);
+                    if (rs.wasNull()) {
+                        return null;
+                    } else {
+                        return new Long(ldata);
+                    }
+                } catch (java.sql.SQLDataException ex) {
+                    // In case of unsigned BIGINT, long is to small to take it
+                    // for now getString is asumed to produce greates compatiblity
+                    // The returned string is used to create a BigInteger
+                    String sdata = rs.getString(index);
+                    if (sdata == null) {
+                        return null;
+                    } else {
+                        return new BigInteger(sdata);
+                    }
                 }
             }
             case Types.DOUBLE: {
@@ -162,13 +177,14 @@ public class DBReadWriteHelper {
                         return new Integer(idata);
                     }
                 } catch (java.sql.SQLDataException ex) {
+                    // in case of an unsigned integer, the java Integer is
+                    // to small to hold it => switch to long in that case
                     long ldata = rs.getLong(index);
                     if (rs.wasNull()) {
                         return null;
                     } else {
                         return new Long(ldata);
                     }
-
                 }
             }
             // JDBC/ODBC bridge JDK1.4 brings back -9 for nvarchar columns in
@@ -189,10 +205,10 @@ public class DBReadWriteHelper {
             }
             case Types.BIT: {
                 byte[] bdata = rs.getBytes(index);
-                if (rs.wasNull()) {
+                if (rs.wasNull() || bdata == null) {
                     return null;
                 } else {
-                    Byte[] internal = new Byte[bdata.length];
+                    byte[] internal = new byte[bdata.length];
                     for (int i = 0; i < bdata.length; i++) {
                         internal[i] = new Byte(bdata[i]);
                     }
@@ -206,63 +222,19 @@ public class DBReadWriteHelper {
             case Types.VARBINARY:
             case Types.LONGVARBINARY:
             case Types.BLOB: {
-                // Try to get a blob object (delay loading till the data is used!)
-                try {
-                    Blob blob = rs.getBlob(index);
-                    
-                    if (blob == null) {
-                        return null;
-                    }
-
-                    Object result = null;
-                    
-                    if (! rs.wasNull()) {
-                        result = new FileBackedBlob(blob.getBinaryStream());
-                    }
-                    
-                    try {
-                        blob.free();
-                    } catch (java.lang.AbstractMethodError err) {
-                        // Blob gained a new method in jdbc4 (drivers compiled
-                        // against older jdks don't provide this methid
-                    } catch (SQLException ex) {
-                        // DBMS failed to free resource or does not support call
-                        // ignore this, as we can't do more
-                    }
-                    
-                    return result;
-                } catch (SQLException ex) {
-                    // Ok - can happen - the jdbc driver might not support
-                    // blob data or can for example not provide a longvarbinary
-                    // as blob - so fall back to our implementation of blob
-                }
-                try {
-                    InputStream is = rs.getBinaryStream(index);
-                    if (is == null) {
-                        return null;
-                    } else {
-                        return new FileBackedBlob(is);
-                    }
-                } catch (SQLDataException x) {
-                    // wrong mapping JavaDB JDBC Type -4
-                    try {
-                        String sdata = rs.getString(index);
-                        if (rs.wasNull()) {
-                            return null;
-                        } else {
-                            return sdata;
-                        }
-                    } catch (SQLException ex) {
-                        // throw the original SQLDataException intead of this one
-                        throw x;
-                    }
+                // Load binary data as stream and hold it internally as a pseudoblob
+                InputStream is = rs.getBinaryStream(index);
+                if (is == null) {
+                    return null;
+                } else {
+                    return new FileBackedBlob(is);
                 }
             }
             case Types.LONGVARCHAR:
             case -16:
             case Types.CLOB:
             case 2011: /*NCLOB */ {
-                // Try to get a blob object (delay loading till the data is used!)
+                // Try to get a clob object
                 try {
                     Clob clob = rs.getClob(index);
 
@@ -287,11 +259,11 @@ public class DBReadWriteHelper {
                     }
                     
                     return result;
-                    
-                } catch (SQLException ex) {
                     // Ok - can happen - the jdbc driver might not support
                     // clob data or can for example not provide a longvarchar
                     // as clob - so fall back to our implementation of clob
+                } catch (SQLException ex) {
+                } catch (java.lang.UnsupportedOperationException ex) {
                 }
                 String sdata = rs.getString(index);
                 if (rs.wasNull()) {
@@ -328,10 +300,24 @@ public class DBReadWriteHelper {
                     break;
 
                 case Types.BIGINT:
-                    numberObj = (valueObj instanceof Number)
-                            ? (Number) valueObj
-                            : new Long(valueObj.toString());
-                    ps.setLong(index, numberObj.longValue());
+                    if(valueObj instanceof BigInteger) {
+                        BigInteger biValue = (BigInteger) valueObj;
+                        if(biValue.compareTo(maxLong) > 0 || biValue.compareTo(minLong) < 0) {
+                            ps.setString(index, valueObj.toString());
+                        } else {
+                            ps.setLong(index, biValue.longValue());
+                        }
+                    } else if (valueObj instanceof Number) {
+                        Number numberValue = (Number) valueObj;
+                        ps.setLong(index, numberValue.longValue());
+                    } else {
+                        BigInteger biValue = new BigInteger(valueObj.toString());
+                        if(biValue.compareTo(maxLong) > 0 || biValue.compareTo(minLong) < 0) {
+                            ps.setString(index, valueObj.toString());
+                        } else {
+                            ps.setLong(index, biValue.longValue());
+                        }
+                    }
                     break;
 
                 case Types.NUMERIC:
@@ -460,8 +446,17 @@ public class DBReadWriteHelper {
                     return TimeType.convert(valueObj);
 
                 case Types.BIGINT:
-                    return valueObj instanceof Long ? valueObj : new Long(valueObj.toString());
-
+                    if(valueObj instanceof Long) {
+                        return valueObj;
+                    } else {
+                        BigInteger value = new BigInteger(valueObj.toString());
+                        if(value.compareTo(minLong) < 0  || value.compareTo(maxUnsignedLong) > 0) {
+                            throw new NumberFormatException("Illegal value for BIGINT");
+                        } else {
+                            return value;
+                        }
+                    }
+                        
                 case Types.DOUBLE:
                     return valueObj instanceof Double ? valueObj : new Double(valueObj.toString());
 

@@ -49,12 +49,16 @@ import java.sql.Blob;
 import java.sql.Clob;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JTable;
+import javax.swing.UIManager;
 import javax.swing.table.TableCellRenderer;
 import org.jdesktop.swingx.renderer.*;
 import org.netbeans.modules.db.dataview.util.DataViewUtils;
+import org.netbeans.modules.db.dataview.util.LobHelper;
 import org.netbeans.modules.db.dataview.util.TimeType;
 import org.netbeans.modules.db.dataview.util.TimestampType;
 
@@ -101,7 +105,7 @@ public class ResultSetCellRenderer extends DefaultTableRenderer {
         });
     }
 
-    public ResultSetCellRenderer(ComponentProvider componentProvider) {
+    public ResultSetCellRenderer(ComponentProvider<? extends JComponent> componentProvider) {
         super(componentProvider);
     }
 
@@ -119,7 +123,7 @@ public class ResultSetCellRenderer extends DefaultTableRenderer {
             return NULL_RENDERER.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
         } else if (value instanceof Number) {
             return NUMNBER_RENDERER.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-        } else if (DataViewUtils.isSQLConstantString(value)) {
+        } else if (DataViewUtils.isSQLConstantString(value, null)) {
             Component c = DEFAULT_RENDERER.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
             setTableCellToolTip(c, value);
             return c;            
@@ -195,13 +199,23 @@ class NullObjectCellRenderer extends SQLConstantsCellRenderer {
 
 class SQLConstantsCellRenderer extends CellFocusCustomRenderer {
 
+    private static final Color foregroundColor;
+
+    static {
+        Color foregroundColorFromMngr = UIManager.getColor(
+                "nb.dataview.table.sqlconstant.foreground"); //NOI18N
+        foregroundColor = foregroundColorFromMngr != null
+                ? foregroundColorFromMngr
+                : Color.DARK_GRAY;
+    }
+
     @Override
     public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
         Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
         c.setFont(new Font(c.getFont().getFamily(), Font.ITALIC, 9));
         ((JLabel) c).setToolTipText(value.toString());
         if (!isSelected) {
-            c.setForeground(Color.DARK_GRAY);
+            c.setForeground(foregroundColor);
         }
 
         return c;
@@ -214,46 +228,24 @@ class BlobCellRenderer extends SQLConstantsCellRenderer {
         if (!(value instanceof Blob)) {
             throw new IllegalArgumentException("BlobCellRenderer can only be used for Blobs");
         }
-        try {
-            Long size = ((Blob) value).length();
-            StringBuilder stringValue = new StringBuilder();
-            stringValue.append("<BLOB ");
-            if(size < 1000) {
-                stringValue.append(String.format("%1$d bytes", size));
-            } else if ( size < 1000000) {
-                stringValue.append(String.format("%1$d kB", size / 1000));
-            } else {
-                stringValue.append(String.format("%1$d MB", size / 1000000));
-            }
-            stringValue.append(">");
-            return super.getTableCellRendererComponent(table, stringValue.toString(), isSelected, hasFocus, row, column);
-        } catch (SQLException ex) {
-            return super.getTableCellRendererComponent(table, "<BLOB of unkown size>", isSelected, hasFocus, row, column);
-        }
+        return super.getTableCellRendererComponent(table, LobHelper.blobToString((Blob) value), isSelected, hasFocus, row, column);
     }
 }
 
-class ClobCellRenderer extends SQLConstantsCellRenderer {
+class ClobCellRenderer extends CellFocusCustomRenderer {
     @Override
     public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
         if (!(value instanceof Clob)) {
-            throw new IllegalArgumentException("ClobCellRenderer can only be used for Blobs");
+            throw new IllegalArgumentException(
+                    "ClobCellRenderer can only be used for Clobs");     //NOI18N
         }
-        try {
-            Long size = ((Clob) value).length();
-            StringBuilder stringValue = new StringBuilder();
-            stringValue.append("<CLOB ");
-            if(size < 1000) {
-                stringValue.append(String.format("%1$d Chars", size));
-            } else if ( size < 1000000) {
-                stringValue.append(String.format("%1$d kChars", size / 1000));
-            } else {
-                stringValue.append(String.format("%1$d MChars", size / 1000000));
-            }
-            stringValue.append(">");
-            return super.getTableCellRendererComponent(table, stringValue.toString(), isSelected, hasFocus, row, column);
-        } catch (SQLException ex) {
-            return super.getTableCellRendererComponent(table, "<CLOB of unkown size>", isSelected, hasFocus, row, column);
+        Clob clobValue = (Clob) value;
+
+        Component renderer = super.getTableCellRendererComponent(table,
+                LobHelper.clobToString(clobValue), isSelected, hasFocus, row, column);
+        if (renderer instanceof JComponent) {
+            ((JComponent) renderer).setToolTipText(LobHelper.clobToDescription(clobValue));
         }
+        return renderer;
     }
 }

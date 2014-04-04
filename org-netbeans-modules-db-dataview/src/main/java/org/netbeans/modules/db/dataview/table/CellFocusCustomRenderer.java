@@ -45,6 +45,7 @@ package org.netbeans.modules.db.dataview.table;
 import java.awt.Color;
 import java.awt.Component;
 import javax.swing.JTable;
+import javax.swing.UIManager;
 import javax.swing.table.DefaultTableCellRenderer;
 
 /**
@@ -52,6 +53,12 @@ import javax.swing.table.DefaultTableCellRenderer;
  * @author Shankari
  */
 public class CellFocusCustomRenderer extends DefaultTableCellRenderer {
+
+    private final static Color selectedCellBackgroundMgr = UIManager.getColor(
+            "nb.dataview.tablecell.focused"); //NOI18N
+    private final static Color selectedCellBackground = selectedCellBackgroundMgr != null
+            ? selectedCellBackgroundMgr
+            : new Color(204,204,255);
 
     public CellFocusCustomRenderer() {       
         setOpaque(true);
@@ -61,12 +68,14 @@ public class CellFocusCustomRenderer extends DefaultTableCellRenderer {
     public Component getTableCellRendererComponent(JTable table,Object value,boolean isSelected,boolean hasFocus,int row, int column) {
         super.getTableCellRendererComponent(table,value,isSelected,hasFocus,row,column);
         if (hasFocus) {
-            setBackground(new Color(204,204,255));
-            setForeground(Color.BLACK);
+            setBackground(selectedCellBackground);
+            setForeground(table.getForeground());
         } else if (isSelected) {
             setBackground(table.getSelectionBackground());
+            setForeground(table.getSelectionForeground());
         } else {
             setBackground(table.getBackground());
+            setForeground(table.getForeground());
         }
         this.putClientProperty("html.disable", Boolean.TRUE);
         return this;

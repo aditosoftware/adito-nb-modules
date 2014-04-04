@@ -55,9 +55,13 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.swing.table.TableModel;
+import java.util.regex.Pattern;
+import javax.swing.SwingUtilities;
+import org.netbeans.api.db.explorer.DatabaseConnection;
 import org.netbeans.modules.db.dataview.meta.DBColumn;
 import org.netbeans.modules.db.dataview.meta.DBConnectionFactory;
 import org.netbeans.modules.db.dataview.meta.DBException;
@@ -67,6 +71,8 @@ import org.netbeans.modules.db.dataview.util.DBReadWriteHelper;
 import org.netbeans.modules.db.dataview.util.DataViewUtils;
 import org.openide.DialogDisplayer;
 import org.openide.NotifyDescriptor;
+import org.openide.util.Cancellable;
+import org.openide.util.Mutex;
 import org.openide.util.NbBundle;
 import org.openide.util.RequestProcessor;
 
@@ -77,82 +83,239 @@ import org.openide.util.RequestProcessor;
  */
 class SQLExecutionHelper {
 
+    private static final Logger LOGGER = Logger.getLogger(SQLExecutionHelper.class.getName());
     private final DataView dataView;
     // the RequestProcessor used for executing statements.
     private final RequestProcessor rp = new RequestProcessor("SQLStatementExecution", 20, true); // NOI18N
-    private static final String LIMIT_CLAUSE = "LIMIT "; // NOI18N
-    public static final String OFFSET_CLAUSE = "OFFSET "; // NOI18N
-    private static final Logger LOGGER = Logger.getLogger(SQLExecutionHelper.class.getName());
+    private static final String LIMIT_CLAUSE = "LIMIT ";               // NOI18N
+    public static final String OFFSET_CLAUSE = "OFFSET ";              // NOI18N
+    private static Pattern GROUP_BY_IN_SELECT = null;
+    private boolean limitSupported = false;
+    private boolean useScrollableCursors = false;
+    private int resultSetScrollType = ResultSet.TYPE_FORWARD_ONLY;
+    private boolean supportesMultipleResultSets = false;
 
     SQLExecutionHelper(DataView dataView) {
         this.dataView = dataView;
     }
 
     void initialDataLoad() throws SQLException {
-        Statement stmt = null;
+        assert (! SwingUtilities.isEventDispatchThread()) : "Must be called off the EDT!";
+
+        /**
+         * Wrap initializing the SQL result into a runnable. This makes it
+         * possible to wait for the result in the main thread and cancel the
+         * running statement from the main thread.
+         *
+         * If no statement is run - Thread.isInterrupted is checked at critical
+         * points and allows us to do an early exit.
+         *
+         * See #159929.
+         */
+        class Loader implements Runnable, Cancellable {
+            // Indicate whether the execution is finished
+            public boolean finished = false;
+            // Hold an exception if it is thrown in the body of the runnable
+            public SQLException ex = null;
+            Statement stmt = null;
+
+            @Override
+            public void run() {
+                try {
+                    DatabaseConnection dc = dataView.getDatabaseConnection();
+                    Connection conn = DBConnectionFactory.getInstance().getConnection(dc);
+                    checkNonNullConnection(conn);
+                    checkSupportForMultipleResultSets(conn);
+                    DBMetaDataFactory dbMeta = new DBMetaDataFactory(conn);
+                    limitSupported = dbMeta.supportsLimit();
+                    String sql = dataView.getSQLString();
+                    boolean isSelect = isSelectStatement(sql);
+
+                    updateScrollableSupport(conn, dc, sql);
+
+                    if (Thread.interrupted()) {
+                        return;
+                    }
+                    stmt = prepareSQLStatement(conn, sql, true);
+
+                    if (Thread.interrupted()) {
+                        return;
+                    }
+                    // Read multiple Resultsets
+                    boolean isResultSet = executeSQLStatement(stmt, sql);
+
+                    // @todo: This needs clearing up => in light of request for
+                    // the ability to disable autocommit, this need to go
+                    if (!isResultSet || dataView.getUpdateCount() != -1) {
+                        if (!conn.getAutoCommit()) {
+                            conn.commit();
+                        }
+                        return;
+                    }
+                    if (Thread.interrupted()) {
+                        return;
+                    }
+                    boolean needReread = false;
+                    ResultSet rs = null;
+
+                    while (true) {
+                        if (isResultSet) {
+                            rs = stmt.getResultSet();
+
+                            Collection<DBTable> tables = dbMeta.generateDBTables(
+                                    rs, sql, isSelect);
+                            DataViewDBTable dvTable = new DataViewDBTable(tables);
+                            DataViewPageContext pageContext = dataView.addPageContext(
+                                    dvTable);
+                            needReread |= resultSetNeedsReloading(dvTable);
+
+                            if (!needReread) {
+                                loadDataFrom(pageContext, rs, useScrollableCursors);
+                            }
+                        }
+                        if (supportesMultipleResultSets) {
+                            isResultSet = stmt.getMoreResults();
+                            // @todo: Do somethink intelligent with the updatecounts
+                            int updateCount = stmt.getUpdateCount();
+                            if (isResultSet == false && updateCount == -1) {
+                                break;
+                            }
+                        } else {
+                            break;
+                        }
+                    }
+
+                    if (needReread) {
+                        isResultSet = executeSQLStatement(stmt, sql);
+                        int res = -1;
+                        while (true) {
+                            if (isResultSet) {
+                                res++;
+                                rs = stmt.getResultSet();
+                                DataViewPageContext pageContext = dataView.getPageContext(
+                                        res);
+                                loadDataFrom(pageContext, rs, useScrollableCursors);
+                            }
+                            if (supportesMultipleResultSets) {
+                                isResultSet = stmt.getMoreResults();
+                                // @todo: Do somethink intelligent with the updatecounts
+                                int updateCount = stmt.getUpdateCount();
+                                if (isResultSet == false && updateCount == -1) {
+                                    break;
+                                }
+                            } else {
+                                break;
+                            }
+                        }
+                    }
+                    // If total count was not retrieved using scrollable cursors,
+                    // compute it now.
+                    if (!useScrollableCursors && dataView.getPageContexts().size() > 0) {
+                        getTotalCount(isSelect, sql, stmt, dataView.getPageContext(0));
+                    }
+                    DataViewUtils.closeResources(rs);
+                } catch (SQLException sqlEx) {
+                    this.ex = sqlEx;
+                } catch (Exception e) {
+                  LOGGER.log(Level.WARNING, null, e);
+                } finally {
+                    DataViewUtils.closeResources(stmt);
+                    synchronized (Loader.this) {
+                        finished = true;
+                        this.notifyAll();
+                    }
+                }
+            }
+
+            @Override
+            public boolean cancel() {
+                if (stmt != null) {
+                    try {
+                        stmt.cancel();
+                    } catch (SQLException sqlEx) {
+                        LOGGER.log(Level.FINE, null, sqlEx);
+                        // Ok! The DBMS might not support Statement-Canceling
+                    }
+                }
+                return true;
+            }
+
+            /**
+             * Check that the connection is not null. If it is null, try to find
+             * cause of the failure and throw an exception.
+             */
+            private void checkNonNullConnection(Connection conn) throws
+                    SQLException {
+                if (conn == null) {
+                    String msg;
+                    Throwable t = DBConnectionFactory.getInstance()
+                            .getLastException();
+                    if (t != null) {
+                        msg = t.getMessage();
+                    } else {
+                        msg = NbBundle.getMessage(SQLExecutionHelper.class,
+                                "MSG_connection_failure", //NOI18N
+                                dataView.getDatabaseConnection());
+                    }
+                    NotifyDescriptor nd = new NotifyDescriptor.Message(msg,
+                            NotifyDescriptor.ERROR_MESSAGE);
+                    DialogDisplayer.getDefault().notifyLater(nd);
+                    LOGGER.log(Level.INFO, msg, t);
+                    throw new SQLException(msg, t);
+                }
+            }
+
+            private void checkSupportForMultipleResultSets(Connection conn) {
+                try {
+                    supportesMultipleResultSets = conn.getMetaData().supportsMultipleResultSets();
+                } catch (SQLException | RuntimeException e) {
+                    LOGGER.log(Level.INFO, "Database driver throws exception "  //NOI18N
+                            + "when checking for multiple resultset support."); //NOI18N
+                    if (LOGGER.isLoggable(Level.FINE)) {
+                        LOGGER.log(Level.FINE, null, ex);
+                    }
+                }
+            }
+        }
+        Loader l = new Loader();
+        Future<?> f = rp.submit(l);
         try {
-            Connection conn = DBConnectionFactory.getInstance().getConnection(dataView.getDatabaseConnection());
-            String msg = "";
-            if (conn == null) {
-                Throwable ex = DBConnectionFactory.getInstance().getLastException();
-                if (ex != null) {
-                    msg = ex.getMessage();
+            f.get();
+        } catch (InterruptedException ex) {
+            f.cancel(true);
+        } catch (ExecutionException ex) {
+            throw new RuntimeException(ex.getCause());
+        }
+        synchronized (l) {
+            while (true) {
+                if (!l.finished) {
+                    try {
+                        l.wait();
+                    } catch (InterruptedException ex) {
+                    }
                 } else {
-                    msg = NbBundle.getMessage(SQLExecutionHelper.class, "MSG_connection_failure", dataView.getDatabaseConnection());
+                    break;
                 }
-                NotifyDescriptor nd = new NotifyDescriptor.Message(msg, NotifyDescriptor.ERROR_MESSAGE);
-                DialogDisplayer.getDefault().notifyLater(nd);
-                throw new IllegalStateException(msg);
             }
-
-            DBMetaDataFactory dbMeta = new DBMetaDataFactory(conn);
-            dataView.setLimitSupported(dbMeta.supportsLimit());
-            String sql = dataView.getSQLString();
-            boolean isSelect = isSelectStatement(sql);
-
-            stmt = prepareSQLStatement(conn, sql);
-            executeSQLStatement(stmt, sql);
-
-            if (dataView.getUpdateCount() != -1) {
-                if (!conn.getAutoCommit()) {
-                    conn.commit();
-                }
-                return;
-            }
-
-            ResultSet rs = null;
-            if(dataView.hasResultSet()) {
-                rs = stmt.getResultSet();
-            }
-
-            if (rs == null) {
-                if (!conn.getAutoCommit()) {
-                    conn.commit();
-                }
-                return;
-            }
-            Collection<DBTable> tables = dbMeta.generateDBTables(rs, sql, isSelect);
-            DataViewDBTable dvTable = new DataViewDBTable(tables);
-            dataView.setDataViewDBTable(dvTable);
-            if (resultSetNeedsReloading()) {
-                executeSQLStatement(stmt, sql);
-                rs = stmt.getResultSet();
-            }
-            loadDataFrom(rs);
-            DataViewUtils.closeResources(rs);
-            getTotalCount(isSelect, sql, stmt);
-        } finally {
-            DataViewUtils.closeResources(stmt);
+        }
+        if (l.ex != null) {
+            throw l.ex;
         }
     }
 
-    RequestProcessor.Task executeInsertRow(final String insertSQL, final Object[] insertedRow) {
+    RequestProcessor.Task executeInsertRow(final DataViewPageContext pageContext,
+            final DBTable table,
+            final String insertSQL,
+            final Object[] insertedRow) {
+        dataView.setEditable(false);
+
         String title = NbBundle.getMessage(SQLExecutionHelper.class, "LBL_sql_insert");
         SQLStatementExecutor executor = new SQLStatementExecutor(dataView, title, "") {
 
             @Override
             public void execute() throws SQLException, DBException {
                 dataView.setEditable(false);
+                List<DBColumn> columns = table.getColumnList();
                 PreparedStatement pstmt = conn.prepareStatement(insertSQL);
                 try {
                     int pos = 1;
@@ -160,13 +323,12 @@ class SQLExecutionHelper {
                         Object val = insertedRow[i];
 
                         // Check for Constant e.g <NULL>, <DEFAULT>, <CURRENT_TIMESTAMP> etc
-                        if (DataViewUtils.isSQLConstantString(val,
-                                dataView.getDataViewDBTable().getColumn(i))) {
+                        if (DataViewUtils.isSQLConstantString(val, columns.get(i))) {
                             continue;
                         }
 
                         // literals
-                        int colType = dataView.getDataViewDBTable().getColumnType(i);
+                        int colType = columns.get(i).getJdbcType();
                         DBReadWriteHelper.setAttributeValue(pstmt, pos++, colType, val);
                     }
 
@@ -183,23 +345,33 @@ class SQLExecutionHelper {
 
             @Override
             public void finished() {
-                dataView.setEditable(true);
+                dataView.resetEditable();
                 commitOrRollback(NbBundle.getMessage(SQLExecutionHelper.class, "LBL_insert_command"));
             }
 
             @Override
             protected void executeOnSucess() {
-                if (dataView.getDataViewPageContext().getTotalRows() < 0) {
-                    dataView.getDataViewPageContext().setTotalRows(0);
-                    dataView.getDataViewPageContext().first();
-                }
-                dataView.incrementRowSize(1);
-
                 // refresh when required
-                if (dataView.getDataViewPageContext().refreshRequiredOnInsert()) {
+                Boolean needRequery = Mutex.EVENT.readAccess(new Mutex.Action<Boolean>() {
+                    @Override
+                    public Boolean run() {
+                        if (pageContext.getTotalRows() < 0) {
+                            pageContext.setTotalRows(0);
+                            pageContext.first();
+                        }
+                        pageContext.incrementRowSize(1);
+                        return pageContext.refreshRequiredOnInsert();
+                    };
+                });
+                if(needRequery) {
                     SQLExecutionHelper.this.executeQuery();
                 } else {
-                    reinstateToolbar();
+                    Mutex.EVENT.readAccess(new Runnable() {
+                        @Override
+                        public void run() {
+                            reinstateToolbar();
+                        }
+                    });
                 }
             }
         };
@@ -209,34 +381,44 @@ class SQLExecutionHelper {
         return task;
     }
 
-    void executeDeleteRow(final DataViewTableUI rsTable) {
-        String title = NbBundle.getMessage(SQLExecutionHelper.class, "LBL_sql_delete");
-        final int[] rows = rsTable.getSelectedRows();
-        SQLStatementExecutor executor = new SQLStatementExecutor(dataView, title, "") {
+    void executeDeleteRow(final DataViewPageContext pageContext, final DBTable table, final DataViewTableUI rsTable) {
+        dataView.setEditable(false);
 
+        SQLStatementGenerator generator = dataView.getSQLStatementGenerator();
+        String title = NbBundle.getMessage(SQLExecutionHelper.class, "LBL_sql_delete");
+
+        class DeleteElement {
+            public List<Object> values = new ArrayList<Object>();
+            public List<Integer> types = new ArrayList<Integer>();
+            public String sql;
+        }
+
+        final List<DeleteElement> rows = new ArrayList<DeleteElement>();
+        for(int viewRow: rsTable.getSelectedRows()) {
+            int modelRow = rsTable.convertRowIndexToModel(viewRow);
+            DeleteElement de = new DeleteElement();
+            de.sql = generator.generateDeleteStatement(table, de.types, de.values, modelRow, rsTable.getModel());
+            rows.add(de);
+        }
+
+        SQLStatementExecutor executor = new SQLStatementExecutor(dataView, title, "") {
             @Override
             public void execute() throws SQLException, DBException {
                 dataView.setEditable(false);
-
-                for (int j = 0; j < rows.length && !error; j++) {
-                    if (Thread.currentThread().isInterrupted()) {
+                for (DeleteElement de: rows) {
+                    if (Thread.currentThread().isInterrupted() || error) {
                         break;
                     }
-                    deleteARow(rsTable.convertRowIndexToModel(rows[j]), rsTable.getModel());
+                    deleteARow(de);
                 }
             }
 
-            private void deleteARow(int rowNum, TableModel tblModel) throws SQLException, DBException {
-                final List<Object> values = new ArrayList<Object>();
-                final List<Integer> types = new ArrayList<Integer>();
-
-                SQLStatementGenerator generator = dataView.getSQLStatementGenerator();
-                final String deleteStmt = generator.generateDeleteStatement(types, values, rowNum, tblModel);
-                PreparedStatement pstmt = conn.prepareStatement(deleteStmt);
+            private void deleteARow(DeleteElement deleteRow) throws SQLException, DBException {
+                PreparedStatement pstmt = conn.prepareStatement(deleteRow.sql);
                 try {
                     int pos = 1;
-                    for (Object val : values) {
-                        DBReadWriteHelper.setAttributeValue(pstmt, pos, types.get(pos - 1), val);
+                    for (Object val : deleteRow.values) {
+                        DBReadWriteHelper.setAttributeValue(pstmt, pos, deleteRow.types.get(pos - 1), val);
                         pos++;
                     }
 
@@ -256,13 +438,13 @@ class SQLExecutionHelper {
 
             @Override
             public void finished() {
-                dataView.setEditable(true);
+                dataView.resetEditable();
                 commitOrRollback(NbBundle.getMessage(SQLExecutionHelper.class, "LBL_delete_command"));
             }
 
             @Override
             protected void executeOnSucess() {
-                dataView.decrementRowSize(rows.length);
+                pageContext.decrementRowSize(rows.size());
                 SQLExecutionHelper.this.executeQuery();
             }
         };
@@ -272,8 +454,44 @@ class SQLExecutionHelper {
         task.schedule(0);
     }
 
-    void executeUpdateRow(final DataViewTableUI rsTable, final boolean selectedOnly) {
+    void executeUpdateRow(final DBTable table, final DataViewTableUI rsTable, final boolean selectedOnly) {
+        dataView.setEditable(false);
+
+        SQLStatementGenerator generator = dataView.getSQLStatementGenerator();
+        final DataViewTableUIModel dataViewTableUIModel = rsTable.getModel();
         String title = NbBundle.getMessage(SQLExecutionHelper.class, "LBL_sql_update");
+
+        class UpdateElement {
+            public List<Object> values = new ArrayList<Object>();
+            public List<Integer> types = new ArrayList<Integer>();
+            public String sql;
+            public Integer key;
+        }
+
+        final List<UpdateElement> updateSet = new ArrayList<UpdateElement>();
+
+        int[] viewRows = rsTable.getSelectedRows();
+        List<Integer> modelRows = new ArrayList<Integer>();
+        for(Integer viewRow: viewRows) {
+            modelRows.add(rsTable.convertRowIndexToModel(viewRow));
+        }
+
+        for (Integer key : dataViewTableUIModel.getUpdateKeys()) {
+            if (modelRows.contains(key) || (!selectedOnly)) {
+                UpdateElement ue = new UpdateElement();
+                try {
+                    ue.key = key;
+                    ue.sql = generator.generateUpdateStatement(table, key,
+                            dataViewTableUIModel.getChangedData(key), ue.values, ue.types,
+                            rsTable.getModel());
+                    updateSet.add(ue);
+                } catch (DBException ex) {
+                    // The model protects against illegal values, so rethrow
+                    throw new RuntimeException(ex);
+                }
+            }
+        }
+
         SQLStatementExecutor executor = new SQLStatementExecutor(dataView, title, "") {
 
             private PreparedStatement pstmt;
@@ -281,54 +499,20 @@ class SQLExecutionHelper {
 
             @Override
             public void execute() throws SQLException, DBException {
-                dataView.setEditable(false);
-                if (selectedOnly) {
-                    updateSelected();
-                } else {
-                    for (Integer key : dataView.getUpdatedRowContext().getUpdateKeys()) {
-                        if (Thread.currentThread().isInterrupted()) {
-                            break;
-                        } else {
-                            updateARow(key);
-                            keysToRemove.add(key);
-                        }
+                for (UpdateElement ue : updateSet) {
+                    if(Thread.interrupted()) {
+                        break;
                     }
+                    updateARow(ue);
+                    keysToRemove.add(ue.key);
                 }
             }
 
-            private void updateSelected() throws SQLException, DBException {
-                int[] rows = rsTable.getSelectedRows();
-                UpdatedRowContext tblContext = dataView.getUpdatedRowContext();
-                for (int j = 0; j < rows.length && !error; j++) {
-                    Set<Integer> keys = tblContext.getUpdateKeys();
-                    for (Integer key : keys) {
-                        if (Thread.currentThread().isInterrupted()) {
-                            break;
-                        } else if (key == rows[j]) {
-                            updateARow(key);
-                            keysToRemove.add(key);
-                        }
-                    }
-                }
-            }
-
-            private void updateARow(Integer key) throws SQLException, DBException {
-                UpdatedRowContext updatedRowCtx = dataView.getUpdatedRowContext();
-                SQLStatementGenerator generator = dataView.getSQLStatementGenerator();
-
-                List<Object> values = new ArrayList<Object>();
-                List<Integer> types = new ArrayList<Integer>();
-                String updateStmt = generator.generateUpdateStatement(key, updatedRowCtx.getChangedData(key), values, types, rsTable.getModel());
-
-                pstmt = conn.prepareStatement(updateStmt);
+            private void updateARow(UpdateElement ue) throws SQLException, DBException {
+                pstmt = conn.prepareStatement(ue.sql);
                 int pos = 1;
-                for (Object val : values) {
-                    // Check for Constant e.g <NULL>, <DEFAULT>, <CURRENT_TIMESTAMP> etc
-                    if (DataViewUtils.isSQLConstantString(val)) {
-                        continue;
-                    }
-
-                    DBReadWriteHelper.setAttributeValue(pstmt, pos, types.get(pos - 1), val);
+                for (Object val : ue.values) {
+                    DBReadWriteHelper.setAttributeValue(pstmt, pos, ue.types.get(pos - 1), val);
                     pos++;
                 }
 
@@ -349,18 +533,22 @@ class SQLExecutionHelper {
 
             @Override
             public void finished() {
-                dataView.setEditable(true);
+                dataView.resetEditable();
                 commitOrRollback(NbBundle.getMessage(SQLExecutionHelper.class, "LBL_update_command"));
             }
 
             @Override
             protected void executeOnSucess() {
-                UpdatedRowContext tblContext = dataView.getUpdatedRowContext();
-                for (Integer key : keysToRemove) {
-                    tblContext.removeUpdateForSelectedRow(key);
-                }
-                dataView.syncPageWithTableModel();
-                reinstateToolbar();
+                Mutex.EVENT.writeAccess(new Runnable() {
+                    @Override
+                    public void run() {
+                        DataViewTableUIModel tblContext = rsTable.getModel();
+                        for (Integer key : keysToRemove) {
+                            tblContext.removeUpdateForSelectedRow(key, false);
+                        }
+                        reinstateToolbar();
+                    }
+                });
             }
         };
         RequestProcessor.Task task = rp.create(executor);
@@ -369,7 +557,7 @@ class SQLExecutionHelper {
     }
 
     // Truncate is allowed only when there is single table used in the query.
-    void executeTruncate() {
+    void executeTruncate(final DataViewPageContext pageContext, final DBTable dbTable) {
         String msg = NbBundle.getMessage(SQLExecutionHelper.class, "MSG_truncate_table_progress");
         String title = NbBundle.getMessage(SQLExecutionHelper.class, "LBL_sql_truncate");
         SQLStatementExecutor executor = new SQLStatementExecutor(dataView, title, msg) {
@@ -378,9 +566,6 @@ class SQLExecutionHelper {
 
             @Override
             public void execute() throws SQLException, DBException {
-
-
-                DBTable dbTable = dataView.getDataViewDBTable().geTable(0);
                 String truncateSql = "TRUNCATE TABLE " + dbTable.getFullyQualifiedName(true); // NOI18N
 
                 try {
@@ -403,8 +588,8 @@ class SQLExecutionHelper {
 
             @Override
             protected void executeOnSucess() {
-                dataView.getDataViewPageContext().setTotalRows(0);
-                dataView.getDataViewPageContext().first();
+                pageContext.setTotalRows(0);
+                pageContext.first();
                 SQLExecutionHelper.this.executeQuery();
             }
         };
@@ -414,8 +599,19 @@ class SQLExecutionHelper {
         task.schedule(0);
     }
 
+    void executeQueryOffEDT() {
+        rp.post(new Runnable() {
+            @Override
+            public void run() {
+                executeQuery();
+            }
+        });
+    }
+
     // Once Data View is created the it assumes the query never changes.
     void executeQuery() {
+        assert (! SwingUtilities.isEventDispatchThread());
+
         String title = NbBundle.getMessage(SQLExecutionHelper.class, "LBL_sql_executequery");
         SQLStatementExecutor executor = new SQLStatementExecutor(dataView, title, dataView.getSQLString()) {
 
@@ -427,18 +623,57 @@ class SQLExecutionHelper {
             public void execute() throws SQLException, DBException {
                 dataView.setEditable(false);
                 String sql = dataView.getSQLString();
-                stmt = prepareSQLStatement(conn, sql);
+                if (Thread.interrupted()) {
+                    return;
+                }
+                boolean getTotal = false;
 
-                // Execute the query
+                // Get total row count
+                for (DataViewPageContext pageContext : dataView.getPageContexts()) {
+                    if (pageContext.getTotalRows() == -1) {
+                        getTotal = true;
+                        break;
+                    }
+                }
+
+                // Get total row count
+                stmt = prepareSQLStatement(conn, sql, getTotal);
+
+                // Execute the query and retrieve all resultsets
                 try {
-                    executeSQLStatement(stmt, sql);
-                    if (dataView.hasResultSet()) {
-                        ResultSet rs = stmt.getResultSet();
-                        loadDataFrom(rs);
-                        DataViewUtils.closeResources(rs);
-                    } else {
+                    if (Thread.interrupted()) {
                         return;
                     }
+                    boolean resultSet = executeSQLStatement(stmt, sql);
+
+                    ResultSet rs = null;
+                    int res = -1;
+
+                    while (true) {
+                        if (resultSet) {
+                            res++;
+                            DataViewPageContext pageContext = dataView.getPageContext(
+                                    res);
+                            rs = stmt.getResultSet();
+                            loadDataFrom(pageContext, rs, getTotal && useScrollableCursors);
+                        }
+                        if (supportesMultipleResultSets) {
+                            resultSet = stmt.getMoreResults();
+                            // @todo: Do somethink intelligent with the updatecounts
+                            int updateCount = stmt.getUpdateCount();
+                            if (resultSet == false && updateCount == -1) {
+                                break;
+                            }
+                        } else {
+                            break;
+                        }
+                    }
+
+                    // Get total count using the old-fashioned method.
+                    if (!useScrollableCursors && getTotal && dataView.getPageContexts().size() > 0) {
+                        getTotalCount(isSelectStatement(sql), sql, stmt, dataView.getPageContext(0));
+                    }
+                    DataViewUtils.closeResources(rs);
                 } catch (SQLException sqlEx) {
                     String title = NbBundle.getMessage(SQLExecutionHelper.class, "MSG_error");
                     String msg = NbBundle.getMessage(SQLExecutionHelper.class, "Confirm_Close");
@@ -450,25 +685,32 @@ class SQLExecutionHelper {
                     }
                     throw sqlEx;
                 }
-
-                // Get total row count
-                if (dataView.getDataViewPageContext().getTotalRows() == -1) {
-                    getTotalCount(isSelectStatement(sql), sql, stmt);
-                }
             }
 
             @Override
             public void finished() {
                 DataViewUtils.closeResources(stmt);
-                dataView.setEditable(lastEditState);
+                dataView.resetEditable();
                 synchronized (dataView) {
                     if (error) {
                         dataView.setErrorStatusText(ex);
                     }
-                    dataView.getUpdatedRowContext().removeAllUpdates();
                     dataView.resetToolbar(error);
-                    dataView.setRowsInTableModel();
                 }
+            }
+
+            @Override
+            public boolean cancel() {
+                boolean superResult = super.cancel();
+                if (stmt != null) {
+                    try {
+                        stmt.cancel();
+                    } catch (SQLException sqlEx) {
+                        LOGGER.log(Level.FINEST, null, sqlEx);
+                        // Ok! The DBMS might not support Statement-Canceling
+                    }
+                }
+                return superResult;
             }
         };
         RequestProcessor.Task task = rp.create(executor);
@@ -476,52 +718,65 @@ class SQLExecutionHelper {
         task.schedule(0);
     }
 
-    void loadDataFrom(ResultSet rs) throws SQLException {
+    private void loadDataFrom(final DataViewPageContext pageContext, ResultSet rs, boolean getTotal) throws SQLException {
         if (rs == null) {
             return;
         }
 
-        int pageSize = dataView.getDataViewPageContext().getPageSize();
-        int startFrom = 0;
-        if (!dataView.isLimitSupported() || isLimitUsedInSelect(dataView.getSQLString())) {
-            startFrom = dataView.getDataViewPageContext().getCurrentPos() - 1;
+        int pageSize = pageContext.getPageSize();
+        int startFrom;
+        if (useScrollableCursors ) {
+            startFrom = pageContext.getCurrentPos(); // will use rs.absolute
+        } else if (!limitSupported || isLimitUsedInSelect(dataView.getSQLString())) {
+            startFrom = pageContext.getCurrentPos(); // need to use slow skip
+        } else {
+            startFrom = 0; // limit added to select, can start from first item
         }
 
-        DataViewDBTable tblMeta = dataView.getDataViewDBTable();
-        List<Object[]> rows = new ArrayList<Object[]>();
-        int colCnt = tblMeta.getColumnCount();
+        final List<Object[]> rows = new ArrayList<Object[]>();
+        int colCnt = pageContext.getTableMetaData().getColumnCount();
         try {
-            // Skip till current position
-            boolean lastRowPicked = rs.next();
-            int curRowPos = 1;
-            while (lastRowPicked && curRowPos < (startFrom + 1)) {
-                if (Thread.currentThread().isInterrupted()) {
-                    return;
+            boolean hasNext = false;
+            boolean needSlowSkip = true;
+
+            if (useScrollableCursors
+                    && (rs.getType() == ResultSet.TYPE_SCROLL_INSENSITIVE
+                    || rs.getType() == ResultSet.TYPE_SCROLL_SENSITIVE)) {
+                try {
+                    hasNext = rs.absolute(startFrom);
+                    needSlowSkip = false;
+                } catch (SQLException ex) {
+                    LOGGER.log(Level.FINE, "Absolute positioning failed", ex); // NOI18N
                 }
-                lastRowPicked = rs.next();
-                curRowPos++;
+            }
+
+            if (needSlowSkip) {
+                // Skip till current position
+                hasNext = rs.next();
+                int curRowPos = 1;
+                while (hasNext && curRowPos < startFrom) {
+                    if (Thread.currentThread().isInterrupted()) {
+                        return;
+                    }
+                    hasNext = rs.next();
+                    curRowPos++;
+                }
             }
 
             // Get next page
             int rowCnt = 0;
-            boolean hasNext = false;
-            if (! lastRowPicked) {
-                hasNext = rs.next();
-            }
-            while (((pageSize == -1) || (pageSize > rowCnt)) && (lastRowPicked || hasNext)) {
+            while (((pageSize == -1) || (pageSize > rowCnt)) && (hasNext)) {
                 if (Thread.currentThread().isInterrupted()) {
                     return;
                 }
 
                 Object[] row = new Object[colCnt];
                 for (int i = 0; i < colCnt; i++) {
-                    row[i] = DBReadWriteHelper.readResultSet(rs, tblMeta.getColumn(i), i + 1);
+                    row[i] = DBReadWriteHelper.readResultSet(rs,
+                            pageContext.getTableMetaData().getColumn(i), i + 1);
                 }
                 rows.add(row);
                 rowCnt++;
-                if (lastRowPicked) {
-                    lastRowPicked = false;
-                }
                 try {
                     hasNext = rs.next();
                 } catch (SQLException x) {
@@ -529,73 +784,87 @@ class SQLExecutionHelper {
                     hasNext = false;
                 }
             }
+
+            if (getTotal) {
+                Integer result = null;
+                assert useScrollableCursors : "Scrollable cursors need" //NOI18N
+                        + " to be enabled to get total counts here";    //NOI18N
+                if (rs.getType() == ResultSet.TYPE_SCROLL_INSENSITIVE
+                        || rs.getType() == ResultSet.TYPE_SCROLL_SENSITIVE) {
+                    try {
+                        rs.last();
+                        result = rs.getRow();
+                    } catch (SQLException ex) {
+                        LOGGER.log(Level.INFO,
+                                "Failed to jump to end of SQL Statement '{0}' - cause: {1}",
+                                new Object[]{dataView.getSQLString(), ex});
+                    }
+                }
+
+                pageContext.setTotalRows(result);
+            }
         } catch (SQLException e) {
             LOGGER.log(Level.SEVERE, "Failed to set up table model.", e); // NOI18N
             throw e;
         } finally {
-            dataView.getDataViewPageContext().setCurrentRows(rows);
-        }
-    }
-
-    void setTotalCount(ResultSet countresultSet) {
-        try {
-            if (countresultSet == null) {
-                dataView.getDataViewPageContext().setTotalRows(-1);
-            } else {
-                if (countresultSet.next()) {
-                    int count = countresultSet.getInt(1);
-                    dataView.getDataViewPageContext().setTotalRows(count);
+            Mutex.EVENT.writeAccess(new Mutex.Action<Void>() {
+                @Override
+                public Void run() {
+                    pageContext.getModel().setData(rows);
+                    return null;
                 }
-            }
-        } catch (SQLException ex) {
-            LOGGER.log(Level.SEVERE, "Could not get total row count " + ex); // NOI18N
+            });
         }
     }
 
-    private String appendLimitIfRequired(String sql) {
-        if (dataView.isLimitSupported() && isSelectStatement(sql)) {
-            if (!isLimitUsedInSelect(sql)) {
-                sql += ' ' + LIMIT_CLAUSE + dataView.getDataViewPageContext().getPageSize();
-                sql += ' ' + OFFSET_CLAUSE + (dataView.getDataViewPageContext().getCurrentPos() - 1);
-            }
-        }
-
-        return sql;
-    }
-
-    private Statement prepareSQLStatement(Connection conn, String sql) throws SQLException {
+    private Statement prepareSQLStatement(Connection conn, String sql, boolean needTotal) throws SQLException {
         Statement stmt = null;
         if (sql.startsWith("{")) { // NOI18N
-
-            stmt = conn.prepareCall(sql);
+            stmt = useScrollableCursors
+                    ? conn.prepareCall(sql, resultSetScrollType, ResultSet.CONCUR_READ_ONLY)
+                    : conn.prepareCall(sql);
         } else if (isSelectStatement(sql)) {
-            stmt = conn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
-            int pageSize = dataView.getDataViewPageContext().getPageSize();
+            stmt = useScrollableCursors
+                    ? conn.createStatement(resultSetScrollType, ResultSet.CONCUR_READ_ONLY)
+                    : conn.createStatement();
 
-            try {
-                stmt.setFetchSize(pageSize);
-            } catch (SQLException e) {
-                // ignore -  used only as a hint to the driver to optimize
-                LOGGER.log(Level.WARNING, "Unable to set Fetch size" + e); // NOI18N
-            }
+            // set a reasonable fetchsize
+            setFetchSize(stmt, 50);
 
-            try {
-                if (dataView.isLimitSupported() && ! isLimitUsedInSelect(sql)) {
-                    stmt.setMaxRows(pageSize);
-                } else {
-                    stmt.setMaxRows(dataView.getDataViewPageContext().getCurrentPos() + pageSize);
+            // hint to only query a certain number of rows -> potentially
+            // improve performance for low page numbers
+            // only usable for "non-total" resultsets
+            if (!needTotal) {
+                try {
+                    Integer maxRows = 0;
+                    for (DataViewPageContext pageContext : dataView.getPageContexts()) {
+                        int currentRows = pageContext.getCurrentPos();
+                        int pageSize = pageContext.getPageSize();
+                        if (pageSize <= 0) {
+                            maxRows = 0;
+                            break;
+                        } else {
+                            maxRows = Math.max(maxRows, currentRows + pageSize);
+                        }
+                    }
+                    stmt.setMaxRows(maxRows);
+                } catch (SQLException exc) {
+                    LOGGER.log(Level.WARNING, "Unable to set Max row count", exc); // NOI18N
+                    try {
+                        stmt.setMaxRows(0);
+                    } catch (SQLException ex) {}
                 }
-            } catch (SQLException exc) {
-                LOGGER.log(Level.WARNING, "Unable to set Max row size" + exc); // NOI18N
             }
         } else {
-            stmt = conn.createStatement();
+            stmt = useScrollableCursors
+                    ? conn.createStatement(resultSetScrollType, ResultSet.CONCUR_READ_ONLY)
+                    : conn.createStatement();
         }
         return stmt;
     }
 
-    private void executeSQLStatement(Statement stmt, String sql) throws SQLException {
-        LOGGER.log(Level.FINE, "Statement: " + sql); // NOI18N
+    private boolean executeSQLStatement(Statement stmt, String sql) throws SQLException {
+        LOGGER.log(Level.FINE, "Statement: {0}", sql); // NOI18N
         dataView.setInfoStatusText(NbBundle.getMessage(SQLExecutionHelper.class, "LBL_sql_executestmt") + sql);
 
         long startTime = System.currentTimeMillis();
@@ -604,29 +873,27 @@ class SQLExecutionHelper {
             isResultSet = ((PreparedStatement) stmt).execute();
         } else {
             try {
-                isResultSet = stmt.execute(appendLimitIfRequired(sql));
+                DataViewPageContext pc = dataView.getPageContexts().size() > 0
+                        ? dataView.getPageContext(0) : null;
+                isResultSet = stmt.execute(appendLimitIfRequired(pc, sql));
             } catch (NullPointerException ex) {
-                LOGGER.log(Level.SEVERE, "Failed to execute SQL Statement [" + sql + "], cause: " + ex);
+                LOGGER.log(Level.SEVERE, "Failed to execute SQL Statement [{0}], cause: {1}", new Object[] {sql, ex});
                 throw new SQLException(ex);
             } catch (SQLException sqlExc) {
-                if (sqlExc.getErrorCode() == 1064 && sqlExc.getSQLState().equals("37000")) {
-                    isResultSet = stmt.execute(sql);
-                } else {
-                    LOGGER.log(Level.SEVERE, "Failed to execute SQL Statement [" + sql + "], cause: " + sqlExc);
-                    throw sqlExc;
-                }
+                LOGGER.log(Level.SEVERE, "Failed to execute SQL Statement [{0}], cause: {1}", new Object[]{sql, sqlExc});
+                throw sqlExc;
             }
         }
 
         long executionTime = System.currentTimeMillis() - startTime;
         synchronized (dataView) {
-            dataView.setHasResultSet(isResultSet);
             dataView.setUpdateCount(stmt.getUpdateCount());
             dataView.setExecutionTime(executionTime);
         }
+        return isResultSet;
     }
 
-    private void executePreparedStatement(PreparedStatement stmt) throws SQLException {
+    private boolean executePreparedStatement(PreparedStatement stmt) throws SQLException {
         long startTime = System.currentTimeMillis();
         boolean isResultSet = stmt.execute();
 
@@ -635,36 +902,28 @@ class SQLExecutionHelper {
         dataView.setInfoStatusText(NbBundle.getMessage(SQLExecutionHelper.class, "MSG_execution_success", execTimeStr));
 
         synchronized (dataView) {
-            dataView.setHasResultSet(isResultSet);
             dataView.setUpdateCount(stmt.getUpdateCount());
             dataView.setExecutionTime(executionTime);
         }
+        return isResultSet;
     }
 
-    private void getTotalCount(boolean isSelect, String sql, Statement stmt) {
-        if (! isSelect) {
-            setTotalCount(null);
-            return ;
-        }
-
-        // Case for LIMIT n OFFSET m
-        if (isLimitUsedInSelect(sql)) {
-            try {
-                String lmtStr = sql.toUpperCase().split(LIMIT_CLAUSE)[1].trim();
-                int rCnt = Integer.parseInt(lmtStr.split(" ")[0]);
-                dataView.getDataViewPageContext().setTotalRows(rCnt);
-                return;
-            } catch (NumberFormatException nex) {
-            }
+    private void getTotalCount(boolean isSelect, String sql, Statement stmt,
+            DataViewPageContext pageContext) {
+        if (!isSelect) {
+            setTotalCount(null, pageContext);
+            return;
         }
 
         // SELECT COUNT(*) FROM (sqlquery) alias
         ResultSet cntResultSet = null;
         try {
-            cntResultSet = stmt.executeQuery(SQLStatementGenerator.getCountAsSubQuery(sql));
-            setTotalCount(cntResultSet);
+            cntResultSet = stmt.executeQuery(
+                    SQLStatementGenerator.getCountAsSubQuery(sql));
+            setTotalCount(cntResultSet, pageContext);
             return;
         } catch (SQLException e) {
+            LOGGER.log(Level.FINE, null, e);
         } finally {
             DataViewUtils.closeResources(cntResultSet);
         }
@@ -673,49 +932,19 @@ class SQLExecutionHelper {
         if (!isGroupByUsedInSelect(sql)) {
             cntResultSet = null;
             try {
-                cntResultSet = stmt.executeQuery(SQLStatementGenerator.getCountSQLQuery(sql));
-                setTotalCount(cntResultSet);
+                cntResultSet = stmt.executeQuery(
+                        SQLStatementGenerator.getCountSQLQuery(sql));
+                setTotalCount(cntResultSet, pageContext);
                 return;
             } catch (SQLException e) {
+                LOGGER.log(Level.FINE, null, e);
             } finally {
                 DataViewUtils.closeResources(cntResultSet);
             }
         }
 
-        // In worse case, get the count from resultset
-        cntResultSet = null;
-        int totalRows = 0;
-        try {
-            // reset fetch size
-            int fetchSize = dataView.getDataViewPageContext().getPageSize();
-            try {
-                fetchSize = stmt.getFetchSize();
-                stmt.setFetchSize(20000);
-            } catch (SQLException sqe) {
-                // ignore
-            }
-
-            cntResultSet = stmt.executeQuery(sql);
-            while (cntResultSet.next()) {
-                totalRows++;
-            }
-            dataView.getDataViewPageContext().setTotalRows(totalRows);
-
-            // set to old value
-            try {
-                stmt.setFetchSize(fetchSize);
-            } catch (SQLException sqe) {
-                // ignore
-            }
-            return;
-        } catch (SQLException e) {
-        } finally {
-            DataViewUtils.closeResources(cntResultSet);
-        }
-
         // Unable to compute the total rows
-        setTotalCount(null);
-
+        setTotalCount(null, pageContext);
     }
 
     private boolean isSelectStatement(String queryString) {
@@ -726,8 +955,48 @@ class SQLExecutionHelper {
         return sql.toUpperCase().indexOf(LIMIT_CLAUSE) != -1;
     }
 
-    private boolean isGroupByUsedInSelect(String sql) {
-        return sql.toUpperCase().indexOf(" GROUP BY ") != -1 || sql.toUpperCase().indexOf(" COUNT(*) ") != -1; // NOI18N
+    static boolean isGroupByUsedInSelect(String sql) {
+        if (GROUP_BY_IN_SELECT == null) {
+            GROUP_BY_IN_SELECT = Pattern.compile(
+                    "\\Wgroup\\s+by\\W" //NOI18N
+                    + "|\\Wcount\\s*\\(\\s*\\*\\s*\\)", //NOI18N
+                    Pattern.CASE_INSENSITIVE);
+        }
+        return GROUP_BY_IN_SELECT.matcher(sql).find();
+    }
+
+    void setTotalCount(ResultSet countresultSet, DataViewPageContext pageContext) {
+        try {
+            if (countresultSet == null) {
+                pageContext.setTotalRows(-1);
+                pageContext.setTotalRows(-1);
+            } else {
+                if (countresultSet.next()) {
+                    int count = countresultSet.getInt(1);
+                    pageContext.setTotalRows(count);
+                }
+            }
+        } catch (SQLException ex) {
+            LOGGER.log(Level.SEVERE, "Could not get total row count ", ex); // NOI18N
+        }
+    }
+
+    private String appendLimitIfRequired(DataViewPageContext pageContext,
+            String sql) {
+        if (useScrollableCursors) {
+            return sql;
+        } else if (limitSupported && isSelectStatement(sql)
+                && !isLimitUsedInSelect(sql)) {
+
+            int pageSize = pageContext == null ? dataView.getPageSize()
+                    : pageContext.getPageSize();
+            int currentPos = pageContext == null ? 1
+                    : pageContext.getCurrentPos();
+            return sql + ' ' + LIMIT_CLAUSE + pageSize
+                    + ' ' + OFFSET_CLAUSE + (currentPos - 1);
+        } else {
+            return sql;
+        }
     }
 
     static String millisecondsToSeconds(long ms) {
@@ -745,14 +1014,14 @@ class SQLExecutionHelper {
      *
      * @return True if and only if the result set needs to be reloaded.
      */
-    private boolean resultSetNeedsReloading() {
+    private boolean resultSetNeedsReloading(DataViewDBTable metadata) {
         if (!dataView.getDatabaseConnection().getDriverClass().contains(
                 "oracle")) {                                            //NOI18N
             return false;
         }
-        int colCnt = dataView.getDataViewDBTable().getColumnCount();
+        int colCnt = metadata.getColumnCount();
         for (int i = 0; i < colCnt; i++) {
-            DBColumn column = dataView.getDataViewDBTable().getColumn(i);
+            DBColumn column = metadata.getColumn(i);
             int jdbcType = column.getJdbcType();
             if (jdbcType == Types.LONGVARCHAR || jdbcType == Types.LONGNVARCHAR
                     || jdbcType == Types.LONGVARBINARY || jdbcType == Types.BLOB
@@ -761,5 +1030,62 @@ class SQLExecutionHelper {
             }
         }
         return false;
+    }
+
+    /**
+     * Guarded version of setFetchSize. See #227756.
+     */
+    private static void setFetchSize(Statement stmt, int fetchSize) {
+        try {
+            stmt.setFetchSize(fetchSize);
+        } catch (SQLException e) {
+            // ignore -  used only as a hint to the driver to optimize
+            LOGGER.log(Level.INFO, "Unable to set Fetch size", e); // NOI18N
+            // But try to reset to default behaviour
+            try {
+                stmt.setFetchSize(0);
+            } catch (SQLException ex) {
+            }
+        }
+    }
+
+    /**
+     * Determine if DBMS/Driver supports scrollable resultsets to be able to
+     * determine complete row count for a given SQL.
+     *
+     * @param conn established JDBC connection
+     * @param dc connection information
+     * @param sql the sql to be executed
+     */
+    private void updateScrollableSupport(Connection conn, DatabaseConnection dc,
+            String sql) {
+        useScrollableCursors = dc.isUseScrollableCursors();
+        if (!useScrollableCursors) {
+            return;
+        }
+        String driverName = dc.getDriverClass();
+        /* Derby fails to support scrollable cursors when invoking 'stored procedures'
+         which return resultsets - it fails hard: not throwing a SQLException,
+         but terminating the connection - so don't try to use scrollable cursor
+         on derby, for "non"-selects */
+        if (driverName != null && driverName.startsWith("org.apache.derby")) { //NOI18N
+            if (!isSelectStatement(sql)) {
+                resultSetScrollType = ResultSet.TYPE_FORWARD_ONLY;
+                return;
+            }
+        }
+        /* Try to get a "good" scrollable ResultSet and follow the DBs support */
+        try {
+            if (conn.getMetaData().supportsResultSetType(
+                    ResultSet.TYPE_SCROLL_INSENSITIVE)) {
+                resultSetScrollType = ResultSet.TYPE_SCROLL_INSENSITIVE;
+            } else if (conn.getMetaData().supportsResultSetType(
+                    ResultSet.TYPE_SCROLL_SENSITIVE)) {
+                resultSetScrollType = ResultSet.TYPE_SCROLL_SENSITIVE;
+            }
+        } catch (Exception ex) {
+            LOGGER.log(Level.WARNING, "Exception while querying" //NOI18N
+                    + " database for scrollable resultset support"); //NOI18N
+        }
     }
 }

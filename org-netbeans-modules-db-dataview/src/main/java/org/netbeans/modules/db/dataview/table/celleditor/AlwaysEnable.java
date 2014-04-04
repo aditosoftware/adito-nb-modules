@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2011 Oracle and/or its affiliates. All rights reserved.
+ * Copyright 2013 Oracle and/or its affiliates. All rights reserved.
  *
  * Oracle and Java are registered trademarks of Oracle and/or its affiliates.
  * Other names may be trademarks of their respective owners.
@@ -37,31 +37,17 @@
  *
  * Contributor(s):
  *
- * Portions Copyrighted 2011 Sun Microsystems, Inc.
+ * Portions Copyrighted 2013 Sun Microsystems, Inc.
  */
 package org.netbeans.modules.db.dataview.table.celleditor;
 
-import org.netbeans.modules.db.dataview.table.ResultSetTableCellEditor;
-import java.awt.Component;
-import javax.swing.BorderFactory;
-import javax.swing.JComponent;
-import javax.swing.JTable;
-import javax.swing.table.TableCellEditor;
-import org.jdesktop.swingx.renderer.JRendererCheckBox;
-
-public class BooleanTableCellEditor extends ResultSetTableCellEditor implements TableCellEditor {
-
-    public BooleanTableCellEditor(JRendererCheckBox cb) {
-        super(cb);
-        cb.setHorizontalAlignment(0);
-    }
-
-    @Override
-    public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row, int column) {
-        Component c = super.getTableCellEditorComponent(table, value, isSelected, row, column);
-        if (suppressEditorBorder && c instanceof JComponent) {
-            ((JComponent) c).setBorder(BorderFactory.createEmptyBorder());
-        }
-        return c;
-    }
+/**
+ * Marker interface for CellEditors that should be enabled even if TableModel is
+ * not editable.
+ *
+ * It is expected that the CellEditor handles unmodifiable models itself
+ *
+ * @author Matthias Bläsing
+ */
+public interface AlwaysEnable {
 }

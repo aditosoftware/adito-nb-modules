@@ -12,54 +12,69 @@
   <groupId>org.netbeans.modules</groupId>
   <artifactId>org-netbeans-modules-db-dataview</artifactId>
   <packaging>nbm</packaging>
-  <version>RELEASE731</version>
+  <version>RELEASE80</version>
   <name>Netbeans IDE module: org-netbeans-modules-db-dataview</name>
 
   <dependencies>
     <dependency>
       <groupId>org.netbeans.api</groupId>
       <artifactId>org-netbeans-api-progress</artifactId>
-      <version>RELEASE731</version>
+      <version>RELEASE80</version>
     </dependency>
     <!--<dependency>
     <groupId>org.netbeans.modules</groupId>
     <artifactId>org-netbeans-libs-swingx</artifactId>
-    <version>RELEASE731</version>
+    <version>RELEASE80</version>
     </dependency>-->
     <dependency>
       <groupId>org.netbeans.api</groupId>
       <artifactId>org-netbeans-modules-db</artifactId>
-      <version>RELEASE731</version>
+      <version>RELEASE80</version>
     </dependency>
     <dependency>
       <groupId>org.netbeans.api</groupId>
       <artifactId>org-openide-awt</artifactId>
-      <version>RELEASE731</version>
+      <version>RELEASE80</version>
     </dependency>
     <dependency>
       <groupId>org.netbeans.api</groupId>
       <artifactId>org-openide-dialogs</artifactId>
-      <version>RELEASE731</version>
+      <version>RELEASE80</version>
+    </dependency>
+    <dependency>
+      <groupId>org.netbeans.api</groupId>
+      <artifactId>org-openide-filesystems</artifactId>
+      <version>RELEASE80</version>
+    </dependency>
+    <dependency>
+      <groupId>org.netbeans.api</groupId>
+      <artifactId>org-openide-loaders</artifactId>
+      <version>RELEASE80</version>
+    </dependency>
+    <dependency>
+      <groupId>org.netbeans.api</groupId>
+      <artifactId>org-openide-nodes</artifactId>
+      <version>RELEASE80</version>
     </dependency>
     <dependency>
       <groupId>org.netbeans.api</groupId>
       <artifactId>org-openide-text</artifactId>
-      <version>RELEASE731</version>
+      <version>RELEASE80</version>
     </dependency>
     <dependency>
       <groupId>org.netbeans.api</groupId>
       <artifactId>org-openide-util</artifactId>
-      <version>RELEASE731</version>
+      <version>RELEASE80</version>
     </dependency>
     <dependency>
       <groupId>org.netbeans.api</groupId>
       <artifactId>org-openide-util-lookup</artifactId>
-      <version>RELEASE731</version>
+      <version>RELEASE80</version>
     </dependency>
     <dependency>
       <groupId>org.netbeans.api</groupId>
       <artifactId>org-openide-windows</artifactId>
-      <version>RELEASE731</version>
+      <version>RELEASE80</version>
     </dependency>
 
     <dependency>
@@ -79,6 +94,10 @@
         <configuration>
           <cluster>ide</cluster>
           <codeNameBase>org.netbeans.modules.db.dataview</codeNameBase>
+          <publicPackages>
+            <publicPackage>org.netbeans.modules.db.dataview.api.*</publicPackage>
+            <publicPackage>org.netbeans.modules.db.dataview.spi.*</publicPackage>
+          </publicPackages>
         </configuration>
       </plugin>
     </plugins>

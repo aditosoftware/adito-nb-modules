@@ -54,19 +54,28 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.net.URL;
 
-import java.util.List;
-import javax.swing.*;
-
+import javax.swing.AbstractButton;
+import javax.swing.BorderFactory;
+import javax.swing.Box;
+import javax.swing.BoxLayout;
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTextField;
+import javax.swing.JToolBar;
+import javax.swing.SwingUtilities;
 import org.jdesktop.swingx.JXButton;
 import org.jdesktop.swingx.JXLabel;
 import org.jdesktop.swingx.JXPanel;
-/*import org.jdesktop.swingx.decorator.Filter;
-import org.jdesktop.swingx.decorator.FilterPipeline;
-import org.netbeans.modules.db.dataview.table.MultiColPatternFilter; */
+import org.netbeans.modules.db.dataview.table.JXTableRowHeader;
+import org.netbeans.modules.db.dataview.table.MultiColPatternFilter;
 import org.netbeans.modules.db.dataview.table.ResultSetJXTable;
-//import static org.netbeans.modules.db.dataview.table.SuperPatternFilter.MODE.LITERAL_FIND;
+import static org.netbeans.modules.db.dataview.table.SuperPatternFilter.MODE.LITERAL_FIND;
 import org.openide.util.NbBundle;
 
 /**
@@ -90,13 +99,22 @@ class DataViewUI extends JXPanel {
     private JXLabel totalRowsLabel;
     private JXLabel limitRow;
     private JXButton[] editButtons = new JXButton[5];
-    private DataViewTablePanel dataPanel;
-    private final DataView dataView;
+    private DataViewTableUI dataPanel;
+    private JScrollPane dataPanelScrollPane;
+    private final DataViewPageContext pageContext;
     private JXButton cancel;
     private DataViewActionHandler actionHandler;
     private String imgPrefix = "/org/netbeans/modules/db/dataview/images/"; // NOI18N
 
     private static final int MAX_TAB_LENGTH = 25;
+
+    private final PropertyChangeListener pageContextListener =
+            new PropertyChangeListener() {
+                @Override
+                public void propertyChange(PropertyChangeEvent evt) {
+                    updateTotalCountLabel();
+                }
+            };
 
     /** Shared mouse listener used for setting the border painting property
      * of the toolbar buttons and for invoking the popup menu.
@@ -131,61 +149,63 @@ class DataViewUI extends JXPanel {
         }
     };
 
-    DataViewUI(DataView dataView, boolean nbOutputComponent) {
+    DataViewUI(DataView dataView, DataViewPageContext pageContext, boolean nbOutputComponent) {
         assert SwingUtilities.isEventDispatchThread() : "Must be called from AWT thread";  //NOI18N
 
-        this.dataView = dataView;
+        this.pageContext = pageContext;
 
         //do not show tab view if there is only one tab
         this.putClientProperty("TabPolicy", "HideWhenAlone"); //NOI18N
-
         this.putClientProperty("PersistenceType", "Never"); //NOI18N
 
         this.setLayout(new BorderLayout());
         this.setBorder(BorderFactory.createEmptyBorder());
-        String sql = dataView.getSQLString();
-        if (sql.length() > MAX_TAB_LENGTH) {
-            String trimmed = NbBundle.getMessage(DataViewUI.class, "DataViewUI_TrimmedTabName", sql.substring(0, Math.min(sql.length(), MAX_TAB_LENGTH)));
-            this.setName(trimmed);
-        } else {
-            this.setName(sql);
-        }
-        this.setToolTipText(sql);
 
         // Main pannel with toolbars
         JPanel panel = initializeMainPanel(nbOutputComponent);
         this.add(panel, BorderLayout.NORTH);
 
-        actionHandler = new DataViewActionHandler(this, dataView);
+        actionHandler = new DataViewActionHandler(this, dataView, pageContext);
 
         //add resultset data panel
-        dataPanel = new DataViewTablePanel(dataView, this, actionHandler);
-        this.add(dataPanel, BorderLayout.CENTER);
+        dataPanel = new DataViewTableUI(this, actionHandler, dataView, pageContext);
+        dataPanelScrollPane = new JScrollPane(dataPanel);
+        JXTableRowHeader rowHeader = new JXTableRowHeader(dataPanel);
+        dataPanelScrollPane.setRowHeaderView(rowHeader);
+        dataPanelScrollPane.setCorner(JScrollPane.UPPER_LEFT_CORNER, rowHeader.getTableHeader());
+
+        this.add(dataPanelScrollPane, BorderLayout.CENTER);
         dataPanel.revalidate();
         dataPanel.repaint();
+
+        dataPanel.setModel(pageContext.getModel());
+        pageContext.addPropertyChangeListener(pageContextListener);
+        updateTotalCountLabel();
+    }
+
+    void handleColumnUpdated() {
+        boolean editMode = dataPanel.getModel().hasUpdates();
+        commit.setEnabled(editMode);
+        cancel.setEnabled(editMode);
+        insert.setEnabled(!editMode);
+        deleteRow.setEnabled(!editMode);
+        truncateButton.setEnabled(!editMode);
     }
 
     JButton[] getEditButtons() {
         return editButtons;
     }
 
-    void setEditable(boolean editable) {
-        dataPanel.setEditable(editable);
-    }
-
-    boolean isEditable() {
-        return dataPanel.isEditable();
-    }
-
-    void setTotalCount(int count) {
+    final void updateTotalCountLabel() {
         assert SwingUtilities.isEventDispatchThread() : "Must be called from AWT thread";  //NOI18N
-        if (count < 0) {
-            int pageSize = dataView.getDataViewPageContext().getPageSize();
-            int totalRows = dataView.getDataViewPageContext().getCurrentRows().size();
-            String NA = NbBundle.getMessage(DataViewUI.class, "LBL_not_available");
-            totalRowsLabel.setText(totalRows < pageSize ? totalRows + "" : NA);
+
+        if (pageContext.isTotalRowCountAvailable()) {
+            totalRowsLabel.setText(
+                    pageContext.getTotalRows() + "   " + pageContext.pageOf());
         } else {
-            totalRowsLabel.setText(count + "   " + dataView.getDataViewPageContext().pageOf());
+            totalRowsLabel.setText(NbBundle.getMessage(DataViewUI.class,
+                    "LBL_not_available") + " "
+                    + pageContext.pageOf());
         }
     }
 
@@ -194,11 +214,11 @@ class DataViewUI extends JXPanel {
     }
 
     DataViewTableUI getDataViewTableUI() {
-        return dataPanel.getDataViewTableUI();
+        return dataPanel;
     }
 
-    UpdatedRowContext getUpdatedRowContext() {
-        return dataPanel.getUpdatedRowContext();
+    DataViewTableUIModel getDataViewTableUIModel() {
+        return dataPanel.getModel();
     }
 
     void setCommitEnabled(boolean flag) {
@@ -207,25 +227,6 @@ class DataViewUI extends JXPanel {
 
     void setCancelEnabled(boolean flag) {
         cancel.setEnabled(flag);
-    }
-
-    void setDataRows(List<Object[]> rows) {
-        dataPanel.createTableModel(rows);
-    }
-
-    void resetValueAt(int row, int col) {
-        Object val = dataView.getDataViewPageContext().getColumnData(row, col);
-        dataPanel.setValueAt(val, row, col);
-    }
-
-    void syncPageWithTableModel() {
-        List<Object[]> newrows = dataPanel.getPageDataFromTable();
-        List<Object[]> oldRows = dataView.getDataViewPageContext().getCurrentRows();
-
-        for (Integer row : dataView.getUpdatedRowContext().getUpdateKeys()) {
-            newrows.set(row, oldRows.get(row));
-        }
-        dataView.getDataViewPageContext().setCurrentRows(newrows);
     }
 
     void disableButtons() {
@@ -250,8 +251,8 @@ class DataViewUI extends JXPanel {
     }
 
     int getPageSize() {
-        int pageSize = dataView.getDataViewPageContext().getPageSize();
-        int totalCount = dataView.getDataViewPageContext().getTotalRows();
+        int pageSize = pageContext.getPageSize();
+        int totalCount = pageContext.getTotalRows();
         try {
             int count = Integer.parseInt(refreshField.getText().trim());
             return count < 0 ? pageSize : count;
@@ -261,7 +262,7 @@ class DataViewUI extends JXPanel {
     }
 
     boolean isDirty() {
-        return dataPanel.isDirty();
+        return dataPanel.getModel().hasUpdates();
     }
 
     void resetToolbar(boolean wasError) {
@@ -271,45 +272,46 @@ class DataViewUI extends JXPanel {
         refreshField.setEnabled(true);
         matchBoxField.setEditable(true);
         deleteRow.setEnabled(false);
-        DataViewPageContext dataPage = dataView.getDataViewPageContext();
         if (!wasError) {
-            if (dataPage.hasPrevious()) {
+            if (pageContext.hasPrevious()) {
                 first.setEnabled(true);
                 previous.setEnabled(true);
             }
 
-            if (dataPage.hasNext()) {
+            if (pageContext.hasNext()) {
                 next.setEnabled(true);
-                last.setEnabled(true);
+                if (pageContext.getTotalRows() >= 0) {
+                    last.setEnabled(true);
+                }
             }
 
-            if (dataPage.hasOnePageOnly()) {
+            if (pageContext.hasOnePageOnly()) {
                 first.setEnabled(false);
                 previous.setEnabled(false);
             }
 
-            if (dataPage.isLastPage()) {
+            if (pageContext.isLastPage()) {
                 next.setEnabled(false);
                 last.setEnabled(false);
             }
 
             // editing controls
-            if (!isEditable()) {
+            if (! dataPanel.getModel().isEditable()) {
                 commit.setEnabled(false);
                 cancel.setEnabled(false);
                 deleteRow.setEnabled(false);
                 insert.setEnabled(false);
                 truncateButton.setEnabled(false);
             } else {
-                if (dataPage.hasRows()) {
+                if (pageContext.hasRows()) {
                     truncateButton.setEnabled(true);
                 } else {
                     deleteRow.setEnabled(false);
                     truncateButton.setEnabled(false);
-                    dataPage.first();
+                    pageContext.first();
                 }
                 insert.setEnabled(true);
-                if (getUpdatedRowContext().getUpdateKeys().isEmpty()) {
+                if (getDataViewTableUIModel().getUpdateKeys().isEmpty()) {
                     commit.setEnabled(false);
                     cancel.setEnabled(false);
                 } else {
@@ -321,7 +323,7 @@ class DataViewUI extends JXPanel {
             disableButtons();
         }
 
-        refreshField.setText("" + dataPage.getPageSize());
+        refreshField.setText("" + pageContext.getPageSize());
         if (dataPanel != null) {
             dataPanel.revalidate();
             dataPanel.repaint();
@@ -346,7 +348,7 @@ class DataViewUI extends JXPanel {
                 } else if (src.equals(previous)) {
                     actionHandler.previousActionPerformed();
                 } else if (src.equals(refreshField)) {
-                    actionHandler.setMaxActionPerformed();
+                    actionHandler.updateActionPerformed();
                 } else if (src.equals(commit)) {
                     actionHandler.commitActionPerformed(false);
                 } else if (src.equals(cancel)) {
@@ -438,22 +440,13 @@ class DataViewUI extends JXPanel {
         toolbar.add(limitRow);
 
         //add refresh text field
-        refreshField = new JTextField(2);
-        refreshField.setMinimumSize(new Dimension(30, 25));
+        refreshField = new JTextField(5);
+        refreshField.setMinimumSize(refreshField.getPreferredSize());
+        refreshField.setMaximumSize(refreshField.getPreferredSize());
         refreshField.addFocusListener(new FocusAdapter() {
             @Override
             public void focusGained(FocusEvent e) {
                 refreshField.selectAll();
-            }
-            @Override
-            public void focusLost(FocusEvent e) {
-                if (refreshField.getText().length() > 2) {
-                    refreshField.setMinimumSize(new Dimension(10 * refreshField.getText().length(), 25));
-                    refreshField.setColumns(refreshField.getText().length());
-                } else {
-                    refreshField.setMinimumSize(new Dimension(30, 25));
-                    refreshField.setColumns(2);
-                }
             }
         });
         refreshField.addActionListener(outputListener);
@@ -509,11 +502,9 @@ class DataViewUI extends JXPanel {
             rows[i] = i;
         }
         {
-            /*MultiColPatternFilter filterP = new MultiColPatternFilter(rows);
+            MultiColPatternFilter filterP = new MultiColPatternFilter(rows);
             filterP.setFilterStr(matchBoxField.getText(), LITERAL_FIND);
-            table.setFilters(new FilterPipeline(new Filter[]{filterP}));*/
-          // EDIT ADITO
-          table.setRowFilter(RowFilter.<Object, Object>regexFilter(matchBoxField.getText()));
+            table.setRowFilter(filterP);
         }
     }
 
@@ -595,5 +586,4 @@ class DataViewUI extends JXPanel {
     public void enableDeleteBtn(boolean value) {
         deleteRow.setEnabled(value);
     }
-
 }

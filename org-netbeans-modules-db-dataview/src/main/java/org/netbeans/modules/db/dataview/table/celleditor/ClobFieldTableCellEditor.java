@@ -57,7 +57,9 @@ import javax.swing.*;
 import javax.swing.table.TableCellEditor;
 import org.netbeans.api.progress.ProgressUtils;
 import org.netbeans.modules.db.dataview.util.FileBackedClob;
-import org.openide.*;
+import org.netbeans.modules.db.dataview.util.LobHelper;
+import org.openide.DialogDisplayer;
+import org.openide.NotifyDescriptor;
 import org.openide.text.CloneableEditorSupport;
 import org.openide.util.Exceptions;
 import org.openide.util.NbBundle;
@@ -65,7 +67,7 @@ import org.openide.windows.WindowManager;
 
 public class ClobFieldTableCellEditor extends AbstractCellEditor
         implements TableCellEditor,
-        ActionListener {
+        ActionListener, AlwaysEnable {
     
     private class CharsetSelector extends JPanel {
         private JComboBox charsetSelect;
@@ -79,7 +81,8 @@ public class ClobFieldTableCellEditor extends AbstractCellEditor
                 }
             });
             charsetSelect = new JComboBox();
-            charsetSelect.setModel(new DefaultComboBoxModel(charset.toArray()));
+            charsetSelect.setModel(new DefaultComboBoxModel(
+                    charset.toArray(new Charset[charset.size()])));
             charsetSelect.setSelectedItem(Charset.defaultCharset());
             this.add(charsetSelect);
         }
@@ -94,14 +97,22 @@ public class ClobFieldTableCellEditor extends AbstractCellEditor
     }
     private static final Logger LOG = Logger.getLogger(
             ClobFieldTableCellEditor.class.getName());
-    protected static final String EDIT = "edit";
-    protected Clob currentValue;
-    protected JButton button;
-    protected JPopupMenu popup;
-    protected JTable table;
-    protected int currentRow;
-    protected int currentColumn;
-    protected JMenuItem saveContentMenuItem;
+    private static final String EDIT = "edit";
+    
+    private static File lastFile;
+    
+    private Clob currentValue;
+    private JButton button;
+    private JPopupMenu popup;
+    private JTable table;
+    private int currentRow;
+    private int currentColumn;
+    private int currentModelRow;
+    private int currentModelColumn;
+    private JMenuItem saveContentMenuItem;
+    private JMenuItem editContentMenuItem;
+    private JMenuItem loadContentMenuItem;
+    private JMenuItem nullContentMenuItem;
     
     @SuppressWarnings("LeakingThisInConstructor")
     public ClobFieldTableCellEditor() {
@@ -117,8 +128,8 @@ public class ClobFieldTableCellEditor extends AbstractCellEditor
         button.setFont(new Font(button.getFont().getFamily(), Font.ITALIC, 9));
         
         popup = new JPopupMenu();
-        final JMenuItem miLobSaveAction = new JMenuItem(NbBundle.getMessage(ClobFieldTableCellEditor.class, "saveLob.title"));
-        miLobSaveAction.addActionListener(new ActionListener() {
+        saveContentMenuItem = new JMenuItem(NbBundle.getMessage(ClobFieldTableCellEditor.class, "saveLob.title"));
+        saveContentMenuItem.addActionListener(new ActionListener() {
             
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -126,10 +137,9 @@ public class ClobFieldTableCellEditor extends AbstractCellEditor
                 fireEditingCanceled();
             }
         });
-        saveContentMenuItem = miLobSaveAction;
-        popup.add(miLobSaveAction);
-        final JMenuItem miLobEditAction = new JMenuItem(NbBundle.getMessage(ClobFieldTableCellEditor.class, "editClob.title"));
-        miLobEditAction.addActionListener(new ActionListener() {
+        popup.add(saveContentMenuItem);
+        editContentMenuItem = new JMenuItem(NbBundle.getMessage(ClobFieldTableCellEditor.class, "editClob.title"));
+        editContentMenuItem.addActionListener(new ActionListener() {
             
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -137,9 +147,9 @@ public class ClobFieldTableCellEditor extends AbstractCellEditor
                 editCell();
             }
         });
-        popup.add(miLobEditAction);                
-        final JMenuItem miLobLoadAction = new JMenuItem(NbBundle.getMessage(ClobFieldTableCellEditor.class, "loadLob.title"));
-        miLobLoadAction.addActionListener(new ActionListener() {
+        popup.add(editContentMenuItem);
+        loadContentMenuItem = new JMenuItem(NbBundle.getMessage(ClobFieldTableCellEditor.class, "loadLob.title"));
+        loadContentMenuItem.addActionListener(new ActionListener() {
             
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -150,9 +160,9 @@ public class ClobFieldTableCellEditor extends AbstractCellEditor
                 fireEditingStopped();
             }
         });
-        popup.add(miLobLoadAction);
-        final JMenuItem miLobNullAction = new JMenuItem(NbBundle.getMessage(ClobFieldTableCellEditor.class, "nullLob.title"));
-        miLobNullAction.addActionListener(new ActionListener() {
+        popup.add(loadContentMenuItem);
+        nullContentMenuItem = new JMenuItem(NbBundle.getMessage(ClobFieldTableCellEditor.class, "nullLob.title"));
+        nullContentMenuItem.addActionListener(new ActionListener() {
             
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -160,7 +170,7 @@ public class ClobFieldTableCellEditor extends AbstractCellEditor
                 fireEditingStopped();
             }
         });
-        popup.add(miLobNullAction);
+        popup.add(nullContentMenuItem);
         
     }
     
@@ -174,31 +184,28 @@ public class ClobFieldTableCellEditor extends AbstractCellEditor
     @Override
     public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row, int column) {
         currentValue = (java.sql.Clob) value;
+        this.currentColumn = column;
+        this.currentRow = row;
+        this.table = table;
+        this.currentModelColumn = table.convertColumnIndexToModel(column);
+        this.currentModelRow = table.convertRowIndexToModel(row);
+        boolean editable = table.getModel().isCellEditable(currentModelRow, currentModelColumn);
         if (currentValue != null) {
             saveContentMenuItem.setEnabled(true);
-            try {
-                long size = currentValue.length();
-                StringBuilder stringValue = new StringBuilder();
-                stringValue.append("<CLOB ");
-                if (size < 1000) {
-                    stringValue.append(String.format("%1$d Chars", size));
-                } else if (size < 1000000) {
-                    stringValue.append(String.format("%1$d kChars", size / 1000));
-                } else {
-                    stringValue.append(String.format("%1$d MChars", size / 1000000));
-                }
-                stringValue.append(">");
-                button.setText(stringValue.toString());
-            } catch (SQLException ex) {
-                button.setText("<CLOB of unknown size>");
-            }
+            button.setText(LobHelper.clobToDescription(currentValue));
         } else {
             saveContentMenuItem.setEnabled(false);
             button.setText("<NULL>");
         }
-        this.currentColumn = column;
-        this.currentRow = row;
-        this.table = table;
+        loadContentMenuItem.setEnabled(editable);
+        nullContentMenuItem.setEnabled(editable);
+        if (editable) {
+            editContentMenuItem.setEnabled(true);
+            editContentMenuItem.setText(NbBundle.getMessage(ClobFieldTableCellEditor.class, "editClob.title"));
+        } else {
+            editContentMenuItem.setEnabled(currentValue != null);
+            editContentMenuItem.setText(NbBundle.getMessage(ClobFieldTableCellEditor.class, "editClobReadOnly.title"));
+        }
         return button;
     }
     
@@ -221,10 +228,12 @@ public class ClobFieldTableCellEditor extends AbstractCellEditor
         }
         CharsetSelector charset = new CharsetSelector();
         JFileChooser c = new JFileChooser();
+        c.setCurrentDirectory(lastFile);
         c.setAccessory(charset);
         int fileDialogState = c.showSaveDialog(table);
         if (fileDialogState == JFileChooser.APPROVE_OPTION) {
             File f = c.getSelectedFile();
+            lastFile = f;
             Reader r;
             Writer w;
             try {
@@ -246,11 +255,13 @@ public class ClobFieldTableCellEditor extends AbstractCellEditor
     private Clob loadLobFromFile() {
         CharsetSelector charset = new CharsetSelector();
         JFileChooser c = new JFileChooser();
+        c.setCurrentDirectory(lastFile);
         c.setAccessory(charset);
         Clob result = null;
         int fileDialogState = c.showOpenDialog(table);
         if (fileDialogState == JFileChooser.APPROVE_OPTION) {
             File f = c.getSelectedFile();
+            lastFile = f;
             Reader r;
             try {
                 result = new FileBackedClob();
@@ -349,25 +360,26 @@ public class ClobFieldTableCellEditor extends AbstractCellEditor
                 stringVal = currentValue.getSubString(1, (int) currentValue.length());
             } catch (SQLException ex) {
             }
+            
         }
 
-        boolean isEditable = table.isCellEditable(currentRow, currentColumn);
-        String dialogName = table.getColumnName(currentColumn);
-
         JEditorPane textPane = new JEditorPane();
+        // Work around: http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=7100524
+        textPane.setDropTarget(null);
         textPane.setEditorKit(CloneableEditorSupport.getEditorKit("text/xml"));
         textPane.setText(stringVal);
         textPane.setCaretPosition(0);
-        textPane.setEditable(isEditable);
-
+        textPane.setEditable(table.getModel().isCellEditable(currentModelRow, currentModelColumn));
+        
         JScrollPane pane = new JScrollPane(textPane);
         pane.setPreferredSize(new Dimension(640, 480));
-
-        if (isEditable) {
-            DialogDescriptor dialogDescriptor = new DialogDescriptor(
-                pane, dialogName, true, JOptionPane.OK_CANCEL_OPTION, JOptionPane.OK_OPTION, null);
-            Object result = DialogDisplayer.getDefault().notify(dialogDescriptor);
-            if (Objects.equals(JOptionPane.OK_OPTION, result)) {
+        pane.addHierarchyListener(
+                new StringTableCellEditor.MakeResizableListener(pane));
+        Component parent = WindowManager.getDefault().getMainWindow();
+        
+        if (table.isCellEditable(currentRow, currentColumn)) {
+            int result = JOptionPane.showOptionDialog(parent, pane, table.getColumnName(currentColumn), JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, null, null, null);
+            if (result == JOptionPane.OK_OPTION) {
                 try {
                     table.setValueAt(new FileBackedClob(textPane.getText()), currentRow, currentColumn);
                 } catch (SQLException ex) {
@@ -375,8 +387,7 @@ public class ClobFieldTableCellEditor extends AbstractCellEditor
                 }
             }
         } else {
-            DialogDescriptor dialogDescriptor = new DialogDescriptor(pane, dialogName, false, new Object[0], null, 0, null, null);
-            DialogDisplayer.getDefault().notify(dialogDescriptor);
+            JOptionPane.showMessageDialog(parent, pane, table.getColumnName(currentColumn), JOptionPane.PLAIN_MESSAGE, null);
         }
     }
 }

@@ -46,18 +46,16 @@ import java.util.EventListener;
 import java.util.Locale;
 import java.util.TimeZone;
 import java.util.logging.Logger;
-
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.JComponent;
 import javax.swing.JFormattedTextField;
+import javax.swing.JFormattedTextField.AbstractFormatter;
+import javax.swing.JFormattedTextField.AbstractFormatterFactory;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.UIManager;
-import javax.swing.JFormattedTextField.AbstractFormatter;
-import javax.swing.JFormattedTextField.AbstractFormatterFactory;
 import javax.swing.text.DefaultFormatterFactory;
-
 import org.jdesktop.swingx.JXHyperlink;
 import org.jdesktop.swingx.JXMonthView;
 import org.jdesktop.swingx.JXPanel;
@@ -318,7 +316,7 @@ public class JXDateTimePicker extends JComponent {
     }
 
     protected class SelectedValuesComparator implements Comparator<Calendar> {
-
+        @Override
         public int compare(Calendar cal1, Calendar cal2) {
 
             if (cal1.get(Calendar.YEAR) == cal2.get(Calendar.YEAR) &&
@@ -360,6 +358,31 @@ public class JXDateTimePicker extends JComponent {
         _monthView = new JXMonthView();
 //        _monthView.setSelectionModel(new SingleDaySelectionModel());
         _monthView.setTraversable(true);
+
+        if (UIManager.getColor("nb.dataview.jxdatetimepicker.background") != null) { //NOI18N
+            _monthView.setBackground(UIManager.getColor("nb.dataview.jxdatetimepicker.background")); //NOI18N
+        }
+        if (UIManager.getColor("nb.dataview.jxdatetimepicker.foreground") != null) { //NOI18N
+            _monthView.setForeground(UIManager.getColor("nb.dataview.jxdatetimepicker.foreground")); //NOI18N
+        }
+        if (UIManager.getColor("nb.dataview.jxdatetimepicker.selectedBackground") != null) { //NOI18N
+            _monthView.setSelectionBackground(UIManager.getColor("nb.dataview.jxdatetimepicker.selectedBackground")); //NOI18N
+        }
+        if (UIManager.getColor("nb.dataview.jxdatetimepicker.selectedForeground") != null) { //NOI18N
+            _monthView.setSelectionForeground(UIManager.getColor("nb.dataview.jxdatetimepicker.selectedForeground")); //NOI18N
+        }
+        if (UIManager.getColor("nb.dataview.jxdatetimepicker.monthStringBackground") != null) {
+            _monthView.setMonthStringBackground(UIManager.getColor("nb.dataview.jxdatetimepicker.monthStringBackground")); //NOI18N
+        }
+        if (UIManager.getColor("nb.dataview.jxdatetimepicker.monthStringForeground") != null) { //NOI18N
+            _monthView.setMonthStringForeground(UIManager.getColor("nb.dataview.jxdatetimepicker.monthStringForeground")); //NOI18N
+        }
+        if (UIManager.getColor("nb.dataview.jxdatetimepicker.daysOfTheWeekForeground") != null) { //NOI18N
+            _monthView.setDaysOfTheWeekForeground(UIManager.getColor("nb.dataview.jxdatetimepicker.daysOfTheWeekForeground")); //NOI18N
+        }
+        if (UIManager.getColor("nb.dataview.jxdatetimepicker.todayBackground") != null) { //NOI18N
+            _monthView.setTodayBackground(UIManager.getColor("nb.dataview.jxdatetimepicker.todayBackground")); //NOI18N
+        }
         _monthView.addPropertyChangeListener(getMonthViewListener());
     }
 
@@ -372,7 +395,7 @@ public class JXDateTimePicker extends JComponent {
     private PropertyChangeListener getMonthViewListener() {
         if (monthViewListener == null) {
             monthViewListener = new PropertyChangeListener() {
-
+                @Override
                 public void propertyChange(PropertyChangeEvent evt) {
                     if ("timeZone".equals(evt.getPropertyName())) {
                         updateTimeZone((TimeZone) evt.getOldValue(), (TimeZone) evt.getNewValue());
@@ -849,6 +872,7 @@ public class JXDateTimePicker extends JComponent {
      * @param height Height of the component to determine baseline for.
      * @return baseline for the specified component
      */
+    @Override
     public int getBaseline(int width, int height) {
         return ((BasicDateTimePickerUI) ui).getBaseline(width, height);
     }
@@ -916,13 +940,22 @@ public class JXDateTimePicker extends JComponent {
         private TodayAction todayAction;
         private JXHyperlink todayLink;
 
+        @SuppressWarnings("rawtypes")
         TodayPanel() {
             super(new FlowLayout());
-            setBackgroundPainter(new MattePainter(new GradientPaint(0, 0, new Color(238, 238, 238), 0, 1, Color.WHITE)));
+            Color gradientStart = UIManager.getColor("nb.dataview.jxdatetimepicker.todayPanel.background.gradient.start") != null //NOI18N
+                    ? UIManager.getColor("nb.dataview.jxdatetimepicker.todayPanel.background.gradient.start") //NOI18N
+                    : new Color(238, 238, 238);
+            Color gradientEnd = UIManager.getColor("nb.dataview.jxdatetimepicker.todayPanel.background.gradient.end") != null //NOI18N
+                    ? UIManager.getColor("nb.dataview.jxdatetimepicker.todayPanel.background.gradient.end") //NOI18N
+                    : Color.WHITE;
+            setBackgroundPainter(new MattePainter(new GradientPaint(0, 0, gradientStart, 0, 1, gradientEnd)));
             todayAction = new TodayAction();
             todayLink = new JXHyperlink(todayAction);
             todayLink.addMouseListener(createDoubleClickListener());
-            Color textColor = new Color(16, 66, 104);
+            Color textColor = UIManager.getColor("nb.dataview.jxdatetimepicker.todayPanel.linkForeground") != null //NOI18N
+                    ? UIManager.getColor("nb.dataview.jxdatetimepicker.todayPanel.linkForeground") //NOI18N
+                    : new Color(16, 66, 104);
             todayLink.setUnclickedColor(textColor);
             todayLink.setClickedColor(textColor);
             add(todayLink);
@@ -936,7 +969,9 @@ public class JXDateTimePicker extends JComponent {
 
                 @Override
                 public void mousePressed(MouseEvent e) {
-                    if (e.getClickCount() != 2) return;
+                    if (e.getClickCount() != 2) {
+                        return;
+                    }
                     todayAction.select = true;
                 }
                 
@@ -973,6 +1008,7 @@ public class JXDateTimePicker extends JComponent {
                 putValue(NAME, getLinkFormat().format(new Object[] {cal.getTime()}));
             }
 
+            @Override
             public void actionPerformed(ActionEvent ae) {
                 String key = select ? JXDateTimePicker.HOME_COMMIT_KEY : JXDateTimePicker.HOME_NAVIGATE_KEY;
                 select = false;

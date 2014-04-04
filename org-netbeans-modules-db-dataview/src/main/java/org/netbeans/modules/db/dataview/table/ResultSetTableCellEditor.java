@@ -39,29 +39,31 @@
  * 
  * Portions Copyrighted 2009-2010 Sun Microsystems, Inc.
  */
-package org.netbeans.modules.db.dataview.table.celleditor;
+package org.netbeans.modules.db.dataview.table;
 
 import java.awt.Component;
 import java.awt.event.MouseEvent;
 import java.util.EventObject;
 import javax.swing.DefaultCellEditor;
-import javax.swing.JComponent;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.UIManager;
+import javax.swing.text.DefaultCaret;
 import org.jdesktop.swingx.renderer.JRendererCheckBox;
-import org.netbeans.modules.db.dataview.meta.DBColumn;
-import org.netbeans.modules.db.dataview.table.ResultSetJXTable;
-import org.netbeans.modules.db.dataview.util.DBReadWriteHelper;
 import org.netbeans.modules.db.dataview.util.DataViewUtils;
-import org.openide.awt.StatusDisplayer;
 
 public class ResultSetTableCellEditor extends DefaultCellEditor {
 
     protected Object val;
-    protected boolean editable = true;
     protected JTable table;
-    static final boolean isGtk = "GTK".equals (UIManager.getLookAndFeel ().getID ()); //NOI18N
+    protected static final boolean suppressEditorBorder;
+
+    static {
+        boolean suppressBorder = false;
+        suppressBorder |= "GTK".equals(UIManager.getLookAndFeel().getID());  //NOI18N
+        suppressBorder |= "Nimbus".equals(UIManager.getLookAndFeel().getName());  //NOI18N
+        suppressEditorBorder = suppressBorder;
+    }
 
     public ResultSetTableCellEditor(final JTextField textField) {
         super(textField);
@@ -87,25 +89,19 @@ public class ResultSetTableCellEditor extends DefaultCellEditor {
                 if (val == null && txtVal.equals("")) {
                     return null;
                 } else {
-                    try {
-                        assert table != null;
-                        int col = table.getEditingColumn();
-                        //textField.addKeyListener(new TableKeyListener());
-                        return DBReadWriteHelper.validate(txtVal, ((ResultSetJXTable) table).getDBColumn(col));
-                    } catch (Exception ex) {
-                        StatusDisplayer.getDefault().setStatusText(ex.getMessage());
                         return txtVal;
                     }
                 }
-            }
         };
 
         textField.addActionListener(delegate);
+        // #204176 - workarround for MacOS L&F
+        textField.setCaret(new DefaultCaret());
     }
 
     @Override
     public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row, int column) {
-        if (DataViewUtils.isSQLConstantString(value)) {
+        if (DataViewUtils.isSQLConstantString(value, null)) {
             value = "";
         }
         return super.getTableCellEditorComponent(table, value, isSelected, row, column);
@@ -141,24 +137,5 @@ public class ResultSetTableCellEditor extends DefaultCellEditor {
         };
 
         checkBox.addActionListener(delegate);
-    }
-
-    protected void setEditable(int column, Component c, boolean celleditable) {
-        assert table != null;
-        DBColumn dbCol = ((ResultSetJXTable) table).getDBColumn(column);
-        if (dbCol.isGenerated()) {
-            editable = false;
-        }
-        if (! celleditable) {
-            editable = false;
-        } else {
-            editable = dbCol.isEditable();
-        }
-
-        if (c instanceof JTextField) {
-            ((JTextField) c).setEditable(editable);
-        } else if (c instanceof JComponent) {
-            ((JComponent) c).setEnabled(editable);
-        }
     }
 }

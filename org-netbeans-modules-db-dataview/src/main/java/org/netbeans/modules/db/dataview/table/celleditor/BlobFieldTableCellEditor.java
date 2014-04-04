@@ -50,28 +50,43 @@ import java.io.*;
 import java.sql.Blob;
 import java.sql.SQLException;
 import java.util.EventObject;
+import java.util.Iterator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.imageio.ImageIO;
+import javax.imageio.ImageReader;
+import javax.imageio.stream.ImageInputStream;
 import javax.swing.*;
 import javax.swing.table.TableCellEditor;
 import org.netbeans.api.progress.ProgressUtils;
 import org.netbeans.modules.db.dataview.util.FileBackedBlob;
+import org.netbeans.modules.db.dataview.util.LobHelper;
 import org.openide.DialogDisplayer;
 import org.openide.NotifyDescriptor;
+import org.openide.cookies.OpenCookie;
+import org.openide.filesystems.FileObject;
+import org.openide.filesystems.FileSystem;
+import org.openide.filesystems.FileUtil;
+import org.openide.loaders.DataObject;
 import org.openide.util.NbBundle;
 
 public class BlobFieldTableCellEditor extends AbstractCellEditor
         implements TableCellEditor,
-        ActionListener {
+        ActionListener, AlwaysEnable {
     private static final Logger LOG = Logger.getLogger(
             BlobFieldTableCellEditor.class.getName());
+    private static final String EDIT = "edit";
 
-    protected static final String EDIT = "edit";
-    protected Blob currentValue;
-    protected JButton button;
-    protected JPopupMenu popup;
-    protected JTable table;
-    protected JMenuItem saveContentMenuItem;
+    private static File lastFile;
+
+    private Blob currentValue;
+    private JButton button;
+    private JPopupMenu popup;
+    private JTable table;
+    private JMenuItem saveContentMenuItem;
+    private JMenuItem miOpenImageMenuItem;
+    private JMenuItem miLobLoadAction;
+    private JMenuItem miLobNullAction;
 
     @SuppressWarnings("LeakingThisInConstructor")
     public BlobFieldTableCellEditor() {
@@ -87,8 +102,8 @@ public class BlobFieldTableCellEditor extends AbstractCellEditor
         button.setFont(new Font(button.getFont().getFamily(), Font.ITALIC, 9));
 
         popup = new JPopupMenu();
-        final JMenuItem miLobSaveAction = new JMenuItem(NbBundle.getMessage(BlobFieldTableCellEditor.class, "saveLob.title"));
-        miLobSaveAction.addActionListener(new ActionListener() {
+        saveContentMenuItem = new JMenuItem(NbBundle.getMessage(BlobFieldTableCellEditor.class, "saveLob.title"));
+        saveContentMenuItem.addActionListener(new ActionListener() {
 
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -96,9 +111,20 @@ public class BlobFieldTableCellEditor extends AbstractCellEditor
                 fireEditingCanceled();
             }
         });
-        saveContentMenuItem = miLobSaveAction;
-        popup.add(miLobSaveAction);
-        final JMenuItem miLobLoadAction = new JMenuItem(NbBundle.getMessage(BlobFieldTableCellEditor.class, "loadLob.title"));
+        popup.add(saveContentMenuItem);
+
+        miOpenImageMenuItem = new JMenuItem("Open as Image");
+        miOpenImageMenuItem.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                openAsImage(currentValue);
+                fireEditingCanceled();
+            }
+        });
+        popup.add(miOpenImageMenuItem);
+
+        miLobLoadAction = new JMenuItem(NbBundle.getMessage(BlobFieldTableCellEditor.class, "loadLob.title"));
         miLobLoadAction.addActionListener(new ActionListener() {
 
             @Override
@@ -111,7 +137,7 @@ public class BlobFieldTableCellEditor extends AbstractCellEditor
             }
         });
         popup.add(miLobLoadAction);
-        final JMenuItem miLobNullAction = new JMenuItem(NbBundle.getMessage(BlobFieldTableCellEditor.class, "nullLob.title"));
+        miLobNullAction = new JMenuItem(NbBundle.getMessage(BlobFieldTableCellEditor.class, "nullLob.title"));
         miLobNullAction.addActionListener(new ActionListener() {
 
             @Override
@@ -134,28 +160,20 @@ public class BlobFieldTableCellEditor extends AbstractCellEditor
     @Override
     public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row, int column) {
         currentValue = (java.sql.Blob) value;
+        int modelRow = table.convertRowIndexToModel(row);
+        int modelColumn = table.convertColumnIndexToModel(column);
+        boolean editable = table.getModel().isCellEditable(modelRow, modelColumn);
         if (currentValue != null) {
             saveContentMenuItem.setEnabled(true);
-            try {
-                long size = currentValue.length();
-                StringBuilder stringValue = new StringBuilder();
-                stringValue.append("<BLOB ");
-                if (size < 1000) {
-                    stringValue.append(String.format("%1$d bytes", size));
-                } else if (size < 1000000) {
-                    stringValue.append(String.format("%1$d kB", size / 1000));
-                } else {
-                    stringValue.append(String.format("%1$d MB", size / 1000000));
-                }
-                stringValue.append(">");
-                button.setText(stringValue.toString());
-            } catch (SQLException ex) {
-                button.setText("<BLOB of unknown size>");
-            }
+            miOpenImageMenuItem.setEnabled(true);
+            button.setText(LobHelper.blobToString(currentValue));
         } else {
             saveContentMenuItem.setEnabled(false);
+            miOpenImageMenuItem.setEnabled(false);
             button.setText("<NULL>");
         }
+        miLobLoadAction.setEnabled(editable);
+        miLobNullAction.setEnabled(editable);
         this.table = table;
         return button;
     }
@@ -178,9 +196,11 @@ public class BlobFieldTableCellEditor extends AbstractCellEditor
             return;
         }
         JFileChooser c = new JFileChooser();
+        c.setCurrentDirectory(lastFile);
         int fileDialogState = c.showSaveDialog(table);
         if (fileDialogState == JFileChooser.APPROVE_OPTION) {
             File f = c.getSelectedFile();
+            lastFile = f;
             InputStream is;
             FileOutputStream fos;
             try {
@@ -201,10 +221,12 @@ public class BlobFieldTableCellEditor extends AbstractCellEditor
 
     private Blob loadLobFromFile() {
         JFileChooser c = new JFileChooser();
+        c.setCurrentDirectory(lastFile);
         Blob result = null;
         int fileDialogState = c.showOpenDialog(table);
         if (fileDialogState == JFileChooser.APPROVE_OPTION) {
             File f = c.getSelectedFile();
+            lastFile = f;
             FileInputStream fis;
             try {
                 fis = new FileInputStream(f);
@@ -283,6 +305,60 @@ public class BlobFieldTableCellEditor extends AbstractCellEditor
                     f.getAbsolutePath(),
                     ex.getLocalizedMessage());
         }
+
+        NotifyDescriptor nd = new NotifyDescriptor(
+                messageMsg,
+                titleMsg,
+                NotifyDescriptor.OK_CANCEL_OPTION,
+                NotifyDescriptor.WARNING_MESSAGE,
+                new Object[]{NotifyDescriptor.CANCEL_OPTION},
+                NotifyDescriptor.CANCEL_OPTION);
+
+        dd.notifyLater(nd);
+    }
+
+    private void openAsImage(Blob b) {
+        if (b == null) {
+            return;
+        }
+        try {
+            ImageInputStream iis = ImageIO.createImageInputStream(
+                    b.getBinaryStream());
+            Iterator<ImageReader> irs = ImageIO.getImageReaders(iis);
+            if (irs.hasNext()) {
+                FileSystem fs = FileUtil.createMemoryFileSystem();
+                FileObject fob = fs.getRoot().createData(
+                        Long.toString(System.currentTimeMillis()),
+                        irs.next().getFormatName());
+                OutputStream os = fob.getOutputStream();
+                os.write(b.getBytes(1, (int) b.length()));
+                os.close();
+                DataObject data = DataObject.find(fob);
+                OpenCookie cookie = data.getLookup().lookup(OpenCookie.class);
+                if (cookie != null) {
+                    cookie.open();
+                    return;
+                }
+            }
+            displayErrorOpenImage("openImageErrorNotImage.message");    //NOI18N
+        } catch (SQLException ex) {
+            LOG.log(Level.INFO,
+                    "SQLException while opening BLOB as file", ex);     //NOI18N
+            displayErrorOpenImage("openImageErrorDB.message");          //NOI18N
+        } catch (IOException ex) {
+            LOG.log(Level.INFO, "IOError while opening BLOB as file", //NOI18N
+                    ex);
+        }
+
+    }
+
+    private void displayErrorOpenImage(String messageProperty) {
+        DialogDisplayer dd = DialogDisplayer.getDefault();
+
+        String messageMsg = NbBundle.getMessage(BlobFieldTableCellEditor.class,
+                messageProperty);
+        String titleMsg = NbBundle.getMessage(BlobFieldTableCellEditor.class,
+                "openImageError.title");                                //NOI18N
 
         NotifyDescriptor nd = new NotifyDescriptor(
                 messageMsg,
