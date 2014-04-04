@@ -1,16 +1,10 @@
-OpenIDE-Module-Public-Packages: org.netbeans.core.windows.nativeaccess
- .*
-OpenIDE-Module-Friends: org.netbeans.core.nativeaccess
-OpenIDE-Module-Module-Dependencies: org.netbeans.core/2 > 3.18, org.ne
- tbeans.modules.options.api/1 > 1.29, org.netbeans.modules.settings/1
-  > 1.8, org.netbeans.swing.plaf, org.netbeans.swing.tabcontrol > 1.38,
-  org.openide.actions > 6.2, org.openide.awt > 7.51, org.openide.dialo
- gs > 7.10, org.openide.explorer > 6.25, org.openide.filesystems > 7.5
- 5, org.openide.loaders > 7.39, org.openide.modules > 6.2, org.openide
- .nodes > 6.2, org.openide.util > 8.21, org.openide.util.lookup > 8.0,
-  org.openide.windows > 6.58, de.adito.aditoweb.modules.nbide.nbaditointerface > 3.2
-OpenIDE-Module-Java-Dependencies: Java > 1.6
-OpenIDE-Module-Implementation-Version: 201306052037
+Manifest-Version: 1.0
+Ant-Version: Apache Ant 1.9.2
+Created-By: 1.7.0_25-b15 (Oracle Corporation)
+OpenIDE-Module-Friends: org.netbeans.core.multitabs, org.netbeans.core
+ .nativeaccess
+OpenIDE-Module-Java-Dependencies: Java > 1.7
+OpenIDE-Module-Implementation-Version: 201403101706
 AutoUpdate-Show-In-Client: false
 OpenIDE-Module: org.netbeans.core.windows/2
 OpenIDE-Module-Localizing-Bundle: org/netbeans/core/windows/resources/
@@ -22,6 +16,6 @@ OpenIDE-Module-Provides: org.netbeans.core.WindowSystem, org.openide.w
 OpenIDE-Module-Recommends: org.netbeans.core.windows.nativeaccess.Nati
  veWindowSystem
 AutoUpdate-Essential-Module: true
-OpenIDE-Module-Specification-Version: 2.58.5
+OpenIDE-Module-Specification-Version: 2.75.1
 OpenIDE-Module-Requires: org.openide.modules.ModuleFormat1
 

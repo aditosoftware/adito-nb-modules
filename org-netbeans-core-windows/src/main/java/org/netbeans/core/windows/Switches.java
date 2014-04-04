@@ -281,7 +281,7 @@ public final class Switches {
     public static int getSimpleTabsPlacement() {
         int result = JTabbedPane.TOP;
         try {
-            String resValue = NbBundle.getMessage(Switches.class, "WinSys.TabControl.SimpleTabs.Enabled" ); //NOI18N
+            String resValue = NbBundle.getMessage(Switches.class, "WinSys.TabControl.SimpleTabs.Placement" ); //NOI18N
             if( "bottom".equals( resValue ) )
                 result = JTabbedPane.BOTTOM;
             else if( "right".equals( resValue ) )
@@ -324,7 +324,13 @@ public final class Switches {
         return getSwitchValue( "WinSys.CtrlTabSwitching.In.JTable.Enabled", true ); //NOI18N
     }
 
+    private static final String PROPERTY_PREFIX = "NB.WinSys."; //NOI18N
+    
     private static boolean getSwitchValue( String switchName, boolean defaultValue ) {
+        String propValue = System.getProperty(PROPERTY_PREFIX + switchName);
+        if( null != propValue ) {
+            return "true".equals(propValue);
+        }
         boolean result = defaultValue;
         try {
             String resValue = NbBundle.getMessage(Switches.class, switchName );

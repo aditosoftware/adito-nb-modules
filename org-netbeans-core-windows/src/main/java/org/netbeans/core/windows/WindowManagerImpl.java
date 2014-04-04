@@ -572,6 +572,11 @@ public final class WindowManagerImpl extends WindowManager implements Workspace 
             // Log something?
             return null;
         }
+
+        //#235242
+        TopComponent multiviewParent = ( TopComponent ) SwingUtilities.getAncestorOfClass( TopComponent.class, tc);
+        if( null != multiviewParent )
+            tc = multiviewParent;
         
         for(Iterator it = getModes().iterator(); it.hasNext(); ) {
             ModeImpl mode = (ModeImpl)it.next();
@@ -1100,12 +1105,16 @@ public final class WindowManagerImpl extends WindowManager implements Workspace 
     }
 
     // PENDING>>
-    public void setRecentViewList(TopComponent[] tcs) {
-        recentViewList.setTopComponents(tcs);
+    public void setRecentViewList(String[] tcIDs) {
+        recentViewList.setTopComponents(tcIDs);
     }
     
     public TopComponent[] getRecentViewList() {
         return recentViewList.getTopComponents();
+    }
+
+    public String[] getRecentViewIDList() {
+        return recentViewList.getTopComponentIDs();
     }
     // PENDING<<
     
@@ -1892,6 +1901,8 @@ public final class WindowManagerImpl extends WindowManager implements Workspace 
         assert null != ws;
         final PersistenceManager pm = PersistenceManager.getDefault();
         
+        PersistenceHandler.getDefault().finishLazyLoading();
+
         //cancel full-screen mode
         MainWindow.getInstance().setFullScreenMode(false);
         
@@ -1899,7 +1910,7 @@ public final class WindowManagerImpl extends WindowManager implements Workspace 
         final TopComponent[] editors = getEditorTopComponents();
         if( !keepDocumentWindows ) {
             for( TopComponent tc : editors ) {
-                if( !AlwaysOpenTopComponentRegistry.canClose(tc) ) // tc.canClose()
+                if( !tc.canClose() )
                     return false;
             }
         }

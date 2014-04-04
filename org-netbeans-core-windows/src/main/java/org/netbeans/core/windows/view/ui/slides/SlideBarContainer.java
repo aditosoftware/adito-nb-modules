@@ -78,14 +78,14 @@ import org.openide.windows.TopComponent;
  * @author Dafe Simonek
  */
 public final class SlideBarContainer extends AbstractModeContainer {
-
+    
     /** panel displaying content of this container */
     VisualPanel panel;
-
+    
     /** Creates a new instance of SlideBarContainer */
     public SlideBarContainer(ModeView modeView, WindowDnDManager windowDnDManager) {
         super(modeView, windowDnDManager, Constants.MODE_KIND_SLIDING);
-
+        
         panel = new VisualPanel(this);
         panel.setBorder(computeBorder(getSlidingView().getSide()));
         Component slideBar = this.tabbedHandler.getComponent();
@@ -95,12 +95,12 @@ public final class SlideBarContainer extends AbstractModeContainer {
         }
         panel.add(slideBar, horizontal ? BorderLayout.WEST : BorderLayout.NORTH );
     }
-
-
+    
+    
     private SlidingView getSlidingView() {
         return (SlidingView)super.getModeView();
     }
-
+    
     @Override
     public void requestAttention (TopComponent tc) {
         tabbedHandler.requestAttention(tc);
@@ -120,12 +120,12 @@ public final class SlideBarContainer extends AbstractModeContainer {
     public void makeBusy(TopComponent tc, boolean busy) {
         tabbedHandler.makeBusy( tc, busy );
     }
-
+    
     @Override
     public void setTopComponents(TopComponent[] tcs, TopComponent selected) {
         super.setTopComponents(tcs, selected);
     }
-
+    
     public Rectangle getTabBounds(int tabIndex) {
         return tabbedHandler.getTabBounds(tabIndex);
     }
@@ -134,12 +134,12 @@ public final class SlideBarContainer extends AbstractModeContainer {
     protected Component getModeComponent() {
         return panel;
     }
-
+    
     @Override
     protected Tabbed createTabbed() {
         return new TabbedSlideAdapter(((SlidingView)modeView).getSide());
     }
-
+    
     @Override
     protected boolean isAttachingPossible() {
         return false;
@@ -148,8 +148,8 @@ public final class SlideBarContainer extends AbstractModeContainer {
     @Override
     protected TopComponentDroppable getModeDroppable() {
         return panel;
-    }
-
+    }    
+    
     @Override
     protected void updateActive(boolean active) {
         // #48588 - when in SDI, slidein needs to front the editor frame.
@@ -160,15 +160,15 @@ public final class SlideBarContainer extends AbstractModeContainer {
             }
         }
     }
-
+    
     @Override
     public boolean isActive() {
         Window window = SwingUtilities.getWindowAncestor(panel);
         // #54791 - just a doublecheck, IMHO should not happen anymore
         // after the winsys reenetrancy fix.
         return window == null ? false : window.isActive();
-    }
-
+    }    
+    
     @Override
     protected void updateTitle(String title) {
         // XXX - we have no title?
@@ -184,7 +184,7 @@ public final class SlideBarContainer extends AbstractModeContainer {
     private static Border rightBorder;
     private static Border topEmptyBorder;
     private static Border topBorder;
-
+    
     /** Builds empty border around slide bar. Computes its correct size
      * based on given orientation
      */
@@ -193,26 +193,26 @@ public final class SlideBarContainer extends AbstractModeContainer {
             return BorderFactory.createEmptyBorder();
         int bottom = 0, left = 0, right = 0, top = 0;
         if (Constants.LEFT.equals(orientation)) {
-            top = 1; left = 1; bottom = 1; right = 2;
+            top = 1; left = 1; bottom = 1; right = 2; 
         }
         if (Constants.BOTTOM.equals(orientation)) {
             top = 2; left = 5; bottom = 1; right = 1;
         }
         if (Constants.TOP.equals(orientation)) {
-            top = 1; left = 1; bottom = 2; right = 1;
+            top = 1; left = 1; bottom = 2; right = 1; 
         }
         if (Constants.RIGHT.equals(orientation)) {
-            top = 1; left = 2; bottom = 1; right = 1;
+            top = 1; left = 2; bottom = 1; right = 1; 
         }
         return new EmptyBorder(top, left, bottom, right);
     }
-
-
+    
+    
     /** Component enclosing slide boxes, implements needed interfaces to talk
      * to rest of winsys
      */
     private static class VisualPanel extends JPanel implements ModeComponent, TopComponentDroppable {
-
+    
         private final SlideBarContainer modeContainer;
         private final String side;
 
@@ -221,7 +221,7 @@ public final class SlideBarContainer extends AbstractModeContainer {
                 bottomBorder = BorderFactory.createMatteBorder(1, 0, 0, 0, UIManager.getColor("NbBrushedMetal.darkShadow")); //NOI18N
 
                 bottomEmptyBorder = BorderFactory.createMatteBorder(3, 0, 0, 0, UIManager.getColor("NbSplitPane.background")); //NOI18N
-
+                
                 topBorder = BorderFactory.createMatteBorder(0, 0, 1, 0, UIManager.getColor("NbBrushedMetal.darkShadow")); //NOI18N
 
                 topEmptyBorder = BorderFactory.createMatteBorder(0, 0, 3, 0, UIManager.getColor("NbSplitPane.background")); //NOI18N
@@ -229,13 +229,13 @@ public final class SlideBarContainer extends AbstractModeContainer {
                 leftEmptyBorder = BorderFactory.createMatteBorder(0, 0, 0, 3, UIManager.getColor("NbSplitPane.background")); //NOI18N
 
                 leftBorder = BorderFactory.createMatteBorder( 0,0,0,1, UIManager.getColor("NbSplitPane.background"));
-
+ 
                 rightEmptyBorder = BorderFactory.createMatteBorder(0, 3, 0, 0, UIManager.getColor("NbSplitPane.background")); //NOI18N
 
                 rightBorder = BorderFactory.createMatteBorder(0, 1, 0, 0, UIManager.getColor("NbBrushedMetal.darkShadow")); //NOI18N
             }
         }
-
+        
         public VisualPanel (SlideBarContainer modeContainer) {
             super(new BorderLayout());
             this.modeContainer = modeContainer;
@@ -254,43 +254,43 @@ public final class SlideBarContainer extends AbstractModeContainer {
         public ModeView getModeView() {
             return modeContainer.getModeView();
         }
-
+        
         @Override
         public int getKind() {
             return modeContainer.getKind();
         }
-
+        
         // TopComponentDroppable>>
         @Override
         public Shape getIndicationForLocation(Point location) {
             return modeContainer.getIndicationForLocation(location);
         }
-
+        
         @Override
         public Object getConstraintForLocation(Point location) {
             return modeContainer.getConstraintForLocation(location);
         }
-
+        
         @Override
         public Component getDropComponent() {
             return modeContainer.getDropComponent();
         }
-
+        
         @Override
         public ViewElement getDropViewElement() {
             return modeContainer.getDropModeView();
         }
-
+        
         @Override
         public boolean canDrop(TopComponentDraggable transfer, Point location) {
             return modeContainer.canDrop(transfer) && !transfer.isModeTransfer();
         }
-
+        
         @Override
         public boolean supportsKind(TopComponentDraggable transfer) {
             if(transfer.isModeTransfer())
                 return false;
-
+            
             if(transfer.isAllowedToMoveAnywhere()) {
                  return true;
             }
@@ -303,7 +303,7 @@ public final class SlideBarContainer extends AbstractModeContainer {
 
         @Override
         public Dimension getMinimumSize() {
-            if (modeContainer.getTopComponents().length == 0) {
+            if (!hasVisibleComponents()) {
                 // have minimum size, to avoid gridbag layout to place the empty component at [0,0] location.
                 // clashes with the dnd
                 Border b = getBorder();
@@ -315,13 +315,23 @@ public final class SlideBarContainer extends AbstractModeContainer {
             }
             return super.getMinimumSize();
         }
-
+        
         @Override
         public Dimension getPreferredSize() {
-            if( isAqua && modeContainer.getTopComponents().length == 0) {
+            if( isAqua && !hasVisibleComponents()) {
                 return getMinimumSize();
             }
             return super.getPreferredSize();
+        }
+        
+        private boolean hasVisibleComponents() {
+            for( Component c : getComponents() ) {
+                if( c instanceof SlideBar )
+                    continue;
+                if( null != c && c.isVisible() )
+                    return true;
+            }
+            return modeContainer.getTopComponents().length > 0;
         }
 
         @Override
@@ -331,22 +341,22 @@ public final class SlideBarContainer extends AbstractModeContainer {
 
             Border result;
             if( Constants.BOTTOM.equals(side) ) {
-                if( modeContainer.getTopComponents().length == 0 )
+                if( !hasVisibleComponents() )
                     result = bottomEmptyBorder;
                 else
                     result = bottomBorder;
             } else if( Constants.TOP.equals(side) ) {
-                if( modeContainer.getTopComponents().length == 0 )
+                if( !hasVisibleComponents() )
                     result = topEmptyBorder;
                 else
                     result = topBorder;
             } else if( Constants.RIGHT.equals(side) ) {
-                if( modeContainer.getTopComponents().length == 0 )
+                if( !hasVisibleComponents() )
                     result = rightEmptyBorder;
                 else
                     result = rightBorder;
             } else if( Constants.LEFT.equals(side) ) {
-                if( modeContainer.getTopComponents().length == 0 )
+                if( !hasVisibleComponents() )
                     result = leftEmptyBorder;
                 else
                     result = leftBorder;
@@ -357,5 +367,5 @@ public final class SlideBarContainer extends AbstractModeContainer {
             return result;
         }
     } // End of VisualPanel
-
+    
 }

@@ -1066,21 +1066,26 @@ final class Central implements ControllerHandler {
                 }
             }
         }
-        TopComponent[] documents = wm.getRecentViewList();
+        String[] ids = wm.getRecentViewIDList();
         
-        for (int i = 0; i < documents.length; i++) {
-            TopComponent tc = documents[i];
-            if (tc == null) {
-                continue;
-            }
-            ModeImpl mode = (ModeImpl)wm.findMode(tc);
+        for( String tcId : ids ) {
+            ModeImpl mode = findMode(tcId);
             if (mode == null 
-               || mode != editorMode
-               || tc == closedTc) {
+               || mode != editorMode) {
                 continue;
             }
-            
+            TopComponent tc = wm.findTopComponent( tcId );
+            if( tc == closedTc )
+                continue;
             return tc;
+        }
+        return null;
+    }
+
+    private ModeImpl findMode( String tcId ) {
+        for( ModeImpl mode : getModes() ) {
+            if( mode.getTopComponentsIDs().contains( tcId ) )
+                return mode;
         }
         return null;
     }
@@ -2626,6 +2631,9 @@ final class Central implements ControllerHandler {
                 break;
             }
         }
+        //#232061 
+        if( !tc.isOpened() )
+            tc.open();
         int prevIndex = prevMode != null && (intoSliding || intoSeparate) ? prevMode.getOpenedTopComponentsIDs().indexOf( tcID ) : -1;
         if(removeTopComponentFromOtherModes(mode, tc)) {
             moved = true;

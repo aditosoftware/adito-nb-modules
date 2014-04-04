@@ -47,6 +47,7 @@ package org.netbeans.core.windows.options;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import javax.swing.JComponent;
+import javax.swing.SwingUtilities;
 import org.netbeans.core.WindowSystem;
 import org.netbeans.spi.options.OptionsPanelController;
 import org.openide.util.HelpCtx;
@@ -54,11 +55,13 @@ import org.openide.util.Lookup;
 
 @OptionsPanelController.SubRegistration(
     displayName="#AdvancedOption_DisplayName_WinSys",
+    id="Windows",
     keywords="#KW_WindowOptions",
-    keywordsCategory="Advanced/Windows"
+    keywordsCategory="Appearance/Windows",
+    location = "Appearance"
 //    toolTip="#AdvancedOption_Tooltip_WinSys"
 )
-public final class WinSysOptionsPanelController extends OptionsPanelController {
+public class WinSysOptionsPanelController extends OptionsPanelController {
 
     private WinSysPanel panel;
     private final PropertyChangeSupport pcs = new PropertyChangeSupport(this);
@@ -72,13 +75,18 @@ public final class WinSysOptionsPanelController extends OptionsPanelController {
 
     @Override
     public void applyChanges() {
-        boolean refreshWinsys = getPanel().store();
-        changed = false;
-        if( refreshWinsys ) {
-            WindowSystem  ws = Lookup.getDefault().lookup( WindowSystem.class );
-            ws.hide();
-            ws.show();
-        }
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                boolean refreshWinsys = getPanel().store();
+                changed = false;
+                if (refreshWinsys) {
+                    WindowSystem ws = Lookup.getDefault().lookup(WindowSystem.class);
+                    ws.hide();
+                    ws.show();
+                }
+            }
+        });
     }
 
     @Override
@@ -116,18 +124,18 @@ public final class WinSysOptionsPanelController extends OptionsPanelController {
         pcs.removePropertyChangeListener(l);
     }
 
-    private WinSysPanel getPanel() {
+    protected WinSysPanel getPanel() {
         if (panel == null) {
             panel = new WinSysPanel(this);
         }
         return panel;
     }
 
-    void changed() {
+    protected void changed(boolean isChanged) {
         if (!changed) {
-            changed = true;
             pcs.firePropertyChange(OptionsPanelController.PROP_CHANGED, false, true);
         }
+        changed = isChanged;
         pcs.firePropertyChange(OptionsPanelController.PROP_VALID, null, null);
     }
 }

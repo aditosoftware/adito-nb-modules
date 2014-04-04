@@ -67,26 +67,27 @@ import org.netbeans.core.windows.view.ViewElement;
 import org.netbeans.core.windows.view.ui.slides.SlideOperation;
 import org.netbeans.core.windows.view.ui.slides.SlideOperationFactory;
 import org.netbeans.swing.tabcontrol.TabbedContainer;
+import org.openide.util.Mutex;
 import org.openide.windows.TopComponent;
 
 
 /** Implementation of compact mode desktop, containing split views as well
  * as slide bars.
-
+ 
  *
  * @author  Dafe Simonek
  */
 public final class DesktopImpl {
 
-    /** overall layered pane, contains desktop at regular layer and slided
-     * component on upper layers */
+    /** overall layered pane, contains desktop at regular layer and slided 
+     * component on upper layers */ 
     private JLayeredPane layeredPane;
-    /** panel which holds regular desktop - split view root and slide bars */
+    /** panel which holds regular desktop - split view root and slide bars */ 
     private JPanel desktop;
     /** root of slit views */
     private ViewElement splitRoot;
     private Component viewComponent;
-
+    
     /** slide bars. Lazy initialization, because slide bars are optional. */
     private Set<SlidingView> slidingViews;
     /** slide in operation in progress or null if no component is currently slided in */
@@ -94,8 +95,8 @@ public final class DesktopImpl {
 
     /** Minimal thick of slided component when system is trying to align
      * slided component with editor area */
-    private static final int MIN_EDITOR_ALIGN_THICK = 200;
-
+    private static final int MIN_EDITOR_ALIGN_THICK = 80;
+    
     /** Creates a new instance of DesktopImpl */
     public DesktopImpl () {
         // layered pane with absolute positioning, to enable overlapping
@@ -109,6 +110,20 @@ public final class DesktopImpl {
                     return false;
                 return super.isOpaque();
             }
+
+            @Override
+            public void updateUI() {
+                Mutex.EVENT.readAccess( new Runnable() {
+                    @Override
+                    public void run() {
+                        superUpdateUI();
+                    }
+                });
+            }
+
+            private void superUpdateUI() {
+                super.updateUI();
+            }
         };
         desktop.setLayout(new GridBagLayout());
         Color bkColor = UIManager.getColor("NbSplitPane.background"); //NOI18N
@@ -118,7 +133,7 @@ public final class DesktopImpl {
         }
         layeredPane.add(desktop);
     }
-
+    
     public Component getDesktopComponent () {
         return layeredPane;
     }
@@ -136,9 +151,9 @@ public final class DesktopImpl {
         height = (view != null ? height - view.getComponent().getSize().height : height);
         return new Dimension(width, height);
     }
-
+    
    public void setSplitRoot (ViewElement splitRoot) {
-
+ 
         this.splitRoot = splitRoot;
         if (splitRoot != null) {
 //            System.out.println("desktopimpl: splitroot comp");
@@ -148,9 +163,9 @@ public final class DesktopImpl {
         }
 
     }
+   
 
-
-
+    
    public void setMaximizedView(ViewElement component) {
 
         if (component.getComponent() != viewComponent) {
@@ -158,7 +173,7 @@ public final class DesktopImpl {
 
         }
     }
-
+    
     private void setViewComponent( Component component) {
         if (viewComponent == component) {
             return;
@@ -182,12 +197,12 @@ public final class DesktopImpl {
         }
         layeredPane.revalidate();
         layeredPane.repaint();
-    }
-
+    }    
+    
     public ViewElement getSplitRoot () {
         return splitRoot;
     }
-
+    
     public void addSlidingView (SlidingView view) {
         Set<SlidingView> slidingViews = getSlidingViews();
         if (slidingViews.contains(view)) {
@@ -201,7 +216,7 @@ public final class DesktopImpl {
             constraint.gridy = 2;
             constraint.gridwidth = 3;
             constraint.anchor = GridBagConstraints.SOUTHWEST;
-
+            
         } else if (Constants.LEFT.equals(view.getSide())) {
             constraint.gridx = 0;
             constraint.gridy = 1;
@@ -220,10 +235,14 @@ public final class DesktopImpl {
             constraint.anchor = GridBagConstraints.NORTHWEST;
         }
         desktop.add(view.getComponent(), constraint);
+        if( Constants.BOTTOM.equals( view.getSide()) && view.getComponent() instanceof JPanel ) {
+            JPanel panel = ( JPanel ) view.getComponent();
+            MainWindow.getInstance().setStatusBarContainer( panel );
+        }
         // #45033 fix - invalidate isn't enough, revalidate is correct
         layeredPane.revalidate();
     }
-
+    
     public void removeSlidingView (SlidingView view) {
         Set slidingViews = getSlidingViews();
         if (!slidingViews.contains(view)) {
@@ -235,7 +254,7 @@ public final class DesktopImpl {
         // #45033 fix - invalidate isn't enough, revalidate is correct
         layeredPane.revalidate();
     }
-
+    
     private void checkCurSlide() {
         if (curSlideIn != null) {
             SlidingView curView = null;
@@ -250,7 +269,7 @@ public final class DesktopImpl {
             layeredPane.remove(curSlideComp);
         }
     }
-
+    
     public void performSlideIn(SlideOperation operation, Rectangle editorBounds) {
         Rectangle slideInBounds = computeSlideInBounds(operation, editorBounds);
         operation.setFinishBounds(slideInBounds);
@@ -258,7 +277,7 @@ public final class DesktopImpl {
         performSlide(operation);
         curSlideIn = operation;
     }
-
+    
     public void performSlideOut(SlideOperation operation, Rectangle editorBounds) {
         Rectangle slideOutBounds = operation.getComponent().getBounds();
         operation.setStartBounds(slideOutBounds);
@@ -269,28 +288,28 @@ public final class DesktopImpl {
         desktop.revalidate();
         desktop.repaint();
     }
-
+    
     public void performSlideIntoEdge(SlideOperation operation, Rectangle editorBounds) {
         operation.setFinishBounds(computeLastButtonBounds(operation));
         Rectangle screenStart = operation.getStartBounds();
         operation.setStartBounds(convertRectFromScreen(layeredPane, screenStart));
-
+        
         performSlide(operation);
     }
-
+    
     public void performSlideIntoDesktop(SlideOperation operation, Rectangle editorBounds) {
         Rectangle screenStart = operation.getStartBounds();
         operation.setStartBounds(convertRectFromScreen(layeredPane, screenStart));
         Rectangle screenFinish = operation.getStartBounds();
         operation.setStartBounds(convertRectFromScreen(layeredPane, screenFinish));
-
+        
         performSlide(operation);
     }
-
+    
     public void performSlideResize(SlideOperation operation) {
         performSlide(operation);
     }
-
+    
     public void performSlideToggleMaximize( TopComponent tc, String side, Rectangle editorBounds ) {
         Component tabbed = findTabbed( tc );
         if( null != tabbed ) {
@@ -300,7 +319,7 @@ public final class DesktopImpl {
             performSlide(operation);
         }
     }
-
+    
     private Component findTabbed( Component comp ) {
         while( comp.getParent() != null ) {
             if( comp.getParent() instanceof TabbedContainer ) {
@@ -311,11 +330,11 @@ public final class DesktopImpl {
         return null;
     }
     /************** private stuff ***********/
-
+    
     private void performSlide(SlideOperation operation) {
         operation.run(layeredPane, Integer.valueOf(102));
     }
-
+    
     private Rectangle convertRectFromScreen (Component comp, Rectangle screenRect) {
         // safety call to not crash on null bounds
         if (screenRect == null) {
@@ -323,11 +342,11 @@ public final class DesktopImpl {
         }
         Point leftTop = screenRect.getLocation();
         SwingUtilities.convertPointFromScreen(leftTop, comp);
-
+        
         return new Rectangle(leftTop, screenRect.getSize());
     }
-
-    /** Updates slide operation by setting correct finish bounds of component
+    
+    /** Updates slide operation by setting correct finish bounds of component 
      * which will component have after slide in. It should cover whole one side
      * of desktop, but overlap editor area only if necessary.
      */
@@ -339,34 +358,34 @@ public final class DesktopImpl {
         SlidingView view = findView(side);
         return computeSlideInBounds( viewComponent.getBounds(), side, view.getComponent(), view.getSlideBounds(), view.getSelectedTopComponent() );
     }
-
+    
     //Package private for unit testing
     Rectangle computeSlideInBounds( Rectangle splitRootRect, String side, Component slideComponent, Rectangle slideBounds, TopComponent selTc ) {
         Rectangle result = new Rectangle();
         Rectangle viewRect = slideComponent.getBounds();
         Dimension viewPreferred = slideComponent.getPreferredSize();
         int minThick = MIN_EDITOR_ALIGN_THICK;
-
+        
         Dimension tcPreferred = null;
-        boolean keepPreferredSizeWhenSlidedIn = null != selTc
+        boolean keepPreferredSizeWhenSlidedIn = null != selTc 
                 && Boolean.TRUE.equals( selTc.getClientProperty( Constants.KEEP_PREFERRED_SIZE_WHEN_SLIDED_IN ) );
         if( keepPreferredSizeWhenSlidedIn ) {
             tcPreferred = selTc.getPreferredSize();
             if( null == tcPreferred )
                 tcPreferred = slideBounds.getSize();
         }
-
+        
         if( keepPreferredSizeWhenSlidedIn )
             minThick = 20;
-
+        
         if (Constants.LEFT.equals(side)) {
             result.x = viewRect.x + Math.max(viewRect.width, viewPreferred.width);
             result.y = viewRect.y;
-            result.height = keepPreferredSizeWhenSlidedIn
+            result.height = keepPreferredSizeWhenSlidedIn 
                     ? tcPreferred.height
                     : splitRootRect.height;
-            result.width = keepPreferredSizeWhenSlidedIn
-                    ? tcPreferred.width
+            result.width = keepPreferredSizeWhenSlidedIn 
+                    ? tcPreferred.width 
                     : slideBounds.width;
             if (result.width < minThick) {
                 result.width = splitRootRect.width / 3;
@@ -388,13 +407,13 @@ public final class DesktopImpl {
             }
             result.y = viewRect.y;
             result.height = keepPreferredSizeWhenSlidedIn
-                    ? tcPreferred.height
+                    ? tcPreferred.height 
                     : splitRootRect.height;
             result.width = rightLimit - result.x;
-
+            
         } else if (Constants.BOTTOM.equals(side)) {
             int lowerLimit = viewRect.y + viewRect.height - Math.max(viewRect.height, viewPreferred.height);
-            int height = keepPreferredSizeWhenSlidedIn
+            int height = keepPreferredSizeWhenSlidedIn 
                     ? tcPreferred.height
                     : slideBounds.height;
             result.x = viewRect.x;
@@ -408,10 +427,10 @@ public final class DesktopImpl {
             }
             result.height = lowerLimit - result.y;
             result.width = keepPreferredSizeWhenSlidedIn
-                    ? tcPreferred.width
+                    ? tcPreferred.width 
                     : splitRootRect.width;
         } else if (Constants.TOP.equals(side)) {
-            int height = keepPreferredSizeWhenSlidedIn
+            int height = keepPreferredSizeWhenSlidedIn 
                     ? tcPreferred.height
                     : slideBounds.height;
             result.x = viewRect.x;
@@ -422,16 +441,16 @@ public final class DesktopImpl {
                         ? splitRootRect.height / 3 : height;
             result.height = Math.min( splitRootRect.height, height );
             result.width = keepPreferredSizeWhenSlidedIn
-                    ? tcPreferred.width
+                    ? tcPreferred.width 
                     : splitRootRect.width;
         }
         return result;
     }
-
+    
     private Rectangle computeThinBounds (SlideOperation operation, Rectangle slideInFinish) {
         String side = operation.getSide();
         Rectangle result = new Rectangle();
-
+        
         if (Constants.LEFT.equals(side)) {
             result.x = slideInFinish.x;
             result.y = slideInFinish.y;
@@ -453,10 +472,10 @@ public final class DesktopImpl {
             result.height = slideInFinish.height;
             result.width = slideInFinish.width;
         }
-
+        
         return result;
     }
-
+    
     /** Returns bounds of last button in sliding view to which given
      * operation belongs. Bounds are relative to desktop layered pane.
      */
@@ -465,16 +484,16 @@ public final class DesktopImpl {
         SlidingView view = findView(side);
         Rectangle screenRect = view.getTabBounds(view.getTopComponents().size() - 1);
         Point leftTop = screenRect.getLocation();
-
+        
         if (Constants.BOTTOM.equals(side)) {
             leftTop.y += desktop.getHeight() - view.getComponent().getPreferredSize().height;
         } else if (Constants.RIGHT.equals(side)) {
             leftTop.x += desktop.getWidth() - view.getComponent().getPreferredSize().width;
         }
-
+        
         return new Rectangle(leftTop, screenRect.getSize());
     }
-
+    
     private SlidingView findView (String side) {
         SlidingView view;
         for (Iterator iter = getSlidingViews().iterator(); iter.hasNext(); ) {
@@ -485,7 +504,7 @@ public final class DesktopImpl {
         }
         return null;
     }
-
+    
     private Set<SlidingView> getSlidingViews() {
         if (slidingViews == null) {
             slidingViews = new HashSet<SlidingView>(5);
@@ -496,7 +515,7 @@ public final class DesktopImpl {
     public void updateCorners() {
         if( UIManager.getBoolean( "NbMainWindow.showCustomBackground" ) ) //NOI18N
             return;
-
+        
         SlidingView leftSlide = null;
         SlidingView topSlide = null;
         for( SlidingView view : slidingViews ) {
@@ -520,7 +539,7 @@ public final class DesktopImpl {
             }
         }
     }
-
+    
     /** Special layout manager for layered pane, just keeps desktop panel
      * coreving whole layered pane and if sliding is in progress, it keeps
      * slided component along right edge.
@@ -533,7 +552,7 @@ public final class DesktopImpl {
             desktop.setBounds(0, 0, size.width, size.height);
             desktop.invalidate();
             desktop.validate();
-            // keep right bounds of slide in progress
+            // keep right bounds of slide in progress 
             if ((curSlideIn != null) && curSlideIn.getComponent().isVisible()) {
                 String side = curSlideIn.getSide();
                 SlidingView curView = findView(side);
@@ -541,7 +560,7 @@ public final class DesktopImpl {
                 if (curView != null && viewComponent != null) {
                     Component slidedComp = curSlideIn.getComponent();
                     TopComponent tc = curView.getSelectedTopComponent();
-                    boolean keepPreferredSizeWhenSlidedIn = null != tc
+                    boolean keepPreferredSizeWhenSlidedIn = null != tc 
                             && Boolean.TRUE.equals( tc.getClientProperty( Constants.KEEP_PREFERRED_SIZE_WHEN_SLIDED_IN ) );
                     Rectangle result = slidedComp.getBounds();
                     Rectangle viewRect = curView.getComponent().getBounds();
@@ -609,27 +628,27 @@ public final class DesktopImpl {
             }
             lastSize = size;
         }
-
+        
         @Override
         public Dimension minimumLayoutSize(Container parent) {
             return desktop.getMinimumSize();
         }
-
+        
         @Override
         public Dimension preferredLayoutSize(Container parent) {
             return desktop.getPreferredSize();
         }
-
+        
         @Override
         public void addLayoutComponent(String name, Component comp) {
             // no op, slided components are added/removed via SlideOperation.run() calls.
         }
-
+        
         @Override
         public void removeLayoutComponent(Component comp) {
             // no op, slided components are added/removed via SlideOperation.run() calls.
         }
-
+        
     } // end of LayeredLayout
-
+    
 }

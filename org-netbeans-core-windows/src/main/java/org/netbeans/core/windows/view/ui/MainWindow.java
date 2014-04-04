@@ -52,6 +52,7 @@ import java.lang.reflect.Field;
 import java.util.*;
 import java.util.List;
 import java.util.logging.Level;
+import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 import javax.swing.*;
 import javax.swing.JPanel;
@@ -68,6 +69,7 @@ import org.openide.filesystems.*;
 import org.openide.loaders.DataObject;
 import org.openide.util.*;
 import org.openide.windows.TopComponent;
+import org.openide.windows.WindowManager;
 
 /** The MainWindow of IDE. Holds toolbars, main menu and also entire desktop
  * if in MDI user interface. Singleton.
@@ -101,7 +103,13 @@ public final class MainWindow {
 
    private static MainWindow theInstance;
 
+   private JPanel statusBarContainer = null;
+   private JComponent statusBar;
+
    private static final Logger LOGGER = Logger.getLogger(MainWindow.class.getName());
+   
+   //update main window title bar when current document is modified (Mac OS X only)
+   private final RequestProcessor RP = new RequestProcessor( "MainWndMac", 1 ); //NOI18N
 
    /** Constructs main window. */
    private MainWindow(JFrame frame) {
@@ -164,6 +172,8 @@ public final class MainWindow {
                }
            }
        }
+
+       logLookAndFeelUsage();
    }
 
    /** Initializes main window. */
@@ -211,14 +221,8 @@ public final class MainWindow {
 
        if(!Constants.SWITCH_STATUSLINE_IN_MENUBAR) {
            if (Constants.CUSTOM_STATUS_LINE_PATH == null) {
-               JLabel status = new StatusLine();
-               // XXX #19910 Not to squeeze status line.
-               status.setText(" "); // NOI18N
-               status.setPreferredSize(new Dimension(0, status.getPreferredSize().height));
-               // text in line should be shifted for 4pix.
-               status.setBorder (BorderFactory.createEmptyBorder (0, 4, 0, 0));
-
-               JPanel statusLinePanel = new JPanel(new BorderLayout());
+               final boolean separateStatusLine = null == statusBarContainer;
+               final JPanel statusLinePanel = new JPanel(new BorderLayout());
                if( isShowCustomBackground() )
                    statusLinePanel.setOpaque( false);
                int magicConstant = 0;
@@ -228,9 +232,13 @@ public final class MainWindow {
                    magicConstant = 12;
 
                    if( "Aqua".equals(UIManager.getLookAndFeel().getID()) ) { //NOI18N
+                       if( separateStatusLine ) {
                        statusLinePanel.setBorder( BorderFactory.createCompoundBorder(
                                BorderFactory.createMatteBorder(1, 0, 0, 0, UIManager.getColor("NbBrushedMetal.darkShadow")), //NOI18N
                                BorderFactory.createMatteBorder(1, 0, 0, 0, UIManager.getColor("NbBrushedMetal.lightShadow") ) ) ); //NOI18N
+                       } else {
+                           statusLinePanel.setBorder( BorderFactory.createMatteBorder(1, 0, 0, 0, UIManager.getColor("NbBrushedMetal.darkShadow")) );
+                       }
                    }
                }
 
@@ -240,14 +248,35 @@ public final class MainWindow {
                        BorderFactory.createEmptyBorder (0, 0, 0, magicConstant)));
 
                if( !"Aqua".equals(UIManager.getLookAndFeel().getID())
-                       && !UIManager.getBoolean( "NbMainWindow.StatusBar.HideSeparator" ) ) { //NOI18N
+                       && !UIManager.getBoolean( "NbMainWindow.StatusBar.HideSeparator" )
+                       && separateStatusLine ) { //NOI18N
                    statusLinePanel.add(new JSeparator(), BorderLayout.NORTH);
                }
-               statusLinePanel.add(status, BorderLayout.CENTER);
+               if( separateStatusLine ) {
+                    JLabel status = new StatusLine();
+                    // XXX #19910 Not to squeeze status line.
+                    status.setText(" "); // NOI18N
+                    status.setPreferredSize(new Dimension(0, status.getPreferredSize().height));
+                    // text in line should be shifted for 4pix.
+                    status.setBorder (BorderFactory.createEmptyBorder (0, 15, 0, 0));
 
-               decoratePanel (statusLinePanel, false);
+                    statusLinePanel.add(status, BorderLayout.CENTER);
+               }
+
+               WindowManager.getDefault().invokeWhenUIReady( new Runnable() {
+                   @Override
+                   public void run() {
+                        decoratePanel (statusLinePanel, false);
+                   }
+               });
                statusLinePanel.setName("statusLine"); //NOI18N
-               frame.getContentPane().add (statusLinePanel, BorderLayout.SOUTH);
+               statusBar = statusLinePanel;
+               if( separateStatusLine ) {
+                    frame.getContentPane().add (statusLinePanel, BorderLayout.SOUTH);
+               } else {
+                   statusBarContainer.add( statusLinePanel, BorderLayout.CENTER );
+                   AutoHideStatusText.install( frame, statusBarContainer );
+               }
            } else { // custom status line provided
                JComponent status = getCustomStatusLine();
                if (status != null) {
@@ -287,41 +316,52 @@ public final class MainWindow {
            if( null != saveResult && null != dobResult ) {
                saveListener = new LookupListener() {
                    @Override
-                   public void resultChanged(LookupEvent ev) {
-                       if (ev.getSource() == saveResult) {
-                           boolean modified = saveResult.allItems().size() > 0;
-                           frame.getRootPane().putClientProperty ("Window.documentModified", //NOI18N
-                                   modified ? Boolean.TRUE : Boolean.FALSE);
-                       } else if (ev.getSource() == dobResult) {
-                           Collection<? extends Lookup.Item<DataObject>> allItems = dobResult.allItems();
-                           int count = allItems.size();
-                           switch (count) {
-                               case 1 :
-                                   DataObject dob = allItems.iterator().next().getInstance();
-                                   if( null != dob ) {
-                                    FileObject file = dob.getPrimaryFile();
-                                    File f = FileUtil.toFile(file);
-                                    if (f != null) {
-                                        frame.getRootPane().putClientProperty("Window.documentFile", f); //NOI18N
-                                        break;
-                                    }
-                                   }
-                                   //Fall through
-                               case 0 :
-                                   //Fall through
-                               default :
-                                   frame.getRootPane().putClientProperty("Window.documentFile", null); //NOI18N
+                   public void resultChanged(final LookupEvent ev) {
+                       RP.post( new Runnable() {
+
+                           @Override
+                           public void run() {
+                               updateMacDocumentProperties(ev);
                            }
-                       }
+                       });
                    }
 
                };
                saveResult.addLookupListener(saveListener);
                dobResult.addLookupListener(saveListener);
            }
+           dobResult.allItems();
        }
    }
 
+   private void updateMacDocumentProperties( LookupEvent ev ) {
+        if (ev.getSource() == saveResult) {
+            final boolean modified = saveResult.allItems().size() > 0;
+            SwingUtilities.invokeLater( new Runnable() {
+                @Override
+                public void run() {
+                    frame.getRootPane().putClientProperty ("Window.documentModified", //NOI18N
+                            modified ? Boolean.TRUE : Boolean.FALSE);
+                }
+            });
+        } else if (ev.getSource() == dobResult) {
+            final File[] documentFile = new File[1];
+            Collection<? extends Lookup.Item<DataObject>> allItems = dobResult.allItems();
+            if( 1 == allItems.size() ) {
+                DataObject dob = allItems.iterator().next().getInstance();
+                if( null != dob ) {
+                    FileObject file = dob.getPrimaryFile();
+                    documentFile[0] = FileUtil.toFile( file );
+                }
+            }
+            SwingUtilities.invokeLater( new Runnable() {
+                @Override
+                public void run() {
+                    frame.getRootPane().putClientProperty("Window.documentFile", documentFile[0]); //NOI18N
+                }
+            });
+        }
+   }
 
    private static void decoratePanel (JPanel panel, boolean safeAccess) {
        assert safeAccess || SwingUtilities.isEventDispatchThread () : "Must run in AWT queue.";
@@ -432,6 +472,15 @@ public final class MainWindow {
        return frame.getJMenuBar();
    }
 
+    void setStatusBarContainer( JPanel panel ) {
+        assert null != panel;
+        assert panel.getLayout() instanceof BorderLayout;
+        this.statusBarContainer = panel;
+        if( null != statusBar ) {
+            statusBarContainer.add( statusBar, BorderLayout.CENTER );
+        }
+    }
+    
    static private class StatusLineElementsListener implements LookupListener {
        private JPanel decoratingPanel;
        StatusLineElementsListener (JPanel decoratingPanel) {
@@ -811,5 +860,23 @@ public final class MainWindow {
    private static boolean isShowCustomBackground() {
        return UIManager.getBoolean("NbMainWindow.showCustomBackground"); //NOI18N
    }
+
+   private static boolean lafLogged = false;
+    private static void logLookAndFeelUsage() {
+        if( lafLogged )
+            return;
+        lafLogged = true;
+        LookAndFeel laf = UIManager.getLookAndFeel();
+        Logger logger = Logger.getLogger( "org.netbeans.ui.metrics.laf" );   // NOI18N
+        LogRecord rec = new LogRecord( Level.INFO, "USG_LOOK_AND_FEEL" ); //NOI18N
+        String lafId = laf.getID();
+        if( laf.getDefaults().getBoolean( "nb.dark.theme" ) ) //NOI18N
+        {
+            lafId = "DARK " + lafId; //NOI18N
+        }
+        rec.setParameters( new Object[]{ lafId, laf.getName() } );
+        rec.setLoggerName( logger.getName() );
+        logger.log( rec );
+    }
 }
 

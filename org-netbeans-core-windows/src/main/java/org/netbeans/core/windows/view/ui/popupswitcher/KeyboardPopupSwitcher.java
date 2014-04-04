@@ -114,7 +114,7 @@ public final class KeyboardPopupSwitcher implements WindowFocusListener {
     private static int triggerKey; // e.g. TAB
     private static int reverseKey = KeyEvent.VK_SHIFT;
     private static int releaseKey; // e.g. CTRL
-    private static boolean documentsOnly = false;
+    private static boolean defaultDocumentsOnly = Boolean.getBoolean("netbeans.winsys.ctrltab.documentsonly"); //NOI18N
     
     /** Indicates whether an item to be selected is previous or next one. */
     private boolean fwd = true;
@@ -163,7 +163,11 @@ public final class KeyboardPopupSwitcher implements WindowFocusListener {
             }
             if( !Switches.isCtrlTabWindowSwitchingInJTableEnabled() ) {
                 Component c = KeyboardFocusManager.getCurrentKeyboardFocusManager().getFocusOwner();
-                if( c instanceof JComponent && !(c instanceof JEditorPane)) {
+                if( c instanceof JEditorPane ) {
+                    if( Boolean.TRUE.equals( ((JEditorPane)c).getClientProperty( "nb.ctrltab.popupswitcher.disable") ) ) { //NOI18N
+                        return false;
+                    }
+                } else if( c instanceof JComponent && !(c instanceof JEditorPane)) {
                     JComponent jc = ( JComponent ) c;
                     if( jc.getFocusTraversalKeysEnabled() ) {
                         Set<AWTKeyStroke> keys = jc.getFocusTraversalKeys( KeyboardFocusManager.FORWARD_TRAVERSAL_KEYS );
@@ -187,7 +191,7 @@ public final class KeyboardPopupSwitcher implements WindowFocusListener {
                         return false;
                     }
                 }
-                AbstractAction rva = new RecentViewListAction();
+                Action rva = defaultDocumentsOnly ? RecentViewListAction.createDocumentsOnlyInstance() : new RecentViewListAction();
                 rva.actionPerformed(new ActionEvent(kev.getSource(),
                         ActionEvent.ACTION_PERFORMED, "C-TAB", kev.getModifiers()));
                 return true;
@@ -225,7 +229,7 @@ public final class KeyboardPopupSwitcher implements WindowFocusListener {
         }
         KeyboardPopupSwitcher.releaseKey = releaseKey;
         KeyboardPopupSwitcher.triggerKey = triggerKey;
-        invokerTimer = new Timer(TIME_TO_SHOW, new PopupInvoker(forward));
+        invokerTimer = new Timer(TIME_TO_SHOW, new PopupInvoker(forward, documentsOnly));
         invokerTimer.setRepeats(false);
         invokerTimer.start();
         invokerTimerRunning = true;
@@ -265,8 +269,10 @@ public final class KeyboardPopupSwitcher implements WindowFocusListener {
      */
     private static class PopupInvoker implements ActionListener {
         private boolean forward;
-        public PopupInvoker( boolean forward ) {
+        private boolean documentsOnly;
+        public PopupInvoker( boolean forward, boolean documentsOnly ) {
             this.forward = forward;
+            this.documentsOnly = documentsOnly;
         }
         /** Timer just hit the specified time_to_show */
         @Override
@@ -276,7 +282,7 @@ public final class KeyboardPopupSwitcher implements WindowFocusListener {
                 if( null != instance ) {
                     instance.hideCurrentPopup();
                 }
-                instance = new KeyboardPopupSwitcher( hits, forward );
+                instance = new KeyboardPopupSwitcher( hits, forward, documentsOnly );
                 instance.showPopup();
             }
         }
@@ -304,7 +310,7 @@ public final class KeyboardPopupSwitcher implements WindowFocusListener {
     /**
      * Creates a new instance of KeyboardPopupSwitcher.
      */
-    private KeyboardPopupSwitcher(int hits, boolean forward) {
+    private KeyboardPopupSwitcher(int hits, boolean forward, boolean documentsOnly) {
         this.fwd = forward;
         switcher = new PopupSwitcher( documentsOnly, hits, forward );
         table = switcher.getTable();
@@ -380,7 +386,8 @@ public final class KeyboardPopupSwitcher implements WindowFocusListener {
             cleanupInterrupter();
             if( null != instance )
                 instance.hideCurrentPopup();
-            instance = new KeyboardPopupSwitcher(hits + 1, true);
+            System.err.println("showing popup with " + defaultDocumentsOnly);
+            instance = new KeyboardPopupSwitcher(hits + 1, true, defaultDocumentsOnly);
             instance.showPopup();
         }
     }

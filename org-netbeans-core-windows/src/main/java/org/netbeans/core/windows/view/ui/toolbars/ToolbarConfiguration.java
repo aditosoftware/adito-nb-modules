@@ -398,6 +398,13 @@ public final class ToolbarConfiguration implements ToolbarPool.Configuration {
      */
     public Component activate () {
         refresh();
+        //#233904
+        SwingUtilities.invokeLater( new Runnable() {
+            @Override
+            public void run() {
+                rebuildMenu();
+            }
+        });
         return toolbarPanel;
     }
 
@@ -461,6 +468,15 @@ public final class ToolbarConfiguration implements ToolbarPool.Configuration {
      */
     void setToolbarButtonDragAndDropAllowed(boolean buttonDndAllowed) {
         dndSupport().setButtonDragAndDropAllowed(buttonDndAllowed);
+    }
+
+    /**
+     * @return True when toolbar configuration window is showing and toolbar
+     * buttons can be rearranged usin drag and drop.
+     * @since 2.66
+     */
+    public boolean isToolbarConfigurationInProgress() {
+        return dndSupport.isButtonDragAndDropAllowed();
     }
 
     /**

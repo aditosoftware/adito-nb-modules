@@ -384,13 +384,17 @@ final class DnDSupport implements DragSourceListener, DragGestureListener, DropT
         this.buttonDndAllowed = buttonDndAllowed;
     }
 
+    boolean isButtonDragAndDropAllowed() {
+        return this.buttonDndAllowed;
+    }
+
     private Window createDragWindow( Image dragImage, Rectangle bounds ) {
         Window w = new Window( SwingUtilities.windowForComponent(sourceRow) );
         w.add(new JLabel(new ImageIcon(dragImage)));
         w.setBounds(bounds);
         w.setVisible(true);
         NativeWindowSystem nws = NativeWindowSystem.getDefault();
-        if( nws.isWindowAlphaSupported() ) {
+        if( nws.isUndecoratedWindowAlphaSupported() ) {
             nws.setWindowAlpha(w, 0.7f);
         }
         return w;

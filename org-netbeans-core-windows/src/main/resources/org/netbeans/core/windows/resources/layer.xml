@@ -102,6 +102,21 @@ made subject to such option by the copyright holder.
             <file name="org-netbeans-core-windows-actions-MoveModeAction.instance"/>
             <file name="org-netbeans-core-windows-actions-MoveWindowAction.instance"/>
             <file name="org-netbeans-core-windows-actions-ToolbarsListAction.instance"/>
+            <file name="org-netbeans-core-windows-actions-MoveWindowLeftAction.instance">
+                <attr name="instanceCreate" methodvalue="org.netbeans.core.windows.actions.MoveWindowWithinModeAction.createMoveLeft"/>
+                <attr name="instanceOf" stringvalue="javax.swing.Action"/>
+            </file>
+            <file name="org-netbeans-core-windows-actions-MoveWindowRightAction.instance">
+                <attr name="instanceCreate" methodvalue="org.netbeans.core.windows.actions.MoveWindowWithinModeAction.createMoveRight"/>
+                <attr name="instanceOf" stringvalue="javax.swing.Action"/>
+            </file>
+            <file name="org-netbeans-core-windows-actions-ShowEditorOnlyAction.instance">
+                <attr name="instanceCreate" methodvalue="org.netbeans.core.windows.actions.ShowEditorOnlyAction.create"/>
+                <attr name="instanceOf" stringvalue="javax.swing.Action"/>
+            </file>
+            <file name="GroupsMenuAction.instance">
+                <attr name="instanceCreate" methodvalue="org.netbeans.core.windows.documentgroup.GroupsMenuAction.create"/>
+            </file>
         </folder>
     </folder>
     
@@ -109,8 +124,17 @@ made subject to such option by the copyright holder.
         <file name="OS-ENTER.shadow">
 	    <attr name="originalFile" stringvalue="Actions/Window/org-netbeans-core-windows-actions-ToggleFullScreenAction.instance"/>
 	</file>
+        <file name="DS-ENTER.shadow">
+	    <attr name="originalFile" stringvalue="Actions/Window/org-netbeans-core-windows-actions-ShowEditorOnlyAction.instance"/>
+	</file>
         <file name="OS-D.shadow">
             <attr name="originalFile" stringvalue="Actions/Window/org-netbeans-core-windows-actions-DockWindowAction.instance"/>
+        </file>
+        <file name="SDO-LEFT.shadow">
+            <attr name="originalFile" stringvalue="Actions/Window/org-netbeans-core-windows-actions-MoveWindowLeftAction.instance"/>
+        </file>
+        <file name="SDO-RIGHT.shadow">
+            <attr name="originalFile" stringvalue="Actions/Window/org-netbeans-core-windows-actions-MoveWindowRightAction.instance"/>
         </file>
     </folder>
 
@@ -135,6 +159,11 @@ made subject to such option by the copyright holder.
             <file name="Separator3.instance">
               <attr name="instanceClass" stringvalue="javax.swing.JSeparator"/>
                 <attr name="position" intvalue="1100"/>
+            </file>
+
+            <file name="ShowEditorOnlyAction.shadow">
+                <attr name="originalFile" stringvalue="Actions/Window/org-netbeans-core-windows-actions-ShowEditorOnlyAction.instance"/>
+                <attr name="position" intvalue="1198"/>
             </file>
             
             <file name="ToggleFullScreenAction.shadow">
@@ -162,7 +191,7 @@ made subject to such option by the copyright holder.
             <attr name="position" intvalue="1200"/>
             <file name="SwitchToRecentDocumentAction.shadow">
                 <attr name="originalFile" stringvalue="Actions/Window/org-netbeans-core-windows-actions-SwitchToRecentDocumentAction.instance"/>
-                <attr name="position" intvalue="1800"/>
+                <attr name="position" intvalue="900"/>
             </file>
             <file name="Separator3.instance">
 	        <attr name="instanceClass" stringvalue="javax.swing.JSeparator"/>
@@ -252,6 +281,10 @@ made subject to such option by the copyright holder.
                 <attr name="originalFile" stringvalue="Actions/Window/org-netbeans-core-windows-actions-CloseAllButThisAction.instance"/>
                 <attr name="position" intvalue="20600"/>
             </file>
+            <file name="GroupsMenuAction.shadow">
+                <attr name="originalFile" stringvalue="Actions/Window/GroupsMenuAction.instance"/>
+                <attr name="position" intvalue="20650"/>
+            </file>
             <file name="DocumentsAction.shadow">
                 <attr name="originalFile" stringvalue="Actions/Window/org-netbeans-core-windows-actions-DocumentsAction.instance"/>
                 <attr name="position" intvalue="20700"/>
@@ -260,6 +293,27 @@ made subject to such option by the copyright holder.
         </folder>
     </folder>
 
+<!--    <folder name="OptionsDialog">
+        <folder name="Advanced">
+            <file name="Windows.instance">
+                org.netbeans.core.windows.options.WinSysOptionsPanelController
+                <attr methodvalue="org.netbeans.spi.options.AdvancedOption.createSubCategory" name="instanceCreate"/>
+                <attr name="controller" newvalue="org.netbeans.core.windows.options.WinSysOptionsPanelController"/>
+                <attr bundlevalue="org.netbeans.core.windows.options.Bundle#AdvancedOption_DisplayName_WinSys" name="displayName"/>
+                <attr bundlevalue="org.netbeans.core.windows.options.Bundle#KW_WindowOptions" name="keywords"/>
+                <attr name="keywordsCategory" stringvalue="Advanced/Windows"/>
+            </file>
+        </folder>
+        <folder name="Keywords">
+            <file name="org.netbeans.core.windows.options.WinSysPanel">
+                org.netbeans.core.windows.options.WinSysPanel
+                <attr name="location" stringvalue="Advanced"/>
+                <attr bundlevalue="org.netbeans.core.windows.options.Bundle#AdvancedOption_DisplayName_WinSys" name="tabTitle"/>
+                <attr bundlevalue="org.netbeans.core.windows.options.Bundle#KW_WindowOptions" name="keywords-1"/>
+            </file>
+        </folder>
+    </folder>
+-->
     <folder name="Toolbars">
         <!-- this attribute is required to correctly instantiate toolbar configuration XML files -->
         <attr name="recognizeXML" boolvalue="true"/>

@@ -690,21 +690,35 @@ class ModeParser {
         // Update order
         List<TCRefParser> localList = new ArrayList<TCRefParser>(10);
         Map<String,TCRefParser> localMap = (Map) ((HashMap) tcRefParserMap).clone();
-        
+
+        if( null == tcRefOrder ) {
+            //#232307
+            PersistenceManager.LOG.log(Level.INFO,
+            "[WinSys.ModeParser.addTCRef]" // NOI18N
+            + " Warning: ModeParser " + getName() + ". TCRefParser " // NOI18N
+            + tcRefName + " is missing TC order."); // NOI18N
+            tcRefParserMap.remove(tcRefName);
+            readOrder();
+        }
         TCRefParser [] tcRefParserArray = new TCRefParser[tcRefOrder.size()];
         for (Iterator it = tcRefOrder.entrySet().iterator(); it.hasNext(); ) {
             Map.Entry en = (Map.Entry) it.next();
             String name = (String) en.getKey();
             int index = ((Integer) en.getValue()).intValue();
             tcRefParser = (TCRefParser) localMap.remove(name);
-            assert tcRefParser != null : "No parser for " + name + " in " + tcRefParser + " when adding " +tcRefName;
             //Put instances to array according to defined order
             //Order should be defined from 0 to N-1
             //log("-- -- ADD [" + index + "]: " + tcRefParser.getName());
             tcRefParserArray[index] = tcRefParser;
         }
         for (int i = 0; i < tcRefParserArray.length; i++) {
-            localList.add(tcRefParserArray[i]);
+            if(  null != tcRefParserArray[i] ) {
+                //#233078 - when enabling modules that add more than one TC
+                //the file system sends one notification per file however the order
+                //attribute in Modes folder contains all new files already so
+                //the parser is missing for files that were notified yet
+                localList.add(tcRefParserArray[i]);
+            }
         }
         //Append remaining instances if any
         for (Iterator<String> it = localMap.keySet().iterator(); it.hasNext(); ) {

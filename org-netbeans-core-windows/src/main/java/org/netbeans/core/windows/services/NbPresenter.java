@@ -249,7 +249,7 @@ implements PropertyChangeListener, WindowListener, Mutex.Action<Void>, Comparato
         //opaque.
         getRootPane().setOpaque(true);
         
-        if (d instanceof WizardDescriptor) {
+        if (d instanceof WizardDescriptor || d.isNoDefaultClose() ) {
             // #81938: wizard close button shouln't work during finish progress
             setDefaultCloseOperation (WindowConstants.DO_NOTHING_ON_CLOSE);
         } else {
@@ -270,11 +270,8 @@ implements PropertyChangeListener, WindowListener, Mutex.Action<Void>, Comparato
         initializePresenter();
 
         pack();
-        // a workaround jdkbug#6925473
-        if (isJava17()) {
-            pack();
-        }
-        setBounds(Utilities.findCenterBounds(getSize()));
+
+        initBounds();
     }
 
     /** Requests focus for <code>currentMessage</code> component.
@@ -389,16 +386,6 @@ implements PropertyChangeListener, WindowListener, Mutex.Action<Void>, Comparato
             getRootPane().putClientProperty("nb.default.option.pane", isDefaultOptionPane); //NOI18N
             getContentPane ().add (toAdd, BorderLayout.CENTER);
         }
-    }
-
-    private static boolean isJava17() {
-        if (isJava17 != null) {
-            return isJava17;
-        }
-        String javaVersion = System.getProperty("java.version", "unknown"); // NOI18N
-        String javaRuntimeName = System.getProperty("java.runtime.name", "unknown"); // NOI18N
-        isJava17 = javaVersion.startsWith("1.7") || javaRuntimeName.startsWith("OpenJDK"); // NOI18N
-        return isJava17;
     }
     
     private static final class FixedHeightLabel extends JLabel {
@@ -623,6 +610,8 @@ implements PropertyChangeListener, WindowListener, Mutex.Action<Void>, Comparato
         
         if (isDefaultButton) {
             result++;
+        } else if( b.equals(descriptor.getDefaultValue ()) ) {
+            result--;
         }
         return result;
     }
@@ -1166,6 +1155,9 @@ implements PropertyChangeListener, WindowListener, Mutex.Action<Void>, Comparato
             update = true;
         } else if (DialogDescriptor.PROP_TITLE.equals(evt.getPropertyName())) {
             setTitle(descriptor.getTitle());
+        } else if (DialogDescriptor.PROP_NO_DEFAULT_CLOSE.equals(evt.getPropertyName())) {
+            setDefaultCloseOperation( descriptor instanceof WizardDescriptor || descriptor.isNoDefaultClose()
+                    ? JDialog.DO_NOTHING_ON_CLOSE : JDialog.DISPOSE_ON_CLOSE );
         } else if (DialogDescriptor.PROP_HELP_CTX.equals(evt.getPropertyName())) {
             // bugfix #40057, restore focus owner after help update
             Component fo = KeyboardFocusManager.getCurrentKeyboardFocusManager ().getFocusOwner ();
@@ -1294,6 +1286,7 @@ implements PropertyChangeListener, WindowListener, Mutex.Action<Void>, Comparato
         }
 
         public void actionPerformed(ActionEvent e) {
+            if( !descriptor.isNoDefaultClose() )
             buttonListener.actionPerformed(e);
         }
         
@@ -1544,4 +1537,53 @@ implements PropertyChangeListener, WindowListener, Mutex.Action<Void>, Comparato
         }
     }
 
+    private void initBounds() {
+        Window w = findFocusedWindow();
+        if( null != w ) {
+            //#133235 - dialog windows should be centered on the main app window, not the whole screen
+            setLocationRelativeTo( w );
+            Rectangle screen = Utilities.getUsableScreenBounds( w.getGraphicsConfiguration() );
+            Rectangle bounds = getBounds();
+            int dx = bounds.x;
+            int dy = bounds.y;
+            // bottom
+            if (dy + bounds.height > screen.y + screen.height) {
+                dy = screen.y + screen.height - bounds.height;
+            }
+            // top
+            if (dy < screen.y) {
+                dy = screen.y;
+            }
+            // right
+            if (dx + bounds.width > screen.x + screen.width) {
+                dx = screen.x + screen.width - bounds.width;
+            }
+            // left
+            if (dx < screen.x) {
+                dx = screen.x;
+            }
+            setLocation( dx, dy );
+        } else {
+            //just center the dialog on the screen and let's hope it'll be
+            //the correct one in multi-monitor setup
+            Dimension size = getSize();
+            Rectangle centerBounds = Utilities.findCenterBounds(size);
+            if(size.equals(centerBounds.getSize())) {
+                setLocation(centerBounds.x, centerBounds.y);
+            } else {
+                setBounds(centerBounds);
+            }
+        }
+    }
+
+    /**
+     * @return Focused and showing Window or null.
+     */
+    private Window findFocusedWindow() {
+        Window w = KeyboardFocusManager.getCurrentKeyboardFocusManager().getFocusedWindow();
+        while( null != w && !w.isShowing() ) {
+            w = w.getOwner();
+        }
+        return w;
+    }
 }
