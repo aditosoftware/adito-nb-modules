@@ -46,7 +46,8 @@ package org.netbeans.core.output2;
 
 import java.beans.*;
 import java.util.Set;
-import org.openide.windows.InputOutput;
+
+import org.netbeans.core.output2.adito.*;
 import org.openide.windows.OutputListener;
 import org.openide.windows.OutputWriter;
 
@@ -62,6 +63,7 @@ import org.openide.windows.IOColorLines;
 import org.openide.windows.IOColorPrint;
 import org.openide.windows.IOColors;
 import org.openide.windows.IOContainer;
+import org.openide.windows.IOFolding;
 import org.openide.windows.IOPosition;
 import org.openide.windows.IOSelect;
 import org.openide.windows.IOTab;
@@ -86,6 +88,7 @@ class NbIO implements InputOutputExt, IInputOutputFilter, Lookup.Provider {
     private Lookup lookup;
     private IOTabImpl ioTab;
     private IOColorsImpl ioColors;
+    private IOFoldingImpl.NbIoFoldHandleDefinition currentFold = null;
 
     private IOutputTabFilterDescription filterOutputDescription;
 
@@ -94,7 +97,7 @@ class NbIO implements InputOutputExt, IInputOutputFilter, Lookup.Provider {
     /** Creates a new instance of NbIO
      * @param name The name of the IO
      * @param toolbarActions an optional set of toolbar actions
-     * @param ioContainer parent container accessor (null for default)
+     * @param iowin parent container accessor (null for default)
      */
     NbIO(String name, Action[] toolbarActions, IOContainer ioContainer) {
         this(name);
@@ -112,13 +115,17 @@ class NbIO implements InputOutputExt, IInputOutputFilter, Lookup.Provider {
         if (Controller.LOG) {
             Controller.log("CLOSE INPUT OUTPUT CALLED FOR " + this);    //NOI18N
         }
+        final NbWriter currentOut;
         synchronized (this) {
-            if (out != null) {
-                if (Controller.LOG) {
-                    Controller.log(" - Its output is non null, calling close() on " + out); //NOI18N
-                }
-                out.close();
+            currentOut = out;
+        }
+        if (currentOut != null) {
+            if (Controller.LOG) {
+                Controller.log(
+                        " - Its output is non null, calling close() on "//NOI18N
+                        + currentOut);
             }
+            currentOut.close();
         }
         post (this, IOEvent.CMD_CLOSE, true);
     }
@@ -146,7 +153,7 @@ class NbIO implements InputOutputExt, IInputOutputFilter, Lookup.Provider {
       return filterOutputDescription;
     }
 
-  String getName() {
+    String getName() {
         return name;
     }
 
@@ -166,19 +173,27 @@ class NbIO implements InputOutputExt, IInputOutputFilter, Lookup.Provider {
         if (Controller.LOG) {
             Controller.log(this + ": IO " + getName() + " is being disposed"); //NOI18N
         }
+        OutWriter currentOut = null;
+        IOReader currentIn = null;
         synchronized (this) {
             if (out != null) {
                 if (Controller.LOG) {
                     Controller.log(this + ": Still has an OutWriter.  Disposing it"); //NOI18N
                 }
-                out().dispose();
+                currentOut = out();
                 out = null;
                 if (in != null) {
-                    in.eof();
+                    currentIn = in;
                     in = null;
                 }
                 focusTaken = null;
             }
+        }
+        if (currentOut != null) {
+            currentOut.dispose();
+        }
+        if (currentIn != null) {
+            currentIn.eof();
         }
         NbIOProvider.dispose(this);
     }
@@ -269,11 +284,13 @@ class NbIO implements InputOutputExt, IInputOutputFilter, Lookup.Provider {
         closed = false;
         streamClosed = false;
 
+        final IOReader currentIn;
         synchronized (this) {
-            if (in != null) {
-                in.eof();
-                in.reuse();
-            }
+            currentIn = in;
+        }
+        if (currentIn != null) {
+            currentIn.eof();
+            currentIn.reuse();
         }
         post (this, IOEvent.CMD_RESET, true);
     }
@@ -326,7 +343,7 @@ class NbIO implements InputOutputExt, IInputOutputFilter, Lookup.Provider {
             ioColors = new IOColorsImpl();
             lookup = Lookups.fixed(ioTab, ioColors, new IOPositionImpl(),
                     new IOColorLinesImpl(), new IOColorPrintImpl(),
-                    new IOSelectImpl(), options);
+                    new IOSelectImpl(), new IOFoldingImpl(), options);
         }
         return lookup;
     }
@@ -542,7 +559,7 @@ class NbIO implements InputOutputExt, IInputOutputFilter, Lookup.Provider {
         protected void println(CharSequence text, OutputListener listener, boolean important, Color color) throws IOException {
             OutWriter out = out();
             if (out != null) {
-                out.print(text, listener, important, color, null, false, true);
+                out.print(text, listener, important, color, null, OutputKind.OUT, true);
             }
         }
     }
@@ -553,7 +570,7 @@ class NbIO implements InputOutputExt, IInputOutputFilter, Lookup.Provider {
         protected void print(CharSequence text, OutputListener listener, boolean important, Color color) throws IOException {
             OutWriter out = out();
             if (out != null) {
-                out.print(text, listener, important, color, null, false, false);
+                out.print(text, listener, important, color, null, OutputKind.OUT, false);
             }
         }
     }
@@ -568,7 +585,7 @@ class NbIO implements InputOutputExt, IInputOutputFilter, Lookup.Provider {
     }
 
     private class IOColorsImpl extends IOColors {
-        Color[] clrs = new Color[4];
+        Color[] clrs = new Color[OutputType.values().length];
 
         @Override
         protected Color getColor(OutputType type) {
@@ -580,6 +597,116 @@ class NbIO implements InputOutputExt, IInputOutputFilter, Lookup.Provider {
             clrs[type.ordinal()] = color;
             post(NbIO.this, IOEvent.CMD_DEF_COLORS, type);
         }
+    }
+
+    private class IOFoldingImpl extends IOFolding {
+
+        @Override
+        protected FoldHandleDefinition startFold(boolean expanded) {
+            synchronized (out()) {
+                if (currentFold != null) {
+                    throw new IllegalStateException(
+                            "The last fold hasn't been finished yet");  //NOI18N
+                }
+                return new NbIoFoldHandleDefinition(null,
+                        getLastLineNumber(), expanded);
+            }
+        }
+
+        class NbIoFoldHandleDefinition extends IOFolding.FoldHandleDefinition {
+
+            private final NbIoFoldHandleDefinition parent;
+            private final int start;
+            private int end = -1;
+            private NbIoFoldHandleDefinition nested = null;
+
+            public NbIoFoldHandleDefinition(NbIoFoldHandleDefinition parent,
+                    int start, boolean expanded) {
+                this.parent = parent;
+                this.start = start;
+                setCurrentFoldStart(start);
+                setExpanded(expanded, false);
+            }
+
+            @Override
+            public void finish() {
+                synchronized (out()) {
+                    if (nested != null) {
+                        throw new IllegalStateException(
+                                "Nested fold hasn't been finished.");   //NOI18N
+                    }
+                    if (end != -1) {
+                        throw new IllegalStateException(
+                                "Fold has been already finished.");     //NOI18N
+                    }
+                    if (parent == null) {
+                        currentFold = null;
+                        setCurrentFoldStart(-1);
+                    } else {
+                        parent.nested = null;
+                        setCurrentFoldStart(parent.start);
+                    }
+                    end = getLastLineNumber();
+                }
+            }
+
+            @Override
+            public FoldHandleDefinition startFold(boolean expanded) {
+                synchronized (out()) {
+                    if (end != -1) {
+                        throw new IllegalStateException(
+                                "The fold has been alredy finished.");  //NOI18N
+                    }
+                    if (nested != null) {
+                        throw new IllegalStateException(
+                                "An unfinished nested fold exists.");   //NOI18N
+                    }
+                    NbIoFoldHandleDefinition def = new NbIoFoldHandleDefinition(
+                            this, getLastLineNumber(), expanded);
+                    this.nested = def;
+                    return def;
+                }
+            }
+
+            @Override
+            public final void setExpanded(boolean expanded) {
+                setExpanded(expanded, true);
+            }
+
+            /**
+             * Expand or collapse a fold.
+             *
+             * @param expanded True to expand the fold, false to collapse it.
+             * @param expandParents If true, parent folds will be expanded if
+             * needed.
+             */
+            private void setExpanded(boolean expanded,
+                    boolean expandParents) {
+                synchronized (out()) {
+                    if (expanded) {
+                        if (expandParents) {
+                            getLines().showFoldAndParentFolds(start);
+                        } else {
+                            getLines().showFold(start);
+                        }
+                    } else {
+                        getLines().hideFold(start);
+                    }
+                }
+            }
+
+            private void setCurrentFoldStart(int foldStartIndex) {
+                getLines().setCurrentFoldStart(foldStartIndex);
+            }
+
+            private AbstractLines getLines() {
+                return ((AbstractLines) out().getLines());
+            }
+        }
+    }
+
+    private int getLastLineNumber() {
+        return Math.max(0, out().getLines().getLineCount() - 2);
     }
 
     /**

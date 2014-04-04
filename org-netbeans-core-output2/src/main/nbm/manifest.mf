@@ -1,15 +1,6 @@
 Manifest-Version: 1.0
-Ant-Version: Apache Ant 1.8.0
-Created-By: 1.6.0_37-b06 (Sun Microsystems Inc.)
-OpenIDE-Module-Public-Packages: org.netbeans.core.output2.**
-OpenIDE-Module-Module-Dependencies: org.netbeans.modules.options.api/1
-  > 1.29, org.netbeans.modules.options.keymap > 1.21, org.netbeans.swi
- ng.plaf > 1.27, org.openide.actions > 6.2, org.openide.awt > 6.8, org
- .openide.dialogs > 6.2, org.openide.filesystems > 7.42, org.openide.i
- o > 1.33, org.openide.util > 8.0, org.openide.util.lookup > 8.0, org.
- openide.windows > 6.2
 OpenIDE-Module-Java-Dependencies: Java > 1.6
-OpenIDE-Module-Implementation-Version: 201306052037
+OpenIDE-Module-Implementation-Version: 201403101706
 AutoUpdate-Show-In-Client: false
 OpenIDE-Module: org.netbeans.core.output2/1
 OpenIDE-Module-Layer: org/netbeans/core/output2/layer.xml
@@ -17,6 +8,6 @@ OpenIDE-Module-Localizing-Bundle: org/netbeans/core/output2/Bundle.pro
  perties
 OpenIDE-Module-Provides: org.openide.windows.IOProvider
 AutoUpdate-Essential-Module: true
-OpenIDE-Module-Specification-Version: 1.30.2
+OpenIDE-Module-Specification-Version: 1.36.1
 OpenIDE-Module-Requires: org.openide.modules.ModuleFormat1
 

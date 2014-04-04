@@ -1,4 +1,4 @@
-package org.netbeans.core.output2;
+package org.netbeans.core.output2.adito;
 
 import org.openide.windows.InputOutput;
 

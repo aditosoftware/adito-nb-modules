@@ -92,6 +92,15 @@ interface Storage {
     public int write (ByteBuffer buf) throws IOException;
 
     /**
+     * Remove bytes from the end of the file. Only removing characters from the
+     * last unfinished line is supported.
+     *
+     * @param length Number of bytes to remove.
+     * @throws IOException if there is a problem writing the data.
+     */
+    public void removeBytesFromEnd(int length) throws IOException;
+
+    /**
      * Dispose of this storage, deleting all associated resources, files, data storage, etc.  This should only
      * be called after it is absolutely certain that nothing will try to write further data to the storage.
      *
@@ -128,4 +137,13 @@ interface Storage {
      * @return true if the storage has been closed
      */
     public boolean isClosed();
+
+    /**
+     * Shift start of the first character by specified offset. This method is
+     * called when a limit is reached and some part of the output should be
+     * forgotten.
+     *
+     * @param byteOffset How many bytes should be forgotten.
+     */
+    public void shiftStart(int byteOffset);
 }

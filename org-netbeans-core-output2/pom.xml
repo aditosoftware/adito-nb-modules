@@ -12,7 +12,7 @@
   <groupId>org.netbeans.modules</groupId>
   <artifactId>org-netbeans-core-output2</artifactId>
   <packaging>nbm</packaging>
-  <version>RELEASE731</version>
+  <version>RELEASE80</version>
   <name>Netbeans IDE module: org-netbeans-core-output2</name>
 
 
@@ -83,7 +83,12 @@
           <cluster>ide</cluster>
           <codeNameBase>org.netbeans.core.output2</codeNameBase>
           <publicPackages>
-            <publicPackage>org.netbeans.core.output2.*</publicPackage>
+            <publicPackage>org.netbeans.api.db.explorer.*</publicPackage>
+            <publicPackage>org.netbeans.api.db.explorer.node.*</publicPackage>
+            <publicPackage>org.netbeans.api.db.explorer.support.*</publicPackage>
+            <publicPackage>org.netbeans.api.db.sql.support.*</publicPackage>
+            <publicPackage>org.netbeans.spi.db.explorer.*</publicPackage>
+            <publicPackage>org.netbeans.core.output2.adito.*</publicPackage>
           </publicPackages>
         </configuration>
       </plugin>

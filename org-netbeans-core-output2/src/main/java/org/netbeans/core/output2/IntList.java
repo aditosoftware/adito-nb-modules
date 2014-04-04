@@ -135,7 +135,7 @@ final class IntList {
     
     private void growArray() {
         int[] old = array;
-        array = allocArray(Math.round(array.length * 1.5f));
+        array = allocArray(Math.round(array.length * 2));
         System.arraycopy(old, 0, array, 0, old.length);
     }
     
@@ -154,4 +154,35 @@ final class IntList {
         return result.toString();
     }
     
+    /**
+     * Shift the list (to left). First {@code shift} items will be forgotten.
+     * Each item can be decremented by {@code decrement}.
+     *
+     * @param shift How many items should be removed. Item at index
+     * {@code shift} will be at index 0 after this operation.
+     * @param decrement The value each item should be decremented by.
+     */
+    public synchronized void compact(int shift, int decrement) {
+        if (shift < 0 || shift > used) {
+            throw new IllegalArgumentException();
+        }
+        for (int i = shift; i < used; i++) {
+            array[i - shift] = array[i] - decrement;
+        }
+        Arrays.fill(array, used - shift, used, Integer.MAX_VALUE);
+        if (used > 0) {
+            used -= shift;
+            lastAdded = (used == 0) ? Integer.MIN_VALUE : lastAdded - decrement;
+        }
+    }
+
+    public synchronized void shorten(int newSize) {
+        if (newSize > used || newSize < 0) {
+            throw new IllegalArgumentException();
+        } else if (newSize < used) {
+            lastAdded = newSize == 0 ? Integer.MIN_VALUE : array[newSize - 1];
+            Arrays.fill(array, newSize, used, Integer.MAX_VALUE);
+            used = newSize;
+        }
+    }
 }

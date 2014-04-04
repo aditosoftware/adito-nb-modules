@@ -59,6 +59,7 @@ import java.util.Collections;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.openide.util.Pair;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.swing.event.ChangeEvent;
@@ -75,6 +76,9 @@ import org.openide.windows.OutputListener;
 abstract class AbstractLines implements Lines, Runnable, ActionListener {
     private static final Logger LOG =
             Logger.getLogger(AbstractLines.class.getName());
+
+    private OutputLimits outputLimits = OutputLimits.getDefault();
+
     /** A collections-like lineStartList that maps file positions to getLine numbers */
     IntList lineStartList;
     IntListSimple lineCharLengthListWithTabs;
@@ -94,10 +98,17 @@ abstract class AbstractLines implements Lines, Runnable, ActionListener {
     private SparseIntList knownLogicalLineCounts = null;
 
     /** Offset positions of tabs */
-    private IntList tabCharOffsets = new IntList(100);
+    private IntList tabCharOffsets = new IntList(128);
     /** Sums of length of all preceding tabs (length of extra spaces) */
-    private IntListSimple tabLengthSums = new IntListSimple(100);
+    private IntListSimple tabLengthSums = new IntListSimple(128);
 
+    private final IntListSimple foldOffsets = new IntListSimple(16);
+    private final IntListSimple visibleList = new IntListSimple(128);
+    private final IntListSimple visibleToRealLine = new IntListSimple(128);
+    private final IntListSimple realToVisibleLine = new IntListSimple(128);
+    private int hiddenLines = 0;
+
+    private int currentFoldStart = -1;
     /** last storage size (after dispose), in bytes */
     private int lastStorageSize = -1;
 
@@ -214,7 +225,7 @@ abstract class AbstractLines implements Lines, Runnable, ActionListener {
     private ChangeListener listener = null;
     public void addChangeListener(ChangeListener cl) {
         this.listener = cl;
-        synchronized(this) {
+        synchronized(readLock()) {
             if (getLineCount() > 0) {
                 //May be a new tab for an old output, hide and reshow, etc.
                 fire();
@@ -308,7 +319,7 @@ abstract class AbstractLines implements Lines, Runnable, ActionListener {
 
     private void init() {
         knownLogicalLineCounts = null;
-        lineStartList = new IntList(100);
+        lineStartList = new IntList(128);
         lineStartList.add(0);
         lineCharLengthListWithTabs = new IntListSimple(100);
         linesToInfos = new IntMap();
@@ -420,7 +431,9 @@ abstract class AbstractLines implements Lines, Runnable, ActionListener {
     }
 
     public int getLineCount() {
-        return lineStartList.size();
+        synchronized (readLock()) {
+            return lineStartList.size();
+        }
     }
 
     public Collection<OutputListener> getListenersForLine(int line) {
@@ -505,6 +518,7 @@ abstract class AbstractLines implements Lines, Runnable, ActionListener {
 
         if (charsPerLine >= longestLineLen || (getLineCount() < 1)) {
             //The doc is empty, or there are no lines long enough to wrap anyway
+            info[0] = visibleToRealLine(logicalLineIdx);
             info[1] = 0;
             info[2] = 1;
             return;
@@ -542,7 +556,7 @@ abstract class AbstractLines implements Lines, Runnable, ActionListener {
             return 0;
         }
         if (charsPerLine >= longestLineLen) {
-            return line;
+            return realToVisibleLine(line);
         }
         if (charsPerLine != knownCharsPerLine || knownLogicalLineCounts == null) {
             calcLogicalLineCount(charsPerLine);
@@ -556,7 +570,7 @@ abstract class AbstractLines implements Lines, Runnable, ActionListener {
      */
     public int getLogicalLineCountIfWrappedAt (int charsPerLine) {
         if (charsPerLine >= longestLineLen) {
-            return getLineCount();
+            return getVisibleLineCount();
         }
         int lineCount = getLineCount();
         if (charsPerLine == 0 || lineCount == 0) {
@@ -581,11 +595,13 @@ abstract class AbstractLines implements Lines, Runnable, ActionListener {
         synchronized (readLock()) {
             int tabIndex1 = tabCharOffsets.findNearest(offset);
             int tabSum1;
-            if (tabIndex1 > 0) {
+            if (tabIndex1 >= 0) {
                 if (tabCharOffsets.get(tabIndex1) < offset) {
                     tabSum1 = tabLengthSums.get(tabIndex1);
-                } else {
+                } else if (tabIndex1 > 0) {
                     tabSum1 = tabLengthSums.get(tabIndex1 - 1);
+                } else {
+                    tabSum1 = 0;
                 }
             } else {
                 tabSum1 = 0;
@@ -663,7 +679,7 @@ abstract class AbstractLines implements Lines, Runnable, ActionListener {
         }
     }
 
-    private IntList importantLines = new IntList(10);
+    private IntList importantLines = new IntList(16);
 
     public int firstImportantListenerLine() {
         return importantLines.size() == 0 ? -1 : importantLines.get(0);
@@ -686,6 +702,10 @@ abstract class AbstractLines implements Lines, Runnable, ActionListener {
 
             int val = 0;
             for (int i = 0; i < lineCount; i++) {
+                if (!isVisible(i)) {
+                    knownLogicalLineCounts.add(i, val);
+                    continue;
+                }
                 int len = lengthWithTabs(i);
 
                 if (len > width) {
@@ -722,6 +742,14 @@ abstract class AbstractLines implements Lines, Runnable, ActionListener {
             if (knownLogicalLineCounts == null) {
                 return;
             }
+            if (currentFoldStart >= 0 && (visibleList.get(currentFoldStart) == 0
+                    || !isVisible(currentFoldStart))) {
+                if (knownLogicalLineCounts.lastIndex() != lineIdx) {
+                    knownLogicalLineCounts.add(lineIdx,
+                            knownLogicalLineCounts.get(lineIdx - 1));
+                }
+                return;
+            };
             // nummber of logical lines above for knownLogicalLineCounts
             int aboveLineCount;
             boolean alreadyAdded = knownLogicalLineCounts.lastIndex() == lineIdx;
@@ -762,9 +790,11 @@ abstract class AbstractLines implements Lines, Runnable, ActionListener {
             if (isFinished) {
                 charLineLength -= 1;
             }
-            updateLastLine(lineStartList.size() - 1, charLengthWithTabs);
+            int lineIndex = lineStartList.size() - 1;
+            updateLastLine(lineIndex, charLengthWithTabs);
             if (isFinished) {
                 lineStartList.add(lineStart + lineLength);
+                updateFolds(lineIndex);
                 lineCharLengthListWithTabs.add(charLengthWithTabs);
             }
             lastLineFinished = isFinished;
@@ -772,6 +802,57 @@ abstract class AbstractLines implements Lines, Runnable, ActionListener {
             lastCharLengthWithTabs = isFinished ? -1 : charLengthWithTabs;
         }
         markDirty();
+    }
+
+    /**
+     * Update data structures with info about folds. Called after a new line is
+     * finished.
+     */
+    private void updateFolds(int lineIndex) {
+        if (currentFoldStart >= visibleList.size()) {
+            LOG.log(Level.FINE, "currentFoldStart = {0}, visibleList" //NOI18N
+                    + ".size() = {1}: Forgetting current fold.", //NOI18N
+                    new Object[]{currentFoldStart, visibleList.size()});
+            currentFoldStart = -1; // #229544, caused e.g. by invalid FoldHandle
+        }
+        if (currentFoldStart == -1) {
+            foldOffsets.add(0);
+        } else {
+            foldOffsets.add(lineIndex - currentFoldStart);
+        }
+        if (currentFoldStart != -1 && (visibleList.get(currentFoldStart) == 0
+                || !isVisible(currentFoldStart))) {
+            hiddenLines++;
+            realToVisibleLine.add(-1);
+        } else {
+            visibleToRealLine.add(lineIndex);
+            realToVisibleLine.add(lineIndex - hiddenLines);
+        }
+        visibleList.add(1);
+    }
+
+    void setCurrentFoldStart(int foldStart) {
+        synchronized (readLock()) {
+            if (foldStart > -1 && foldStart + 1 < foldOffsets.size()
+                    && foldOffsets.get(foldStart + 1) != 1) {
+                LOG.log(Level.FINE, "Ignoring currentFoldStart at " //NOI18N
+                        + "{0}, because foldOffset at {1} is {2}", //NOI18N
+                        new Object[]{foldStart, foldStart + 1, foldOffsets.get(
+                            foldStart + 1)});
+                this.currentFoldStart = -1;
+            } else if (foldStart >= foldOffsets.size()) {
+                LOG.log(Level.FINE, "Ignoring currentFoldStart at " //NOI18N
+                        + "{0}, foldOffsets.size() is only {1}", //NOI18N
+                        new Object[]{foldStart, foldOffsets.size()});
+                this.currentFoldStart = -1;
+            } else {
+                this.currentFoldStart = foldStart;
+            }
+        }
+    }
+
+    IntListSimple getFoldOffsets() {
+        return this.foldOffsets;
     }
 
     /** Convert an index from chars to byte count (*2).  Simple math, but it
@@ -843,7 +924,8 @@ abstract class AbstractLines implements Lines, Runnable, ActionListener {
             OutputOptions.getDefault().getColorStandard(),
             OutputOptions.getDefault().getColorError(),
             OutputOptions.getDefault().getColorLink(),
-            OutputOptions.getDefault().getColorLinkImportant()
+            OutputOptions.getDefault().getColorLinkImportant(),
+            OutputOptions.getDefault().getColorInput(),
         };
     }
 
@@ -860,11 +942,24 @@ abstract class AbstractLines implements Lines, Runnable, ActionListener {
         if (info != null) {
             int lineLength = length(line);
             if (lineLength > info.getEnd()) {
-                info.addSegment(lineLength, false, null, null, null, false);
+                // This is an input
+                info.addSegment(lineLength, OutputKind.IN, null, null, null, false);
             }
             return info;
         } else {
-            return new LineInfo(this, length(line));
+            // The last line can contain input
+            if (line == getLineCount() - 1) {
+                LineInfo li = new LineInfo(this);
+                try {
+                    li.addSegment(getLine(line).length(), OutputKind.OUT, null, null, null, false);
+                } catch (IOException e) {
+                    LOG.log(Level.INFO, null, e);
+                }
+                li.addSegment(length(line), OutputKind.IN, null, null, null, false);
+                return li;
+            } else {
+                return new LineInfo(this, length(line));
+            }
         }
     }
 
@@ -1010,7 +1105,7 @@ abstract class AbstractLines implements Lines, Runnable, ActionListener {
         return lineStartList.toString();
     }
 
-    private int addSegment(CharSequence s, int offset, int lineIdx, int pos, OutputListener l, boolean important, boolean err, Color c, Color b) {
+    private int addSegment(CharSequence s, int offset, int lineIdx, int pos, OutputListener l, boolean important, OutputKind outKind, Color c, Color b) {
         int len = length(lineIdx);
         if (len > 0) {
             LineInfo info = (LineInfo) linesToInfos.get(lineIdx);
@@ -1020,7 +1115,7 @@ abstract class AbstractLines implements Lines, Runnable, ActionListener {
             }
             int curEnd = info.getEnd();
             if (pos > 0 && pos != curEnd) {
-                info.addSegment(pos, false, null, null, null, false);
+                info.addSegment(pos, OutputKind.OUT, null, null, null, false);
                 curEnd = pos;
             }
             if (l != null) {
@@ -1043,15 +1138,15 @@ abstract class AbstractLines implements Lines, Runnable, ActionListener {
                     }
                 }
                 if (leadingCnt > 0) {
-                    info.addSegment(curEnd + leadingCnt, false, null, null, null, false);
+                    info.addSegment(curEnd + leadingCnt, OutputKind.OUT, null, null, null, false);
                 }
-                info.addSegment(endPos - trailingCnt, err, l, c, b, important);
+                info.addSegment(endPos - trailingCnt, outKind, l, c, b, important);
                 if (trailingCnt > 0) {
-                    info.addSegment(endPos, false, null, null, null, false);
+                    info.addSegment(endPos, OutputKind.OUT, null, null, null, false);
                 }
                 registerLineWithListener(lineIdx, info, important);
             } else {
-                info.addSegment(len, err, l, c, b, important);
+                info.addSegment(len, outKind, l, c, b, important);
                 if (important) {
                     importantLines.add(lineIdx);
                 }
@@ -1060,7 +1155,7 @@ abstract class AbstractLines implements Lines, Runnable, ActionListener {
         return len;
     }
 
-    void updateLinesInfo(CharSequence s, int startLine, int startPos, OutputListener l, boolean important, boolean err, Color c, Color b) {
+    void updateLinesInfo(CharSequence s, int startLine, int startPos, OutputListener l, boolean important, OutputKind outKind, Color c, Color b) {
         int offset = 0;
         /* If it's necessary to translate tabs to spaces, use this.
          * But it seems that it works fine without the translation. Translation breaks character indexes.
@@ -1091,17 +1186,21 @@ abstract class AbstractLines implements Lines, Runnable, ActionListener {
             }
         }
          */
-        int startLinePos = startPos - getLineStart(startLine);
-        for (int i = startLine; i < getLineCount(); i++) {
-            offset += addSegment(s, offset, i, startLinePos, l, important, err, c, b) + 1;
-            startLinePos = 0;
+        synchronized (readLock()) {
+            int startLinePos = startPos - getLineStart(startLine);
+            for (int i = startLine; i < getLineCount(); i++) {
+                offset += addSegment(s, offset, i, startLinePos, l, important, outKind, c, b) + 1;
+                startLinePos = 0;
+            }
         }
     }
 
     void addLineInfo(int idx, LineInfo info, boolean important) {
-        linesToInfos.put(idx, info);
-        if (!info.getListeners().isEmpty()) {
-            registerLineWithListener(idx, info, important);
+        synchronized (readLock()) {
+            linesToInfos.put(idx, info);
+            if (!info.getListeners().isEmpty()) {
+                registerLineWithListener(idx, info, important);
+            }
         }
     }
 
@@ -1111,6 +1210,85 @@ abstract class AbstractLines implements Lines, Runnable, ActionListener {
         } else {
             return tabLengthSums.get(i) - tabLengthSums.get(i-1) + 1;
         }
+    }
+
+    int checkLimits() {
+        synchronized (readLock()) {
+            if (getLineCount() >= outputLimits.getMaxLines()
+                    || getCharCount() >= outputLimits.getMaxChars()
+                    || linesToInfos.size() >= 524288) { // #239445
+                return removeOldLines();
+            } else {
+                return 0;
+            }
+        }
+    }
+
+    /**
+     * Tell the storage that oldest bytes can be forgotten, and update all data
+     * structures.
+     */
+    private int removeOldLines() {
+        int newFirstLine = Math.min(outputLimits.getRemoveLines(),
+                lineStartList.size() / 2);
+        int firstByteOffset = lineStartList.get(newFirstLine);
+        lineStartList.compact(newFirstLine, firstByteOffset);
+        lineCharLengthListWithTabs.compact(newFirstLine, 0);
+        lineWithListenerToInfo.decrementKeys(newFirstLine);
+        linesToInfos.decrementKeys(newFirstLine);
+
+        int firstCharOffset = toCharIndex(firstByteOffset);
+        int firstTabIndex = tabCharOffsets.findNearest(firstCharOffset);
+        tabCharOffsets.compact(Math.max(0, firstTabIndex), firstCharOffset);
+        if (firstTabIndex > 0) {
+            tabLengthSums.compact(firstTabIndex,
+                    tabLengthSums.get(firstTabIndex - 1));
+        }
+        int firstImportantLine = importantLines.findNearest(newFirstLine);
+        importantLines.compact(Math.max(0, firstImportantLine), newFirstLine);
+        knownLogicalLineCounts = null;
+        foldOffsets.compact(newFirstLine, 0);
+        int foIndex = 0;
+        while (foIndex < foldOffsets.size() && foldOffsets.get(foIndex) != 0) {
+            foldOffsets.set(foIndex, 0);
+            foIndex++;
+        }
+        visibleList.compact(newFirstLine, 0);
+        visibleList.set(0, 1);
+        realToVisibleLine.compact(newFirstLine, 0);
+        currentFoldStart = Math.max(-1, currentFoldStart - newFirstLine);
+        recomputeRealToVisibleLine();
+        updateVisibleToRealLines(0);
+        getStorage().shiftStart(firstByteOffset);
+        fire();
+        return firstByteOffset;
+    }
+
+    private void recomputeRealToVisibleLine() {
+        int currentVisibleLine = 0;
+        int currentHiddenLineCount = 0;
+        int hiddenFoldStart = -1;
+        for (int i = 0; i < realToVisibleLine.size(); i++) {
+            if (hiddenFoldStart == -1 && visibleList.get(i) == 0) {
+                hiddenFoldStart = i;
+                realToVisibleLine.set(i, currentVisibleLine++);
+            } else if (hiddenFoldStart > -1 &&foldOffsets.get(i) > 0
+                    && foldOffsets.get(i) <= i - hiddenFoldStart) {
+                realToVisibleLine.set(i, -1);
+                currentHiddenLineCount++;
+            } else {
+                realToVisibleLine.set(i, currentVisibleLine++);
+                hiddenFoldStart = -1;
+            }
+        }
+        hiddenLines = currentHiddenLineCount;
+    }
+
+    /**
+     * Redefine output limits. Can be called from test cases.
+     */
+    void setOutputLimits(OutputLimits outputLimits) {
+        this.outputLimits = outputLimits;
     }
 
     void addTabAt(int i, int tabLength) {
@@ -1124,6 +1302,34 @@ abstract class AbstractLines implements Lines, Runnable, ActionListener {
             }
             tabLengthSums.add(tabLength);
         }
+    }
+
+    /**
+     * Remove last tab.
+     *
+     * @return Size of the last tab (characters).
+     */
+    int removeLastTab() {
+        synchronized (readLock()) {
+            LOG.log(Level.FINEST, "removeLastTabAt");
+            int size = tabLengthSums.size();
+            if (size == 0) {
+                return 0;
+            }
+            tabCharOffsets.shorten(tabCharOffsets.size() - 1);
+            int tabLen;
+            if (size > 1) {
+                tabLen = tabLengthSums.get(size - 1) - tabLengthSums.get(size - 2);
+            } else {
+                tabLen = tabLengthSums.get(0);
+            }
+            tabLengthSums.shorten(size - 1);
+            return tabLen;
+        }
+    }
+
+    private boolean isFoldStartValid(int foldStartIndex) {
+        return foldStartIndex >= 0 && foldStartIndex < foldOffsets.size();
     }
 
     /**
@@ -1149,6 +1355,378 @@ abstract class AbstractLines implements Lines, Runnable, ActionListener {
         public void releaseBuffer() {
             cb = null;
             parentResource.releaseBuffer();
+        }
+    }
+
+    @Override
+    public void showFold(int foldStartIndex) {
+        synchronized (readLock()) {
+            if (isFoldStartValid(foldStartIndex)) {
+                setFoldExpanded(foldStartIndex, true);
+            }
+        }
+    }
+
+    @Override
+    public void hideFold(int foldStartIndex) {
+        synchronized (readLock()) {
+            if (isFoldStartValid(foldStartIndex)) {
+                setFoldExpanded(foldStartIndex, false);
+            }
+        }
+    }
+
+    /**
+     * @param foldStartIndex Real index of the first line of the fold.
+     */
+    private void setFoldExpanded(int foldStartIndex, boolean expanded) {
+        synchronized (readLock()) {
+            if (visibleList.get(foldStartIndex) == (expanded ? 1 : 0)) {
+                return;
+            }
+            visibleList.set(foldStartIndex, expanded ? 1 : 0);
+            if (!isVisible(foldStartIndex)) {
+                return; // No need to recompute any mapping.
+            }
+            int len = foldLength(foldStartIndex);
+            if (len > 0) {
+                int changed = updateRealToVisibleIndexesInFold(foldStartIndex,
+                        len, expanded);
+                for (int i = foldStartIndex + len + 1;
+                        i < realToVisibleLine.size(); i++) {
+                    int currentValue = realToVisibleLine.get(i);
+                    if (currentValue != -1) {
+                        realToVisibleLine.set(i,
+                                currentValue + (expanded ? changed : -changed));
+                    }
+                }
+                hiddenLines += expanded ? -changed : changed;
+                updateVisibleToRealLines(foldStartIndex);
+                foldVisibilityUpdated();
+            }
+        }
+    }
+
+    @Override
+    public void hideAllFolds() {
+        synchronized (readLock()) {
+            int currentVisibleLine = 0;
+            int currentHiddenLineCount = 0;
+            for (int i = 0; i < foldOffsets.size(); i++) {
+                boolean isFoldStart = (i + 1 < foldOffsets.size()
+                        && foldOffsets.get(i + 1) == 1);
+                if (isFoldStart) {
+                    visibleList.set(i, 0);
+                }
+                if (foldOffsets.get(i) > 0) {
+                    realToVisibleLine.set(i, -1);
+                    currentHiddenLineCount++;
+                } else {
+                    realToVisibleLine.set(i, currentVisibleLine);
+                    currentVisibleLine++;
+                }
+            }
+            hiddenLines = currentHiddenLineCount;
+            updateVisibleToRealLines(0);
+            foldVisibilityUpdated();
+        }
+    }
+
+    @Override
+    public void showAllFolds() {
+        synchronized (readLock()) {
+            for (int i = 0; i < foldOffsets.size(); i++) {
+                boolean isFoldStart = (i + 1 < foldOffsets.size()
+                        && foldOffsets.get(i + 1) == 1);
+                if (isFoldStart) {
+                    visibleList.set(i, 1);
+                }
+                realToVisibleLine.set(i, i);
+            }
+            hiddenLines = 0;
+            updateVisibleToRealLines(0);
+            foldVisibilityUpdated();
+        }
+    }
+
+    @Override
+    public void showFoldTree(int foldStartIndex) {
+        synchronized (readLock()) {
+            if (isFoldStartValid(foldStartIndex)) {
+                setFoldTreeExpanded(foldStartIndex, true);
+            }
+        }
+    }
+
+    @Override
+    public void showFoldAndParentFolds(int foldStartIndex) {
+        synchronized (readLock()) {
+            int foldOffset = getFoldOffsets().get(foldStartIndex);
+            if (foldOffset > 0) {
+                int parentFoldStart = foldStartIndex - foldOffset;
+                if (parentFoldStart >= 0) {
+                    showFoldAndParentFolds(parentFoldStart);
+                }
+            }
+            showFold(foldStartIndex);
+        }
+    }
+
+    @Override
+    public void showFoldsForLine(int realLineIndex) {
+        synchronized (readLock()) {
+            int foldStart = getFoldStart(realLineIndex);
+            showFoldAndParentFolds(foldStart);
+        }
+    }
+
+    @Override
+    public void hideFoldTree(int foldStartIndex) {
+        synchronized (readLock()) {
+            if (isFoldStartValid(foldStartIndex)) {
+                setFoldTreeExpanded(foldStartIndex, false);
+            }
+        }
+    }
+
+    private void setFoldTreeExpanded(int foldStartIndex, boolean expanded) {
+        int visibleValue = expanded ? 1 : 0;
+        synchronized (readLock()) {
+            assert isVisible(foldStartIndex);
+            visibleList.set(foldStartIndex, visibleValue);
+            int visibleFoldStartIndex = realToVisibleLine.get(foldStartIndex);
+            int delta = 0; // difference in count of visible lines
+            int lastUpdatedIndex = Integer.MAX_VALUE - 1;
+            for (int i = foldStartIndex + 1; i < foldOffsets.size(); i++) {
+                int offset = i - foldStartIndex;
+                if (foldOffsets.get(i) == 0 || foldOffsets.get(i) > offset) {
+                    break;
+                }
+                if (i + 1 < foldOffsets.size() && foldOffsets.get(i + 1) == 1) {
+                    visibleList.set(i, visibleValue);
+                }
+                int visibleIndex = realToVisibleLine.get(i);
+                if ((expanded && visibleIndex < 0)
+                        || (!expanded && visibleIndex >= 0)) {
+                    delta += expanded ? 1 : -1;
+                }
+                realToVisibleLine.set(i,
+                        expanded ? visibleFoldStartIndex + offset : -1);
+                lastUpdatedIndex = i;
+            }
+            for (int i = lastUpdatedIndex + 1; i < realToVisibleLine.size(); i++) {
+                realToVisibleLine.set(i, realToVisibleLine.get(i) + delta);
+            }
+            hiddenLines -= delta;
+            updateVisibleToRealLines(foldStartIndex);
+            foldVisibilityUpdated();
+        }
+    }
+
+    private void foldVisibilityUpdated() {
+        if (knownCharsPerLine > 0) {
+            calcLogicalLineCount(knownCharsPerLine);
+        }
+        markDirty();
+        delayedFire();
+    }
+
+    /**
+     * Update realToVisibleLine indexes in a fold. Handle nested folds, keep
+     * their expanded/collapsed state.
+     *
+     * @param foldStart Real index of the first line of the fold.
+     * @param len Total length of the fold, including nested folds
+     * @param expanded True to expand the fold, false to collapse the fold.
+     *
+     * @return Number of newly hidden of shown lines.
+     */
+    private int updateRealToVisibleIndexesInFold(
+            int foldStart, int len, boolean expanded) {
+
+        int changed = 0;
+        int nestedHidden = -1; // start index of currently processed hidden fold
+        for (int i = 0; i < len; i++) {
+            int lineIndex = foldStart + i + 1;
+            int foldOffset = foldOffsets.get(lineIndex);
+            if (i > 0 && foldOffset == 1 && visibleList.get(lineIndex - 1) == 0
+                    && nestedHidden == -1) {
+                // a nested hidden fold encountered
+                nestedHidden = lineIndex - 1;
+            } else if (foldOffset <= i + 1 && (nestedHidden == -1
+                    || foldOffset > lineIndex - nestedHidden)) {
+                assert !expanded || realToVisibleLine.get(lineIndex) == -1;
+                assert expanded || realToVisibleLine.get(lineIndex) != -1;
+                nestedHidden = -1;
+                changed++;
+                realToVisibleLine.set(lineIndex, expanded
+                        ? realToVisibleLine.get(foldStart) + changed
+                        : -1); // invisible: -1
+            } else if (foldOffset <= len + 1 && nestedHidden != -1) {
+                assert foldOffset <= lineIndex - nestedHidden;
+            } else {
+                assert false : "Only nested fold expected";             //NOI18N
+            }
+        }
+        return changed;
+    }
+
+    private void updateVisibleToRealLines(int fromRealIndex) {
+        for (int i = fromRealIndex; i < getLineCount() - 1; i++) {
+            int visibleLine = realToVisibleLine.get(i);
+            if (visibleLine == -1) {
+                continue;
+            }
+            if (visibleLine >= visibleToRealLine.size()) {
+                visibleToRealLine.add(i);
+            } else {
+                visibleToRealLine.set(visibleLine, i);
+            }
+        }
+        if (visibleToRealLine.size() > realToVisibleLine.size() - hiddenLines) {
+            visibleToRealLine.shorten(realToVisibleLine.size() - hiddenLines);
+        }
+    }
+
+    @Override
+    public int visibleToRealLine(int visibleLineIndex) {
+        synchronized (readLock()) {
+            if (visibleLineIndex >= visibleToRealLine.size()) {
+                return visibleLineIndex + hiddenLines;
+            } else if (visibleLineIndex < 0) {
+                return visibleLineIndex;
+            }
+            return visibleToRealLine.get(visibleLineIndex);
+        }
+    }
+
+    @Override
+    public int realToVisibleLine(int realLineIndex) {
+        synchronized (readLock()) {
+            if (realLineIndex >= realToVisibleLine.size()) {
+                return realLineIndex - hiddenLines;
+            }
+            return realToVisibleLine.get(realLineIndex);
+        }
+    }
+
+    /**
+     * @param lineIndex Real line index.
+     */
+    @Override
+    public boolean isVisible(int lineIndex) {
+        synchronized (readLock()) {
+            if (lineIndex >= foldOffsets.size()) {
+                return true;
+            }
+            int fo = foldOffsets.get(lineIndex);
+            if (fo == 0) {
+                return true;
+            }
+            int parentFold = lineIndex - foldOffsets.get(lineIndex);
+            while (parentFold >= 0) {
+                if (visibleList.get(parentFold) == 0) {
+                    return false;
+                } else {
+                    fo = foldOffsets.get(parentFold);
+                    if (fo == 0) {
+                        break;
+                    } else {
+                        parentFold = parentFold - fo;
+                    }
+                }
+            }
+            return true;
+        }
+    }
+
+    /**
+     * @param foldStart Real fold start index.
+     */
+    int foldLength(int foldStart) {
+        int i = foldStart + 1;
+        while (i < foldOffsets.size()
+                && foldOffsets.get(i) > 0
+                && foldOffsets.get(i) <= i - foldStart) {
+            i++;
+        }
+        return i - foldStart - 1;
+    }
+
+    @Override
+    public int getVisibleLineCount() {
+        synchronized (readLock()) {
+            return getLineCount() - hiddenLines;
+        }
+    }
+
+    @Override
+    public int getFoldStart(int realLineIndex) {
+        synchronized (readLock()) {
+            if (realLineIndex + 1 < foldOffsets.size()
+                    && foldOffsets.get(realLineIndex + 1) == 1) {
+                return realLineIndex;
+            } else if (realLineIndex < 0
+                    || realLineIndex >= foldOffsets.size()) {
+                return Math.max(0, realLineIndex);
+            } else {
+                return realLineIndex - foldOffsets.get(realLineIndex);
+            }
+        }
+    }
+
+    @Override
+    public int getParentFoldStart(int realLineIndex) {
+        synchronized (readLock()) {
+            if (realLineIndex < 0 || realLineIndex >= foldOffsets.size()) {
+                return -1;
+            } else {
+                int offset = foldOffsets.get(realLineIndex);
+                if (offset > 0) {
+                    int result = realLineIndex - offset;
+                    return result >= 0 ? result : -1;
+                } else {
+                    return -1;
+                }
+            }
+        }
+    }
+
+    /**
+     * @param length Value 1 for last character, -1 for the whole line.
+     */
+    @Override
+    public Pair<Integer, Integer> removeCharsFromLastLine(int length) {
+        synchronized (readLock()) {
+            if (lastLineFinished) {
+                return Pair.of(0, 0);
+            } else {
+                String lastLine;
+                try {
+                    lastLine = getLine(getLineCount() - 1);
+                } catch (IOException e) {
+                    LOG.log(Level.INFO, null, e);
+                    return Pair.of(0, 0);
+                }
+                if (lastLine.isEmpty()) {
+                    return Pair.of(0, 0);
+                } else {
+                    int removed;
+                    if (length < 0) {
+                        removed = lastLine.length();
+                    } else {
+                        removed = Math.max(length, lastLine.length());
+                    }
+                    int tabs = 0;
+                    for (int i = 0; i < removed; i++) {
+                        if (lastLine.charAt(lastLine.length() - 1 - i) == '\t') {
+                            tabs += removeLastTab();
+                        }
+                    }
+                    lastLineLength -= removed;
+                    return Pair.of(removed, tabs);
+                }
+            }
         }
     }
 }

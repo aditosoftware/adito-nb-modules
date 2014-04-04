@@ -49,6 +49,7 @@ import org.openide.windows.OutputListener;
 import javax.swing.event.ChangeListener;
 import java.io.IOException;
 import java.util.Collection;
+import org.openide.util.Pair;
 import org.openide.windows.IOColors;
 
 /**
@@ -342,4 +343,108 @@ public interface Lines {
      * @return True if there is still an open stream which may write to the backing storage and no error has occured
      */
     boolean isGrowing();
+
+    /**
+     * Show lines in fold that starts at {@code foldStartIndex}.
+     */
+    void showFold(int foldStartIndex);
+
+    /**
+     * Hide lines in fold that starts at {@code foldStartIndex}.
+     */
+    void hideFold(int foldStartIndex);
+
+    /**
+     * Show all parent folds of the fold starting at line
+     * {@code foldStartIndex}.
+     *
+     * @param foldStartIndex Real index of the line where the fold starts.
+     */
+    void showFoldAndParentFolds(int foldStartIndex);
+
+    /**
+     * Expand all parent folds of a line, so that the line is visible.
+     *
+     * @param realLineIndex Real line index of the line to show.
+     */
+    void showFoldsForLine(int realLineIndex);
+
+    /**
+     * Show all folds in the output, including nested folds.
+     */
+    void showAllFolds();
+
+    /**
+     * Hide all folds in the output, including nested folds.
+     */
+    void hideAllFolds();
+
+    /**
+     * Show fold and all its nested folds.
+     *
+     * @param foldStartIndex Real index of the line at which the fold starts.
+     */
+    void showFoldTree(int foldStartIndex);
+
+    /**
+     * Hide fold and all its nested folds.
+     *
+     * @param foldStartIndex Real index of the line at which the fold starts.
+     */
+    void hideFoldTree(int foldStartIndex);
+
+    /**
+     * Check whether a line is visible, e.i. it's not inside a collapsed folds.
+     *
+     * @param realLineIndex Index of the line, including hidden lines.
+     */
+    boolean isVisible(int realLineIndex);
+
+    int getVisibleLineCount();
+
+//    /**
+//     * Test whether a line is visible, e.g. it is not inside a hidden fold.
+//     */
+//    boolean isVisible(int lineIndex);
+//
+//    /**
+//     * Get count of visible lines.
+//     */
+//    int visibleLineCount();
+//
+    /**
+     * Convert real line index to visible line index.
+     *
+     * @return Visible line index, or -1 if the line is invisible.
+     */
+    int realToVisibleLine(int realLineIndex);
+
+    /**
+     * Convert visible line index to a real line index.
+     */
+    int visibleToRealLine(int visibleLineIndex);
+
+    /**
+     * Get index of the line at which fold containing line {@code realLineIndex}
+     * starts. If the line itself is starting line of a fold, or the line is
+     * outside of any fold, {@code realLineIndex} is returnded.
+     */
+    int getFoldStart(int realLineIndex);
+
+    /**
+     * Get index of the line at which fold containing line {@code realLineIndex}
+     * starts. If the line is not inside a fold, value -1 is returned.
+     */
+    int getParentFoldStart(int realLineIndex);
+
+    /**
+     * Remove characters from the end of the last unfinished line.
+     *
+     * @param length Number of characters to remove, -1 to remove all characters
+     * in the last line.
+     * @return Pair, where the first items is number of removed characters (can
+     * be different from parameter {@code length}), and the second item is
+     * number of removed tab spaces.
+     */
+    public Pair<Integer, Integer> removeCharsFromLastLine(int length);
 }

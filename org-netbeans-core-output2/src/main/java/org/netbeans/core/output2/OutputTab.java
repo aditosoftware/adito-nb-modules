@@ -54,6 +54,7 @@ import java.awt.FileDialog;
 import java.awt.Frame;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
@@ -71,10 +72,10 @@ import javax.swing.Action;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JComponent;
 import javax.swing.JFileChooser;
+import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPopupMenu;
-import javax.swing.JSeparator;
 import javax.swing.KeyStroke;
 import javax.swing.RootPaneContainer;
 import javax.swing.SwingUtilities;
@@ -87,6 +88,7 @@ import javax.swing.text.JTextComponent;
 import org.netbeans.api.options.OptionsDisplayer;
 import org.netbeans.core.options.keymap.api.KeyStrokeUtils;
 import org.netbeans.core.output2.Controller.ControllerOutputEvent;
+import org.netbeans.core.output2.adito.IOutputTabFilterDescription;
 import org.netbeans.core.output2.ui.AbstractOutputPane;
 import org.netbeans.core.output2.ui.AbstractOutputTab;
 import org.openide.DialogDisplayer;
@@ -97,7 +99,6 @@ import org.openide.util.Exceptions;
 import org.openide.util.NbBundle;
 import org.openide.windows.IOContainer;
 import org.openide.windows.OutputListener;
-import org.openide.windows.WindowManager;
 import org.openide.xml.XMLUtil;
 
 import static org.netbeans.core.output2.OutputTab.ACTION.*;
@@ -139,6 +140,8 @@ final class OutputTab extends AbstractOutputTab implements IOContainer.CallBacks
                     opts.getColorStandard());
             lines.setDefColor(IOColors.OutputType.ERROR,
                     opts.getColorError());
+            lines.setDefColor(IOColors.OutputType.INPUT,
+                    opts.getColorInput());
             lines.setDefColor(IOColors.OutputType.HYPERLINK,
                     opts.getColorLink());
             lines.setDefColor(IOColors.OutputType.HYPERLINK_IMPORTANT,
@@ -155,6 +158,7 @@ final class OutputTab extends AbstractOutputTab implements IOContainer.CallBacks
      */
     private void setTextViewBackground(JTextComponent textView, Color bg) {
         getOutputPane().getTextView().setBackground(bg);
+        getOutputPane().getFoldingSideBar().setBackground(bg);
         if ("Nimbus".equals(UIManager.getLookAndFeel().getName())) { //NOI18N
             UIDefaults defaults = new UIDefaults();
             defaults.put("EditorPane[Enabled].backgroundPainter", bg);  //NOI18N
@@ -210,14 +214,14 @@ final class OutputTab extends AbstractOutputTab implements IOContainer.CallBacks
         return new OutputPane(this);
     }
 
-    protected void inputSent(String txt) {
+    public void inputSent(String txt) {
         if (Controller.LOG) Controller.log("Input sent on OutputTab: " + txt);
         getOutputPane().lockScroll();
         NbIO.IOReader in = io.in();
         if (in != null) {
             if (Controller.LOG) Controller.log("Sending input to " + in);
             in.pushText(txt + "\n");
-            outWriter.println(txt);
+            outWriter.print(txt, null, false, null, null, OutputKind.IN, true);
         }
     }
 
@@ -326,16 +330,8 @@ final class OutputTab extends AbstractOutputTab implements IOContainer.CallBacks
             }
             if (line >= 0) {
                 getOutputPane().sendCaretToLine(line, false);
-                if (isSDI()) {
-                    requestActive();
-                }
             }
         }
-    }
-
-    private boolean isSDI() {
-        Container c = getTopLevelAncestor();
-        return (c != WindowManager.getDefault().getMainWindow());
     }
 
      void hasOutputListenersChanged(boolean hasOutputListeners) {
@@ -479,8 +475,9 @@ final class OutputTab extends AbstractOutputTab implements IOContainer.CallBacks
             String msg;
             if (sel != null) {
                 getOutputPane().unlockScroll();
-                getOutputPane().setSelection(sel[0], sel[1]);
                 int line = out.getLines().getLineAt(sel[0]);
+                ensureLineVisible(out, line);
+                getOutputPane().setSelection(sel[0], sel[1]);
                 int col = sel[0] - out.getLines().getLineStart(line);
                 msg = NbBundle.getMessage(OutputTab.class, "MSG_Found", lastPattern, line + 1, col + 1);
                 if (appendMsg != null) {
@@ -493,6 +490,19 @@ final class OutputTab extends AbstractOutputTab implements IOContainer.CallBacks
             return sel != null;
         }
         return false;
+    }
+
+    /**
+     * Ensure that a line is visible (not inside a collapsed fold). If a change
+     * in the lines object is needed, fire immediately.
+     */
+    private void ensureLineVisible(OutWriter out, int line) {
+        if (!out.getLines().isVisible(line)) {
+            out.getLines().showFoldsForLine(line);
+            if (out.getLines() instanceof ActionListener) {
+                ((ActionListener) out.getLines()).actionPerformed(null);
+            }
+        }
     }
 
     /**
@@ -641,14 +651,14 @@ final class OutputTab extends AbstractOutputTab implements IOContainer.CallBacks
                 }
             }
             if (added) {
-                popup.add(new JSeparator());
+                popup.addSeparator();
             }
         }
 
         List<TabAction> activeActions = new ArrayList<TabAction>(popupItems.length);
         for (int i = 0; i < popupItems.length; i++) {
             if (popupItems[i] == null) {
-                popup.add(new JSeparator());
+                popup.addSeparator();
             } else {
                 TabAction ta = action(popupItems[i]);
                 if (popupItems[i] == ACTION.WRAP) {
@@ -674,6 +684,7 @@ final class OutputTab extends AbstractOutputTab implements IOContainer.CallBacks
                 }
             }
         }
+        addFoldingActionsToPopUpMenu(popup, activeActions);
         // hack to remove the esc keybinding when doing popup..
         KeyStroke esc = KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0);
         JComponent c = getOutputPane().getTextView();
@@ -684,6 +695,23 @@ final class OutputTab extends AbstractOutputTab implements IOContainer.CallBacks
         popup.addPopupMenuListener(new PMListener(activeActions, escHandle));
         popup.show(src, p.x, p.y);
 
+    }
+
+    private void addFoldingActionsToPopUpMenu(JPopupMenu menu,
+            List<TabAction> activeActions) {
+        JMenu submenu = new JMenu(NbBundle.getMessage(
+                OutputTab.class, "LBL_OutputFolds"));                   //NOI18N
+        for (ACTION a : popUpFoldItems) {
+            if (a == null) {
+                submenu.addSeparator();
+            } else {
+                TabAction ta = action(a);
+                activeActions.add(ta);
+                submenu.add(new JMenuItem(ta));
+            }
+        }
+        menu.addSeparator();
+        menu.add(submenu);
     }
 
     void updateActions() {
@@ -779,6 +807,9 @@ final class OutputTab extends AbstractOutputTab implements IOContainer.CallBacks
         } else if (OutputOptions.PROP_COLOR_ERROR.equals(pn)) {
             lines.setDefColor(IOColors.OutputType.ERROR,
                     opts.getColorError());
+        } else if (OutputOptions.PROP_COLOR_INPUT.equals(pn)) {
+            lines.setDefColor(IOColors.OutputType.INPUT,
+                    opts.getColorInput());
         } else if (OutputOptions.PROP_COLOR_LINK.equals(pn)) {
             lines.setDefColor(IOColors.OutputType.HYPERLINK,
                     opts.getColorLink());
@@ -829,7 +860,9 @@ final class OutputTab extends AbstractOutputTab implements IOContainer.CallBacks
     static enum ACTION { COPY, WRAP, SAVEAS, CLOSE, NEXT_ERROR, PREV_ERROR,
                          SELECT_ALL, FIND, FIND_NEXT, NAVTOLINE, POSTMENU,
                          FIND_PREVIOUS, CLEAR, NEXTTAB, PREVTAB, LARGER_FONT,
-                         SMALLER_FONT, SETTINGS, FILTER, PASTE }
+                         SMALLER_FONT, SETTINGS, FILTER, PASTE, COLLAPSE_FOLD,
+                         EXPAND_FOLD, COLLAPSE_ALL, EXPAND_ALL, COLLAPSE_TREE,
+                         EXPAND_TREE}
 
     private static final ACTION[] popupItems = new ACTION[] {
         COPY, PASTE, null, FIND, FIND_NEXT, FIND_PREVIOUS, FILTER, null,
@@ -837,9 +870,17 @@ final class OutputTab extends AbstractOutputTab implements IOContainer.CallBacks
         SAVEAS, CLEAR, CLOSE,
     };
 
+    private static final ACTION[] popUpFoldItems = new ACTION[]{
+        COLLAPSE_FOLD, EXPAND_FOLD, null,
+        COLLAPSE_ALL, EXPAND_ALL, null,
+        COLLAPSE_TREE, EXPAND_TREE
+    };
+
     private static final ACTION[] actionsToInstall = new ACTION[] {
             COPY, SELECT_ALL, FIND, FIND_NEXT, FIND_PREVIOUS, WRAP, LARGER_FONT,
             SMALLER_FONT, SAVEAS, CLOSE, COPY, NAVTOLINE, POSTMENU, CLEAR, FILTER,
+            COLLAPSE_FOLD, EXPAND_FOLD, COLLAPSE_ALL, EXPAND_ALL, COLLAPSE_TREE,
+            EXPAND_TREE
     };
 
     private final Map<ACTION, TabAction> actions = new EnumMap<ACTION, TabAction>(ACTION.class);;
@@ -865,6 +906,12 @@ final class OutputTab extends AbstractOutputTab implements IOContainer.CallBacks
                 case SMALLER_FONT:
                 case SETTINGS:
                 case CLEAR:
+                case COLLAPSE_FOLD:
+                case EXPAND_FOLD:
+                case COLLAPSE_ALL:
+                case EXPAND_ALL:
+                case COLLAPSE_TREE:
+                case EXPAND_TREE:
                     action = new TabAction(a, "ACTION_"+a.name());
                     break;
                 case NAVTOLINE:
@@ -905,7 +952,7 @@ final class OutputTab extends AbstractOutputTab implements IOContainer.CallBacks
          * <li>A name for the action matching the passed key</li>
          * <li>An accelerator for the action matching [key].accel</li>
          * </ul>
-         * @param action An action
+         * @param id An action ID
          * @param bundleKey A key for the bundle associated with the Controller class
          * @see org.openide.util.Utilities#stringToKey
          */
@@ -935,7 +982,7 @@ final class OutputTab extends AbstractOutputTab implements IOContainer.CallBacks
          * Create a ControllerAction with the specified ID, name and keystroke.  Actions created
          * using this constructor will not be added to the popup menu of the component.
          *
-         * @param action The action
+         * @param id The ID
          * @param name A programmatic name for the item
          * @param stroke An accelerator keystroke
          */
@@ -1009,6 +1056,24 @@ final class OutputTab extends AbstractOutputTab implements IOContainer.CallBacks
                 case WRAP:
                     return KeyStrokeUtils.getKeyStrokesForAction(
                             OutputKeymapManager.WRAP_ACTION_ID, null);
+                case COLLAPSE_FOLD:
+                    return KeyStrokeUtils.getKeyStrokesForAction(
+                            "collapse-fold", null);                     //NOI18N
+                case EXPAND_FOLD:
+                    return KeyStrokeUtils.getKeyStrokesForAction(
+                            "expand-fold", null);                       //NOI18N
+                case COLLAPSE_ALL:
+                    return KeyStrokeUtils.getKeyStrokesForAction(
+                            "collapse-all-folds", null);                //NOI18N
+                case EXPAND_ALL:
+                    return KeyStrokeUtils.getKeyStrokesForAction(
+                            "expand-all-folds", null);                  //NOI18N
+                case COLLAPSE_TREE:
+                    return KeyStrokeUtils.getKeyStrokesForAction(
+                            "collapse-fold-tree", null);                //NOI18N
+                case EXPAND_TREE:
+                    return KeyStrokeUtils.getKeyStrokesForAction(
+                            "expand-fold-tree", null);                  //NOI18N
                 default:
                     return null;
             }
@@ -1171,6 +1236,24 @@ final class OutputTab extends AbstractOutputTab implements IOContainer.CallBacks
                           }
                         }
                     }
+                    break;
+                case COLLAPSE_FOLD:
+                    getOutputPane().collapseFold();
+                    break;
+                case EXPAND_FOLD:
+                    getOutputPane().expandFold();
+                    break;
+                case COLLAPSE_ALL:
+                    getOutputPane().collapseAllFolds();
+                    break;
+                case EXPAND_ALL:
+                    getOutputPane().expandAllFolds();
+                    break;
+                case COLLAPSE_TREE:
+                    getOutputPane().collapseFoldTree();
+                    break;
+                case EXPAND_TREE:
+                    getOutputPane().expandFoldTree();
                     break;
                 default:
                     assert false;

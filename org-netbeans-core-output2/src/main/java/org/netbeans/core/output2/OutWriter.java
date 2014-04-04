@@ -57,6 +57,7 @@ import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.openide.util.Exceptions;
+import org.openide.util.Pair;
 import org.openide.util.Utilities;
 
 /**
@@ -399,11 +400,20 @@ class OutWriter extends PrintWriter {
     @Override
     public synchronized void write(int c) {
         doWrite(new String(new char[]{(char)c}), 0, 1);
+        checkLimits();
+    }
+
+    private void checkLimits() {
+        int shift = lines.checkLimits();
+        if (lineStart > 0) {
+            lineStart -= shift;
+        }
     }
     
     @Override
     public synchronized void write(char data[], int off, int len) {
         doWrite(new CharArrayWrapper(data), off, len);
+        checkLimits();
     }
     
     /** write buffer size in chars */
@@ -414,7 +424,7 @@ class OutWriter extends PrintWriter {
         }
         
         // XXX will not pick up ANSI sequences broken across write blocks, but this is likely rare
-        if (printANSI(s.subSequence(off, off + len), false, false, false)) {
+        if (printANSI(s.subSequence(off, off + len), false, OutputKind.OUT, false)) {
             return;
         }
         /* XXX causes stack overflow
@@ -431,6 +441,8 @@ class OutWriter extends PrintWriter {
             ByteBuffer byteBuff = getStorage().getWriteBuffer(WRITE_BUFF_SIZE * 2);
             CharBuffer charBuff = byteBuff.asCharBuffer();
             int charOffset = AbstractLines.toCharIndex(getStorage().size());
+            int skipped = 0;
+            int tabLength = 0; // last tab length
             for (int i = off; i < off + len; i++) {
                 if (charBuff.position() + 1 >= WRITE_BUFF_SIZE) {
                     write((ByteBuffer) byteBuff.position(charBuff.position() * 2), lineCLVT, false);
@@ -443,27 +455,57 @@ class OutWriter extends PrintWriter {
                     written = false;
                 }
                 char c = s.charAt(i);
+                if (lastChar == '\r' && c != '\n') { // \r without following \n
+                    int p;
+                    for (p = charBuff.position(); p > 0; p--) {
+                        char charP1 = charBuff.get(p - 1);
+                        if (charP1 == '\n') {
+                            break;
+                        }
+                        if (charP1 == '\t') {
+                            lineCLVT -= lines.removeLastTab();
+                        }
+                        skipped++;
+                        charBuff.position(p - 1);
+                    }
+                    if (p == 0) {
+                        clearLine();
+                    }
+                }
                 if (c == '\t') {
                     charBuff.put(c);
-                    int tabLength = WrappedTextView.TAB_SIZE - ((this.lineCharLengthWithTabs + lineCLVT) % WrappedTextView.TAB_SIZE);
+                    tabLength = WrappedTextView.TAB_SIZE - ((this.lineCharLengthWithTabs + lineCLVT) % WrappedTextView.TAB_SIZE);
                     LOG.log(Level.FINEST, "Going to add tab: charOffset = {0}, i = {1}, off = {2}," //NOI18N
-                            + "tabLength = {3}, tabIndex = {4}", //NOI18N
-                            new Object[]{charOffset, i, off, tabLength, charOffset + (i - off)}); // #201450
-                    lines.addTabAt(charOffset + (i - off), tabLength);
+                            + "tabLength = {3}, tabIndex = {4}, skipped = {5}", //NOI18N
+                            new Object[]{charOffset, i, off, tabLength, charOffset + (i - off), skipped}); // #201450
+                    lines.addTabAt(charOffset + (i - off) - skipped, tabLength);
                     lineCLVT += tabLength;
                 } else if (c == '\b') {
-                    handleBackspace(charBuff);
-                } else if (c == '\r' || (c == '\n' && lastChar != '\r')) {
+                    int skip = handleBackspace(charBuff);
+                    if (skip == -2) {
+                        lineCLVT -= lines.removeLastTab();;
+                    } else if (skip == 2) {
+                        lineCLVT--;
+                    } else if (skip == 1) {
+                        Pair<Integer, Integer> removedInfo;
+                        removedInfo = lines.removeCharsFromLastLine(1);
+                        storage.removeBytesFromEnd(removedInfo.first() * 2);
+                        lineLength -= removedInfo.first() * 2;
+                        lineCharLengthWithTabs -= removedInfo.second();
+                    }
+                    skipped += Math.abs(skip);
+                } else if (c == '\n') {
                     charBuff.put('\n');
                     int pos = charBuff.position() * 2;
                     ByteBuffer bf = (ByteBuffer) byteBuff.position(pos);
                     write(bf, lineCLVT, true);
                     written = true;
-                } else if (c == '\n') {
-                    assert lastChar == '\r';
-                } else {
+                } else if (c != '\r') {
                     charBuff.put(c);
                     lineCLVT++;
+                } else {
+                    assert c == '\r';
+                    skipped++;
                 }
                 lastChar = c;
             }
@@ -477,21 +519,39 @@ class OutWriter extends PrintWriter {
         return;
     }
 
-    /** Update state of character buffer after a backspace character has been
-        read */
-    private void handleBackspace(CharBuffer charBuff) {
+    /**
+     * Update state of character buffer after a backspace character has been
+     * read.
+     *
+     * @return Value -2, 1 or 2: number of character that will be skipped (has
+     * no corresponding visible character) in the resulting output. In standard
+     * case, it is 2 (the last character + the \b character), if the buffer is
+     * empty, it is 1 (only the \b character). If tab character was deleted,
+     * return -2.
+     */
+    private int handleBackspace(CharBuffer charBuff) {
         if (charBuff.position() > 0) {
+            char deletedChar = charBuff.get(charBuff.position() - 1);
             charBuff.position(charBuff.position() - 1);
+            return deletedChar == '\t' ? -2 : 2;
+        } else {
+            return 1;
         }
     }
 
     @Override
     public synchronized void write(char data[]) {
         doWrite(new CharArrayWrapper(data), 0, data.length);
+        checkLimits();
     }
 
     @Override
     public synchronized void println() {
+        printLineEnd();
+        checkLimits();
+    }
+
+    private void printLineEnd() {
         doWrite("\n", 0, 1);
     }
 
@@ -504,11 +564,13 @@ class OutWriter extends PrintWriter {
     @Override
     public synchronized void write(String s, int off, int len) {
         doWrite(s, off, len);
+        checkLimits();
     }
 
     @Override
     public synchronized void write(String s) {
         doWrite(s, 0, s.length());
+        checkLimits();
     }
 
     public synchronized void println(String s, OutputListener l) {
@@ -516,12 +578,12 @@ class OutWriter extends PrintWriter {
     }
 
     public synchronized void println(String s, OutputListener l, boolean important) {
-        print(s, l, important, null, null, false, true);
+        print(s, l, important, null, null, OutputKind.OUT, true);
     }
 
-    synchronized void print(CharSequence s, OutputListener l, boolean important, Color c, Color b, boolean err, boolean addLS) {
+    synchronized void print(CharSequence s, OutputListener l, boolean important, Color c, Color b, OutputKind outKind, boolean addLS) {
         if (c == null) {
-            if (l == null && printANSI(s, important, err, addLS)) {
+            if (l == null && printANSI(s, important, outKind, addLS)) {
                 return;
             }
             c = ansiColor; // carry over from previous line
@@ -530,9 +592,10 @@ class OutWriter extends PrintWriter {
         int lastPos = lines.getCharCount();
         doWrite(s, 0, s.length());
         if (addLS) {
-            println();
+            printLineEnd();
         }
-        lines.updateLinesInfo(s, lastLine, lastPos, l, important, err, c, b);
+        lines.updateLinesInfo(s, lastLine, lastPos, l, important, outKind, c, b);
+        checkLimits();
     }
     private Color ansiColor;
     private Color ansiBackground;
@@ -540,7 +603,7 @@ class OutWriter extends PrintWriter {
     private int ansiBackgroundCode = 9;
     private boolean ansiBright;
     private boolean ansiFaint;
-    private static final Pattern ANSI_CSI_SGR = Pattern.compile("\u001B\\[(\\d+(;\\d+)*)?m"); // XXX or x9B for single-char CSI?
+    private static final Pattern ANSI_CSI = Pattern.compile("\u001B\\[(\\d+(;\\d+)*)?(\\p{Alpha})"); // XXX or x9B for single-char CSI?
     private static final Color[] COLORS = { // xterm from http://en.wikipedia.org/wiki/ANSI_escape_code#Colors
         null, // default color (black for stdout)
         new Color(205, 0, 0),
@@ -560,7 +623,7 @@ class OutWriter extends PrintWriter {
         new Color(0, 255, 255),
         new Color(255, 255, 255),
     };
-    private boolean printANSI(CharSequence s, boolean important, boolean err, boolean addLS) { // #192779
+    private boolean printANSI(CharSequence s, boolean important, OutputKind outKind, boolean addLS) { // #192779
         int len = s.length();
         boolean hasEscape = false; // fast initial check
         for (int i = 0; i < len - 1; i++) {
@@ -572,14 +635,20 @@ class OutWriter extends PrintWriter {
         if (!hasEscape) {
             return false;
         }
-        Matcher m = ANSI_CSI_SGR.matcher(s);
+        Matcher m = ANSI_CSI.matcher(s);
         int text = 0;
         while (m.find()) {
             int esc = m.start();
             if (esc > text) {
-                print(s.subSequence(text, esc), null, important, ansiColor, ansiBackground, err, false);
+                print(s.subSequence(text, esc), null, important, ansiColor, ansiBackground, outKind, false);
             }
             text = m.end();
+            if ("K".equals(m.group(3)) && "2".equals(m.group(1))) {     //NOI18N
+                clearLine();
+                continue;
+            } else if (!"m".equals(m.group(3))) {                       //NOI18N
+                continue; // not a SGR ANSI sequence
+            }
             String paramsS = m.group(1);
             if (Controller.VERBOSE) {
                 Controller.log("ANSI CSI+SGR: " + paramsS);
@@ -635,11 +704,27 @@ class OutWriter extends PrintWriter {
             return false;
         }
         if (text < len) { // final segment
-            print(s.subSequence(text, len), null, important, ansiColor, ansiBackground, err, addLS);
+            print(s.subSequence(text, len), null, important, ansiColor, ansiBackground, outKind, addLS);
         } else if (addLS) { // line ended w/ control seq
-            println();
+            printLineEnd();
         }
         return true;
+    }
+
+    /**
+     * Clears the current line. Called when ANSI sequence "\u001B[2K" is
+     * detected, or a CR (\r) character not followed by LN (\n) is reached.
+     */
+    private void clearLine() {
+        //NOI18N
+        Pair<Integer, Integer> r = lines.removeCharsFromLastLine(-1);
+        try {
+            getStorage().removeBytesFromEnd(r.first() * 2);
+        } catch (IOException ex) {
+            Exceptions.printStackTrace(ex);
+        }
+        lineLength -= r.first() * 2;
+        lineCharLengthWithTabs -= r.second();
     }
 
     synchronized void print(CharSequence s, LineInfo info, boolean important) {
@@ -648,6 +733,7 @@ class OutWriter extends PrintWriter {
         if (info != null) {
             lines.addLineInfo(line, info, important);
         }
+        checkLimits();
     }
 
     /**

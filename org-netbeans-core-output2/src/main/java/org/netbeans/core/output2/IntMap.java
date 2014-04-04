@@ -66,9 +66,9 @@ import org.openide.util.Exceptions;
  */
 final class IntMap {
     private int[] keys = new int[] { Integer.MAX_VALUE, Integer.MAX_VALUE, 
-        Integer.MAX_VALUE, Integer.MAX_VALUE, Integer.MAX_VALUE};
+        Integer.MAX_VALUE, Integer.MAX_VALUE};
         
-    private Object[] vals = new Object[5];
+    private Object[] vals = new Object[4];
     private int last = -1;
     
     /** Creates a new instance of IntMap */
@@ -163,7 +163,7 @@ final class IntMap {
     }
     
     private void growArrays() {
-        int newSize = last * 2;
+        int newSize = keys.length * 2;
         int[] newKeys = new int[newSize];
         Object[] newVals = new Object[newSize];
         Arrays.fill (newKeys, Integer.MAX_VALUE); //So binarySearch works
@@ -226,5 +226,31 @@ final class IntMap {
             sb.append ("empty"); //NOI18N
         }
         return sb.toString();
+    }
+
+    /**
+     * Decrement keys in the map. Entries with negative keys will be removed.
+     *
+     * @param decrement Value the keys should be decremented by. Must be zero or
+     * higher.
+     */
+    public void decrementKeys(int decrement) {
+
+        if (decrement < 0) {
+            throw new IllegalArgumentException();
+        }
+
+        int shift = Arrays.binarySearch(keys, decrement);
+        if (shift < 0) {
+            shift = -shift - 1;
+        }
+
+        for (int i = shift; i <= last; i++) {
+            keys[i - shift] = keys[i] - decrement;
+            vals[i - shift] = vals[i];
+        }
+
+        Arrays.fill(keys, last - shift + 1, last + 1, Integer.MAX_VALUE);
+        last = last - shift;
     }
 }

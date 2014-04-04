@@ -53,13 +53,11 @@ import javax.swing.event.DocumentListener;
 import javax.swing.text.*;
 import java.awt.*;
 import java.awt.event.*;
+import org.netbeans.core.output2.FoldingSideBar;
 import org.netbeans.core.output2.Lines;
 import org.netbeans.core.output2.OutputDocument;
 import org.netbeans.core.output2.options.OutputOptions;
 import org.openide.util.Exceptions;
-import org.openide.windows.InputOutput;
-import org.openide.windows.OutputEvent;
-import org.openide.windows.OutputListener;
 
 /**
  * A scroll pane containing an editor pane, with special handling of the caret
@@ -76,6 +74,7 @@ public abstract class AbstractOutputPane extends JScrollPane implements Document
     private int fontHeight = -1;
     private int fontWidth = -1;
     protected JEditorPane textView;
+    private FoldingSideBar foldingSideBar;
     int lastCaretLine = 0;
     int caretBlinkRate = 500;
     boolean hadSelection = false;
@@ -164,7 +163,7 @@ public abstract class AbstractOutputPane extends JScrollPane implements Document
      * OutputDocument only fires changes on the event queue.
      */
     public final void ensureCaretPosition() {
-        if (locked && !enqueued) {
+        if (!enqueued) {
             //Make sure the scrollbar is updated *after* the document change
             //has been processed and the scrollbar model's maximum updated
             enqueued = true;
@@ -183,6 +182,27 @@ public abstract class AbstractOutputPane extends JScrollPane implements Document
         if (locked) {
             getVerticalScrollBar().setValue(getVerticalScrollBar().getModel().getMaximum());
             getHorizontalScrollBar().setValue(getHorizontalScrollBar().getModel().getMinimum());
+        }
+        ensureCaretAtVisiblePosition();
+    }
+
+    /**
+     * Ensure that the caret is at a visible position, not inside a collapsed
+     * fold. If not, move it up to nearest visible line above the current
+     * (hidden) line.
+     */
+    private void ensureCaretAtVisiblePosition() {
+        assert EventQueue.isDispatchThread();
+        final Lines lines = getLines();
+        if (lines != null) {
+            int caretLine = lines.getLineAt(getCaretPos());
+            int origCaretLine = caretLine;
+            while (caretLine >= 0 && !lines.isVisible(caretLine)) {
+                caretLine = lines.getParentFoldStart(caretLine);
+            }
+            if (caretLine != origCaretLine && caretLine >= 0) {
+                getCaret().setDot(lines.getLineStart(caretLine));
+            }
         }
     }
 
@@ -231,13 +251,14 @@ public abstract class AbstractOutputPane extends JScrollPane implements Document
     }
 
     protected void init() {
+        setRowHeaderView(foldingSideBar = new FoldingSideBar(textView, this));
         setViewportView(textView);
         textView.setEditable(false);
 
         textView.addMouseListener(this);
-        textView.addMouseWheelListener(this);
         textView.addMouseMotionListener(this);
         textView.addKeyListener(this);
+        textView.addMouseWheelListener(this);
         //#107354
         OCaret oc = new OCaret();
         oc.setUpdatePolicy(DefaultCaret.NEVER_UPDATE);
@@ -277,6 +298,10 @@ public abstract class AbstractOutputPane extends JScrollPane implements Document
      */
     public final JTextComponent getTextView() {
         return textView;
+    }
+
+    public final FoldingSideBar getFoldingSideBar() {
+        return foldingSideBar;
     }
 
     public final void copy() {
@@ -350,7 +375,12 @@ public abstract class AbstractOutputPane extends JScrollPane implements Document
         try {
             Rectangle rect = textView.modelToView(pos);
             if (rect != null) {
-                textView.scrollRectToVisible(rect);
+                int spaceAround
+                        = (textView.getVisibleRect().height - rect.height) / 2;
+                Rectangle centeredRect = new Rectangle(
+                        rect.x, rect.y - spaceAround + rect.height,
+                        rect.width, spaceAround * 2 + rect.height);
+                textView.scrollRectToVisible(centeredRect);
             }
             locked = false;
         } catch (BadLocationException ex) {
@@ -569,7 +599,7 @@ public abstract class AbstractOutputPane extends JScrollPane implements Document
         //Ensure it is consumed
         e.getLength();
         documentChanged();
-        if (e.getOffset() >= getCaretPos() && (locked || !(e instanceof OutputDocument.DO))) {
+        if (e.getOffset() + e.getLength() >= getCaretPos() && (locked || !(e instanceof OutputDocument.DO))) {
             //#119985 only move caret when not in editable section
             OutputDocument doc = (OutputDocument)e.getDocument();
             if (! (e instanceof OutputDocument.DO) && getCaretPos() >= doc.getOutputLength()) {
@@ -584,7 +614,7 @@ public abstract class AbstractOutputPane extends JScrollPane implements Document
         //Ensure it is consumed
         e.getLength();
         documentChanged();
-        if (e.getOffset() >= getCaretPos() && (locked || !(e instanceof OutputDocument.DO))) {
+        if (e.getOffset() + e.getLength() >= getCaretPos() && (locked || !(e instanceof OutputDocument.DO))) {
             //#119985 only move caret when not in editable section
             OutputDocument doc = (OutputDocument)e.getDocument();
             if (! (e instanceof OutputDocument.DO) && getCaretPos() >= doc.getOutputLength()) {
@@ -755,6 +785,12 @@ public abstract class AbstractOutputPane extends JScrollPane implements Document
             changeFontSizeBy(change);
             e.consume();
             return;
+        } else if (e.isShiftDown()) { // horizontal scrolling
+            BoundedRangeModel sbmodel = getHorizontalScrollBar().getModel();
+            int currPosition = sbmodel.getValue();
+            int newPosition = Math.max(0, Math.min(sbmodel.getMaximum(), currPosition + (e.getUnitsToScroll()) * fontWidth));
+            sbmodel.setValue (newPosition);
+            return;
         }
         BoundedRangeModel sbmodel = getVerticalScrollBar().getModel();
         int max = sbmodel.getMaximum();
@@ -777,6 +813,56 @@ public abstract class AbstractOutputPane extends JScrollPane implements Document
         return textView.getCaret();
     }
     
+    public void collapseFold() {
+        Lines l = getLines();
+        if (l != null) {
+            l.hideFold(l.getFoldStart(l.visibleToRealLine(getCaretLine())));
+        }
+    }
+
+    public void expandFold() {
+        Lines l = getLines();
+        if (l != null) {
+            l.showFold(l.getFoldStart(l.visibleToRealLine(getCaretLine())));
+        }
+    }
+
+    public void collapseAllFolds() {
+        Lines l = getLines();
+        if (l != null) {
+            l.hideAllFolds();
+        }
+    }
+
+    public void expandAllFolds() {
+        Lines l = getLines();
+        if (l != null) {
+            l.showAllFolds();
+        }
+    }
+
+    public void collapseFoldTree() {
+        Lines l = getLines();
+        if (l != null) {
+            l.hideFoldTree(l.getFoldStart(l.visibleToRealLine(getCaretLine())));
+        }
+    }
+
+    public void expandFoldTree() {
+        Lines l = getLines();
+        if (l != null) {
+            l.showFoldTree(l.getFoldStart(l.visibleToRealLine(getCaretLine())));
+        }
+    }
+
+    private Lines getLines() {
+        Document d = getDocument();
+        if (d instanceof OutputDocument) {
+            return ((OutputDocument) d).getLines();
+        }
+        return null;
+    }
+
     private class OCaret extends DefaultCaret {
         @Override
         public void paint(Graphics g) {
