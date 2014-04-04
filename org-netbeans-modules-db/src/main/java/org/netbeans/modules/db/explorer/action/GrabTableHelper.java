@@ -138,7 +138,6 @@ public class GrabTableHelper {
         }
         TableColumn cmdcol = cmd.createPrimaryKeyConstraint(
                 table.getName());
-        //OracleTableColumnHack.fixPrimaryKeyConstraint(connector.getDatabaseSpecification(), cmdcol, table.getName(), table.getName());
         cmdcol.setTableConstraintColumns(colItems);
         cmdcol.setColumnType(0);
         cmdcol.setColumnSize(0);

@@ -559,7 +559,7 @@ public class DefaultAdaptor implements DatabaseMetaDataAdaptor, Serializable {
     /**
     * What's the version of this JDBC driver?
     * @return JDBC driver version
-    * @exception java.sql.SQLException if a database access error occurs
+    * @exception SQLException if a database access error occurs
     */
     public String getDriverVersion() throws SQLException
     {
@@ -623,7 +623,7 @@ public class DefaultAdaptor implements DatabaseMetaDataAdaptor, Serializable {
     /**
     * Does the database store tables in a local file?
     * @return <code>true</code> if so
-    * @exception java.sql.SQLException if a database access error occurs
+    * @exception SQLException if a database access error occurs
     */
     public boolean usesLocalFiles() throws SQLException
     {
@@ -650,7 +650,7 @@ public class DefaultAdaptor implements DatabaseMetaDataAdaptor, Serializable {
     /**
     * Does the database use a file for each table?
     * @return true if the database uses a local file for each table
-    * @exception java.sql.SQLException if a database access error occurs
+    * @exception SQLException if a database access error occurs
     */
     public boolean usesLocalFilePerTable() throws SQLException
     {
@@ -717,7 +717,7 @@ public class DefaultAdaptor implements DatabaseMetaDataAdaptor, Serializable {
     * Does the database treat mixed case unquoted SQL identifiers as
     * case insensitive and store them in upper case?
     * @return <code>true</code> if so
-    * @exception java.sql.SQLException if a database access error occurs
+    * @exception SQLException if a database access error occurs
     */
     public boolean storesUpperCaseIdentifiers() throws SQLException
     {
@@ -731,7 +731,7 @@ public class DefaultAdaptor implements DatabaseMetaDataAdaptor, Serializable {
     * Does the database treat mixed case unquoted SQL identifiers as
     * case insensitive and store them in lower case?
     * @return <code>true</code> if so
-    * @exception java.sql.SQLException if a database access error occurs
+    * @exception SQLException if a database access error occurs
     */
     public boolean storesLowerCaseIdentifiers() throws SQLException
     {
@@ -745,7 +745,7 @@ public class DefaultAdaptor implements DatabaseMetaDataAdaptor, Serializable {
     * Does the database treat mixed case unquoted SQL identifiers as
     * case insensitive and store them in mixed case?
     * @return <code>true</code> if so
-    * @exception java.sql.SQLException if a database access error occurs
+    * @exception SQLException if a database access error occurs
     */
     public boolean storesMixedCaseIdentifiers() throws SQLException
     {
@@ -760,7 +760,7 @@ public class DefaultAdaptor implements DatabaseMetaDataAdaptor, Serializable {
     * case sensitive and as a result store them in mixed case?
     * A JDBC Compliant<sup><font size=-2>TM</font></sup> driver will always return true.
     * @return <code>true</code> if so
-    * @exception java.sql.SQLException if a database access error occurs
+    * @exception SQLException if a database access error occurs
     */
     public boolean supportsMixedCaseQuotedIdentifiers() throws SQLException
     {
@@ -800,7 +800,7 @@ public class DefaultAdaptor implements DatabaseMetaDataAdaptor, Serializable {
     * Does the database treat mixed case quoted SQL identifiers as
     * case insensitive and store them in upper case?
     * @return <code>true</code> if so
-    * @exception java.sql.SQLException if a database access error occurs
+    * @exception SQLException if a database access error occurs
     */
     public boolean storesUpperCaseQuotedIdentifiers() throws SQLException
     {
@@ -814,7 +814,7 @@ public class DefaultAdaptor implements DatabaseMetaDataAdaptor, Serializable {
     * Does the database treat mixed case quoted SQL identifiers as
     * case insensitive and store them in lower case?
     * @return <code>true</code> if so
-    * @exception java.sql.SQLException if a database access error occurs
+    * @exception SQLException if a database access error occurs
     */
     public boolean storesLowerCaseQuotedIdentifiers() throws SQLException
     {
@@ -841,7 +841,7 @@ public class DefaultAdaptor implements DatabaseMetaDataAdaptor, Serializable {
     * What's the string used to quote SQL identifiers?
     * This returns a space " " if identifier quoting isn't supported.
     * @return the quoting string
-    * @exception java.sql.SQLException if a database access error occurs
+    * @exception SQLException if a database access error occurs
     */
     public String getIdentifierQuoteString() throws SQLException
     {
@@ -864,7 +864,7 @@ public class DefaultAdaptor implements DatabaseMetaDataAdaptor, Serializable {
     * Gets a comma-separated list of all a database's SQL keywords
     * that are NOT also SQL92 keywords.
     * @return the list 
-    * @exception java.sql.SQLException if a database access error occurs
+    * @exception SQLException if a database access error occurs
     */
     public String getSQLKeywords() throws SQLException
     {
@@ -888,7 +888,7 @@ public class DefaultAdaptor implements DatabaseMetaDataAdaptor, Serializable {
     * X/Open CLI math function names used in the JDBC function escape 
     * clause.
     * @return the list
-    * @exception java.sql.SQLException if a database access error occurs
+    * @exception SQLException if a database access error occurs
     */
     public String getNumericFunctions() throws SQLException
     {
@@ -912,7 +912,7 @@ public class DefaultAdaptor implements DatabaseMetaDataAdaptor, Serializable {
     * X/Open CLI string function names used in the JDBC function escape 
     * clause.
     * @return the list
-    * @exception java.sql.SQLException if a database access error occurs
+    * @exception SQLException if a database access error occurs
     */
     public String getStringFunctions() throws SQLException
     {
@@ -936,7 +936,7 @@ public class DefaultAdaptor implements DatabaseMetaDataAdaptor, Serializable {
     * X/Open CLI system function names used in the JDBC function escape 
     * clause.
     * @return the list
-    * @exception java.sql.SQLException if a database access error occurs
+    * @exception SQLException if a database access error occurs
     */
     public String getSystemFunctions() throws SQLException
     {
@@ -958,7 +958,7 @@ public class DefaultAdaptor implements DatabaseMetaDataAdaptor, Serializable {
     /**
     * Gets a comma-separated list of time and date functions.
     * @return the list
-    * @exception java.sql.SQLException if a database access error occurs
+    * @exception SQLException if a database access error occurs
     */
     public String getTimeDateFunctions() throws SQLException
     {
@@ -985,7 +985,7 @@ public class DefaultAdaptor implements DatabaseMetaDataAdaptor, Serializable {
     * <P>The '%' character represents any sequence of zero or 
     * more characters.
     * @return the string used to escape wildcard characters
-    * @exception java.sql.SQLException if a database access error occurs
+    * @exception SQLException if a database access error occurs
     */
     public String getSearchStringEscape() throws SQLException
     {
@@ -1008,7 +1008,7 @@ public class DefaultAdaptor implements DatabaseMetaDataAdaptor, Serializable {
     * Gets all the "extra" characters that can be used in unquoted
     * identifier names (those beyond a-z, A-Z, 0-9 and _).
     * @return the string containing the extra characters 
-    * @exception java.sql.SQLException if a database access error occurs
+    * @exception SQLException if a database access error occurs
     */
     public String getExtraNameCharacters() throws SQLException
     {
@@ -1056,7 +1056,7 @@ public class DefaultAdaptor implements DatabaseMetaDataAdaptor, Serializable {
     /**
     * Is "ALTER TABLE" with drop column supported?
     * @return <code>true</code> if so
-    * @exception java.sql.SQLException if a database access error occurs
+    * @exception SQLException if a database access error occurs
     */
     public boolean supportsAlterTableWithDropColumn() throws SQLException
     {
@@ -1139,7 +1139,7 @@ public class DefaultAdaptor implements DatabaseMetaDataAdaptor, Serializable {
     /**
     * Is the CONVERT function between SQL types supported?
     * @return <code>true</code> if so
-    * @exception java.sql.SQLException if a database access error occurs
+    * @exception SQLException if a database access error occurs
     */
     public boolean supportsConvert() throws SQLException
     {
@@ -1179,7 +1179,7 @@ public class DefaultAdaptor implements DatabaseMetaDataAdaptor, Serializable {
     * Are table correlation names supported?
     * A JDBC Compliant<sup><font size=-2>TM</font></sup> driver always returns true.
     * @return <code>true</code> if so
-    * @exception java.sql.SQLException if a database access error occurs
+    * @exception SQLException if a database access error occurs
     */
     public boolean supportsTableCorrelationNames() throws SQLException
     {
@@ -1206,7 +1206,7 @@ public class DefaultAdaptor implements DatabaseMetaDataAdaptor, Serializable {
     /**
     * If table correlation names are supported, are they restricted
     * to be different from the names of the tables?
-    * @exception java.sql.SQLException if a database access error occurs
+    * @exception SQLException if a database access error occurs
     */
     public boolean supportsDifferentTableCorrelationNames() throws SQLException
     {
@@ -1233,7 +1233,7 @@ public class DefaultAdaptor implements DatabaseMetaDataAdaptor, Serializable {
     /**
     * Are expressions in "ORDER BY" lists supported?
     * @return <code>true</code> if so
-    * @exception java.sql.SQLException if a database access error occurs
+    * @exception SQLException if a database access error occurs
     */
     public boolean supportsExpressionsInOrderBy() throws SQLException
     {
@@ -1260,7 +1260,7 @@ public class DefaultAdaptor implements DatabaseMetaDataAdaptor, Serializable {
     /**
     * Can an "ORDER BY" clause use columns not in the SELECT statement?
     * @return <code>true</code> if so
-    * @exception java.sql.SQLException if a database access error occurs
+    * @exception SQLException if a database access error occurs
     */
     public boolean supportsOrderByUnrelated() throws SQLException
     {
@@ -1313,7 +1313,7 @@ public class DefaultAdaptor implements DatabaseMetaDataAdaptor, Serializable {
     /**
     * Can a "GROUP BY" clause use columns not in the SELECT?
     * @return <code>true</code> if so
-    * @exception java.sql.SQLException if a database access error occurs
+    * @exception SQLException if a database access error occurs
     */
     public boolean supportsGroupByUnrelated() throws SQLException
     {
@@ -1368,7 +1368,7 @@ public class DefaultAdaptor implements DatabaseMetaDataAdaptor, Serializable {
     * Is the escape character in "LIKE" clauses supported?
     * A JDBC Compliant<sup><font size=-2>TM</font></sup> driver always returns true.
     * @return <code>true</code> if so
-    * @exception java.sql.SQLException if a database access error occurs
+    * @exception SQLException if a database access error occurs
     */
     public boolean supportsLikeEscapeClause() throws SQLException
     {
@@ -1395,7 +1395,7 @@ public class DefaultAdaptor implements DatabaseMetaDataAdaptor, Serializable {
     /**
     * Are multiple ResultSets from a single execute supported?
     * @return <code>true</code> if so
-    * @exception java.sql.SQLException if a database access error occurs
+    * @exception SQLException if a database access error occurs
     */
     public boolean supportsMultipleResultSets() throws SQLException
     {
@@ -1423,7 +1423,7 @@ public class DefaultAdaptor implements DatabaseMetaDataAdaptor, Serializable {
     * Can we have multiple transactions open at once (on different
     * connections)?
     * @return <code>true</code> if so
-    * @exception java.sql.SQLException if a database access error occurs
+    * @exception SQLException if a database access error occurs
     */
     public boolean supportsMultipleTransactions() throws SQLException
     {
@@ -1450,7 +1450,7 @@ public class DefaultAdaptor implements DatabaseMetaDataAdaptor, Serializable {
     /**
     * Can columns be defined as non-nullable?
     * A JDBC Compliant<sup><font size=-2>TM</font></sup> driver always returns true.
-    * @exception java.sql.SQLException if a database access error occurs
+    * @exception SQLException if a database access error occurs
     */
     public boolean supportsNonNullableColumns() throws SQLException
     {
@@ -1478,7 +1478,7 @@ public class DefaultAdaptor implements DatabaseMetaDataAdaptor, Serializable {
     * Is the ODBC Minimum SQL grammar supported?
     * All JDBC Compliant<sup><font size=-2>TM</font></sup> drivers must return true.
     * @return <code>true</code> if so
-    * @exception java.sql.SQLException if a database access error occurs
+    * @exception SQLException if a database access error occurs
     */
     public boolean supportsMinimumSQLGrammar() throws SQLException
     {
@@ -1505,7 +1505,7 @@ public class DefaultAdaptor implements DatabaseMetaDataAdaptor, Serializable {
     /**
     * Is the ODBC Core SQL grammar supported?
     * @return <code>true</code> if so
-    * @exception java.sql.SQLException if a database access error occurs
+    * @exception SQLException if a database access error occurs
     */
     public boolean supportsCoreSQLGrammar() throws SQLException
     {
@@ -1559,7 +1559,7 @@ public class DefaultAdaptor implements DatabaseMetaDataAdaptor, Serializable {
     * Is the ANSI92 entry level SQL grammar supported?
     * All JDBC Compliant<sup><font size=-2>TM</font></sup> drivers must return true.
     * @return <code>true</code> if so
-    * @exception java.sql.SQLException if a database access error occurs
+    * @exception SQLException if a database access error occurs
     */
     public boolean supportsANSI92EntryLevelSQL() throws SQLException
     {
@@ -1585,7 +1585,7 @@ public class DefaultAdaptor implements DatabaseMetaDataAdaptor, Serializable {
 
     /**
     * Is the ANSI92 intermediate SQL grammar supported?
-    * @exception java.sql.SQLException if a database access error occurs
+    * @exception SQLException if a database access error occurs
     */
     public boolean supportsANSI92IntermediateSQL() throws SQLException
     {
@@ -1638,7 +1638,7 @@ public class DefaultAdaptor implements DatabaseMetaDataAdaptor, Serializable {
     /**
     * Is the SQL Integrity Enhancement Facility supported?
     * @return <code>true</code> if so
-    * @exception java.sql.SQLException if a database access error occurs
+    * @exception SQLException if a database access error occurs
     */
     public boolean supportsIntegrityEnhancementFacility() throws SQLException
     {
@@ -1665,7 +1665,7 @@ public class DefaultAdaptor implements DatabaseMetaDataAdaptor, Serializable {
     /**
     * Is some form of outer join supported?
     * @return <code>true</code> if so
-    * @exception java.sql.SQLException if a database access error occurs
+    * @exception SQLException if a database access error occurs
     */
     public boolean supportsOuterJoins() throws SQLException
     {
@@ -1692,7 +1692,7 @@ public class DefaultAdaptor implements DatabaseMetaDataAdaptor, Serializable {
     /**
     * Are full nested outer joins supported?
     * @return <code>true</code> if so
-    * @exception java.sql.SQLException if a database access error occurs
+    * @exception SQLException if a database access error occurs
        	*/
     public boolean supportsFullOuterJoins() throws SQLException
     {
@@ -1720,7 +1720,7 @@ public class DefaultAdaptor implements DatabaseMetaDataAdaptor, Serializable {
     * Is there limited support for outer joins?  (This will be true
     * if supportFullOuterJoins is true.)
     * @return <code>true</code> if so
-    * @exception java.sql.SQLException if a database access error occurs
+    * @exception SQLException if a database access error occurs
     */
     public boolean supportsLimitedOuterJoins() throws SQLException
     {
@@ -1748,7 +1748,7 @@ public class DefaultAdaptor implements DatabaseMetaDataAdaptor, Serializable {
     * What's the database vendor's preferred term for "schema"?
     	*
     	* @return the vendor term
-    	* @exception java.sql.SQLException if a database access error occurs
+    	* @exception SQLException if a database access error occurs
     	*/
     public String getSchemaTerm() throws SQLException
     {
@@ -1771,7 +1771,7 @@ public class DefaultAdaptor implements DatabaseMetaDataAdaptor, Serializable {
     	* What's the database vendor's preferred term for "procedure"?
     	*
     	* @return the vendor term
-    	* @exception java.sql.SQLException if a database access error occurs
+    	* @exception SQLException if a database access error occurs
     	*/
     public String getProcedureTerm() throws SQLException
     {
@@ -1794,7 +1794,7 @@ public class DefaultAdaptor implements DatabaseMetaDataAdaptor, Serializable {
     	* What's the database vendor's preferred term for "catalog"?
     	*
     	* @return the vendor term
-    	* @exception java.sql.SQLException if a database access error occurs
+    	* @exception SQLException if a database access error occurs
     	*/
     public String getCatalogTerm() throws SQLException
     {
@@ -1817,7 +1817,7 @@ public class DefaultAdaptor implements DatabaseMetaDataAdaptor, Serializable {
     * Does a catalog appear at the start of a qualified table name?
     * (Otherwise it appears at the end)
     * @return true if it appears at the start 
-    * @exception java.sql.SQLException if a database access error occurs
+    * @exception SQLException if a database access error occurs
     */
 
     public boolean isCatalogAtStart() throws SQLException {
@@ -1846,7 +1846,7 @@ public class DefaultAdaptor implements DatabaseMetaDataAdaptor, Serializable {
     /**
     * What's the separator between catalog and table name?
     * @return the separator string
-    * @exception java.sql.SQLException if a database access error occurs
+    * @exception SQLException if a database access error occurs
     */
     public String getCatalogSeparator() throws SQLException
     {
@@ -1868,7 +1868,7 @@ public class DefaultAdaptor implements DatabaseMetaDataAdaptor, Serializable {
     /**
     * Can a schema name be used in a data manipulation statement?
     * @return <code>true</code> if so
-    * @exception java.sql.SQLException if a database access error occurs
+    * @exception SQLException if a database access error occurs
     */
     public boolean supportsSchemasInDataManipulation() throws SQLException
     {
@@ -1895,7 +1895,7 @@ public class DefaultAdaptor implements DatabaseMetaDataAdaptor, Serializable {
     /**
     * Can a schema name be used in a procedure call statement?
     * @return <code>true</code> if so
-    * @exception java.sql.SQLException if a database access error occurs
+    * @exception SQLException if a database access error occurs
     */
     public boolean supportsSchemasInProcedureCalls() throws SQLException
     {
@@ -1922,7 +1922,7 @@ public class DefaultAdaptor implements DatabaseMetaDataAdaptor, Serializable {
     /**
     * Can a schema name be used in a table definition statement?
     * @return <code>true</code> if so
-    * @exception java.sql.SQLException if a database access error occurs
+    * @exception SQLException if a database access error occurs
     */
     public boolean supportsSchemasInTableDefinitions() throws SQLException
     {
@@ -1949,7 +1949,7 @@ public class DefaultAdaptor implements DatabaseMetaDataAdaptor, Serializable {
     /**
     * Can a schema name be used in an index definition statement?
     * @return <code>true</code> if so
-    * @exception java.sql.SQLException if a database access error occurs
+    * @exception SQLException if a database access error occurs
     */
     public boolean supportsSchemasInIndexDefinitions() throws SQLException
     {
@@ -1976,7 +1976,7 @@ public class DefaultAdaptor implements DatabaseMetaDataAdaptor, Serializable {
     /**
     * Can a schema name be used in a privilege definition statement?
     * @return <code>true</code> if so
-    * @exception java.sql.SQLException if a database access error occurs
+    * @exception SQLException if a database access error occurs
     */
     public boolean supportsSchemasInPrivilegeDefinitions() throws SQLException
     {
@@ -2003,7 +2003,7 @@ public class DefaultAdaptor implements DatabaseMetaDataAdaptor, Serializable {
     /**
     * Can a catalog name be used in a data manipulation statement?
     * @return <code>true</code> if so
-    * @exception java.sql.SQLException if a database access error occurs
+    * @exception SQLException if a database access error occurs
     */
     public boolean supportsCatalogsInDataManipulation() throws SQLException
     {
@@ -2030,7 +2030,7 @@ public class DefaultAdaptor implements DatabaseMetaDataAdaptor, Serializable {
     /**
     * Can a catalog name be used in a procedure call statement?
     * @return <code>true</code> if so
-    * @exception java.sql.SQLException if a database access error occurs
+    * @exception SQLException if a database access error occurs
     */
     public boolean supportsCatalogsInProcedureCalls() throws SQLException
     {
@@ -2057,7 +2057,7 @@ public class DefaultAdaptor implements DatabaseMetaDataAdaptor, Serializable {
     /**
     * Can a catalog name be used in a table definition statement?
     * @return <code>true</code> if so
-    * @exception java.sql.SQLException if a database access error occurs
+    * @exception SQLException if a database access error occurs
     */
     public boolean supportsCatalogsInTableDefinitions() throws SQLException
     {
@@ -2084,7 +2084,7 @@ public class DefaultAdaptor implements DatabaseMetaDataAdaptor, Serializable {
     /**
     * Can a catalog name be used in an index definition statement?
     * @return <code>true</code> if so
-    * @exception java.sql.SQLException if a database access error occurs
+    * @exception SQLException if a database access error occurs
     */
     public boolean supportsCatalogsInIndexDefinitions() throws SQLException
     {
@@ -2111,7 +2111,7 @@ public class DefaultAdaptor implements DatabaseMetaDataAdaptor, Serializable {
     /**
     * Can a catalog name be used in a privilege definition statement?
     * @return <code>true</code> if so
-    * @exception java.sql.SQLException if a database access error occurs
+    * @exception SQLException if a database access error occurs
     */
     public boolean supportsCatalogsInPrivilegeDefinitions() throws SQLException
     {
@@ -2138,7 +2138,7 @@ public class DefaultAdaptor implements DatabaseMetaDataAdaptor, Serializable {
     /**
     * Is positioned DELETE supported?
     * @return <code>true</code> if so
-    * @exception java.sql.SQLException if a database access error occurs
+    * @exception SQLException if a database access error occurs
     */
     public boolean supportsPositionedDelete() throws SQLException
     {
@@ -2165,7 +2165,7 @@ public class DefaultAdaptor implements DatabaseMetaDataAdaptor, Serializable {
     /**
     * Is positioned UPDATE supported?
     * @return <code>true</code> if so
-    * @exception java.sql.SQLException if a database access error occurs
+    * @exception SQLException if a database access error occurs
     */
     public boolean supportsPositionedUpdate() throws SQLException
     {
@@ -2192,7 +2192,7 @@ public class DefaultAdaptor implements DatabaseMetaDataAdaptor, Serializable {
     /**
     * Is SELECT for UPDATE supported?
     * @return <code>true</code> if so
-    * @exception java.sql.SQLException if a database access error occurs
+    * @exception SQLException if a database access error occurs
     */
     public boolean supportsSelectForUpdate() throws SQLException
     {
@@ -2220,7 +2220,7 @@ public class DefaultAdaptor implements DatabaseMetaDataAdaptor, Serializable {
     * Are stored procedure calls using the stored procedure escape
     * syntax supported?
     * @return <code>true</code> if so
-    * @exception java.sql.SQLException if a database access error occurs
+    * @exception SQLException if a database access error occurs
     */
     public boolean supportsStoredProcedures() throws SQLException
     {
@@ -2248,7 +2248,7 @@ public class DefaultAdaptor implements DatabaseMetaDataAdaptor, Serializable {
     * Are subqueries in comparison expressions supported?
     * A JDBC Compliant<sup><font size=-2>TM</font></sup> driver always returns true.
     * @return <code>true</code> if so
-    * @exception java.sql.SQLException if a database access error occurs
+    * @exception SQLException if a database access error occurs
     */
     public boolean supportsSubqueriesInComparisons() throws SQLException
     {
@@ -2276,7 +2276,7 @@ public class DefaultAdaptor implements DatabaseMetaDataAdaptor, Serializable {
     * Are subqueries in 'exists' expressions supported?
     * A JDBC Compliant<sup><font size=-2>TM</font></sup> driver always returns true.
     * @return <code>true</code> if so
-    * @exception java.sql.SQLException if a database access error occurs
+    * @exception SQLException if a database access error occurs
     */
     public boolean supportsSubqueriesInExists() throws SQLException
     {
@@ -2331,7 +2331,7 @@ public class DefaultAdaptor implements DatabaseMetaDataAdaptor, Serializable {
     * Are subqueries in quantified expressions supported?
     * A JDBC Compliant<sup><font size=-2>TM</font></sup> driver always returns true.
     * @return <code>true</code> if so
-    * @exception java.sql.SQLException if a database access error occurs
+    * @exception SQLException if a database access error occurs
     */
     public boolean supportsSubqueriesInQuantifieds() throws SQLException
     {
@@ -2359,7 +2359,7 @@ public class DefaultAdaptor implements DatabaseMetaDataAdaptor, Serializable {
     * Are correlated subqueries supported?
     * A JDBC Compliant<sup><font size=-2>TM</font></sup> driver always returns true.
     * @return <code>true</code> if so
-    * @exception java.sql.SQLException if a database access error occurs
+    * @exception SQLException if a database access error occurs
     */
     public boolean supportsCorrelatedSubqueries() throws SQLException
     {
@@ -2386,7 +2386,7 @@ public class DefaultAdaptor implements DatabaseMetaDataAdaptor, Serializable {
     /**
     * Is SQL UNION supported?
     * @return <code>true</code> if so
-    * @exception java.sql.SQLException if a database access error occurs
+    * @exception SQLException if a database access error occurs
     */
     public boolean supportsUnion() throws SQLException
     {
@@ -2413,7 +2413,7 @@ public class DefaultAdaptor implements DatabaseMetaDataAdaptor, Serializable {
     /**
     * Is SQL UNION ALL supported?
     * @return <code>true</code> if so
-    * @exception java.sql.SQLException if a database access error occurs
+    * @exception SQLException if a database access error occurs
     */
     public boolean supportsUnionAll() throws SQLException
     {
@@ -2440,7 +2440,7 @@ public class DefaultAdaptor implements DatabaseMetaDataAdaptor, Serializable {
     /**
     * Can cursors remain open across commits? 
     * @return <code>true</code> if cursors always remain open
-    * @exception java.sql.SQLException if a database access error occurs
+    * @exception SQLException if a database access error occurs
     */
     public boolean supportsOpenCursorsAcrossCommit() throws SQLException
     {
@@ -2467,7 +2467,7 @@ public class DefaultAdaptor implements DatabaseMetaDataAdaptor, Serializable {
     /**
     * Can cursors remain open across rollbacks?
     * @return <code>true</code> if cursors always remain open
-    * @exception java.sql.SQLException if a database access error occurs
+    * @exception SQLException if a database access error occurs
     */
     public boolean supportsOpenCursorsAcrossRollback() throws SQLException
     {
@@ -2494,7 +2494,7 @@ public class DefaultAdaptor implements DatabaseMetaDataAdaptor, Serializable {
     /**
     * Can statements remain open across commits?
     * @return <code>true</code> if statements always remain open
-    * @exception java.sql.SQLException if a database access error occurs
+    * @exception SQLException if a database access error occurs
     */
     public boolean supportsOpenStatementsAcrossCommit() throws SQLException
     {
@@ -2521,7 +2521,7 @@ public class DefaultAdaptor implements DatabaseMetaDataAdaptor, Serializable {
     /**
     * Can statements remain open across rollbacks?
     * @return <code>true</code> if statements always remain open
-    * @exception java.sql.SQLException if a database access error occurs
+    * @exception SQLException if a database access error occurs
     */
     public boolean supportsOpenStatementsAcrossRollback() throws SQLException
     {
@@ -2548,7 +2548,7 @@ public class DefaultAdaptor implements DatabaseMetaDataAdaptor, Serializable {
     /**
     * How many hex characters can you have in an inline binary literal?
     * @return max binary literal length in hex characters
-    * @exception java.sql.SQLException if a database access error occurs
+    * @exception SQLException if a database access error occurs
     */
     public int getMaxBinaryLiteralLength() throws SQLException
     {
@@ -2570,7 +2570,7 @@ public class DefaultAdaptor implements DatabaseMetaDataAdaptor, Serializable {
     /**
     * What's the max length for a character literal?
     * @return max literal length
-    * @exception java.sql.SQLException if a database access error occurs
+    * @exception SQLException if a database access error occurs
     */
     public int getMaxCharLiteralLength() throws SQLException
     {
@@ -2592,7 +2592,7 @@ public class DefaultAdaptor implements DatabaseMetaDataAdaptor, Serializable {
     /**
     * What's the limit on column name length?
     * @return max column name length
-    * @exception java.sql.SQLException if a database access error occurs
+    * @exception SQLException if a database access error occurs
     */
     public int getMaxColumnNameLength() throws SQLException
     {
@@ -2614,7 +2614,7 @@ public class DefaultAdaptor implements DatabaseMetaDataAdaptor, Serializable {
     /**
     * What's the maximum number of columns in a "GROUP BY" clause?
     * @return max number of columns
-    * @exception java.sql.SQLException if a database access error occurs
+    * @exception SQLException if a database access error occurs
     */
     public int getMaxColumnsInGroupBy() throws SQLException
     {
@@ -2636,7 +2636,7 @@ public class DefaultAdaptor implements DatabaseMetaDataAdaptor, Serializable {
     /**
     * What's the maximum number of columns allowed in an index?
     * @return max number of columns
-    * @exception java.sql.SQLException if a database access error occurs
+    * @exception SQLException if a database access error occurs
     */
     public int getMaxColumnsInIndex() throws SQLException
     {
@@ -2658,7 +2658,7 @@ public class DefaultAdaptor implements DatabaseMetaDataAdaptor, Serializable {
     /**
     * What's the maximum number of columns in an "ORDER BY" clause?
     * @return max number of columns
-    * @exception java.sql.SQLException if a database access error occurs
+    * @exception SQLException if a database access error occurs
     */
     public int getMaxColumnsInOrderBy() throws SQLException
     {
@@ -2680,7 +2680,7 @@ public class DefaultAdaptor implements DatabaseMetaDataAdaptor, Serializable {
     /**
     * What's the maximum number of columns in a "SELECT" list?
     * @return max number of columns
-    * @exception java.sql.SQLException if a database access error occurs
+    * @exception SQLException if a database access error occurs
     */
     public int getMaxColumnsInSelect() throws SQLException
     {
@@ -2702,7 +2702,7 @@ public class DefaultAdaptor implements DatabaseMetaDataAdaptor, Serializable {
     /**
     * What's the maximum number of columns in a table?
     * @return max number of columns
-    * @exception java.sql.SQLException if a database access error occurs
+    * @exception SQLException if a database access error occurs
     */
     public int getMaxColumnsInTable() throws SQLException
     {
@@ -2724,7 +2724,7 @@ public class DefaultAdaptor implements DatabaseMetaDataAdaptor, Serializable {
     /**
     * How many active connections can we have at a time to this database?
     * @return max number of active connections
-    * @exception java.sql.SQLException if a database access error occurs
+    * @exception SQLException if a database access error occurs
     */
     public int getMaxConnections() throws SQLException
     {
@@ -2746,7 +2746,7 @@ public class DefaultAdaptor implements DatabaseMetaDataAdaptor, Serializable {
     /**
     * What's the maximum cursor name length?
     * @return max cursor name length in bytes
-    * @exception java.sql.SQLException if a database access error occurs
+    * @exception SQLException if a database access error occurs
     */
     public int getMaxCursorNameLength() throws SQLException
     {
@@ -2768,7 +2768,7 @@ public class DefaultAdaptor implements DatabaseMetaDataAdaptor, Serializable {
     /**
     * What's the maximum length of an index (in bytes)?	
     * @return max index length in bytes
-    * @exception java.sql.SQLException if a database access error occurs
+    * @exception SQLException if a database access error occurs
     */
     public int getMaxIndexLength() throws SQLException
     {
@@ -2790,7 +2790,7 @@ public class DefaultAdaptor implements DatabaseMetaDataAdaptor, Serializable {
     /**
     * What's the maximum length allowed for a schema name?
     * @return max name length in bytes
-    * @exception java.sql.SQLException if a database access error occurs
+    * @exception SQLException if a database access error occurs
     */
     public int getMaxSchemaNameLength() throws SQLException
     {
@@ -2812,7 +2812,7 @@ public class DefaultAdaptor implements DatabaseMetaDataAdaptor, Serializable {
     /**
     * What's the maximum length of a procedure name?
     * @return max name length in bytes
-    * @exception java.sql.SQLException if a database access error occurs
+    * @exception SQLException if a database access error occurs
     */
     public int getMaxProcedureNameLength() throws SQLException
     {
@@ -2834,7 +2834,7 @@ public class DefaultAdaptor implements DatabaseMetaDataAdaptor, Serializable {
     /**
     * What's the maximum length of a catalog name?
     * @return max name length in bytes
-    * @exception java.sql.SQLException if a database access error occurs
+    * @exception SQLException if a database access error occurs
     */
     public int getMaxCatalogNameLength() throws SQLException
     {
@@ -2856,7 +2856,7 @@ public class DefaultAdaptor implements DatabaseMetaDataAdaptor, Serializable {
     /**
     * What's the maximum length of a single row?
     * @return max row size in bytes
-    * @exception java.sql.SQLException if a database access error occurs
+    * @exception SQLException if a database access error occurs
     */
     public int getMaxRowSize() throws SQLException
     {
@@ -2879,7 +2879,7 @@ public class DefaultAdaptor implements DatabaseMetaDataAdaptor, Serializable {
     * Did getMaxRowSize() include LONGVARCHAR and LONGVARBINARY
     * blobs?
     * @return <code>true</code> if so
-    * @exception java.sql.SQLException if a database access error occurs
+    * @exception SQLException if a database access error occurs
     */
     public boolean doesMaxRowSizeIncludeBlobs() throws SQLException
     {
@@ -2906,7 +2906,7 @@ public class DefaultAdaptor implements DatabaseMetaDataAdaptor, Serializable {
     /**
     * What's the maximum length of a SQL statement?
     * @return max length in bytes
-    * @exception java.sql.SQLException if a database access error occurs
+    * @exception SQLException if a database access error occurs
     */
     public int getMaxStatementLength() throws SQLException
     {
@@ -2929,7 +2929,7 @@ public class DefaultAdaptor implements DatabaseMetaDataAdaptor, Serializable {
     * How many active statements can we have open at one time to this
     * database?
     * @return the maximum number of statements that can be open at one time
-    * @exception java.sql.SQLException if a database access error occurs
+    * @exception SQLException if a database access error occurs
     */
     public int getMaxStatements() throws SQLException
     {
@@ -2951,7 +2951,7 @@ public class DefaultAdaptor implements DatabaseMetaDataAdaptor, Serializable {
     /**
     * What's the maximum length of a table name?
     * @return max name length in bytes
-    * @exception java.sql.SQLException if a database access error occurs
+    * @exception SQLException if a database access error occurs
     */
     public int getMaxTableNameLength() throws SQLException
     {
@@ -2973,7 +2973,7 @@ public class DefaultAdaptor implements DatabaseMetaDataAdaptor, Serializable {
     /**
     * What's the maximum number of tables in a SELECT statement?
     * @return the maximum number of tables allowed in a SELECT statement
-    * @exception java.sql.SQLException if a database access error occurs
+    * @exception SQLException if a database access error occurs
     */
     public int getMaxTablesInSelect() throws SQLException
     {
@@ -2995,7 +2995,7 @@ public class DefaultAdaptor implements DatabaseMetaDataAdaptor, Serializable {
     /**
     * What's the maximum length of a user name?
     * @return max user name length  in bytes
-    * @exception java.sql.SQLException if a database access error occurs
+    * @exception SQLException if a database access error occurs
     */
     public int getMaxUserNameLength() throws SQLException
     {
@@ -3018,7 +3018,7 @@ public class DefaultAdaptor implements DatabaseMetaDataAdaptor, Serializable {
     * What's the database's default transaction isolation level?  The
     * values are defined in <code>java.sql.Connection</code>.
     * @return the default isolation level 
-    * @exception java.sql.SQLException if a database access error occurs
+    * @exception SQLException if a database access error occurs
     */
     public int getDefaultTransactionIsolation() throws SQLException
     {
@@ -3040,7 +3040,7 @@ public class DefaultAdaptor implements DatabaseMetaDataAdaptor, Serializable {
     /**
     * Are transactions supported? If not, invoking the method
     * @return <code>true</code> if transactions are supported
-    * @exception java.sql.SQLException if a database access error occurs
+    * @exception SQLException if a database access error occurs
     */
     public boolean supportsTransactions() throws SQLException
     {
@@ -3068,7 +3068,7 @@ public class DefaultAdaptor implements DatabaseMetaDataAdaptor, Serializable {
     * Does this database support the given transaction isolation level?
     * @param level the values are defined in <code>java.sql.Connection</code>
     * @return <code>true</code> if so
-    * @exception java.sql.SQLException if a database access error occurs
+    * @exception SQLException if a database access error occurs
     */
     public boolean supportsTransactionIsolationLevel(int level) throws SQLException
     {
@@ -3080,7 +3080,7 @@ public class DefaultAdaptor implements DatabaseMetaDataAdaptor, Serializable {
     * Are both data definition and data manipulation statements
     * within a transaction supported?
     * @return <code>true</code> if so
-    * @exception java.sql.SQLException if a database access error occurs
+    * @exception SQLException if a database access error occurs
     */
     public boolean supportsDataDefinitionAndDataManipulationTransactions() throws SQLException
     {
@@ -3108,7 +3108,7 @@ public class DefaultAdaptor implements DatabaseMetaDataAdaptor, Serializable {
     * Are only data manipulation statements within a transaction
     * supported?
     * @return <code>true</code> if so
-    * @exception java.sql.SQLException if a database access error occurs
+    * @exception SQLException if a database access error occurs
     */
     public boolean supportsDataManipulationTransactionsOnly() throws SQLException
     {
@@ -3136,7 +3136,7 @@ public class DefaultAdaptor implements DatabaseMetaDataAdaptor, Serializable {
     * Does a data definition statement within a transaction force the
     * transaction to commit?
     * @return <code>true</code> if so
-    * @exception java.sql.SQLException if a database access error occurs
+    * @exception SQLException if a database access error occurs
     */
     public boolean dataDefinitionCausesTransactionCommit() throws SQLException
     {
@@ -3163,7 +3163,7 @@ public class DefaultAdaptor implements DatabaseMetaDataAdaptor, Serializable {
     /**
      * Is a data definition statement within a transaction ignored?
      * @return <code>true</code> if so
-     * @exception java.sql.SQLException if a database access error occurs
+     * @exception SQLException if a database access error occurs
      */
     public boolean dataDefinitionIgnoredInTransactions() throws SQLException
     {
@@ -3281,7 +3281,7 @@ public class DefaultAdaptor implements DatabaseMetaDataAdaptor, Serializable {
     /**
     * Gets the catalog names available in this database.  The results
     * are ordered by catalog name.
-    * @exception java.sql.SQLException if a database access error occurs
+    * @exception SQLException if a database access error occurs
     */
     public ResultSet getCatalogs() throws SQLException
     {
@@ -3750,8 +3750,8 @@ public class DefaultAdaptor implements DatabaseMetaDataAdaptor, Serializable {
     * Does the database support the given result set type?
     * @param type defined in <code>java.sql.ResultSet</code>
     * @return <code>true</code> if so
-    * @exception java.sql.SQLException if a database access error occurs
-    * @see java.sql.Connection
+    * @exception SQLException if a database access error occurs
+    * @see Connection
     */
     public boolean supportsResultSetType(int type) throws SQLException
     {
@@ -3765,8 +3765,8 @@ public class DefaultAdaptor implements DatabaseMetaDataAdaptor, Serializable {
     * @param type defined in <code>java.sql.ResultSet</code>
     * @param concurrency type defined in <code>java.sql.ResultSet</code>
     * @return <code>true</code> if so
-    * @exception java.sql.SQLException if a database access error occurs
-    * @see java.sql.Connection
+    * @exception SQLException if a database access error occurs
+    * @see Connection
     */
     public boolean supportsResultSetConcurrency(int type, int concurrency) throws SQLException
     {
@@ -3777,7 +3777,7 @@ public class DefaultAdaptor implements DatabaseMetaDataAdaptor, Serializable {
     /**
     * Indicates whether a result set's own updates are visible.
     * @param result set type, i.e. ResultSet.TYPE_XXX
-    * @exception java.sql.SQLException if a database access error occurs
+    * @exception SQLException if a database access error occurs
     */
     public boolean ownUpdatesAreVisible(int type) throws SQLException
     {
@@ -3789,7 +3789,7 @@ public class DefaultAdaptor implements DatabaseMetaDataAdaptor, Serializable {
     * Indicates whether a result set's own deletes are visible.
     * @param result set type, i.e. ResultSet.TYPE_XXX
     * @return <code>true</code> if deletes are visible for the result set type
-    * @exception java.sql.SQLException if a database access error occurs
+    * @exception SQLException if a database access error occurs
     */
     public boolean ownDeletesAreVisible(int type) throws SQLException
     {
@@ -3801,7 +3801,7 @@ public class DefaultAdaptor implements DatabaseMetaDataAdaptor, Serializable {
     * Indicates whether a result set's own inserts are visible.
     * @param result set type, i.e. ResultSet.TYPE_XXX
     * @return <code>true</code> if inserts are visible for the result set type
-    * @exception java.sql.SQLException if a database access error occurs
+    * @exception SQLException if a database access error occurs
     */
     public boolean ownInsertsAreVisible(int type) throws SQLException
     {
@@ -3814,7 +3814,7 @@ public class DefaultAdaptor implements DatabaseMetaDataAdaptor, Serializable {
     * @param result set type, i.e. ResultSet.TYPE_XXX
     * @return <code>true</code> if updates made by others
     * are visible for the result set type
-    * @exception java.sql.SQLException if a database access error occurs
+    * @exception SQLException if a database access error occurs
     */
     public boolean othersUpdatesAreVisible(int type) throws SQLException
     {
@@ -3827,7 +3827,7 @@ public class DefaultAdaptor implements DatabaseMetaDataAdaptor, Serializable {
     * @param result set type, i.e. ResultSet.TYPE_XXX
     * @return <code>true</code> if deletes made by others
     * are visible for the result set type
-    * @exception java.sql.SQLException if a database access error occurs
+    * @exception SQLException if a database access error occurs
     */
     public boolean othersDeletesAreVisible(int type) throws SQLException
     {
@@ -3841,7 +3841,7 @@ public class DefaultAdaptor implements DatabaseMetaDataAdaptor, Serializable {
     * @return true if updates are visible for the result set type
     * @return <code>true</code> if inserts made by others
     * are visible for the result set type
-    * @exception java.sql.SQLException if a database access error occurs
+    * @exception SQLException if a database access error occurs
     */
     public boolean othersInsertsAreVisible(int type) throws SQLException
     {
@@ -3854,7 +3854,7 @@ public class DefaultAdaptor implements DatabaseMetaDataAdaptor, Serializable {
     * calling the method <code>ResultSet.rowUpdated</code>.
     * @param result set type, i.e. ResultSet.TYPE_XXX
     * @return <code>true</code> if changes are detected by the result set type
-    * @exception java.sql.SQLException if a database access error occurs
+    * @exception SQLException if a database access error occurs
     */
     public boolean updatesAreDetected(int type) throws SQLException
     {
@@ -3868,7 +3868,7 @@ public class DefaultAdaptor implements DatabaseMetaDataAdaptor, Serializable {
     * returns false, then deleted rows are removed from the result set.
     * @param result set type, i.e. ResultSet.TYPE_XXX
     * @return true if changes are detected by the resultset type
-    * @exception java.sql.SQLException if a database access error occurs
+    * @exception SQLException if a database access error occurs
     */
     public boolean deletesAreDetected(int type) throws SQLException
     {
@@ -3881,7 +3881,7 @@ public class DefaultAdaptor implements DatabaseMetaDataAdaptor, Serializable {
     * by calling ResultSet.rowInserted().
     * @param result set type, i.e. ResultSet.TYPE_XXX
     * @return true if changes are detected by the resultset type
-    * @exception java.sql.SQLException if a database access error occurs
+    * @exception SQLException if a database access error occurs
     */
     public boolean insertsAreDetected(int type) throws SQLException
     {
@@ -4061,11 +4061,11 @@ public class DefaultAdaptor implements DatabaseMetaDataAdaptor, Serializable {
         return false;
     }
 
-    public Object unwrap(Class iface) throws SQLException {
+    public Object unwrap(java.lang.Class iface) throws java.sql.SQLException {
         return null;
     }
     
-    public RowIdLifetime getRowIdLifetime() throws SQLException {
+    public java.sql.RowIdLifetime getRowIdLifetime() throws SQLException {
         return null;
     }
 

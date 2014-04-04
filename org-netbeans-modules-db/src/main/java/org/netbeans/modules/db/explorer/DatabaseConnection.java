@@ -164,6 +164,10 @@ public final class DatabaseConnection implements DBConnection {
      */
     private Properties connectionProperties = new Properties();
 
+    private volatile boolean separateSystemTables = false;
+
+    private Boolean useScrollableCursors = null; // null = driver default
+
     /**
      * The API DatabaseConnection (delegates to this instance)
      */
@@ -1057,15 +1061,12 @@ public final class DatabaseConnection implements DBConnection {
     public boolean equals(Object obj) {
         if (obj instanceof DatabaseConnection) {
             DatabaseConnection conn = (DatabaseConnection) obj;
-            if (toString().equals(conn.toString())) {
-                if ((connectionProperties == null
-                        && conn.getConnectionProperties() == null)) {
-                    return true;
-                } else if (connectionProperties != null) {
-                    return connectionProperties.equals(
-                            conn.getConnectionProperties());
-        }
-            }
+            return Objects.equals(drv, conn.drv)
+                    && Objects.equals(drvname, conn.drvname)
+                    && Objects.equals(db, conn.db)
+                    && Objects.equals(usr, conn.usr)
+                    && Objects.equals(getSchema(), conn.getSchema())
+                    && Objects.equals(getConnectionProperties(), conn.getConnectionProperties());
         }
 
         return false;
@@ -1184,7 +1185,7 @@ public final class DatabaseConnection implements DBConnection {
     }
     
     public void refreshInExplorer() throws DatabaseException {
-        final ConnectionNode connectionNode = findConnectionNode(getName());
+        final ConnectionNode connectionNode = findConnectionNode(getDisplayName());
         if (connectionNode != null) {
             RP.post(
                 new Runnable() {
@@ -1215,7 +1216,7 @@ public final class DatabaseConnection implements DBConnection {
     public void showConnectionDialog() {
         try {
             final ConnectionNode cni = findConnectionNode(getDisplayName());
-            assert cni != null : "DatabaseConnection node found for " + this;
+            assert cni != null : "DatabaseConnection node not found for " + this;
             if (cni != null && cni.getDatabaseConnection().getConnector().isDisconnected()) {
                 Mutex.EVENT.readAccess(new Runnable() {
                     @Override
@@ -1252,7 +1253,21 @@ public final class DatabaseConnection implements DBConnection {
         }
     }
 
-    // Needed by unit tests as well as internally
+    /**
+     * Find a connection node using the supplied name.
+     *
+     * <p>
+     * Assumption: the name of the connection node is the display name of the
+     * connection</p>
+     *
+     * <p>
+     * Needed by unit tests as well as internally</p>
+     *
+     * @param connection display name of the connection for which the connection
+     * node should be found
+     * @return
+     * @throws DatabaseException
+     */
     public static ConnectionNode findConnectionNode(String connection) throws DatabaseException {
         assert connection != null;
 
@@ -1334,5 +1349,38 @@ public final class DatabaseConnection implements DBConnection {
 
     public boolean isImportantCatalog(String database) {
         return importantCatalogs != null && importantCatalogs.contains(database);
+    }
+
+    public boolean isSeparateSystemTables() {
+        return separateSystemTables;
+    }
+
+    public void setSeparateSystemTables(boolean separateSystemTables) {
+        boolean oldVal = this.separateSystemTables;
+        this.separateSystemTables = separateSystemTables;
+        propertySupport.firePropertyChange("separateSystemTables", oldVal, separateSystemTables); //NOI18N
+    }
+
+    /**
+     * Decide whether scrollable cursors should be used by the connection.
+     */
+    private boolean isUseScrollableCursorsByDefault() {
+        return drv != null
+                && (drv.startsWith("org.apache.derby") //NOI18N
+                || drv.startsWith("com.mysql") //NOI18N
+                || drv.startsWith("oracle") //NOI18N
+                || drv.startsWith("org.postgresql")); //NOI18N
+    }
+
+    public boolean isUseScrollableCursors() {
+        return useScrollableCursors == null
+                ? isUseScrollableCursorsByDefault()
+                : useScrollableCursors;
+    }
+
+    public void setUseScrollableCursors(boolean useScrollableCursors) {
+        boolean oldVal = isUseScrollableCursors();
+        this.useScrollableCursors = useScrollableCursors;
+        propertySupport.firePropertyChange("useScrollableCursors", oldVal, useScrollableCursors); //NOI18N
     }
 }

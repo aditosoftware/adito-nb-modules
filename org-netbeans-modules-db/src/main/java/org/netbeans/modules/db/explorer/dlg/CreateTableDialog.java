@@ -65,7 +65,6 @@ import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.JSeparator;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.border.BevelBorder;
@@ -79,6 +78,7 @@ import javax.swing.event.TableModelListener;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableModel;
+import org.netbeans.api.db.explorer.node.BaseNode;
 import org.netbeans.lib.ddl.DDLException;
 import org.openide.DialogDescriptor;
 import org.openide.DialogDisplayer;
@@ -86,9 +86,12 @@ import org.openide.NotifyDescriptor;
 import org.openide.util.NbBundle;
 import org.netbeans.lib.ddl.impl.Specification;
 import org.netbeans.lib.ddl.util.PListReader;
+import org.netbeans.modules.db.explorer.DatabaseConnection;
 import org.netbeans.modules.db.explorer.DbUtilities;
+import org.netbeans.modules.db.explorer.node.TableNode;
 import org.openide.NotificationLineSupport;
 import org.openide.awt.Mnemonics;
+import org.openide.nodes.Node;
 import org.openide.util.HelpCtx;
 
 public class CreateTableDialog {
@@ -127,6 +130,7 @@ public class CreateTableDialog {
 
     public CreateTableDialog(final Specification spe, final String schema, List<ColumnItem> pItems, String pTableName) {
         spec = spe;
+
         try {
             JLabel label;
             JPanel pane = new JPanel();

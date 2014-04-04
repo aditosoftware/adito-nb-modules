@@ -48,7 +48,7 @@ public class JDBCSynonymSchema extends JDBCSchema
   }
 
   protected JDBCTable createJDBCTable(String name) {
-    return new JDBCTable(this, name);
+    return new JDBCTable(this, name, false);
   }
 
   /**

@@ -72,9 +72,6 @@ import org.netbeans.modules.db.explorer.DbUtilities;
 import org.netbeans.modules.db.explorer.dlg.ConnectPanel;
 import org.netbeans.modules.db.explorer.dlg.ConnectProgressDialog;
 import org.openide.nodes.Node;
-
-//import org.netbeans.modules.db.explorer.PointbasePlus;
-
 import org.netbeans.modules.db.explorer.dlg.ConnectionDialog;
 import org.netbeans.modules.db.explorer.dlg.ConnectionDialogMediator;
 import org.netbeans.modules.db.explorer.dlg.SchemaPanel;
@@ -190,7 +187,8 @@ public class ConnectAction extends BaseAction {
             // Note that we don't have to show the dialog if the password is 
             // null and remember is true; null is often a valid password
             // (and is the default password for MySQL and PostgreSQL).
-            if (user == null || !remember || showDialog) {
+            if (((!supportsConnectWithoutUsername(dbcon))
+                    && (user == null || !remember)) || showDialog) {
                 final ConnectPanel basePanel = new ConnectPanel(this, dbcon);
 
                 final PropertyChangeListener connectionListener = new PropertyChangeListener() {
@@ -288,8 +286,8 @@ public class ConnectAction extends BaseAction {
                     progressComponent.setPreferredSize(new Dimension(350, 20));
                     ConnectProgressDialog panel = new ConnectProgressDialog(progressComponent, null);
                     panel.getAccessibleContext().setAccessibleDescription(NbBundle.getMessage (ConnectAction.class, "ACS_ConnectingDialogTextA11yDesc"));
-                    descriptor = new DialogDescriptor(panel, NbBundle.getMessage (ConnectAction.class, "ConnectingDialogTitle"), true, new Object[] { DialogDescriptor.CANCEL_OPTION },
-                            DialogDescriptor.CANCEL_OPTION, DialogDescriptor.DEFAULT_ALIGN, null, null);
+                    descriptor = new DialogDescriptor(panel, NbBundle.getMessage (ConnectAction.class, "ConnectingDialogTitle"), true, new Object[] {},
+                            null, DialogDescriptor.DEFAULT_ALIGN, null, null);
                     final Dialog dialog = DialogDisplayer.getDefault().createDialog(descriptor);
                     
                     final PropertyChangeListener connectionListener = new PropertyChangeListener() {
@@ -389,6 +387,10 @@ public class ConnectAction extends BaseAction {
             }
 
             return schemaPanel.setSchemas(schemas, defaultSchema);
+        }
+
+        private boolean supportsConnectWithoutUsername(DatabaseConnection dc) {
+            return dc.findJDBCDriver().getClassName().equals("org.sqlite.JDBC"); //NOI18N
         }
     }
 

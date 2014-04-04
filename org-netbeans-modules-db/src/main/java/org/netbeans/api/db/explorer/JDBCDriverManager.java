@@ -87,7 +87,6 @@ public final class JDBCDriverManager {
         if (DEFAULT == null) {
             // init runtimes
             DatabaseRuntimeManager.getDefault().getRuntimes();
-            JDBCDriverConvertor.importOldDrivers();
             DEFAULT = new JDBCDriverManager();
         }
         return DEFAULT;
@@ -133,7 +132,7 @@ public final class JDBCDriverManager {
         if (drvClass == null) {
             throw new NullPointerException();
         }
-        LinkedList<JDBCDriver> res = new LinkedList<JDBCDriver>();
+        LinkedList<JDBCDriver> res = new LinkedList<>();
         JDBCDriver[] drvs = getDrivers();
         for (int i = 0; i < drvs.length; i++) {
             if (drvClass.equals(drvs[i].getClassName())) {

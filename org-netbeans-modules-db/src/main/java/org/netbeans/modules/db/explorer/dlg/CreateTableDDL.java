@@ -108,8 +108,8 @@ public class CreateTableDDL {
                   cmdcol.setDefaultValue(defval);
               if (col.hasCheckConstraint()) {
                   // add the TABLE check constraint
-                TableColumn checkConstraintCol = cmd.createCheckConstraint(name, col.getCheckConstraint());
-                OracleTableColumnHack.fixCheckConstraint(spec, checkConstraintCol, tablename, name);
+                  TableColumn checkConstraintCol = cmd.createCheckConstraint(name, col.getCheckConstraint());
+                  OracleTableColumnHack.fixCheckConstraint(spec, checkConstraintCol, tablename, name);
               }
               if (col.isIndexed()&&!col.isPrimaryKey()&&!col.isUnique()) {
                   xcmd = spec.createCommandCreateIndex(tablename);
@@ -126,7 +126,6 @@ public class CreateTableDDL {
           }
           if( hasPrimaryKeys(pkcols) ) {
               cmdcol = cmd.createPrimaryKeyConstraint(tablename);
-              //OracleTableColumnHack.fixPrimaryKeyConstraint(spec, cmdcol, tablename, tablename);
               cmdcol.setTableConstraintColumns(new Vector(pkcols));
               cmdcol.setColumnType(0);
               cmdcol.setColumnSize(0);
