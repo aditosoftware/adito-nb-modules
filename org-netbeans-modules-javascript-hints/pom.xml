@@ -34,22 +34,22 @@
     <dependency>
       <groupId>org.netbeans.api</groupId>
       <artifactId>org-netbeans-modules-csl-api</artifactId>
-      <version>RELEASE731</version>
+      <version>RELEASE80</version>
     </dependency>
     <dependency>
       <groupId>org.netbeans.api</groupId>
       <artifactId>org-netbeans-modules-diff</artifactId>
-      <version>RELEASE731</version>
+      <version>RELEASE80</version>
     </dependency>
     <dependency>
       <groupId>org.netbeans.api</groupId>
       <artifactId>org-netbeans-modules-editor-lib</artifactId>
-      <version>RELEASE731</version>
+      <version>RELEASE80</version>
     </dependency>
     <dependency>
       <groupId>org.netbeans.api</groupId>
       <artifactId>org-netbeans-modules-editor-lib2</artifactId>
-      <version>RELEASE731</version>
+      <version>RELEASE80</version>
     </dependency>
     <dependency>
       <groupId>org.netbeans.modules</groupId>
@@ -59,77 +59,77 @@
     <dependency>
       <groupId>org.netbeans.api</groupId>
       <artifactId>org-netbeans-modules-lexer</artifactId>
-      <version>RELEASE731</version>
+      <version>RELEASE80</version>
     </dependency>
     <dependency>
       <groupId>org.netbeans.api</groupId>
       <artifactId>org-netbeans-modules-options-api</artifactId>
-      <version>RELEASE731</version>
+      <version>RELEASE80</version>
     </dependency>
     <dependency>
       <groupId>org.netbeans.api</groupId>
       <artifactId>org-netbeans-modules-parsing-api</artifactId>
-      <version>RELEASE731</version>
+      <version>RELEASE80</version>
     </dependency>
     <dependency>
       <groupId>org.netbeans.api</groupId>
       <artifactId>org-netbeans-modules-projectapi</artifactId>
-      <version>RELEASE731</version>
+      <version>RELEASE80</version>
     </dependency>
     <dependency>
       <groupId>org.netbeans.api</groupId>
       <artifactId>org-netbeans-modules-refactoring-api</artifactId>
-      <version>RELEASE731</version>
+      <version>RELEASE80</version>
     </dependency>
     <dependency>
       <groupId>org.netbeans.api</groupId>
       <artifactId>org-netbeans-spi-editor-hints</artifactId>
-      <version>RELEASE731</version>
+      <version>RELEASE80</version>
     </dependency>
     <dependency>
       <groupId>org.netbeans.api</groupId>
       <artifactId>org-openide-awt</artifactId>
-      <version>RELEASE731</version>
+      <version>RELEASE80</version>
     </dependency>
     <dependency>
       <groupId>org.netbeans.api</groupId>
       <artifactId>org-openide-dialogs</artifactId>
-      <version>RELEASE731</version>
+      <version>RELEASE80</version>
     </dependency>
     <dependency>
       <groupId>org.netbeans.api</groupId>
       <artifactId>org-openide-filesystems</artifactId>
-      <version>RELEASE731</version>
+      <version>RELEASE80</version>
     </dependency>
     <dependency>
       <groupId>org.netbeans.api</groupId>
       <artifactId>org-openide-loaders</artifactId>
-      <version>RELEASE731</version>
+      <version>RELEASE80</version>
     </dependency>
     <dependency>
       <groupId>org.netbeans.api</groupId>
       <artifactId>org-openide-nodes</artifactId>
-      <version>RELEASE731</version>
+      <version>RELEASE80</version>
     </dependency>
     <dependency>
       <groupId>org.netbeans.api</groupId>
       <artifactId>org-openide-text</artifactId>
-      <version>RELEASE731</version>
+      <version>RELEASE80</version>
     </dependency>
     <dependency>
       <groupId>org.netbeans.api</groupId>
       <artifactId>org-openide-util</artifactId>
-      <version>RELEASE731</version>
+      <version>RELEASE80</version>
     </dependency>
     <dependency>
       <groupId>org.netbeans.api</groupId>
       <artifactId>org-openide-util-lookup</artifactId>
-      <version>RELEASE731</version>
+      <version>RELEASE80</version>
     </dependency>
     <dependency>
       <groupId>org.netbeans.api</groupId>
       <artifactId>org-openide-windows</artifactId>
-      <version>RELEASE731</version>
+      <version>RELEASE80</version>
     </dependency>
   </dependencies>
 
