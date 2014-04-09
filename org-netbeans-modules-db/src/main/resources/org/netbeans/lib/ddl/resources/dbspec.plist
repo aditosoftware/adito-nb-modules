@@ -2169,12 +2169,12 @@
 //
 //  ********************************************************************************/
 
-  "Firebird something == notyet impelemented" = {
-    DatabaseProductName = "Firebird something == notyet impelemented";
+  "Firebird 2.51WI" = {
+    DatabaseProductName = "Firebird 2.51WI";
     TypeMap = {
       java.sql.Types.BLOB = "BLOB SUB_TYPE 0";  //JDBC 2.0 A type representing an SQL Binary Large Object
       java.sql.Types.CHAR = CHAR;
-	    java.sql.Types.CLOB = "BLOB SUB_TYPE TEXT";
+	    java.sql.Types.CLOB = "BLOB SUB_TYPE 1";
       java.sql.Types.DATE = DATE;
       java.sql.Types.DECIMAL = DECIMAL;
       java.sql.Types.DOUBLE = "DOUBLE PRECISION";
@@ -2186,7 +2186,7 @@
       java.sql.Types.TIMESTAMP = TIMESTAMP;
       java.sql.Types.VARCHAR = VARCHAR;
     };
-    SizelessTypes = ("BLOB SUB_TYPE 0","BLOB SUB_TYPE TEXT",DATE,"DOUBLE PRECISION",INTEGER,SMALLINT);
+    SizelessTypes = ("BLOB SUB_TYPE 0","BLOB SUB_TYPE 1",DATE,"DOUBLE PRECISION",INTEGER,SMALLINT);
     DecimalTypes = (DECIMAL,FLOAT,NUMERIC);
     CharacterTypes = (CHAR,VARCHAR);
   };
