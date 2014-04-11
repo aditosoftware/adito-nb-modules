@@ -1325,24 +1325,32 @@ public class FormDesigner
     return explorerManager.getSelectedNodes();
   }
 
-  void setSelectedNodes(Node... nodes)
+  void setSelectedNodes(final Node... nodes)
   {
-    try
+    // Adito#5074: invokeLater ...
+    SwingUtilities.invokeLater(new Runnable()
     {
-//            if (formEditor == null) {
-//                // Lazy synchronization of already closed form - issue 129877
-//                return;
-//            }
-//            DataObject fdo = formEditor.getFormDataObject();
-//            if (!fdo.isValid()) {
-//                return; // Issue 130637
-//            }
-      explorerManager.setSelectedNodes(nodes);
-    }
-    catch (PropertyVetoException ex)
-    {
-      Logger.getLogger(getClass().getName()).log(Level.INFO, ex.getMessage(), ex);
-    }
+      public void run()
+      {
+        try
+        {
+          //            if (formEditor == null) {
+          //                // Lazy synchronization of already closed form - issue 129877
+          //                return;
+          //            }
+          //            DataObject fdo = formEditor.getFormDataObject();
+          //            if (!fdo.isValid()) {
+          //                return; // Issue 130637
+          //
+          //        }
+          explorerManager.setSelectedNodes(nodes);
+        }
+        catch (PropertyVetoException ex)
+        {
+          Logger.getLogger(getClass().getName()).log(Level.INFO, ex.getMessage(), ex);
+        }
+      }
+    });
   }
 
   private class NodeSelectionListener implements PropertyChangeListener
