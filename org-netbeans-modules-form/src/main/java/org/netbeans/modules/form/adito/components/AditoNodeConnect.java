@@ -2,6 +2,7 @@ package org.netbeans.modules.form.adito.components;
 
 import de.adito.aditoweb.nbm.nbide.nbaditointerface.NbAditoInterface;
 import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.sync.*;
+import org.jetbrains.annotations.Nullable;
 import org.netbeans.modules.form.RADComponent;
 import org.openide.filesystems.FileObject;
 import org.openide.loaders.*;
@@ -60,6 +61,7 @@ public final class AditoNodeConnect
     });
   }
 
+  @Nullable
   public static Sheet getSheet(RADComponent pComponent)
   {
     return _resolve(pComponent, new _FileObjectC<Sheet>()
@@ -115,6 +117,7 @@ public final class AditoNodeConnect
     return Arrays.asList(actions);
   }
 
+  @Nullable
   public static Lookup getLookup(RADComponent pComponent)
   {
     return _resolve(pComponent, new _DataObjectC<Lookup>()

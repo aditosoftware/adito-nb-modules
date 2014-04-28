@@ -3,6 +3,7 @@ package org.netbeans.modules.form.adito;
 import org.netbeans.modules.form.*;
 
 import java.util.Collection;
+import java.util.logging.*;
 
 /**
  * @author J. Boesl, 18.05.11
@@ -56,17 +57,17 @@ public abstract class AFormModelListener implements FormModelListener
             break;
         }
       }
-      catch (Exception e)
+      catch (EventCouldNotBeProcessedException e)
       {
-        e.printStackTrace(); // TODO
-        //if (event.isModifying())
-        //{
-        //  FormModel formModel = event.getFormModel();
-        //  if (formModel == null && eventComponent != null)
-        //    formModel = eventComponent.getFormModel();
-        //  if (formModel != null)
-        //    formModel.forceUndoOfCompoundEdit();
-        //}
+        Logger.getLogger(AFormModelListener.class.getCanonicalName()).log(Level.WARNING, "", e);
+        if (event.isModifying())
+        {
+          FormModel formModel = event.getFormModel();
+          if (formModel == null && eventComponent != null)
+            formModel = eventComponent.getFormModel();
+          if (formModel != null)
+            formModel.forceUndoOfCompoundEdit();
+        }
       }
     }
   }

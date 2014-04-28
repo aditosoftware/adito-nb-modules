@@ -91,16 +91,21 @@ public class RADComponentNode extends FormNode
   {
     this(component instanceof ComponentContainer ?
              new RADChildren((ComponentContainer) component) : Children.LEAF,
-         component);
+         component
+    );
   }
 
   public RADComponentNode(Children children, final RADComponent component)
   {
+    this(children, component, AditoNodeConnect.getLookup(component));
+  }
+
+  public RADComponentNode(Children children, final RADComponent component, Lookup pLookup)
+  {
     super(children, component.getFormModel(),
-          Lookups.exclude(AditoNodeConnect.getLookup(component), DataObject.class, Node.class));
+          pLookup == null ? Lookup.EMPTY : Lookups.exclude(pLookup, DataObject.class, Node.class));
     this.component = component;
     component.setNodeReference(this);
-    //        getCookieSet().add(this);
     if (component instanceof ComponentContainer)
       getInstanceContent().add(new ComponentsIndex());
     updateName();
@@ -121,18 +126,17 @@ public class RADComponentNode extends FormNode
     // wenn sich die Properties ändern soll das Sheet aktualisiert werden.
     AditoNodeConnect.addPropertyChangeListener(
         component, WeakListeners.propertyChange(propertyChangeListenerReference, new Object()
-    {
-      // wird per Reflection von 'WeakListeners.propertyChange' aufgerufen.
-      @SuppressWarnings("UnusedDeclaration")
-      public void removePropertyChangeListener(PropertyChangeListener pPropertyChangeListener)
-      {
-        AditoNodeConnect.removePropertyChangeListener(component, pPropertyChangeListener);
-      }
-    }));
+        {
+          // wird per Reflection von 'WeakListeners.propertyChange' aufgerufen.
+          @SuppressWarnings("UnusedDeclaration")
+          public void removePropertyChangeListener(PropertyChangeListener pPropertyChangeListener)
+          {
+            AditoNodeConnect.removePropertyChangeListener(component, pPropertyChangeListener);
+          }
+        })
+    );
 
-
-    Node node = AditoNodeConnect.getLookup(getRADComponent()).lookup(Node.class);
-
+    Node node = pLookup == null ? null : pLookup.lookup(Node.class);
     if (node != null)
     {
       SearchInfoDefinition searchDef = node.getLookup().lookup(SearchInfoDefinition.class);
@@ -255,7 +259,8 @@ public class RADComponentNode extends FormNode
   {
     try
     {
-      return AditoNodeConnect.getSheet(component);
+      Sheet sheet = AditoNodeConnect.getSheet(component);
+      return sheet == null ? new Sheet() : sheet;
     }
     catch (IllegalArgumentException e)
     {

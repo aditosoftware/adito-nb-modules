@@ -48,9 +48,18 @@ public class ARADComponentHandler
     ARADComponentHandler parentRadHandler = parentRadComponent.getARADComponentHandler();
 
     IAditoModelDataProvider dataProvider = NbAditoInterface.lookup(IAditoModelDataProvider.class);
-    FileObject createdOrRestored = dataProvider.createDataModel(parentRadHandler.getModelFileObject(),
-                                                                radComponent.getBeanClass(),
-                                                                radComponent.getName());
+    FileObject createdOrRestored;
+    try
+    {
+      createdOrRestored = dataProvider.createDataModel(parentRadHandler.getModelFileObject(),
+                                                                  radComponent.getBeanClass(),
+                                                                  radComponent.getName());
+    }
+    catch (Exception e)
+    {
+      throw new EventCouldNotBeProcessedException(e);
+    }
+
     setModelFileObject(createdOrRestored);
     assert modelFileObject != null;
     radComponent.setName(modelFileObject.getName());
