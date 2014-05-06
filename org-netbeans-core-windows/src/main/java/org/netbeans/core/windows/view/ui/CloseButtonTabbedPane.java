@@ -513,9 +513,6 @@ final class CloseButtonTabbedPane extends JTabbedPane implements PropertyChangeL
                 }
             };
 
-            // Damit auch hier die Schrift weiﬂ wird
-            label.setForeground(Color.WHITE);
-
             add(label);
             JButton tabCloseButton = CloseButtonFactory.createCloseButton();
             tabCloseButton.addActionListener(new ActionListener() {
