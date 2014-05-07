@@ -143,7 +143,6 @@ public class RADComponentNode extends FormNode
       if (searchDef != null)
         getInstanceContent().add(searchDef);
     }
-
   }
 
   void updateName()
@@ -527,7 +526,10 @@ public class RADComponentNode extends FormNode
   public void setName(String s)
   {
     component.rename(s.trim());
-
+    // #5185:
+    // wenn der displayName nicht gesetzt ist, dann ändert sich durch setzen des Namens auch der displayName und das
+    // muss gefeuert werden.
+    fireDisplayNameChange(null, null);
   }
 
   /**

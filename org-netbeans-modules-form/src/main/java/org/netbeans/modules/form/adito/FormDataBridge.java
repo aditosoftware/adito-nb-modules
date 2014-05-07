@@ -282,6 +282,9 @@ public class FormDataBridge
               }
             });
             break;
+          case IFormComponentInfo.PROP_NAME_CHANGED:
+            radComponent.rename((String) evt.getNewValue());
+            break;
           case IFormComponentInfo.PROP_VALUE_CHANGED:
             _alignFormToAditoProperty((String) evt.getNewValue());
             break;

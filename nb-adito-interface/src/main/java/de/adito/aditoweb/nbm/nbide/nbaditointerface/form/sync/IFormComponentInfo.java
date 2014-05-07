@@ -17,6 +17,7 @@ import java.util.*;
 public interface IFormComponentInfo
 {
 
+  public static final String PROP_NAME_CHANGED = "propNameChanged";
   public static final String PROP_VALUE_CHANGED = "propValueChanged";
   public static final String PROP_CHILD_ADDED = "propChildAdded";
   public static final String PROP_CHILD_REMOVED = "propChildRemoved";
