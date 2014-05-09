@@ -8,8 +8,6 @@ import java.awt.*;
 public interface INonSwingComponent extends INonSwingContainer
 {
 
-  void setName(String pName);
-
   /**
    * Komponente soll hergeschaltet werden, wenn sie versteckt sein kann. Kann sonst ignoriert werden.
    */
