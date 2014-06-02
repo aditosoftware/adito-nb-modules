@@ -44,24 +44,19 @@
 
 package org.netbeans.core.windows.view.ui;
 
-import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import java.util.regex.Pattern;
+import org.netbeans.core.windows.actions.MaximizeWindowAction;
+import org.openide.awt.*;
+import org.openide.util.*;
+import org.openide.windows.TopComponent;
+
 import javax.swing.*;
 import javax.swing.plaf.UIResource;
-import org.netbeans.core.windows.actions.MaximizeWindowAction;
-import org.openide.awt.CloseButtonFactory;
-import org.openide.awt.TabbedPaneFactory;
-import org.openide.util.Exceptions;
-import org.openide.util.Utilities;
-import org.openide.windows.TopComponent;
+import javax.swing.plaf.basic.BasicLabelUI;
+import java.awt.*;
+import java.awt.event.*;
+import java.beans.*;
+import java.util.logging.*;
+import java.util.regex.Pattern;
 
 /**
  * Copy of original CloseButtonTabbedPane from the NetBeans 3.4 winsys.  Old code never dies.
@@ -161,8 +156,9 @@ final class CloseButtonTabbedPane extends JTabbedPane implements PropertyChangeL
     public void insertTab(String title, Icon icon, Component component, String tip, int index) {
         super.insertTab(title, icon, component, tip, index);
             component.addPropertyChangeListener(TabbedPaneFactory.NO_CLOSE_BUTTON, this);
-            if (!hideCloseButton(component)) {
-                setTabComponentAt(index, new ButtonTab());
+            if (!hideCloseButton(component))
+            {
+                setTabComponentAt(index, new ButtonTab(this));
             }
         if (title != null) {
             setTitleAt(index, title);
@@ -468,7 +464,7 @@ final class CloseButtonTabbedPane extends JTabbedPane implements PropertyChangeL
             Component c = (Component) evt.getSource();
             int idx = indexOfComponent(c);
             boolean noCloseButton = (Boolean) evt.getNewValue();
-            setTabComponentAt(idx, noCloseButton ? null : new ButtonTab());
+            setTabComponentAt(idx, noCloseButton ? null : new ButtonTab(this));
         }
     }
     
@@ -478,7 +474,8 @@ final class CloseButtonTabbedPane extends JTabbedPane implements PropertyChangeL
     class ButtonTab extends JPanel {
         JLabel label;
 
-        public ButtonTab() {
+        public ButtonTab(JTabbedPane _tab)
+        {
             super(new FlowLayout(FlowLayout.LEFT, 0, 0));
             setOpaque(false);
             label = new JLabel("") {
@@ -512,6 +509,8 @@ final class CloseButtonTabbedPane extends JTabbedPane implements PropertyChangeL
                     return icon;
                 }
             };
+
+            label.setUI(new _LabelUI(_tab));
 
             add(label);
             JButton tabCloseButton = CloseButtonFactory.createCloseButton();
@@ -547,4 +546,30 @@ final class CloseButtonTabbedPane extends JTabbedPane implements PropertyChangeL
             return getTabCount() > 1;
         }
     }
+
+  private class _LabelUI extends BasicLabelUI
+  {
+    private JTabbedPane _tab;
+
+    private _LabelUI(JTabbedPane pTabPane)
+    {
+      _tab = pTabPane;
+    }
+
+    @Override
+    public void paint(Graphics g, JComponent c)
+    {
+      JLabel label = (JLabel)c;
+      String text = label.getText();
+      label.setText("");
+
+      if(_tab.getSelectedComponent().getName().equals(text))
+        label.setForeground(Color.WHITE);
+      else
+        label.setForeground(new Color(143, 169, 191).darker());
+
+      label.setText(text);
+      super.paint(g, c);
+    }
+  }
 }
