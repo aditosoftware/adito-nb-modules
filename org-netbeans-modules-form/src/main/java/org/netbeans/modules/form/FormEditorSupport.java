@@ -62,7 +62,8 @@ import org.netbeans.api.project.libraries.Library;
 import org.netbeans.api.project.libraries.LibraryManager;
 import org.netbeans.core.api.multiview.MultiViewHandler;
 import org.netbeans.core.api.multiview.MultiViews;
-import org.netbeans.core.spi.multiview.CloseOperationState;
+import org.netbeans.core.spi.multiview.*;
+import org.netbeans.core.spi.multiview.text.MultiViewEditorElement;
 import org.netbeans.modules.form.project.*;
 import org.openide.DialogDisplayer;
 import org.openide.ErrorManager;
@@ -103,6 +104,18 @@ import org.openide.xml.XMLUtil;
 
 public class FormEditorSupport extends DataEditorSupport implements EditorSupport,
         EditorCookie.Observable, CloseCookie, PrintCookie {
+
+    @MultiViewElement.Registration(
+        preferredID = "XFormSourceElement",
+        mimeType = "text/x-form",
+        displayName = "Source",
+        persistenceType = TopComponent.PERSISTENCE_NEVER,
+        position = 2000)
+    public static MultiViewElement createAodXmlSourceEditor(Lookup lkp)
+    {
+        return new MultiViewEditorElement(lkp);
+    }
+
 
     /** ID of the form designer (in the multiview) */
     static final String MV_FORM_ID = "form"; //NOI18N
