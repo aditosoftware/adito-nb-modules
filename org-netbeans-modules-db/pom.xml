@@ -163,7 +163,7 @@
                 <!-- Copy -->
                 <resource>
                   <directory>${project.build.sourceDirectory}/../patches</directory>
-                  <targetPath>${project.build.outputDirectory}/../nbm/netbeans/ide/modules</targetPath>
+                  <targetPath>${project.build.outputDirectory}/../nbm/netbeans/ide/modules/patches</targetPath>
                   <preservePath>true</preservePath>
                 </resource>
               </resources>
