@@ -603,6 +603,7 @@
       java.sql.Types.BLOB = BLOB;  //JDBC 2.0 A type representing an SQL Binary Large Object
 	    java.sql.Types.CLOB = CLOB;
       java.sql.Types.CHAR = CHAR;
+      java.sql.Types.NCHAR = NCHAR;
       java.sql.Types.DECIMAL = DECIMAL;
       java.sql.Types.DATE = DATE;
       java.sql.Types.FLOAT = FLOAT;
@@ -612,6 +613,7 @@
       java.sql.Types.REAL = REAL;
       java.sql.Types.SMALLINT = SMALLINT;
       java.sql.Types.VARCHAR = VARCHAR2;
+      java.sql.Types.NVARCHAR = NVARCHAR2;
     };
     ProcedureArgumentMap = {
       IN = IN;
@@ -625,7 +627,7 @@
     };
     SizelessTypes = (BIGINT,BLOB,CLOB,DATE,INT,INTEGER,REAL,SMALLINT);
     DecimalTypes = (DECIMAL,FLOAT,NUMERIC);
-    CharacterTypes = (CHAR,VARCHAR2);
+    CharacterTypes = (CHAR,VARCHAR2,NCHAR,NVARCHAR2);
 
 //
 // Define ADITO
