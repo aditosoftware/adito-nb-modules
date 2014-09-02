@@ -44,6 +44,7 @@
 
 package org.netbeans.core.windows.view.ui;
 
+import de.adito.aditoweb.swingcommon.lf.LfUtil;
 import org.netbeans.core.windows.actions.MaximizeWindowAction;
 import org.openide.awt.*;
 import org.openide.util.*;
@@ -560,15 +561,13 @@ final class CloseButtonTabbedPane extends JTabbedPane implements PropertyChangeL
     public void paint(Graphics g, JComponent c)
     {
       JLabel label = (JLabel)c;
-      String text = label.getText();
-      label.setText("");
 
-      if(_tab.getSelectedComponent().getName().equals(text))
-        label.setForeground(Color.WHITE);
+      // der aktive Tab ist dunkel und bekommt eine helle Schriftfarbe. Bei den inaktiven Tabs ist es umgekehrt
+      if (indexOfTabComponent(c.getParent()) == _tab.getSelectedIndex())
+        label.setForeground(LfUtil.get().getGuiColors().getWhite());
       else
-        label.setForeground(new Color(143, 169, 191).darker());
+        label.setForeground(LfUtil.get().getGuiColors().getDesignerTabColor());
 
-      label.setText(text);
       super.paint(g, c);
     }
   }
