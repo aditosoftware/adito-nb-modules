@@ -96,10 +96,10 @@ public class CreateTableAction extends BaseAction {
     }
 
     private void perform(final BaseNode node) {
+        String schema = findSchemaWorkingName(node.getLookup());
+
         DatabaseConnection connection = node.getLookup().lookup(DatabaseConnection.class);
         Specification spec = connection.getConnector().getDatabaseSpecification();
-
-        String schema = findSchemaWorkingName(node.getLookup());
 
         List<ColumnItem> items = ColumnItemCreator.getDefaultSystemColumnItems(connection.getDriver(), spec);
         boolean tableCreated = CreateTableDialog.showDialogAndCreate(connection.getConnector().getDatabaseSpecification(),

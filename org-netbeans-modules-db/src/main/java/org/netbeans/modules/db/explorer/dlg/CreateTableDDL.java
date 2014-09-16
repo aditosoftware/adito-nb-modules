@@ -34,9 +34,9 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
-
-import org.netbeans.adito.db.OracleTableColumnHack;
-import org.netbeans.lib.ddl.impl.*;
+import org.netbeans.lib.ddl.impl.CreateIndex;
+import org.netbeans.lib.ddl.impl.CreateTable;
+import org.netbeans.lib.ddl.impl.Specification;
 import org.netbeans.lib.ddl.util.CommandBuffer;
 
 /**
@@ -86,14 +86,10 @@ public class CreateTableDDL {
           while (it.hasNext()) {
               ColumnItem col = (ColumnItem)it.next();
               String name = col.getName();
-              if (col.isPrimaryKey()&& !hasPrimaryKeys(pkcols)) {
+              if (col.isPrimaryKey()&& !hasPrimaryKeys(pkcols))
                   cmdcol = cmd.createPrimaryKeyColumn(name);
-                  OracleTableColumnHack.fixPrimaryKeyColumn(spec, cmdcol, tablename, name);
-              }
-              else if (col.isUnique()&&!col.isPrimaryKey()) {
+              else if (col.isUnique()&&!col.isPrimaryKey())
                   cmdcol = cmd.createUniqueColumn(name);
-                  OracleTableColumnHack.fixUniqueColumn(spec, cmdcol, tablename, name);
-              }
               else cmdcol = cmd.createColumn(name);
 
               //bugfix for #31064
@@ -106,18 +102,16 @@ public class CreateTableDDL {
               String defval = col.getDefaultValue();
               if (defval != null && defval.length() > 0)
                   cmdcol.setDefaultValue(defval);
-              if (col.hasCheckConstraint()) {
+              if (col.hasCheckConstraint())
                   // add the TABLE check constraint
-                  TableColumn checkConstraintCol = cmd.createCheckConstraint(name, col.getCheckConstraint());
-                  OracleTableColumnHack.fixCheckConstraint(spec, checkConstraintCol, tablename, name);
-              }
+                  cmd.createCheckConstraint(name, col.getCheckConstraint());
               if (col.isIndexed()&&!col.isPrimaryKey()&&!col.isUnique()) {
                   xcmd = spec.createCommandCreateIndex(tablename);
                   // This index is referring to a tablename that is being
                   // created now, versus an existing one.  This
                   // means we shouldn't quote it.
                   xcmd.setNewObject(true);
-                  xcmd.setIndexName(tablename + "_" + name + "_idx"); // NOI18N
+                  xcmd.setIndexName(tablename+ "_" + name + "_idx"); // NOI18N
                   xcmd.setIndexType(new String());
                   xcmd.setObjectOwner(schema);
                   xcmd.specifyNewColumn(name);

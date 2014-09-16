@@ -52,7 +52,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.event.ChangeListener;
-
 import org.netbeans.adito.db.OracleTableColumnHack;
 import org.netbeans.api.db.explorer.DatabaseException;
 import org.netbeans.lib.ddl.DatabaseProductNotFoundException;

@@ -57,7 +57,9 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.MissingResourceException;
 import java.util.concurrent.Callable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -100,6 +102,7 @@ public class CreateTableDialog {
     JTable table;
     JButton addbtn, delbtn, editBtn, upBtn, downBtn;
     Specification spec;
+    //private final BaseNode tablesNode;
     private DialogDescriptor descriptor = null;
     private NotificationLineSupport statusLine;
 
@@ -128,8 +131,9 @@ public class CreateTableDialog {
         return dlgtab;
     }
 
-    public CreateTableDialog(final Specification spe, final String schema, List<ColumnItem> pItems, String pTableName) {
+  public CreateTableDialog(final Specification spe, final String schema, List<ColumnItem> pItems, String pTableName) {
         spec = spe;
+        //tablesNode = node;
 
         try {
             JLabel label;
@@ -398,20 +402,6 @@ public class CreateTableDialog {
         } catch (MissingResourceException ex) {
             LOGGER.log(Level.SEVERE, ex.getLocalizedMessage(), ex);
         }
-
-        String tableName = Objects.toString(pTableName, "").trim();
-        if (tableName.length() > 0)
-          dbnamefield.setText(tableName);
-
-        if ((pItems != null) && (pItems.size() > 0))
-        {
-          DataModel model = (DataModel) table.getModel();
-          for (ColumnItem item : pItems)
-          {
-            model.addRow(item);
-          }
-        }
-
     }
 
     /**
@@ -428,6 +418,26 @@ public class CreateTableDialog {
         }
         return false;
     }
+    
+    /*private String getTableUntitledName() {
+        final String nameBase = NbBundle.getMessage (CreateTableDialog.class, "CreateTableUntitledName"); // NOI18N
+        String name = nameBase;
+        int counter = 1;        
+        boolean existsSameTableName;
+        
+        do {
+            existsSameTableName = false;
+            for(Node node : tablesNode.getChildNodes()) {
+                if (node instanceof TableNode && node.getName().equalsIgnoreCase(name)) {
+                    counter++;
+                    name = nameBase + counter;
+                    existsSameTableName = true;
+                }
+            }
+        } while(existsSameTableName);       
+        
+        return name;
+    }*/
 
     private String getTableName() {
         return dbnamefield.getText();
