@@ -30,12 +30,12 @@
     <dependency>
       <groupId>org.netbeans.api</groupId>
       <artifactId>org-netbeans-modules-editor-codetemplates</artifactId>
-      <version>RELEASE80</version>
+      <version>RELEASE801</version>
     </dependency>
     <dependency>
       <groupId>org.netbeans.modules</groupId>
       <artifactId>org-netbeans-modules-editor-errorstripe</artifactId>
-      <version>RELEASE80</version>
+      <version>RELEASE801</version>
     </dependency>
 
 
@@ -47,152 +47,152 @@
     <dependency>
       <groupId>org.netbeans.api</groupId>
       <artifactId>org-netbeans-api-annotations-common</artifactId>
-      <version>RELEASE80</version>
+      <version>RELEASE801</version>
     </dependency>
     <dependency>
       <groupId>org.netbeans.api</groupId>
       <artifactId>org-netbeans-api-java-classpath</artifactId>
-      <version>RELEASE80</version>
+      <version>RELEASE801</version>
     </dependency>
     <dependency>
       <groupId>org.netbeans.api</groupId>
       <artifactId>org-netbeans-core-multiview</artifactId>
-      <version>RELEASE80</version>
+      <version>RELEASE801</version>
     </dependency>
     <dependency>
       <groupId>org.netbeans.api</groupId>
       <artifactId>org-netbeans-libs-xerces</artifactId>
-      <version>RELEASE80</version>
+      <version>RELEASE801</version>
     </dependency>
     <dependency>
       <groupId>org.netbeans.api</groupId>
       <artifactId>org-netbeans-modules-csl-api</artifactId>
-      <version>RELEASE80</version>
+      <version>RELEASE801</version>
     </dependency>
     <dependency>
       <groupId>org.netbeans.api</groupId>
       <artifactId>org-netbeans-modules-editor</artifactId>
-      <version>RELEASE80</version>
+      <version>RELEASE801</version>
     </dependency>
     <dependency>
       <groupId>org.netbeans.api</groupId>
       <artifactId>org-netbeans-modules-editor-bracesmatching</artifactId>
-      <version>RELEASE80</version>
+      <version>RELEASE801</version>
     </dependency>
     <dependency>
       <groupId>org.netbeans.api</groupId>
       <artifactId>org-netbeans-modules-editor-indent</artifactId>
-      <version>RELEASE80</version>
+      <version>RELEASE801</version>
     </dependency>
     <dependency>
       <groupId>org.netbeans.api</groupId>
       <artifactId>org-netbeans-modules-editor-lib</artifactId>
-      <version>RELEASE80</version>
+      <version>RELEASE801</version>
     </dependency>
     <dependency>
       <groupId>org.netbeans.api</groupId>
       <artifactId>org-netbeans-modules-editor-mimelookup</artifactId>
-      <version>RELEASE80</version>
+      <version>RELEASE801</version>
     </dependency>
     <dependency>
       <groupId>org.netbeans.api</groupId>
       <artifactId>org-netbeans-modules-editor-settings</artifactId>
-      <version>RELEASE80</version>
+      <version>RELEASE801</version>
     </dependency>
     <dependency>
       <groupId>org.netbeans.modules</groupId>
       <artifactId>org-netbeans-modules-html-editor</artifactId>
-      <version>RELEASE80</version>
+      <version>RELEASE801</version>
     </dependency>
     <dependency>
       <groupId>org.netbeans.modules</groupId>
       <artifactId>org-netbeans-modules-html-editor-lib</artifactId>
-      <version>RELEASE80</version>
+      <version>RELEASE801</version>
     </dependency>
     <dependency>
       <groupId>org.netbeans.api</groupId>
       <artifactId>org-netbeans-modules-html-lexer</artifactId>
-      <version>RELEASE80</version>
+      <version>RELEASE801</version>
     </dependency>
     <dependency>
       <groupId>org.netbeans.api</groupId>
       <artifactId>org-netbeans-modules-lexer</artifactId>
-      <version>RELEASE80</version>
+      <version>RELEASE801</version>
     </dependency>
     <dependency>
       <groupId>org.netbeans.api</groupId>
       <artifactId>org-netbeans-modules-options-api</artifactId>
-      <version>RELEASE80</version>
+      <version>RELEASE801</version>
     </dependency>
     <dependency>
       <groupId>org.netbeans.api</groupId>
       <artifactId>org-netbeans-modules-parsing-api</artifactId>
-      <version>RELEASE80</version>
+      <version>RELEASE801</version>
     </dependency>
     <dependency>
       <groupId>org.netbeans.api</groupId>
       <artifactId>org-netbeans-modules-projectapi</artifactId>
-      <version>RELEASE80</version>
+      <version>RELEASE801</version>
     </dependency>
     <dependency>
       <groupId>org.netbeans.api</groupId>
       <artifactId>org-netbeans-spi-tasklist</artifactId>
-      <version>RELEASE80</version>
+      <version>RELEASE801</version>
     </dependency>
     <dependency>
       <groupId>org.netbeans.api</groupId>
       <artifactId>org-openide-awt</artifactId>
-      <version>RELEASE80</version>
+      <version>RELEASE801</version>
     </dependency>
     <dependency>
       <groupId>org.netbeans.api</groupId>
       <artifactId>org-openide-dialogs</artifactId>
-      <version>RELEASE80</version>
+      <version>RELEASE801</version>
     </dependency>
     <dependency>
       <groupId>org.netbeans.api</groupId>
       <artifactId>org-openide-filesystems</artifactId>
-      <version>RELEASE80</version>
+      <version>RELEASE801</version>
     </dependency>
     <dependency>
       <groupId>org.netbeans.api</groupId>
       <artifactId>org-openide-io</artifactId>
-      <version>RELEASE80</version>
+      <version>RELEASE801</version>
     </dependency>
     <dependency>
       <groupId>org.netbeans.api</groupId>
       <artifactId>org-openide-loaders</artifactId>
-      <version>RELEASE80</version>
+      <version>RELEASE801</version>
     </dependency>
     <dependency>
       <groupId>org.netbeans.api</groupId>
       <artifactId>org-openide-modules</artifactId>
-      <version>RELEASE80</version>
+      <version>RELEASE801</version>
     </dependency>
     <dependency>
       <groupId>org.netbeans.api</groupId>
       <artifactId>org-openide-nodes</artifactId>
-      <version>RELEASE80</version>
+      <version>RELEASE801</version>
     </dependency>
     <dependency>
       <groupId>org.netbeans.api</groupId>
       <artifactId>org-openide-text</artifactId>
-      <version>RELEASE80</version>
+      <version>RELEASE801</version>
     </dependency>
     <dependency>
       <groupId>org.netbeans.api</groupId>
       <artifactId>org-openide-util</artifactId>
-      <version>RELEASE80</version>
+      <version>RELEASE801</version>
     </dependency>
     <dependency>
       <groupId>org.netbeans.api</groupId>
       <artifactId>org-openide-util-lookup</artifactId>
-      <version>RELEASE80</version>
+      <version>RELEASE801</version>
     </dependency>
     <dependency>
       <groupId>org.netbeans.api</groupId>
       <artifactId>org-openide-windows</artifactId>
-      <version>RELEASE80</version>
+      <version>RELEASE801</version>
     </dependency>
 
   </dependencies>

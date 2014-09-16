@@ -12,95 +12,95 @@
   <groupId>org.netbeans.api</groupId>
   <artifactId>org-netbeans-modules-db</artifactId>
   <packaging>nbm</packaging>
-  <version>RELEASE80</version>
+  <version>RELEASE801</version>
   <name>Netbeans IDE module: org-netbeans-modules-db</name>
 
   <dependencies>
     <dependency>
       <groupId>org.netbeans.api</groupId>
       <artifactId>org-netbeans-api-progress</artifactId>
-      <version>RELEASE80</version>
+      <version>RELEASE801</version>
     </dependency>
     <dependency>
       <groupId>org.netbeans.api</groupId>
       <artifactId>org-netbeans-core-ide</artifactId>
-      <version>RELEASE80</version>
+      <version>RELEASE801</version>
     </dependency>
     <dependency>
       <groupId>org.netbeans.modules</groupId>
       <artifactId>org-netbeans-modules-db-metadata-model</artifactId>
-      <version>RELEASE80</version>
+      <version>RELEASE801</version>
       <optional>true</optional>
     </dependency>
     <dependency>
       <groupId>org.netbeans.api</groupId>
       <artifactId>org-netbeans-modules-javahelp</artifactId>
-      <version>RELEASE80</version>
+      <version>RELEASE801</version>
     </dependency>
     <dependency>
       <groupId>org.netbeans.api</groupId>
       <artifactId>org-netbeans-modules-keyring</artifactId>
-      <version>RELEASE80</version>
+      <version>RELEASE801</version>
     </dependency>
     <dependency>
       <groupId>org.netbeans.api</groupId>
       <artifactId>org-netbeans-modules-project-libraries</artifactId>
-      <version>RELEASE80</version>
+      <version>RELEASE801</version>
     </dependency>
     <dependency>
       <groupId>org.netbeans.api</groupId>
       <artifactId>org-openide-awt</artifactId>
-      <version>RELEASE80</version>
+      <version>RELEASE801</version>
     </dependency>
     <dependency>
       <groupId>org.netbeans.api</groupId>
       <artifactId>org-openide-dialogs</artifactId>
-      <version>RELEASE80</version>
+      <version>RELEASE801</version>
     </dependency>
     <dependency>
       <groupId>org.netbeans.api</groupId>
       <artifactId>org-openide-explorer</artifactId>
-      <version>RELEASE80</version>
+      <version>RELEASE801</version>
     </dependency>
     <dependency>
       <groupId>org.netbeans.api</groupId>
       <artifactId>org-openide-filesystems</artifactId>
-      <version>RELEASE80</version>
+      <version>RELEASE801</version>
     </dependency>
     <dependency>
       <groupId>org.netbeans.api</groupId>
       <artifactId>org-openide-io</artifactId>
-      <version>RELEASE80</version>
+      <version>RELEASE801</version>
     </dependency>
     <dependency>
       <groupId>org.netbeans.api</groupId>
       <artifactId>org-openide-loaders</artifactId>
-      <version>RELEASE80</version>
+      <version>RELEASE801</version>
     </dependency>
     <dependency>
       <groupId>org.netbeans.api</groupId>
       <artifactId>org-openide-modules</artifactId>
-      <version>RELEASE80</version>
+      <version>RELEASE801</version>
     </dependency>
     <dependency>
       <groupId>org.netbeans.api</groupId>
       <artifactId>org-openide-nodes</artifactId>
-      <version>RELEASE80</version>
+      <version>RELEASE801</version>
     </dependency>
     <dependency>
       <groupId>org.netbeans.api</groupId>
       <artifactId>org-openide-util</artifactId>
-      <version>RELEASE80</version>
+      <version>RELEASE801</version>
     </dependency>
     <dependency>
       <groupId>org.netbeans.api</groupId>
       <artifactId>org-openide-util-lookup</artifactId>
-      <version>RELEASE80</version>
+      <version>RELEASE801</version>
     </dependency>
     <dependency>
       <groupId>org.netbeans.api</groupId>
       <artifactId>org-openide-windows</artifactId>
-      <version>RELEASE80</version>
+      <version>RELEASE801</version>
     </dependency>
 
     <dependency>

@@ -12,7 +12,7 @@
   <groupId>org.netbeans.modules</groupId>
   <artifactId>org-netbeans-core-output2</artifactId>
   <packaging>nbm</packaging>
-  <version>RELEASE80</version>
+  <version>RELEASE801</version>
   <name>Netbeans IDE module: org-netbeans-core-output2</name>
 
 
