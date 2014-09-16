@@ -362,7 +362,7 @@ public class ClobFieldTableCellEditor extends AbstractCellEditor
             }
             
         }
-
+        // adito edited
         JEditorPane textPane = new JEditorPane();
         // Work around: http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=7100524
         textPane.setDropTarget(null);
