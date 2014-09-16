@@ -147,6 +147,8 @@ final class OutputTab extends AbstractOutputTab implements IOContainer.CallBacks
             lines.setDefColor(IOColors.OutputType.HYPERLINK_IMPORTANT,
                     opts.getColorLinkImportant());
             Color bg = io.getOptions().getColorBackground();
+            getOutputPane().getFoldingSideBar().setForeground(
+                    opts.getColorStandard());
             setTextViewBackground(getOutputPane().getTextView(), bg);
             getOutputPane().setViewFont(
                     io.getOptions().getFont(getOutputPane().isWrapped()));
@@ -198,6 +200,15 @@ final class OutputTab extends AbstractOutputTab implements IOContainer.CallBacks
         }
         // get new OutWriter
         outWriter = io.out();
+
+        // Workaround for bug 242979.
+        Document actualDocument = getDocument();
+        if (actualDocument instanceof OutputDocument) {
+            OutputDocument od = (OutputDocument) actualDocument;
+            if (od.getWriter() == outWriter) {
+                return;
+            }
+        }
         setDocument(new OutputDocument(outWriter));
         applyOptions();
     }
@@ -803,6 +814,8 @@ final class OutputTab extends AbstractOutputTab implements IOContainer.CallBacks
 
         if (OutputOptions.PROP_COLOR_STANDARD.equals(pn)) {
             lines.setDefColor(IOColors.OutputType.OUTPUT,
+                    opts.getColorStandard());
+            getOutputPane().getFoldingSideBar().setForeground(
                     opts.getColorStandard());
         } else if (OutputOptions.PROP_COLOR_ERROR.equals(pn)) {
             lines.setDefColor(IOColors.OutputType.ERROR,

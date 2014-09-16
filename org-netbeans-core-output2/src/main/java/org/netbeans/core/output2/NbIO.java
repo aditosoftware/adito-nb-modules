@@ -213,6 +213,21 @@ class NbIO implements InputOutputExt, IInputOutputFilter, Lookup.Provider {
         return out == null ? null : out.out();
     }
 
+    /**
+     * Get the current OutWriter object. If it is null, throw exception.
+     *
+     * @return The current OutWriter object, never null.
+     * @throws IllegalStateException if no OutWriter is available.
+     */
+    private OutWriter outOrException() {
+        OutWriter outWriter = out();
+        if (outWriter == null) {
+            throw new IllegalStateException("No OutWriter available");  //NOI18N
+        } else {
+            return outWriter;
+        }
+    }
+
     void setClosed (boolean val) {
         boolean oldVal = closed;
         closed = val;
@@ -603,7 +618,7 @@ class NbIO implements InputOutputExt, IInputOutputFilter, Lookup.Provider {
 
         @Override
         protected FoldHandleDefinition startFold(boolean expanded) {
-            synchronized (out()) {
+            synchronized (outOrException()) {
                 if (currentFold != null) {
                     throw new IllegalStateException(
                             "The last fold hasn't been finished yet");  //NOI18N
@@ -630,7 +645,7 @@ class NbIO implements InputOutputExt, IInputOutputFilter, Lookup.Provider {
 
             @Override
             public void finish() {
-                synchronized (out()) {
+                synchronized (outOrException()) {
                     if (nested != null) {
                         throw new IllegalStateException(
                                 "Nested fold hasn't been finished.");   //NOI18N
@@ -652,7 +667,7 @@ class NbIO implements InputOutputExt, IInputOutputFilter, Lookup.Provider {
 
             @Override
             public FoldHandleDefinition startFold(boolean expanded) {
-                synchronized (out()) {
+                synchronized (outOrException()) {
                     if (end != -1) {
                         throw new IllegalStateException(
                                 "The fold has been alredy finished.");  //NOI18N
@@ -682,7 +697,7 @@ class NbIO implements InputOutputExt, IInputOutputFilter, Lookup.Provider {
              */
             private void setExpanded(boolean expanded,
                     boolean expandParents) {
-                synchronized (out()) {
+                synchronized (outOrException()) {
                     if (expanded) {
                         if (expandParents) {
                             getLines().showFoldAndParentFolds(start);
