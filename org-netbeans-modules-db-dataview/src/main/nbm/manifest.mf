@@ -5,11 +5,11 @@ OpenIDE-Module-Friends: org.netbeans.modules.etl.editor, org.netbeans.
  modules.db.core, org.netbeans.modules.dm.virtual.db, org.netbeans.mod
  ules.edm.editor
 OpenIDE-Module-Java-Dependencies: Java > 1.7
-OpenIDE-Module-Implementation-Version: 201403101706
+OpenIDE-Module-Implementation-Version: 201408251540
 AutoUpdate-Show-In-Client: false
 OpenIDE-Module: org.netbeans.modules.db.dataview
 OpenIDE-Module-Localizing-Bundle: org/netbeans/modules/db/dataview/Bun
  dle.properties
-OpenIDE-Module-Specification-Version: 1.24.1
+OpenIDE-Module-Specification-Version: 1.25.1
 OpenIDE-Module-Requires: org.openide.modules.ModuleFormat1
 

@@ -4,7 +4,7 @@ Created-By: 1.7.0_25-b15 (Oracle Corporation)
 OpenIDE-Module-Friends: org.netbeans.core.multitabs, org.netbeans.core
  .nativeaccess
 OpenIDE-Module-Java-Dependencies: Java > 1.7
-OpenIDE-Module-Implementation-Version: 201403101706
+OpenIDE-Module-Implementation-Version: 201408251540
 AutoUpdate-Show-In-Client: false
 OpenIDE-Module: org.netbeans.core.windows/2
 OpenIDE-Module-Localizing-Bundle: org/netbeans/core/windows/resources/
@@ -16,6 +16,6 @@ OpenIDE-Module-Provides: org.netbeans.core.WindowSystem, org.openide.w
 OpenIDE-Module-Recommends: org.netbeans.core.windows.nativeaccess.Nati
  veWindowSystem
 AutoUpdate-Essential-Module: true
-OpenIDE-Module-Specification-Version: 2.75.1
+OpenIDE-Module-Specification-Version: 2.77.1
 OpenIDE-Module-Requires: org.openide.modules.ModuleFormat1
 
