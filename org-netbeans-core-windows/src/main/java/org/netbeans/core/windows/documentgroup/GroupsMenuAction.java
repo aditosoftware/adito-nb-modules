@@ -102,7 +102,7 @@ public class GroupsMenuAction extends AbstractAction implements Presenter.Menu {
         GroupsManager gm = GroupsManager.getDefault();
         DocumentGroupImpl current = gm.getCurrentGroup();
         List<DocumentGroupImpl> groups = gm.getGroups();
-
+        
         //new group
         menu.add( new AbstractAction(NbBundle.getMessage(GroupsMenuAction.class, "CTL_NewGroupAction")) {
             @Override
