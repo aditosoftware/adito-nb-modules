@@ -57,9 +57,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
-import java.util.List;
-import java.util.Map;
-import java.util.MissingResourceException;
+import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -401,6 +399,19 @@ public class CreateTableDialog {
             validate();
         } catch (MissingResourceException ex) {
             LOGGER.log(Level.SEVERE, ex.getLocalizedMessage(), ex);
+        }
+
+        String tableName = Objects.toString(pTableName, "").trim();
+        if (tableName.length() > 0)
+          dbnamefield.setText(tableName);
+
+        if ((pItems != null) && (pItems.size() > 0))
+        {
+          DataModel model = (DataModel) table.getModel();
+          for (ColumnItem item : pItems)
+          {
+            model.addRow(item);
+          }
         }
     }
 
