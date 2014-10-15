@@ -214,7 +214,7 @@ public class JScrollPaneSupport extends AbstractLayoutSupport {
 
     // ------------
 
-  private static Method getSetViewportViewMethod() {
+    private static Method getSetViewportViewMethod() {
         if (setViewportViewMethod == null) {
             try {
                 setViewportViewMethod = JScrollPane.class.getMethod(

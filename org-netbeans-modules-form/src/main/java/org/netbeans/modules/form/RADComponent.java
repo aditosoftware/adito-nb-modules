@@ -44,20 +44,27 @@
 
 package org.netbeans.modules.form;
 
-import org.netbeans.modules.form.RADProperty.FakePropertyDescriptor;
-import org.netbeans.modules.form.adito.ARADComponentHandler;
-import org.openide.nodes.Node;
-import org.openide.util.*;
-import org.openide.util.datatransfer.NewType;
-
-import javax.accessibility.*;
-import javax.swing.*;
-import java.awt.*;
+import java.awt.EventQueue;
 import java.beans.*;
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
-import java.util.List;
-import java.util.logging.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.accessibility.Accessible;
+import javax.accessibility.AccessibleContext;
+import javax.swing.AbstractButton;
+import javax.swing.ButtonGroup;
+import javax.swing.JComboBox;
+import javax.swing.JComponent;
+import org.netbeans.modules.form.RADProperty.FakePropertyDescriptor;
+
+import org.netbeans.modules.form.adito.ARADComponentHandler;
+import org.openide.nodes.*;
+import org.openide.util.Lookup;
+import org.openide.util.NbBundle;
+import org.openide.util.datatransfer.NewType;
+
+import org.openide.util.Utilities;
 
 /**
  *
@@ -87,7 +94,7 @@ public class RADComponent {
 
     private String id = Integer.toString(++idCounter);
 
-    private Class<?> beanClass;
+    private Class<? extends Object> beanClass;
     private Object beanInstance;
     private BeanInfo beanInfo;
     private BeanInfo fakeBeanInfo;
@@ -135,7 +142,7 @@ public class RADComponent {
 
     /**
      * Called to initialize the component with specified FormModel.
-     *
+     * 
      * @param formModel the FormModel of the form into which this component
      * will be added
      * @return <code>true</code> if the model was initialized,
@@ -166,50 +173,50 @@ public class RADComponent {
     /** Initializes the bean instance represented by this meta component.
      * A default instance is created for the given bean class.
      * The meta component is fully initialized after this method returns.
-     *
+     * 
      * @param beanClass the bean class to be represented by this meta component
      * @return initialized instance.
      * @throws java.lang.Exception when the instance cannot be initialized.
      */
     public Object initInstance(Class<?> beanClass, ARADComponentHandler pARADComponentHandler) throws Exception
     {
-      if (beanClass == null)
-        throw new NullPointerException();
+        if (beanClass == null)
+            throw new NullPointerException();
 
-      if (this.beanClass != beanClass && this.beanClass != null)
-      {
-        beanInfo = null;
-        fakeBeanInfo = null;
-        clearProperties();
-      }
-      this.beanClass = beanClass;
+        if (this.beanClass != beanClass && this.beanClass != null) {
+            beanInfo = null;
+            fakeBeanInfo = null;
+            clearProperties();
+        }
 
-      if (pARADComponentHandler != null)
-        pARADComponentHandler.setRadComponent(this);
-      aRADComponentHandler = pARADComponentHandler;
+        this.beanClass = beanClass;
 
-      Object bean = createBeanInstance();
-      getBeanInfo(); // force BeanInfo creation here - will be needed, may fail
-      setBeanInstance(bean);
+        if (pARADComponentHandler != null)
+          pARADComponentHandler.setRadComponent(this);
+        aRADComponentHandler = pARADComponentHandler;
 
-      return beanInstance;
+        Object bean = createBeanInstance();
+        getBeanInfo(); // force BeanInfo creation here - will be needed, may fail
+        setBeanInstance(bean);
+
+        return beanInstance;
     }
 
-  public final ARADComponentHandler getARADComponentHandler()
-  {
-    return aRADComponentHandler;
-  }
+    public final ARADComponentHandler getARADComponentHandler()
+    {
+        return aRADComponentHandler;
+    }
 
-  /** Sets the bean instance represented by this meta component.
+    /** Sets the bean instance represented by this meta component.
      * The meta component is fully initialized after this method returns.
      * @param beanInstance the bean to be represented by this meta component
      */
     public void setInstance(Object beanInstance) {
         if (this.beanClass != beanInstance.getClass()){
-            beanInfo = null;
+            beanInfo = null;                
             fakeBeanInfo = null;
         }
-
+            
         clearProperties();
 
         this.beanClass = beanInstance.getClass();
@@ -233,7 +240,7 @@ public class RADComponent {
 
     /** Updates the bean instance - e.g. when setting a property requires
      * to create new instance of the bean.
-     *
+     * 
      * @param beanInstance bean instance.
      */
     public void updateInstance(Object beanInstance) {
@@ -249,7 +256,7 @@ public class RADComponent {
      * Called to create the instance of the bean. This method is called if the
      * initInstance method is used; using the setInstance method, the bean
      * instance is set directly.
-     *
+     * 
      * @return the instance of the bean that will be used during design time
      * @throws java.lang.Exception when the instance cannot be created.
      */
@@ -258,7 +265,7 @@ public class RADComponent {
     }
 
     /** Sets directly the bean instance. Can be overriden.
-     *
+     * 
      * @param beanInstance bean instance.
      */
     protected void setBeanInstance(Object beanInstance) {
@@ -303,7 +310,7 @@ public class RADComponent {
     /** Provides access to the Class of the bean represented by this RADComponent
      * @return the Class of the bean represented by this RADComponent
      */
-    public final Class<?> getBeanClass() {
+    public final Class<? extends Object> getBeanClass() {
         return beanClass;
     }
 
@@ -332,24 +339,55 @@ public class RADComponent {
         return false;
     }
 
-  public Object cloneBeanInstance(Collection<RADProperty> relativeProperties) {
-        Object clone;
+    public Object cloneBeanInstance(Collection<RADProperty> relativeProperties) {
+        Object clone = null;
         try {
-          // TODO: stripped
+            // A
             /*if (JavaCodeGenerator.VALUE_SERIALIZE.equals(getAuxValue(JavaCodeGenerator.AUX_CODE_GENERATION))) {
                 clone = createDefaultDeserializedInstance();
             } else */{
                 clone = createBeanInstance();
             }
-        }
-        catch (Exception ex) { // ignore, this should not fail
-            org.openide.ErrorManager.getDefault().notify(org.openide.ErrorManager.INFORMATIONAL, ex);
-            return null;
+        } catch (Exception ex) {
+            // The serialization support is usually useless and not working well in many situations.
+            // If set on, its mostly by mistake. In case of failure let's fall back to a default
+            // instance creation so the cloning does not fail (or does not return null as it used to,
+            // which was not good for the replicated design view).
+            Logger.getLogger(RADComponent.class.getName()).log(Level.INFO, ex.getMessage(), ex);
         }
 
-        FormUtils.copyPropertiesToBean(getKnownBeanProperties(),
-                                       clone,
-                                       relativeProperties);
+        if (clone == null && beanClass.getName().startsWith("org.jdesktop.swingx.")) { // NOI18N
+            // Hack for bug 127881 - SwingX components may fail to instantiate if project
+            // classloader has changed and so UIDefaults for the previous classloader were
+            // removed. A possible workaround is to load the class again with the new classloader.
+            // A drawback is we return an instance of a different class, increasing a risk
+            // of ClassCastException (but with changing classloaders it is generally
+            // unavoidable anyway, we'd have to reload the whole form to be quite correct).
+            try {
+                Class newBeanClass = FormUtils.loadClass(beanClass.getName(), formModel);
+                if (newBeanClass != beanClass) {
+                    clone = CreationFactory.createDefaultInstance(newBeanClass);
+                }
+            } catch (Exception ex) {
+                Logger.getLogger(RADComponent.class.getName()).log(Level.WARNING, ex.getMessage(), ex);
+            } catch (LinkageError ex) {
+                Logger.getLogger(RADComponent.class.getName()).log(Level.WARNING, ex.getMessage(), ex);
+            }
+        }
+
+        if (clone == null) {
+            try {
+                clone = createBeanInstance();
+            } catch (Exception ex) { // this should not fail, we already have an instance of this kind
+                Logger.getLogger(RADComponent.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
+            }
+        }
+
+        if (clone != null) {
+            FormUtils.copyPropertiesToBean(getKnownBeanProperties(),
+                                           clone,
+                                           relativeProperties);
+        }
         return clone;
     }
 
@@ -359,7 +397,7 @@ public class RADComponent {
     public BeanInfo getBeanInfo() {
         if (beanInfo == null) {
             try {
-                beanInfo = FormUtils.getBeanInfo(beanClass);
+                beanInfo = createBeanInfo(beanClass);        
             } catch (Error err) { // Issue 74002
                 org.openide.ErrorManager.getDefault().notify(org.openide.ErrorManager.INFORMATIONAL, err);
                 beanInfo = new FakeBeanInfo();
@@ -368,17 +406,36 @@ public class RADComponent {
                 beanInfo = new FakeBeanInfo();
             }
         }
-        if(isValid()) {
+        if(isValid()) {            
             return beanInfo;
         } else {
             if (fakeBeanInfo == null) {
 		fakeBeanInfo  = new FakeBeanInfo();
-	    }
-            return fakeBeanInfo ;
-        }
+	    }            
+            return fakeBeanInfo ;            
+        }        
+    }            
+
+    protected BeanInfo createBeanInfo(Class cls) throws IntrospectionException {
+        return FormUtils.getBeanInfo(cls);        
     }
 
-  /** Getter for the name of the metacomponent - it maps to variable name
+    /** This method can be used to check whether the bean represented by this
+     * RADComponent has hidden-state.
+     * @return true if the component has hidden state, false otherwise
+     */
+    public boolean hasHiddenState() {
+        String name = beanClass.getName();
+        if (name.startsWith("javax.") // NOI18N
+              || name.startsWith("java.") // NOI18N
+              || name.startsWith("org.openide.")) // NOI18N
+            return false;
+
+        return getBeanInfo().getBeanDescriptor()
+                                .getValue("hidden-state") != null; // NOI18N
+    }
+
+    /** Getter for the name of the metacomponent - it maps to variable name
      * declared for the instance of the component in the generated java code.
      * It is a unique identification of the component within a form, but it may
      * change (currently editable as "Variable Name" in code gen. properties).
@@ -391,14 +448,13 @@ public class RADComponent {
     /** Setter for the name of the component - it is the name of the
      * component's node and the name of the variable declared for the component
      * in the generated code.
-     *
+     * 
      * @param name new name of the component
      */
-    public void setName(String name)
-    {
-      if (!needsVariableRename(name))
-        return;
-      setStoredName(name);
+    public void setName(String name) {
+        if (!needsVariableRename(name))
+            return;
+        setStoredName(name);
     }
 
     /**
@@ -407,30 +463,30 @@ public class RADComponent {
      * @param name the new name for the variable
      */
     public void rename(String name) {
-      if (!needsVariableRename(name))
-        return;
-      //RenameSupport.renameComponent(this, name);
-      setStoredName(name);
+        if (!needsVariableRename(name))
+            return;
+        //RenameSupport.renameComponent(this, name);
+        setStoredName(name);
 
-      Node.Property<String> nameProperty = getPropertyByName("name");
-      if (nameProperty != null)
-      {
-        try
+        Node.Property<String> nameProperty = getPropertyByName("name");
+        if (nameProperty != null)
         {
-          nameProperty.setValue(name);
+            try
+            {
+                nameProperty.setValue(name);
+            }
+            catch (Exception e)
+            {
+                throw new RuntimeException(e);
+            }
         }
-        catch (Exception e)
-        {
-          throw new RuntimeException(e);
-        }
-      }
 
       // STRIPPED
         /*if (!org.openide.util.Utilities.isJavaIdentifier(name)) {
             IllegalArgumentException iae =
                 new IllegalArgumentException("Invalid component name"); // NOI18N
             ErrorManager.getDefault().annotate(
-                iae, ErrorManager.USER, null,
+                iae, ErrorManager.USER, null, 
                 FormUtils.getBundleString("ERR_INVALID_COMPONENT_NAME"), // NOI18N
                 null, null);
             throw iae;
@@ -457,23 +513,23 @@ public class RADComponent {
     }
 
     private boolean needsVariableRename(String name) {
-      return (!storedNameAlreadySet && (storedName == null || !storedName.equals(name)));
+        return (!storedNameAlreadySet && (storedName == null || !storedName.equals(name)));
     }
 
-  private void _renameNode(String name)
-  {
-    if (aRADComponentHandler != null)
-      aRADComponentHandler.nameIsAboutToChange(storedName, name);
-  }
+    private void _renameNode(String name)
+    {
+        if (aRADComponentHandler != null)
+            aRADComponentHandler.nameIsAboutToChange(storedName, name);
+    }
 
-  public void setStoredName(String name)
-  {
-    storedNameAlreadySet = true;
-    //Benennt Node um -> Dadurch PropertyListener-Aufruf, der DisplayName ändert
-    _renameNode(name);
-    storedName = name;
-    storedNameAlreadySet = false;
-  }
+    public void setStoredName(String name)
+    {
+        storedNameAlreadySet = true;
+        //Benennt Node um -> Dadurch PropertyListener-Aufruf, der DisplayName ändert
+        _renameNode(name);
+        storedName = name;
+        storedNameAlreadySet = false;
+    }
 
   // STRIPPED
     /*private void renameDefaultEventHandlers(String oldComponentName,
@@ -519,12 +575,16 @@ public class RADComponent {
      * @param value new value of the aux property or null to remove it
      */
     public void setAuxValue(String key, Object value) {
-        if (auxValues == null) {
-            if (value == null)
-                return;
-            auxValues = new TreeMap<String,Object>();
+        if (value == null) {
+            if (auxValues != null) {
+                auxValues.remove(key);
+            }
+        } else {
+            if (auxValues == null) {
+                auxValues = new TreeMap<String,Object>();
+            }
+            auxValues.put(key, value);
         }
-        auxValues.put(key, value);
     }
 
     /** Allows to obtain an auxiliary value for specified aux property name.
@@ -561,16 +621,14 @@ public class RADComponent {
         return NO_NEW_TYPES;
     }
 
-    public synchronized Node.PropertySet[] getProperties()
-    {
-      if (propertySets == null)
-      {
-        List<Node.PropertySet> propSets = new ArrayList<Node.PropertySet>();
-        createPropertySets(propSets);
-        propertySets = new Node.PropertySet[propSets.size()];
-        propSets.toArray(propertySets);
-      }
-      return propertySets;
+    public synchronized Node.PropertySet[] getProperties() {
+        if (propertySets == null) {
+            List<Node.PropertySet> propSets = new ArrayList<Node.PropertySet>(5);
+            createPropertySets(propSets);
+            propertySets = new Node.PropertySet[propSets.size()];
+            propSets.toArray(propertySets);
+        }
+        return propertySets;
     }
 
     public synchronized RADProperty[] getAllBeanProperties() {
@@ -696,7 +754,7 @@ public class RADComponent {
     /**
      * Returns property of given name corresponding to a property or event.
      * Forces creation of all property objects.
-     *
+     * 
      * @param name name of the property.
      * @return bean or event property
      */
@@ -711,15 +769,15 @@ public class RADComponent {
     /**
      * Returns bean properties of given names. Creates the properties if not
      * created yet, but does not force creation of all bean properties.
-     *
+     * 
      * @param propNames property names.
      * @return array of properties corresponding to the names; may contain
      *         null if there is no property of given name
      */
     public synchronized RADProperty[] getBeanProperties(String[] propNames) {
-        RADProperty[] properties = new RADProperty[propNames.length];
+        RADProperty[] properties = new RADProperty[propNames.length];        
         PropertyDescriptor[] descriptors = null;
-
+        
         boolean empty = knownBeanProperties == null;
         int validCount = 0;
         List<RADProperty> newProps = null;
@@ -814,26 +872,26 @@ public class RADComponent {
 
     protected synchronized void clearProperties() {
         if (nameToProperty != null)
-          nameToProperty.clear();
+            nameToProperty.clear();
         else
-          nameToProperty = new HashMap<String,Node.Property>()
-          {
-            @Override
-            public Node.Property put(String key, Node.Property value)
+            nameToProperty = new HashMap<String,Node.Property>()
             {
-              Node.Property oldProp = get(key);
-              try
+              @Override
+              public Node.Property put(String key, Node.Property value)
               {
-                assert oldProp == null : getName() + ": The property '" + key + "' is alread defined in 'nameToProperty'.";
+                Node.Property oldProp = get(key);
+                try
+                {
+                  assert oldProp == null : getName() + ": The property '" + key + "' is alread defined in 'nameToProperty'.";
+                }
+                catch (AssertionError e)
+                {
+                  e.printStackTrace();
+                  return null;
+                }
+                return super.put(key, value);
               }
-              catch (AssertionError e)
-              {
-                e.printStackTrace();
-                return null;
-              }
-              return super.put(key, value);
-            }
-          };
+            };
 
         propertySets = null;
         syntheticProperties = null;
@@ -847,7 +905,12 @@ public class RADComponent {
     }
 
     static final boolean SUPPRESS_PROPERTY_TABS = Boolean.getBoolean(
-            "nb.form.suppressTabs");
+            "nb.form.suppressTabs"); // NOI18N
+
+    /**
+     * Attribute for specifying an alternative display name of the property set.
+     */
+    private static final String ALTERNATE_PS_NAME = "PS_AlternateDisplayName"; // NOI18N
 
     protected synchronized void createPropertySets(List<Node.PropertySet> propSets) {
         if (beanProperties1 == null)
@@ -855,8 +918,7 @@ public class RADComponent {
 
         ResourceBundle bundle = FormUtils.getBundle();
 
-        Node.PropertySet ps;
-        propSets.add(new Node.PropertySet(
+        Node.PropertySet ps = new Node.PropertySet(
                 "properties", // NOI18N
                 bundle.getString("CTL_PropertiesTab"), // NOI18N
                 bundle.getString("CTL_PropertiesTabHint")) // NOI18N
@@ -865,34 +927,34 @@ public class RADComponent {
             public Node.Property[] getProperties() {
                 return getBeanProperties1();
             }
-        });
+        };
+        ps.setValue(ALTERNATE_PS_NAME, bundle.getString("CTL_AlternatePropertiesTab")); // NOI18N
+        propSets.add(ps);
 
         if (SUPPRESS_PROPERTY_TABS) {
             return;
         }
 
         if(isValid()) {
-          for (Map.Entry<Object, RADProperty[]> objectEntry : otherProperties.entrySet())
-          {
-            final String category = (String) objectEntry.getKey();
-            ps = new Node.PropertySet(category, category, category)
-            {
-              @Override
-              public Node.Property[] getProperties()
-              {
-                if (otherProperties == null)
-                {
-                  createBeanProperties();
-                }
-                return otherProperties.get(category);
-              }
-            };
-            //ps.setValue("tabName", category); // NOI18N
-            propSets.add(ps);
-          }
-
+            Iterator entries = otherProperties.entrySet().iterator();
+            while (entries.hasNext()) {
+                Map.Entry entry = (Map.Entry)entries.next();
+                final String category = (String)entry.getKey();
+                ps = new Node.PropertySet(category, category, category) {        
+                    @Override
+                    public Node.Property[] getProperties() {
+                        if (otherProperties == null) {
+                            createBeanProperties();
+                        }
+                        return (Node.Property[])otherProperties.get(category);
+                    }
+                };
+                //ps.setValue("tabName", category); // NOI18N
+                propSets.add(ps);
+            }
+        
             if (beanProperties2.length > 0) {
-                propSets.add(new Node.PropertySet(
+                ps = new Node.PropertySet(
                         "properties2", // NOI18N
                         bundle.getString("CTL_Properties2Tab"), // NOI18N
                         bundle.getString("CTL_Properties2TabHint")) // NOI18N
@@ -901,7 +963,9 @@ public class RADComponent {
                     public Node.Property[] getProperties() {
                         return getBeanProperties2();
                     }
-                });
+                };
+                ps.setValue(ALTERNATE_PS_NAME, bundle.getString("CTL_AlternateProperties2Tab")); // NOI18N
+                propSets.add(ps);
             }
 
           // STRIPPED
@@ -1030,57 +1094,49 @@ public class RADComponent {
         Object[] propsAccess = FormUtils.getPropertiesAccessClsf(beanClass);
         Object[] propParentChildDepClsf = FormUtils.getPropertiesParentChildDepsClsf(beanClass);
 
-      for (PropertyDescriptor pd : props)
-      {
-        boolean action = (pd.getValue("action") != null); // NOI18N
-        Object category = pd.getValue("category"); // NOI18N
-        List<RADProperty> listToAdd;
+        for (int i = 0; i < props.length; i++) {
+            PropertyDescriptor pd = props[i];
+            boolean action = (pd.getValue("action") != null); // NOI18N
+            Object category = pd.getValue("category"); // NOI18N
+            List<RADProperty> listToAdd;
+            
+            if ((category == null) || (!(category instanceof String))) {
+                Object propCat = FormUtils.getPropertyCategory(pd, propsCats);
+                if (propCat == FormUtils.PROP_PREFERRED)
+                    listToAdd = prefProps;
+                else if (propCat == FormUtils.PROP_NORMAL)
+                    listToAdd = normalProps;
+                else if (propCat == FormUtils.PROP_EXPERT)
+                    listToAdd = expertProps;
+                else continue; // PROP_HIDDEN
 
-        if ((category == null) || (!(category instanceof String)))
-        {
-          Object propCat = FormUtils.getPropertyCategory(pd, propsCats);
-          if (propCat == FormUtils.PROP_PREFERRED)
-            listToAdd = prefProps;
-          else if (propCat == FormUtils.PROP_NORMAL)
-            listToAdd = normalProps;
-          else if (propCat == FormUtils.PROP_EXPERT)
-            listToAdd = expertProps;
-          else continue; // PROP_HIDDEN
-
-        }
-        else
-        {
-          listToAdd = otherProps.get(category);
-          if (listToAdd == null)
-          {
-            listToAdd = new ArrayList<RADProperty>();
-            otherProps.put(category, listToAdd);
-          }
-        }
-
-        RADProperty prop = getPropertyByName(pd.getName(), RADProperty.class, false);
-        if (prop == null)
-          prop = createBeanProperty(pd, propsAccess, propParentChildDepClsf);
-
-        if (prop != null)
-        {
-          listToAdd.add(prop);
-          if ("action".equals(pd.getName()) && (listToAdd == prefProps) && Action.class.isAssignableFrom(pd.getPropertyType()))
-          { // NOI18N
-            action = true;
-            prop.setValue("actionName", FormUtils.getBundleString("CTL_SetAction")); // NOI18N
-          }
-          if (action)
-          {
-            Object actionName = pd.getValue("actionName"); // NOI18N
-            if (actionName instanceof String)
-            {
-              prop.setValue("actionName", actionName); // NOI18N
+            } else {
+                listToAdd = otherProps.get(category);
+                if (listToAdd == null) {
+                    listToAdd = new ArrayList<RADProperty>();
+                    otherProps.put(category, listToAdd);
+                }
             }
-            actionProps.add(prop);
-          }
+            
+            RADProperty prop = getPropertyByName(pd.getName(), RADProperty.class, false);
+            if (prop == null)
+                prop = createBeanProperty(pd, propsAccess, propParentChildDepClsf);
+
+            if (prop != null) {
+                listToAdd.add(prop);
+                if ("action".equals(pd.getName()) && (listToAdd == prefProps) && javax.swing.Action.class.isAssignableFrom(pd.getPropertyType())) { // NOI18N
+                    action = true;
+                    prop.setValue("actionName", FormUtils.getBundleString("CTL_SetAction")); // NOI18N
+                }
+                if (action) {
+                    Object actionName = pd.getValue("actionName"); // NOI18N
+                    if (actionName instanceof String) {
+                        prop.setValue("actionName", actionName); // NOI18N
+                    }
+                    actionProps.add(prop);
+                }
+            }
         }
-      }
 
         changePropertiesExplicitly(prefProps, normalProps, expertProps);
 
@@ -1108,7 +1164,7 @@ public class RADComponent {
             }
             else beanProperties2 = new RADProperty[0];
         }
-
+        
         Map<Object,RADProperty[]> otherProps2 = new TreeMap<Object,RADProperty[]>();
         RADProperty[] array = new RADProperty[0];
         for (Map.Entry<Object,List<RADProperty>> entry : otherProps.entrySet()) {
@@ -1117,7 +1173,7 @@ public class RADComponent {
             otherProps2.put(entry.getKey(), catProps.toArray(array));
         }
         otherProperties = otherProps2;
-
+        
         FormUtils.reorderProperties(beanClass, beanProperties1);
         FormUtils.reorderProperties(beanClass, beanProperties2);
 
@@ -1129,9 +1185,9 @@ public class RADComponent {
         System.arraycopy(beanProperties2, 0,
                          knownBeanProperties, beanProperties1.length,
                          beanProperties2.length);
-
+        
         int where = beanProperties1.length + beanProperties2.length;
-
+        
         for (Map.Entry<Object,RADProperty[]> entry : otherProperties.entrySet()) {
             RADProperty[] catProps = entry.getValue();
             System.arraycopy(catProps, 0,
@@ -1197,7 +1253,7 @@ public class RADComponent {
         return accessibilityProperties;
     }
 
-  synchronized FormProperty[] getKnownAccessibilityProperties() {
+    synchronized FormProperty[] getKnownAccessibilityProperties() {
         return accessibilityProperties != null ? accessibilityProperties : NO_PROPERTIES;
     }
 
@@ -1209,12 +1265,12 @@ public class RADComponent {
                 accessibilityData = new MetaAccessibleContext();
             accessibilityProperties = accessibilityData.getProperties();
 
-          for (FormProperty prop : accessibilityProperties)
-          {
-            setPropertyListener(prop);
-            prop.setPropertyContext(new FormPropertyContext.Component(this));
-            nameToProperty.put(prop.getName(), prop);
-          }
+            for (int i=0; i < accessibilityProperties.length; i++) {
+                FormProperty prop = accessibilityProperties[i];
+                setPropertyListener(prop);
+                prop.setPropertyContext(new FormPropertyContext.Component(this));
+                nameToProperty.put(prop.getName(), prop);
+            }
 
             if (!EventQueue.isDispatchThread()) { // Issue 187131
                 EventQueue.invokeLater(new Runnable() {
@@ -1258,14 +1314,14 @@ public class RADComponent {
         if (desc.getPropertyType() == null)
             return null;
 
-        RADProperty prop;
+        RADProperty prop = null;
         if(desc instanceof FakePropertyDescriptor){
             try {
-                prop = new FakeRADProperty(this, (FakePropertyDescriptor) desc);
+                prop = new FakeRADProperty(this, (FakePropertyDescriptor) desc);   
             } catch (IntrospectionException ex) { // should not happen
                 Logger.getLogger(getClass().getName()).log(Level.INFO, ex.getMessage(), ex);
 		return null;
-            }
+            }             
         } else {
             prop = new RADProperty(this, desc);
         }
@@ -1283,10 +1339,10 @@ public class RADComponent {
 
 	// prop.addPropertyChangeListener(getPropertyListener());
 	nameToProperty.put(desc.getName(), prop);
-
+        
         // setting javax.swing.Action property should not overwrite
         // manually entered prop values (text, tooltip, etc.)
-        if ("action".equals(prop.getName()) && // NOI18N
+        if ("action".equals(prop.getName()) && // NOI18N 
                 (AbstractButton.class.isAssignableFrom(beanClass)
                 || JComboBox.class.isAssignableFrom(beanClass))) {
             prop.addPropertyChangeListener(new PropertyChangeListener() {
@@ -1352,7 +1408,7 @@ public class RADComponent {
 
     /** Called to modify original bean properties obtained from BeanInfo.
      * Properties may be added, removed etc. - due to specific needs.
-     *
+     * 
      * @param prefProps preferred properties.
      * @param normalProps normal properties.
      * @param expertProps expert properties.
@@ -1404,7 +1460,7 @@ public class RADComponent {
                 Logger.getLogger(getClass().getName()).log(Level.INFO, ex.getMessage(), ex);
             }
         }
-
+        
         // PENDING improve performance - keep lookup result, listen on it etc.
         boolean modified = false;
         Lookup.Template<PropertyModifier> template = new Lookup.Template<PropertyModifier>(PropertyModifier.class);
@@ -1412,7 +1468,7 @@ public class RADComponent {
         for (PropertyModifier modifier : modifiers) {
             modified |= modifier.modifyProperties(this, prefProps, normalProps, expertProps);
         }
-
+        
         if (modified) {
             checkForAddedProperties(prefProps);
             checkForAddedProperties(normalProps);
@@ -1465,7 +1521,8 @@ public class RADComponent {
         for (Object o : props) {
             FormProperty prop = (FormProperty)o;
             String propName = prop.getName();
-            if (!nameToProperty.containsKey(propName)) {
+            Node.Property knownProp = nameToProperty.get(propName);
+            if (prop != knownProp) {
                 nameToProperty.put(propName, prop);
                 setPropertyListener(prop);
             }
@@ -1658,7 +1715,7 @@ public class RADComponent {
             return new ButtonGroupPropertyEditor();
         }
 
-      @Override
+        @Override
         public void restoreDefaultValue() throws IllegalAccessException, InvocationTargetException {
             if (this.getValue() instanceof FormDesignValue) {
                 FormDesignValue formValue = (FormDesignValue) this.getValue();
@@ -1670,10 +1727,10 @@ public class RADComponent {
             }
             super.restoreDefaultValue();
         }
-
+        
         // add/removes AbtractButton components to/from RadioGroup component now or later
-        private void synchronizeButtonGroup(final AbstractButton button,
-                                            final Object originalComponent,
+        private void synchronizeButtonGroup(final AbstractButton button, 
+                                            final Object originalComponent, 
                                             final Object newComponent)
         {
             boolean isOriginalValid = (originalComponent == null) ||
@@ -1700,7 +1757,7 @@ public class RADComponent {
                             (FormDesignValue) originalComponent,
                             (FormDesignValue) newComponent);
                 } else {
-                    // there are no instances of buttongroup components yet,
+                    // there are no instances of buttongroup components yet, 
                     // ide is loading form right now, try later ...
                     EventQueue.invokeLater(new Runnable() {
 
@@ -1716,8 +1773,8 @@ public class RADComponent {
         }
 
         // add/removes AbtractButton components to/from RadioGroup component
-        private void synchronizeButtonGroupInAWT(AbstractButton button,
-                                                 FormDesignValue originalComponent,
+        private void synchronizeButtonGroupInAWT(AbstractButton button, 
+                                                 FormDesignValue originalComponent, 
                                                  FormDesignValue newComponent)
         {
             if (originalComponent != null) {
@@ -1733,7 +1790,7 @@ public class RADComponent {
                 Object groupObj = newComponent.getDesignValue();
                 if (groupObj instanceof ButtonGroup) {
                     ButtonGroup group = (ButtonGroup) groupObj;
-
+                    
                     // try to find button inside buttongroup
                     boolean add = true;
                     for (Enumeration e = group.getElements(); e.hasMoreElements(); ) {
@@ -1741,7 +1798,7 @@ public class RADComponent {
                             add = false;
                             break;
                          }
-                     }
+                     }                    
 
                     // button not found inside group, add it
                     if (add) {
@@ -1776,17 +1833,17 @@ public class RADComponent {
             setBeanTypes(new Class[] { javax.swing.ButtonGroup.class });
             setComponentCategory(NONVISUAL_COMPONENTS);
         }
-
+        
         @Override
         public String getDisplayName() {
             return NbBundle.getBundle(getClass()).getString("CTL_ButtonGroupPropertyEditor_DisplayName"); // NOI18N
         }
     }
-
+    
     public void setValid(boolean valid){
         this.valid = valid;
     }
-
+    
     protected boolean isValid() {
         return valid;
     }
@@ -1797,14 +1854,14 @@ public class RADComponent {
             prop.ensureDefaultValueInitialization();
         }
     }*/
-
+    
     private class FakeBeanInfo extends SimpleBeanInfo {
-
+        
         private List<PropertyDescriptor> propertyDescriptors = new ArrayList<PropertyDescriptor>();
-
+        
         @Override
         public BeanDescriptor getBeanDescriptor() {
-            return (beanInfo == this) ? new BeanDescriptor(beanClass) : beanInfo.getBeanDescriptor();
+            return (beanInfo == this) ? new BeanDescriptor(beanClass) : beanInfo.getBeanDescriptor();            
         }
 
         @Override
@@ -1813,8 +1870,13 @@ public class RADComponent {
         }
 
         @Override
-        public EventSetDescriptor[] getEventSetDescriptors() {
+        public EventSetDescriptor[] getEventSetDescriptors() {            
 	    return new EventSetDescriptor[0];
+        }
+
+        @Override
+        public MethodDescriptor[] getMethodDescriptors() {
+            return new MethodDescriptor[0];
         }
 
         void addPropertyDescriptor(String propertyName, Class propertyClass) {
@@ -1824,11 +1886,11 @@ public class RADComponent {
                 Logger.getLogger(getClass().getName()).log(Level.INFO, ex.getMessage(), ex); // should not happen
             }
         }
-
+                
         void addPropertyDescriptor(PropertyDescriptor pd) {
             propertyDescriptors.add(pd);
         }
-
+        
         void removePropertyDescriptors() {
             propertyDescriptors.clear();
         }
@@ -1857,7 +1919,7 @@ public class RADComponent {
                         }
                         @Override
                         public void setTargetValue(Object value) {
-                            accName = value;
+                            accName = (String) value;
                         }
                         @Override
                         public boolean supportsDefaultValue () {
@@ -1896,7 +1958,7 @@ public class RADComponent {
                         }
                         @Override
                         public void setTargetValue(Object value) {
-                            accDescription = value;
+                            accDescription = (String) value;
                         }
                         @Override
                         public boolean supportsDefaultValue () {
@@ -1981,10 +2043,7 @@ public class RADComponent {
                             super.restoreDefaultValue();
                             accParent = BeanSupport.NO_VALUE;
                         }
-                        @Override
-                        public PropertyEditor getExpliciteEditor() {
-                            return new RADVisualComponent.AccessibleParentEditor();
-                        }
+
                       // STRIPPED
                         /*@Override
                         String getPartialSetterCode(String javaInitStr) {

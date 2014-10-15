@@ -48,7 +48,6 @@ import java.util.*;
 import java.lang.reflect.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-//import org.netbeans.modules.form.codestructure.*;
 
 /**
  * @author Tomas Pavek
@@ -66,11 +65,11 @@ public class CreationDescriptor {
 
         public Class[] getParameterTypes();
 
-        //public Class[] getExceptionTypes(); // STRIPPED
+        //public Class[] getExceptionTypes(); // A
 
         public String[] getPropertyNames();
 
-      // STRIPPED
+        // A
         /*public Object createInstance(FormProperty[] props)
             throws InstantiationException, IllegalAccessException,
                    IllegalArgumentException, InvocationTargetException;*/
@@ -79,10 +78,10 @@ public class CreationDescriptor {
             throws InstantiationException, IllegalAccessException,
                    IllegalArgumentException, InvocationTargetException;
 
-        // [this will become useless when we can rely on getCodeOrigin(...)]
-        //public String getJavaCreationCode(FormProperty[] props, Class expressionType, String genericTypes); // STRIPPED
+        // A
+        //public String getJavaCreationCode(FormProperty[] props, String[] propNames, String[] propCodes, Class expressionType, String genericTypes);
 
-        //public CodeExpressionOrigin getCodeOrigin(CodeExpression[] params); // STRIPPED
+        //public CodeExpressionOrigin getCodeOrigin(CodeExpression[] params);
     }
 
     private Class describedClass;
@@ -169,9 +168,9 @@ public class CreationDescriptor {
                     if(propertyParameters != null && propertyParameters.length > 0) {
                         for (int ppi = 0; ppi < propertyParameters.length; ppi++) {
                             if( propertyParameters[ppi].getPropertyName().equals(constrPropNames[i][j]) ) {
-                                properties[j].setPropertyParameters(propertyParameters[ppi]);
+                                properties[j].setPropertyParameters(propertyParameters[ppi]);      
                             }
-                        }
+                        }                        
                     }
                 }               
                 
@@ -186,7 +185,7 @@ public class CreationDescriptor {
         
         defaultParams = defParams == null ? emptyParams : defParams;
     }
-
+    
     public void addCreator(Creator creator, Object[] defaultParams) {
         creators.add(creator);
         this.defaultParams = defaultParams;
@@ -266,12 +265,12 @@ public class CreationDescriptor {
     // ----------
 
     // finds first constructor that matches defaultConstrParams
-    private Creator findDefaultCreator() throws NoSuchMethodException {
+    private Creator findDefaultCreator() throws NoSuchMethodException {        
         for (Iterator<Creator> it = creators.iterator(); it.hasNext();) {
-
+            
             Creator creator = it.next();
             Class[] paramTypes = creator.getParameterTypes();
-
+            
             if (paramTypes.length == defaultParams.length) {
                 int ii;
                 for (ii=0; ii < paramTypes.length; ii++) {
@@ -294,7 +293,7 @@ public class CreationDescriptor {
                         break;
                 }
                 if (ii == paramTypes.length) {
-                    return creator;
+                    return creator;                    
                 }
             }
         }
@@ -335,7 +334,7 @@ public class CreationDescriptor {
             return constructor.getParameterTypes(); //constructorParamTypes;
         }
 
-      // STRIPPED
+        // A
         /*@Override
         public final Class[] getExceptionTypes() {
             return constructor.getExceptionTypes();
@@ -346,7 +345,7 @@ public class CreationDescriptor {
             return constructorPropNames;
         }
 
-      // STRIPPED
+        // A
         /*@Override
         public Object createInstance(FormProperty[] props)
             throws InstantiationException, IllegalAccessException,
@@ -380,9 +379,9 @@ public class CreationDescriptor {
             return constructor.newInstance(paramValues);
         }
 
-      // STRIPPED
+        // A
         /*@Override
-        public String getJavaCreationCode(FormProperty[] props, Class expressionType, String genericTypes) {
+        public String getJavaCreationCode(FormProperty[] props, String[] propNames, String[] propCodes, Class expressionType, String genericTypes) {
             StringBuilder buf = new StringBuilder();
             buf.append("new "); // NOI18N
             buf.append(theClass.getCanonicalName());
@@ -392,27 +391,41 @@ public class CreationDescriptor {
             buf.append("("); // NOI18N
 
             for (int i=0; i < constructorPropNames.length; i++) {
-                FormProperty prop = CreationFactory.findProperty(
-                                        constructorPropNames[i], props);
-                if (prop == null)
+                String propCode = null;
+                if (propNames != null) { // find explicitly provided code for the property
+                    for (int j=0; j < propNames.length; j++) {
+                        if (constructorPropNames[i].equals(propNames[j])) {
+                            propCode = propCodes[j];
+                            break;
+                        }
+                    }
+                }
+                if (propCode == null) { // no explicite code provided
+                    FormProperty prop = CreationFactory.findProperty(constructorPropNames[i], props);
+                    if (prop != null) { // use standard code created by the property
+                        propCode = prop.getJavaInitializationString();
+                    }
+                }
+                if (propCode == null) {
                     return null; // should not happen
+                }
 
-                buf.append(prop.getJavaInitializationString());
-                if (i+1 < constructorPropNames.length)
+                buf.append(propCode);
+                if (i+1 < constructorPropNames.length) {
                     buf.append(", "); // NOI18N
+                }
             }
 
             buf.append(")"); // NOI18N
             return buf.toString();
-        }*/
+        }
 
-      // STRIPPED
-        /*@Override
+        @Override
         public CodeExpressionOrigin getCodeOrigin(CodeExpression[] params) {
             return CodeStructure.createOrigin(constructor, params);
         }*/
     }
-
+    
     static class MethodCreator implements Creator {
         private Class factoryClass;
         private Class describedClass;
@@ -436,15 +449,14 @@ public class CreationDescriptor {
                                     
             Class[] paramTypes = paramTypesList.toArray(new Class[paramTypesList.size()]);
 
-            method = factoryClass.getMethod(methodName, paramTypes);
-
-            this.factoryClass = factoryClass;
+            method = factoryClass.getMethod(methodName, paramTypes);  
+                
+            this.factoryClass = factoryClass;                   
             this.describedClass = describedClass;
-            this.properties = properties;
-
-        }
-    
+            this.properties = properties; 
             
+        }
+
         @Override
         public final int getParameterCount() {
             return propertyNames.length; 
@@ -455,7 +467,7 @@ public class CreationDescriptor {
             return method.getParameterTypes(); 
         }
 
-      // STRIPPED
+        // A
         /*@Override
         public final Class[] getExceptionTypes() {
             return method.getExceptionTypes();
@@ -466,14 +478,14 @@ public class CreationDescriptor {
             return propertyNames;
         }
 
-      // STRIPPED
+        // A
         /*@Override
         public Object createInstance(FormProperty[] props)
             throws InstantiationException, IllegalAccessException,
                    IllegalArgumentException, InvocationTargetException
         {
-
-            List<Object> paramValuesList = new ArrayList<Object>();
+                                
+            List<Object> paramValuesList = new ArrayList<Object>(); 
             for (int i=0; i < properties.length; i++) {
                 FormProperty prop = CreationFactory.findProperty(properties[i].getPropertyName(), props);
                 if (prop == null)
@@ -482,13 +494,13 @@ public class CreationDescriptor {
                 Object[] propertyParameters = properties[i].getPropertyParametersValues(prop);
                 for (int j = 0; j < propertyParameters.length; j++) {
                     paramValuesList.add(propertyParameters[j]);
-                }
+                }                                        
             }
-
+            
             Object[] paramValues = paramValuesList.toArray(new Object[paramValuesList.size()]);
-
+            
             Object ret = method.invoke(null, paramValues);
-            if(ret.getClass() != describedClass) {
+            if(ret.getClass() != describedClass) {                
                 throw new IllegalArgumentException();
             }
             return ret;
@@ -507,9 +519,9 @@ public class CreationDescriptor {
             return ret;
         }
 
-      // STRIPPED
+        // A
         /*@Override
-        public String getJavaCreationCode(FormProperty[] props, Class expressionType, String genericTypes) {
+        public String getJavaCreationCode(FormProperty[] props, String[] propNames, String[] propCodes, Class expressionType, String genericTypes) {
             StringBuilder buf = new StringBuilder();
             if (expressionType == null) expressionType = describedClass;
             if (!expressionType.isAssignableFrom(method.getReturnType())) { // Issue 71220
@@ -520,19 +532,31 @@ public class CreationDescriptor {
             buf.append(method.getName());
             buf.append("("); // NOI18N
 
-
             for (int i=0; i < properties.length; i++) {
+                String propName = properties[i].getPropertyName();                
+                String propCode = null;
+                if (propNames != null) { // find explicitly provided code for the property
+                    for (int j=0; j < propNames.length; j++) {
+                        if (propName.equals(propNames[j])) {
+                            propCode = propCodes[j];
+                            break;
+                        }
+                    }
+                }
+                if (propCode == null) { // no explicite code provided
+                    FormProperty prop = CreationFactory.findProperty(propName, props);
+                    if (prop != null) { // create the property code the standard way
+                        propCode = properties[i].getJavaParametersString(prop);
+                    }
+                }
+                if (propCode == null) {
+                    propCode = "null"; // NOI18N
+                }
 
-                String name = properties[i].getPropertyName();
-                FormProperty prop = CreationFactory.findProperty(name, props);
-
-                if (prop == null)
-                    return null; // should not happen
-
-                    buf.append(properties[i].getJavaParametersString(prop));
-
-                if (i+1 < properties.length)
+                buf.append(propCode);
+                if (i+1 < properties.length) {
                     buf.append(", "); // NOI18N
+                }
             }
 
             buf.append(")"); // NOI18N
@@ -542,7 +566,7 @@ public class CreationDescriptor {
         @Override
         public CodeExpressionOrigin getCodeOrigin(CodeExpression[] params) {
             // nobody cares ...
-            return null;
+            return null; 
         }*/
     }
 

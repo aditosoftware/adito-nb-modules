@@ -64,7 +64,7 @@ public class InvalidComponent extends JPanel {
     public InvalidComponent() {
         this.setBorder(BorderFactory.createLineBorder(Color.RED));
         this.setLayout(new BorderLayout());
-
+         
         label.setForeground(Color.RED);
         ResourceBundle bundle = FormUtils.getBundle();
         label.setText("<html><center>" + bundle.getString("CTL_LB_InvalidComponent") + "</center></html>"); // NOI18N

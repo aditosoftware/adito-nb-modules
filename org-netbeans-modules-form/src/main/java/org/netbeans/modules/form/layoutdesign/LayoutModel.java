@@ -395,11 +395,12 @@ public class LayoutModel implements LayoutConstants {
             interval.unsetAttribute(attribute);
         }
         int newAttributes = interval.getAttributes();
-        
-        // record undo/redo (don't fire event)
-        LayoutEvent.Interval ev = new LayoutEvent.Interval(this, LayoutEvent.INTERVAL_ATTRIBUTES_CHANGED);
-        ev.setAttributes(interval, oldAttributes, newAttributes);
-        addChange(ev);
+        if (newAttributes != oldAttributes) {
+            // record undo/redo (don't fire event)
+            LayoutEvent.Interval ev = new LayoutEvent.Interval(this, LayoutEvent.INTERVAL_ATTRIBUTES_CHANGED);
+            ev.setAttributes(interval, oldAttributes, newAttributes);
+            addChange(ev);
+        }
     }
 
     void setIntervalAlignment(LayoutInterval interval, int alignment) {
@@ -428,8 +429,11 @@ public class LayoutModel implements LayoutConstants {
     void setLayoutContainer(LayoutComponent component, boolean container) {
         boolean oldContainer = component.isLayoutContainer();
         if (oldContainer != container) {
-            List<LayoutInterval[]> roots = component.getLayoutRoots();
+            List<LayoutInterval[]> roots = oldContainer ? component.getLayoutRoots() : null;
             component.setLayoutContainer(container, null);
+            if (container) {
+                roots = component.getLayoutRoots();
+            }
 
             // record undo/redo (don't fire event)
             LayoutEvent.Component ev = new LayoutEvent.Component(this, LayoutEvent.CONTAINER_ATTR_CHANGED);
@@ -440,7 +444,11 @@ public class LayoutModel implements LayoutConstants {
 
     public void setUserIntervalSize(LayoutInterval interval, int dimension, int size) {
         int min = interval.getMinimumSize();
+        int pref = interval.getPreferredSize();
         int max = interval.getMaximumSize();
+        if (min == pref && max == USE_PREFERRED_SIZE && pref != size) {
+            min = USE_PREFERRED_SIZE;
+        }
         if (resizeHandler != null) {
             resizeHandler.setIntervalSize(interval, dimension, min, size, max);
         } else {
@@ -464,8 +472,7 @@ public class LayoutModel implements LayoutConstants {
             }
             max = Short.MAX_VALUE;
         } else {
-            min = (size == 0 || size == NOT_EXPLICITLY_DEFINED)
-                    ? interval.getMinimumSize() : USE_PREFERRED_SIZE;
+            min = (size == 0 || size == NOT_EXPLICITLY_DEFINED) ? size : USE_PREFERRED_SIZE;
             max = USE_PREFERRED_SIZE;
         }
         if (resizeHandler != null) {
@@ -475,7 +482,7 @@ public class LayoutModel implements LayoutConstants {
         }
 
         if (sizeChange) {
-            interval.unsetAttribute(LayoutInterval.ATTR_FLEX_SIZEDEF);
+            changeIntervalAttribute(interval, LayoutInterval.ATTR_FLEX_SIZEDEF, false);
         }
     }
 
@@ -628,7 +635,7 @@ public class LayoutModel implements LayoutConstants {
         addChange(ev);
     }
 
-    static LayoutInterval[] createIntervalsFromBounds(Map<LayoutComponent, Rectangle> compToBounds) {
+    LayoutInterval[] createIntervalsFromBounds(Map<LayoutComponent, Rectangle> compToBounds) {
         RegionInfo region = new RegionInfo(compToBounds);
         region.calculateIntervals();
         LayoutInterval[] result = new LayoutInterval[DIM_COUNT];
@@ -638,7 +645,7 @@ public class LayoutModel implements LayoutConstants {
         return result;
     }
 
-    private static class RegionInfo {
+    private class RegionInfo {
         private LayoutInterval horizontal = null;
         private LayoutInterval vertical = null;
         private Map<LayoutComponent, Rectangle> compToBounds;
@@ -729,7 +736,7 @@ public class LayoutModel implements LayoutConstants {
                     LayoutInterval parent = (dim == HORIZONTAL) ? horizontal : vertical;
                     if (!parent.isParallel()) {
                         LayoutInterval parGroup = new LayoutInterval(PARALLEL);
-                        parGroup.add(parent, -1);
+                        add(parent, parGroup);
                         if (dim == HORIZONTAL) {
                             horizontal = parGroup;
                         } else {
@@ -743,7 +750,7 @@ public class LayoutModel implements LayoutConstants {
                         LayoutInterval interval = comp.getLayoutInterval(dim);
                         int gap = (dim == HORIZONTAL) ? bounds.x - minx : bounds.y - miny;
                         interval = prefixByGap(interval, gap);
-                        parent.add(interval, -1);
+                        add(interval, parent);
                     }
                 }
             }
@@ -829,9 +836,9 @@ public class LayoutModel implements LayoutConstants {
                     gap.setSize(seqGap);
                     seqGroup.add(gap, -1);
                 }
-                seqGroup.add(seqInterval, -1);
+                add(seqInterval, seqGroup);
                 parInterval = prefixByGap(parInterval, parGap);
-                parGroup.add(parInterval, -1);
+                add(parInterval, parGroup);
             }
             if (dimension == HORIZONTAL) {
                 horizontal = seqGroup;
@@ -851,13 +858,21 @@ public class LayoutModel implements LayoutConstants {
                 } else {
                     LayoutInterval group = new LayoutInterval(SEQUENTIAL);
                     group.add(gap, -1);
-                    group.add(interval, -1);
+                    add(interval, group);
                     interval = group;
                 }
             }
             return interval;
         }
-        
+
+        private void add(LayoutInterval interval, LayoutInterval parent) {
+            if (interval.isComponent()) { // needs to be undoable
+                addInterval(interval, parent, -1);
+            } else {
+                parent.add(interval, -1);
+            }
+        }
+
         public LayoutInterval getInterval(int dimension) {
             return (dimension == HORIZONTAL) ? horizontal : vertical;
         }
@@ -1205,18 +1220,18 @@ public class LayoutModel implements LayoutConstants {
         return AditoLayoutPersistenceManager.saveContainer(this, container, idToNameMap, indent, humanReadable);
     }
 
-      /**
-       * Loads the layout of the given container.
-       *
-       * @param containerId ID of the layout container to be loaded
+    /**
+     * Loads the layout of the given container.
+     *
+     * @param containerId ID of the layout container to be loaded
        * @param pModelComp  component to load from
-       * @param nameToIdMap map from component names to component IDs
-       */
+     * @param nameToIdMap map from component names to component IDs
+     */
       public void loadContainerLayout(String containerId, FileObject pModelComp, Map<String, String> nameToIdMap)
-          throws java.io.IOException
-      {
+        throws java.io.IOException
+    {
         AditoLayoutPersistenceManager.loadContainer(this, containerId, pModelComp, nameToIdMap);
-      }
+    }
 
     /**
      * Returns whether the model was repaired (because of some error found) or

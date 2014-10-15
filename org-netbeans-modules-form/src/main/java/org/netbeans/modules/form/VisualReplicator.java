@@ -51,6 +51,7 @@ import java.util.*;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.text.PlainDocument;
 
 import org.netbeans.modules.form.adito.components.AditoVisualReplicator;
 import org.openide.ErrorManager;
@@ -79,10 +80,11 @@ public class VisualReplicator {
     private Map<String,Object> idToClone = new HashMap<String,Object>();
     private Map<Object,String> cloneToId = new HashMap<Object,String>();
 
+    private Map<Container,LayoutManager> defaultLayouts = new HashMap<Container,LayoutManager>();
     private Map<String,SwingLayoutBuilder> layoutBuilders = new HashMap<String,SwingLayoutBuilder>();
 
-    //private BindingDesignSupport bindingSupport; // STRIPPED
-    //private BindingDesignSupport.BindingVisualReplicator bindingReplicator; // STRIPPED
+    //private BindingDesignSupport bindingSupport; // A
+    //private BindingDesignSupport.BindingVisualReplicator bindingReplicator; //A
 
     private boolean designRestrictions;
 
@@ -107,10 +109,10 @@ public class VisualReplicator {
 
     public VisualReplicator(boolean designRestrictions,
                             ViewConverter[] converters/*,
-                            BindingDesignSupport bindingSupport*/) { // STRIPPED
+                            BindingDesignSupport bindingSupport*/) { // A
         this.designRestrictions = designRestrictions;
         this.converters = converters;
-        //this.bindingSupport = bindingSupport; // STRIPPED
+        //this.bindingSupport = bindingSupport; // A
     }
 
     // ---------
@@ -122,6 +124,17 @@ public class VisualReplicator {
 
     public Object getClonedComponent(String id) {
         return idToClone.get(id);
+    }
+
+    private Object getClonedComponent(RADComponent metacomp, boolean nonWindow) {
+        Object clone = getClonedComponent(metacomp);
+        if (!nonWindow && clone instanceof JRootPane) {
+            Object w = ((JRootPane)clone).getClientProperty(RADVisualContainer.CUSTOM_WINDOW_CONTAINER);
+            if (w instanceof RootPaneContainer) {
+                clone = w;
+            }
+        }
+        return clone;
     }
 
     public String getClonedComponentId(Object component) {
@@ -153,7 +166,7 @@ public class VisualReplicator {
         return builder;
     }
 
-  // STRIPPED
+    // A
     /*private BindingDesignSupport.BindingVisualReplicator getBindingReplicator() {
         if (bindingReplicator == null) {
             bindingReplicator = bindingSupport.createReplicator();
@@ -172,8 +185,9 @@ public class VisualReplicator {
         topMetaComponent = metacomponent;
         idToClone.clear();
         cloneToId.clear();
+        defaultLayouts.clear();
         layoutBuilders.clear();
-        //bindingReplicator = null; // STRIPPED
+        // bindingReplicator = null; // A
     }
 
     public boolean getDesignRestrictions() {
@@ -214,9 +228,10 @@ public class VisualReplicator {
                     entry.setValue(rc.getBeanInstance());
                 }
             }
-          // STRIPPED
+            // A
             /*boolean restrictions = getDesignRestrictions();
-            for (String id : mapToClones.keySet()) {
+            for (Map.Entry<String,Object> entry : entries) {
+                String id = entry.getKey();
                 RADComponent rc = formModel.getMetaComponent(id);
                 if ((rc != null) && (rc.getKnownBindingProperties().length != 0)) {
                     if (restrictions) { // this is an updated view (designer)
@@ -224,6 +239,13 @@ public class VisualReplicator {
                                 rc, false, mapToClones, false);
                         // BindingDesignSupport will unbind and remove these bindings
                         // automatically if user removes a binding or whole component
+                        Object comp = entry.getValue();
+                        if (comp instanceof Component) {
+                            Component parent = ((Component)comp).getParent();
+                            if (parent != null) {
+                                parent.invalidate(); // bug #211888
+                            }
+                        }
                     } else { // this is a one-off view (preview)
                         getBindingReplicator().establishOneOffBindings(
                                 rc, false, mapToClones);
@@ -232,14 +254,31 @@ public class VisualReplicator {
             }*/
         }
         catch (Exception ex) {
-            ErrorManager.getDefault().notify(ErrorManager.WARNING, ex);
+            ErrorManager.getDefault().notify(ErrorManager.INFORMATIONAL, ex);
             clone = null;
+        }
+
+        if (getDesignRestrictions() && clone instanceof RootPaneContainer && clone instanceof Window) {
+            // For a custom widnow we show its root pane (so not just the container delegate) in the
+            // design view so there is the maximum of the superclass visible. We need to remember
+            // the window instance to be able to determine the real container delegate and to set
+            // the window bean properties (might affect a subcomponent, so be visible in the designer).
+            // It's a hack that we steal the window's root pane and add it to a different container,
+            // but seems working thanks to that the window keeps its reference to the root pane and
+            // that the window itself is never shown.
+            JRootPane rootPane = ((RootPaneContainer)clone).getRootPane();
+            rootPane.putClientProperty(RADVisualContainer.CUSTOM_WINDOW_CONTAINER, clone);
+            cloneToId.remove(clone);
+            clone = rootPane;
+            idToClone.put(metacomp.getId(), clone);
+            cloneToId.put(clone, metacomp.getId());
         }
 
         return clone;
     }
 
     public void reorderComponents(ComponentContainer metacont) {
+        // A
         if (aditoVisualReplicator.canHandleReorder(metacont))
             aditoVisualReplicator.reorder(metacont);
         else if (metacont instanceof RADVisualContainer) {
@@ -328,9 +367,11 @@ public class VisualReplicator {
 
         // set the layout and re-add the components
         if (laysup != null) { // old layout support
+            handleDefaultLayout(metacont, contDelegate);
             laysup.setLayoutToContainer(cont, contDelegate);
-            if (comps.length > 0)
+            if (comps.length > 0) {
                 laysup.addComponentsToContainer(cont, contDelegate, comps, 0);
+            }
             laysup.arrangeContainer(cont, contDelegate);
         }
         else { // new layout support
@@ -343,6 +384,19 @@ public class VisualReplicator {
             }
 
             setupContainerLayout(metacont, comps, compIds);
+        }
+
+        updateLayeredPane(cont, metacomps, comps);
+    }
+
+    private static void updateLayeredPane(Container cont, RADVisualComponent[] metacomps, Component[] comps) {
+        if (cont instanceof JLayeredPane) {
+            JLayeredPane layeredPane = (JLayeredPane) cont;
+            for (int i=0; i < metacomps.length; i++) {
+                RADVisualComponent sub = metacomps[i];
+                int layer = sub.getComponentLayer();
+                layeredPane.setLayer(comps[i], layer);
+            }
         }
     }
 
@@ -410,6 +464,10 @@ public class VisualReplicator {
                             new Component[] { (Component) clone },
                             ((RADVisualComponent)metacomp).getComponentIndex());
                     laysup.arrangeContainer(cont, contDelegate);
+                    if (contDelegate instanceof JLayeredPane) {
+                        int layer = ((RADVisualComponent)metacomp).getComponentLayer();
+                        ((JLayeredPane)contDelegate).setLayer((Component)clone, layer);
+                    }
                 }
     //            else { // new layout support
     //                getLayoutBuilder(metacont.getId()).addComponentsToContainer(
@@ -431,6 +489,7 @@ public class VisualReplicator {
             else
                 addToMenu(cont, clone);
         }
+        // A
         else if (aditoVisualReplicator.canHandle(metacomp)) {
             // clone has to be created first. '.addComponent(..,..)' uses the createdClone then.
             createClone(metacomp);
@@ -531,6 +590,7 @@ public class VisualReplicator {
                 menuCont.remove(menuComp);
             else return;
         }
+        // A
         else if (aditoVisualReplicator.canHandle(metacomp))
             aditoVisualReplicator.removeComponent(metacomp, metacont);
 
@@ -544,7 +604,7 @@ public class VisualReplicator {
         RADComponent metacomp = property.getRADComponent();
 
         // target component of the property
-        Object targetComp = getClonedComponent(metacomp);
+        Object targetComp = getClonedComponent(metacomp, false);
         if (targetComp == null)
             return;
 
@@ -568,7 +628,7 @@ public class VisualReplicator {
             return;
 
         // Mnemonics support - start -
-      // STRIPPED
+        // A
         /*if ("text".equals(property.getName()) // NOI18N
             && (targetComp instanceof AbstractButton
                 || targetComp instanceof JLabel)
@@ -599,11 +659,10 @@ public class VisualReplicator {
             if (value instanceof RADComponent.ComponentReference) {
                 valueComp = ((RADComponent.ComponentReference)value).getComponent();
             }
-            // STRIPPED
+            // A
             /*else if (FormUtils.isRelativeConnectionValue(value)) {
                 valueComp = ((RADConnectionPropertyEditor.RADConnectionDesignValue)value).getRADComponent();
-            }*/
-            else {
+            }*/ else {
                 valueComp = null;
             }
             
@@ -614,12 +673,11 @@ public class VisualReplicator {
                 if (clonedComp == null) { // there's no cloned instance yet
                     clonedComp = createClone(valueComp);
                 }
-              // STRIPPED
+                // A
                 /*if (value instanceof RADConnectionPropertyEditor.RADConnectionDesignValue) {
                     clonedValue = ((RADConnectionPropertyEditor.RADConnectionDesignValue)value)
                             .getValueForBean(clonedComp);
-                } else*/
-                {
+                } else */{
                     clonedValue = clonedComp;
                 }
             } else { // this is not a relative property (another component)
@@ -632,7 +690,21 @@ public class VisualReplicator {
                     if (realValue == FormDesignValue.IGNORED_VALUE) {
                         return; // ignore the value, as it is not a real value
                     }
-                    clonedValue = FormUtils.cloneObject(realValue, property.getPropertyContext().getFormModel());
+                    // Bug 85826: If setting a font from the font chooser that matches the default
+                    // font then use the default font instead (FontUIResource instead of Font) that
+                    // handles better multiple languages.
+                    if (realValue instanceof java.awt.Font && !(realValue instanceof javax.swing.plaf.FontUIResource)) {
+                        Object defaultFont = property.getDefaultValue();
+                        if (defaultFont instanceof javax.swing.plaf.FontUIResource
+                                && realValue.equals(defaultFont)) {
+                            realValue = defaultFont;
+                        }
+                    }
+                    try {
+                        clonedValue = FormUtils.cloneObject(realValue, property.getPropertyContext().getFormModel());
+                    } catch (CloneNotSupportedException ex) {
+                        clonedValue = realValue; // fallback to using the same value instance (bug #216775)
+                    }
                 }
             }
 
@@ -653,19 +725,18 @@ public class VisualReplicator {
                     ((ButtonGroup)clonedValue).add(button);
                 }
             } else {
-                writeMethod.invoke(targetComp, clonedValue);
+                writeMethod.invoke(targetComp, new Object[] { clonedValue });
             }
 
             if (targetComp instanceof Component) {
                 ((Component)targetComp).invalidate();
             }
-        } catch (CloneNotSupportedException ex) { // ignore cloning failure
         } catch (Exception ex) {
             Logger.getLogger(VisualReplicator.class.getName()).log(Level.INFO, null, ex); // NOI18N
         }
     }
 
-  // STRIPPED
+    // A
     /*public void updateBinding(MetaBinding newBinding) {
         if (newBinding != null && bindingSupport != null) {
             RADComponent metaTarget = newBinding.getTarget();
@@ -701,21 +772,29 @@ public class VisualReplicator {
             if (convert != null) {
                 clone = convert.getConverted();
                 compClone = convert.getEnclosed();
-
-                Iterator<RADProperty> applyProperties;
-                if (clone instanceof Window) { // some properties should not be set to Window, e.g. visible
-                    applyProperties = metacomp.getBeanPropertiesIterator(new FormProperty.Filter() {
-                        @Override
-                        public boolean accept(FormProperty property) {
-                            return !"visible".equals(property.getName()); // NOI18N
-                        }
-                    }, false);
-                } else {
-                    applyProperties = Arrays.asList(metacomp.getKnownBeanProperties()).iterator();
-                }
-                FormUtils.copyPropertiesToBean(applyProperties,
-                                               compClone != null ? compClone : clone,
-                                               relativeProperties);
+                java.util.List<RADProperty> relProps = relativeProperties;
+                Object target = compClone != null ? compClone : clone;
+                do {
+                    Iterator<RADProperty> applyProperties;
+                    if (target instanceof Window) { // some properties should not be set to Window, e.g. visible
+                        applyProperties = metacomp.getBeanPropertiesIterator(new FormProperty.Filter() {
+                            @Override
+                            public boolean accept(FormProperty property) {
+                                return !"visible".equals(property.getName()); // NOI18N
+                            }
+                        }, false);
+                    } else {
+                        applyProperties = Arrays.asList(metacomp.getKnownBeanProperties()).iterator();
+                    }
+                    FormUtils.copyPropertiesToBean(applyProperties, target, relProps);
+                    if (target != clone && target instanceof RootPaneContainer) {
+                        // second time apply to the subst. JFrame that was created for the original window
+                        target = clone;
+                        relProps = null;
+                    } else {
+                        target = null;
+                    }
+                } while (target != null);
                 break;
             }
         }
@@ -739,6 +818,7 @@ public class VisualReplicator {
             ((java.beans.DesignMode)compClone).setDesignTime(getDesignRestrictions());
         }
 
+        // A
         // Extrabehandlung für Container die nicht-sichtbare Komponenten enthalten.
         if (aditoVisualReplicator.canHandle(metacomp))
         {
@@ -777,6 +857,7 @@ public class VisualReplicator {
             } else { // set layout
                 final LayoutSupportManager laysup = metacont.getLayoutSupport();
                 if (laysup != null) { // old layout support
+                    handleDefaultLayout(metacont, contDelegate);
                     laysup.setLayoutToContainer(cont, contDelegate);
                     if (comps.length > 0) { // add cloned subcomponents to container
                         laysup.addComponentsToContainer(cont, contDelegate, comps, 0);
@@ -786,6 +867,7 @@ public class VisualReplicator {
                 else { // new layout support
                     setupContainerLayout(metacont, comps, compIds);
                 }
+                updateLayeredPane(cont, metacomps, comps);
             }
         }
         else if (metacomp instanceof RADMenuComponent) {
@@ -794,14 +876,15 @@ public class VisualReplicator {
                 RADComponent sub = metacomps[i];
                 Object menuItem = getClonedComponent(sub);
                 if (menuItem == null) {
-                    menuItem = cloneComponent(sub, relativeProperties);
+                    menuItem = cloneComponent((RADMenuItemComponent)sub, relativeProperties);
                 }
                 addToMenu(compClone, menuItem);
             }
         }
 
         if (clone instanceof Component && getDesignRestrictions()) {
-            FakePeerSupport.attachFakePeer((Component)clone);
+            Component comp = (Component) clone;
+            FakePeerSupport.attachFakePeer(comp);
             if (clone instanceof Container)
                 FakePeerSupport.attachFakePeerRecursively((Container)clone);
 
@@ -815,13 +898,17 @@ public class VisualReplicator {
             }
             disableFocusing((Component)clone);
 
-            // patch for JDK 1.4 - hide glass pane of JInternalFrame
-            if (clone instanceof JInternalFrame)
+            if (clone instanceof JInternalFrame) { // hack since JDK 1.4 - hide glass pane of JInternalFrame
                 ((JInternalFrame)clone).getGlassPane().setVisible(false);
+            } else if (clone instanceof JEditorPane && ((JEditorPane)clone).getDocument() instanceof PlainDocument) {
+                // JEditorPane with PlainDocument can't compute a reasonable preferred size.
+                // Once laid out it just returns the biggest size it was set so far.
+                comp.setPreferredSize(BeanSupport.getDefaultPreferredSize(JEditorPane.class));
+            }
         }
 
         // Mnemonics support - start -
-      // STRIPPED
+        // A
         /*if ((clone instanceof AbstractButton || clone instanceof JLabel)
             && JavaCodeGenerator.isUsingMnemonics(metacomp))
         {
@@ -864,6 +951,21 @@ public class VisualReplicator {
         if (th != null) {
             ErrorManager.getDefault().notify(th);
             getFormModel().forceUndoOfCompoundEdit();            
+        }
+    }
+
+    private void handleDefaultLayout(RADVisualContainer metacont, Container cont) {
+        // first remember the default layout if not remembered yet
+        if (!metacont.hasDedicatedLayoutSupport() && !defaultLayouts.containsKey(cont)) {
+            defaultLayouts.put(cont, cont.getLayout());
+        }
+        // set the default layout instance if the primary container is set so
+        if (metacont.hasDefaultLayout() && defaultLayouts.containsKey(cont)) {
+            LayoutManager defaultLayout = defaultLayouts.get(cont);
+            if (cont.getLayout() != defaultLayout) {
+                // e.g. UnknownLayoutSupport can't set the layout
+                cont.setLayout(defaultLayout);
+            }
         }
     }
 
@@ -967,7 +1069,7 @@ public class VisualReplicator {
                 RADComponent valueComp;
                 if (value instanceof RADComponent.ComponentReference) {
                     valueComp = ((RADComponent.ComponentReference)value).getComponent();
-                  // STRIPPED
+                // A
                 /*} else if (FormUtils.isRelativeConnectionValue(value)) {
                     valueComp = ((RADConnectionPropertyEditor.RADConnectionDesignValue)value).getRADComponent();*/
                 } else {
@@ -981,12 +1083,11 @@ public class VisualReplicator {
                         clonedComp = cloneComponent(valueComp, relativeProperties);
                     }
                     Object clonedValue;
-                  // STRIPPED
+                    // A
                     /*if (value instanceof RADConnectionPropertyEditor.RADConnectionDesignValue) {
                         clonedValue = ((RADConnectionPropertyEditor.RADConnectionDesignValue)value)
                             .getValueForBean(clonedComp);
-                    } else*/
-                    {
+                    } else */{
                         clonedValue = clonedComp;
                     }
 
@@ -1013,8 +1114,12 @@ public class VisualReplicator {
 
     private void removeMapping(RADComponent metacomp) {
         Object comp = idToClone.remove(metacomp.getId());
-        if (comp != null)
+        if (comp != null) {
             cloneToId.remove(comp);
+            if (comp instanceof Container) {
+                defaultLayouts.remove((Container)comp);
+            }
+        }
 
         if (metacomp instanceof ComponentContainer) {
             layoutBuilders.remove(metacomp.getId());
@@ -1031,11 +1136,15 @@ public class VisualReplicator {
         @Override
         public Convert convert(Object component, boolean root, boolean designRestrictions) {
             Class compClass = component.getClass();
+            boolean basicSwing = compClass.getName().startsWith("javax.swing."); // NOI18N
             Class convClass = null;
             if (designRestrictions) { // convert windows and AWT menus for design view
                 if ((RootPaneContainer.class.isAssignableFrom(compClass)
-                            && Window.class.isAssignableFrom(compClass))
-                        || Frame.class.isAssignableFrom(compClass)) {
+                            && Window.class.isAssignableFrom(compClass))) {
+                    if (basicSwing || !canUseRootPaneFromWindow((RootPaneContainer)component)) {
+                        convClass = JRootPane.class;
+                    } // otherwise for custom window do no conversion, will use its JRootPane in design view
+                } else if (Frame.class.isAssignableFrom(compClass)) {
                     convClass = JRootPane.class;
                 } else if (Window.class.isAssignableFrom(compClass)
                            || java.applet.Applet.class.isAssignableFrom(compClass)) {
@@ -1046,11 +1155,11 @@ public class VisualReplicator {
             } else if (root) { // need to enclose in JFrame/Frame for preview
                 if (RootPaneContainer.class.isAssignableFrom(compClass)
                         || JComponent.class.isAssignableFrom(compClass)) { // Swing
-                    if (!JFrame.class.isAssignableFrom(compClass)) {
+                    if (!JFrame.class.isAssignableFrom(compClass) || ((JFrame)component).isDisplayable()) {
                         convClass = JFrame.class;
                     }
                 } else if (Component.class.isAssignableFrom(compClass)) { // AWT
-                    if (!Frame.class.isAssignableFrom(compClass)) {
+                    if (!Frame.class.isAssignableFrom(compClass) || ((Frame)component).isDisplayable()) {
                         convClass = Frame.class;
                     }
                 }
@@ -1063,14 +1172,19 @@ public class VisualReplicator {
                 Component converted = (Component) CreationFactory.createDefaultInstance(convClass);
                 Component enclosed = null;
 
-                if (converted instanceof JFrame) {
-                    if (JComponent.class.isAssignableFrom(compClass)
-                            && !RootPaneContainer.class.isAssignableFrom(compClass)) {
-                        // JComponent but not JInternalFrame
+                if (converted instanceof JFrame) { // for preview
+                    if (RootPaneContainer.class.isAssignableFrom(compClass)) {
+                        if (!basicSwing) {
+                            // for custom window components use its root pane in the subst. frame and
+                            // keep the instance for setting properties
+                            enclosed = (Component) CreationFactory.createDefaultInstance(compClass);
+                            transferRootPane((JFrame)converted, ((RootPaneContainer)enclosed).getRootPane());
+                        } // for Swing windows will just copy properties to the subst. frame
+                    } else if (JComponent.class.isAssignableFrom(compClass)) {
                         enclosed = (Component) CreationFactory.createDefaultInstance(compClass);
                         ((JFrame)converted).getContentPane().add(enclosed);
                     }
-                } else if (converted instanceof JRootPane) { // RootPaneContainer or Frame converted to JRootPane
+                } else if (converted instanceof JRootPane) { // RootPaneContainer or Frame converted to JRootPane (for design view)
                     Container contentCont = (Container) CreationFactory.createDefaultInstance(
                             RootPaneContainer.class.isAssignableFrom(compClass) ? JPanel.class : Panel.class);
                     ((JRootPane)converted).setContentPane(contentCont);
@@ -1107,6 +1221,28 @@ public class VisualReplicator {
         @Override
         public Object getEnclosed() {
             return enclosed;
+        }
+    }
+
+    private static final String KEEP_ROOTPANE = "netbeans.form.no_custom_rootpane"; // NOI18N
+
+    private static boolean canUseRootPaneFromWindow(RootPaneContainer window) {
+        if (Boolean.getBoolean(KEEP_ROOTPANE)) {
+            return false;
+        }
+        JRootPane rootPane = window.getRootPane();
+        if (rootPane != null && Boolean.TRUE.equals(rootPane.getClientProperty(KEEP_ROOTPANE))) {
+            return false;
+        }
+        return true;
+    }
+
+    private static void transferRootPane(JFrame frame, JRootPane otherRootPane) {
+        try {
+            Method m = JFrame.class.getDeclaredMethod("setRootPane", JRootPane.class); // NOI18N
+            m.setAccessible(true);
+            m.invoke(frame, otherRootPane);
+        } catch (Exception ex) { // should not fail, the method is protected, can't be changed
         }
     }
 }

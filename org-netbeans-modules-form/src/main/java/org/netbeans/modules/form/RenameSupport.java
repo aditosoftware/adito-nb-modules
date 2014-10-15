@@ -45,11 +45,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-//import org.netbeans.modules.form.codestructure.CodeVariable; // STRIPPED
 import org.openide.filesystems.FileObject;
-import org.openide.nodes.Node;
-import org.openide.util.Exceptions;
-import org.openide.util.Lookup;
 
 /**
  *
@@ -61,8 +57,8 @@ public class RenameSupport {
         void renameComponent(FormModel formModel, String currentName, String newName);
     }
 
-    static void renameComponent(RADComponent component, String newName) {
-      // STRIPPED
+    // A
+    /*static void renameComponent(RADComponent component, String newName) {
         /*int varType = component.getCodeExpression().getVariable().getType();
         if ((varType & CodeVariable.SCOPE_MASK) == CodeVariable.LOCAL) {
             // local variable - no refactoring needed, no renaming out of generated (guarded) code
@@ -78,11 +74,10 @@ public class RenameSupport {
             } else {
                 renameComponentInClass(component, newName, true);
             }
-        }*/
+        }
     }
 
-  // STRIPPED
-    /*private static void renameComponentInClass(RADComponent component, String newName, boolean outOfGenerated) {
+    private static void renameComponentInClass(RADComponent component, String newName, boolean outOfGenerated) {
         renameComponentInCustomCode(component, newName);
         if (outOfGenerated) {
             FormEditor.getFormJavaSource(component.getFormModel())
@@ -97,7 +92,7 @@ public class RenameSupport {
      * directly in the model, while processCustomCode changes the .form file
      * (so does not require the form to be opened).
      */
-    // STRIPPED
+    // A
     /*static void renameComponentInCustomCode(RADComponent metacomp, String newName) {
         String oldName = metacomp.getName();
         for (RADComponent comp : metacomp.getFormModel().getAllComponents()) {
@@ -108,10 +103,9 @@ public class RenameSupport {
             }
             renameInCustomCode(comp.getSyntheticProperties(), oldName, newName);
         }
-    }*/
+    }
 
-  // STRIPPED
-    /*private static void renameInCustomCode(Node.Property[] properties, String oldName, String newName) {
+    private static void renameInCustomCode(Node.Property[] properties, String oldName, String newName) {
         if (properties == null) {
             return;
         }
@@ -263,7 +257,7 @@ public class RenameSupport {
                             int idx = line.indexOf(attr);
                             if (idx > 0) {
                                 // get the value of the attribute - string enclosed in ""
-                                int idx1 = idx1 = idx + attr.length();
+                                int idx1 = idx + attr.length();
                                 if (!attr.endsWith("\"")) { // NOI18N
                                     while (idx1 < line.length() && line.charAt(idx1) != '\"') { // NOI18N
                                         idx1++;

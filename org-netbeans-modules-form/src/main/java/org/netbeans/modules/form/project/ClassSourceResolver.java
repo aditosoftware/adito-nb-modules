@@ -41,29 +41,18 @@ import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
-//import java.util.ArrayList;
-//import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-//import java.util.logging.Level;
-//import org.netbeans.api.java.classpath.ClassPath;
-//import org.netbeans.api.java.project.JavaProjectConstants;
-//import org.netbeans.api.java.project.classpath.ProjectClassPathModifier;
-//import org.netbeans.api.java.queries.BinaryForSourceQuery;
-//import org.netbeans.api.java.queries.UnitTestForSourceQuery;
 import org.netbeans.api.project.FileOwnerQuery;
 import org.netbeans.api.project.Project;
 import org.netbeans.api.project.ProjectManager;
-//import org.netbeans.api.project.ProjectUtils;
-//import org.netbeans.api.project.SourceGroup;
-//import org.netbeans.api.project.Sources;
 import org.netbeans.api.project.libraries.Library;
 import org.netbeans.api.project.libraries.LibraryManager;
-//import org.netbeans.modules.form.FormUtils;
-//import org.netbeans.modules.form.project.ClassSource;
 import org.netbeans.modules.form.project.ClassSource.Entry;
+import org.netbeans.spi.project.libraries.LibraryFactory;
+import org.netbeans.spi.project.libraries.LibraryImplementation;
+import org.netbeans.spi.project.libraries.support.LibrariesSupport;
 import org.openide.filesystems.FileObject;
-//import org.openide.filesystems.FileStateInvalidException;
 import org.openide.filesystems.FileUtil;
 import org.openide.util.Exceptions;
 import org.openide.util.NbBundle;
@@ -79,6 +68,7 @@ public class ClassSourceResolver implements ClassSource.Resolver {
     private static final String TYPE_JAR = "jar"; // NOI18N
     private static final String TYPE_LIBRARY = "library"; // NOI18N
     private static final String TYPE_PROJECT = "project"; // NOI18N
+    private static final String TYPE_NAMED_DEPENDENCY ="dependency"; // only for NBM projects // NOI18N
 
     @Override
     public Entry resolve(String type, String name) {
@@ -135,6 +125,16 @@ public class ClassSourceResolver implements ClassSource.Resolver {
                 }
             }
             return null;
+        } else if (type.equals(TYPE_NAMED_DEPENDENCY)) {
+            Library lib = null;
+            LibraryImplementation libImpl = LibrariesSupport.createLibraryImplementation("j2se", new String[] {"classpath"}); // NOI18N
+            libImpl.setName(name);
+            try {
+                libImpl.setContent("classpath", Collections.singletonList(
+                        new URL("jar:nbinst://"+name+"/modules/"+name.replace('.', '-')+".jar!/"))); // NOI18N
+                lib = LibraryFactory.createLibrary(libImpl);
+            } catch (MalformedURLException ex) {}
+            return lib != null ? new LibraryEntry(lib) : null;
         } else {
             return null;
         }
@@ -177,8 +177,8 @@ public class ClassSourceResolver implements ClassSource.Resolver {
             if (FileUtil.isArchiveFile(jarFile)) {
                 u = FileUtil.getArchiveRoot(u);
             }
+            // A
             return false;
-            // STRIPPED
             //return Boolean.valueOf(ProjectClassPathModifier.addRoots(new URL[] {u}, projectArtifact, classPathType));
         }
         @Override
@@ -212,8 +212,8 @@ public class ClassSourceResolver implements ClassSource.Resolver {
         }
         @Override
         public Boolean addToProjectClassPath(FileObject projectArtifact, String classPathType) throws IOException, UnsupportedOperationException {
+            // A
             return false;
-            // STRIPPED
             //return  Boolean.valueOf(ProjectClassPathModifier.addLibraries(new Library[] {lib}, projectArtifact, classPathType));
         }
         @Override
@@ -229,7 +229,7 @@ public class ClassSourceResolver implements ClassSource.Resolver {
             // For backward compatibility with old *.palette_item files, treat bare names as global libraries.
             // Project libraries are given as e.g. "file:/some/where/libs/index.properties#mylib"
             LibraryManager mgr = lib.getManager();
-            if (mgr == LibraryManager.getDefault()) {
+            if (mgr == LibraryManager.getDefault() || mgr == null) {
                 return lib.getName();
             } else {
                 return mgr.getLocation() + "#" + lib.getName(); // NOI18N
@@ -247,35 +247,35 @@ public class ClassSourceResolver implements ClassSource.Resolver {
 
         @Override
         public List<URL> getClasspath() {
+            // A
             return Collections.emptyList();
-          // STRIPPED
-            //Sources sources = ProjectUtils.getSources(project);
-            //SourceGroup[] sgs = sources.getSourceGroups(JavaProjectConstants.SOURCES_TYPE_JAVA);
-            //List<URL> list = new ArrayList<URL>();
-            //for (SourceGroup sg : sgs) {
-            //    try {
-            //        ClassPath cp = ClassPath.getClassPath(sg.getRootFolder(), ClassPath.SOURCE);
-            //        if (cp != null) {
-            //            for (FileObject fob : cp.getRoots()) {
-            //                URL[] urls = UnitTestForSourceQuery.findSources(fob);
-            //                if (urls.length == 0) {
-            //                    BinaryForSourceQuery.Result result = BinaryForSourceQuery.findBinaryRoots(fob.getURL());
-            //                    list.addAll(Arrays.asList(result.getRoots()));
-            //                }
-            //            }
-            //        }
-            //    } catch (FileStateInvalidException fsiex) {
-            //        FormUtils.LOGGER.log(Level.INFO, fsiex.getMessage(), fsiex);
-            //    }
-            //}
-            //return list;
+            /*Sources sources = ProjectUtils.getSources(project);
+            SourceGroup[] sgs = sources.getSourceGroups(JavaProjectConstants.SOURCES_TYPE_JAVA);
+            List<URL> list = new ArrayList<URL>();
+            for (SourceGroup sg : sgs) {
+                try {
+                    ClassPath cp = ClassPath.getClassPath(sg.getRootFolder(), ClassPath.SOURCE);
+                    if (cp != null) {
+                        for (FileObject fob : cp.getRoots()) {
+                            URL[] urls = UnitTestForSourceQuery.findSources(fob);
+                            if (urls.length == 0) {
+                                BinaryForSourceQuery.Result result = BinaryForSourceQuery.findBinaryRoots(fob.getURL());
+                                list.addAll(Arrays.asList(result.getRoots()));
+                            }
+                        }
+                    }
+                } catch (FileStateInvalidException fsiex) {
+                    FormUtils.LOGGER.log(Level.INFO, fsiex.getMessage(), fsiex);
+                }
+            }
+            return list;*/
         }
         @Override
         public Boolean addToProjectClassPath(FileObject projectArtifact, String classPathType) throws IOException, UnsupportedOperationException {
-          // STRIPPED
-            //if (project != FileOwnerQuery.getOwner(projectArtifact)) {
-            //    return Boolean.valueOf(ProjectClassPathModifier.addProjects(new Project[] {project}, projectArtifact, classPathType));
-            //}
+            // A
+            /*if (project != FileOwnerQuery.getOwner(projectArtifact)) {
+                return Boolean.valueOf(ProjectClassPathModifier.addProjects(new Project[] {project}, projectArtifact, classPathType));
+            }*/
             return Boolean.FALSE;
         }
         @Override

@@ -45,6 +45,8 @@
 package org.netbeans.modules.form.project;
 
 import java.io.*;
+import java.lang.ref.Reference;
+import java.lang.ref.WeakReference;
 import java.net.*;
 import java.util.*;
 import java.util.logging.Level;
@@ -70,7 +72,18 @@ import org.netbeans.spi.java.classpath.support.ClassPathSupport;
 
 public class ClassPathUtils {
 
-    private static Map<Project,FormClassLoader> loaders = new WeakHashMap<Project,FormClassLoader>();
+    /**
+     * Cache the classloader instance related to the project (shared for all
+     * forms from the project).
+     */
+    private static Map<Project,Reference<FormClassLoader>> loaders = new WeakHashMap<Project,Reference<FormClassLoader>>();
+
+    /**
+     * Make sure the project-related classloader is not forgotten by the weak
+     * cache during the time a form is opened (same instance used all the time,
+     * for the form, if not changed otherwise, e.g. due to project CP change).
+     */
+    private static Map<FileObject, FormClassLoader> formLoaders = new HashMap<FileObject,FormClassLoader>();
 
     /**
      * Class loading type for a class to be always loaded by the IDE's system
@@ -116,15 +129,21 @@ public class ClassPathUtils {
         loaders.remove(p);
     }
 
+    public static void releaseFormClassLoader(FileObject fileInPoject) {
+        formLoaders.remove(fileInPoject);
+    }
+
     private static FormClassLoader getFormClassLoader(FileObject fileInProject) {
         Project p = FileOwnerQuery.getOwner(fileInProject);
-        FormClassLoader fcl = loaders.get(p);
+        Reference<FormClassLoader> ref = loaders.get(p);
+        FormClassLoader fcl = ref != null ? ref.get() : null;
         ClassLoader existingProjectCL = fcl != null ? fcl.getProjectClassLoader() : null;
         ClassLoader newProjectCL = ProjectClassLoader.getUpToDateClassLoader(
                                      fileInProject, existingProjectCL);
         if (fcl == null || newProjectCL != existingProjectCL) {
             fcl = new FormClassLoader(newProjectCL);
-            loaders.put(p, fcl);
+            formLoaders.put(fileInProject, fcl);
+            loaders.put(p, new WeakReference<FormClassLoader>(fcl));
         }
         return fcl;
     }
@@ -185,7 +204,7 @@ public class ClassPathUtils {
 
         return loader.loadClass(classSource.getClassName());
     }
-
+    
     public static boolean isOnClassPath(FileObject fileInProject, String className) {
         String resourceName = className.replace('.', '/') + ".class"; // NOI18N
         ClassPath classPath = ClassPath.getClassPath(fileInProject, ClassPath.COMPILE);
@@ -201,6 +220,14 @@ public class ClassPathUtils {
             return false;
 
         return classPath.findResource("javax/swing/GroupLayout.class") != null; // NOI18N
+    }
+
+    public static boolean isJava7ProjectPlatform(FileObject fileInProject) {
+        ClassPath classPath = ClassPath.getClassPath(fileInProject, ClassPath.BOOT);
+        if (classPath == null)
+            return false;
+
+        return classPath.findResource("javax/swing/JLayer.class") != null; // NOI18N
     }
 
     /** Updates project'c classpath with entries from ClassSource object.
@@ -304,22 +331,22 @@ public class ClassPathUtils {
         if (list == null) {
             return false;
         }
-
-        Iterator it = list.iterator();
-        while (it.hasNext()) {
-            ClassPattern cp = (ClassPattern) it.next();
+        for (ClassPattern cp : list) {
             switch (cp.type) {
                 case (ClassPattern.CLASS):
-                    if (className.equals(cp.name))
-                        return true;
+                    if (className.equals(cp.name)) {
+                        return !cp.exclude;
+                    }
                     break;
                 case (ClassPattern.PACKAGE):
-                    if (className.startsWith(cp.name) && (className.lastIndexOf('.') <= cp.name.length()))
-                        return true;
+                    if (className.startsWith(cp.name) && (className.lastIndexOf('.') <= cp.name.length())) {
+                        return !cp.exclude;
+                    }
                     break;
                 case (ClassPattern.PACKAGE_AND_SUBPACKAGES):
-                    if (className.startsWith(cp.name))
-                        return true;
+                    if (className.startsWith(cp.name)) {
+                        return !cp.exclude;
+                    }
                     break;
             }
         }
@@ -420,8 +447,13 @@ public class ClassPathUtils {
         static final int PACKAGE_AND_SUBPACKAGES = 2;
         String name;
         int type;
+        boolean exclude;
         
         ClassPattern(String name, int type) {
+            if (name.startsWith("-")) { // NOI18N
+                exclude = true;
+                name = name.substring(1);
+            }
             this.name = name;
             this.type = type;
         }

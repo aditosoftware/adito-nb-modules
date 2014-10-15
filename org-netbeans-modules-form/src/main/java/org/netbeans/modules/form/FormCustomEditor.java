@@ -73,7 +73,6 @@ public class FormCustomEditor extends JPanel implements PropertyChangeListener {
     private FormPropertyEditor editor;
     private PropertyEditor[] allEditors;
     private Component[] allCustomEditors;
-    private boolean[] validValues;
     private int originalEditorIndex;
 
     private javax.swing.JPanel cardPanel;
@@ -118,7 +117,6 @@ public class FormCustomEditor extends JPanel implements PropertyChangeListener {
         PropertyEditor currentEditor = editor.getCurrentEditor();
 
         allCustomEditors = new Component[allEditors.length];
-        validValues = new boolean[allEditors.length];
 
         PropertyEnv env = editor.getPropertyEnv();
         Object currentValue = editor.getValue();
@@ -170,18 +168,12 @@ public class FormCustomEditor extends JPanel implements PropertyChangeListener {
                     Object defaultValue = property.getDefaultValue();
                     if (defaultValue != BeanSupport.NO_VALUE) {
                         prEd.setValue(defaultValue);
-                        valueSet = true;
                     }
-                    // [but if there's no default value it is not possible to
-                    // switch to this property editor and enter something - see
-                    // getPropertyValue() - it returns BeanSupport.NO_VALUE]
                 }
 
                 if (prEd.supportsCustomEditor())
                     custEd = prEd.getCustomEditor();
             }
-
-            validValues[i] = valueSet;
 
             String editorName;
             if (prEd instanceof NamedPropertyEditor) {
@@ -251,16 +243,18 @@ public class FormCustomEditor extends JPanel implements PropertyChangeListener {
             }
         });
 
-        updateHelpAndAccessibleDescription();
         editorsCombo.getAccessibleContext().setAccessibleDescription(
             FormUtils.getBundleString("ACSD_EditingMode")); // NOI18N
+
+        updateHelpAndAccessibleDescription();
     }
-    
+
     private void updateHelpAndAccessibleDescription() {
+        HelpCtx.setHelpIDString(this, null);
         int i = editorsCombo.getSelectedIndex();
         HelpCtx helpCtx = i < 0 ? null : HelpCtx.findHelp(cardPanel.getComponent(i));
-        String helpID = helpCtx != null ? helpCtx.getHelpID() : ""; // NOI18N
-        HelpCtx.setHelpIDString(FormCustomEditor.this, helpID);
+        String helpID = helpCtx != null && helpCtx != HelpCtx.DEFAULT_HELP ? helpCtx.getHelpID() : "f1_mat_prop_html"; // NOI18N
+        HelpCtx.setHelpIDString(this, helpID);
 
         updateAccessibleDescription(i < 0 ? null : cardPanel.getComponent(i));
     }
@@ -350,7 +344,7 @@ public class FormCustomEditor extends JPanel implements PropertyChangeListener {
         PropertyEditor currentEditor = currentIndex > -1 ? allEditors[currentIndex] : null;
         if (currentEditor != null) {
             // assuming the editor already has the new value set through PropertyEnv listener
-            Object value = validValues[currentIndex] ? currentEditor.getValue() : BeanSupport.NO_VALUE;
+            Object value = currentEditor.getValue();
             if (editor.getProperty().canWrite()) { // issue 83770
                 // create a special "value with editor" to switch the current
                 // editor in FormProperty

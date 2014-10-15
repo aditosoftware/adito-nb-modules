@@ -47,7 +47,7 @@ import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.util.*;
+import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.prefs.PreferenceChangeEvent;
@@ -73,7 +73,7 @@ import org.openide.windows.TopComponent;
 
 @MultiViewElement.Registration(
     displayName="#CTL_DesignTabCaption",
-    iconBase= FormEditorSupport.iconURL,
+    iconBase=FormEditorSupport.iconURL,
     persistenceType=TopComponent.PERSISTENCE_NEVER,
     preferredID=FormEditorSupport.MV_FORM_ID,
     mimeType="text/x-form",
@@ -94,7 +94,7 @@ public class FormDesignerTC extends TopComponent implements MultiViewElement {
 
     private PreLoadTask preLoadTask;
 
-    private static final String ICON_URL =
+    private static String iconURL =
         "org/netbeans/modules/form/resources/formDesigner.gif"; // NOI18N
 
     public FormDesignerTC(Lookup lkp) {
@@ -106,7 +106,7 @@ public class FormDesignerTC extends TopComponent implements MultiViewElement {
         lookup = new FormDesignerLookup();
         createDesigner();
         associateLookup(lookup);
-        setIcon(ImageUtilities.loadImage(ICON_URL));
+        setIcon(ImageUtilities.loadImage(iconURL));
         setLayout(new BorderLayout());
         setMinimumSize(new Dimension(10, 10));
     }
@@ -129,6 +129,7 @@ public class FormDesignerTC extends TopComponent implements MultiViewElement {
 
     @Override
     protected String preferredID() {
+      // A
       try
       {
         return formEditorSupport.getFormDataObject().getName();
@@ -190,8 +191,14 @@ public class FormDesignerTC extends TopComponent implements MultiViewElement {
             reload = false;
         }
 
+        // A
+        //JToolBar toolbar = formDesigner != null ? formDesigner.getToolBar() : null;
         formEditorSupport = closeDesigner();
         createDesigner();
+        // A
+        /*if (toolbar != null) { // need to reuse the previous toolbar component (toolbar of MultiViewElement)
+            formDesigner.setToolBar(toolbar);
+        }*/
 
         if (selected) {
             TopComponent activeTC = TopComponent.getRegistry().getActivated();
@@ -324,7 +331,8 @@ public class FormDesignerTC extends TopComponent implements MultiViewElement {
     }
 
     @Override
-        public CloseOperationState canCloseElement() {
+    public CloseOperationState canCloseElement() {
+        // A
         return formEditorSupport == null ? CloseOperationState.STATE_OK :
                 formEditorSupport.canCloseElement(multiViewObserver.getTopComponent());
     }
@@ -394,8 +402,10 @@ public class FormDesignerTC extends TopComponent implements MultiViewElement {
     private void updateAssistant() {
         if (FormLoaderSettings.getInstance().getAssistantShown()) {
             AssistantModel assistant = FormEditor.getAssistantModel(formDesigner.getFormModel());
+            // A
             //assistantView = new AssistantView(assistant);
             assistant.setContext("select"); // NOI18N
+            // A
             //add(assistantView, BorderLayout.NORTH);
         } else if (assistantView != null) {
             remove(assistantView);

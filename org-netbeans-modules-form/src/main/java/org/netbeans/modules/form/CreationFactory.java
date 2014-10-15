@@ -222,7 +222,7 @@ public class CreationFactory {
         return instance;
     }
 
-  // STRIPPED
+    // A
     /*public static String getJavaCreationCode(Class cls,
                                              FormProperty[] props,
                                              int style) {
@@ -230,7 +230,7 @@ public class CreationFactory {
         if (cd != null) {
             CreationDescriptor.Creator creator = cd.findBestCreator(props, style);
             if (creator != null) {
-               creator.getJavaCreationCode(props, null, null);
+               creator.getJavaCreationCode(props, null, null, null, null);
             }
         }
         return null;
@@ -579,8 +579,9 @@ public class CreationFactory {
         constrPropertyNames = new String[][] {
             { "borderInsets" }
         };
-        
-        defaultConstrParams = new Object[] { new Integer(1), new Integer(1), new Integer(1), new Integer(1) };
+
+        Integer one = Integer.valueOf(1);
+        defaultConstrParams = new Object[] { one, one, one, one };
         methodName = "createEmptyBorder";
         
         registerDescriptor(new CreationDescriptor(
@@ -605,7 +606,7 @@ public class CreationFactory {
             { "border" }
         };
         
-        defaultConstrParams = new Object[] { null, "", new Integer(0), new Integer(0) };
+        defaultConstrParams = new Object[] { null, "", Integer.valueOf(0), Integer.valueOf(0) };
         methodName = "createTitledBorder";                      
         registerDescriptor(new CreationDescriptor(
                 javax.swing.BorderFactory.class, javax.swing.border.TitledBorder.class, methodName,
@@ -640,7 +641,7 @@ public class CreationFactory {
                            "shadowOuterColor", "shadowInnerColor" }
         };
                       
-        defaultConstrParams = new Object[] { new Integer(javax.swing.border.BevelBorder.RAISED) };
+        defaultConstrParams = new Object[] { Integer.valueOf(javax.swing.border.BevelBorder.RAISED) };
         methodName = "createBevelBorder";                     
         registerDescriptor(new CreationDescriptor(
                 javax.swing.BorderFactory.class, javax.swing.border.BevelBorder.class, methodName, 
@@ -683,7 +684,7 @@ public class CreationFactory {
             { "borderInsets", "matteColor" }
         };         
         defaultConstrParams = new Object[] { 
-            new Integer(1), new Integer(1), new Integer(1), new Integer(1),
+            one, one, one, one,
             java.awt.Color.black
         };        
         methodName = "createMatteBorder";                                
@@ -837,7 +838,12 @@ public class CreationFactory {
         public Object[] getPropertyParametersValues(FormProperty prop) {                        
             Insets insets = (Insets) getRealValue(prop);                            
             if(insets != null) {
-                return new Object[] { new Integer(insets.top), new Integer(insets.left), new Integer(insets.bottom), new Integer(insets.right)};                
+                return new Object[] {
+                    Integer.valueOf(insets.top),
+                    Integer.valueOf(insets.left),
+                    Integer.valueOf(insets.bottom),
+                    Integer.valueOf(insets.right)
+                };
             } else {
                 return new Object[] { };                
             }                    

@@ -147,7 +147,7 @@ public abstract class PersistenceManager {
     private static List<PersistenceManager> getManagersList() {
         if (managers == null) {
             managers = new ArrayList<PersistenceManager>();
-            //managers.add(new GandalfPersistenceManager());
+            //managers.add(new GandalfPersistenceManager()); // A
             managers.add(new AditoPersistenceManager());
         }
         return managers;

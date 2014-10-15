@@ -43,8 +43,6 @@ package org.netbeans.modules.form;
 
 import java.io.IOException;
 import javax.swing.text.Document;
-import javax.swing.text.Position;
-//import org.netbeans.api.editor.guards.GuardedSectionManager; // STRIPPED
 import org.openide.filesystems.FileObject;
 import org.openide.nodes.Node;
 
@@ -55,16 +53,21 @@ import org.openide.nodes.Node;
 public interface EditorSupport extends Node.Cookie {
     static String SECTION_INIT_COMPONENTS = "initComponents"; // NOI18N
     static String SECTION_VARIABLES = "variables"; // NOI18N
-    
+
     Document getDocument();
-    //GuardedSectionManager getGuardedSectionManager(); // STRIPPED
+    //GuardedSectionManager getGuardedSectionManager(); // A
     void markModified();
     Object getJavaContext();
-    //void openAt(Position pos); // STRIPPED
+    //void openAt(Position pos); // A
     void discardEditorUndoableEdits();
     void saveAs(FileObject folder, String fileName) throws IOException;
     void openDesign();
     void openSource();
     void reloadForm();
     boolean isJavaEditorDisplayed();
+    Boolean getFoldState(int offset);
+    void restoreFoldState(boolean collapsed, int startOffset, int endOffset);
+    //int getCodeIndentSize(); // A
+    // boolean getCodeBraceOnNewLine(); // A
+    // boolean canGenerateNBMnemonicsCode(); // A
 }

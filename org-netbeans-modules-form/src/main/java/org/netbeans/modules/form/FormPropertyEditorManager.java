@@ -199,8 +199,8 @@ final public class FormPropertyEditorManager {
             }
         }
 
-        // 5th - add the RADConnectionPropertyEditor - twice
-      // STRIPPED
+        // 5th general editors for connection and custom code
+        // A
         //editorList.add(new RADConnectionPropertyEditor(type, RADConnectionPropertyEditor.Type.FormConnection));
         //editorList.add(new RADConnectionPropertyEditor(type, RADConnectionPropertyEditor.Type.CustomCode));
 
@@ -232,7 +232,7 @@ final public class FormPropertyEditorManager {
                     String name = path + "." + typeName + "Editor"; // NOI18N
                     try {
                         editorClass = FormUtils.loadSystemClass(name);
-                        if (wrapperAllowed /*|| !ResourceWrapperEditor.class.isAssignableFrom(editorClass)*/) { // STRIPPED
+                        if (wrapperAllowed /*|| !ResourceWrapperEditor.class.isAssignableFrom(editorClass)*/) { // A
                             prEd = createEditorInstance(editorClass);
                             if (prEd != null) {
                                 break;

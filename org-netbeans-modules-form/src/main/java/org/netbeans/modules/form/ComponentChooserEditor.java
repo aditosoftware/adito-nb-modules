@@ -119,14 +119,14 @@ public class ComponentChooserEditor implements PropertyEditor,
         if (value != null && INVALID_REF.equals(value.getDescription()))
             return BeanSupport.NO_VALUE; // special - invalid value was loaded
         
-        return isDefaultValue() ? FormProperty.DEFAULT_VALUE : value;
+        return isDefaultValue() ? FormProperty.DEFAULT_VALUE : value; 
     }
 
     @Override
     public String[] getTags() {
         List compList = getComponents();
 
-        int extraValues;
+        int extraValues;        
         int count;
         String[] names;                                    
 
@@ -157,7 +157,7 @@ public class ComponentChooserEditor implements PropertyEditor,
     /**
      * Determines whether none/null value should be offered by this
      * property editor.
-     *
+     * 
      * @return {@code true} if none/null value should be offered
      * or {@code false} otherwise.
      */

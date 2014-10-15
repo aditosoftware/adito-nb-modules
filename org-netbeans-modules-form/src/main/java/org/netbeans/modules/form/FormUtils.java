@@ -44,26 +44,39 @@
 
 package org.netbeans.modules.form;
 
-import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.component.INoFormContainer;
-import org.netbeans.modules.form.project.ClassPathUtils;
-import org.openide.ErrorManager;
-import org.openide.filesystems.FileObject;
-import org.openide.loaders.DataObject;
-import org.openide.nodes.Node;
-import org.openide.util.*;
-
-import javax.swing.*;
-import javax.swing.border.TitledBorder;
-import javax.swing.event.TreeModelListener;
-import javax.swing.plaf.ComponentUI;
-import javax.swing.tree.DefaultTreeModel;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.beans.*;
 import java.io.*;
-import java.lang.reflect.*;
 import java.util.*;
+import java.lang.reflect.*;
 import java.util.List;
-import java.util.logging.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.swing.*;
+import javax.swing.border.TitledBorder;
+import javax.swing.event.ListSelectionListener;
+import javax.swing.event.TableModelListener;
+import javax.swing.event.TreeModelListener;
+import javax.swing.plaf.ComponentUI;
+import javax.swing.plaf.FontUIResource;
+import javax.swing.tree.DefaultTreeModel;
+import javax.swing.table.DefaultTableModel;
+
+import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.component.INoFormContainer;
+import org.openide.ErrorManager;
+import org.openide.loaders.DataObject;
+import org.openide.util.*;
+import org.openide.nodes.Node;
+import org.openide.filesystems.FileObject;
+import org.netbeans.modules.form.project.ClassPathUtils;
+import org.openide.DialogDescriptor;
+import org.openide.awt.Mnemonics;
+import org.openide.xml.XMLUtil;
+import org.w3c.dom.Document;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 
 /**
  * A class that contains utility methods for the formeditor.
@@ -99,7 +112,8 @@ public class FormUtils
         { "java.awt.Component", CLASS_AND_SUBCLASSES,
                 "locale", PROP_HIDDEN,
                 "locationOnScreen", PROP_HIDDEN,
-                "showing", PROP_HIDDEN },
+                "showing", PROP_HIDDEN,
+                "componentOrientation", PROP_HIDDEN },
         { "java.awt.Component", CLASS_AND_SWING_SUBCLASSES,
                 "accessibleContext", PROP_HIDDEN,
                 "components", PROP_HIDDEN,
@@ -363,7 +377,7 @@ public class FormUtils
      * properties needs to be restricted to "detached write". */
     private static Object[][] propertiesAccess = {
         { "javax.swing.JFrame", CLASS_AND_SUBCLASSES,
-              "defaultCloseOperation", new Integer(FormProperty.DETACHED_WRITE) }
+              "defaultCloseOperation", Integer.valueOf(FormProperty.DETACHED_WRITE) }
     };
 
     /** Table of properties that need the component to be added in the parent,
@@ -385,7 +399,8 @@ public class FormUtils
     /** Table defining order of dependent properties. */
     private static Object[][] propertyOrder = {
         { "javax.swing.text.JTextComponent",
-            "document", "text" },
+            "document", "text",
+            "editable", "background" },
         { "javax.swing.JSpinner",
             "model", "editor" },
         { "javax.swing.AbstractButton",
@@ -416,6 +431,12 @@ public class FormUtils
             "model", "text" },
         { "javax.swing.JRadioButton",
             "model", "buttonGroup" },
+        { "java.awt.Dialog",
+            "undecorated", "opacity",
+            "undecorated", "shape" },
+        { "java.awt.Frame",
+            "undecorated", "opacity",
+            "undecorated", "shape" },
         { "javax.swing.JFileChooser",
             "dialogType", "approveButtonText"}
     };
@@ -423,8 +444,11 @@ public class FormUtils
     /** Table enumerating properties that can hold HTML text. */
     private static Object[][] swingTextProperties = {
         { "javax.swing.JComponent", FormUtils.CLASS_AND_SUBCLASSES,
-            "text", Boolean.TRUE,
-            "toolTipText", Boolean.TRUE }
+            "toolTipText", Boolean.TRUE },
+        { "javax.swing.JLabel", FormUtils.CLASS_AND_SUBCLASSES,
+            "text", Boolean.TRUE },
+        { "javax.swing.AbstractButton", FormUtils.CLASS_AND_SUBCLASSES,
+            "text", Boolean.TRUE }
     };
 
     /** List of components that should never be containers; some of them are
@@ -469,16 +493,26 @@ public class FormUtils
         return NbBundle.getBundle(FormUtils.class).getString(key);
     }
 
-    public static String getFormattedBundleString(String key,
-                                                  Object[] arguments)
-    {
+    public static String getFormattedBundleString(String key, Object... arguments) {
         return NbBundle.getMessage(FormUtils.class, key, arguments);
+    }
+
+    /**
+     * Provides preset value for given key, overrideable by branding.
+     */
+    public static boolean getPresetValue(String key, boolean defaultValue) {
+        try {
+            String s = NbBundle.getMessage(FormUtils.class, key);
+            return "true".equals(s.toLowerCase()); // NOI18N
+        } catch( MissingResourceException ex) { // ignore
+        }
+        return defaultValue;
     }
 
     /** Utility method that tries to clone an object. Objects of explicitly
      * specified types are constructed directly, other are serialized and
      * deserialized (if not serializable exception is thrown).
-     *
+     * 
      * @param o object to clone.
      * @param formModel form model.
      * @return cloned of the given object.
@@ -499,7 +533,7 @@ public class FormUtils
             return o; // no need to change reference
         }
 
-        if (o.getClass() == Font.class) {
+        if (o.getClass() == Font.class || o.getClass() == FontUIResource.class) {
             return o;
         }
         // Issue 49973 & 169933
@@ -548,16 +582,52 @@ public class FormUtils
             for (TreeModelListener listener : listeners) {
                 model.removeTreeModelListener(listener);
             }
-            Object clone = cloneBeanInstance(o, null, formModel);
-            for (TreeModelListener listener : listeners) {
-                model.addTreeModelListener(listener);
+            try {
+                return cloneBeanInstance(o, null, formModel);
+            } finally {
+                for (TreeModelListener listener : listeners) {
+                    model.addTreeModelListener(listener);
+                }
             }
-            return clone;
         }
-        if (o instanceof Throwable)
-            return o;
-
-        // for TableModel we use TableModelEditor.NbTableModel which takes care of its serialization
+        if (o.getClass() == DefaultSingleSelectionModel.class) {
+            // avoid potential problems with serialization of listeners (#231334)
+            DefaultSingleSelectionModel selModel = (DefaultSingleSelectionModel)o;
+            DefaultSingleSelectionModel newSelModel = new DefaultSingleSelectionModel();
+            newSelModel.setSelectedIndex(selModel.getSelectedIndex());
+            return newSelModel;
+        }
+        if (o.getClass() == DefaultListSelectionModel.class) {
+            // avoid potential problems with serialization of listeners (#231334)
+            DefaultListSelectionModel selModel = (DefaultListSelectionModel)o;
+            ListSelectionListener[] listeners = selModel.getListSelectionListeners();
+            for (ListSelectionListener listener : listeners) {
+                selModel.removeListSelectionListener(listener);
+            }
+            try {
+                return cloneBeanInstance(o, null, formModel);
+            } finally {
+                for (ListSelectionListener listener : listeners) {
+                    selModel.addListSelectionListener(listener);
+                }
+            }
+        }
+        if (o.getClass() == DefaultTableModel.class) {
+            // avoid potential problems with serialization of listeners (#231334)
+            DefaultTableModel tableModel = (DefaultTableModel)o;
+            TableModelListener[] listeners = tableModel.getTableModelListeners();
+            for (TableModelListener listener : listeners) {
+                tableModel.removeTableModelListener(listener);
+            }
+            try {
+                return cloneBeanInstance(o, null, formModel);
+            } finally {
+                for (TableModelListener listener : listeners) {
+                    tableModel.addTableModelListener(listener);
+                }
+            }
+        }
+        // note TableModelEditor.NbTableModel takes care of its serialization
 
         if (o instanceof Serializable) {
             return cloneBeanInstance(o, null, formModel);
@@ -570,7 +640,7 @@ public class FormUtils
      * First - if it is serializable, then it is copied using serialization.
      * If not serializable, then all properties (taken from BeanInfo) are
      * copied (property values cloned recursively).
-     *
+     * 
      * @param bean bean to clone.
      * @param bInfo bean info.
      * @param formModel form model.
@@ -592,7 +662,7 @@ public class FormUtils
                 oos.close();
 
                 ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
-                return new OIS(bais, bean.getClass().getClassLoader(), formModel).readObject();
+                return new OIS(bais, bean.getClass().getClassLoader(), formModel).readObject();                
             } catch (Exception ex) {
                 LOGGER.log(Level.INFO, "Cannot clone "+bean.getClass().getName(), ex); // NOI18N
                 throw new CloneNotSupportedException();
@@ -685,7 +755,7 @@ public class FormUtils
          * If a marker was serialized, it means the component's client properties
          * serialization was at least started - which is done after installing
          * the ComponentUI back after serializing the component itself (see
-         * JComponent.writeObject). If the marker was not serialized, it is
+         * JComponent.writeObject). If the marker was not serialized, it is 
          * likely that the ComponentUI was left uninstalled (from
          * JComponent.compWriteObjectNotify).
          */
@@ -759,7 +829,7 @@ public class FormUtils
      * DISABLE_CHANGE_FIRING (to disable firing of changes in target properties),
      * PASS_DESIGN_VALUES (to pass the same FormDesignValue instances if they
      *                     cannot or should not be copied),
-     *
+     * 
      * @param sourceProperties properties to copy values from.
      * @param targetProperties properties to copy values to.
      * @param mode see the description above.
@@ -799,13 +869,13 @@ public class FormUtils
                 Object copiedValue = propertyValue;
                 if ((mode & DONT_CLONE_VALUES) == 0) {
                     if (!(propertyValue instanceof FormDesignValue)) {
-                        try { // clone common property value
-                            FormModel formModel = (sfProp == null) ? null : sfProp.getPropertyContext().getFormModel();
+                        try { // clone common property value                        
+                            FormModel formModel = (sfProp == null) ? null : sfProp.getPropertyContext().getFormModel();                        
                             copiedValue = FormUtils.cloneObject(propertyValue, formModel);
                         }
                         catch (CloneNotSupportedException ex) {} // ignore, don't report
                     }
-                    else { // handle FormDesignValue
+                    else { // handle FormDesignValue                    
                         Object val = ((FormDesignValue)propertyValue).copy(tfProp);
                         if (val != null)
                             copiedValue = val;
@@ -823,7 +893,7 @@ public class FormUtils
                 }
                 else tnProp.setValue(copiedValue);
 
-              // STRIPPED
+                // A
                 /*if (sfProp != null && tfProp != null) {
                     // also clone current PropertyEditor
                     PropertyEditor sPrEd = sfProp.getCurrentEditor();
@@ -882,7 +952,7 @@ public class FormUtils
                     Object value = prop.getValue();
                     if (value instanceof RADComponent
                             || value instanceof RADComponent.ComponentReference
-                            /*|| isRelativeConnectionValue(value)*/) { // STRIPPED
+                            /*|| isRelativeConnectionValue(value)*/) { // A
                         relativeProperties.add(prop);
                         continue;
                     }
@@ -900,14 +970,16 @@ public class FormUtils
                 }
                 if (newValue == null) {
                     Object realValue = prop.getRealValue();
-                    if (realValue == FormDesignValue.IGNORED_VALUE)
+                    if (realValue == FormDesignValue.IGNORED_VALUE) {
                         continue; // ignore this value, as it is not a real value
-
-                    newValue = FormUtils.cloneObject(realValue, prop.getPropertyContext().getFormModel());
+                    }
+                    try {
+                        newValue = FormUtils.cloneObject(realValue, prop.getPropertyContext().getFormModel());
+                    } catch (CloneNotSupportedException ex) {
+                        newValue = realValue; // fallback to using the same value instance (bug #216775)
+                    }
                 }
                 writeMethod.invoke(targetBean, new Object[] { newValue });
-            }
-            catch (CloneNotSupportedException ex) { // ignore, don't report
             }
             catch (Exception ex) {
                 LOGGER.log(Level.INFO, null, ex); // NOI18N
@@ -915,7 +987,7 @@ public class FormUtils
         }
     }
 
-  // STRIPPED
+    // A
     /*static boolean isRelativeConnectionValue(Object value) {
         if (value instanceof RADConnectionPropertyEditor.RADConnectionDesignValue) {
             RADConnectionPropertyEditor.RADConnectionDesignValue conValue
@@ -934,7 +1006,7 @@ public class FormUtils
             && !method.getDeclaringClass().isAssignableFrom(targetClass)) {
             // try to use find the same method in the target class
             try {
-                method = targetClass.getMethod(method.getName(),
+                method = targetClass.getMethod(method.getName(), 
                                                method.getParameterTypes());
             } catch (Exception ex) { // ignore
                 method = null;
@@ -1024,7 +1096,7 @@ public class FormUtils
 
     /**
      * Determines whether instances of the given class can serve as containers.
-     *
+     * 
      * @param beanClass class to check.
      * @return 1 if the class is explicitly specified as container in BeanInfo;
      *          0 if the class is explicitly enumerated in forbiddenContainers
@@ -1203,7 +1275,7 @@ public class FormUtils
      * Finds out if given property can hold text with <html> prefix. Basically
      * it must be a text property of a Swing component. Used by String property
      * editor.
-     *
+     * 
      * @param property property to check.
      * @return true if the property can hold <html> text
      */
@@ -1329,15 +1401,15 @@ public class FormUtils
 
     /**
      * Utility method that returns name of the method.
-     *
+     * 
      * @param desc descriptor of the method.
      * @return a formatted name of specified method
      */
-    public static String getMethodName(MethodDescriptor desc) {
+    public static String getMethodName(MethodDescriptor desc) {                
         return getMethodName(desc.getName(), desc.getMethod().getParameterTypes());
     }
-
-    public static String getMethodName(String name, Class[] params) {
+    
+    public static String getMethodName(String name, Class[] params) {        
 	StringBuilder sb = new StringBuilder(name);
         if ((params == null) ||(params.length == 0)) {
             sb.append("()"); // NOI18N
@@ -1363,7 +1435,7 @@ public class FormUtils
             }
         });
     }
-
+    
     static void reorderProperties(Class beanClass, RADProperty[] properties) {
         sortProperties(properties);
         Object[] order = collectPropertiesOrder(beanClass, propertyOrder);
@@ -1371,7 +1443,7 @@ public class FormUtils
             updatePropertiesOrder(properties, (String)order[2*i], (String)order[2*i+1]);
         }
     }
-
+    
     private static void updatePropertiesOrder(RADProperty[] properties,
         String firstProp, String secondProp) {
         int firstIndex = findPropertyIndex(properties, firstProp);
@@ -1385,7 +1457,7 @@ public class FormUtils
             properties[secondIndex] = first;
         }
     }
-
+    
     private static int findPropertyIndex(RADProperty[] properties, String property) {
         int index = -1;
         for (int i=0; i<properties.length; i++) {
@@ -1396,7 +1468,7 @@ public class FormUtils
         }
         return index;
     }
-
+    
     private static Object[] collectPropertiesOrder(Class beanClass, Object[][] table) {
         // Set of names of super classes of the bean and interfaces implemented by the bean.
         Set<String> superClasses = superClasses(beanClass);
@@ -1422,7 +1494,7 @@ public class FormUtils
         if (formModel != null) {
             if (editor instanceof FormAwareEditor) {
                 ((FormAwareEditor)editor).updateFormVersionLevel();
-        /*    } else if (value instanceof ResourceValue) {
+            } /*else if (value instanceof ResourceValue) {
                 formModel.raiseVersionLevel(FormModel.FormVersion.NB60, FormModel.FormVersion.NB60);
             }
             Object owner = context.getOwner();
@@ -1432,8 +1504,8 @@ public class FormUtils
                 if (("alignOnBaseline".equals(propName) && beanClass.equals(FlowLayout.class)) // NOI18N
                         || beanClass.equals(GridBagLayout.class)) {
                     formModel.raiseVersionLevel(FormModel.FormVersion.NB71, FormModel.FormVersion.NB71);
-                }*/
-            }
+                }
+            }*/
         }
         // this method is not called for binding properties - see BindingProperty.setValue
     }
@@ -1444,7 +1516,7 @@ public class FormUtils
      * editor. The class might be either a support class being part of the IDE,
      * or a user class defined externally (by a project classpath).
      * There are also separate loadSystemClass for loading a module class only.
-     *
+     * 
      * @param name String name of the class
      * @param formFile FileObject representing the form file as part of a project
      * @return loaded class.
@@ -1466,7 +1538,7 @@ public class FormUtils
 
     /** Loads a class using IDE system class loader. Usable for form module
      * support classes, property editors, etc.
-     *
+     * 
      * @param name name of the class to load.
      * @return loaded class.
      * @throws java.lang.ClassNotFoundException if there is a problem with class loading.
@@ -1498,7 +1570,7 @@ public class FormUtils
             String name = streamCls.getName();
             return loadClass(name);
         }
-
+        
         private Class loadClass(String name) throws ClassNotFoundException {
             if (classLoader != null) {
                 try {
@@ -1507,7 +1579,7 @@ public class FormUtils
             }
             return FormUtils.loadClass(name, formModel);
         }
-
+        
     }
 
     public static List<RADComponent> getSelectedLayoutComponents(Node[] nodes) {
@@ -1551,7 +1623,7 @@ public class FormUtils
         }
         return false;
     }
-
+    
     private static Set<String> superClasses(Class beanClass) {
         Set<String> superClasses = new HashSet<String>();
         Class[] infaces = beanClass.getInterfaces();
@@ -1800,7 +1872,7 @@ public class FormUtils
         }
         return buf.toString();
     }
-
+ 
     /*
      * Calls Introspector.getBeanInfo() more safely to handle 3rd party BeanInfos
      * that may be broken or malformed. This is a replacement for Introspector.getBeanInfo().
@@ -1856,7 +1928,7 @@ public class FormUtils
         computeVisibleRect(comp, rect);
         return rect;
     }
-
+    
     private static void computeVisibleRect(Component c, Rectangle visibleRect) {
         Container p = c.getParent();
         Rectangle bounds = c.getBounds();
@@ -1869,6 +1941,259 @@ public class FormUtils
             visibleRect.y -= bounds.y;
             SwingUtilities.computeIntersection(0,0,bounds.width,bounds.height,visibleRect);
         }
+    }
+
+    /**
+     * Creates a DialogDescriptor for showing a dialog with an error message and
+     * additional exceptions that should be reported to the user. This is different
+     * from the standard exception dialog which informs about IDE failure; here the
+     * failure is from custom components provided by the user, or due to wrong
+     * classpath setup. I.e. the user needs to see these exceptions to be able to
+     * diagnose and fix the problem on her side.
+     * @param title
+     * @param message
+     * @param messageType
+     * @param options The additional buttons that the dialog should show. If null
+     *        is provided than only OK button will be shown.
+     * @param exceptions
+     * @return configured DialogDescriptor that can be used to construct the dialog
+     */
+    static DialogDescriptor createErrorDialogWithExceptions(String title, final String message, int messageType, Object[] options, final Throwable...exceptions) {
+        final JButton detailsBtn = new JButton();
+        Mnemonics.setLocalizedText(detailsBtn, FormUtils.getBundleString("CTL_ShowExceptions")); // NOI18N
+        detailsBtn.setToolTipText(FormUtils.getBundleString("CTL_ShowHideExceptionsHint")); // NOI18N
+        detailsBtn.setDefaultCapable(false);
+        if (options == null) {
+            options = new Object[] { DialogDescriptor.OK_OPTION };
+        }
+        final DialogDescriptor dd = new DialogDescriptor(message, title, true, DialogDescriptor.OK_CANCEL_OPTION,
+                    options.length > 0 ? options[0]:null, null) {
+            // Initially when the message is set via constructor, it is handled as a String
+            // by JOptionPane (ends up as a stack of labels). But when set later via setMessage
+            // method, the message is always converted into a JTextArea component that looks
+            // different and also has a screwed preferred size. Here we try to make it look as
+            // close as possible to the original state. But no way to restore the message as a String.
+            @Override
+            public void setMessage(Object message) {
+                super.setMessage(message);
+                Object m = getMessage();
+                if (message instanceof String && m instanceof Component) {
+                    Component c = (Component) m;
+                    c.setPreferredSize(null);
+                    Font f = UIManager.getFont("OptionPane.messageFont"); // NOI18N
+                    if (f != null) {
+                        c.setFont(f);
+                    }
+                }
+            }
+        };
+        dd.setMessageType(messageType);
+        dd.setOptions(options);
+        dd.setClosingOptions(options);
+        dd.setAdditionalOptions(new Object[] { detailsBtn});
+
+        // listener to handle showing/hiding the exceptions
+        dd.setButtonListener(new ActionListener() {
+            Component excDetail;
+            JTextPane output;
+            Rectangle baseBounds;
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (e.getSource() != detailsBtn) {
+                    return;
+                }
+                final Rectangle screenBounds = Utilities.getUsableScreenBounds();
+                if (excDetail == null) {
+                    output = new JTextPane();
+                    output.setEditable(false);
+                    Font f = output.getFont();
+                    output.setFont(new Font("Monospaced", Font.PLAIN, null == f ? 12 : f.getSize() + 1)); // NOI18N
+                    output.setForeground(UIManager.getColor("Label.foreground")); // NOI18N
+                    output.setBackground(UIManager.getColor("Label.background")); // NOI18N
+                    StringWriter sw = new StringWriter();
+                    PrintWriter pw = new PrintWriter(sw, true);
+                    for (Throwable ex : exceptions) {
+                        ex.printStackTrace(pw);
+                    }
+                    output.setText(sw.toString());
+                    output.getCaret().setDot(0);
+                    // hack to avoid NbPresenter to add a scrollpane over everything
+                    excDetail = new javax.swing.JScrollPane(output) {
+                        @Override
+                        public Dimension getPreferredSize() {
+                            Dimension sz = new Dimension(super.getPreferredSize());
+                            if (sz.height > screenBounds.height - 125) {
+                                sz.height = Math.min(screenBounds.height * 3 / 4, screenBounds.height - 125);
+                                Component vs = getVerticalScrollBar();
+                                if (vs != null) {
+                                    sz.width += vs.getPreferredSize().width;
+                                }
+                            }
+                            if (sz.width > screenBounds.width - 167) {
+                                sz.width = Math.min(screenBounds.width * 3 / 4, screenBounds.width - 167);
+                            }
+                            return sz;
+                        }
+                    };
+                    output.requestFocus();
+                }
+                Window w = SwingUtilities.getWindowAncestor(detailsBtn);
+                if (!excDetail.isShowing()) { // show exceptions
+                    baseBounds = w.getBounds();
+                    dd.setMessage(excDetail);
+                    Mnemonics.setLocalizedText(detailsBtn, FormUtils.getBundleString("CTL_HideExceptions")); // NOI18N
+                    w.pack();
+                    Rectangle newBounds = w.getBounds();
+                    if (newBounds.width < baseBounds.width) {
+                        newBounds.width = baseBounds.width;
+                    } else {
+                        newBounds.x = baseBounds.x - (newBounds.width - baseBounds.width)/2;
+                    }
+                    if (newBounds.x < screenBounds.x) {
+                        newBounds.x = screenBounds.x;
+                    } else if (newBounds.x + newBounds.width > screenBounds.x + screenBounds.width) {
+                        newBounds.x = screenBounds.x + screenBounds.width - newBounds.width;
+                    }
+                    newBounds.y = baseBounds.y - (newBounds.height - baseBounds.height)/2;
+                    if (newBounds.y < screenBounds.y) {
+                        newBounds.y = screenBounds.y;
+                    } else if (newBounds.y + newBounds.height > screenBounds.y + screenBounds.height) {
+                        newBounds.y = screenBounds.y + screenBounds.height - newBounds.height;
+                    }
+                    w.setBounds(newBounds);
+                } else { // show original message
+                    dd.setMessage(message);
+                    Mnemonics.setLocalizedText(detailsBtn, FormUtils.getBundleString("CTL_ShowExceptions")); // NOI18N
+                    // The message text set later via setMessage method is handled differently than
+                    // it was set initially via the constructor. It may need a different height now.
+                    Dimension newPrefSize = w.getPreferredSize();
+                    int heightDiff = baseBounds.height - newPrefSize.height;
+                    if (Math.abs(heightDiff) > 10) {
+                        baseBounds.y += heightDiff/2;
+                        baseBounds.height = newPrefSize.height;
+                    }
+                    w.setBounds(baseBounds);
+                }
+            }
+        });
+        return dd;
+    }
+
+    /**
+     * Parse form file into DOM document. If the form is a xml 1.1 file, try to
+     * parse it first as 1.0, only if it fails then try to process it as 1.1.
+     * The reason is that xml 1.1 parser fails to parse larger files correctly
+     * (e.g. in TableCustomizer or GridBagCustomizer forms some property names
+     * are read mangled, while read fine as xml 1.0).
+     * @param formFile
+     * @return
+     * @throws IOException
+     * @throws SAXException 
+     */
+    static Document readFormToDocument(FileObject formFile) throws IOException, SAXException {
+        InputStream xmlInputStream = new XML10InputStream(formFile.getInputStream());
+        try {
+            return XMLUtil.parse(new InputSource(xmlInputStream),
+                                 false, false, null, null);
+        } catch (Exception ex) {
+            LOGGER.log(Level.INFO, "Could not read form as xml 1.0, will try as xml 1.1."); // NOI18N
+            LOGGER.log(Level.FINE, "", ex); // NOI18N
+        }
+        return XMLUtil.parse(new InputSource(formFile.getInputStream()),
+                             false, false, null, null);
+    }
+
+    private static class XML10InputStream extends InputStream {
+        /** Form files saved as xml 1.1 start with this string. */
+        private static final String FORM_XML11_HEADER = "<?xml version=\"1.1"; // NOI18N
+
+        /** Index in header read so far and matching. */
+        private int matchIndex;
+
+        /** Source stream. */
+        private final InputStream is;
+
+        XML10InputStream(InputStream is) {
+            this.is = is;
+        }
+
+        @Override
+        public int read() throws IOException {
+            int c = is.read();
+            if (matchIndex < FORM_XML11_HEADER.length()) {
+                if (c == FORM_XML11_HEADER.charAt(matchIndex)) {
+                    matchIndex++;
+                    if (matchIndex == FORM_XML11_HEADER.length()) {
+                        // this is a xml 1.1 form, pretend it is xml 1.0
+                        c = '0';
+                    }
+                } else if (matchIndex > 0 || c == '\n') {
+                    matchIndex = FORM_XML11_HEADER.length(); // header not found, this is not a xml 1.1 form
+                }
+            }
+            return c;
+        }
+
+        @Override
+        public int available() throws IOException {
+            return is.available();
+        }
+
+        @Override
+        public void close() throws IOException {
+            is.close();
+        }
+
+        @Override
+        public synchronized void mark(int readlimit) {
+            is.mark(readlimit);
+        }
+
+        @Override
+        public boolean markSupported() {
+            return is.markSupported();
+        }
+
+        @Override
+        public long skip(long n) throws IOException {
+            return is.skip(n);
+        }
+    }
+
+    public static Object decodePrimitiveValue(String encoded, Class type) {
+        if (String.class.isAssignableFrom(type)) {
+            return encoded;
+        }
+        if ("null".equals(encoded)) { // NOI18N
+            return null;
+        }
+
+        if (Integer.class.isAssignableFrom(type) || Integer.TYPE.equals(type)) {
+            return Integer.valueOf(encoded);
+        }
+        if (Short.class.isAssignableFrom(type) || Short.TYPE.equals(type)) {
+            return Short.valueOf(encoded);
+        }
+        if (Byte.class.isAssignableFrom(type) || Byte.TYPE.equals(type)) {
+            return Byte.valueOf(encoded);
+        }
+        if (Long.class.isAssignableFrom(type) || Long.TYPE.equals(type)) {
+            return Long.valueOf(encoded);
+        }
+        if (Float.class.isAssignableFrom(type) || Float.TYPE.equals(type)) {
+            return Float.valueOf(encoded);
+        }
+        if (Double.class.isAssignableFrom(type) || Double.TYPE.equals(type)) {
+            return Double.valueOf(encoded);
+        }
+        if (Boolean.class.isAssignableFrom(type) || Boolean.TYPE.equals(type)) {
+            return Boolean.valueOf(encoded);
+        }
+        if (Character.class.isAssignableFrom(type) || Character.TYPE.equals(type)) {
+            return Character.valueOf(encoded.charAt(0));
+        }
+
+        throw new IllegalArgumentException();
     }
 
 }

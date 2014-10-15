@@ -360,8 +360,8 @@ public abstract class FormProperty extends Node.Property {
             // set the real value to the target object
             if (realValue != FormDesignValue.IGNORED_VALUE) {
                 setTargetValueInLAFBlock(realValue);
-            }
-            else if (valueSet && defValue != BeanSupport.NO_VALUE) {
+            } else if (valueSet && defValue != BeanSupport.NO_VALUE
+                       && (lastRealValue != null || defValue != null)/* bug 230687 */) {
                 setTargetValueInLAFBlock(defValue);
             }
 
@@ -730,7 +730,7 @@ public abstract class FormProperty extends Node.Property {
         return null;
     }
 
-  // STRIPPED
+  // A
    // /** Gets the java code for setting the property value (without the object
    //  * on which the property is set, and without semicolon at the end).
    //  * This method is optional. Example: setText("Button 1")
@@ -988,12 +988,17 @@ public abstract class FormProperty extends Node.Property {
             if (isExternalChangeMonitoring()) {
                 value = getTargetValue();
                 if (!equals(value, lastRealValue)) {
-                    // the value is different from the one last set
+                    // the value is different than when we saw it last time
                     Object propValue = (propertyValue instanceof FormDesignValue) ?
                         ((FormDesignValue)propertyValue).getDesignValue() : propertyValue;
-                    if (propValue != FormDesignValue.IGNORED_VALUE) {
-                        // TODO check type of the value, beware of boolean != Boolean
-//                        assert (propValue == null) || getValueType().isAssignableFrom(propValue.getClass());
+                    if (equals(value, propValue)) {
+                        // Bug 236005 - after setting a property value, the value obtained from
+                        // getter at that moment (and kept in lastRealValue) might be different.
+                        // But later it may return to the value originally set (after some other
+                        // property is set). In this case we should consider the property value
+                        // still set (not changed externally - derived).
+                        lastRealValue = value;
+                    } else if (propValue != FormDesignValue.IGNORED_VALUE) {
                         valueSet = false;
                         setChanged(false);
                         lastRealValue = null;

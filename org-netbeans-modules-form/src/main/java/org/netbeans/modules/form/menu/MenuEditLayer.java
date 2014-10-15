@@ -92,7 +92,6 @@ import javax.swing.event.MouseInputAdapter;
 import javax.swing.plaf.PopupMenuUI;
 import org.netbeans.modules.form.*;
 import org.netbeans.modules.form.actions.PropertyAction;
-//import org.netbeans.modules.form.editors.IconEditor.NbImageIcon;
 import org.netbeans.modules.form.palette.PaletteItem;
 import org.netbeans.modules.form.palette.PaletteUtils;
 import org.openide.filesystems.FileObject;
@@ -1168,9 +1167,7 @@ public class MenuEditLayer extends JPanel {
     public static boolean addComponentToEndOfMenu(RADComponent targetContainer, PaletteItem paletteItem) {
         FormModel model = targetContainer.getFormModel();
         MetaComponentCreator creator = model.getComponentCreator();
-        creator.precreateVisualComponent(paletteItem);
-        boolean added = creator.addPrecreatedComponent(targetContainer, null);
-        return added;
+        return creator.createComponent(paletteItem, targetContainer, null) != null;
     }
     
     
@@ -1222,7 +1219,7 @@ public class MenuEditLayer extends JPanel {
                                     configureEditedComponent(evt.getComponent());
                                 }
                             }
-                            if(evt.getChangeType() == FormModelEvent.COMPONENT_PROPERTY_CHANGED /*|| evt.getChangeType() == FormModelEvent.BINDING_PROPERTY_CHANGED*/) { // STRIPPED
+                            if(evt.getChangeType() == FormModelEvent.COMPONENT_PROPERTY_CHANGED/* || evt.getChangeType() == FormModelEvent.BINDING_PROPERTY_CHANGED*/) { // A
                                 if(evt.getContainer() == metacomp || evt.getComponent() == metacomp) {
                                     rebuildOnScreenMenu(metacomp);
                                 }
@@ -1456,7 +1453,7 @@ public class MenuEditLayer extends JPanel {
             if(rad != null) {
                 Object o = formDesigner.getComponent(rad);
                 JComponent c = (o instanceof JComponent) ? (JComponent)o : null;
-                if(c != null && isTopLevelMenu(c)) {
+                if(c != null && isTopLevelMenu(c) && rad instanceof RADVisualComponent) {
                     if(e.getClickCount() > 1) {
                         isEditing = true;
                         configureEditedComponent(c);

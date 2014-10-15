@@ -46,9 +46,11 @@ package org.netbeans.modules.form.layoutdesign;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author Tomas Pavek
@@ -59,7 +61,7 @@ public final class LayoutInterval implements LayoutConstants {
      * container. */
     static final int ATTR_DESIGN_CONTAINER_GAP = 4;
     
-    /** Marker attribute for a parallel group with significant percieved
+    /** Marker attribute for a parallel group with significant perceived
      * boundaries on both sides (i.e. not visually open for extending). */
     static final int ATTR_CLOSED_GROUP = 32;
 
@@ -439,18 +441,6 @@ public final class LayoutInterval implements LayoutConstants {
         if (getParent() == interval) {
             throw new IllegalArgumentException("Cannot add parent as a sub-interval!"); // NOI18N
         }
-        if (interval.isComponent()) { // Issue 118562
-            LayoutComponent comp = interval.getComponent();
-            for (LayoutInterval subInterval : subIntervals) {
-                if (subInterval.isComponent() && comp.equals(subInterval.getComponent())) {
-                    if (System.getProperty("netbeans.ignore.issue118562") == null) { // NOI18N
-                        throw new IllegalArgumentException("Cannot add a component into a group twice!"); // NOI18N
-                    } else {
-                        return -1;
-                    }
-                }
-            }
-        }
         if (index < 0) {
             index = subIntervals.size();
         }
@@ -464,6 +454,9 @@ public final class LayoutInterval implements LayoutConstants {
         if (index >= 0) {
             subIntervals.remove(index);
             interval.parentInterval = null;
+            if (interval.isGroup()) {
+                addRemovedIntervalStacktrace(interval);
+            }
         }
         return index;
     }
@@ -472,6 +465,9 @@ public final class LayoutInterval implements LayoutConstants {
         LayoutInterval interval = subIntervals.get(index);
         subIntervals.remove(index);
         interval.parentInterval = null;
+        if (interval.isGroup()) {
+            addRemovedIntervalStacktrace(interval);
+        }
         return interval;
     }
 
@@ -912,13 +908,22 @@ public final class LayoutInterval implements LayoutConstants {
     /**
      * @return whether given interval is allowed to resize (not defined as fixed)
      */
-    static boolean canResize(LayoutInterval interval) {
+    public static boolean canResize(LayoutInterval interval) {
         // [don't care about shrinking, assuming min possibly not defined - is it ok?]
         int max = interval.getMaximumSize();
         int pref = interval.getPreferredSize();
         assert interval.isGroup() || max != NOT_EXPLICITLY_DEFINED;
-        return (max != pref && max != USE_PREFERRED_SIZE)
-               || max == NOT_EXPLICITLY_DEFINED;
+        if ((max != pref && max != USE_PREFERRED_SIZE) || max == NOT_EXPLICITLY_DEFINED) {
+            if (interval.isComponent()) {
+                LayoutComponent comp = interval.getComponent();
+                int dimension = comp.getLayoutInterval(HORIZONTAL) == interval ? HORIZONTAL : VERTICAL;
+                if (comp.isLinkSized(dimension)) {
+                    return false; // components with linked size actually can't resize
+                }
+            }
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -926,7 +931,7 @@ public final class LayoutInterval implements LayoutConstants {
      * space by its parent).
      * @return whether given interval would resize if given opportunity
      */
-    static boolean wantResize(LayoutInterval interval) {
+    public static boolean wantResize(LayoutInterval interval) {
         return canResize(interval)
                && (!interval.isGroup() || contentWantResize(interval));
     }
@@ -1082,7 +1087,7 @@ public final class LayoutInterval implements LayoutConstants {
      * Computes effective alignment of an interval in its parent. In case of
      * a sequential parent, the effective interval alignment depends on other
      * intervals and their resizability. E.g. if a preceding interval is
-     * resizing then the interval is effectivelly "pushed" to the trailing end.
+     * resizing then the interval is effectively "pushed" to the trailing end.
      * If there are no other intervals resizing then the parent alignment is
      * returned. If there are resizing intervals on both sides, or the interval
      * itself is resizing, then the there is no (positive) effective alignment.
@@ -1183,24 +1188,28 @@ public final class LayoutInterval implements LayoutConstants {
     /**
      * Computes effective alignment of an interval's edge relatively to given
      * parent.
+     * @param interval the interval whose edge alignment should be determined
+     * @param parent the parent interval in which the alignment should be
+     *        determined; null can be used to go up to the root
      * @return effective alignment within parent, or DEFAULT in case of
      *         ambiguous alignment in sequential parent
      */
     static int getEffectiveAlignmentInParent(LayoutInterval interval, LayoutInterval parent, int edge) {
-        assert parent.isParentOf(interval);
+        assert parent == null || parent.isParentOf(interval);
         int alignment = edge;
         do {
             alignment = getEffectiveAlignment(interval, alignment, true);
             interval = interval.getParent();
             if (alignment != LEADING && alignment != TRAILING) {
-                while (interval != parent) {
-                    if (getEffectiveAlignment(interval) != alignment)
+                while (interval != parent && interval.getParent() != null) {
+                    if (getEffectiveAlignment(interval) != alignment) {
                         return DEFAULT;
+                    }
                     interval = interval.getParent();
                 }
             }
         }
-        while (interval != parent);
+        while (interval != parent && interval.getParent() != null);
         return alignment;
     }
 
@@ -1259,5 +1268,45 @@ public final class LayoutInterval implements LayoutConstants {
             clone.setPaddingType(interval.getPaddingType());
         }
         return clone;
+    }
+
+    // -----
+    // special error diagnostics for localizing bug 240634/222703, to be removed once fixed
+
+    private static Map<LayoutInterval, Throwable> removedIntervalsMap;
+
+    private static void addRemovedIntervalStacktrace(LayoutInterval li) {
+        if (removedIntervalsMap != null) {
+            removedIntervalsMap.put(li, new Throwable());
+        }
+    }
+
+    static String getRemoveStacktrace(LayoutInterval li) {
+        Throwable t = removedIntervalsMap != null ? removedIntervalsMap.get(li) : null;
+        if (t != null) {
+            StackTraceElement[] ste = t.getStackTrace();
+            StringBuilder sb = new StringBuilder();
+            for (int i=1; i < ste.length; i++) {
+                sb.append("      at "); // NOI18N
+                sb.append(ste[i].toString());
+                sb.append("\n"); // NOI18N
+            }
+            if (sb.length() > 0) {
+                return "remove stacktrace:\n" + sb.toString(); // NOI18N
+            }
+        }
+        return null;
+    }
+
+    static void prepareDiagnostics() {
+        cleanDiagnostics();
+        removedIntervalsMap = new HashMap();
+    }
+
+    static void cleanDiagnostics() {
+        if (removedIntervalsMap != null) {
+            removedIntervalsMap.clear();
+            removedIntervalsMap = null;
+        }
     }
 }

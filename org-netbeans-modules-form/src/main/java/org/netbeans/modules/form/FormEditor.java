@@ -44,10 +44,9 @@
 
 package org.netbeans.modules.form;
 
-//import java.awt.EventQueue;
-
 import org.netbeans.modules.form.actions.*;
 import org.netbeans.modules.form.assistant.AssistantModel;
+import org.netbeans.modules.form.layoutdesign.LayoutDesigner;
 import org.netbeans.modules.form.palette.PaletteUtils;
 import org.netbeans.modules.form.project.*;
 import org.netbeans.spi.palette.PaletteController;
@@ -59,19 +58,13 @@ import org.openide.util.*;
 import org.openide.util.actions.SystemAction;
 
 import javax.swing.*;
+import java.awt.*;
 import java.beans.*;
 import java.io.IOException;
 import java.util.*;
+import java.util.List;
 import java.util.logging.*;
 import java.util.prefs.*;
-
-//import javax.swing.text.Document;
-//import org.netbeans.api.editor.guards.GuardedSectionManager;
-//import org.netbeans.api.editor.guards.SimpleSection;
-//import org.netbeans.api.project.FileOwnerQuery;
-//import org.netbeans.api.project.Project;
-//import org.openide.filesystems.FileObject;
-//import org.openide.util.Lookup;
 
 /**
  * Form editor.
@@ -145,6 +138,12 @@ public class FormEditor
   private List<java.awt.Window> floatingWindows;
 
   /**
+   * Set of nodes for which a standalone Properties window was opened.
+   * The windows must be closed when the form is closed.
+   */
+  private Set<FormNode> nodesWithPropertiesWindows;
+
+  /**
    * The DataObject of the form
    */
   private DataObject formDataObject;
@@ -201,7 +200,7 @@ public class FormEditor
     return formDataObject;
   }
 
-  EditorSupport getEditorSupport()
+  public final EditorSupport getEditorSupport()
   {
     return editorSupport;
   }
@@ -348,6 +347,10 @@ public class FormEditor
   public boolean loadFormData()
   {
     assert !formLoaded;
+
+    // bug #234032: Beans.setDesignTime is ThreadGroupContext sensitive since JDK 7
+    Beans.setDesignTime(true);
+
     if (persistenceManager == null && !prepareLoading())
     {
       return false;
@@ -463,7 +466,7 @@ public class FormEditor
         }
     }*/
 
-  void saveFormData() throws PersistenceException
+  public void saveFormData() throws PersistenceException
   {
     if (formLoaded && formDataObject.getPrimaryFile().canWrite() && !formModel.isReadOnly())
     {
@@ -583,15 +586,40 @@ public class FormEditor
 
   public void reportSavingErrors()
   { // TODO can get rid of this? (throw exc on failed saving)
-    reportErrors(false);
+    reportErrors(false, null);
   }
 
+  // TODO should not be needed, kept temporarily for compatibility
   public String reportLoadingErrors()
   {
-    return reportErrors(formLoaded);
+    DialogDescriptor dd = reportLoadingErrors(null);
+    Object message = dd != null ? dd.getMessage() : null;
+    return message instanceof String ? (String) message : null;
   }
 
-  private String reportErrors(boolean checkNonFatalLoadingErrors)
+  /**
+   * Helper methods for reporting errors that happend during form loading.
+   * (1) If some fatal error happened (i.e. the form could not be loaded) then
+   * it is reported right away by this method in a modal dialog.
+   * (2) If only some non-fatal errors happened causing some components or
+   * properties not loaded, then a DialogDescriptor is created and returned to
+   * be used to report the errors at a suitable moment (i.e. after the loading
+   * sequence is completed so the GUI form becomes fully visible incl. broken
+   * components). In this case the parameter 'options' is used, representing
+   * how the user can proceed (e.g. view only, edit anyway, cancel opening).
+   *
+   * @return DialogDescriptor to use to report errors to the user, or null if
+   * nothing needs to be reported
+   */
+  public DialogDescriptor reportLoadingErrors(Object[] options)
+  {
+    // The options for DialogDescriptor must be provided upfront so the first
+    // option can be set as initial (default). This cannot be set later, only
+    // in constructor of DialogDescriptor.
+    return reportErrors(formLoaded, options);
+  }
+
+  private DialogDescriptor reportErrors(boolean checkNonFatalLoadingErrors, Object[] options)
   {
     if (!anyPersistenceError())
     {
@@ -651,6 +679,11 @@ public class FormEditor
           dataLossError = true;
       }
 
+      if (dataLossError && !(t instanceof PersistenceException))
+      {
+        Logger.getLogger("").log(Level.INFO, t.getLocalizedMessage(), t); // NOI18N
+      }
+
       if (checkNonFatalLoadingErrors && persistManager != null)
       {
         Logger.getLogger(FormEditor.class.getName()).log(Level.WARNING, t.getLocalizedMessage(), t);
@@ -672,18 +705,21 @@ public class FormEditor
       }
     }
 
-    resetPersistenceErrorLog();
-
+    DialogDescriptor dd = null;
     if (checkNonFatalLoadingErrors && dataLossError)
     {
       // the form was loaded with some non-fatal errors - some data
       // was not loaded - show a warning about possible data loss
-      return userErrorMsgs.append(FormUtils.getBundleString("MSG_FormLoadedWithErrors")).toString();  // NOI18N
+      userErrorMsgs.append(FormUtils.getBundleString("MSG_FormLoadedWithErrors"));
+      dd = FormUtils.createErrorDialogWithExceptions(
+          FormUtils.getBundleString("CTL_FormLoadedWithErrors"), // NOI18N
+          userErrorMsgs.toString(),
+          DialogDescriptor.WARNING_MESSAGE,
+          options,
+          persistenceErrors.toArray(new Throwable[persistenceErrors.size()]));
     }
-    else
-    {
-      return null;
-    }
+    resetPersistenceErrorLog();
+    return dd;
   }
 
   /**
@@ -720,12 +756,20 @@ public class FormEditor
   }
 
   /**
-   * Sets the FormEditor in Read-Only mode
+   * Sets the FormEditor to read-only mode.
    */
   public void setFormReadOnly()
   {
     formModel.setReadOnly(true);
-    getFormDesigner().getHandleLayer().setViewOnly(true);
+    FormDesigner designer = getFormDesigner();
+    if (designer != null)
+    {
+      HandleLayer handleLayer = designer.getHandleLayer();
+      if (handleLayer != null)
+      {
+        handleLayer.setViewOnly(true);
+      }
+    }
     detachFormListener();
   }
 
@@ -800,7 +844,7 @@ public class FormEditor
    * Closes the form. Used when closing the form editor or reloading
    * the form.
    */
-  void closeForm()
+  public void closeForm()
   {
     if (formLoaded)
     {
@@ -836,7 +880,17 @@ public class FormEditor
         }
         floatingWindows = null;
       }
+
+      // close standalone properties window invoked explicitly on selected nodes via the Properties action
+      if (nodesWithPropertiesWindows != null)
+      {
+        for (FormNode n : nodesWithPropertiesWindows)
+        {
+          n.fireNodeDestroyedHelper();
+        }
+      }
     }
+    ClassPathUtils.releaseFormClassLoader(formDataObject.getPrimaryFile());
     // cleanup just for sure
     formRootNode = null;
     formDesigner = null;
@@ -847,6 +901,31 @@ public class FormEditor
     //prefetchedSuperclassName = null; // STRIPPED
     //resourceSupport = null; // STRIPPED
     //bindingSupport = null; // STRIPPED
+  }
+
+  /**
+   * Changes the DataObject of the form. Should be used only in situations when
+   * the original java and form files are renamed or moved elsewhere and the
+   * form editor cannot be reloaded (recreated) with the new FormDataObject
+   * (e.g. because it is opened with unsaved changes). This may happen in JDev.
+   */
+  public void relocate(DataObject newDataObject)
+  {
+    detachDataObjectListener();
+    detachPaletteListener();
+    DataObject oldDataObject = formDataObject;
+    formDataObject = newDataObject;
+    if (formLoaded)
+    {
+      String name = formDataObject.getName();
+      formModel.setName(name);
+      formRootNode.updateName(name);
+      ClassPathUtils.getProjectClassLoader(newDataObject.getPrimaryFile());
+      ClassPathUtils.releaseFormClassLoader(oldDataObject.getPrimaryFile());
+      attachDataObjectListener();
+      attachPaletteListener();
+      formModel.fireFormChanged(false);
+    }
   }
 
   private void attachFormListener()
@@ -864,6 +943,7 @@ public class FormEditor
         if (events == null)
           return;
 
+        boolean justAfterLoading = false;
         boolean modifying = false;
         Set<ComponentContainer> changedContainers = events.length > 0 ?
             new HashSet<ComponentContainer>() : null;
@@ -928,6 +1008,10 @@ public class FormEditor
               compsToSelect.remove(ev.getContainer());
             }
           }
+          else if (type == FormModelEvent.FORM_LOADED)
+          {
+            justAfterLoading = true;
+          }
         }
 
         FormDesigner designer = getFormDesigner();
@@ -945,8 +1029,10 @@ public class FormEditor
           }
         }
 
-        if (modifying)
-        { // mark the form document modified explicitly
+        if (modifying && (!justAfterLoading || needPostCreationUpdate() || formModel.isCompoundEditInProgress()))
+        {
+          // mark the form document modified explicitly, but not if modified
+          // as a result of correction during form loading (not to open as modified)
           getEditorSupport().markModified();
           //checkFormVersionUpgrade(); // STRIPPED
         }
@@ -996,67 +1082,88 @@ public class FormEditor
    * user refuses the upgrade, undo is performed (for that all the fired
    * changes must be already processed).
    */
-  // STRIPPED
-/*    private void checkFormVersionUpgrade() {
-        FormModel.FormVersion currentVersion = formModel.getCurrentVersionLevel();
-        FormModel.FormVersion maxVersion = formModel.getMaxVersionLevel();
-        if (currentVersion.ordinal() > maxVersion.ordinal()) {
-            if (EventQueue.isDispatchThread()) {
-                processVersionUpgrade(true);
-            } else { // not a result of a user action, or some forgotten upgrade...
-                confirmVersionUpgrade();
-            }
-        }
+/*  private void checkFormVersionUpgrade()
+  {
+    FormModel.FormVersion currentVersion = formModel.getCurrentVersionLevel();
+    FormModel.FormVersion maxVersion = formModel.getMaxVersionLevel();
+    if (currentVersion.ordinal() > maxVersion.ordinal())
+    {
+      if (EventQueue.isDispatchThread())
+      {
+        processVersionUpgrade(true);
+      }
+      else
+      { // not a result of a user action, or some forgotten upgrade...
+        confirmVersionUpgrade();
+      }
     }
+  }
 
-    private void processVersionUpgrade(boolean processingEvents) {
-        if (!processingEvents && formModel.hasPendingEvents()) {
-            processingEvents = true;
-        }
-        if (processingEvents) { // post a task for later, if not already posted
-            if (!upgradeCheckPosted) {
-                upgradeCheckPosted = true;
-                EventQueue.invokeLater(new Runnable() {
-                    @Override
-                    public void run() {
-                        upgradeCheckPosted = false;
-                        if (formModel != null) {
-                            processVersionUpgrade(false);
-                        }
-                    }
-                });
-            }
-        } else { // all events processed
-            String upgradeOption = FormUtils.getBundleString("CTL_UpgradeOption"); // NOI18N
-            String undoOption = FormUtils.getBundleString("CTL_CancelOption"); // NOI18N
-            NotifyDescriptor d = new NotifyDescriptor(
-                    FormUtils.getBundleString("MSG_UpgradeQuestion"), // NOI18N
-                    FormUtils.getBundleString("TITLE_FormatUpgrade"), // NOI18N
-                    NotifyDescriptor.DEFAULT_OPTION,
-                    NotifyDescriptor.QUESTION_MESSAGE,
-                    new String[] { upgradeOption, undoOption},
-                    upgradeOption);
-            if (DialogDisplayer.getDefault().notify(d) == upgradeOption) {
-                confirmVersionUpgrade();
-            } else { // upgrade refused
-                revertVersionUpgrade();
-            }
-        }
+  private void processVersionUpgrade(boolean processingEvents)
+  {
+    if (!processingEvents && formModel.hasPendingEvents())
+    {
+      processingEvents = true;
     }
-
-    private void confirmVersionUpgrade() {
-        if (formModel != null) {
-            formModel.confirmVersionLevel();
-            formModel.setMaxVersionLevel(FormModel.LATEST_VERSION);
-        }
+    if (processingEvents)
+    { // post a task for later, if not already posted
+      if (!upgradeCheckPosted)
+      {
+        upgradeCheckPosted = true;
+        EventQueue.invokeLater(new Runnable()
+        {
+          @Override
+          public void run()
+          {
+            upgradeCheckPosted = false;
+            if (formModel != null)
+            {
+              processVersionUpgrade(false);
+            }
+          }
+        });
+      }
     }
+    else
+    { // all events processed
+      String upgradeOption = FormUtils.getBundleString("CTL_UpgradeOption"); // NOI18N
+      String undoOption = FormUtils.getBundleString("CTL_CancelOption"); // NOI18N
+      NotifyDescriptor d = new NotifyDescriptor(
+          FormUtils.getBundleString("MSG_UpgradeQuestion"), // NOI18N
+          FormUtils.getBundleString("TITLE_FormatUpgrade"), // NOI18N
+          NotifyDescriptor.DEFAULT_OPTION,
+          NotifyDescriptor.QUESTION_MESSAGE,
+          new String[]{upgradeOption, undoOption},
+          upgradeOption);
+      if (DialogDisplayer.getDefault().notify(d) == upgradeOption)
+      {
+        confirmVersionUpgrade();
+      }
+      else
+      { // upgrade refused
+        revertVersionUpgrade();
+      }
+    }
+  }
 
-    private void revertVersionUpgrade() {
-        if (formModel != null) {
-            formModel.getUndoRedoManager().undo();
-            formModel.revertVersionLevel();
-        }
-    }*/
+  private void confirmVersionUpgrade()
+  {
+    if (formModel != null)
+    {
+      formModel.confirmVersionLevel();
+      formModel.setMaxVersionLevel(FormModel.LATEST_VERSION);
+    }
+  }
+
+  private void revertVersionUpgrade()
+  {
+    if (formModel != null)
+    {
+      formModel.getUndoRedoManager().undo();
+      formModel.revertVersionLevel();
+    }
+  }*/
+
   private void attachDataObjectListener()
   {
     if (dataObjectListener != null)
@@ -1110,45 +1217,80 @@ public class FormEditor
     settingsListener = new PreferenceChangeListener()
     {
       @Override
-      public void preferenceChange(PreferenceChangeEvent evt)
+      public void preferenceChange(final PreferenceChangeEvent evt)
       {
-        Iterator iter = openForms.keySet().iterator();
-        while (iter.hasNext())
+        if (EventQueue.isDispatchThread())
         {
-          FormModel formModel = (FormModel) iter.next();
-          String propName = evt.getKey();
-
-          if (FormLoaderSettings.PROP_USE_INDENT_ENGINE.equals(propName))
+          updateSettings(evt);
+        }
+        else
+        {
+          EventQueue.invokeLater(new Runnable()
           {
-            formModel.fireSyntheticPropertyChanged(null, propName,
-                                                   null, evt.getNewValue());
-          }
-          else if (FormLoaderSettings.PROP_SELECTION_BORDER_SIZE.equals(propName)
-              || FormLoaderSettings.PROP_SELECTION_BORDER_COLOR.equals(propName)
-              || FormLoaderSettings.PROP_CONNECTION_BORDER_COLOR.equals(propName)
-              || FormLoaderSettings.PROP_FORMDESIGNER_BACKGROUND_COLOR.equals(propName)
-              || FormLoaderSettings.PROP_FORMDESIGNER_BORDER_COLOR.equals(propName))
-          {
-            FormDesigner designer = getFormDesigner(formModel);
-            if (designer != null)
+            @Override
+            public void run()
             {
-              designer.updateVisualSettings();
+              updateSettings(evt);
             }
-          }
-          else if (FormLoaderSettings.PROP_PALETTE_IN_TOOLBAR.equals(propName))
-          {
-            FormDesigner designer = getFormDesigner(formModel);
-            if (designer != null)
-            {
-              designer.getFormToolBar().showPaletteButton(
-                  FormLoaderSettings.getInstance().isPaletteInToolBar());
-            }
-          }
+          });
         }
       }
     };
 
     FormLoaderSettings.getPreferences().addPreferenceChangeListener(settingsListener);
+  }
+
+  private static void updateSettings(PreferenceChangeEvent evt)
+  {
+    Iterator iter = openForms.keySet().iterator();
+    while (iter.hasNext())
+    {
+      FormModel formModel = (FormModel) iter.next();
+      String propName = evt.getKey();
+
+      if (FormLoaderSettings.PROP_USE_INDENT_ENGINE.equals(propName))
+      {
+        formModel.fireSyntheticPropertyChanged(null, propName,
+                                               null, evt.getNewValue());
+      }
+      else if (FormLoaderSettings.PROP_SELECTION_BORDER_SIZE.equals(propName)
+          || FormLoaderSettings.PROP_SELECTION_BORDER_COLOR.equals(propName)
+          || FormLoaderSettings.PROP_CONNECTION_BORDER_COLOR.equals(propName)
+          || FormLoaderSettings.PROP_FORMDESIGNER_BACKGROUND_COLOR.equals(propName)
+          || FormLoaderSettings.PROP_FORMDESIGNER_BORDER_COLOR.equals(propName)
+          || FormLoaderSettings.PROP_GUIDING_LINE_COLOR.equals(propName))
+      {
+        FormDesigner designer = getFormDesigner(formModel);
+        if (designer != null)
+        {
+          designer.updateVisualSettings();
+        }
+      }
+      else if (FormLoaderSettings.PROP_PALETTE_IN_TOOLBAR.equals(propName))
+      {
+        FormDesigner designer = getFormDesigner(formModel);
+        if (designer != null)
+        {
+          designer.getFormToolBar().showPaletteButton(
+              FormLoaderSettings.getInstance().isPaletteInToolBar());
+        }
+      }
+      else if (FormLoaderSettings.PROP_PAINT_ADVANCED_LAYOUT.equals(propName))
+      {
+        FormDesigner designer = getFormDesigner(formModel);
+        if (designer != null)
+        {
+          LayoutDesigner layoutDesigner = designer.getLayoutDesigner();
+          if (layoutDesigner != null)
+          {
+            int paintLayout = FormLoaderSettings.getInstance().getPaintAdvancedLayoutInfo();
+            layoutDesigner.setPaintAlignment((paintLayout & 1) != 0);
+            layoutDesigner.setPaintGaps((paintLayout & 2) != 0);
+            designer.getHandleLayer().repaint();
+          }
+        }
+      }
+    }
   }
 
   private static void detachSettingsListener()
@@ -1223,7 +1365,6 @@ public class FormEditor
   }
 
   // STRIPPED
-
   /**
    * Returns code editor pane for the specified form.
    *
@@ -1327,7 +1468,7 @@ public class FormEditor
   {
     return openForms.get(formModel);
   }
-    
+
     /*UndoRedo.Manager getFormUndoRedoManager() {
         return formModel != null ? formModel.getUndoRedoManager() : null;
     }*/
@@ -1347,25 +1488,41 @@ public class FormEditor
       floatingWindows.remove(window);
   }
 
-  // STRIPPED
-    /*public void registerDefaultComponentAction(Action action) {
-        if (defaultActions == null) {
-            createDefaultComponentActionsList();
-        } else {
-            defaultActions.remove(action);
-        }
-        defaultActions.add(0, action);
+  void registerNodeWithPropertiesWindow(FormNode node)
+  {
+    if (nodesWithPropertiesWindows == null)
+    {
+      nodesWithPropertiesWindows = new WeakSet<FormNode>();
     }
+    nodesWithPropertiesWindows.add(node);
+  }
 
-    public void unregisterDefaultComponentAction(Action action) {
-        if (defaultActions != null) {
-            defaultActions.remove(action);
-        }
-    }*/
+  // STRIPPED
+  /*public void registerDefaultComponentAction(Action action)
+  {
+    if (defaultActions == null)
+    {
+      createDefaultComponentActionsList();
+    }
+    else
+    {
+      defaultActions.remove(action);
+    }
+    defaultActions.add(0, action);
+  }
+
+  public void unregisterDefaultComponentAction(Action action)
+  {
+    if (defaultActions != null)
+    {
+      defaultActions.remove(action);
+    }
+  }*/
 
   private void createDefaultComponentActionsList()
   {
     defaultActions = new LinkedList<Action>();
+    //defaultActions.add(SystemAction.get(CustomizeEmptySpaceAction.EditSingleGapAction.class));
     defaultActions.add(SystemAction.get(EditContainerAction.class));
     defaultActions.add(SystemAction.get(EditFormAction.class));
     //defaultActions.add(SystemAction.get(DefaultRADAction.class));
@@ -1412,19 +1569,21 @@ public class FormEditor
   }
 
   // STRIPPED
-  //  /**
-  //  * Updates project classpath with the beans binding library.
-  //  *
-  //  * @param formModel form model.
-  //  * @return <code>true</code> if the project was updated.
-  //  */
-  //  public static boolean updateProjectForBeansBinding(FormModel formModel) {
-  //      FormEditor formEditor = getFormEditor(formModel);
-  //      if (formEditor != null) {
-  //          return formEditor.getBindingSupport().updateProjectForBeansBinding();
-  //      }
-  //      return false;
-  //  }
+  /**
+   * Updates project classpath with the beans binding library.
+   *
+   * @param formModel form model.
+   * @return <code>true</code> if the project was updated.
+   */
+  /*public static boolean updateProjectForBeansBinding(FormModel formModel)
+  {
+    FormEditor formEditor = getFormEditor(formModel);
+    if (formEditor != null)
+    {
+      return formEditor.getBindingSupport().updateProjectForBeansBinding();
+    }
+    return false;
+  }*/
 
   public static boolean isNonVisualTrayEnabled()
   {

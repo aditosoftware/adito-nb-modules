@@ -48,6 +48,7 @@ import de.adito.aditoweb.nbm.nbide.nbaditointerface.NbAditoInterface;
 import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.layout.*;
 import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.model.*;
 import org.netbeans.api.actions.Savable;
+import org.netbeans.lib.awtextra.AbsoluteLayout;
 import org.netbeans.modules.form.actions.TestAction;
 import org.netbeans.modules.form.adito.components.AditoFormDesignerExtension;
 import org.netbeans.modules.form.adito.perstistencemanager.*;
@@ -79,8 +80,6 @@ import java.beans.*;
 import java.util.*;
 import java.util.List;
 import java.util.logging.*;
-
-//import org.netbeans.modules.form.wizard.ConnectionWizard; // STRIPPED
 
 
 /**
@@ -129,7 +128,7 @@ public class FormDesigner
 
   // selection
   private List<RADComponent> selectedComponents = new ArrayList<RADComponent>();
-  private List<RADComponent> selectedLayoutComponents = new ArrayList<RADComponent>();
+  private List<RADVisualComponent> selectedLayoutComponents = new ArrayList<RADVisualComponent>();
   private ExplorerManager explorerManager;
   private boolean synchronizingSelection;
 
@@ -227,8 +226,8 @@ public class FormDesigner
       }
     };
     layeredPane.setLayout(new OverlayLayout(layeredPane));
-    layeredPane.add(designPanel, new Integer(1000));
-    layeredPane.add(handleLayer, new Integer(1001));
+    layeredPane.add(designPanel, Integer.valueOf(1000));
+    layeredPane.add(handleLayer, Integer.valueOf(1001));
     canvasRoot = layeredPane;
 
 //        updateAssistant();
@@ -246,13 +245,16 @@ public class FormDesigner
     explorerManager.setRootContext(formEditor.getFormRootNode());
 
     undoRedoProvider = formEditor.getFormDataObject().getLookup().lookup(UndoRedo.Provider.class);
-        /*undoRedoProvider = new UndoRedo.Provider() {
-            @Override
-            public UndoRedo getUndoRedo() {
-                UndoRedo ur = formModel != null ? formModel.getUndoRedoManager() : null;
-                return ur != null ? ur : UndoRedo.NONE;
-            }
-        };*/
+    // A
+    /*undoRedoProvider = new UndoRedo.Provider()
+    {
+      @Override
+      public UndoRedo getUndoRedo()
+      {
+        UndoRedo ur = formModel != null ? formModel.getUndoRedoManager() : null;
+        return ur != null ? ur : UndoRedo.NONE;
+      }
+    };*/
     lookupContent.add(undoRedoProvider);
 
     initLookup();
@@ -262,16 +264,18 @@ public class FormDesigner
     formModel.addFormModelListener(formModelListener);
 
     replicator = new VisualReplicator(true, FormUtils.getViewConverters()/*,
-            FormEditor.getBindingSupport(formModel)*/); // STRIPPED
+            FormEditor.getBindingSupport(formModel)*/); // A
 
     resetTopDesignComponent(false);
     handleLayer.setViewOnly(formModel.isReadOnly());
 
-    // Beans without layout model doesn't require layout designer
+    // Beans without layout model don't need layout designer
     if (formModel.getLayoutModel() != null)
     {
-      layoutDesigner = new LayoutDesigner(formModel.getLayoutModel(),
-                                          new LayoutMapper());
+      layoutDesigner = new LayoutDesigner(formModel.getLayoutModel(), new LayoutMapper());
+      int paintLayout = FormLoaderSettings.getInstance().getPaintAdvancedLayoutInfo();
+      layoutDesigner.setPaintAlignment((paintLayout & 1) != 0);
+      layoutDesigner.setPaintGaps((paintLayout & 2) != 0);
     }
 
     updateWholeDesigner();
@@ -473,7 +477,7 @@ public class FormDesigner
     boolean dataNodeLookup = (lookups[index] != Lookup.EMPTY);
     if (includeDataNodeLookup != dataNodeLookup)
     {
-      lookups[index] = includeDataNodeLookup && formEditor.getFormDataObject().isValid()
+      lookups[index] = includeDataNodeLookup && formEditor.getFormDataObject().isValid() // A
           ? formEditor.getFormDataObject().getNodeDelegate().getLookup()
           : Lookup.EMPTY;
       try
@@ -585,12 +589,12 @@ public class FormDesigner
 
   public Object getComponent(RADComponent metacomp)
   {
-    return replicator.getClonedComponent(metacomp.getId());
+    return replicator != null ? replicator.getClonedComponent(metacomp.getId()) : null;
   }
 
   public Object getComponent(String componentId)
   {
-    return replicator.getClonedComponent(componentId);
+    return replicator != null ? replicator.getClonedComponent(componentId) : null;
   }
 
   public RADComponent getMetaComponent(Object comp)
@@ -617,7 +621,6 @@ public class FormDesigner
   public void setTopDesignComponent(RADVisualComponent component,
                                     boolean update)
   {
-
     highlightTopDesignComponentName(false);
     // TODO need to remove bindings of the current cloned view (or clone bound components as well)
     Object old = topDesignComponent;
@@ -626,11 +629,23 @@ public class FormDesigner
     highlightTopDesignComponentName(!isTopRADComponent());
     if (update)
     {
+      selectedLayoutComponents.clear(); // so e.g. JScrollPane does not keep selected while its contained JPanel became root
       setSelectedComponent(topDesignComponent);
       updateWholeDesigner();
     }
     firePropertyChange(PROP_TOP_DESIGN_COMPONENT, old, component);
     updateTestAction();
+    // topDesignComponent could have been out of the design view so far,
+    // so not selected as a layout component
+    if (!selectedLayoutComponents.contains(topDesignComponent))
+    {
+      selectedLayoutComponents.add(topDesignComponent);
+      if (layoutDesigner != null && topDesignComponent instanceof RADVisualContainer
+          && ((RADVisualContainer) topDesignComponent).getLayoutSupport() == null)
+      {
+        layoutDesigner.setSelectedComponents(new String[]{topDesignComponent.getId()});
+      }
+    }
   }
 
   // Issue 200631. It would be much better if TestAction was observing
@@ -667,7 +682,7 @@ public class FormDesigner
    *
    * @param metacomp component.
    * @return <code>true</code> if the component is in designer,
-   *         returns <code>false</code> otherwise.
+   * returns <code>false</code> otherwise.
    */
   public boolean isInDesigner(RADVisualComponent metacomp)
   {
@@ -808,29 +823,28 @@ public class FormDesigner
   private static Locale switchToDesignLocale(FormModel formModel)
   {
     Locale defaultLocale = null;
-    // STRIPPED
-       /* String locale = FormEditor.getResourceSupport(formModel).getDesignLocale();
-        if (locale != null && !locale.equals("")) { // NOI18N
-            defaultLocale = Locale.getDefault();
+    // A
+    /*String locale = FormEditor.getResourceSupport(formModel).getDesignLocale();
+    if (locale != null && !locale.equals(""))
+    { // NOI18N
+      defaultLocale = Locale.getDefault();
 
-            String[] parts = locale.split("_"); // NOI18N
-            int i = 0;
-            if ("".equals(parts[i])) // NOI18N
-                i++;
-            String language = i < parts.length ? parts[i++] : null;
-            String country = i < parts.length ? parts[i++] : ""; // NOI18N
-            String variant = i < parts.length ? parts[i] : ""; // NOI18N
-            if (language != null)
-                Locale.setDefault(new Locale(language, country, variant));
-        }*/
+      String[] parts = locale.split("_"); // NOI18N
+      int i = 0;
+      if ("".equals(parts[i])) // NOI18N
+        i++;
+      String language = i < parts.length ? parts[i++] : null;
+      String country = i < parts.length ? parts[i++] : ""; // NOI18N
+      String variant = i < parts.length ? parts[i] : ""; // NOI18N
+      if (language != null)
+        Locale.setDefault(new Locale(language, country, variant));
+    }*/
     return defaultLocale;
   }
 
   Component getTopDesignComponentView()
   {
-    return topDesignComponent != null
-        ? (Component) replicator.getClonedComponent(topDesignComponent)
-        : null;
+    return (Component) replicator.getClonedComponent(topDesignComponent);
   }
 
   // NOTE: does not create a new Point instance
@@ -932,19 +946,11 @@ public class FormDesigner
     if (mode == MODE_ADD)
     {
       PaletteItem pitem = PaletteUtils.getSelectedItem();
-      if ((pitem != null) && PaletteItem.TYPE_CHOOSE_BEAN.equals(pitem.getExplicitComponentType())
-          && getSelectedDesigner() == this)
+      if (pitem != null && getSelectedDesigner() == this)
       {
-        NotifyDescriptor.InputLine desc = new NotifyDescriptor.InputLine(
-            FormUtils.getBundleString("MSG_Choose_Bean"), // NOI18N
-            FormUtils.getBundleString("TITLE_Choose_Bean")); // NOI18N
-        DialogDisplayer.getDefault().notify(desc);
-        if (NotifyDescriptor.OK_OPTION.equals(desc.getValue()))
-        {
-          pitem.setClassFromCurrentProject(desc.getInputText(),
-                                           formEditor.getFormDataObject().getPrimaryFile());
-        }
-        else
+        boolean prepared = pitem.prepareComponentInitializer(
+            formEditor.getFormDataObject().getPrimaryFile());
+        if (!prepared)
         {
           toggleSelectionMode();
           return;
@@ -1033,6 +1039,10 @@ public class FormDesigner
 
   private void setupDesignerSize()
   {
+    if (formModel == null)
+    { // the form can be closed just after opened, before this gets called (#70439, #240027)
+      return;
+    }
     Dimension size = null;
     RADVisualFormContainer formCont = topDesignComponent instanceof RADVisualFormContainer ?
         (RADVisualFormContainer) topDesignComponent : null;
@@ -1046,6 +1056,7 @@ public class FormDesigner
       }
       if (size == null)
       {
+        // A
         Node.Property propWidth = topDesignComponent.getPropertyByName("width");
         Node.Property propHeight = topDesignComponent.getPropertyByName("height");
         int width = 0;
@@ -1062,7 +1073,7 @@ public class FormDesigner
         if (width != 0 && height != 0)
           size = new Dimension(width, height);
         else
-          size = (Dimension) topDesignComponent.getAuxValue(PROP_DESIGNER_SIZE);
+        size = (Dimension) topDesignComponent.getAuxValue(PROP_DESIGNER_SIZE);
       }
       if (size != null)
       {
@@ -1100,69 +1111,100 @@ public class FormDesigner
       {
         topCont = topComp;
       }
-      // can't rely on minimum size of the container wrap - e.g. menu bar
-      // returns wrong min height
-      int wDiff = topComp.getWidth() - topCont.getWidth();
-      int hDiff = topComp.getHeight() - topCont.getHeight();
-
-      Dimension designerSize = new Dimension(getDesignerSize());
-      designerSize.width -= wDiff;
-      designerSize.height -= hDiff;
-      boolean corrected = false;
-      if (layoutDesigner != null && layoutDesigner.isPreferredSizeChanged())
+      if (shouldAdjustDesignerSize(topCont))
       {
-        Dimension prefSize = topCont.getPreferredSize();
-        if (designerSize.width != prefSize.width)
-        {
-          designerSize.width = prefSize.width;
-          corrected = true;
-        }
-        if (designerSize.height != prefSize.height)
-        {
-          designerSize.height = prefSize.height;
-          corrected = true;
-        }
-      }
-      else
-      {
-        Dimension minSize = topCont.getMinimumSize();
-        if (designerSize.width < minSize.width)
-        {
-          designerSize.width = minSize.width;
-          corrected = true;
-        }
-        if (designerSize.height < minSize.height)
-        {
-          designerSize.height = minSize.height;
-          corrected = true;
-        }
-      }
+        // can't rely on minimum size of the container wrap - e.g. menu bar
+        // returns wrong min height
+        int wDiff = topComp.getWidth() - topCont.getWidth();
+        int hDiff = topComp.getHeight() - topCont.getHeight();
 
-      if (corrected)
-      {
-        if (shouldHonorDesignerMinSize(topCont, designerSizeExplictlySet))
+        Dimension designerSize = new Dimension(getDesignerSize());
+        designerSize.width -= wDiff;
+        designerSize.height -= hDiff;
+        boolean corrected = false;
+        if (layoutDesigner != null && layoutDesigner.isPreferredSizeChanged()
+            && shouldHonorDesignerPrefSize(topCont))
         {
-          designerSize.width += wDiff;
-          designerSize.height += hDiff;
-
-          // hack: we need the size correction in the undo/redo
-          if (formModel.isCompoundEditInProgress())
+          Dimension prefSize = topCont.getPreferredSize();
+          if (designerSize.width != prefSize.width)
           {
-            FormModelEvent ev = new FormModelEvent(formModel, FormModelEvent.SYNTHETIC_PROPERTY_CHANGED);
-            ev.setComponentAndContainer(topDesignComponent, null);
-            ev.setProperty(PROP_DESIGNER_SIZE, getDesignerSize(), designerSize);
-            formModel.addUndoableEdit(ev.getUndoableEdit());
+            designerSize.width = prefSize.width;
+            corrected = true;
           }
-
-          componentLayer.setDesignerSize(designerSize);
-          storeDesignerSize(designerSize);
+          if (designerSize.height != prefSize.height)
+          {
+            designerSize.height = prefSize.height;
+            corrected = true;
+          }
         }
-      }
-      else
-      {
-        designerSizeExplictlySet = false;
+        else
+        {
+          Dimension minSize = topCont.getMinimumSize();
+          if (designerSize.width < minSize.width)
+          {
+            designerSize.width = minSize.width;
+            corrected = true;
+          }
+          if (designerSize.height < minSize.height)
+          {
+            designerSize.height = minSize.height;
+            corrected = true;
+          }
+        }
+
+        if (corrected)
+        {
+          if (shouldHonorDesignerMinSize(topCont, designerSizeExplictlySet))
+          {
+            designerSize.width += wDiff;
+            designerSize.height += hDiff;
+
+            // hack: we need the size correction in the undo/redo
+            if (formModel.isCompoundEditInProgress())
+            {
+              FormModelEvent ev = new FormModelEvent(formModel, FormModelEvent.SYNTHETIC_PROPERTY_CHANGED);
+              ev.setComponentAndContainer(topDesignComponent, null);
+              ev.setProperty(PROP_DESIGNER_SIZE, getDesignerSize(), designerSize);
+              formModel.addUndoableEdit(ev.getUndoableEdit());
+            }
+
+            componentLayer.setDesignerSize(designerSize);
+            storeDesignerSize(designerSize);
+          }
+        }
+        else
+        {
+          designerSizeExplictlySet = false;
+        }
       }
     }
+  }
+
+  private static boolean shouldAdjustDesignerSize(Component topComp)
+  {
+    // Null and AbsolutLayout can't provide a reasonable preferred or
+    // minimum size, don't try to adjust the designer size according to them.
+    // (E.g. when reacting to a change in a subpanel with Free Design which
+    // is included in a top container with null layout.)
+    if (topComp instanceof Container)
+    {
+      LayoutManager lm = ((Container) topComp).getLayout();
+      if (lm == null || lm instanceof AbsoluteLayout)
+      {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  private static boolean shouldHonorDesignerPrefSize(Component topComp)
+  {
+    // Hack for FlowLayout - don't let the designer follow the preferred size
+    // according to the layout. The designer has often different actual size
+    // and a change in a subpanel with Free Design should not cause the whole
+    // designer to resize.
+    return !(topComp instanceof Container)
+        || !(((Container) topComp).getLayout() instanceof FlowLayout);
   }
 
   private static boolean shouldHonorDesignerMinSize(Component topComp, boolean sizeSetExplicitly)
@@ -1186,7 +1228,7 @@ public class FormDesigner
     return selectedComponents;
   }
 
-  java.util.List<RADComponent> getSelectedLayoutComponents()
+  java.util.List<RADVisualComponent> getSelectedLayoutComponents()
   {
     return selectedLayoutComponents;
   }
@@ -1304,7 +1346,11 @@ public class FormDesigner
   void removeComponentFromSelectionImpl(RADComponent metacomp)
   {
     selectedComponents.remove(metacomp);
-    selectedLayoutComponents.remove(metacomp);
+    RADVisualComponent layoutComponent = componentToLayoutComponent(metacomp);
+    if (layoutComponent != null)
+    {
+      selectedLayoutComponents.remove(layoutComponent);
+    }
     selectionChanged();
   }
 
@@ -1363,7 +1409,7 @@ public class FormDesigner
         syncComponentsFromNodes();
         Node[] selectedNodes = getSelectedNodes();
         // if no form node, select data node (of DataObject) in lookup
-        switchNodeInLookup(selectedNodes.length == 0);
+        switchNodeInLookup(selectedNodes.length == 0 && formEditor.getFormDataObject().isValid());
         firePropertyChange(ExplorerManager.PROP_SELECTED_NODES, evt.getOldValue(), evt.getNewValue());
         // specially handle node selection in connection mode
         if (getDesignerMode() == MODE_CONNECT && selectedNodes.length > 0)
@@ -1426,7 +1472,7 @@ public class FormDesigner
       // initialized again
       return;
     }
-    updateDesignerActions();
+    updateLayoutDesigner();
     updateResizabilityActions();
     updateAssistantContext();
   }
@@ -1439,16 +1485,41 @@ public class FormDesigner
     }
   }
 
-  private void updateDesignerActions()
+  private void updateLayoutDesigner()
   {
-    Collection selectedIds = selectedLayoutComponentIds();
-    boolean enabled = (layoutDesigner == null) ? false : layoutDesigner.canAlign(selectedIds);
-    Iterator iter = getDesignerActions(true).iterator();
-    while (iter.hasNext())
+    boolean enabled;
+    if (layoutDesigner != null)
     {
-      Action action = (Action) iter.next();
+      Collection<String> selectedIds = selectedLayoutComponentIds();
+      enabled = layoutDesigner.canAlign(selectedIds);
+      selectedIds = getSelectedComponentsForLayoutDesigner(selectedIds);
+      layoutDesigner.setSelectedComponents(selectedIds.toArray(new String[selectedIds.size()]));
+    }
+    else
+    {
+      enabled = false;
+    }
+    for (Action action : getDesignerActions(true))
+    {
       action.setEnabled(enabled);
     }
+  }
+
+  private Collection<String> getSelectedComponentsForLayoutDesigner(Collection<String> selectedIds)
+  {
+    for (RADComponent metacomp : getSelectedLayoutComponents())
+    {
+      RADVisualComponent subcomp = substituteWithSubComponent((RADVisualComponent) metacomp);
+      if (subcomp != metacomp && subcomp instanceof RADVisualContainer
+          && ((RADVisualContainer) subcomp).getLayoutSupport() == null)
+      {
+        // Reversed logic as in componentToLayoutComponent - while the scrollpane
+        // should be the selected component which is manipulated in outer layout,
+        // the contained component should also be selected as a container.
+        selectedIds.add(subcomp.getId());
+      }
+    }
+    return selectedIds;
   }
 
   public void updateResizabilityActions()
@@ -1610,17 +1681,59 @@ public class FormDesigner
       RADVisualComponent visualComp = (RADVisualComponent) metacomp;
       if (!visualComp.isMenuComponent())
       {
-        RADVisualContainer metacont = visualComp.getParentContainer();
-        if ((metacont != null) && JScrollPane.class.isAssignableFrom(metacont.getBeanInstance().getClass())
-            && isInDesigner(metacont))
-        {   // substitute with scroll pane...
-          return metacont;
+        RADVisualComponent subst = substituteWithContainer(visualComp);
+        if (subst != null)
+        {
+          return subst;
         }
         // otherwise just check if it is visible in the designer
         return isInDesigner(visualComp) ? visualComp : null;
       }
     }
     return null;
+  }
+
+  /**
+   * For some outwards-related operations the selected components may need to
+   * be substituted with the enclosing container, typically JScrollPane. This
+   * method returns the parent container for given component if such substition
+   * is possible, or just the component itself if not.
+   */
+  RADVisualComponent substituteWithContainer(RADVisualComponent metacomp)
+  {
+    if (metacomp != null)
+    {
+      RADVisualContainer metacont = metacomp.getParentContainer();
+      if (isTransparentContainer(metacont)
+          && metacont.getParentContainer() != null
+          && isInDesigner(metacont))
+      {
+        return metacont;
+      }
+    }
+    return metacomp;
+  }
+
+  /**
+   * For some inwards-related operations the selected parent container of certain
+   * type (like JScrollPane) may need to be substituted with the enclosed sub
+   * component. This method returns the subcomponent for given component if such
+   * substition is possible, or just the component itself if not.
+   */
+  static RADVisualComponent substituteWithSubComponent(RADVisualComponent metacont)
+  {
+    if (isTransparentContainer(metacont))
+    {
+      return ((RADVisualContainer) metacont).getSubComponents()[0];
+    }
+    return metacont;
+  }
+
+  static boolean isTransparentContainer(RADVisualComponent metacont)
+  {
+    return metacont instanceof RADVisualContainer
+        && metacont.getBeanClass().isAssignableFrom(JScrollPane.class)
+        && ((RADVisualContainer) metacont).hasVisualSubComponents();
   }
 
   /**
@@ -1860,7 +1973,7 @@ public class FormDesigner
    *
    * @param compIds <code>Collection</code> of component IDs.
    * @return common container parent or <code>null</code>
-   *         if the components are not from the same container.
+   * if the components are not from the same container.
    */
   private RADComponent commonParent(Collection compIds)
   {
@@ -1911,12 +2024,12 @@ public class FormDesigner
 //            return;
 //        }
 
-    if (comp.isShowing())
-      return; // component is showing
-    if (!isInDesigner(metacomp))
-      return; // component is not in designer
+    if (comp.isShowing() || !isInDesigner(metacomp) || metacomp == topDesignComponent)
+    {
+      return;
+    }
 
-    Component topComp = (Component) getComponent(topDesignComponent);
+    Component topComp = getTopDesignComponentView();
     if (topComp == null || !topComp.isShowing())
       return; // designer is not showing
 
@@ -1972,7 +2085,7 @@ public class FormDesigner
         if (connectionTarget != null)
         {
           FormEditor.getAssistantModel(formModel).setContext("connectWizard"); // NOI18N
-//                    createConnection(connectionSource, connectionTarget); // TODO: stripped
+//                    createConnection(connectionSource, connectionTarget); // A
         }
 //                resetConnection();
         toggleSelectionMode();
@@ -2000,26 +2113,30 @@ public class FormDesigner
     }
   }
 
-  // STRIPPED
-    /*private void createConnection(RADComponent source, RADComponent target) {
-        ConnectionWizard cw = new ConnectionWizard(formModel, source,target);
+  // A
+  /*private void createConnection(RADComponent source, RADComponent target)
+  {
+    ConnectionWizard cw = new ConnectionWizard(formModel, source, target);
 
-        if (cw.show()) {
-            final Event event = cw.getSelectedEvent();
-            final String eventName = cw.getEventName();
-            String bodyText = cw.getGeneratedCode();
+    if (cw.show())
+    {
+      final Event event = cw.getSelectedEvent();
+      final String eventName = cw.getEventName();
+      String bodyText = cw.getGeneratedCode();
 
-            formModel.getFormEvents().attachEvent(event, eventName, bodyText);
+      formModel.getFormEvents().attachEvent(event, eventName, bodyText);
 
-            // hack: after all updates, switch to editor
-            SwingUtilities.invokeLater(new Runnable() {
-                @Override
-                public void run() {
-                    formModel.getFormEvents().attachEvent(event, eventName, null);
-                }
-            });
+      // hack: after all updates, switch to editor
+      SwingUtilities.invokeLater(new Runnable()
+      {
+        @Override
+        public void run()
+        {
+          formModel.getFormEvents().attachEvent(event, eventName, null);
         }
-    }*/
+      });
+    }
+  }*/
 
   // -----------------
   // in-place editing
@@ -2027,6 +2144,7 @@ public class FormDesigner
   public void startInPlaceEditing(RADComponent metacomp)
   {
 
+    // A
     // Inplace-Editing vorerst mal disabled, da es in der Form nicht richtig funktioniert und nicht viel bringt.
     // Könnte evtl. in erweiterter Form wiederhergestellt werden.
     if (true)
@@ -2180,8 +2298,25 @@ public class FormDesigner
     }
 
     Class beanClass = metacomp.getBeanClass();
-    return InPlaceEditLayer.supportsEditingFor(beanClass, false)
-        && (!JTabbedPane.class.isAssignableFrom(beanClass) || ((JTabbedPane) comp).getTabCount() != 0);
+    if (!InPlaceEditLayer.supportsEditingFor(beanClass, false))
+    {
+      return false;
+    }
+    if (JTabbedPane.class.isAssignableFrom(beanClass))
+    {
+      if (metacomp instanceof RADVisualContainer)
+      {
+        RADVisualContainer metacont = (RADVisualContainer) metacomp;
+        if (metacont.getLayoutSupport() != null && metacont.getLayoutSupport().isDedicated())
+        {
+          // so hopefully really a JTabbedPane container with tabs as subcomponents (bug 231236)
+          int tabCount = ((JTabbedPane) comp).getTabCount();
+          return tabCount > 0 && tabCount == metacont.getSubComponents().length;
+        }
+      }
+      return false;
+    }
+    return true;
   }
 
   private void notifyCannotEditInPlace()
@@ -2248,6 +2383,7 @@ public class FormDesigner
       ComponentInspector.getInstance().attachActions();
       getToolBar().putClientProperty("isActive", Boolean.TRUE); // for JDev // NOI18N
 
+      // A
       if (componentLayer != null)
         _onEach(componentLayer);
     }
@@ -2340,7 +2476,7 @@ public class FormDesigner
       textEditLayer = new InPlaceEditLayer();
       textEditLayer.setVisible(false);
       textEditLayer.addFinishListener(getFinnishListener());
-      layeredPane.add(textEditLayer, new Integer(2001));
+      layeredPane.add(textEditLayer, Integer.valueOf(2001));
     }
     return textEditLayer;
   }
@@ -2351,7 +2487,7 @@ public class FormDesigner
     {
       menuEditLayer = new MenuEditLayer(this);
       menuEditLayer.setVisible(false);
-      layeredPane.add(menuEditLayer, new Integer(2000));
+      layeredPane.add(menuEditLayer, Integer.valueOf(2000));
     }
     return menuEditLayer;
   }
@@ -2367,6 +2503,10 @@ public class FormDesigner
 //            return getTopDesignComponent().getId();
 //        }
 
+    /**
+     * @return actual bounds of given component, null if the component is not
+     * currently visualized in the design area
+     */
     @Override
     public Rectangle getComponentBounds(String componentId)
     {
@@ -2434,7 +2574,7 @@ public class FormDesigner
       if (getLayoutDesigner().logTestCode())
       {
         getLayoutDesigner().testCode.add("  compMinSize.put(\"" + componentId + "\", new Dimension(" +  //NOI18N
-                                             new Double(dim.getWidth()).intValue() + ", " + new Double(dim.getHeight()).intValue() + "));"); //NOI18N
+                                             dim.width + ", " + dim.height + "));"); //NOI18N
       }
       return dim;
     }
@@ -2451,7 +2591,7 @@ public class FormDesigner
       if (getLayoutDesigner().logTestCode())
       {
         getLayoutDesigner().testCode.add("  compPrefSize.put(\"" + componentId + "\", new Dimension(" +  //NOI18N
-                                             new Double(dim.getWidth()).intValue() + ", " + new Double(dim.getHeight()).intValue() + "));"); //NOI18N
+                                             dim.width + ", " + dim.height + "));"); //NOI18N
       }
       return dim;
     }
@@ -2492,16 +2632,30 @@ public class FormDesigner
         baseLinePos = 0;
       }
 
+      if (baseLinePos == -1 && comp != null && height >= 0)
+      {
+        Insets insets = comp.getInsets();
+        if (insets == null || height - insets.top - insets.bottom >= 0)
+        {
+          if (width < 0)
+          {
+            width = 0;
+          }
+          try
+          {
+            baseLinePos = comp.getBaseline(width, height);
+          }
+          catch (Exception ex)
+          {
+            // Sometimes getting baseline may fail even if we do nothing wrong,
+            // e.g. when a JLabel with html text and icon is set smaller than default (bug 229412).
+            Logger.getLogger(FormDesigner.class.getName()).log(Level.INFO, null, ex);
+          }
+        }
+      }
       if (baseLinePos == -1)
       {
-        if (comp != null)
-        {
-          baseLinePos = comp.getBaseline(width, height);
-        }
-        else
-        {
-          baseLinePos = 0;
-        }
+        baseLinePos = 0;
       }
 
       if (getLayoutDesigner().logTestCode())
@@ -2527,8 +2681,8 @@ public class FormDesigner
             + (paddingType != null ? paddingType.ordinal() : 0);
       }
 
-      JComponent comp1 = (JComponent) getVisualComponent(comp1Id, true, true);
-      JComponent comp2 = (JComponent) getVisualComponent(comp2Id, true, true);
+      JComponent comp1 = (JComponent) getVisualComponent(comp1Id, false, true);
+      JComponent comp2 = (JComponent) getVisualComponent(comp2Id, false, true);
       if (comp1 == null || comp2 == null)
       { // not JComponents...
         if (getLayoutDesigner().logTestCode())
@@ -2596,7 +2750,7 @@ public class FormDesigner
         RADVisualContainer metacont = (RADVisualContainer)
             getMetaComponent(parentId);
         parent = metacont.getContainerDelegate(parent);
-        comp = (JComponent) getVisualComponent(compId, true, true);
+        comp = (JComponent) getVisualComponent(compId, false, true);
       }
       if (comp == null)
       {
@@ -2694,6 +2848,101 @@ public class FormDesigner
       }
     }
 
+    @Override
+    public void repaintDesigner(String forComponentId)
+    {
+      RADComponent metacomp = formModel != null ? formModel.getMetaComponent(forComponentId) : null;
+      if (metacomp instanceof RADVisualComponent
+          && isInDesigner((RADVisualComponent) metacomp))
+      {
+        getHandleLayer().repaint();
+      }
+    }
+
+    @Override
+    public Shape getComponentVisibilityClip(String componentId)
+    {
+      Component component = getVisualComponent(componentId, true, false);
+      if (component == null)
+      {
+        return null;
+      }
+
+      int x1 = 0;
+      int x2 = component.getWidth();
+      int y1 = 0;
+      int y2 = component.getHeight();
+      int cutX1 = 0; // biggest cut of x1 position (negative)
+      int cutX2 = 0; // biggest cut of x2 position (positive)
+      int cutY1 = 0; // biggest cut of y1 position (negative)
+      int cutY2 = 0; // biggest cut of y2 position (positive)
+
+      Component top = getTopDesignComponentView();
+      if (component != top)
+      {
+        Component comp = component;
+        Component parent = comp.getParent();
+        while (comp != top)
+        {
+          if (parent == null)
+          {
+            return null; // not under top design component, something wrong
+          }
+          x1 += comp.getX();
+          if (x1 < cutX1)
+          {
+            cutX1 = x1;
+          }
+          x2 += comp.getX();
+          int outX2 = x2 - parent.getWidth();
+          if (outX2 > cutX2)
+          {
+            cutX2 = outX2;
+          }
+          y1 += comp.getY();
+          if (y1 < cutY1)
+          {
+            cutY1 = y1;
+          }
+          y2 += comp.getY();
+          int outY2 = y2 - parent.getHeight();
+          if (outY2 > cutY2)
+          {
+            cutY2 = outY2;
+          }
+          comp = parent;
+          parent = comp.getParent();
+        }
+      }
+
+      Rectangle bounds = new Rectangle(x1 - cutX1, y1 - cutY1,
+                                       x2 - cutX2 - x1 + cutX1, y2 - cutY2 - y1 + cutY1);
+      if (bounds.width < 0)
+      {
+        bounds.width = 0;
+      }
+      if (bounds.height < 0)
+      {
+        bounds.height = 0;
+      }
+      return bounds;
+    }
+
+    @Override
+    public String[] getIndirectSubComponents(String compId)
+    {
+      RADComponent metacomp = formModel.getMetaComponent(compId);
+      if (metacomp instanceof RADVisualContainer)
+      {
+        List<String> l = collectRootLayoutSubComponents((RADVisualContainer) metacomp, null);
+        if (l != null)
+        {
+          return l.toArray(new String[l.size()]);
+        }
+      }
+      return null;
+    }
+
     // -------
 
     private RADComponent getMetaComponent(String compId)
@@ -2736,6 +2985,30 @@ public class FormDesigner
           (Component) comp : null;
     }
 
+  }
+
+  private static List<String> collectRootLayoutSubComponents(RADVisualContainer metacont, List<String> list)
+  {
+    for (RADVisualComponent sub : metacont.getSubComponents())
+    {
+      if (sub instanceof RADVisualContainer)
+      {
+        RADVisualContainer subcont = (RADVisualContainer) sub;
+        if (subcont.getLayoutSupport() == null)
+        {
+          if (list == null)
+          {
+            list = new ArrayList<String>();
+          }
+          list.add(subcont.getId());
+        }
+        else
+        {
+          list = collectRootLayoutSubComponents(subcont, list);
+        }
+      }
+    }
+    return list;
   }
 
   // --------
@@ -2802,8 +3075,8 @@ public class FormDesigner
             modifying = true;
           if ((ev.getChangeType() == FormModelEvent.COMPONENT_ADDED)
               || (ev.getChangeType() == FormModelEvent.COMPONENT_PROPERTY_CHANGED)
-                            /*|| (ev.getChangeType() == FormModelEvent.BINDING_PROPERTY_CHANGED)*/)
-          { // STRIPPED
+              /*|| (ev.getChangeType() == FormModelEvent.BINDING_PROPERTY_CHANGED)*/) // A
+          {
             lafBlock = true;
             break;
           }
@@ -2837,8 +3110,8 @@ public class FormDesigner
     {
       if (events == null)
       {
-        Object originalVisualComp = (topDesignComponent == null) ? null : replicator.getClonedComponent(topDesignComponent);
-        Dimension originalSize = originalVisualComp instanceof Component ?
+        Object originalVisualComp = getTopDesignComponentView();
+        final Dimension originalSize = originalVisualComp instanceof Component ?
             ((Component) originalVisualComp).getSize() : null;
 
         replicator.setTopMetaComponent(topDesignComponent);
@@ -2852,9 +3125,14 @@ public class FormDesigner
             componentLayer.setDesignerSize(originalSize);
             checkDesignerSize();
           }
-          else setupDesignerSize();
+          else
+          {
+            setupDesignerSize();
+          }
           if (getLayoutDesigner() != null)
+          {
             getLayoutDesigner().externalSizeChangeHappened();
+          }
           // Must be invoked later. ComponentLayer doesn't have a peer (yet)
           // when the form is opened and validate does nothing on components
           // without peer.
@@ -2863,6 +3141,10 @@ public class FormDesigner
             @Override
             public void run()
             {
+              if (originalSize == null)
+              {
+                setupDesignerSize(); // once again to workaround some quirks in first layout (e.g. scrollpane with table)
+              }
               updateComponentLayer(false);
             }
           });
@@ -2876,6 +3158,7 @@ public class FormDesigner
       int prevType = 0;
       ComponentContainer prevContainer = null;
       boolean updateDone = false;
+      boolean updateLayoutDesignerSelection = false;
 
       for (int i = 0; i < events.length; i++)
       {
@@ -2887,20 +3170,28 @@ public class FormDesigner
             || type == FormModelEvent.CONTAINER_LAYOUT_CHANGED
             || type == FormModelEvent.COMPONENT_LAYOUT_CHANGED)
         {
+          RADVisualContainer visualMetaCont = (RADVisualContainer) metacont;
           if ((prevType != FormModelEvent.CONTAINER_LAYOUT_EXCHANGED
               && prevType != FormModelEvent.CONTAINER_LAYOUT_CHANGED
               && prevType != FormModelEvent.COMPONENT_LAYOUT_CHANGED)
               || prevContainer != metacont)
           {
-            replicator.updateContainerLayout((RADVisualContainer)
-                                                 metacont);
+            replicator.updateContainerLayout(visualMetaCont);
             updateDone = true;
+          }
+          if (type == FormModelEvent.CONTAINER_LAYOUT_EXCHANGED
+              && visualMetaCont.getLayoutSupport() == null
+              && getSelectedComponents().contains(visualMetaCont))
+          {
+            // switched to free design, update selection in LayoutDesigner
+            updateLayoutDesignerSelection = true;
           }
         }
         else if (type == FormModelEvent.COMPONENT_ADDED)
         {
           if ((metacont instanceof RADVisualContainer
               || metacont instanceof RADMenuComponent
+              // A
               || metacont instanceof NonvisContainerRADComponent
               || metacont instanceof NonvisContainerRADVisualComponent)
               && (prevType != FormModelEvent.COMPONENT_ADDED
@@ -2946,24 +3237,28 @@ public class FormDesigner
         {
           RADProperty eventProperty = ev.getComponentProperty();
           RADComponent eventComponent = ev.getComponent();
-
-          replicator.updateComponentProperty(eventProperty);
-          //updateConnectedProperties(eventProperty, eventComponent);
-          if (layoutDesigner != null && formModel.isCompoundEditInProgress())
-          {
-            layoutDesigner.componentDefaultSizeChanged(eventComponent.getId());
+          if (eventProperty != null)
+          { // bug #220513, don't update anything e.g. for a11y properties
+            replicator.updateComponentProperty(eventProperty);
+            //updateConnectedProperties(eventProperty, eventComponent); // A
+            if (layoutDesigner != null && formModel.isCompoundEditInProgress())
+            {
+              layoutDesigner.componentDefaultSizeChanged(eventComponent.getId());
+            }
           }
 
           updateDone = true;
         }
-        // STRIPPED
-                /*else if (type == FormModelEvent.BINDING_PROPERTY_CHANGED) {
-                    if (ev.getSubPropertyName() == null) {
-                        replicator.updateBinding(ev.getNewBinding());
-                    }
-                    // Note: BindingDesignSupport takes care of removing the old binding
-                    updateDone = true;
-                }*/
+        // A
+        /*else if (type == FormModelEvent.BINDING_PROPERTY_CHANGED)
+        {
+          if (ev.getSubPropertyName() == null)
+          {
+            replicator.updateBinding(ev.getNewBinding());
+          }
+          // Note: BindingDesignSupport takes care of removing the old binding
+          updateDone = true;
+        }*/
         else if (type == FormModelEvent.SYNTHETIC_PROPERTY_CHANGED
             && PROP_DESIGNER_SIZE.equals(ev.getPropertyName()))
         {
@@ -2990,6 +3285,10 @@ public class FormDesigner
           getLayoutDesigner().externalSizeChangeHappened();
         }
         updateComponentLayer(true);
+        if (updateLayoutDesignerSelection)
+        {
+          updateLayoutDesigner();
+        }
       }
     }
 
@@ -3028,8 +3327,8 @@ public class FormDesigner
 
     /**
      * @return 1: order is e1 then e2,
-     *         0: order is e2 then e1,
-     *         -1: order not determined
+     * 0: order is e2 then e1,
+     * -1: order not determined
      */
     private int eventsOrder(FormModelEvent e1, FormModelEvent e2)
     {
@@ -3048,34 +3347,43 @@ public class FormDesigner
       return -1;
     }
 
-    // STRIPPED
-        /*private void updateConnectedProperties(RADProperty eventProperty, RADComponent eventComponent){
-            for (RADComponent component : formModel.getAllComponents()){
-                RADProperty[] properties = component.getKnownBeanProperties();
-                for(int i = 0; i < properties.length; i++){
-                    try{
-                        if (properties[i].isChanged()) {
-                            Object value = properties[i].getValue();
-                            if (value instanceof RADConnectionPropertyEditor.RADConnectionDesignValue) {
-                                RADConnectionPropertyEditor.RADConnectionDesignValue propertyValue =
-                                    (RADConnectionPropertyEditor.RADConnectionDesignValue)value;
+    // A
+    /*private void updateConnectedProperties(RADProperty eventProperty, RADComponent eventComponent)
+    {
+      for (RADComponent component : formModel.getAllComponents())
+      {
+        RADProperty[] properties = component.getKnownBeanProperties();
+        for (int i = 0; i < properties.length; i++)
+        {
+          try
+          {
+            if (properties[i].isChanged())
+            {
+              Object value = properties[i].getValue();
+              if (value instanceof RADConnectionPropertyEditor.RADConnectionDesignValue)
+              {
+                RADConnectionPropertyEditor.RADConnectionDesignValue propertyValue =
+                    (RADConnectionPropertyEditor.RADConnectionDesignValue) value;
 
-                                if (propertyValue.getRADComponent() != null
-                                   && propertyValue.getProperty() != null
-                                   && eventComponent.getName().equals(propertyValue.getRADComponent().getName())
-                                   && eventProperty.getName().equals(propertyValue.getProperty().getName())) {
+                if (propertyValue.getRADComponent() != null
+                    && propertyValue.getProperty() != null
+                    && eventComponent.getName().equals(propertyValue.getRADComponent().getName())
+                    && eventProperty.getName().equals(propertyValue.getProperty().getName()))
+                {
 
-                                    replicator.updateComponentProperty(properties[i]);
-                                }
-                            }
-                        }
-                    } catch(Exception e){
-                        ErrorManager.getDefault().notify(e);
-                    }
+                  replicator.updateComponentProperty(properties[i]);
                 }
+              }
             }
+          }
+          catch (Exception e)
+          {
+            ErrorManager.getDefault().notify(e);
+          }
+        }
+      }
 
-        }*/
+    }*/
   }
 
   /**
@@ -3121,7 +3429,7 @@ public class FormDesigner
         code = (horizontal ? (leading ? "l" : "r") : (leading ? "u" : "d")); // NOI18N
       }
       String iconResource = ICON_BASE + code + ".png"; // NOI18N
-      putValue(Action.SMALL_ICON, ImageUtilities.loadImageIcon(iconResource, false));
+      putValue(Action.SMALL_ICON, ImageUtilities.loadImageIcon(iconResource, true));
       putValue(Action.SHORT_DESCRIPTION, FormUtils.getBundleString("CTL_AlignAction_" + code)); // NOI18N
       setEnabled(false);
     }

@@ -74,7 +74,7 @@ public class FormModelEvent extends EventObject
     public static final int COMPONENT_REMOVED = 8;
     public static final int COMPONENTS_REORDERED = 9;
     public static final int COMPONENT_PROPERTY_CHANGED = 10;
-    //public static final int BINDING_PROPERTY_CHANGED = 16; // STRIPPED
+    //public static final int BINDING_PROPERTY_CHANGED = 16;
     public static final int SYNTHETIC_PROPERTY_CHANGED = 11;
     public static final int EVENT_HANDLER_ADDED = 12;
     public static final int EVENT_HANDLER_REMOVED = 13;
@@ -91,16 +91,16 @@ public class FormModelEvent extends EventObject
     private int componentIndex = -1;
     private int[] reordering;
     private String propertyName;
-    //private String subPropertyName; // STRIPPED
+    //private String subPropertyName;
     private Object oldPropertyValue;
     private Object newPropertyValue;
-    //private Event componentEvent; // STRIPPED
+    //private Event componentEvent;
 
     private UndoableEdit undoableEdit;
 
     // -----------
 
-    private FormModelEvent additionalEvent;
+    private FormModelEvent additionalEvent; 
     private static List<FormModelEvent> interestList; // events interested in additional events
 
     // -----------
@@ -108,7 +108,7 @@ public class FormModelEvent extends EventObject
     FormModelEvent(FormModel source, int changeType) {
         super(source);
         this.changeType = changeType;
-        //informInterestedEvents(this); // STRIPPED
+        //informInterestedEvents(this);
     }
 
     void setProperty(String propName, Object oldValue, Object newValue) {
@@ -117,7 +117,6 @@ public class FormModelEvent extends EventObject
         newPropertyValue = newValue;
     }
 
-  // STRIPPED
     /*void setSubProperty(String subPropertyName) {
         this.subPropertyName = subPropertyName;
     }*/
@@ -183,7 +182,6 @@ public class FormModelEvent extends EventObject
         }
     }
 
-  // STRIPPED
     /*void setEvent(Event event, // may be null if the handler is just updated
                   String handler,
                   String bodyText,
@@ -194,8 +192,8 @@ public class FormModelEvent extends EventObject
             component = event.getComponent();
         componentEvent = event;
         propertyName = handler;
-        newPropertyValue = bodyText;
-        oldPropertyValue = annotationText;
+        oldPropertyValue = bodyText;
+        newPropertyValue = annotationText;
         createdDeleted = createdNew;
     }*/
 
@@ -205,7 +203,6 @@ public class FormModelEvent extends EventObject
         newPropertyValue = newHandlerName;
     }
 
-  // STRIPPED
     /*void setChangeType(int changeType) {
         this.changeType = changeType;
     }*/
@@ -234,7 +231,7 @@ public class FormModelEvent extends EventObject
         return changeType != FORM_LOADED
                && changeType != FORM_TO_BE_SAVED
                && changeType != FORM_TO_BE_CLOSED
-               && (changeType != EVENT_HANDLER_ADDED /*|| componentEvent != null*/); // STRIPPED
+               && (changeType != EVENT_HANDLER_ADDED /*|| componentEvent != null*/); // A
     }
 
     public final boolean getCreatedDeleted() {
@@ -253,7 +250,7 @@ public class FormModelEvent extends EventObject
         return constraints;
     }
 
-  // STRIPPED
+    // A
     /*public final int getComponentIndex() {
         return componentIndex;
     }*/
@@ -262,7 +259,7 @@ public class FormModelEvent extends EventObject
         return propertyName;
     }
 
-  // STRIPPED
+    // A
     /*public final String getSubPropertyName() {
         return subPropertyName;
     }*/
@@ -280,7 +277,7 @@ public class FormModelEvent extends EventObject
         return newPropertyValue;
     }
 
-  // STRIPPED
+    // A
     /*public final MetaBinding getOldBinding() {
         return (MetaBinding) oldPropertyValue;
     }
@@ -297,7 +294,7 @@ public class FormModelEvent extends EventObject
         return (LayoutSupportDelegate) newPropertyValue;
     }
 
-  // STRIPPED
+    // A
     /*public final int[] getReordering() {
         return reordering;
     }
@@ -372,7 +369,7 @@ public class FormModelEvent extends EventObject
     // methods for events interested in additional events occured
     // (used for undo/redo processing of event handlers)
 
-  // STRIPPED
+    // A
     /*private static void addToInterestList(FormModelEvent ev) {
         if (interestList == null) {
             interestList = new ArrayList<FormModelEvent>();
@@ -443,7 +440,7 @@ public class FormModelEvent extends EventObject
                     FormModel.t("UNDO: synthetic property change"); // NOI18N
                     undoSyntheticPropertyChange();
                     break;
-                // STRIPPED
+                // A
                 /*case EVENT_HANDLER_ADDED:
                     FormModel.t("UNDO: event handler addition"); // NOI18N
                     undoEventHandlerAddition();
@@ -511,7 +508,7 @@ public class FormModelEvent extends EventObject
                     FormModel.t("REDO: synthetic property change"); // NOI18N
                     redoSyntheticPropertyChange();
                     break;
-                // STRIPPED
+                // A
                 /*case EVENT_HANDLER_ADDED:
                     FormModel.t("REDO: event handler addition"); // NOI18N
                     redoEventHandlerAddition();
@@ -762,7 +759,7 @@ public class FormModelEvent extends EventObject
                 }
         }
 
-      // STRIPPED
+        // A
         /*private void undoBindingPropertyChange() {
             String subPropName = getSubPropertyName();
             BindingProperty prop = getComponent().getBindingProperty(getPropertyName());
@@ -893,7 +890,7 @@ public class FormModelEvent extends EventObject
             }
         }
 
-      // STRIPPED
+        // A
         /*private void undoEventHandlerAddition() {
             Event event = getComponentEvent();
             if (event == null)

@@ -77,7 +77,7 @@ public class RADMenuItemComponent extends RADComponent {
     static final int MASK_SEPARATOR         = 0x10000;
 
 
-  @Override
+    @Override
     public Object initInstance(Class<?> beanClass,  ARADComponentHandler pARADComponentHandler) throws Exception {
         type = recognizeType(beanClass);
         return super.initInstance(beanClass, pARADComponentHandler);

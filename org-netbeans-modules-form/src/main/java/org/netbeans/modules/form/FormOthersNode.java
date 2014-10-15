@@ -44,15 +44,16 @@
 
 package org.netbeans.modules.form;
 
-import org.netbeans.modules.form.actions.AddAction;
-import org.netbeans.modules.form.adito.actions.AditoActionObject;
-import org.openide.actions.*;
-import org.openide.nodes.Node;
-import org.openide.util.actions.SystemAction;
-import org.openide.util.datatransfer.PasteType;
+import java.awt.datatransfer.*;
+import javax.swing.Action;
 
-import javax.swing.*;
-import java.awt.datatransfer.Transferable;
+import org.netbeans.modules.form.adito.actions.AditoActionObject;
+import org.openide.nodes.*;
+import org.openide.actions.*;
+import org.openide.util.actions.SystemAction;
+
+import org.netbeans.modules.form.actions.AddAction;
+import org.openide.util.datatransfer.PasteType;
 
 /**
  * This class represents the root node of "Other Components".
@@ -60,109 +61,93 @@ import java.awt.datatransfer.Transferable;
  * @author Tomas Pavek
  */
 
-class FormOthersNode extends FormNode
-{
+class FormOthersNode extends FormNode {
 
-  public FormOthersNode(FormModel formModel)
-  {
-    super(new OthersChildren(formModel), formModel);
+    public FormOthersNode(FormModel formModel) {
+        super(new OthersChildren(formModel), formModel);
 
-    getInstanceContent().add(new OthersIndex((OthersChildren) getChildren()));
-    setIconBaseWithExtension("org/netbeans/modules/form/resources/formNonVisual.gif"); // NOI18N
-    setName("Others Node"); // NOI18N
-    setName(FormUtils.getBundleString("CTL_NonVisualComponents")); // NOI18N
-  }
-
-  @Override
-  public Action[] getActions(boolean context)
-  {
-
-    super.getActions(context);
-    for (Object a : super.getSortedActionList().toArray())
-      actions.add((AditoActionObject) a);
-
-    if (!getFormModel().isReadOnly())
-    {
-      actions.add(new AditoActionObject(SystemAction.get(AddAction.class), 1));
-      actions.add(new AditoActionObject(null, 2));
-      actions.add(new AditoActionObject(SystemAction.get(PasteAction.class), 5));
-      actions.add(new AditoActionObject(null, 6));
-      actions.add(new AditoActionObject(SystemAction.get(ReorderAction.class), 7));
-      actions.add(new AditoActionObject(null, 8));
-    }
-    return actions.toActionArray();
-  }
-
-  @Override
-  protected void createPasteTypes(Transferable t, java.util.List<PasteType> s)
-  {
-    CopySupport.createPasteTypes(t, s, getFormModel(), null);
-  }
-
-  // -------------
-
-  static class OthersChildren extends FormNodeChildren
-  {
-
-    private FormModel formModel;
-
-    protected OthersChildren(FormModel formModel)
-    {
-      this.formModel = formModel;
-      updateKeys();
-    }
-
-    // FormNodeChildren implementation
-    @Override
-    protected void updateKeys()
-    {
-      setKeys(formModel.getOtherComponents().toArray());
+        getInstanceContent().add(new OthersIndex((OthersChildren) getChildren()));
+        setIconBaseWithExtension("org/netbeans/modules/form/resources/formNonVisual.gif"); // NOI18N
+        setName("Others Node"); // NOI18N
+        setName(FormUtils.getBundleString("CTL_NonVisualComponents")); // NOI18N
     }
 
     @Override
-    protected Node[] createNodes(Object key)
-    {
-      Node node = new RADComponentNode((RADComponent) key);
-      node.getChildren().getNodes(); // enforce subnodes creation
-      return new Node[]{node};
-    }
+    public Action[] getActions(boolean context) {
+        super.getActions(context);
+        for (Object a : super.getSortedActionList().toArray())
+            actions.add((AditoActionObject) a);
 
-    protected final FormModel getFormModel()
-    {
-      return formModel;
-    }
-  }
-
-  // -------------
-
-  static final class OthersIndex extends org.openide.nodes.Index.Support
-  {
-    private OthersChildren children;
-
-    public OthersIndex(OthersChildren children)
-    {
-      this.children = children;
+        if (!getFormModel().isReadOnly()) {
+            actions.add(new AditoActionObject(SystemAction.get(AddAction.class), 1));
+            actions.add(new AditoActionObject(null, 2));
+            actions.add(new AditoActionObject(SystemAction.get(PasteAction.class), 5));
+            actions.add(new AditoActionObject(null, 6));
+            actions.add(new AditoActionObject(SystemAction.get(ReorderAction.class), 7));
+            actions.add(new AditoActionObject(null, 8));
+        }
+        return actions.toActionArray();
     }
 
     @Override
-    public Node[] getNodes()
-    {
-      return children.getNodes();
+    protected void createPasteTypes(Transferable t, java.util.List<PasteType> s) {
+        CopySupport.createPasteTypes(t, s, getFormModel(), null);
     }
 
-    @Override
-    public int getNodesCount()
-    {
-      return getNodes().length;
+    // -------------
+
+    static class OthersChildren extends FormNodeChildren {
+
+        private FormModel formModel;
+
+        protected OthersChildren(FormModel formModel) {
+            this.formModel = formModel;
+            updateKeys();
+        }
+
+        // FormNodeChildren implementation
+        @Override
+        protected void updateKeys() {
+            setKeys(formModel.getOtherComponents().toArray());
+        }
+
+        @Override
+        protected Node[] createNodes(Object key) {
+            Node node = new RADComponentNode((RADComponent)key);
+            node.getChildren().getNodes(); // enforce subnodes creation
+            return new Node[] { node };
+        }
+
+        protected final FormModel getFormModel() {
+            return formModel;
+        }
     }
 
-    @Override
-    public void reorder(int[] perm)
-    {
-      ComponentContainer cont = children.getFormModel().getModelContainer();
-      cont.reorderSubComponents(perm);
-      children.getFormModel().fireComponentsReordered(cont, perm);
+    // -------------
+
+    static final class OthersIndex extends org.openide.nodes.Index.Support {
+        private OthersChildren children;
+
+        public OthersIndex(OthersChildren children) {
+            this.children = children;
+        }
+
+        @Override
+        public Node[] getNodes() {
+            return children.getNodes();
+        }
+
+        @Override
+        public int getNodesCount() {
+            return getNodes().length;
+        }
+
+        @Override
+        public void reorder(int[] perm) {
+            ComponentContainer cont = children.getFormModel().getModelContainer();
+            cont.reorderSubComponents(perm);
+            children.getFormModel().fireComponentsReordered(cont, perm);
 //            children.updateKeys();
+        }
     }
-  }
 }

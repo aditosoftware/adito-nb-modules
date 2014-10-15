@@ -46,11 +46,9 @@ package org.netbeans.modules.form;
 
 import java.awt.Color;
 import java.util.prefs.Preferences;
+import javax.swing.UIManager;
 import org.openide.util.HelpCtx;
-//import org.netbeans.modules.form.codestructure.*; // STRIPPED
 import org.openide.util.NbPreferences;
-
-import javax.swing.*;
 
 /**
  * Settings for the form editor.
@@ -121,6 +119,8 @@ public class FormLoaderSettings implements HelpCtx.Provider   {
     public static final String PROP_GAP_WIDTH = "gapWidth"; // NOI18N
     /** Property name of the GridDesigner gap support gap height property. */
     public static final String PROP_GAP_HEIGHT = "gapHeight"; // NOI18N
+    /** Property name of the Free Design's layout visualization setting. */
+    public static final String PROP_PAINT_ADVANCED_LAYOUT = "paintAdvancedLayout"; // NOI18N
 
     /** Name of the property for automatic resources/i18n management.
      * The name refers only to i18n for compatibility reasons. */
@@ -148,7 +148,7 @@ public class FormLoaderSettings implements HelpCtx.Provider   {
     // property access methods
 
     public boolean getUseIndentEngine() {
-        return getPreferences().getBoolean(PROP_USE_INDENT_ENGINE, false);
+        return getPreferences().getBoolean(PROP_USE_INDENT_ENGINE, false); 
     }
 
     public void setUseIndentEngine(boolean value) {
@@ -166,7 +166,7 @@ public class FormLoaderSettings implements HelpCtx.Provider   {
 
     /**
      * Setter for the event listener code generation style option.
-     *
+     * 
      * @param style listener generation style.
      */
     public void setListenerGenerationStyle(int style) {
@@ -184,7 +184,7 @@ public class FormLoaderSettings implements HelpCtx.Provider   {
 
     /**
      * Setter for the selectionBorderSize option.
-     *
+     * 
      * @param value selection border size.
      */
     public void setSelectionBorderSize(int value) {
@@ -193,7 +193,7 @@ public class FormLoaderSettings implements HelpCtx.Provider   {
         else if (value > MAX_SELECTION_BORDER_SIZE)
             value = MAX_SELECTION_BORDER_SIZE;
 
-
+        
         getPreferences().putInt(PROP_SELECTION_BORDER_SIZE, value);
     }
 
@@ -209,7 +209,7 @@ public class FormLoaderSettings implements HelpCtx.Provider   {
 
     /**
      * Setter for the selectionBorderColor option
-     *
+     * 
      * @param value color of selection border.
      */
     public void setSelectionBorderColor(java.awt.Color value) {
@@ -231,7 +231,7 @@ public class FormLoaderSettings implements HelpCtx.Provider   {
 
     /**
      * Setter for the connectionBorderColor option.
-     *
+     * 
      * @param value color of connection border.
      */
     public void setConnectionBorderColor(java.awt.Color value) {
@@ -253,16 +253,16 @@ public class FormLoaderSettings implements HelpCtx.Provider   {
 
     /**
      * Setter for the dragBorderColor option.
-     *
+     * 
      * @param value color of drag border.
      */
     public void setDragBorderColor(java.awt.Color value) {
         if (value == null) {
             return;
-        }
+        }        
         getPreferences().putInt(PROP_DRAG_BORDER_COLOR, value.getRGB());
     }
-
+    
     /**
      * Getter for the guidingLineColor option.
      * 
@@ -276,13 +276,13 @@ public class FormLoaderSettings implements HelpCtx.Provider   {
 
     /**
      * Setter for the dragBorderColor option.
-     *
+     * 
      * @param value color of guiding lines.
      */
     public void setGuidingLineColor(java.awt.Color value) {
         if (value == null) {
             return;
-        }
+        }        
         getPreferences().putInt(PROP_GUIDING_LINE_COLOR, value.getRGB());
     }
 
@@ -316,7 +316,7 @@ public class FormLoaderSettings implements HelpCtx.Provider   {
 
     /**
      * Setter for the gridY option.
-     *
+     * 
      * @param value size of vertical grid.
      */
     public void setGridY(int value) {
@@ -335,7 +335,7 @@ public class FormLoaderSettings implements HelpCtx.Provider   {
 
     /**
      * Setter for the applyGridToPosition option.
-     *
+     * 
      * @param value determines whether position of component should snap to grid.
      */
     public void setApplyGridToPosition(boolean value) {
@@ -354,11 +354,11 @@ public class FormLoaderSettings implements HelpCtx.Provider   {
 
     /**
      * Setter for the applyGridToSize option.
-     *
+     * 
      * @param value determines whether size of component should snap to grid.
      */
     public void setApplyGridToSize(boolean value) {
-        getPreferences().putBoolean(PROP_APPLY_GRID_TO_SIZE, value);
+        getPreferences().putBoolean(PROP_APPLY_GRID_TO_SIZE, value);    
     }
 
     /**
@@ -370,22 +370,21 @@ public class FormLoaderSettings implements HelpCtx.Provider   {
         return getPreferences().getBoolean(PROP_VARIABLES_LOCAL, false);
     }
 
-  // STRIPPED
     /**
      * Setter for the variablesLocal option.
      *
      * @param value determines whether variables should be local.
-     *//*
-    public void setVariablesLocal(boolean value) {
+     */
+    /*public void setVariablesLocal(boolean value) {
         getPreferences().putBoolean(PROP_VARIABLES_LOCAL, value);
-        int variablesModifier = getVariablesModifier();
+        int variablesModifier = getVariablesModifier();        
         int varType = value ?
             CodeVariable.LOCAL | (variablesModifier & CodeVariable.FINAL)
                                | CodeVariable.EXPLICIT_DECLARATION
             :
             CodeVariable.FIELD | variablesModifier;
 
-        if (value) {
+        if (value) {            
             variablesModifier &= CodeVariable.FINAL;
             setVariablesModifier(variablesModifier);
         }
@@ -400,23 +399,22 @@ public class FormLoaderSettings implements HelpCtx.Provider   {
         return getPreferences().getInt(PROP_VARIABLES_MODIFIER, java.lang.reflect.Modifier.PRIVATE);
     }
 
-  // STRIPPED
-  //  /**
-  //   * Setter for the variablesModifier option.
-  //   *
-  //   * @param value variables modifier.
-  //   */
-  //  public void setVariablesModifier(int value) {
-  //      getPreferences().putInt(PROP_VARIABLES_MODIFIER, value);
-  //
-  //      int varType;
-  //      if (getVariablesLocal()) {
-  //          varType = CodeVariable.LOCAL | value;
-  //          if ((value & CodeVariable.FINAL) == 0)
-  //              varType |= CodeVariable.EXPLICIT_DECLARATION;
-  //      }
-  //      else varType = CodeVariable.FIELD | value;
-  //  }
+    /**
+     * Setter for the variablesModifier option.
+     *
+     * @param value variables modifier.
+     */
+    /*public void setVariablesModifier(int value) {
+        getPreferences().putInt(PROP_VARIABLES_MODIFIER, value);
+
+        int varType;
+        if (getVariablesLocal()) {
+            varType = CodeVariable.LOCAL | value;
+            if ((value & CodeVariable.FINAL) == 0)
+                varType |= CodeVariable.EXPLICIT_DECLARATION;
+        }
+        else varType = CodeVariable.FIELD | value;
+    }*/
 
     public int getAutoSetComponentName() {
         return getPreferences().getInt(PROP_AUTO_SET_COMPONENT_NAME, AUTO_NAMING_DEFAULT);
@@ -474,7 +472,7 @@ public class FormLoaderSettings implements HelpCtx.Provider   {
 
     /**
      * Setter for the editorSearchPath option.
-     *
+     * 
      * @param value property editor search path.
      */
     public void setEditorSearchPath(String[] value) {
@@ -498,43 +496,55 @@ public class FormLoaderSettings implements HelpCtx.Provider   {
      * @return background color of the designer.
      */
     public java.awt.Color getFormDesignerBackgroundColor() {
-        Color c = new JPanel().getBackground();
-        int rgb = getPreferences().getInt(PROP_FORMDESIGNER_BACKGROUND_COLOR , c.getRGB());
+        Color defaultBackground = UIManager.getColor( "Tree.background" ); //NOI18N
+        if( null == defaultBackground )
+            defaultBackground = Color.white;
+        int rgb = getPreferences().getInt(PROP_FORMDESIGNER_BACKGROUND_COLOR , defaultBackground.getRGB());
         return new Color(rgb);        
         
     }
 
-  /**
+    /**
+     * Setter for the formDesignerBackgroundColor option.
+     * 
+     * @param value background color of the designer.
+     */
+    public void setFormDesignerBackgroundColor(java.awt.Color value) {
+        if (value == null)
+            return;
+        getPreferences().putInt(PROP_FORMDESIGNER_BACKGROUND_COLOR , value.getRGB());    
+    }
+
+    /**
      * Getter for the formDesignerBorderColor option.
      * 
      * @return color of the border of the designer.
      */
     public java.awt.Color getFormDesignerBorderColor() {
-        Color c = new Color(181, 186, 189);
-        int rgb = getPreferences().getInt(PROP_FORMDESIGNER_BORDER_COLOR , c.getRGB());
+        int rgb = getPreferences().getInt(PROP_FORMDESIGNER_BORDER_COLOR , new Color(181, 186, 189).getRGB());
         return new Color(rgb);        
         
     }
 
     /**
      * Setter for the formDesignerBorderColor option.
-     *
+     * 
      * @param value color of the border of the designer.
      */
     public void setFormDesignerBorderColor(java.awt.Color value) {
         if (value == null)
             return;
-        getPreferences().putInt(PROP_FORMDESIGNER_BORDER_COLOR , value.getRGB());
+        getPreferences().putInt(PROP_FORMDESIGNER_BORDER_COLOR , value.getRGB());    
     }
-
+    
     /**
      * Getter for the foldGeneratedCode option
-     *
+     * 
      * @return <code>true</code> if the code should be folded,
      * returns <code>false</code> otherwise.
      */
     public boolean getFoldGeneratedCode() {
-        return getPreferences().getBoolean(PROP_FOLD_GENERATED_CODE, true);
+        return getPreferences().getBoolean(PROP_FOLD_GENERATED_CODE, true);    
     }
 
     /**
@@ -543,7 +553,7 @@ public class FormLoaderSettings implements HelpCtx.Provider   {
      * @param value determines whether the code should be folded.
      */
     public void setFoldGeneratedCode(boolean value) {
-        getPreferences().putBoolean(PROP_FOLD_GENERATED_CODE, value);
+        getPreferences().putBoolean(PROP_FOLD_GENERATED_CODE, value);    
     }
 
     /**
@@ -566,19 +576,19 @@ public class FormLoaderSettings implements HelpCtx.Provider   {
     }
 
     public int getLayoutCodeTarget() {
-        return getPreferences().getInt(PROP_LAYOUT_CODE_TARGET, 0);
+        return getPreferences().getInt(PROP_LAYOUT_CODE_TARGET, 0);    
     }
 
     public void setLayoutCodeTarget(int target) {
-        getPreferences().putInt(PROP_LAYOUT_CODE_TARGET, target);
+        getPreferences().putInt(PROP_LAYOUT_CODE_TARGET, target);    
     }
 
     public int getI18nAutoMode() {
-        return getPreferences().getInt(PROP_AUTO_RESOURCING, 0);
+        return getPreferences().getInt(PROP_AUTO_RESOURCING, 0);    
     }
 
     public void setI18nAutoMode(int mode) {
-        getPreferences().putInt(PROP_AUTO_RESOURCING, mode);
+        getPreferences().putInt(PROP_AUTO_RESOURCING, mode);    
     }
 
     public boolean getGenerateFQN() {
@@ -586,7 +596,7 @@ public class FormLoaderSettings implements HelpCtx.Provider   {
     }
 
     public void setGenerateFQN(boolean generateFQN) {
-        getPreferences().putBoolean(PROP_GENERATE_FQN, generateFQN);
+        getPreferences().putBoolean(PROP_GENERATE_FQN, generateFQN);    
     }
 
     public boolean getPadEmptyCells() {
@@ -596,7 +606,7 @@ public class FormLoaderSettings implements HelpCtx.Provider   {
     public void setPadEmptyCells(boolean padEmptyCells) {
         getPreferences().putBoolean(PROP_PAD_EMPTY_CELLS, padEmptyCells);
     }
-
+   
     public int getGapWidth() {
         return getPreferences().getInt(PROP_GAP_WIDTH, -1);
     }
@@ -604,7 +614,7 @@ public class FormLoaderSettings implements HelpCtx.Provider   {
     public void setGapWidth(int gapWidth) {
         getPreferences().putInt(PROP_GAP_WIDTH, gapWidth);
     }
-
+   
     public int getGapHeight() {
         return getPreferences().getInt(PROP_GAP_HEIGHT, -1);
     }
@@ -613,10 +623,22 @@ public class FormLoaderSettings implements HelpCtx.Provider   {
         getPreferences().putInt(PROP_GAP_HEIGHT, gapHeight);
     }
 
+    /**
+     * @return 0: don't paint anything, 1: paint anchors and alignment,
+     *         2: paint gaps, 3: paint everything (anchors, alignment, gaps)
+     */
+    public int getPaintAdvancedLayoutInfo() {
+        return getPreferences().getInt(PROP_PAINT_ADVANCED_LAYOUT, 3);
+    }
+
+    public void setPaintAdvancedLayoutInfo(int paintLevel) {
+        getPreferences().putInt(PROP_PAINT_ADVANCED_LAYOUT, paintLevel);
+    }
+
     private static String[] toArray(String esp) {
         return esp.split(" , ");//NOI18N
     }
-
+    
     private static String fromArray(String[] items) {
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < items.length; i++) {
@@ -625,9 +647,9 @@ public class FormLoaderSettings implements HelpCtx.Provider   {
                 sb.append(" , ");//NOI18N
             }
         }
-        return sb.toString();
+        return sb.toString();        
     }
-
+    
     // XXX(-tdt) Hmm, backward compatibility with com.netbeans package name
     // again. The property editor search path is stored in user settings, we
     // must translate    
@@ -643,7 +665,7 @@ public class FormLoaderSettings implements HelpCtx.Provider   {
     }
 
     /** This method must be overriden. It returns display name of this options.
-     *
+     * 
      * @return display name.
      */
     public String displayName() {

@@ -44,6 +44,8 @@
 
 package org.netbeans.modules.form.layoutsupport;
 
+import org.openide.util.NbBundle;
+
 /**
  * This class is used internally to provide basic support for containers
  * with unknown layout. Used when no suitable LayoutSupportDelegate is found.
@@ -52,6 +54,11 @@ package org.netbeans.modules.form.layoutsupport;
  */
 
 class UnknownLayoutSupport extends AbstractLayoutSupport {
+
+    @Override
+    public String getDisplayName() {
+        return NbBundle.getMessage(UnknownLayoutSupport.class, "CTL_Unsupported"); // NOI18N
+    }
 
     @Override
     public Class getSupportedClass() {

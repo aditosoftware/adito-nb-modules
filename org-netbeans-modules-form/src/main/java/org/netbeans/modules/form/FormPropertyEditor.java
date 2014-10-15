@@ -244,7 +244,7 @@ public class FormPropertyEditor implements PropertyEditor,
         }
 
         PropertyEditor prEd = property.getCurrentEditor();
-        return prEd != null && property.canRead() ? prEd.getAsText() : null;
+        return prEd != null ? prEd.getAsText() : null;
     }
 
     /**
@@ -304,8 +304,8 @@ public class FormPropertyEditor implements PropertyEditor,
     public Component getCustomEditor() {
         // hack: PropertyPicker wants code regenerated - it might lead to
         // setting values to property editors
-      // STRIPPED
-/*        FormModel formModel = property.getPropertyContext().getFormModel();
+        // A
+        /*FormModel formModel = property.getPropertyContext().getFormModel();
         if (formModel != null) {
             JavaCodeGenerator codeGen = (JavaCodeGenerator) FormEditor.getCodeGenerator(formModel);
             if (codeGen != null) { // may happen property sheet wants something from an already closed form (#111205)
@@ -337,8 +337,8 @@ public class FormPropertyEditor implements PropertyEditor,
 
         if (!property.canWrite()) { // read only property
             for (int i=0; i < editors.length; i++)
-                if (/*!editors[i].getClass().equals(RADConnectionPropertyEditor.class) // STRIPPED
-                        &&*/ editors[i].supportsCustomEditor())
+                if (/*!editors[i].getClass().equals(RADConnectionPropertyEditor.class) // A
+                        && */editors[i].supportsCustomEditor())
                     return true;
             return false;
         }
@@ -379,8 +379,8 @@ public class FormPropertyEditor implements PropertyEditor,
             // Explicite editor should be added to editors (if not already present).
             // The current editor should replace the corresponding default editor.
             // Replace the delegate editor in ResourceWrapperEditor if needed.
-          // STRIPPED
-/*            for (int i=0; i < typeEditors.length && (expliciteEditor != null || currentEditor != null); i++) {
+            // A
+            /*for (int i=0; i < typeEditors.length && (expliciteEditor != null || currentEditor != null); i++) {
                 PropertyEditor prEd = typeEditors[i];
                 ResourceWrapperEditor wrapper = null;
                 if (prEd instanceof ResourceWrapperEditor && !(currentEditor instanceof ResourceWrapperEditor)) {

@@ -62,12 +62,21 @@ public class JTabbedPaneSupport extends AbstractLayoutSupport {
 
     private int selectedTab = -1;
 
-  /** Gets the supported layout manager class - JTabbedPane.
+    /** Gets the supported layout manager class - JTabbedPane.
      * @return the class supported by this delegate
      */
     @Override
     public Class getSupportedClass() {
         return JTabbedPane.class;
+    }
+
+    @Override
+    public boolean checkEmptyContainer(Container cont) {
+        boolean empty = false;
+        if (cont instanceof JTabbedPane) {
+            empty = ((JTabbedPane)cont).getTabCount() == 0;
+        }
+        return empty;
     }
 
     /** Removes one component from the layout (at metadata level).
@@ -266,7 +275,7 @@ public class JTabbedPaneSupport extends AbstractLayoutSupport {
 
     // ---------
 
-  /** This method is called to get a default component layout constraints
+    /** This method is called to get a default component layout constraints
      * metaobject in case it is not provided (e.g. in addComponents method).
      * @return the default LayoutConstraints object for the supported layout;
      *         null if no component constraints are used
@@ -278,7 +287,7 @@ public class JTabbedPaneSupport extends AbstractLayoutSupport {
 
     // ----------
 
-  // ----------
+    // ----------
 
     /** LayoutConstraints implementation for managing JTabbedPane tab
      * parameters.
@@ -290,12 +299,26 @@ public class JTabbedPaneSupport extends AbstractLayoutSupport {
 
         private FormProperty[] properties;
 
-      public TabConstraints(String title) {
+        public TabConstraints(String title) {
             this.title = title;
-      }
+        }
+
+        public TabConstraints(String title, Icon icon, String toolTip) {
+            this.title = title;
+            this.icon = icon;
+            this.toolTip = toolTip;
+        }
+
+        public String getTitle() { 
+            return title;
+        }
 
         public Icon getIcon() {
             return icon;
+        }
+
+        public String getToolTip() {
+            return toolTip;
         }
 
         // -----------

@@ -75,7 +75,7 @@ public class RADVisualFormContainer extends RADVisualContainer implements FormCo
     private Point formPosition;
     private boolean generatePosition = true;
     private boolean generateSize = true;
-    private boolean generateCenter = true;
+    private boolean generateCenter = false;
     private int formSizePolicy = GEN_NOTHING;
 
     // ------------------------------------------------------------------------------
@@ -183,11 +183,22 @@ public class RADVisualFormContainer extends RADVisualContainer implements FormCo
     }
 
     private Dimension setDesignerSizeImpl(Dimension value, boolean persistent) {
-        Dimension old = designerSize;
+        final Dimension old = designerSize;
         designerSize = value;
         setAuxValue(FormDesigner.PROP_DESIGNER_SIZE, persistent ? value : null);
         if (getNodeReference() != null) { // propagate the change to node
-            getNodeReference().firePropertyChangeHelper(FormDesigner.PROP_DESIGNER_SIZE, old, value);
+            if (!FormLAF.inLAFBlock()) {
+                getNodeReference().firePropertyChangeHelper(FormDesigner.PROP_DESIGNER_SIZE, old, value);
+            } else { // firing the change may lead to UI update out of GUI builder, we don't want that in LAF block
+                EventQueue.invokeLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (getNodeReference() != null) {
+                            getNodeReference().firePropertyChangeHelper(FormDesigner.PROP_DESIGNER_SIZE, old, designerSize);
+                        }
+                    }
+                });
+            }
         }
         return old;
     }
@@ -210,6 +221,10 @@ public class RADVisualFormContainer extends RADVisualContainer implements FormCo
     public void setGenerateSize(boolean value) {
         boolean old = generateSize;
         generateSize = value;
+        if (!old && generateSize && getFormSizePolicy() == GEN_BOUNDS
+                && getFormSize() == null && getDesignerSize() != null) {
+            setDesignerSize(getDesignerSize()); // force recalculation of formSize
+        }
         getFormModel().fireSyntheticPropertyChanged(this, PROP_GENERATE_SIZE,
                                         old ? Boolean.TRUE : Boolean.FALSE, value ? Boolean.TRUE : Boolean.FALSE);
     }
@@ -220,6 +235,11 @@ public class RADVisualFormContainer extends RADVisualContainer implements FormCo
 
     public void setGenerateCenter(boolean value) {
         boolean old = generateCenter;
+        if (isInternalFrame()) {
+            // bug 226740 - centering on screen does not make sense for JInternalFrame,
+            // but old forms may have this set (we must keep the property)
+            value = false;
+        }
         generateCenter = value;
         getFormModel().fireSyntheticPropertyChanged(this, PROP_GENERATE_CENTER,
                                         old ? Boolean.TRUE : Boolean.FALSE, value ? Boolean.TRUE : Boolean.FALSE);
@@ -230,8 +250,7 @@ public class RADVisualFormContainer extends RADVisualContainer implements FormCo
     }
 
     public int getFormSizePolicy() {
-        return java.awt.Window.class.isAssignableFrom(getBeanClass())
-                   || javax.swing.JInternalFrame.class.isAssignableFrom(getBeanClass())
+        return java.awt.Window.class.isAssignableFrom(getBeanClass()) || isInternalFrame()
                ? formSizePolicy : GEN_NOTHING;
     }
 
@@ -251,7 +270,7 @@ public class RADVisualFormContainer extends RADVisualContainer implements FormCo
             setAuxValue(FormDesigner.PROP_DESIGNER_SIZE, getDesignerSize());
         }
         getFormModel().fireSyntheticPropertyChanged(this, PROP_FORM_SIZE_POLICY,
-                                        new Integer(old), new Integer(value));
+            Integer.valueOf(old), Integer.valueOf(value));
     }
 
     // ------------------------------------------------------------------------------
@@ -270,7 +289,7 @@ public class RADVisualFormContainer extends RADVisualContainer implements FormCo
             @Override
             public Object getValue() throws
                 IllegalAccessException, IllegalArgumentException, java.lang.reflect.InvocationTargetException {
-                return new Integer(getFormSizePolicy());
+                return Integer.valueOf(getFormSizePolicy());
             }
 
             @Override
@@ -359,6 +378,9 @@ public class RADVisualFormContainer extends RADVisualContainer implements FormCo
             @Override
             public Object getValue() throws
                 IllegalAccessException, IllegalArgumentException, java.lang.reflect.InvocationTargetException {
+                if (getFormSizePolicy() != GEN_BOUNDS || getGenerateCenter()) {
+                    return Boolean.FALSE;
+                }
                 return getGeneratePosition() ? Boolean.TRUE : Boolean.FALSE;
             }
 
@@ -388,6 +410,9 @@ public class RADVisualFormContainer extends RADVisualContainer implements FormCo
             @Override
             public Object getValue() throws
                 IllegalAccessException, IllegalArgumentException, java.lang.reflect.InvocationTargetException {
+                if (getFormSizePolicy() != GEN_BOUNDS) {
+                    return Boolean.FALSE;
+                }
                 return getGenerateSize() ? Boolean.TRUE : Boolean.FALSE;
             }
 
@@ -415,6 +440,9 @@ public class RADVisualFormContainer extends RADVisualContainer implements FormCo
             @Override
             public Object getValue() throws
                 IllegalAccessException, IllegalArgumentException, java.lang.reflect.InvocationTargetException {
+                if (getFormSizePolicy() == GEN_NOTHING) {
+                    return Boolean.FALSE;
+                }
                 return getGenerateCenter() ? Boolean.TRUE : Boolean.FALSE;
             }
 
@@ -429,7 +457,7 @@ public class RADVisualFormContainer extends RADVisualContainer implements FormCo
 
             @Override
             public boolean canWrite() {
-                return !isReadOnly() && getFormSizePolicy() == GEN_BOUNDS;
+                return !isReadOnly() && getFormSizePolicy() != GEN_NOTHING && !isInternalFrame();
             }
         };
 
@@ -460,11 +488,9 @@ public class RADVisualFormContainer extends RADVisualContainer implements FormCo
 
         java.util.List<Node.Property> propList = new java.util.ArrayList<Node.Property>();
 
-        //propList.add(JavaCodeGenerator.createBeanClassNameProperty(this)); // STRIPPED
+        //propList.add(JavaCodeGenerator.createBeanClassNameProperty(this)); // A
 
-        if (java.awt.Window.class.isAssignableFrom(getBeanClass())
-            || javax.swing.JInternalFrame.class.isAssignableFrom(getBeanClass()))
-        {            
+        if (java.awt.Window.class.isAssignableFrom(getBeanClass()) || isInternalFrame()) {            
             propList.add(sizeProperty);
             propList.add(positionProperty);
             propList.add(policyProperty);
@@ -472,7 +498,7 @@ public class RADVisualFormContainer extends RADVisualContainer implements FormCo
             propList.add(genSizeProperty);
             propList.add(genCenterProperty);
         }
-                
+
         propList.add(designerSizeProperty);
 
         Node.Property[] props = new Node.Property[propList.size()];
@@ -531,6 +557,10 @@ public class RADVisualFormContainer extends RADVisualContainer implements FormCo
         }
     }
 
+    private boolean isInternalFrame() {
+        return javax.swing.JInternalFrame.class.isAssignableFrom(getBeanClass());
+    }
+
     // ------------------------------------------------------------------------------------------
     // Innerclasses
 
@@ -561,11 +591,11 @@ public class RADVisualFormContainer extends RADVisualContainer implements FormCo
         @Override
         public void setAsText(String str) {
             if (names[0].equals(str))
-                setValue(new Integer(0));
+                setValue(Integer.valueOf(0));
             else if (names[1].equals(str))
-                setValue(new Integer(1));
+                setValue(Integer.valueOf(1));
             else if (names[2].equals(str))
-                setValue(new Integer(2));
+                setValue(Integer.valueOf(2));
         }
     }
 }

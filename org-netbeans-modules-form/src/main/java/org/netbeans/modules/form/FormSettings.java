@@ -45,8 +45,6 @@
 package org.netbeans.modules.form;
 
 import java.util.*;
-import javax.swing.UIManager;
-import org.netbeans.modules.form.project.ClassPathUtils;
 
 /**
  * Settings for one form.
@@ -64,7 +62,7 @@ public class FormSettings {
 
         // Variables Modifier
         int variablesModifier = FormLoaderSettings.getInstance().getVariablesModifier();
-        settings.put(FormLoaderSettings.PROP_VARIABLES_MODIFIER, new Integer(variablesModifier));
+        settings.put(FormLoaderSettings.PROP_VARIABLES_MODIFIER, Integer.valueOf(variablesModifier));
         
         // Local Variables
         boolean localVariables = FormLoaderSettings.getInstance().getVariablesLocal();
@@ -76,7 +74,7 @@ public class FormSettings {
         
         // Listener Generation Style
         int listenerGenerationStyle = FormLoaderSettings.getInstance().getListenerGenerationStyle();
-        settings.put(FormLoaderSettings.PROP_LISTENER_GENERATION_STYLE, new Integer(listenerGenerationStyle));
+        settings.put(FormLoaderSettings.PROP_LISTENER_GENERATION_STYLE, Integer.valueOf(listenerGenerationStyle));
 
         // Generate FQN
         boolean generateFQN = FormLoaderSettings.getInstance().getGenerateFQN();
@@ -90,20 +88,20 @@ public class FormSettings {
         Integer variablesModifier = (Integer)settings.get(FormLoaderSettings.PROP_VARIABLES_MODIFIER);
         return variablesModifier.intValue();
     }
-
+    
     public void setVariablesModifier(int value) {
-        settings.put(FormLoaderSettings.PROP_VARIABLES_MODIFIER, new Integer(value));
+        settings.put(FormLoaderSettings.PROP_VARIABLES_MODIFIER, Integer.valueOf(value));
     }
-
+    
     public boolean getVariablesLocal() {
         Boolean variablesLocal = (Boolean)settings.get(FormLoaderSettings.PROP_VARIABLES_LOCAL);
         return variablesLocal.booleanValue();
     }
-
+    
     public void setVariablesLocal(boolean value) {
         settings.put(FormLoaderSettings.PROP_VARIABLES_LOCAL, Boolean.valueOf(value));
     }
-
+    
     public boolean getAutoSetComponentName() {
         Boolean setting = (Boolean) settings.get(FormLoaderSettings.PROP_AUTO_SET_COMPONENT_NAME);
         boolean autoName;
@@ -124,7 +122,7 @@ public class FormSettings {
     boolean getDefaultAutoSetComponentName() {
         int globalNaming = FormLoaderSettings.getInstance().getAutoSetComponentName();
         boolean autoName = globalNaming == FormLoaderSettings.AUTO_NAMING_ON;
-      // STRIPPED
+        // A
         /*if (globalNaming == FormLoaderSettings.AUTO_NAMING_DEFAULT) {
             ResourceSupport resourceSupport = FormEditor.getResourceSupport(formModel);
             if (resourceSupport.projectUsesResources()) {
@@ -138,27 +136,30 @@ public class FormSettings {
         Boolean generateMnemonicsCode = (Boolean)settings.get(FormLoaderSettings.PROP_GENERATE_MNEMONICS);
         return generateMnemonicsCode.booleanValue();
     }
-
+    
     public void setGenerateMnemonicsCode(boolean value) {
         settings.put(FormLoaderSettings.PROP_GENERATE_MNEMONICS, Boolean.valueOf(value));
     }
-
+    
     public int getListenerGenerationStyle() {
         Integer listenerGenerationStyle = (Integer)settings.get(FormLoaderSettings.PROP_LISTENER_GENERATION_STYLE);
         return listenerGenerationStyle.intValue();
     }
-
+    
     public void setListenerGenerationStyle(int value) {
-        settings.put(FormLoaderSettings.PROP_LISTENER_GENERATION_STYLE, new Integer(value));
+        settings.put(FormLoaderSettings.PROP_LISTENER_GENERATION_STYLE, Integer.valueOf(value));
     }
 
-  // STRIPPED
+    // A
     /*public int getLayoutCodeTarget() {
         return checkLayoutCodeTarget();
-    }*/
+    }
 
-  // STRIPPED
-    /*private int checkLayoutCodeTarget() {
+    public void setLayoutCodeTarget(int value) {
+        settings.put(FormLoaderSettings.PROP_LAYOUT_CODE_TARGET, Integer.valueOf(value));
+    }
+
+    private int checkLayoutCodeTarget() {
         Integer lctSetting = (Integer)settings.get(FormLoaderSettings.PROP_LAYOUT_CODE_TARGET);
         int layoutCodeTarget;
         if (lctSetting != null) {
@@ -170,12 +171,21 @@ public class FormSettings {
         if (layoutCodeTarget == JavaCodeGenerator.LAYOUT_CODE_AUTO) {
             int globalLCT = FormLoaderSettings.getInstance().getLayoutCodeTarget();
             if (globalLCT == JavaCodeGenerator.LAYOUT_CODE_AUTO) {
-                boolean isAquaLookAndFeel = "Aqua".equals(UIManager.getLookAndFeel().getID()); // NOI18N
-                layoutCodeTarget = !isAquaLookAndFeel && ClassPathUtils.isJava6ProjectPlatform(
-                        FormEditor.getFormDataObject(formModel).getPrimaryFile()) ?
-                    JavaCodeGenerator.LAYOUT_CODE_JDK6 : JavaCodeGenerator.LAYOUT_CODE_LIBRARY;
+                if (!Lookup.getDefault().lookup(FormServices.class).isLayoutExtensionsLibrarySupported()) {
+                    layoutCodeTarget = JavaCodeGenerator.LAYOUT_CODE_JDK6;
+                } else {
+                    FileObject fo = FormEditor.getFormDataObject(formModel).getPrimaryFile();
+                    if ("Aqua".equals(UIManager.getLookAndFeel().getID())) { // workaround for old Aqua LF (bug #173912) // NOI18N
+                        layoutCodeTarget = ClassPathUtils.isJava7ProjectPlatform(fo) ?
+                                           JavaCodeGenerator.LAYOUT_CODE_JDK6 : JavaCodeGenerator.LAYOUT_CODE_LIBRARY;
+                    } else {
+                        layoutCodeTarget = ClassPathUtils.isJava6ProjectPlatform(fo) ?
+                                           JavaCodeGenerator.LAYOUT_CODE_JDK6 : JavaCodeGenerator.LAYOUT_CODE_LIBRARY;
+                    }
+                }
+            } else {
+                layoutCodeTarget = globalLCT;
             }
-            else layoutCodeTarget = globalLCT;
             setLayoutCodeTarget(layoutCodeTarget);
         }
         else if (lctSetting == null) {
@@ -191,8 +201,8 @@ public class FormSettings {
     // for compatibility
     static final String PROP_AUTO_I18N = "i18nAutoMode"; // NOI18N
 
-  // TODO: stripped
-/*    void setResourceAutoMode(int value) {
+    // A
+    /*void setResourceAutoMode(int value) {
         settings.put(ResourceSupport.PROP_AUTO_RESOURCING, value);
         settings.put(PROP_AUTO_I18N, value == ResourceSupport.AUTO_I18N); // for compatibility
     }
@@ -210,7 +220,8 @@ public class FormSettings {
                     resAutoMode = ResourceSupport.AUTO_I18N;
             }
             else { // no setting available
-                if (FormEditor.getFormEditor(formModel).needPostCreationUpdate()) {
+                FormEditor formEditor = FormEditor.getFormEditor(formModel);
+                if (formEditor.needPostCreationUpdate()) {
                     int globalResAutoMode = FormLoaderSettings.getInstance().getI18nAutoMode();
                     if (globalResAutoMode == FormLoaderSettings.AUTO_RESOURCE_ON) {
                         ResourceSupport resourceSupport = FormEditor.getResourceSupport(formModel);
@@ -223,8 +234,12 @@ public class FormSettings {
                         ResourceSupport resourceSupport = FormEditor.getResourceSupport(formModel);
                         if (resourceSupport.projectWantsUseResources())
                             resAutoMode = ResourceSupport.AUTO_RESOURCING; // only if app framework already on cp
-                        else if (resourceSupport.isDefaultInternationalizableProject())
+                        else if (resourceSupport.isDefaultInternationalizableProject()) {
                             resAutoMode = ResourceSupport.AUTO_I18N; // NBM project
+                            if (formEditor.getEditorSupport().canGenerateNBMnemonicsCode()) {
+                                setGenerateMnemonicsCode(true);
+                            }
+                        }
                     }
                 }
                 setResourceAutoMode(resAutoMode);
@@ -268,7 +283,7 @@ public class FormSettings {
         }
         settings.put(name, value);
     }
-
+    
     public Object get(String name) {
         Object value;
         if (settings.containsKey(name)) {

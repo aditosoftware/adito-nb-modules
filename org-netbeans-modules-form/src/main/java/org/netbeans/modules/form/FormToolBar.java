@@ -53,11 +53,9 @@ import java.beans.BeanInfo;
 import java.util.*;
 
 import org.openide.nodes.*;
-//import org.openide.util.HelpCtx;
-//import org.openide.util.actions.SystemAction;
 
 import org.netbeans.modules.form.palette.*;
-//import org.netbeans.modules.form.actions.TestAction;
+import org.openide.util.ImageUtilities;
 
 /**
  * ToolBar in the FormDesigner - by default it holds buttons for selection and
@@ -86,17 +84,30 @@ final class FormToolBar {
         this.formDesigner = designer;
         if (toolbar == null) {
             toolbar = new ToolBar();
+        } else {
+            Object tb = toolbar.getClientProperty(FormToolBar.class);
+            if (tb instanceof FormToolBar) { // clean everything added by the previous FormToolBar
+                FormToolBar prevFormToolBar = (FormToolBar) tb;
+                toolbar.removeMouseListener(prevFormToolBar.listener);
+                // remove all relevant components - the first one is a horizontal strut before the selection button
+                int i = toolbar.getComponentIndex(prevFormToolBar.selectionButton) - 1;
+                if (i >= 0) {
+                    while (i < toolbar.getComponentCount()) {
+                        toolbar.remove(i);
+                    }
+                }
+            }
         }
         this.toolbar = toolbar;
+        toolbar.putClientProperty(FormToolBar.class, this);
         toolbar.putClientProperty("isPrimary", Boolean.TRUE); // for JDev // NOI18N
 
-        //listener = new Listener();
+        listener = new Listener();
 
         // selection button
-        selectionButton = new JToggleButton(
-            new ImageIcon(getClass().getResource(
-                          "/org/netbeans/modules/form/resources/selection_mode.png")), // NOI18N
-            false);
+        selectionButton = new JToggleButton(new ImageIcon(ImageUtilities.loadImage("org/netbeans/modules/form/resources/selection_mode.png", true)), // NOI18N
+                                            false);
+        // A
         /*selectionButton.addActionListener(listener);
         selectionButton.addMouseListener(listener);
         selectionButton.setToolTipText(
@@ -106,10 +117,8 @@ final class FormToolBar {
         initButton(selectionButton);*/
 
         // connection button
-        connectionButton = new JToggleButton(
-            new ImageIcon(getClass().getResource(
-                          "/org/netbeans/modules/form/resources/connection_mode.png")), // NOI18N
-            false);
+        connectionButton = new JToggleButton(new ImageIcon(ImageUtilities.loadImage("org/netbeans/modules/form/resources/connection_mode.png", true)), // NOI18N
+                                             false);
         /*connectionButton.addActionListener(listener);
         connectionButton.addMouseListener(listener);
         connectionButton.setToolTipText(

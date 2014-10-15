@@ -72,7 +72,7 @@ public class MenuFakeSupport extends AbstractLayoutSupport {
         return false;
     }
 
-  @Override
+    @Override
     public void addComponentsToContainer(Container container,
                                          Container containerDelegate,
                                          Component[] components,

@@ -44,20 +44,27 @@
 
 package org.netbeans.modules.form;
 
+import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.Rectangle;
+import java.io.IOException;
+import java.awt.datatransfer.*;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import javax.swing.undo.UndoableEdit;
+import org.openide.*;
+import org.openide.nodes.*;
+import org.openide.util.Mutex;
+import org.openide.util.MutexException;
+import org.openide.util.datatransfer.PasteType;
+import org.openide.util.datatransfer.ExTransferable;
+import org.openide.util.datatransfer.MultiTransferObject;
+import org.openide.ErrorManager;
+import org.netbeans.modules.form.project.*;
 import org.netbeans.modules.form.layoutdesign.*;
 import org.netbeans.modules.form.layoutsupport.LayoutSupportManager;
-import org.netbeans.modules.form.project.ClassSource;
-import org.openide.*;
-import org.openide.nodes.Node;
-import org.openide.util.*;
-import org.openide.util.datatransfer.*;
-
-import javax.swing.undo.UndoableEdit;
-import java.awt.*;
-import java.awt.datatransfer.*;
-import java.io.IOException;
-import java.util.*;
-import java.util.List;
+import org.openide.util.Lookup;
 
 /**
  * Support class for copy/cut/paste operations in form editor.
@@ -356,6 +363,10 @@ class CopySupport {
                         RADVisualComponent sourceCompVisual = (RADVisualComponent) sourceComp;
                         if (!sourceCompVisual.isMenuComponent()) {
                             LayoutComponent layoutComp = sourceLayout.getLayoutComponent(sourceCompVisual.getId());
+                            if (layoutComp == null) { // workaround for bug 214841, the source layout is broken or container was removed
+                                commonRoot = null;
+                                break;
+                            }
                             LayoutInterval compInterval = layoutComp.getLayoutInterval(0);
                             if (commonRoot == null) {
                                 commonRoot = compInterval.getRoot();
@@ -403,27 +414,27 @@ class CopySupport {
 
             try {
 
+              // A
               if (!move)
                 targetComponent.getARADComponentHandler().addChildren(sourceComponents);
               else
                 targetComponent.getARADComponentHandler().reInsert(sourceComponents);
 
                 // copy or move the components
-                for (RADComponent sourceComp : sourceComponents) {
-                    //RADComponent copiedComp;
+                // A
+                /*for (RADComponent sourceComp : sourceComponents) {
+                    RADComponent copiedComp;
                     if (!move) {
-                        //targetComponent.getARADComponentHandler().addChild(sourceComp);
-                        //copiedComp = targetForm.getComponentCreator().copyComponent(sourceComp, targetComponent);
-                        /*if (copiedComp == null) {
+                        copiedComp = targetForm.getComponentCreator().copyComponent(sourceComp, targetComponent);
+                        if (copiedComp == null) {
                             return null; // copy failed...
-                        }*/
+                        }
                     } else { // move within the same form
-                      //sourceComp.getARADComponentHandler().move(targetComponent);
-                        //targetForm.getComponentCreator().moveComponent(sourceComp, targetComponent);
-                        //copiedComp = sourceComp;
+                        targetForm.getComponentCreator().moveComponent(sourceComp, targetComponent);
+                        copiedComp = sourceComp;
                     }
 
-                    /*if (copiedComp instanceof RADVisualComponent
+                    if (copiedComp instanceof RADVisualComponent
                             && !((RADVisualComponent)copiedComp).isMenuComponent()
                             && sourceComp instanceof RADVisualComponent) { // might be even a LayoutManager componen...
                         // for visual components we must care about the layout model (new layout)
@@ -456,8 +467,8 @@ class CopySupport {
                             // new-to-old layout copy, need to remove layout component from source
                             getLayoutDesigner().removeComponentsFromParent(sourceComp.getId());
                         } // old-to-old layout copy is fully handled by MetaComponentCreator
-                    } // also copying menu component needs no additional treatment*/
-                }
+                    } // also copying menu component needs no additional treatment
+                }*/
 
                 // copy the layout for all visual components together
                 if (sourceToTargetId != null) { // new layout to new layout
@@ -510,14 +521,24 @@ class CopySupport {
 
         private static Rectangle getComponentBounds(RADComponent sourceComp) {
             FormDesigner designer = FormEditor.getFormDesigner(sourceComp.getFormModel());
-            Component comp = (Component) designer.getComponent(sourceComp);
-            return comp != null ? comp.getBounds() : null;
+            if (designer != null) {
+                Component comp = (Component) designer.getComponent(sourceComp);
+                if (comp != null) {
+                    return comp.getBounds();
+                }
+            }
+            return null;
         }
 
         private static Dimension getComponentSize(RADComponent sourceComp) {
             FormDesigner designer = FormEditor.getFormDesigner(sourceComp.getFormModel());
-            Component comp = (Component) designer.getComponent(sourceComp);
-            return comp != null ? comp.getSize() : null;
+            if (designer != null) {
+                Component comp = (Component) designer.getComponent(sourceComp);
+                if (comp != null) {
+                    return comp.getSize();
+                }
+            }
+            return null;
         }
 
         private static boolean isConvertibleLayout(RADVisualContainer metaCont) {
@@ -580,7 +601,7 @@ class CopySupport {
 
         private Transferable doPaste() throws IOException {
             if ((classSource.getClassName().indexOf('.') == -1) // Issue 79573
-                /*&& !FormJavaSource.isInDefaultPackage(targetForm)*/) { // STRIPPED
+                /*&& !FormJavaSource.isInDefaultPackage(targetForm)*/) { // A
                 String message = FormUtils.getBundleString("MSG_DefaultPackageBean"); // NOI18N
                 NotifyDescriptor nd = new NotifyDescriptor.Message(message, NotifyDescriptor.WARNING_MESSAGE);
                 DialogDisplayer.getDefault().notify(nd);

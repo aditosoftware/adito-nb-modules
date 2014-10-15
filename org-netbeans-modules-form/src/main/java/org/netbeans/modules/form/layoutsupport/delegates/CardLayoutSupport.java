@@ -74,11 +74,11 @@ public class CardLayoutSupport extends AbstractLayoutSupport {
     /** Adds new components to the layout. This is done just at the metadata
      * level, no real components but their CodeExpression representations
      * are added.
-     * @param components array of CodeExpression objects representing the
-     *        components to be accepted
+     * @param components     array of RADVisualComponent objects representing the
+     *                       components to be accepted
      * @param newConstraints array of layout constraints of the components
-     * @param index position at which the components should be added (inserted);
-     *        if -1, the components should be added at the end
+     * @param index          position at which the components should be added (inserted);
+     *                       if -1, the components should be added at the end
      */
     @Override
     public void addComponents(RADVisualComponent[] components,
@@ -203,7 +203,7 @@ public class CardLayoutSupport extends AbstractLayoutSupport {
 
     // ---------
 
-  /** This method is called to get a default component layout constraints
+    /** This method is called to get a default component layout constraints
      * metaobject in case it is not provided (e.g. in addComponents method).
      * @return the default LayoutConstraints object for the supported layout
      */

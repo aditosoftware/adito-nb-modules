@@ -188,7 +188,7 @@ public class FlowLayoutSupport extends AbstractLayoutSupport
 
     @Override
     public Object[] getAssistantParams() {
-        return new Object[] {assistantParams + 1};
+        return new Object[] {Integer.valueOf(assistantParams+1)};
     }
 
     /** This method paints a dragging feedback for a component dragged over

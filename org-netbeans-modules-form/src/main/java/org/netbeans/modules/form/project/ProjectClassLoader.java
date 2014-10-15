@@ -49,6 +49,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.*;
 import org.netbeans.api.java.classpath.ClassPath;
+import org.netbeans.modules.form.FormServices;
 import org.openide.ErrorManager;
 import org.openide.filesystems.FileObject;
 import org.openide.filesystems.FileStateInvalidException;
@@ -71,6 +72,7 @@ class ProjectClassLoader extends ClassLoader {
     private ClassLoader projectClassLoaderDelegate;
     private ClassPath sources;
     private ClassLoader systemClassLoader;
+    private ClassLoader orgJDesktopLayoutClassLoader;
 
     private ProjectClassLoader(ClassLoader projectClassLoaderDelegate, ClassPath sources) {
         this.projectClassLoaderDelegate = projectClassLoaderDelegate;
@@ -111,15 +113,18 @@ class ProjectClassLoader extends ClassLoader {
             // possible to load such a class from project. If we find a case
             // when the project class needs to be preferred over the system,
             // we'll need an additional category to SYSTEM_CLASS.]
-            try {
-                // See issue 135745, the classes that form module classloader
-                // is able to load should be the same as the one loaded
-                // by systemClassLoader, but there shouldn't be clash
+
+            if (name.startsWith("org.jdesktop.layout")) { // NOI18N
+                // See issues 135745 and 221685: the classes that this
+                // classloader is able to load should be the same as the ones
+                // loaded by systemClassLoader, but there shouldn't be the clash
                 // with a copy of GroupLayout hacked by libs.ppawtlayout module.
-                // The classes that cannot be loaded by form module classloader
-                // will be handled by systemClassLoader as before.
-                c = getClass().getClassLoader().loadClass(name);
-            } catch (ClassNotFoundException cnfe) {
+                if (orgJDesktopLayoutClassLoader == null) {
+                    FormServices services = Lookup.getDefault().lookup(FormServices.class);
+                    orgJDesktopLayoutClassLoader = services.getClass().getClassLoader();
+                }
+                c = orgJDesktopLayoutClassLoader.loadClass(name);
+            } else {
                 c = systemClassLoader.loadClass(name);
             }
         } else {
@@ -186,12 +191,17 @@ class ProjectClassLoader extends ClassLoader {
 
     @Override
     protected URL findResource(String name) {
-        FileObject fo = sources.findResource(name);
-        if (fo != null) {
-            try {
-                return fo.getURL();
-            } catch (FileStateInvalidException ex) {
-                ErrorManager.getDefault().notify(ErrorManager.INFORMATIONAL, ex);
+        // In design time some resources added/changed by the user might not be propagated
+        // to execution classpath yet (until the project is rebuilt), so not found by
+        // custom components. That's why we prefer to look for them on sources classpath
+        // first (bug 69377). An exception is use of @NbBundle.Messages annotations which
+        // fills the properties file only in built results. If the same file is also
+        // present in sources then it is incomplete and we should not use it (bug 238094).
+        if ((!name.equals("Bundle.properties") && !name.endsWith("/Bundle.properties")) // NOI18N
+                || !isProjectWithNbBundle()) {
+            FileObject fo = sources.findResource(name);
+            if (fo != null) {
+                return fo.toURL();
             }
         }
         return projectClassLoaderDelegate.getResource(name);
@@ -213,6 +223,10 @@ class ProjectClassLoader extends ClassLoader {
             urls.add(e.nextElement());
         }
         return Collections.enumeration(urls);
+    }
+
+    private boolean isProjectWithNbBundle() {
+        return projectClassLoaderDelegate.getResource("org/openide/util/NbBundle.class") != null; // NOI18N
     }
 
     private ClassLoader commonsLoggingClassLoader;

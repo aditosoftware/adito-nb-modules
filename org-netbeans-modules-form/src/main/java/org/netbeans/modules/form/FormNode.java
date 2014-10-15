@@ -46,7 +46,6 @@ package org.netbeans.modules.form;
 
 import org.netbeans.api.actions.*;
 import org.netbeans.modules.form.adito.actions.*;
-import org.openide.actions.PropertiesAction;
 import org.openide.loaders.DataObject;
 import org.openide.nodes.*;
 import org.openide.util.Lookup;
@@ -159,22 +158,22 @@ public class FormNode extends AbstractNode implements FormCookie
     return this;
   }
 
-
-    /*@Override
-    public <T extends Node.Cookie> T getCookie(Class<T> type) {
-        T cookie = super.getCookie(type);
-        if (cookie == null
-            && (DataObject.class.isAssignableFrom(type)
-                || SaveCookie.class.isAssignableFrom(type)
-                || CloseCookie.class.isAssignableFrom(type)
-                || PrintCookie.class.isAssignableFrom(type)))
-        {
-            FormDataObject fdo = FormEditor.getFormDataObject(formModel);
-            if (fdo != null)
-                cookie = fdo.getCookie(type);
-        }
-        return cookie;
-    }*/
+  /*@Override
+  public <T extends Node.Cookie> T getCookie(Class<T> type)
+  {
+    T cookie = super.getCookie(type);
+    if (cookie == null
+        && (DataObject.class.isAssignableFrom(type)
+        || SaveCookie.class.isAssignableFrom(type)
+        || CloseCookie.class.isAssignableFrom(type)
+        || PrintCookie.class.isAssignableFrom(type)))
+    {
+      FormDataObject fdo = FormEditor.getFormDataObject(formModel);
+      if (fdo != null)
+        cookie = fdo.getCookie(type);
+    }
+    return cookie;
+  }*/
 
   // because delegating cookies to FormDataObject we have a bit complicated
   // way of updating cookies on node - need fire a change on nodes explicitly
@@ -204,6 +203,37 @@ public class FormNode extends AbstractNode implements FormCookie
     return actions;
   }
 
+  /**
+   * A wrapper for the standard Properties action to ensure that standalone properties
+   * windows opened by the user do not stay around after the form is closed.
+   */
+  private static class PropertiesAction extends org.openide.actions.PropertiesAction
+  {
+    @Override
+    protected void performAction(Node[] nodes)
+    {
+      if (nodes != null)
+      {
+        FormEditor formEditor = null;
+        for (Node n : nodes)
+        {
+          if (n instanceof FormNode)
+          {
+            FormNode fn = (FormNode) n;
+            if (formEditor == null)
+            {
+              formEditor = FormEditor.getFormEditor(fn.getFormModel());
+            }
+            if (formEditor != null)
+            {
+              formEditor.registerNodeWithPropertiesWindow(fn);
+            }
+          }
+        }
+      }
+      super.performAction(nodes);
+    }
+  }
 
   @Override
   public Component getCustomizer()
@@ -255,8 +285,14 @@ public class FormNode extends AbstractNode implements FormCookie
   public void firePropertyChangeHelper(String name,
                                        Object oldValue, Object newValue)
   {
-    // doesn't have to be fired - properties are synchronized anyways.
+    // A
+    // JB: doesn't have to be fired - properties are synchronized anyways.
     //super.firePropertyChange(name, oldValue, newValue);
+  }
+
+  void fireNodeDestroyedHelper()
+  {
+    fireNodeDestroyed();
   }
 
   // ----------

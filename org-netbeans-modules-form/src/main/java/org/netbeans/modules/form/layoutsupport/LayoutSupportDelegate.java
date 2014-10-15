@@ -86,11 +86,10 @@ public interface LayoutSupportDelegate {
      *    (lmInstance != null, fromCode == false),
      * (3) initialization from persistent code structure,
      *    (lmInstance == null, fromCode == true).
-     *
      * @param layoutContext provides a necessary context information for the
      *                      layout delegate
      * @param lmInstance LayoutManager instance for initialization (may be null)
-     * @exception Exception Exception occurred during initialization
+     * @exception Exception occurred during initialization
      */
     void initialize(LayoutSupportContext layoutContext,
                     LayoutManager lmInstance)
@@ -178,7 +177,7 @@ public interface LayoutSupportDelegate {
      */
     Component getSupportCustomizer();
 
-  /** Gets number of components in the layout.
+    /** Gets number of components in the layout.
      * @return number of components in the layout
      */
     int getComponentCount();
@@ -189,12 +188,12 @@ public interface LayoutSupportDelegate {
      * (e.g. IllegalArgumentException). It's up to the delagate to display an
      * error or warning message, the exception is not reported outside.
      * To accept any components simply do nothing here.
-     * @param components array of CodeExpression objects representing the
-     *        components to be added
+     * @param components  array of RADVisualComponent objects representing the
+     *        components to be accepted
      * @param constraints array of layout constraints of the components, may
      *        contain nulls
-     * @param index position at which the components should be added (inserted);
-     *        if -1, the components should be added at the end
+     * @param index position at which the components are to be added (inserted);
+     *        -1 means that the components will be added at the end
      * @exception RuntimeException to refuse components
      */
     void acceptNewComponents(RADVisualComponent[] components,
@@ -226,7 +225,7 @@ public interface LayoutSupportDelegate {
 
     /** Adds new components to the layout. (This is intended just at the
      * metadata level, no real components are added in fact.)
-     * @param components array of CodeExpression objects representing the
+     * @param components array of RADVisualComponent objects representing the
      *        components to be added
      * @param constraints array of layout constraints of the components, may
      *        contain nulls
@@ -246,7 +245,19 @@ public interface LayoutSupportDelegate {
      */
     void removeAll();
 
-  /** Gets layout constraints for a component at the given index.
+    /** Indicates whether there's some change in the layout in comparison
+     * with the default layout of given container. If there's no change, no
+     * code needs to be delegate (e.g. default FlowLayout in JPanel).
+     * Note this is related to the container layout only, not to components.
+     * @param defaultContainer instance of the default container to compare with
+     * @param defaultContainerDelegate effective container delegate of the
+     *        default container (e.g. like content pane of JFrame)
+     * @return whether the current layout is different from the default one
+     */
+    boolean isLayoutChanged(Container defaultContainer,
+                            Container defaultContainerDelegate);
+
+    /** Gets layout constraints for a component at the given index.
      * @param index index of the component in the layout
      * @return layout constraints of given component
      */
@@ -455,10 +466,11 @@ public interface LayoutSupportDelegate {
 
     /** Cloning method - creates a copy of the layout delegate.
      * @param targetContext LayoutSupportContext for the new layout delegate
-     * @param components array of RADVisualComponent objects representing the
+     * @param targetComponents array of RADVisualComponent objects representing the
      *        components for the new layout delegate (corresponding to the
      *        current ones)
      * @return cloned layout delegate instance
      */
-    LayoutSupportDelegate cloneLayoutSupport(LayoutSupportContext targetContext, RADVisualComponent[] components);
+    LayoutSupportDelegate cloneLayoutSupport(LayoutSupportContext targetContext,
+                                             RADVisualComponent[] targetComponents);
 }

@@ -47,12 +47,6 @@ package org.netbeans.modules.form;
 
 import de.adito.aditoweb.nbm.nbide.nbaditointerface.NbAditoInterface;
 import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.model.IAditoModelDataProvider;
-
-import javax.swing.Action;
-// STRIPPED
-/*import org.netbeans.api.java.loaders.JavaDataSupport;
-import org.netbeans.modules.form.EditorSupport;
-import org.netbeans.modules.form.DataObject;*/
 import org.openide.actions.EditAction;
 import org.openide.actions.OpenAction;
 import org.openide.filesystems.FileObject;
@@ -62,6 +56,8 @@ import org.openide.nodes.FilterNode;
 import org.openide.nodes.Node;
 
 import org.openide.util.actions.SystemAction;
+
+import javax.swing.*;
 
 /** The DataNode for Forms.
  *
@@ -75,18 +71,18 @@ public class FormDataNode extends FilterNode {
     private static final String FORM_ICON_BASE = "org/netbeans/modules/form/resources/form.gif"; // NOI18N
 
     /** Constructs a new FormDataObject for specified primary file
-     *
+     * 
      * @param fdo form data object
      */
     public FormDataNode(DataObject fdo) {
         this(_getNode(fdo.getPrimaryFile()));
     }
-
+    
     private FormDataNode(Node orig) {
         super(orig);
         ((AbstractNode) orig).setIconBaseWithExtension(FORM_ICON_BASE);
     }
-
+    
     @Override
     public Action getPreferredAction() {
         // issue 56351
@@ -98,7 +94,7 @@ public class FormDataNode extends FilterNode {
             }
         };
     }
-
+    
     @Override
     public Action[] getActions(boolean context) {
         Action[] javaActions = super.getActions(context);
@@ -122,6 +118,6 @@ public class FormDataNode extends FilterNode {
     {
       return new AbstractNode(Children.LEAF);
     }
-  }
+    }
 
 }

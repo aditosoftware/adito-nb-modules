@@ -63,13 +63,16 @@ import org.netbeans.modules.form.FormProperty;
  * @author Tran Duc Trung, Tomas Pavek
  */
 // Expects ltr orientation of the designer
-public class BoxLayoutSupport extends AbstractLayoutSupport
-{
+public class BoxLayoutSupport extends AbstractLayoutSupport {
+
+    private int initialAxis = BoxLayout.LINE_AXIS;
     private int axis = BoxLayout.LINE_AXIS;
 
     private FormProperty[] properties;
 
     private static Constructor boxLayoutConstructor;
+
+    private static final String PROP_AXIS = "axis"; // NOI18N
 
     /** Gets the supported layout manager class - BoxLayout.
      * @return the class supported by this delegate
@@ -92,6 +95,12 @@ public class BoxLayoutSupport extends AbstractLayoutSupport
         // since it has no properties, it must be create again
         updateLayoutInstance();
         super.acceptContainerLayoutChange(ev);
+    }
+
+    @Override
+    public boolean isLayoutChanged(Container defaultContainer, Container defaultContainerDelegate) {
+        return super.isLayoutChanged(defaultContainer, defaultContainerDelegate)
+                || axis != initialAxis; // the axis property is not a bean property, so not found by the super method
     }
 
     /** This method calculates position (index) for a component dragged
@@ -156,7 +165,7 @@ public class BoxLayoutSupport extends AbstractLayoutSupport
 
     @Override
     public Object[] getAssistantParams() {
-        return new Object[] {assistantParams + 1};
+        return new Object[] {Integer.valueOf(assistantParams+1)};
     }
 
 
@@ -278,7 +287,7 @@ public class BoxLayoutSupport extends AbstractLayoutSupport
         return new BoxLayout(containerDelegate, axis);
     }
 
-  /** Since BoxLayout is not a bean, we must specify its properties
+    /** Since BoxLayout is not a bean, we must specify its properties
      * explicitly. This method is called from getPropertySets() implementation
      * to obtain the default property set for the layout (assuming there's only
      * one property set). So it woul be also possible to override (more
@@ -293,19 +302,19 @@ public class BoxLayoutSupport extends AbstractLayoutSupport
             properties = new FormProperty[1];
 
             properties[0] = new FormProperty(
-                                "axis", // NOI18N
+                                PROP_AXIS,
                                 Integer.TYPE,
                                 getBundle().getString("PROP_axis"), // NOI18N
                                 getBundle().getString("HINT_axis")) // NOI18N
             {
                 @Override
                 public Object getTargetValue() {
-                    return axis;
+                    return new Integer(axis);
                 }
 
                 @Override
                 public void setTargetValue(Object value) {
-                    int ax = (Integer) value;
+                    int ax = ((Integer)value).intValue();
                     if (ax == BoxLayout.X_AXIS || ax == BoxLayout.Y_AXIS
                             || ax == BoxLayout.LINE_AXIS || ax == BoxLayout.PAGE_AXIS) {
                         axis = ax;
@@ -319,7 +328,7 @@ public class BoxLayoutSupport extends AbstractLayoutSupport
 
                 @Override
                 public Object getDefaultValue() {
-                    return BoxLayout.LINE_AXIS;
+                    return new Integer(BoxLayout.LINE_AXIS);
                 }
 
                 @Override
@@ -342,7 +351,16 @@ public class BoxLayoutSupport extends AbstractLayoutSupport
      */
     @Override
     protected Node.Property getProperty(String propName) {
-        return "axis".equals(propName) ? getProperties()[0] : null; // NOI18N
+        return PROP_AXIS.equals(propName) ? getProperties()[0] : null;
+    }
+
+    @Override
+    protected boolean isPropertyChangedFromInitial(FormProperty prop) {
+        if (PROP_AXIS.equals(prop.getName())) { // NOI18N
+            // axis is not a bean property that could be compared by the super method
+            return axis != initialAxis;
+        }
+        return prop.isChanged();
     }
 
     // --------
@@ -372,10 +390,10 @@ public class BoxLayoutSupport extends AbstractLayoutSupport
             getBundle().getString("VALUE_axis_y")  // NOI18N
         };
         private final Integer[] values = {
-            BoxLayout.LINE_AXIS,
-            BoxLayout.PAGE_AXIS,
-            BoxLayout.X_AXIS,
-            BoxLayout.Y_AXIS
+            new Integer(BoxLayout.LINE_AXIS),
+            new Integer(BoxLayout.PAGE_AXIS),
+            new Integer(BoxLayout.X_AXIS),
+            new Integer(BoxLayout.Y_AXIS)
         };
         private final String[] javaInitStrings = {
             "javax.swing.BoxLayout.LINE_AXIS", // NOI18N

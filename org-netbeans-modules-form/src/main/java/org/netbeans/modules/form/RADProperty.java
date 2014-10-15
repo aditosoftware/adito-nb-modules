@@ -47,13 +47,9 @@ package org.netbeans.modules.form;
 
 import java.beans.*;
 import java.lang.reflect.*;
-import java.util.ArrayList;
-import java.util.List;
-import org.openide.ErrorManager;
 
-//import org.netbeans.modules.form.editors.*; // STRIPPED
-//import org.netbeans.modules.form.editors2.JTableSelectionModelEditor; // STRIPPED
 import org.netbeans.modules.form.fakepeer.FakePeerSupport;
+import org.openide.util.Exceptions;
 
 /**
  * Implementation of properties for (meta)components (class RADComponent).
@@ -157,31 +153,22 @@ public class RADProperty extends FormProperty {
 
             Throwable tex = ex.getTargetException();
             if(tex instanceof IllegalArgumentException) {
-                ErrorManager.getDefault().annotate(
-                    tex, ErrorManager.WARNING, null,
-                    message, null, null);
                 // Issue 73627
                 if ("contentType".equals(getName()) && (beanInstance instanceof javax.swing.JTextPane)) { // NOI18N
                     return;
                 }
+                Exceptions.attachLocalizedMessage(tex, message);
                 throw (IllegalArgumentException) tex;
             } else if(tex instanceof IllegalAccessException) {
-                ErrorManager.getDefault().annotate(
-                    tex, ErrorManager.WARNING, null,
-                    message, null, null);                
+                Exceptions.attachLocalizedMessage(tex, message);
                 throw (IllegalAccessException) tex;
             } else if(value==null && tex instanceof NullPointerException) {
                 IllegalArgumentException iae = new IllegalArgumentException();
-                ErrorManager.getDefault().annotate(
-                    iae, ErrorManager.WARNING, null,
-                    message, null, null);                
+                Exceptions.attachLocalizedMessage(iae, message);
                 throw iae;                
             }
-            
-            ErrorManager.getDefault().annotate(
-                ex, ErrorManager.WARNING, null,
-                message, null, null);
 
+            Exceptions.attachLocalizedMessage(ex, message);
             throw ex;
         }
 
@@ -235,14 +222,14 @@ public class RADProperty extends FormProperty {
         PropertyEditor prEd = null;
 
         PropertyDescriptor descriptor = getPropertyDescriptor();
-      // STRIPPED
+        // A
         /*if (descriptor.getPropertyType() == Integer.TYPE
             && ("mnemonic".equals(descriptor.getName()) // NOI18N
                 || "displayedMnemonic".equals(descriptor.getName()))) { // NOI18N
                 prEd = new MnemonicEditor();
         } else if (descriptor.getPropertyType().isArray()) {
             String typeName = descriptor.getPropertyType().getSimpleName();
-
+            
             if (typeName.equals("boolean[]") || typeName.equals("byte[]")       // NOI18N
                || typeName.equals("short[]") || typeName.equals("int[]")        // NOI18N
                || typeName.equals("long[]") || typeName.equals("float[]")       // NOI18N
@@ -270,7 +257,7 @@ public class RADProperty extends FormProperty {
             }
         }
 
-      // STRIPPED
+        // A
         /*if ((prEd == null) && (descriptor.getPropertyType().isEnum())) {
             prEd = createDefaultEnumEditor(descriptor.getPropertyType());
         }*/
@@ -278,7 +265,7 @@ public class RADProperty extends FormProperty {
         return prEd;
     }
 
-  // STRIPPED
+    // A
     /*static PropertyEditor createDefaultEnumEditor(Class enumClass) {
         try {
             Method method = enumClass.getMethod("values"); // NOI18N
@@ -318,11 +305,11 @@ public class RADProperty extends FormProperty {
                // default value (0) does not correspond to any of the
                // enumerated constants (NONE_OPTION is -1)
             enumerationValues = new Object[] {
-                "NONE_OPTION", new Integer(-1), "DebugGraphics.NONE_OPTION", // NOI18N
-                "NO_CHANGES", new Integer(0), "0", // NOI18N
-                "LOG_OPTION", new Integer(1), "DebugGraphics.LOG_OPTION", // NOI18N
-                "FLASH_OPTION", new Integer(2), "DebugGraphics.FLASH_OPTION", // NOI18N
-                "BUFFERED_OPTION", new Integer(4), "DebugGraphics.BUFFERED_OPTION" }; // NOI18N
+                "NONE_OPTION", Integer.valueOf(-1), "DebugGraphics.NONE_OPTION", // NOI18N
+                "NO_CHANGES", Integer.valueOf(0), "0", // NOI18N
+                "LOG_OPTION", Integer.valueOf(1), "DebugGraphics.LOG_OPTION", // NOI18N
+                "FLASH_OPTION", Integer.valueOf(2), "DebugGraphics.FLASH_OPTION", // NOI18N
+                "BUFFERED_OPTION", Integer.valueOf(4), "DebugGraphics.BUFFERED_OPTION" }; // NOI18N
         }
 
         if (enumerationValues == null
@@ -334,11 +321,11 @@ public class RADProperty extends FormProperty {
         {   // hack: enumeration definition is missing in standard Swing
             // for JDialog and JInternalFrame defaultCloseOperation property
             enumerationValues = new Object[] {
-                "DISPOSE_ON_CLOSE", new Integer(2), // NOI18N
+                "DISPOSE_ON_CLOSE", Integer.valueOf(2), // NOI18N
                         "WindowConstants.DISPOSE_ON_CLOSE", // NOI18N
-                "DO_NOTHING_ON_CLOSE", new Integer(0), // NOI18N
+                "DO_NOTHING_ON_CLOSE", Integer.valueOf(0), // NOI18N
                         "WindowConstants.DO_NOTHING_ON_CLOSE", // NOI18N
-                "HIDE_ON_CLOSE", new Integer(1), // NOI18N
+                "HIDE_ON_CLOSE", Integer.valueOf(1), // NOI18N
                          "WindowConstants.HIDE_ON_CLOSE" }; // NOI18N
         }
 
@@ -347,8 +334,8 @@ public class RADProperty extends FormProperty {
     }
 
     @Override
-    protected Method getWriteMethod() {
-	return desc.getWriteMethod();
+    protected Method getWriteMethod() {	    
+	return desc.getWriteMethod();	    
     }*/
     
     @Override

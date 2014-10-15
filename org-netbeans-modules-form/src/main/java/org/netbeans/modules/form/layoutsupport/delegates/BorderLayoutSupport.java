@@ -142,35 +142,30 @@ public class BorderLayoutSupport extends AbstractLayoutSupport
         String[] suggested = new String[] { primary, alternateY, alternateX };
         String[] free = findFreePositions();
 
-      for (String str : suggested)
-      {
-        if (str == null) continue;
+        for (int i=0; i < suggested.length; i++) {
+            String str = suggested[i];
+            if (str == null) continue;
 
-        for (String aFree : free)
-          if (aFree.equals(str))
-          {
-            if (isAWTContainer())
-            {
-              str = (String) toAbsolute(str);
-            }
-            assistantParams = str;
-            return new BorderConstraints(str);
-          }
+            for (int j=0; j  < free.length; j++)
+                if (free[j].equals(str)) {
+                    if (isAWTContainer()) {
+                        str = (String) toAbsolute(str);
+                    }
+                    assistantParams = str;
+                    return new BorderConstraints(str);
+                }
 
-        if (component != null)
-        {
-          int idx = getComponentOnPosition(str);
-          if (containerDelegate.getComponent(idx) == component)
-          {
-            if (isAWTContainer())
-            {
-              str = (String) toAbsolute(str);
+            if (component != null) {
+                int idx = getComponentOnPosition(str);
+                if (containerDelegate.getComponent(idx) == component) {
+                    if (isAWTContainer()) {
+                        str = (String) toAbsolute(str);
+                    }
+                    assistantParams = str;
+                    return new BorderConstraints(str);
+                }
             }
-            assistantParams = str;
-            return new BorderConstraints(str);
-          }
         }
-      }
         if (isAWTContainer()) {
             free[0] = (String) toAbsolute(free[0]);
         }
@@ -300,7 +295,7 @@ public class BorderLayoutSupport extends AbstractLayoutSupport
 
     // ----------
 
-  /** This method is called to get a default component layout constraints
+    /** This method is called to get a default component layout constraints
      * metaobject in case it is not provided (e.g. in addComponents method).
      * @return the default LayoutConstraints object for the supported layout
      */
@@ -473,12 +468,11 @@ public class BorderLayoutSupport extends AbstractLayoutSupport
 
         @Override
         public void setAsText(String str) {
-          for (String value : values)
-            if (str.equals(value))
-            {
-              setValue(str);
-              break;
-            }
+            for (int i = 0; i < values.length; i++)
+                if (str.equals(values[i])) {
+                    setValue(str);
+                    break;
+                }
         }
 
         @Override

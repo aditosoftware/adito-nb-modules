@@ -57,15 +57,26 @@ import org.netbeans.modules.form.*;
 
 class MetaLayout extends RADComponent {
 
-  public MetaLayout(AbstractLayoutSupport layoutDelegate,
+    private AbstractLayoutSupport abstLayoutDelegate;
+
+    public MetaLayout(AbstractLayoutSupport layoutDelegate,
                       LayoutManager lmInstance)
     {
         super();
 
-      initialize(((LayoutSupportManager) layoutDelegate.getLayoutContext()).getMetaContainer().getFormModel());
+        abstLayoutDelegate = layoutDelegate;
+
+        initialize(((LayoutSupportManager)abstLayoutDelegate.getLayoutContext())
+                         .getMetaContainer().getFormModel());
 
         setBeanInstance(lmInstance);
     }
+
+    // A
+    /*@Override
+    protected void createCodeExpression() {
+        // code expression is handled by the layout support class
+    }*/
 
     @Override
     protected void createPropertySets(java.util.List<Node.PropertySet> propSets) {
@@ -97,5 +108,10 @@ class MetaLayout extends RADComponent {
         // cannot reuse RADComponent.PropertyListener, because this is not
         // a regular RADComponent (properties have a special meaning)
         return null;
+    }
+
+    @Override
+    protected BeanInfo createBeanInfo(Class cls) throws IntrospectionException {
+        return super.createBeanInfo(abstLayoutDelegate.getSupportedClass());
     }
 }

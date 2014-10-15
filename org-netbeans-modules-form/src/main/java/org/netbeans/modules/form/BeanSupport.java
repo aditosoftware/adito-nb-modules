@@ -81,15 +81,23 @@ public class BeanSupport
     public static Object createBeanInstance(Class beanClass) {
         try {
             return CreationFactory.createDefaultInstance(beanClass);
-        }
-        catch (Exception ex) {
-            Logger.getLogger(BeanSupport.class.getName())
-                    .log(Level.INFO, "Cannot create default instance of: "+beanClass.getName(), ex); // NOI18N
+        } catch (Exception ex) {
+            if (Logger.getLogger(BeanSupport.class.getName()).isLoggable(Level.FINEST)) {
+                Logger.getLogger(BeanSupport.class.getName())
+                    .log(Level.FINEST, "Cannot create default instance of: "+beanClass.getName(), ex); // NOI18N
+            } else if (!instancesCache.containsKey(beanClass)) {
+                Logger.getLogger(BeanSupport.class.getName())
+                     .log(Level.INFO, "Cannot create default instance of: {0}", beanClass.getName()); // NOI18N
+            }
             return null;
-        }
-        catch (LinkageError ex) {
-            Logger.getLogger(BeanSupport.class.getName())
-                    .log(Level.INFO, "Cannot create default instance of: "+beanClass.getName(), ex); // NOI18N
+        } catch (LinkageError ex) {
+            if (Logger.getLogger(BeanSupport.class.getName()).isLoggable(Level.FINEST)) {
+                Logger.getLogger(BeanSupport.class.getName())
+                    .log(Level.FINEST, "Cannot create default instance of: "+beanClass.getName(), ex); // NOI18N
+            } else if (!instancesCache.containsKey(beanClass)) {
+                Logger.getLogger(BeanSupport.class.getName())
+                     .log(Level.INFO, "Cannot create default instance of: {0}", beanClass.getName()); // NOI18N
+            }
             return null;
         }
     }
@@ -118,6 +126,11 @@ public class BeanSupport
         return defInstance;
     }
 
+    public static Dimension getDefaultPreferredSize(Class<? extends java.awt.Component> compClass) {
+        Component instance = (Component) getDefaultInstance(compClass);
+        return instance != null ? instance.getPreferredSize() : null;
+    }
+
     /** Utility method that obtains icon for a bean class.
      * (This method is currently used only for obtaining default icons for AWT
      *  components. Other icons should be provided by BeanInfo.)
@@ -133,7 +146,7 @@ public class BeanSupport
     /** A utility method that returns a class of event adapter for
      * specified listener. It works only on known listeners from java.awt.event.
      * Null is returned for unknown listeners.
-     *
+     * 
      * @param listener class of the listener
      * @return class of an adapter for specified listener or null if
      *               unknown/does not exist

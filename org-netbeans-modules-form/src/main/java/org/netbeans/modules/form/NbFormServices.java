@@ -42,15 +42,12 @@ import java.util.logging.Level;
 import javax.swing.JEditorPane;
 import javax.swing.text.Document;
 import org.netbeans.api.editor.DialogBinding;
-import org.netbeans.modules.form.EditorSupport;
-import org.netbeans.modules.form.FormServices;
-import org.netbeans.modules.form.FormUtils;
 import org.netbeans.modules.form.palette.*;
 import org.netbeans.modules.form.project.ClassSource;
 import org.netbeans.spi.palette.PaletteActions;
 import org.openide.filesystems.FileObject;
-import org.openide.loaders.*;
-import org.openide.loaders.MultiDataObject.Entry;
+import org.openide.loaders.DataObject;
+import org.openide.loaders.DataObjectNotFoundException;
 import org.openide.nodes.Node;
 import org.openide.nodes.NodeTransfer;
 import org.openide.util.lookup.ServiceProvider;
@@ -76,6 +73,12 @@ public class NbFormServices implements FormServices {
         } catch (DataObjectNotFoundException dnfex) {
             FormUtils.LOGGER.log(Level.INFO, dnfex.getMessage(), dnfex);
         }
+        /*if (!(dob instanceof FormDataObject)) {
+            FormUtils.LOGGER.log(Level.INFO, "Unable to find FormDataObject for {0}", srcFile); // NOI18N
+            return;
+        }
+        FormDataObject formDob = (FormDataObject)dob;*/
+        // A
         Document document = dob.getLookup().lookup(FormEditorSupport.class).getDocument();
         DialogBinding.bindComponentToDocument(document, ccPosition, 0, editor);
 

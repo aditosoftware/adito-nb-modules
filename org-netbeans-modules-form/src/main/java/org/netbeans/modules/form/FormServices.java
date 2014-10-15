@@ -58,6 +58,7 @@ public interface FormServices {
     PaletteActions createPaletteActions();
     ClassSource getCopiedBeanClassSource(Transferable transferable);
     Node createFormDataNode(DataObject formDataObject);
+    //MultiDataObject.Entry createPrimaryEntry(MultiDataObject obj, FileObject primaryFile); // A
     boolean isLayoutExtensionsLibrarySupported();
     EditorSupport createEditorSupport(DataObject formDataObject);
 }

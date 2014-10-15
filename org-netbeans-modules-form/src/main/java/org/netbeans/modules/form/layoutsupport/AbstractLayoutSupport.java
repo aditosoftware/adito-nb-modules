@@ -47,10 +47,11 @@ package org.netbeans.modules.form.layoutsupport;
 import org.netbeans.modules.form.*;
 import org.openide.ErrorManager;
 import org.openide.nodes.Node;
-import org.openide.util.ImageUtilities;
+import org.openide.util.*;
 
 import java.awt.*;
 import java.beans.*;
+import java.lang.reflect.*;
 import java.util.*;
 import java.util.List;
 
@@ -58,7 +59,7 @@ import java.util.List;
  * Default implementation of LayoutSupportDelegate interface. This class
  * implements most of general methods of LayoutSupportDelegate and introduces
  * other more specific methods which can be easily customized in subclasses.
- * <p/>
+ *
  * This class provides basic support for layouts following these rules:
  * (1) the supported layout manager is a JavaBean (it means that it has an
  * empty public constructor, the parameters are set as properties,
@@ -68,13 +69,13 @@ import java.util.List;
  * (3) Container.add(Component) and Container.add(Component, Object) methods
  * are used on the container to add components (the second method for
  * adding with layout constraints).
- * <p/>
+ *
  * To create basic support for such a layout manager, it's enough to implement
  * getSupportedClass method only.
- * <p/>
+ *
  * Note that the subclass should have public constructor without parameters,
  * otherwise it should override cloneSupportInstance method.
- * <p/>
+ *
  * Note that the default implementation does not (and even cannot) provide any
  * working support for layout constraints of components in general - this must
  * be implemented in the sublasses individually. See BorderLayoutSupport for an
@@ -87,21 +88,26 @@ import java.util.List;
 
 public abstract class AbstractLayoutSupport implements LayoutSupportDelegate
 {
-    /** Default icon URL. */
-    private static String iconURL =
-        "org/netbeans/modules/form/layoutsupport/resources/AbstractLayout.gif"; // NOI18N
-    /** Default icon URL. */
-    private static String icon32URL =
-        "org/netbeans/modules/form/layoutsupport/resources/AbstractLayout32.gif"; // NOI18N
+  /**
+   * Default icon URL.
+   */
+  private static String iconURL =
+      "org/netbeans/modules/form/layoutsupport/resources/AbstractLayout.gif"; // NOI18N
+  /**
+   * Default icon URL.
+   */
+  private static String icon32URL =
+      "org/netbeans/modules/form/layoutsupport/resources/AbstractLayout32.gif"; // NOI18N
 
   // ------
 
   private LayoutSupportContext layoutContext;
 
-  private List<RADVisualComponent> radComponents = new ArrayList<RADVisualComponent>();
-  private List<LayoutConstraints> componentConstraints = new ArrayList<LayoutConstraints>();
+  private List<RADVisualComponent> radComponents = new ArrayList<>();
+  private java.util.List<LayoutConstraints> componentConstraints = new ArrayList<>();
 
-  private MetaLayout metaLayout;
+  private MetaLayout initialLayout;
+  protected MetaLayout metaLayout;
   private FormProperty[] allProperties;
 
   // ------------------
@@ -117,13 +123,15 @@ public abstract class AbstractLayoutSupport implements LayoutSupportDelegate
    * (3) initialization from persistent code structure,
    * (lmInstance == null, fromCode == true).
    *
-   * @param layoutContext provides a necessary context information for the
-   *                      layout delegate
-   * @param lmInstance    LayoutManager instance for initialization (may be null)
-   * @throws Exception Exception occurred during initialization
+   * @param layoutContext   provides a necessary context information for the
+   *                        layout delegate
+   * @param initialInstance LayoutManager instance for initialization (may be null)
+   * @throws Exception occurred during initialization
    */
   @Override
-  public void initialize(LayoutSupportContext layoutContext, LayoutManager lmInstance) throws Exception
+  public void initialize(LayoutSupportContext layoutContext,
+                         LayoutManager initialInstance)
+      throws Exception
   {
     if (this.layoutContext == layoutContext)
       return;
@@ -135,20 +143,27 @@ public abstract class AbstractLayoutSupport implements LayoutSupportDelegate
     if (cls != null && LayoutManager.class.isAssignableFrom(cls))
     {
       // create MetaLayout to manage layout manager as a bean
-      if (lmInstance == null || !lmInstance.getClass().equals(cls))
+      if (initialInstance != null && !cls.isAssignableFrom(initialInstance.getClass()))
       {
-        // no valid layout manager instance - create a default one
-        lmInstance = createDefaultLayoutInstance();
+        initialInstance = null; // no relevant layout manager instance - create a default one
       }
-
-      if (lmInstance != null)
-      {
-        metaLayout = new MetaLayout(this, lmInstance);
-        deriveChangedPropertiesFromInstance(metaLayout);
-      }
+      initializeInstance(initialInstance);
     }
-    else
-      metaLayout = null;
+    else metaLayout = null;
+  }
+
+  protected void initializeInstance(LayoutManager initialInstance)
+      throws Exception
+  {
+    metaLayout = new MetaLayout(this, createDefaultLayoutInstance());
+    if (initialInstance != null)
+    {
+      initialLayout = new MetaLayout(this, initialInstance);
+      FormUtils.copyProperties(initialLayout.getAllBeanProperties(),
+                               metaLayout.getAllBeanProperties(),
+                               FormUtils.DISABLE_CHANGE_FIRING);
+    }
+    deriveChangedPropertiesFromInstance(metaLayout);
   }
 
   protected void deriveChangedPropertiesFromInstance(MetaLayout metaLayout)
@@ -159,7 +174,7 @@ public abstract class AbstractLayoutSupport implements LayoutSupportDelegate
    * States whether this support class is dedicted to some special container.
    *
    * @return true if only certain container is supported,
-   *         false if a layout manager for use in any container is supported
+   * false if a layout manager for use in any container is supported
    */
   @Override
   public boolean isDedicated()
@@ -175,7 +190,7 @@ public abstract class AbstractLayoutSupport implements LayoutSupportDelegate
    *
    * @param cont default instance of Container
    * @return true if the container can be used as default (empty) instance
-   *         with this layout support
+   * with this layout support
    */
   @Override
   public boolean checkEmptyContainer(Container cont)
@@ -289,12 +304,12 @@ public abstract class AbstractLayoutSupport implements LayoutSupportDelegate
     if (propertySets != null)
     {
       java.util.List<Node.Property> allPropsList = new ArrayList<Node.Property>();
-      for (Node.PropertySet propertySet : propertySets)
+      for (int i = 0; i < propertySets.length; i++)
       {
-        Node.Property[] props = propertySet.getProperties();
-        for (Node.Property prop : props)
-          if (prop instanceof FormProperty)
-            allPropsList.add(prop);
+        Node.Property[] props = propertySets[i].getProperties();
+        for (int j = 0; j < props.length; j++)
+          if (props[j] instanceof FormProperty)
+            allPropsList.add(props[j]);
       }
       allProperties = new FormProperty[allPropsList.size()];
       allPropsList.toArray(allProperties);
@@ -357,6 +372,13 @@ public abstract class AbstractLayoutSupport implements LayoutSupportDelegate
    * (e.g. IllegalArgumentException). It's up to the delagate to display an
    * error or warning message, the exception is not reported outside.
    * The default implementation accepts any components - simply does nothing.
+   *
+   * @param components  array of RADVisualComponent objects representing the
+   *                    components to be accepted
+   * @param constraints array of layout constraints of the components, may
+   *                    contain nulls
+   * @param index       position at which the components are to be added (inserted);
+   *                    -1 means that the components will be added at the end
    */
   @Override
   public void acceptNewComponents(RADVisualComponent[] components,
@@ -381,8 +403,9 @@ public abstract class AbstractLayoutSupport implements LayoutSupportDelegate
   {
     // as this method is called for each change, we update the layout
     // bean code here too
-//        if (layoutBeanCode != null)
-//            layoutBeanCode.updateCode();
+    // A
+    //if (layoutBeanCode != null)
+    //  layoutBeanCode.updateCode();
   }
 
   /**
@@ -408,7 +431,7 @@ public abstract class AbstractLayoutSupport implements LayoutSupportDelegate
    * are added.
    * The code structures describing the layout is updated immediately.
    *
-   * @param components     array of CodeExpression objects representing the
+   * @param components     array of RADVisualComponent objects representing the
    *                       components to be accepted
    * @param newConstraints array of layout constraints of the components, may
    *                       contain nulls
@@ -463,6 +486,47 @@ public abstract class AbstractLayoutSupport implements LayoutSupportDelegate
   }
 
   /**
+   * Indicates whether there's some change in the layout in comparison
+   * with the default layout of given container. If there's no change, no
+   * code needs to be delegate (e.g. default FlowLayout in JPanel).
+   * Note this is related to the container layout only, not to components.
+   *
+   * @param defaultContainer         instance of the default container to compare with
+   * @param defaultContainerDelegate effective container delegate of the
+   *                                 default container (e.g. like content pane of JFrame)
+   * @return whether the current layout is different from the default one
+   */
+  @Override
+  public boolean isLayoutChanged(Container defaultContainer,
+                                 Container defaultContainerDelegate)
+  {
+    if (isDedicated())
+      return false;
+
+    Class<?> layoutClass = getSupportedClass();
+    LayoutManager lm = defaultContainerDelegate.getLayout();
+
+    if (layoutClass == null)
+      return lm != null;
+    if (lm == null)
+      return true;
+
+    //
+    if (!layoutClass.isAssignableFrom(lm.getClass()))
+      return true;
+
+    for (FormProperty prop : getAllProperties())
+    {
+      if (isPropertyChangedFromInitial(prop))
+      {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  /**
    * Gets layout constraints for a component at the given index.
    *
    * @param index index of the component in the layout
@@ -471,7 +535,8 @@ public abstract class AbstractLayoutSupport implements LayoutSupportDelegate
   @Override
   public LayoutConstraints getConstraints(int index)
   {
-    return index < 0 || index >= componentConstraints.size() ? null : componentConstraints.get(index);
+    return index < 0 || index >= componentConstraints.size() ? null :
+        componentConstraints.get(index);
   }
 
   /**
@@ -566,7 +631,7 @@ public abstract class AbstractLayoutSupport implements LayoutSupportDelegate
    *                          (e.g. like content pane of JFrame)
    * @param component         component to be removed
    * @return whether it was possible to remove the component (some containers
-   *         may not support removing individual components reasonably)
+   * may not support removing individual components reasonably)
    */
   @Override
   public boolean removeComponentFromContainer(Container container,
@@ -585,7 +650,7 @@ public abstract class AbstractLayoutSupport implements LayoutSupportDelegate
    * @param containerDelegate effective container delegate of the container
    *                          (e.g. like content pane of JFrame)
    * @return whether it was possible to clear the container (some containers
-   *         may not support this)
+   * may not support this)
    */
   @Override
   public boolean clearContainer(Container container,
@@ -593,7 +658,8 @@ public abstract class AbstractLayoutSupport implements LayoutSupportDelegate
   {
     Component[] components = containerDelegate.getComponents();
     containerDelegate.removeAll();
-    for (Component component : components) component.setBounds(0, 0, 0, 0);
+    for (int i = 0; i < components.length; i++)
+      components[i].setBounds(0, 0, 0, 0);
     return true;
   }
 
@@ -662,9 +728,9 @@ public abstract class AbstractLayoutSupport implements LayoutSupportDelegate
    * @param posInComp         position of mouse in the dragged component; null if
    *                          there's no dragged component
    * @return new LayoutConstraints object corresponding to the position of
-   *         the component in the container; may return null if the layout
-   *         does not use component constraints, or if default constraints
-   *         should be used
+   * the component in the container; may return null if the layout
+   * does not use component constraints, or if default constraints
+   * should be used
    */
   @Override
   public LayoutConstraints getNewConstraints(Container container,
@@ -694,8 +760,8 @@ public abstract class AbstractLayoutSupport implements LayoutSupportDelegate
    * @param posInComp         position of mouse in the dragged component; null if
    *                          there's no dragged component
    * @return index corresponding to the position of the component in the
-   *         container; may return -1 if the layout rather uses component
-   *         constraints, or if a default index should be used
+   * container; may return -1 if the layout rather uses component
+   * constraints, or if a default index should be used
    */
   @Override
   public int getNewIndex(Container container,
@@ -711,7 +777,7 @@ public abstract class AbstractLayoutSupport implements LayoutSupportDelegate
   /**
    * Returns context for the assistant (context sensitive help bar).
    *
-   * @return context for the assistant.
+   * @rerurn context for the assistant.
    */
   public String getAssistantContext()
   {
@@ -744,8 +810,8 @@ public abstract class AbstractLayoutSupport implements LayoutSupportDelegate
    *                          (if newConstraints == null)
    * @param g                 Graphics object for painting (with color and line style set)
    * @return whether any feedback was painted (may return false if the
-   *         constraints or index are invalid, or if the painting is not
-   *         implemented)
+   * constraints or index are invalid, or if the painting is not
+   * implemented)
    */
   @Override
   public boolean paintDragFeedback(Container container,
@@ -792,7 +858,7 @@ public abstract class AbstractLayoutSupport implements LayoutSupportDelegate
    * @param sizeChanges       Insets object with size differences
    * @param posInCont         position of mouse in the container delegate
    * @return component layout constraints for resized component; null if
-   *         resizing is not possible or not implemented
+   * resizing is not possible or not implemented
    */
   @Override
   public LayoutConstraints getResizedConstraints(Container container,
@@ -809,19 +875,22 @@ public abstract class AbstractLayoutSupport implements LayoutSupportDelegate
   /**
    * Cloning method - creates a copy of the layout delegate.
    *
-   * @param targetContext LayoutSupportContext for the new layout delegate
-   * @param components    array of RADVisualComponent objects representing the
-   *                      components for the new layout delegate (corresponding to the
-   *                      current ones)
+   * @param targetContext   LayoutSupportContext for the new layout delegate
+   * @param components      array of RADVisualComponent objects representing the
+   *                        components for the new layout delegate (corresponding to the
+   *                        current ones)
    * @return cloned layout delegate instance
    */
   @Override
-  public LayoutSupportDelegate cloneLayoutSupport(LayoutSupportContext targetContext, RADVisualComponent[] components)
+  public LayoutSupportDelegate cloneLayoutSupport(
+      LayoutSupportContext targetContext,
+      RADVisualComponent[] components)
   {
     AbstractLayoutSupport clone = createLayoutSupportInstance();
+    LayoutManager initialInstance = isDedicated() ? null : getLayoutContext().getDefaultLayoutInstance();
     try
     {
-      clone.initialize(targetContext, null);
+      clone.initialize(targetContext, initialInstance);
     }
     catch (Exception ex)
     { // should not fail (not reading from code)
@@ -859,7 +928,8 @@ public abstract class AbstractLayoutSupport implements LayoutSupportDelegate
    *
    * @return new (default) instance of supported layout manager
    */
-  protected LayoutManager createDefaultLayoutInstance() throws Exception
+  protected LayoutManager createDefaultLayoutInstance()
+      throws Exception
   {
     return (LayoutManager)
         CreationFactory.createDefaultInstance(getSupportedClass());
@@ -876,7 +946,7 @@ public abstract class AbstractLayoutSupport implements LayoutSupportDelegate
    * @param containerDelegate effective container delegate of the container
    *                          (e.g. like content pane of JFrame)
    * @return new instance of layout manager representing the layout (with
-   *         all properties set)
+   * all properties set)
    */
   protected LayoutManager cloneLayoutInstance(Container container,
                                               Container containerDelegate)
@@ -896,7 +966,7 @@ public abstract class AbstractLayoutSupport implements LayoutSupportDelegate
   {
     try
     {
-      return getClass().newInstance();
+      return (AbstractLayoutSupport) getClass().newInstance();
     }
     catch (Exception ex)
     { // should not happen for AbstractLayoutSupport subclasses
@@ -920,7 +990,7 @@ public abstract class AbstractLayoutSupport implements LayoutSupportDelegate
    * metaobject in case it is not provided (e.g. in addComponents method).
    *
    * @return the default LayoutConstraints object for the supported layout;
-   *         null if no component constraints are used
+   * null if no component constraints are used
    */
   protected LayoutConstraints createDefaultConstraints()
   {
@@ -953,6 +1023,28 @@ public abstract class AbstractLayoutSupport implements LayoutSupportDelegate
     return null; // use default "bean" properties
   }
 
+  protected boolean isPropertyChangedFromInitial(FormProperty prop)
+  {
+    if (initialLayout != null)
+    {
+      FormProperty initProp = initialLayout.getBeanProperty(prop.getName());
+      if (initProp != null)
+      {
+        try
+        {
+          return !Utilities.compareObjects(prop.getValue(), initProp.getValue());
+        }
+        catch (IllegalAccessException ex)
+        { // unlikely, don't care here
+        }
+        catch (InvocationTargetException ex)
+        { // unlikely, don't care here
+        }
+      }
+    }
+    return prop.isChanged();
+  }
+
   // ---------------
   // useful methods for subclasses
 
@@ -960,7 +1052,7 @@ public abstract class AbstractLayoutSupport implements LayoutSupportDelegate
    * Gets the LayoutSupportContext instance set in initialize method.
    *
    * @return the attached LayoutSupportContext object providing necessary
-   *         context information
+   * context information
    */
   protected final LayoutSupportContext getLayoutContext()
   {

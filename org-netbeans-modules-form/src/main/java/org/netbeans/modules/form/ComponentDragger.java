@@ -544,7 +544,7 @@ class ComponentDragger
                 }
 
                 constraints.add(constr);
-                indices.add(new Integer(index));
+                indices.add(Integer.valueOf(index));
             }
         }
         while (fixTargetContainer != null);
@@ -607,7 +607,7 @@ class ComponentDragger
 
                 if (correction != 0) {
                     index -= correction;
-                    indices.set(i, new Integer(index));
+                    indices.set(i, Integer.valueOf(index));
                 }
             }
         }

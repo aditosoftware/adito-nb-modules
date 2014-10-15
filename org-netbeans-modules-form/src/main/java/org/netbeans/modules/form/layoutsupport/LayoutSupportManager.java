@@ -51,7 +51,6 @@ import java.util.*;
 import org.openide.nodes.*;
 
 import org.netbeans.modules.form.*;
-//import org.netbeans.modules.form.codestructure.*; // STRIPPED
 import org.netbeans.modules.form.layoutsupport.delegates.NullLayoutSupport;
 import org.netbeans.modules.form.fakepeer.FakePeerSupport;
 
@@ -80,7 +79,7 @@ public final class LayoutSupportManager implements LayoutSupportContext {
 
     private LayoutListener layoutListener;
 
-    private final RADVisualContainer metaContainer;
+    private RADVisualContainer metaContainer;
 
     private Container primaryContainer; // bean instance from metaContainer
     private Container primaryContainerDelegate; // container delegate for it
@@ -90,7 +89,7 @@ public final class LayoutSupportManager implements LayoutSupportContext {
     //private CodeExpression containerCodeExpression; // STRIPPED
     //private CodeExpression containerDelegateCodeExpression; // STRIPPED
 
-  // ----------
+    // ----------
     // initialization
 
     // initialization for a new container, layout delegate is set to null
@@ -101,13 +100,13 @@ public final class LayoutSupportManager implements LayoutSupportContext {
 
     /**
      * Creation and initialization of a layout delegate for a new container.
-     * @param initialize whether the layout-delegate shall be installed.
      * @return false if suitable layout delegate is not found
-     * @throw Exception if the container instance is not empty
+     * @throw IllegalArgumentException if the container instance is not empty
      */
-    public boolean prepareLayoutDelegate(boolean initialize) throws Exception
+    public boolean prepareLayoutDelegate(/*boolean fromCode, */boolean initialize) // A
+        throws Exception
     {
-        LayoutSupportDelegate delegate;
+        LayoutSupportDelegate delegate = null;
         LayoutManager lmInstance = null;
 
         FormModel formModel = metaContainer.getFormModel();
@@ -115,45 +114,38 @@ public final class LayoutSupportManager implements LayoutSupportContext {
             LayoutSupportRegistry.getRegistry(formModel);
 
         // first try to find a dedicated layout delegate (for the container)
-        Class layoutDelegateClass = layoutRegistry.getSupportClassForContainer(
-                                                  metaContainer.getBeanClass());
-
-        if (layoutDelegateClass != null) {
-            delegate = (LayoutSupportDelegate) layoutDelegateClass.newInstance();
-            if (!delegate.checkEmptyContainer(getPrimaryContainer())) {
-                RuntimeException ex = new IllegalArgumentException();
-                org.openide.ErrorManager.getDefault().annotate(
-                    ex, AbstractLayoutSupport.getBundle().getString(
-                                        "MSG_ERR_NonEmptyContainer")); // NOI18N
+        delegate = layoutRegistry.createSupportForContainer(metaContainer.getBeanClass());
+        if (delegate != null) {
+            if (/*!fromCode && */!delegate.checkEmptyContainer(getPrimaryContainer())) { // A
+                RuntimeException ex = new IllegalArgumentException(
+                        AbstractLayoutSupport.getBundle().getString("MSG_ERR_NonEmptyContainer")); // NOI18N
                 throw ex;
             }
-        }
-        else {
-          // initialization from LayoutManager instance
-          Container contDel = getPrimaryContainerDelegate();
-          if (contDel.getComponentCount() == 0) {
-              // we can still handle only empty containers ...
-              lmInstance = contDel.getLayout();
-              delegate = lmInstance != null ?
-                  layoutRegistry.createSupportForLayout(lmInstance.getClass()) :
-                  new NullLayoutSupport();
-          }
-          else {
-              RuntimeException ex = new IllegalArgumentException();
-              org.openide.ErrorManager.getDefault().annotate(
-                  ex, AbstractLayoutSupport.getBundle().getString(
-                                      "MSG_ERR_NonEmptyContainer")); // NOI18N
-              throw ex;
-          }
+        } else {
+            if (delegate == null) { // initialization from LayoutManager instance
+                Container contDel = getPrimaryContainerDelegate();
+                if (!(contDel instanceof InvalidComponent)) {
+                    if (contDel.getComponentCount() == 0) {
+                        // we can still handle only empty containers ...
+                        lmInstance = contDel.getLayout();
+                        delegate = lmInstance != null ?
+                            layoutRegistry.createSupportForLayout(lmInstance.getClass()) :
+                            new NullLayoutSupport();
+                    } else {
+                        RuntimeException ex = new IllegalArgumentException(
+                                AbstractLayoutSupport.getBundle().getString("MSG_ERR_NonEmptyContainer")); // NOI18N
+                        throw ex;
+                    }
+                }
+            }
         }
 
         if (delegate == null)
             return false;
 
         if (initialize) {
-            setLayoutDelegate(delegate);
-        }
-        else {
+            setLayoutDelegate(delegate, lmInstance);
+        } else {
             layoutDelegate = delegate;
             needInit = true;
             initializeFromInstance = lmInstance != null;
@@ -173,12 +165,15 @@ public final class LayoutSupportManager implements LayoutSupportContext {
         }
     }
 
-    public void setLayoutDelegate(LayoutSupportDelegate newDelegate) throws Exception
+    public void setLayoutDelegate(LayoutSupportDelegate newDelegate,
+                                  LayoutManager lmInstance)
+        throws Exception
     {
         LayoutConstraints[] oldConstraints;
         LayoutSupportDelegate oldDelegate = layoutDelegate;
 
-        if (layoutDelegate != null)
+        if (layoutDelegate != null
+                && (layoutDelegate != newDelegate))
             oldConstraints = removeLayoutDelegate(true);
         else
             oldConstraints = null;
@@ -189,7 +184,7 @@ public final class LayoutSupportManager implements LayoutSupportContext {
 
         if (layoutDelegate != null) {
             try {
-                layoutDelegate.initialize(this, null);
+                layoutDelegate.initialize(this, lmInstance);
                 fillLayout(oldConstraints);
                 getPropertySets(); // force properties and listeners creation
             }
@@ -207,9 +202,24 @@ public final class LayoutSupportManager implements LayoutSupportContext {
         return layoutDelegate;
     }
 
+    public static LayoutSupportDelegate getLayoutDelegateForDefaultLayout(
+                      FormModel formModel, LayoutManager layout) throws Exception {
+        LayoutSupportDelegate defaultLayoutDelegate;
+        if (layout == null) {
+            defaultLayoutDelegate = new NullLayoutSupport();
+        } else {
+            LayoutSupportRegistry layoutRegistry = LayoutSupportRegistry.getRegistry(formModel);
+            defaultLayoutDelegate = layoutRegistry.createSupportForLayout(layout.getClass());
+            if (defaultLayoutDelegate == null) {
+                defaultLayoutDelegate = new UnknownLayoutSupport();
+            }
+        }
+        return defaultLayoutDelegate;
+    }
+
     public void setUnknownLayoutDelegate() {
         try {
-            setLayoutDelegate(new UnknownLayoutSupport());
+            setLayoutDelegate(new UnknownLayoutSupport(), null);
         }
         catch (Exception ex) { // nothing should happen, ignore
             ex.printStackTrace();
@@ -224,7 +234,7 @@ public final class LayoutSupportManager implements LayoutSupportContext {
     public boolean isSpecialLayout() {
         // Every standard layout manager has its own layout delegate.
         // Hence, the DefaultLayoutSupport is used by special layout managers only.
-        return !(layoutDelegate instanceof DefaultLayoutSupport);
+        return layoutDelegate instanceof DefaultLayoutSupport;
     }
 
     // copy layout delegate from another container
@@ -271,7 +281,7 @@ public final class LayoutSupportManager implements LayoutSupportContext {
                                       getPrimaryContainerDelegate());
     }
 
-  public RADVisualContainer getMetaContainer() {
+    public RADVisualContainer getMetaContainer() {
         return metaContainer;
     }
 
@@ -279,7 +289,8 @@ public final class LayoutSupportManager implements LayoutSupportContext {
 //        return layoutDelegate instanceof LayoutSupportArranging;
 //    }
 
-    private LayoutConstraints[] removeLayoutDelegate(boolean extractConstraints)
+    private LayoutConstraints[] removeLayoutDelegate(
+                                    boolean extractConstraints)
     {
         int componentCount = layoutDelegate.getComponentCount();
         LayoutConstraints[] constraints = null;
@@ -295,7 +306,8 @@ public final class LayoutSupportManager implements LayoutSupportContext {
                     if (extractConstraints)
                         constraints[i] = constr;
                     if (constr != null)
-                        metacomps[i].setLayoutConstraints(layoutDelegate.getClass(), constr);
+                        metacomps[i].setLayoutConstraints(layoutDelegate.getClass(),
+                                                          constr);
                 }
             }
         }
@@ -332,9 +344,11 @@ public final class LayoutSupportManager implements LayoutSupportContext {
                              comp : (Component) metacomp.getBeanInstance();
         }
 
-        layoutDelegate.convertConstraints(oldConstraints,
-                                          newConstraints,
-                                          designComps);
+        if (metaContainer.getFormModel().isUndoRedoRecording()) {
+            layoutDelegate.convertConstraints(oldConstraints,
+                                              newConstraints,
+                                              designComps);
+        } // otherwise in undo/redo - don't try to convert constraints
 
         if (componentCount > 0) {
             acceptNewComponents(metacomps, newConstraints, 0);
@@ -342,16 +356,20 @@ public final class LayoutSupportManager implements LayoutSupportContext {
 
             for (int i=0; i < componentCount; i++)
                 metacomps[i].resetConstraintsProperties();
-            }
+        }
 
         // setup primary container
         Container cont = getPrimaryContainer();
         Container contDel = getPrimaryContainerDelegate();
 //        layoutDelegate.clearContainer(cont, contDel);
+        if (metaContainer.isDefaultLayoutDelegate(layoutDelegate) && layoutDelegate.getSupportedClass() == null) {
+            // e.g. UnknownLayoutSupport can't set the layout
+            contDel.setLayout(metaContainer.getDefaultLayout());
+        }
         layoutDelegate.setLayoutToContainer(cont, contDel);
-        if (componentCount > 0)
-            layoutDelegate.addComponentsToContainer(cont, contDel,
-                                                    primaryComps, 0);
+        if (componentCount > 0) {
+            layoutDelegate.addComponentsToContainer(cont, contDel, primaryComps, 0);
+        }
     }
 
     // ---------
@@ -425,6 +443,13 @@ public final class LayoutSupportManager implements LayoutSupportContext {
         return null;
     }
 
+    public boolean isLayoutPropertyChangedFromInitial(FormProperty prop) {
+        if (layoutDelegate instanceof AbstractLayoutSupport) {
+            return ((AbstractLayoutSupport)layoutDelegate).isPropertyChangedFromInitial(prop);
+        }
+        return prop.isChanged();
+    }
+
     public Class getCustomizerClass() {
         return layoutDelegate.getCustomizerClass();
     }
@@ -433,7 +458,7 @@ public final class LayoutSupportManager implements LayoutSupportContext {
         return layoutDelegate.getSupportCustomizer();
     }
 
-  // data validation
+    // data validation
     public void acceptNewComponents(RADVisualComponent[] components,
                                     LayoutConstraints[] constraints,
                                     int index)
@@ -458,8 +483,8 @@ public final class LayoutSupportManager implements LayoutSupportContext {
 
         layoutDelegate.addComponents(components, constraints, index);
 
-        for (RADVisualComponent component : components)
-          component.resetConstraintsProperties();
+        for (int i=0; i < components.length; i++)
+            components[i].resetConstraintsProperties();
 
         layoutDelegate.addComponentsToContainer(getPrimaryContainer(),
                                                 getPrimaryContainerDelegate(),
@@ -524,7 +549,17 @@ public final class LayoutSupportManager implements LayoutSupportContext {
                                       getPrimaryContainerDelegate());
     }
 
-  // managing constraints
+    public boolean isLayoutChanged() {
+        Container defaultContainer = (Container)
+                BeanSupport.getDefaultInstance(metaContainer.getBeanClass());
+        Container defaultContDelegate =
+                metaContainer.getContainerDelegate(defaultContainer);
+
+        return layoutDelegate.isLayoutChanged(defaultContainer,
+                                              defaultContDelegate);
+    }
+
+    // managing constraints
     public LayoutConstraints getConstraints(int index) {
         return layoutDelegate.getConstraints(index);
     }
@@ -689,7 +724,7 @@ public final class LayoutSupportManager implements LayoutSupportContext {
     // -----------
     // API for layout delegates (LayoutSupportContext implementation)
 
-  // return container instance of meta container
+    // return container instance of meta container
     @Override
     public Container getPrimaryContainer() {
         return (Container) metaContainer.getBeanInstance();
@@ -705,6 +740,12 @@ public final class LayoutSupportManager implements LayoutSupportContext {
                 metaContainer.getContainerDelegate(defCont);
         }
         return primaryContainerDelegate;
+    }
+
+    // return initial layout of the primary container delegate
+    @Override
+    public LayoutManager getDefaultLayoutInstance() {
+        return metaContainer.getDefaultLayout();
     }
 
     // return component instance of meta component

@@ -46,6 +46,7 @@ package org.netbeans.modules.form.layoutsupport.delegates;
 
 import java.awt.*;
 import java.beans.*;
+import java.util.*;
 import java.lang.reflect.Method;
 
 import org.openide.util.ImageUtilities;
@@ -62,7 +63,12 @@ public class NullLayoutSupport extends AbsoluteLayoutSupport {
 
     private static Method setBoundsMethod;
 
-  /** Gets the supported layout manager class - this one is rather special,
+    /** The icon for NullLayout. */
+    private static String iconURL = "org/netbeans/modules/form/layoutsupport/resources/NullLayout.gif"; // NOI18N
+    /** The icon for NullLayout. */
+    private static String icon32URL = "org/netbeans/modules/form/layoutsupport/resources/NullLayout32.gif"; // NOI18N    
+
+    /** Gets the supported layout manager class - this one is rather special,
      * it's null.
      * @return the class supported by this delegate
      */
@@ -82,11 +88,9 @@ public class NullLayoutSupport extends AbsoluteLayoutSupport {
         switch (type) {
             case BeanInfo.ICON_COLOR_16x16:
             case BeanInfo.ICON_MONO_16x16:
-              String iconURL = "org/netbeans/modules/form/layoutsupport/resources/NullLayout.gif";
-              return ImageUtilities.loadImage(iconURL);
+                return ImageUtilities.loadImage(iconURL);
             default:
-              String icon32URL = "org/netbeans/modules/form/layoutsupport/resources/NullLayout32.gif";
-              return ImageUtilities.loadImage(icon32URL);
+                return ImageUtilities.loadImage(icon32URL);
         }
     }
 
@@ -142,7 +146,7 @@ public class NullLayoutSupport extends AbsoluteLayoutSupport {
 
     // ---------
 
-  private static Method getSetBoundsMethod() {
+    private static Method getSetBoundsMethod() {
         if (setBoundsMethod == null) {
             try {
                 setBoundsMethod = Component.class.getMethod(

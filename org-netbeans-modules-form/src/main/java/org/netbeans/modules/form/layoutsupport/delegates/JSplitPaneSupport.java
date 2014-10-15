@@ -342,7 +342,7 @@ public class JSplitPaneSupport extends AbstractLayoutSupport {
     
     // ------
 
-  /** This method is called to get a default component layout constraints
+    /** This method is called to get a default component layout constraints
      * metaobject in case it is not provided (e.g. in addComponents method).
      * @return the default LayoutConstraints object for the supported layout;
      *         null if no component constraints are used
@@ -469,12 +469,12 @@ public class JSplitPaneSupport extends AbstractLayoutSupport {
 
         @Override
         public void setAsText(String str) {
-          for (String value : values)
-            if (str.equals(value))
-            {
-              setValue(str);
-              break;
-            }
+            for (int i = 0; i < values.length; i++)
+                if (str.equals(values[i])) {
+                    setValue(str);
+                    break;
+                }
+
         }
     }
     }

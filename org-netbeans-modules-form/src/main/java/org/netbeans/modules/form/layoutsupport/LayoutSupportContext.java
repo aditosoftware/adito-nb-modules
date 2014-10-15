@@ -46,6 +46,7 @@ package org.netbeans.modules.form.layoutsupport;
 
 import java.awt.Component;
 import java.awt.Container;
+import java.awt.LayoutManager;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyVetoException;
 
@@ -67,7 +68,7 @@ import java.beans.PropertyVetoException;
 
 public interface LayoutSupportContext {
 
-  /** Gets the primary container. This is the reference instance used in form
+    /** Gets the primary container. This is the reference instance used in form
      * metadata structures.
      * @return instance of the primary container
      */
@@ -77,6 +78,13 @@ public interface LayoutSupportContext {
      * @return instance of the primary container delegate
      */
     public Container getPrimaryContainerDelegate();
+
+    /** Provides the instance of LayoutManager as it was initially set in the
+     * primary container delegate. Makes only sense for general (non-dedicated
+     * containers. Should not be changed.
+     * @return default (initial) LayoutManager instance
+     */
+    public LayoutManager getDefaultLayoutInstance();
 
     /** Gets the primary component (reference instance) on given index in
      * the primary container.

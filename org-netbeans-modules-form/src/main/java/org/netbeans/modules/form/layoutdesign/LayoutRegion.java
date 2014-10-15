@@ -80,7 +80,9 @@ class LayoutRegion implements LayoutConstants {
 
     LayoutRegion(LayoutRegion reg) {
         this();
-        set(reg);
+        if (reg != null) {
+            set(reg);
+        }
     }
 
     LayoutRegion(Rectangle bounds, int baselinePos) {
@@ -376,13 +378,20 @@ class LayoutRegion implements LayoutConstants {
         int[] pos2 = r2.positions[dimension];
         int p2L = pos2[LEADING];
         int p2T = pos2[TRAILING];
-        assert pos1[LEADING] != UNKNOWN && pos1[TRAILING] != UNKNOWN
+        boolean defined = pos1[LEADING] != UNKNOWN && pos1[TRAILING] != UNKNOWN
                && p2L != UNKNOWN && p2T != UNKNOWN;
+        assert defined; // we want bug reports on use of undefined regions,
+        if (!defined) { // but in final product should be able to cope with it
+            return false;
+        }
         int p1L = pos1[LEADING] - margin;
         int p1T = pos1[TRAILING] + margin;
         return (p1T > p2L && p1L < p2T)
-                || (p1L == p1T && (p1L == p2L || p1T == p2T))
-                || (p2L == p2T && (p2L == p1L || p2T == p1T));
+                || (p1L == p2L && (p1L == p1T || p2L == p2T)); // 0 size at leading edge (trailing is exclusive)
+    }
+
+    static boolean overlap(LayoutRegion r1, LayoutRegion r2) {
+        return overlap(r1, r2, HORIZONTAL, 0) && overlap(r1, r2, VERTICAL, 0);
     }
 
     /**
