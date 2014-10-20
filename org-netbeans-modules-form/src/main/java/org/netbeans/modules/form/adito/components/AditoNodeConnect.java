@@ -7,7 +7,7 @@ import org.netbeans.modules.form.RADComponent;
 import org.openide.filesystems.FileObject;
 import org.openide.loaders.*;
 import org.openide.nodes.*;
-import org.openide.util.Lookup;
+import org.openide.util.*;
 
 import javax.swing.*;
 import java.awt.*;
@@ -76,27 +76,14 @@ public final class AditoNodeConnect
     });
   }
 
-  public static void addPropertyChangeListener(RADComponent pComponent, final PropertyChangeListener pListener)
+  public static void addWeakPropertyChangeListener(RADComponent pComponent, final PropertyChangeListener pListener)
   {
     _resolve(pComponent, new _NodeC<Void>()
     {
       @Override
       public Void resolve(Node pNode)
       {
-        pNode.addPropertyChangeListener(pListener);
-        return null;
-      }
-    });
-  }
-
-  public static void removePropertyChangeListener(RADComponent pComponent, final PropertyChangeListener pListener)
-  {
-    _resolve(pComponent, new _NodeC<Void>()
-    {
-      @Override
-      public Void resolve(Node pNode)
-      {
-        pNode.removePropertyChangeListener(pListener);
+        pNode.addPropertyChangeListener(WeakListeners.propertyChange(pListener, pNode));
         return null;
       }
     });

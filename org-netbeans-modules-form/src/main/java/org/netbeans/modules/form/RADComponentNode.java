@@ -123,17 +123,7 @@ public class RADComponentNode extends FormNode
       }
     };
     // wenn sich die Properties ändern soll das Sheet aktualisiert werden.
-    AditoNodeConnect.addPropertyChangeListener(
-        component, WeakListeners.propertyChange(propertyChangeListenerReference, new Object()
-        {
-          // wird per Reflection von 'WeakListeners.propertyChange' aufgerufen.
-          @SuppressWarnings("UnusedDeclaration")
-          public void removePropertyChangeListener(PropertyChangeListener pPropertyChangeListener)
-          {
-            AditoNodeConnect.removePropertyChangeListener(component, pPropertyChangeListener);
-          }
-        })
-    );
+    AditoNodeConnect.addWeakPropertyChangeListener(component, propertyChangeListenerReference);
 
     Node node = pLookup == null ? null : pLookup.lookup(Node.class);
     if (node != null)
