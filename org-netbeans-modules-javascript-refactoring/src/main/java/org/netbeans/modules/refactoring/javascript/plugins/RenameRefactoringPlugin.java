@@ -43,57 +43,35 @@
  */
 package org.netbeans.modules.refactoring.javascript.plugins;
 
-import java.util.logging.Level;
+import org.mozilla.nb.javascript.*;
 import org.mozilla.nb.javascript.Token;
-import org.netbeans.modules.csl.api.Error;
-import org.netbeans.modules.csl.api.Severity;
-import org.netbeans.modules.csl.spi.GsfUtilities;
+import org.netbeans.api.lexer.*;
+import org.netbeans.editor.*;
 import org.netbeans.editor.Utilities;
-import org.netbeans.modules.javascript.editing.AstPath;
-import org.netbeans.modules.javascript.editing.AstUtilities;
-import org.netbeans.modules.parsing.api.ParserManager;
-import org.netbeans.modules.parsing.api.UserTask;
-import org.openide.filesystems.FileUtil;
-import org.openide.text.CloneableEditorSupport;
-import org.openide.util.Exceptions;
+import org.netbeans.modules.csl.api.*;
+import org.netbeans.modules.csl.api.Error;
+import org.netbeans.modules.csl.spi.GsfUtilities;
+import org.netbeans.modules.csl.spi.support.ModificationResult;
+import org.netbeans.modules.csl.spi.support.ModificationResult.Difference;
+import org.netbeans.modules.javascript.editing.*;
+import org.netbeans.modules.javascript.editing.Element;
+import org.netbeans.modules.javascript.editing.JsAnalyzer.AnalysisResult;
+import org.netbeans.modules.javascript.editing.lexer.*;
+import org.netbeans.modules.parsing.api.*;
+import org.netbeans.modules.parsing.spi.ParseException;
+import org.netbeans.modules.refactoring.api.*;
+import org.netbeans.modules.refactoring.javascript.*;
+import org.netbeans.modules.refactoring.spi.*;
+import org.openide.filesystems.*;
+import org.openide.text.*;
+import org.openide.util.*;
+
+import javax.swing.text.*;
+import javax.swing.text.Position.Bias;
 import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.*;
-import java.util.logging.Logger;
-import javax.swing.text.BadLocationException;
-import javax.swing.text.Document;
-import javax.swing.text.Position.Bias;
-import org.mozilla.nb.javascript.Node;
-import org.netbeans.modules.csl.api.ElementKind;
-import org.netbeans.modules.csl.api.OffsetRange;
-import org.netbeans.api.lexer.TokenHierarchy;
-import org.netbeans.api.lexer.TokenId;
-import org.netbeans.api.lexer.TokenSequence;
-import org.netbeans.api.lexer.TokenUtilities;
-import org.netbeans.editor.BaseDocument;
-import org.netbeans.modules.csl.spi.support.ModificationResult;
-import org.netbeans.modules.csl.spi.support.ModificationResult.Difference;
-import org.netbeans.modules.javascript.editing.Element;
-import org.netbeans.modules.javascript.editing.JsAnalyzer.AnalysisResult;
-import org.netbeans.modules.javascript.editing.AstElement;
-import org.netbeans.modules.javascript.editing.JsParseResult;
-import org.netbeans.modules.javascript.editing.JsUtils;
-import org.netbeans.modules.javascript.editing.ParseTreeWalker;
-import org.netbeans.modules.javascript.editing.VariableVisitor;
-import org.netbeans.modules.javascript.editing.lexer.JsTokenId;
-import org.netbeans.modules.refactoring.javascript.DiffElement;
-import org.netbeans.modules.refactoring.api.*;
-import org.netbeans.modules.refactoring.javascript.RetoucheUtils;
-import org.netbeans.modules.refactoring.javascript.JsElementCtx;
-import org.openide.filesystems.FileObject;
-import org.netbeans.modules.refactoring.spi.RefactoringElementsBag;
-import org.netbeans.modules.javascript.editing.lexer.LexUtilities;
-import org.netbeans.modules.parsing.api.ResultIterator;
-import org.netbeans.modules.parsing.api.Source;
-import org.netbeans.modules.parsing.spi.ParseException;
-import org.netbeans.modules.refactoring.spi.RefactoringCommit;
-import org.openide.text.PositionRef;
-import org.openide.util.NbBundle;
+import java.util.logging.*;
 
 /**
  * The actual Renaming refactoring work for Js. The skeleton (name checks etc.) based
@@ -849,6 +827,9 @@ public class RenameRefactoringPlugin extends JsRefactoringPlugin {
                     PositionRef startPos = ces.createPositionRef(start, Bias.Forward);
                     PositionRef endPos = ces.createPositionRef(end, Bias.Forward);
                     Difference diff = new Difference(Difference.Kind.CHANGE, startPos, endPos, "", "", desc); // NOI18N
+                  // changed by ADITO #5244
+                  // falls der Eintrag schon existiert, nicht nochmal aufnehmen
+                  if (!diffsContainsDiff(diff))
                     diffs.add(diff);
                 }
             }
@@ -868,6 +849,30 @@ public class RenameRefactoringPlugin extends JsRefactoringPlugin {
 
             ces = null;
         }
+
+      // changed by ADITO #5244
+
+      /**
+       * Gibt an, ob das Diff schon in der Liste der Diffs enthalten ist.
+       *
+       * @param pDiff Das zur hinzufügung anstehende Diff
+       * @return true, wenns schon existiert
+       */
+      private boolean diffsContainsDiff(Difference pDiff)
+      {
+        for (Difference diff : diffs)
+        {
+          if (diff.getStartPosition().getOffset() == pDiff.getStartPosition().getOffset() &&
+              diff.getEndPosition().getOffset() == pDiff.getEndPosition().getOffset() &&
+              diff.getOldText() == pDiff.getOldText() &&
+              diff.getNewText() == pDiff.getNewText() &&
+              diff.getKind().equals(pDiff.getKind()))
+            return true;
+        }
+
+        return false;
+      }
+      // changed by ADITO #5244
         
         private void searchTokenSequence(TokenSequence<?> ts) {
             if (ts.moveNext()) {
@@ -901,6 +906,9 @@ public class RenameRefactoringPlugin extends JsRefactoringPlugin {
                                 PositionRef endPos = ces.createPositionRef(end, Bias.Forward);
                                 String desc = getString("ChangeComment");
                                 Difference diff = new Difference(Difference.Kind.CHANGE, startPos, endPos, oldName, newName, desc);
+                              // changed by ADITO #5244
+                              // falls der Eintrag schon existiert, nicht nochmal aufnehmen
+                              if (!diffsContainsDiff(diff))
                                 diffs.add(diff);
                             }
                         }
@@ -1062,6 +1070,9 @@ public class RenameRefactoringPlugin extends JsRefactoringPlugin {
             PositionRef startPos = ces.createPositionRef(start, Bias.Forward);
             PositionRef endPos = ces.createPositionRef(end, Bias.Forward);
             Difference diff = new Difference(Difference.Kind.CHANGE, startPos, endPos, oldCode, newCode, desc);
+          // changed by ADITO #5244
+          // falls der Eintrag schon existiert, nicht nochmal aufnehmen
+          if (!diffsContainsDiff(diff))
             diffs.add(diff);
         }
 
