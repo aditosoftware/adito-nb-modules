@@ -1,6 +1,5 @@
 package de.adito.aditoweb.nbm.nbide.nbaditointerface.form.model;
 
-import org.jetbrains.annotations.NotNull;
 import org.openide.filesystems.*;
 import org.openide.loaders.*;
 
