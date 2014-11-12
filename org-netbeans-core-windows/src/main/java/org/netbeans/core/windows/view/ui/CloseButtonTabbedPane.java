@@ -44,26 +44,20 @@
 
 package org.netbeans.core.windows.view.ui;
 
-import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseWheelEvent;
-import java.awt.event.MouseWheelListener;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import java.util.regex.Pattern;
+import de.adito.aditoweb.swingcommon.lf.LfUtil;
+import org.netbeans.core.windows.actions.MaximizeWindowAction;
+import org.openide.awt.*;
+import org.openide.util.*;
+import org.openide.windows.TopComponent;
+
 import javax.swing.*;
 import javax.swing.plaf.UIResource;
-import org.netbeans.core.windows.actions.MaximizeWindowAction;
-import org.openide.awt.CloseButtonFactory;
-import org.openide.awt.TabbedPaneFactory;
-import org.openide.util.Exceptions;
-import org.openide.util.Utilities;
-import org.openide.windows.TopComponent;
+import javax.swing.plaf.basic.BasicLabelUI;
+import java.awt.*;
+import java.awt.event.*;
+import java.beans.*;
+import java.util.logging.*;
+import java.util.regex.Pattern;
 
 /**
  * Copy of original CloseButtonTabbedPane from the NetBeans 3.4 winsys.  Old code never dies.
@@ -75,439 +69,528 @@ import org.openide.windows.TopComponent;
  *
  */
 final class CloseButtonTabbedPane extends JTabbedPane implements PropertyChangeListener {
-    
+
+  private static final boolean IS_AQUA_LAF = "Aqua".equals(UIManager.getLookAndFeel().getID()); //NOI18N
+  private static final boolean HTML_TABS_BROKEN = htmlTabsBroken();
+  private final Pattern removeHtmlTags = HTML_TABS_BROKEN ? Pattern.compile("\\<.*?\\>") : null;
     private Action scrollLeftAction;
     private Action scrollRightAction;
-    
-    private static final boolean IS_AQUA_LAF = "Aqua".equals( UIManager.getLookAndFeel().getID() ); //NOI18N
-
+  private int pressedCloseButtonIndex = -1;
+  private int mouseOverCloseButtonIndex = -1;
     CloseButtonTabbedPane() {
             // close tab via middle button
             addMouseListener(new MouseAdapter() {
                 int lastIdx = -1;
 
-                @Override
-                public void mousePressed(MouseEvent e) {
-                    if (SwingUtilities.isMiddleMouseButton(e)) {
-                        lastIdx = getUI().tabForCoordinate(CloseButtonTabbedPane.this, e.getX(), e.getY());
-                    }
+              @Override
+              public void mousePressed(MouseEvent e)
+              {
+                if (SwingUtilities.isMiddleMouseButton(e))
+                {
+                  lastIdx = getUI().tabForCoordinate(CloseButtonTabbedPane.this, e.getX(), e.getY());
                 }
+              }
 
-                @Override
-                public void mouseReleased(MouseEvent e) {
-                    if (SwingUtilities.isMiddleMouseButton(e)) {
-                        int idx = getUI().tabForCoordinate(CloseButtonTabbedPane.this, e.getX(), e.getY());
-                        if (idx >= 0) {
-                            Component comp = getComponentAt(idx);
-                            if (idx == lastIdx && comp != null && !hideCloseButton(comp)) {
-                                fireCloseRequest(comp);
-                            }
-                        }
-                        lastIdx = -1;
+              @Override
+              public void mouseReleased(MouseEvent e)
+              {
+                if (SwingUtilities.isMiddleMouseButton(e))
+                {
+                  int idx = getUI().tabForCoordinate(CloseButtonTabbedPane.this, e.getX(), e.getY());
+                  if (idx >= 0)
+                  {
+                    Component comp = getComponentAt(idx);
+                    if (idx == lastIdx && comp != null && !hideCloseButton(comp))
+                    {
+                      fireCloseRequest(comp);
                     }
+                  }
+                  lastIdx = -1;
                 }
+              }
 
-            @Override
-            public void mouseClicked( MouseEvent e ) {
-                if( e.getClickCount() == 2 && SwingUtilities.isLeftMouseButton( e ) ) {
-                    //toggle maximize
-                    TopComponent tc = ( TopComponent ) SwingUtilities.getAncestorOfClass( TopComponent.class, CloseButtonTabbedPane.this );
-                    if( null != tc ) {
-                        MaximizeWindowAction mwa = new MaximizeWindowAction(tc);
-                        if( mwa.isEnabled() )
-                            mwa.actionPerformed(null);
-                    }
+              @Override
+              public void mouseClicked(MouseEvent e)
+              {
+                if (e.getClickCount() == 2 && SwingUtilities.isLeftMouseButton(e))
+                {
+                  //toggle maximize
+                  TopComponent tc = (TopComponent) SwingUtilities.getAncestorOfClass(TopComponent.class, CloseButtonTabbedPane.this);
+                  if (null != tc)
+                  {
+                    MaximizeWindowAction mwa = new MaximizeWindowAction(tc);
+                    if (mwa.isEnabled())
+                      mwa.actionPerformed(null);
+                  }
                 }
-            }
+              }
 
             });
-            
-            //mouse wheel scrolling
-            addMouseWheelListener(new MouseWheelListener() {
-                @Override
-                public void mouseWheelMoved(MouseWheelEvent e) {
-                    if( e.getScrollType() == MouseWheelEvent.WHEEL_UNIT_SCROLL ) {
-                        if( e.getWheelRotation() < 0 ) {
-                            scrollTabsLeft();
-                        } else {
-                            scrollTabsRight();
-                        }
-                    }
-                }
-            });
-        //Bugfix #28263: Disable focus.
-        setFocusable(false);
-        setFocusCycleRoot(true);
-        setFocusTraversalPolicy(new CBTPPolicy());
-        setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);
-    }
 
-    private Component sel() {
-        Component c = getSelectedComponent();
-        return c == null ? this : c;
-    }
-
-    private class CBTPPolicy extends FocusTraversalPolicy {
+      //mouse wheel scrolling
+      addMouseWheelListener(new MouseWheelListener()
+      {
         @Override
-        public Component getComponentAfter(Container aContainer, Component aComponent) {
-            return sel();
-        }
-
-        @Override
-        public Component getComponentBefore(Container aContainer, Component aComponent) {
-            return sel();
-        }
-
-        @Override
-        public Component getFirstComponent(Container aContainer) {
-            return sel();
-        }
-
-        @Override
-        public Component getLastComponent(Container aContainer) {
-            return sel();
-        }
-
-        @Override
-        public Component getDefaultComponent(Container aContainer) {
-            return sel();
-        }
-    }
-
-    private int pressedCloseButtonIndex = -1;
-    private int mouseOverCloseButtonIndex = -1;
-
-    @Override
-    public void insertTab(String title, Icon icon, Component component, String tip, int index) {
-        super.insertTab(title, icon, component, tip, index);
-            component.addPropertyChangeListener(TabbedPaneFactory.NO_CLOSE_BUTTON, this);
-            if (!hideCloseButton(component)) {
-                setTabComponentAt(index, new ButtonTab());
+        public void mouseWheelMoved(MouseWheelEvent e)
+        {
+          if (e.getScrollType() == MouseWheelEvent.WHEEL_UNIT_SCROLL)
+          {
+            if (e.getWheelRotation() < 0)
+            {
+              scrollTabsLeft();
             }
-        if (title != null) {
-            setTitleAt(index, title);
+            else
+            {
+              scrollTabsRight();
+            }
+          }
         }
-        validate();
+      });
+      //Bugfix #28263: Disable focus.
+      setFocusable(false);
+      setFocusCycleRoot(true);
+      setFocusTraversalPolicy(new CBTPPolicy());
+      setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);
     }
 
-    @Override
-    public void updateUI() {
-        super.updateUI();
-        //#179323 - disable ctrl+page up/down actions if there's just one tab,
-        //parent container, e.g. TopComponent tabs, may want to handle these keys itself
-        ActionMap am = getActionMap();
-        Action a = am.get("navigatePageUp");
-        if( null != a && !(a instanceof MyNavigateAction) ) {
-            am.put("navigatePageUp", new MyNavigateAction(a));
-        }
-        a = am.get("navigatePageDown");
-        if( null != a && !(a instanceof MyNavigateAction) ) {
-            am.put("navigatePageDown", new MyNavigateAction(a));
-        }
-        scrollRightAction = am.get("scrollTabsForwardAction"); //NOI18N
-        scrollLeftAction = am.get("scrollTabsBackwardAction"); //NOI18N
-    }
-    
-    private void scrollTabsLeft() {
-        if( IS_AQUA_LAF ) {
-            int selIndex = getSelectedIndex();
-            if( selIndex > 0 ) {
-                setSelectedIndex(selIndex-1);
+  private static boolean htmlTabsBroken()
+  {
+    String version = System.getProperty("java.version");
+    for (int i = 14; i < 18; i++)
+    {
+      if (version.startsWith("1.6.0_" + i))
+      {
+        return true;
             }
-        } else if( null != scrollLeftAction && scrollLeftAction.isEnabled() ) {
-            scrollLeftAction.actionPerformed(new ActionEvent(this, 0, "")); //NOI18N
         }
+    if (version.startsWith("1.6.0") && IS_AQUA_LAF)
+      return true;
+    return false;
     }
-    
-    private void scrollTabsRight() {
-        if( IS_AQUA_LAF ) {
-            int selIndex = getSelectedIndex();
-            if( selIndex < getTabCount()-1 ) {
-                setSelectedIndex(selIndex+1);
-            }
-        } else if( null != scrollRightAction && scrollRightAction.isEnabled() ) {
-            scrollRightAction.actionPerformed(new ActionEvent(this, 0, "")); //NOI18N
+
+  static void fixGetBoundsAt(Rectangle b)
+  {
+    if (b.y < 0)
+      b.y = -b.y;
+    if (b.x < 0)
+      b.x = -b.x;
+    }
+
+  static int findTabForCoordinate(JTabbedPane tab, int x, int y)
+  {
+    for (int i = 0; i < tab.getTabCount(); i++)
+    {
+      Rectangle b = tab.getBoundsAt(i);
+      if (b != null)
+      {
+        b = new Rectangle(b);
+        fixGetBoundsAt(b);
+
+        if (b.contains(x, y))
+        {
+          return i;
         }
+            }
+        }
+    return -1;
+    }
+
+  private Component sel()
+  {
+    Component c = getSelectedComponent();
+    return c == null ? this : c;
     }
     
     @Override
-    public void removeTabAt(int index) {
-        Component c = getComponentAt(index);
-        c.removePropertyChangeListener(TabbedPaneFactory.NO_CLOSE_BUTTON, this);
-        super.removeTabAt(index);
+    public void insertTab(String title, Icon icon, Component component, String tip, int index)
+    {
+      super.insertTab(title, icon, component, tip, index);
+      component.addPropertyChangeListener(TabbedPaneFactory.NO_CLOSE_BUTTON, this);
+      if (!hideCloseButton(component))
+      {
+        setTabComponentAt(index, new ButtonTab(this));
+      }
+      if (title != null)
+      {
+        setTitleAt(index, title);
+      }
+      validate();
     }
 
-    private static final boolean HTML_TABS_BROKEN = htmlTabsBroken();
-    private static boolean htmlTabsBroken() {
-        String version = System.getProperty("java.version");
-        for (int i = 14; i < 18; i++) {
-            if (version.startsWith("1.6.0_" + i)) {
-                return true;
-            }
-        }
-        if( version.startsWith("1.6.0") && IS_AQUA_LAF )
-            return true;
-        return false;
+  @Override
+  public void updateUI()
+  {
+    super.updateUI();
+    //#179323 - disable ctrl+page up/down actions if there's just one tab,
+    //parent container, e.g. TopComponent tabs, may want to handle these keys itself
+    ActionMap am = getActionMap();
+    Action a = am.get("navigatePageUp");
+    if (null != a && !(a instanceof MyNavigateAction))
+    {
+      am.put("navigatePageUp", new MyNavigateAction(a));
     }
-    private final Pattern removeHtmlTags = HTML_TABS_BROKEN ? Pattern.compile("\\<.*?\\>") : null;
+    a = am.get("navigatePageDown");
+    if (null != a && !(a instanceof MyNavigateAction))
+    {
+      am.put("navigatePageDown", new MyNavigateAction(a));
+    }
+    scrollRightAction = am.get("scrollTabsForwardAction"); //NOI18N
+    scrollLeftAction = am.get("scrollTabsBackwardAction"); //NOI18N
+  }
+
+  private void scrollTabsLeft()
+  {
+    if (IS_AQUA_LAF)
+    {
+      int selIndex = getSelectedIndex();
+      if (selIndex > 0)
+      {
+        setSelectedIndex(selIndex - 1);
+            }
+    }
+    else if (null != scrollLeftAction && scrollLeftAction.isEnabled())
+    {
+      scrollLeftAction.actionPerformed(new ActionEvent(this, 0, "")); //NOI18N
+        }
+    }
+
+  private void scrollTabsRight()
+  {
+    if (IS_AQUA_LAF)
+    {
+      int selIndex = getSelectedIndex();
+      if (selIndex < getTabCount() - 1)
+      {
+        setSelectedIndex(selIndex + 1);
+      }
+    }
+    else if (null != scrollRightAction && scrollRightAction.isEnabled())
+    {
+      scrollRightAction.actionPerformed(new ActionEvent(this, 0, "")); //NOI18N
+    }
+  }
 
     @Override
-    public void setTitleAt(int idx, String title) {
-        if (title == null) {
-            super.setTitleAt(idx, null);
-            return;
-        }
-        // workaround for JDK bug (http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6670274)
-        // NB issue #113388
-        if (removeHtmlTags != null && title.startsWith("<html>")) {
-            title = removeHtmlTags.matcher(title).replaceAll("");
-            title = title.replace("&nbsp;", "");
-        }
-
-        super.setTitleAt(idx, title);
+    public void removeTabAt(int index)
+    {
+      Component c = getComponentAt(index);
+      c.removePropertyChangeListener(TabbedPaneFactory.NO_CLOSE_BUTTON, this);
+      super.removeTabAt(index);
     }
 
-    private Component findTabAt(int index) {
-        int componentIndex = -1;
-        for( Component c : getComponents() ) {
-            if( c instanceof UIResource )
-                continue;
-            if( ++componentIndex == index )
-                return c;
+  @Override
+  public void setTitleAt(int idx, String title)
+  {
+    if (title == null)
+    {
+      super.setTitleAt(idx, null);
+      return;
         }
-        return null;
+    // workaround for JDK bug (http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6670274)
+    // NB issue #113388
+    if (removeHtmlTags != null && title.startsWith("<html>"))
+    {
+      title = removeHtmlTags.matcher(title).replaceAll("");
+      title = title.replace("&nbsp;", "");
+    }
+
+    super.setTitleAt(idx, title);
+    }
+
+  private Component findTabAt(int index)
+  {
+    int componentIndex = -1;
+    for (Component c : getComponents())
+    {
+      if (c instanceof UIResource)
+        continue;
+      if (++componentIndex == index)
+        return c;
+        }
+    return null;
     }
 
     private boolean hideCloseButton(Component c) {
-        if (c!=null && c instanceof JComponent) {
-            Object prop = ((JComponent) c).getClientProperty(TabbedPaneFactory.NO_CLOSE_BUTTON);
-            if (prop!=null && prop instanceof Boolean && (Boolean) prop) {
-                return true;
+      if (c != null && c instanceof JComponent)
+      {
+        Object prop = ((JComponent) c).getClientProperty(TabbedPaneFactory.NO_CLOSE_BUTTON);
+        if (prop != null && prop instanceof Boolean && (Boolean) prop)
+        {
+          return true;
             }
         }
-        return false;
+      return false;
     }
 
-    private Rectangle getCloseButtonBoundsAt(int i) {
-        Component c = findTabAt(i);
-        //if NO_CLOSE_BUTTON -> return null
-        if (hideCloseButton(c)) {
-            return null;
-        }
-        Rectangle b = getBoundsAt(i);
-        if (b == null)
-            return null;
-        else {
-            b = new Rectangle(b);
-            fixGetBoundsAt(b);
+  private Rectangle getCloseButtonBoundsAt(int i)
+  {
+    Component c = findTabAt(i);
+    //if NO_CLOSE_BUTTON -> return null
+    if (hideCloseButton(c))
+    {
+      return null;
+    }
+    Rectangle b = getBoundsAt(i);
+    if (b == null)
+      return null;
+    else
+    {
+      b = new Rectangle(b);
+      fixGetBoundsAt(b);
 
-            Dimension tabsz = getSize();
-            if (b.x + b.width >= tabsz.width
-                || b.y + b.height >= tabsz.height)
-                return null;
-             // bugfix #110654
-             if (b.width == 0 || b.height == 0) {
-                 return null;
-             }
-            if( (isWindowsVistaLaF() || isWindowsXPLaF() || isWindowsLaF()) && i == getSelectedIndex() ) {
-                b.x -= 3;
-                b.y -= 2;
-            } else if( isWindowsXPLaF() || isWindowsLaF() || IS_AQUA_LAF ) {
-                b.x -= 2;
-            } else if( isGTKLaF() && i == getSelectedIndex() ) {
-                b.x -= 1;
-                b.y -= 2;
-            }
-            if( i == getTabCount()-1 ) {
-                if( isMetalLaF() )
-                    b.x--;
-                else if( IS_AQUA_LAF ) 
-                    b.x -= 3;
-            }
-            return new Rectangle(b.x + b.width - 13,
-                                 b.y + b.height / 2 - 5,
-                                 12,
-                                 12);
-        }
+      Dimension tabsz = getSize();
+      if (b.x + b.width >= tabsz.width
+          || b.y + b.height >= tabsz.height)
+        return null;
+      // bugfix #110654
+      if (b.width == 0 || b.height == 0)
+      {
+        return null;
+      }
+      if ((isWindowsVistaLaF() || isWindowsXPLaF() || isWindowsLaF()) && i == getSelectedIndex())
+      {
+        b.x -= 3;
+        b.y -= 2;
+      }
+      else if (isWindowsXPLaF() || isWindowsLaF() || IS_AQUA_LAF)
+      {
+        b.x -= 2;
+      }
+      else if (isGTKLaF() && i == getSelectedIndex())
+      {
+        b.x -= 1;
+        b.y -= 2;
+      }
+      if (i == getTabCount() - 1)
+      {
+        if (isMetalLaF())
+          b.x--;
+        else if (IS_AQUA_LAF)
+          b.x -= 3;
+      }
+      return new Rectangle(b.x + b.width - 13,
+                           b.y + b.height / 2 - 5,
+                           12,
+                           12);
+    }
     }
 
+  private boolean isWindowsVistaLaF()
+  {
+    String osName = System.getProperty("os.name");
+    return osName.indexOf("Vista") >= 0
+        || (osName.equals("Windows NT (unknown)") && "6.0".equals(System.getProperty("os.version")));
+    }
 
-    private boolean isWindowsVistaLaF() {
-        String osName = System.getProperty ("os.name");
-        return osName.indexOf("Vista") >= 0 
-            || (osName.equals( "Windows NT (unknown)" ) && "6.0".equals( System.getProperty("os.version") ));
+  private boolean isWindowsXPLaF()
+  {
+    Boolean isXP = (Boolean) Toolkit.getDefaultToolkit().
+        getDesktopProperty("win.xpstyle.themeActive"); //NOI18N
+    return isWindowsLaF() && (isXP == null ? false : isXP.booleanValue());
     }
-    
-    private boolean isWindowsXPLaF() {
-        Boolean isXP = (Boolean)Toolkit.getDefaultToolkit().
-                        getDesktopProperty("win.xpstyle.themeActive"); //NOI18N
-        return isWindowsLaF() && (isXP == null ? false : isXP.booleanValue());
-    }
-    
-    private boolean isWindowsLaF () {
+
+  private boolean isWindowsLaF()
+  {
         String lfID = UIManager.getLookAndFeel().getID();
-        return lfID.endsWith("Windows"); //NOI18N
-    }
-    
-    private boolean isMetalLaF () {
-        String lfID = UIManager.getLookAndFeel().getID();
-        return "Metal".equals( lfID ); //NOI18N
+    return lfID.endsWith("Windows"); //NOI18N
     }
 
+  private boolean isMetalLaF()
+  {
+    String lfID = UIManager.getLookAndFeel().getID();
+    return "Metal".equals(lfID); //NOI18N
+    }
+    
     private boolean isGTKLaF () {
-        return "GTK".equals( UIManager.getLookAndFeel().getID() ); //NOI18N
+      return "GTK".equals(UIManager.getLookAndFeel().getID()); //NOI18N
     }
-    
+
     private void setPressedCloseButtonIndex(int index) {
-        if (pressedCloseButtonIndex == index)
-            return;
+      if (pressedCloseButtonIndex == index)
+        return;
 
-        if (pressedCloseButtonIndex >= 0
-        && pressedCloseButtonIndex < getTabCount()) {
-            Rectangle r = getCloseButtonBoundsAt(pressedCloseButtonIndex);
+      if (pressedCloseButtonIndex >= 0
+          && pressedCloseButtonIndex < getTabCount())
+      {
+        Rectangle r = getCloseButtonBoundsAt(pressedCloseButtonIndex);
             if (r != null) {
                 repaint(r.x, r.y, r.width + 2, r.height + 2);
             }
 
-            JComponent c = _getJComponentAt(pressedCloseButtonIndex);
+        JComponent c = _getJComponentAt(pressedCloseButtonIndex);
             if( c != null )
-                setToolTipTextAt(pressedCloseButtonIndex, c.getToolTipText());
+              setToolTipTextAt(pressedCloseButtonIndex, c.getToolTipText());
         }
 
-        pressedCloseButtonIndex = index;
+      pressedCloseButtonIndex = index;
 
-        if (pressedCloseButtonIndex >= 0
-        && pressedCloseButtonIndex < getTabCount()) {
-            Rectangle r = getCloseButtonBoundsAt(pressedCloseButtonIndex);
+      if (pressedCloseButtonIndex >= 0
+          && pressedCloseButtonIndex < getTabCount())
+      {
+        Rectangle r = getCloseButtonBoundsAt(pressedCloseButtonIndex);
             if (r != null) {
                 repaint(r.x, r.y, r.width + 2, r.height + 2);
             }
-            setMouseOverCloseButtonIndex(-1);
-            setToolTipTextAt(pressedCloseButtonIndex, null);
+        setMouseOverCloseButtonIndex(-1);
+        setToolTipTextAt(pressedCloseButtonIndex, null);
         }
     }
 
-    private void setMouseOverCloseButtonIndex(int index) {
-        if (mouseOverCloseButtonIndex == index)
-            return;
+  private void setMouseOverCloseButtonIndex(int index)
+  {
+    if (mouseOverCloseButtonIndex == index)
+      return;
 
-        if (mouseOverCloseButtonIndex >= 0
-        && mouseOverCloseButtonIndex < getTabCount()) {
-            Rectangle r = getCloseButtonBoundsAt(mouseOverCloseButtonIndex);
-            if (r != null) {
-                repaint(r.x, r.y, r.width + 2, r.height + 2);
-            }
-            JComponent c = _getJComponentAt(mouseOverCloseButtonIndex);
-            if( c != null )
-                setToolTipTextAt(mouseOverCloseButtonIndex, c.getToolTipText());
-        }
-
-        mouseOverCloseButtonIndex = index;
-
-        if (mouseOverCloseButtonIndex >= 0
-        && mouseOverCloseButtonIndex < getTabCount()) {
-            Rectangle r = getCloseButtonBoundsAt(mouseOverCloseButtonIndex);
-            if (r != null) {
-                repaint(r.x, r.y, r.width + 2, r.height + 2);
-            }
-            setPressedCloseButtonIndex(-1);
-            setToolTipTextAt(mouseOverCloseButtonIndex, null);
-        }
+    if (mouseOverCloseButtonIndex >= 0
+        && mouseOverCloseButtonIndex < getTabCount())
+    {
+      Rectangle r = getCloseButtonBoundsAt(mouseOverCloseButtonIndex);
+      if (r != null)
+      {
+        repaint(r.x, r.y, r.width + 2, r.height + 2);
+      }
+      JComponent c = _getJComponentAt(mouseOverCloseButtonIndex);
+      if (c != null)
+        setToolTipTextAt(mouseOverCloseButtonIndex, c.getToolTipText());
     }
 
-    private JComponent _getJComponentAt( int tabIndex ) {
-        Component c = getComponentAt( tabIndex );
-        return c instanceof JComponent ? (JComponent)c : null;
+    mouseOverCloseButtonIndex = index;
+
+    if (mouseOverCloseButtonIndex >= 0
+        && mouseOverCloseButtonIndex < getTabCount())
+    {
+      Rectangle r = getCloseButtonBoundsAt(mouseOverCloseButtonIndex);
+      if (r != null)
+      {
+        repaint(r.x, r.y, r.width + 2, r.height + 2);
+      }
+      setPressedCloseButtonIndex(-1);
+      setToolTipTextAt(mouseOverCloseButtonIndex, null);
+    }
+    }
+
+  private JComponent _getJComponentAt(int tabIndex)
+  {
+    Component c = getComponentAt(tabIndex);
+    return c instanceof JComponent ? (JComponent) c : null;
+    }
+
+  private void fireCloseRequest(Component c)
+  {
+    firePropertyChange(TabbedPaneFactory.PROP_CLOSE, null, c);
+    if (getTabLayoutPolicy() == JTabbedPane.SCROLL_TAB_LAYOUT)
+    {
+      int idx = getSelectedIndex();
+      if (idx > 0)
+      {
+        setSelectedIndex(0);
+        setSelectedIndex(idx);
+      }
+    }
+    }
+
+  @Override
+  protected void processMouseEvent(MouseEvent me)
+  {
+    try
+    {
+      super.processMouseEvent(me);
+    }
+    catch (ArrayIndexOutOfBoundsException aioobe)
+    {
+      //Bug in BasicTabbedPaneUI$Handler:  The focusIndex field is not
+      //updated when tabs are removed programmatically, so it will try to
+      //repaint a tab that's not there
+      Exceptions.attachLocalizedMessage(aioobe,
+                                        "Suppressed AIOOBE bug in BasicTabbedPaneUI"); //NOI18N
+      Logger.getAnonymousLogger().log(Level.WARNING, null, aioobe);
+        }
     }
     
-    private void fireCloseRequest(Component c) {
-        firePropertyChange(TabbedPaneFactory.PROP_CLOSE, null, c);
-        if (getTabLayoutPolicy() == JTabbedPane.SCROLL_TAB_LAYOUT) {
-            int idx = getSelectedIndex();
-            if (idx > 0) {
-                setSelectedIndex(0);
-                setSelectedIndex(idx);
-            }
-        }
-    }
-
-    static void fixGetBoundsAt(Rectangle b) {
-        if (b.y < 0)
-            b.y = -b.y;
-        if (b.x < 0)
-            b.x = -b.x;
-    }
-
-    static int findTabForCoordinate(JTabbedPane tab, int x, int y) {
-        for (int i = 0; i < tab.getTabCount(); i++) {
-            Rectangle b = tab.getBoundsAt(i);
-            if (b != null) {
-                b = new Rectangle(b);
-                fixGetBoundsAt(b);
-
-                if (b.contains(x, y)) {
-                    return i;
-                }
-            }
-        }
-        return -1;
-    }
-    
-
     @Override
-    protected void processMouseEvent (MouseEvent me) {
+    protected void fireStateChanged()
+    {
         try {
-            super.processMouseEvent (me);
-        } catch (ArrayIndexOutOfBoundsException aioobe) {
-            //Bug in BasicTabbedPaneUI$Handler:  The focusIndex field is not
-            //updated when tabs are removed programmatically, so it will try to
-            //repaint a tab that's not there
-            Exceptions.attachLocalizedMessage(aioobe,
-                                              "Suppressed AIOOBE bug in BasicTabbedPaneUI"); //NOI18N
-            Logger.getAnonymousLogger().log(Level.WARNING, null, aioobe);
+          super.fireStateChanged();
+        }
+        catch (ArrayIndexOutOfBoundsException e)
+        {
+          if (Utilities.isMac())
+          {
+            //#126651 - JTabbedPane is buggy on Mac OS
+          }
+          else
+          {
+            throw e;
+          }
         }
     }
 
     @Override
-    protected void fireStateChanged() {
-        try {
-            super.fireStateChanged();
-        } catch( ArrayIndexOutOfBoundsException e ) {
-            if( Utilities.isMac() ) {
-                //#126651 - JTabbedPane is buggy on Mac OS
-            } else {
-                throw e;
+    public Color getBackgroundAt(int index)
+    {
+      if (isWindowsLaF() && !isWindowsXPLaF())
+      {
+        // In Windows L&F selected and unselected tab may have same color
+        // which make hard to distinguish which tab is selected (especially
+        // in SCROLL_TAB_LAYOUT). In such case manage tab colors manually.
+        Color selected = UIManager.getColor("controlHighlight");
+        Color unselected = UIManager.getColor("control");
+        if (selected.equals(unselected))
+        {
+          //make unselected tabs darker
+          unselected = new Color(Math.max(selected.getRed() - 12, 0),
+                                 Math.max(selected.getGreen() - 12, 0),
+                                 Math.max(selected.getBlue() - 12, 0));
             }
+        return index == getSelectedIndex() ? selected : unselected;
         }
+      return super.getBackgroundAt(index);
     }
 
     @Override
-    public Color getBackgroundAt(int index) {
-        if( isWindowsLaF() && !isWindowsXPLaF() ) {
-            // In Windows L&F selected and unselected tab may have same color
-            // which make hard to distinguish which tab is selected (especially
-            // in SCROLL_TAB_LAYOUT). In such case manage tab colors manually.
-            Color selected = UIManager.getColor("controlHighlight");
-            Color unselected = UIManager.getColor("control");
-            if (selected.equals(unselected)) {
-                //make unselected tabs darker
-                unselected = new Color(Math.max(selected.getRed() - 12, 0),
-                        Math.max(selected.getGreen() - 12, 0),
-                        Math.max(selected.getBlue() - 12, 0));
-            }
-            return index == getSelectedIndex() ? selected : unselected;
+    public void propertyChange(PropertyChangeEvent evt)
+    {
+      if (evt.getSource() instanceof Component)
+      {
+        assert evt.getPropertyName().equals(TabbedPaneFactory.NO_CLOSE_BUTTON);
+        Component c = (Component) evt.getSource();
+        int idx = indexOfComponent(c);
+        boolean noCloseButton = (Boolean) evt.getNewValue();
+        setTabComponentAt(idx, noCloseButton ? null : new ButtonTab(this));
         }
-        return super.getBackgroundAt(index);
+    }
+
+  private class CBTPPolicy extends FocusTraversalPolicy
+  {
+    @Override
+    public Component getComponentAfter(Container aContainer, Component aComponent)
+    {
+      return sel();
     }
 
     @Override
-    public void propertyChange(PropertyChangeEvent evt) {
-        if (evt.getSource() instanceof Component) {
-            assert evt.getPropertyName().equals(TabbedPaneFactory.NO_CLOSE_BUTTON);
-            Component c = (Component) evt.getSource();
-            int idx = indexOfComponent(c);
-            boolean noCloseButton = (Boolean) evt.getNewValue();
-            setTabComponentAt(idx, noCloseButton ? null : new ButtonTab());
+    public Component getComponentBefore(Container aContainer, Component aComponent)
+    {
+      return sel();
+    }
+
+    @Override
+    public Component getFirstComponent(Container aContainer)
+    {
+      return sel();
+    }
+
+    @Override
+    public Component getLastComponent(Container aContainer)
+    {
+      return sel();
+    }
+
+    @Override
+    public Component getDefaultComponent(Container aContainer)
+    {
+      return sel();
         }
     }
     
@@ -517,7 +600,8 @@ final class CloseButtonTabbedPane extends JTabbedPane implements PropertyChangeL
     class ButtonTab extends JPanel {
         JLabel label;
 
-        public ButtonTab() {
+      public ButtonTab(JTabbedPane _tab)
+      {
             super(new FlowLayout(FlowLayout.LEFT, 0, 0));
             setOpaque(false);
             label = new JLabel("") {
@@ -551,7 +635,10 @@ final class CloseButtonTabbedPane extends JTabbedPane implements PropertyChangeL
                     return icon;
                 }
             };
-            add(label);
+
+        label.setUI(new _LabelUI(_tab));
+
+        add(label);
             JButton tabCloseButton = CloseButtonFactory.createCloseButton();
             tabCloseButton.addActionListener(new ActionListener() {
 
@@ -585,4 +672,29 @@ final class CloseButtonTabbedPane extends JTabbedPane implements PropertyChangeL
             return getTabCount() > 1;
         }
     }
+
+  // changed by ADITO
+  private class _LabelUI extends BasicLabelUI
+  {
+    private JTabbedPane _tab;
+
+    private _LabelUI(JTabbedPane pTabPane)
+    {
+      _tab = pTabPane;
+    }
+
+    @Override
+    public void paint(Graphics g, JComponent c)
+    {
+      JLabel label = (JLabel) c;
+
+      // der aktive Tab ist dunkel und bekommt eine helle Schriftfarbe. Bei den inaktiven Tabs ist es umgekehrt
+      if (indexOfTabComponent(c.getParent()) == _tab.getSelectedIndex())
+        label.setForeground(LfUtil.get().getGuiColors().getWhite());
+      else
+        label.setForeground(LfUtil.get().getGuiColors().getDesignerTabColor());
+
+      super.paint(g, c);
+    }
+  }
 }
