@@ -41,50 +41,27 @@
  */
 package org.netbeans.modules.db.dataview.table;
 
-import java.awt.datatransfer.StringSelection;
-import java.awt.datatransfer.Transferable;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
-import java.awt.event.MouseEvent;
-import java.sql.Blob;
-import java.sql.Clob;
-import java.sql.SQLException;
-import java.sql.Timestamp;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javax.swing.DefaultRowSorter;
-import javax.swing.JComponent;
-import javax.swing.JLabel;
-import javax.swing.JTextField;
-import javax.swing.RowFilter;
-import javax.swing.RowSorter;
-import javax.swing.TransferHandler;
-import javax.swing.event.TableModelEvent;
-import javax.swing.event.TableModelListener;
-import javax.swing.plaf.UIResource;
-import javax.swing.table.*;
-import org.jdesktop.swingx.JXTable;
 import org.jdesktop.swingx.JXTableHeader;
-import org.jdesktop.swingx.decorator.ColorHighlighter;
-import org.jdesktop.swingx.decorator.HighlightPredicate;
-import org.jdesktop.swingx.decorator.HighlighterFactory;
-import org.jdesktop.swingx.renderer.CheckBoxProvider;
-import org.jdesktop.swingx.renderer.JRendererCheckBox;
-import org.jdesktop.swingx.renderer.StringValues;
+import org.jdesktop.swingx.decorator.*;
+import org.jdesktop.swingx.renderer.*;
 import org.netbeans.modules.db.dataview.meta.DBColumn;
 import org.netbeans.modules.db.dataview.table.celleditor.*;
-import org.netbeans.modules.db.dataview.util.BinaryToStringConverter;
-import org.netbeans.modules.db.dataview.util.DataViewUtils;
-import org.netbeans.modules.db.dataview.util.DateType;
-import org.netbeans.modules.db.dataview.util.TimeType;
-import org.netbeans.modules.db.dataview.util.TimestampType;
-import org.openide.util.Exceptions;
-import org.openide.util.Lookup;
+import org.netbeans.modules.db.dataview.util.*;
+import org.openide.util.*;
 import org.openide.util.datatransfer.ExClipboard;
+
+import javax.swing.*;
+import javax.swing.event.*;
+import javax.swing.plaf.UIResource;
+import javax.swing.table.*;
+import java.awt.*;
+import java.awt.datatransfer.*;
+import java.awt.event.*;
+import java.sql.*;
+import java.text.*;
+import java.util.*;
+import java.util.List;
+import java.util.logging.*;
 
 /**
  * A better-looking table than JTable, implements JXTable and a decorator to draw empty rows 
@@ -127,7 +104,7 @@ public class ResultSetJXTable extends JXTableDecorator {
         setHorizontalScrollEnabled(true);
 
         setHighlighters(HighlighterFactory.createAlternateStriping(ROW_COLOR, ALTERNATE_ROW_COLOR));
-        addHighlighter(new ColorHighlighter(HighlightPredicate.ROLLOVER_ROW, ROLLOVER_ROW_COLOR, null));
+      addHighlighter(new ColorHighlighter(HighlightPredicate.ROLLOVER_ROW, ROLLOVER_ROW_COLOR, Color.WHITE));
 
         setDefaultCellRenderers();
         setDefaultCellEditors();
@@ -163,24 +140,28 @@ public class ResultSetJXTable extends JXTableDecorator {
     }
 
     @Override
-    public void setModel(TableModel dataModel) {
-        if(! (dataModel instanceof ResultSetTableModel)) {
-            throw new IllegalArgumentException(
-                    "TableModel for ResultSetJXTable must be an "  // NOI18N
-                    + " instance of ResultSetTableModel"           // NOI18N
-            );
-        }
-        if(getModel() != null) {
-            getModel().removeTableModelListener(dataExchangedListener);
-        }
-        super.setModel(dataModel);
-        updateHeader();
-        dataModel.addTableModelListener(dataExchangedListener);
+    public ResultSetTableModel getModel()
+    {
+      return (ResultSetTableModel) super.getModel();
     }
 
     @Override
-    public ResultSetTableModel getModel() {
-        return (ResultSetTableModel) super.getModel();
+    public void setModel(TableModel dataModel)
+    {
+      if (!(dataModel instanceof ResultSetTableModel))
+      {
+        throw new IllegalArgumentException(
+            "TableModel for ResultSetJXTable must be an "  // NOI18N
+                + " instance of ResultSetTableModel"           // NOI18N
+        );
+      }
+      if (getModel() != null)
+      {
+        getModel().removeTableModelListener(dataExchangedListener);
+      }
+      super.setModel(dataModel);
+      updateHeader();
+      dataModel.addTableModelListener(dataExchangedListener);
     }
 
     @SuppressWarnings("deprecation")
