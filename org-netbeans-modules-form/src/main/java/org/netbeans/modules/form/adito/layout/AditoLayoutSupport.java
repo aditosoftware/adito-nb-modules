@@ -50,7 +50,7 @@ public class AditoLayoutSupport extends AbstractLayoutSupport
   public LayoutConstraints getNewConstraints(Container container, Container containerDelegate, Component component,
                                              int index, Point posInCont, Point posInComp)
   {
-    LayoutConstraints constr = getConstraints(index);
+    AditoComponentConstraints constr = new AditoComponentConstraints();
 
     int x = posInCont.x;
     int y = posInCont.y;
@@ -59,13 +59,8 @@ public class AditoLayoutSupport extends AbstractLayoutSupport
 
     if (component != null)
     {
-      int currentW = -1;
-      int currentH = -1;
-      if (constr instanceof AditoComponentConstraints)
-      {
-        currentW = ((AditoComponentConstraints) constr).getBounds().width;
-        currentH = ((AditoComponentConstraints) constr).getBounds().height;
-      }
+      int currentW = constr.getBounds().width;
+      int currentH = constr.getBounds().height;
 
       Dimension size = component.getSize();
       Dimension prefSize = component.getPreferredSize();
@@ -86,13 +81,7 @@ public class AditoLayoutSupport extends AbstractLayoutSupport
       y = computeGridSize(y, formSettings.getGridY());
     }
 
-    AditoComponentConstraints adConstr;
-    if (constr instanceof AditoComponentConstraints)
-      adConstr = (AditoComponentConstraints) constr.cloneConstraints();
-    else
-    {
-      adConstr = new AditoComponentConstraints();
-    }
+    AditoComponentConstraints adConstr = (AditoComponentConstraints) constr.cloneConstraints();
     adConstr.setBounds(new Rectangle(x, y, w, h));
     return adConstr;
   }
@@ -126,10 +115,10 @@ public class AditoLayoutSupport extends AbstractLayoutSupport
   public void acceptNewComponents(RADVisualComponent[] components, LayoutConstraints[] constraints, int index)
   {
     for (RADVisualComponent component : components)
-        {
-          if (component.getBeanClass().getSimpleName().equals("ARegisterTab"))
-            throw new IllegalArgumentException("RegisterTabs can not be added to this component.");
-        }
+    {
+      if (component.getBeanClass().getSimpleName().equals("ARegisterTab"))
+        throw new IllegalArgumentException("RegisterTabs can not be added to this component.");
+    }
   }
 
   @Override
