@@ -239,48 +239,29 @@ public class ARADComponentHandler
    */
   public void reInsert(final List<RADComponent> pComponents)
   {
-    try
+    IAditoModelDataProvider dataProvider = NbAditoInterface.lookup(IAditoModelDataProvider.class);
+    IFormComponentChildContainer childContainer = dataProvider.getChildContainer(getModelFileObject());
+    if (childContainer != null)
     {
-      // TODO 'move' darf nicht in 'atomicAction' ausgeführt werden, weil dann Undo nicht funktioniert.
-      modelFileObject.getFileSystem().runAtomicAction(new FileSystem.AtomicAction()
+      List<String> names = new ArrayList<>();
+      List<DataObject> dataObjects = new ArrayList<>();
+      for (RADComponent c : pComponents)
       {
-        @Override
-        public void run() throws IOException
-        {
-          List<String> names = new ArrayList<>();
-          for (RADComponent c : pComponents)
-          {
-            ARADComponentHandler handler = c.getARADComponentHandler();
-            handler.move(radComponent, null);
-            names.add(handler.getModelFileObject().getName());
-          }
+        ARADComponentHandler componentHandler = c.getARADComponentHandler();
+        names.add(componentHandler.getModelFileObject().getName());
+        dataObjects.add(0, DataFolder.findFolder(componentHandler.getModelFileObject()));
+      }
 
-          IAditoModelDataProvider dataProvider = NbAditoInterface.lookup(IAditoModelDataProvider.class);
-          IFormComponentChildContainer childContainer = dataProvider.getChildContainer(getModelFileObject());
-          if (childContainer != null)
-          {
-            List<DataObject> dataObjects = new ArrayList<>();
-            for (FileObject fo : childContainer.getAllChildren())
-            {
-              try
-              {
-                if (names.contains(fo.getName()))
-                  dataObjects.add(DataObject.find(fo));
-              }
-              catch (DataObjectNotFoundException e)
-              {
-                e.printStackTrace();
-              }
-            }
-            dataProvider.calcDropLocation(dataObjects);
-            dataProvider.toFront(getModelFileObject(), dataObjects);
-          }
-        }
-      });
-    }
-    catch (IOException e)
-    {
-      e.printStackTrace();
+      dataProvider.calcDropLocation(dataObjects);
+
+      for (RADComponent c : pComponents)
+        c.getARADComponentHandler().move(radComponent, null);
+
+      dataObjects.clear();
+      for (FileObject fo : childContainer.getAllChildren())
+        if (names.contains(fo.getName()))
+          dataObjects.add(DataFolder.findFolder(fo));
+      dataProvider.toFront(getModelFileObject(), dataObjects);
     }
   }
 
