@@ -31,7 +31,7 @@ public class ARADComponentHandler
   public void setRadComponent(@NotNull RADComponent pRadComponent)
   {
     radComponent = pRadComponent;
-    tryInit();
+    _tryInit();
   }
 
   public void added()
@@ -52,8 +52,8 @@ public class ARADComponentHandler
     try
     {
       createdOrRestored = dataProvider.createDataModel(parentRadHandler.getModelFileObject(),
-                                                                  radComponent.getBeanClass(),
-                                                                  radComponent.getName());
+                                                       radComponent.getBeanClass(),
+                                                       radComponent.getName());
     }
     catch (Exception e)
     {
@@ -65,7 +65,10 @@ public class ARADComponentHandler
     radComponent.setName(modelFileObject.getName());
 
     if (_isBridgeValid())
+    {
+      assert formDataBridge != null; // wird von _isBridgeValid() sicher gestellt.
       formDataBridge.newComponentAdded();
+    }
   }
 
   public void nameIsAboutToChange(String pOldName, String pNewName) throws IllegalStateException
@@ -121,7 +124,10 @@ public class ARADComponentHandler
     });
 
     if (_isBridgeValid() && hasToReorder)
+    {
+      assert formDataBridge != null; // wird von _isBridgeValid() sicher gestellt.
       formDataBridge.syncChildren();
+    }
   }
 
   public DataObject addChild(RADComponent pToCopy)
@@ -132,6 +138,7 @@ public class ARADComponentHandler
       IFormComponentChildContainer defaultChildContainer = modelDataProvider.getChildContainer(modelFileObject);
       if (defaultChildContainer == null)
       {
+        assert modelFileObject != null; // wenn defaultChildContainer nicht 'null' ist kann das auch nicht 'null' sein.
         FileObject fo = modelFileObject;
         while (!fo.isRoot() & defaultChildContainer == null)
         {
@@ -149,6 +156,15 @@ public class ARADComponentHandler
       e.printStackTrace();  // TODO: exceptionHandling
     }
     return null;
+  }
+
+  public void applyValuesFromAditoModel()
+  {
+    if (_isBridgeValid())
+    {
+      assert formDataBridge != null;
+      formDataBridge.copyValuesFromAdito();
+    }
   }
 
   /**
@@ -195,11 +211,6 @@ public class ARADComponentHandler
     return dataProvider.canAdd(getModelFileObject(), pCls);
   }
 
-  public void move(RADComponent pTarget)
-  {
-    move(pTarget, null);
-  }
-
   public void move(RADComponent pTarget, Node.Property[] pProperties)
   {
     IAditoModelDataProvider dataProvider = NbAditoInterface.lookup(IAditoModelDataProvider.class);
@@ -230,6 +241,7 @@ public class ARADComponentHandler
   {
     try
     {
+      // TODO 'move' darf nicht in 'atomicAction' ausgeführt werden, weil dann Undo nicht funktioniert.
       modelFileObject.getFileSystem().runAtomicAction(new FileSystem.AtomicAction()
       {
         @Override
@@ -239,7 +251,7 @@ public class ARADComponentHandler
           for (RADComponent c : pComponents)
           {
             ARADComponentHandler handler = c.getARADComponentHandler();
-            handler.move(radComponent);
+            handler.move(radComponent, null);
             names.add(handler.getModelFileObject().getName());
           }
 
@@ -309,13 +321,16 @@ public class ARADComponentHandler
   public void setModelFileObject(@NotNull FileObject pModelFileObject)
   {
     modelFileObject = pModelFileObject;
-    tryInit();
+    _tryInit();
   }
 
   public void layoutPropertiesChanged(String pPropertyName)
   {
     if (_isBridgeValid())
+    {
+      assert formDataBridge != null;
       formDataBridge.layoutPropertiesChanged(pPropertyName);
+    }
   }
 
   public void deinitialize()
@@ -338,7 +353,7 @@ public class ARADComponentHandler
     return formDataBridge != null && modelFileObject != null && modelFileObject.isValid();
   }
 
-  private void tryInit()
+  private void _tryInit()
   {
     if (radComponent != null && modelFileObject != null && formDataBridge == null)
     {

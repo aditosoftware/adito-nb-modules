@@ -15,7 +15,6 @@ import org.openide.filesystems.FileObject;
 import org.openide.loaders.DataObject;
 
 import java.awt.*;
-import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 import java.util.List;
 
@@ -67,7 +66,7 @@ public class AditoPersistenceManager extends PersistenceManager
 
         RADComponent topComp = formModel.getTopRADComponent();
         _loadComponent(pInfo, modelRoot, topComp, null);
-        AditoFormUtils.copyValuesFromModelToComponent(topComp);
+        topComp.getARADComponentHandler().applyValuesFromAditoModel();
       }
 
       List<RADComponent> list = new ArrayList<>();
@@ -78,7 +77,7 @@ public class AditoPersistenceManager extends PersistenceManager
         if (othersRadComp != null)
         {
           list.add(othersRadComp);
-          AditoFormUtils.copyValuesFromModelToComponent(othersRadComp);
+          othersRadComp.getARADComponentHandler().applyValuesFromAditoModel();
         }
       }
       RADComponent[] nonVisualComps = new RADComponent[list.size()];
@@ -269,18 +268,8 @@ public class AditoPersistenceManager extends PersistenceManager
       container.initSubComponents(childComponents);
     }
 
-    try
-    {
-      _copyChildValues(container);
-    }
-    catch (IllegalAccessException e)
-    {
-      e.printStackTrace();  // TODO: error-handling
-    }
-    catch (InvocationTargetException e)
-    {
-      e.printStackTrace();  // TODO: error-handling
-    }
+    for (RADComponent childComponent : container.getSubBeans())
+      childComponent.getARADComponentHandler().applyValuesFromAditoModel();
 
 
 //    // hack for properties that can't be set until the component is added
@@ -340,14 +329,6 @@ public class AditoPersistenceManager extends PersistenceManager
 
 //    if (pParentComponent == null) // this is a root component
 //      ResourceSupport.loadInjectedResources(pComponent);
-  }
-
-  // recognizes, creates, initializes and loads a meta component
-
-  private void _copyChildValues(ComponentContainer pContainer) throws InvocationTargetException, IllegalAccessException
-  {
-    for (RADComponent childComponent : pContainer.getSubBeans())
-      AditoFormUtils.copyValuesFromModelToComponent(childComponent);
   }
 
   private RADComponent _restoreComponent(APersistenceManagerInfo pInfo, FileObject pChildModel,
