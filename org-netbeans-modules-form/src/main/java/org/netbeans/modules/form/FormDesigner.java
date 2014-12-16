@@ -1373,9 +1373,10 @@ public class FormDesigner
 
   void setSelectedNodes(final Node... nodes)
   {
-    // Adito#5074: invokeLater ...
-    SwingUtilities.invokeLater(new Runnable()
+    // Adito#5074: Mutext wird in BeanTreeView bei Selektionsänderung auch verwendet.
+    Mutex.EVENT.postReadRequest(new Runnable()
     {
+      @Override
       public void run()
       {
         try

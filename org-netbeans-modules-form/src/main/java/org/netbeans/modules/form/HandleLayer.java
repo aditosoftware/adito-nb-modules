@@ -1535,16 +1535,24 @@ public class HandleLayer extends JPanel implements MouseListener, MouseMotionLis
     }
   }
 
-  private void showContextMenu(Point popupPos)
+  private void showContextMenu(final Point popupPos)
   {
-    formDesigner.componentActivated(); // just for sure...
-
-    Node[] selectedNodes = formDesigner.getSelectedNodes();
-    JPopupMenu popup = NodeOp.findContextMenu(selectedNodes);
-    if (popup != null)
+    // Adito#6320: Mutext wird in BeanTreeView bei Selektionsänderung auch verwendet.
+    Mutex.EVENT.postReadRequest(new Runnable()
     {
-      popup.show(HandleLayer.this, popupPos.x, popupPos.y);
-    }
+      @Override
+      public void run()
+      {
+        formDesigner.componentActivated(); // just for sure...
+
+        Node[] selectedNodes = formDesigner.getSelectedNodes();
+        JPopupMenu popup = NodeOp.findContextMenu(selectedNodes);
+        if (popup != null)
+        {
+          popup.show(HandleLayer.this, popupPos.x, popupPos.y);
+        }
+      }
+    });
   }
 
   // --------
