@@ -13,8 +13,10 @@ import org.netbeans.modules.form.layoutdesign.LayoutModel;
 import org.netbeans.modules.form.layoutsupport.LayoutSupportManager;
 import org.openide.filesystems.FileObject;
 import org.openide.loaders.DataObject;
+import org.openide.nodes.Node;
 
 import java.awt.*;
+import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 import java.util.List;
 
@@ -66,7 +68,7 @@ public class AditoPersistenceManager extends PersistenceManager
 
         RADComponent topComp = formModel.getTopRADComponent();
         _loadComponent(pInfo, modelRoot, topComp, null);
-        topComp.getARADComponentHandler().applyValuesFromAditoModel();
+        _copyValuesFromModelToComponent(topComp);
       }
 
       List<RADComponent> list = new ArrayList<>();
@@ -77,7 +79,7 @@ public class AditoPersistenceManager extends PersistenceManager
         if (othersRadComp != null)
         {
           list.add(othersRadComp);
-          othersRadComp.getARADComponentHandler().applyValuesFromAditoModel();
+          _copyValuesFromModelToComponent(othersRadComp);
         }
       }
       RADComponent[] nonVisualComps = new RADComponent[list.size()];
@@ -268,8 +270,15 @@ public class AditoPersistenceManager extends PersistenceManager
       container.initSubComponents(childComponents);
     }
 
-    for (RADComponent childComponent : container.getSubBeans())
-      childComponent.getARADComponentHandler().applyValuesFromAditoModel();
+    try
+    {
+      for (RADComponent childComponent : container.getSubBeans())
+        _copyValuesFromModelToComponent(childComponent);
+    }
+    catch (IllegalAccessException | InvocationTargetException e)
+    {
+      e.printStackTrace();  // TODO: error-handling
+    }
 
 
 //    // hack for properties that can't be set until the component is added
@@ -454,6 +463,23 @@ public class AditoPersistenceManager extends PersistenceManager
   private IFormComponentInfoProvider _getPropertyInfo()
   {
     return NbAditoInterface.lookup(IFormComponentInfoProvider.class);
+  }
+
+  private static void _copyValuesFromModelToComponent(RADComponent pComponent)
+      throws InvocationTargetException, IllegalAccessException
+  {
+    FileObject modelFileObject = pComponent.getARADComponentHandler().getModelFileObject();
+    if (modelFileObject == null)
+      throw new IllegalStateException(pComponent.toString());
+
+    IFormComponentInfoProvider compInfoProvider = NbAditoInterface.lookup(IFormComponentInfoProvider.class);
+    IFormComponentInfo componentInfo = compInfoProvider.createComponentInfo(modelFileObject);
+    for (Map.Entry<String, Object> entry : componentInfo.getInitialValues().entrySet())
+    {
+      Node.Property radProperty = pComponent.getPropertyByName(entry.getKey());
+      if (radProperty != null)
+        radProperty.setValue(entry.getValue());
+    }
   }
 
 }
