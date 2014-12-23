@@ -44,54 +44,24 @@
 
 package org.netbeans.core.windows.persistence;
 
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
-import java.io.ByteArrayInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InvalidObjectException;
-import java.io.NotSerializableException;
-import java.lang.ref.Reference;
-import java.lang.ref.WeakReference;
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Set;
-import java.util.WeakHashMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.netbeans.core.windows.Debug;
-import org.openide.cookies.InstanceCookie;
-import org.openide.cookies.SaveCookie;
-import org.openide.filesystems.FileLock;
-import org.openide.filesystems.FileObject;
+import org.openide.cookies.*;
+import org.openide.filesystems.*;
 import org.openide.filesystems.FileSystem;
-import org.openide.filesystems.FileUtil;
-import org.openide.loaders.DataFolder;
-import org.openide.loaders.DataObject;
-import org.openide.loaders.DataObjectNotFoundException;
-import org.openide.loaders.InstanceDataObject;
-import org.openide.modules.ModuleInfo;
-import org.openide.modules.SpecificationVersion;
-import org.openide.util.Exceptions;
-import org.openide.util.Lookup;
-import org.openide.util.NbBundle;
-import org.openide.util.Utilities;
-import org.openide.util.io.SafeException;
+import org.openide.loaders.*;
+import org.openide.modules.*;
+import org.openide.util.*;
 import org.openide.windows.TopComponent;
 import org.openide.xml.XMLUtil;
-import org.xml.sax.EntityResolver;
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
-import org.xml.sax.XMLReader;
+import org.xml.sax.*;
 import org.xml.sax.helpers.DefaultHandler;
+
+import java.beans.*;
+import java.io.*;
+import java.lang.ref.*;
+import java.lang.reflect.Method;
+import java.util.*;
+import java.util.logging.*;
 
 /** Manages persistent data of window system, currently stored in XML format.
  * Default setting of layers is that reading is done through default file system
@@ -426,7 +396,7 @@ public final class PersistenceManager implements PropertyChangeListener {
         }
     }
 
-    /** Just a method to wrap up all calls to TopComponent.getPersistenceType(),
+    /** Just a method to sendSSL up all calls to TopComponent.getPersistenceType(),
      * so we can do some tricks with the return value in future.
      * 
      * @param tc top component to find persistence type for
