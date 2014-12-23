@@ -44,7 +44,8 @@
 
 package org.netbeans.core.windows.view.ui;
 
-import de.adito.aditoweb.swingcommon.lf.LfUtil;
+import de.adito.aditoweb.nbm.nbide.nbaditointerface.INetbeansAditoInterface;
+import de.adito.aditoweb.nbm.nbide.nbaditointerface.common.IAditoColorProvider;
 import org.netbeans.core.windows.actions.MaximizeWindowAction;
 import org.openide.awt.*;
 import org.openide.util.*;
@@ -200,7 +201,7 @@ final class CloseButtonTabbedPane extends JTabbedPane implements PropertyChangeL
     Component c = getSelectedComponent();
     return c == null ? this : c;
     }
-    
+
     @Override
     public void insertTab(String title, Icon icon, Component component, String tip, int index)
     {
@@ -400,7 +401,7 @@ final class CloseButtonTabbedPane extends JTabbedPane implements PropertyChangeL
     String lfID = UIManager.getLookAndFeel().getID();
     return "Metal".equals(lfID); //NOI18N
     }
-    
+
     private boolean isGTKLaF () {
       return "GTK".equals(UIManager.getLookAndFeel().getID()); //NOI18N
     }
@@ -506,7 +507,7 @@ final class CloseButtonTabbedPane extends JTabbedPane implements PropertyChangeL
       Logger.getAnonymousLogger().log(Level.WARNING, null, aioobe);
         }
     }
-    
+
     @Override
     protected void fireStateChanged()
     {
@@ -593,7 +594,7 @@ final class CloseButtonTabbedPane extends JTabbedPane implements PropertyChangeL
       return sel();
         }
     }
-    
+
     /**
      * Custom tab component for JTabbedPane
      */
@@ -605,19 +606,19 @@ final class CloseButtonTabbedPane extends JTabbedPane implements PropertyChangeL
             super(new FlowLayout(FlowLayout.LEFT, 0, 0));
             setOpaque(false);
             label = new JLabel("") {
-                
+
                 private String lastText = null;
-                
+
                 @Override
                 public String getText() {
                     String currentText = "";
                     int i = indexOfTabComponent(ButtonTab.this);
                     if (i >= 0)
                         currentText = getTitleAt(i);
-                    
+
                     if (null != lastText && lastText.equals(currentText))
                         return lastText;
-                    
+
                     lastText = currentText;
                     if (!super.getText().equals(currentText)) {
                         setText(currentText);
@@ -687,13 +688,19 @@ final class CloseButtonTabbedPane extends JTabbedPane implements PropertyChangeL
     public void paint(Graphics g, JComponent c)
     {
       JLabel label = (JLabel) c;
-
-      // der aktive Tab ist dunkel und bekommt eine helle Schriftfarbe. Bei den inaktiven Tabs ist es umgekehrt
-      if (indexOfTabComponent(c.getParent()) == _tab.getSelectedIndex())
-        label.setForeground(LfUtil.get().getGuiColors().getWhite());
-      else
-        label.setForeground(LfUtil.get().getGuiColors().getDesignerTabColor());
-
+      INetbeansAditoInterface nbAditoInterface = Lookup.getDefault().lookup(INetbeansAditoInterface.class);
+      if (nbAditoInterface != null)
+      {
+        IAditoColorProvider colorProvider = nbAditoInterface.lookup(IAditoColorProvider.class);
+        if (colorProvider != null)
+        {
+          // der aktive Tab ist dunkel und bekommt eine helle Schriftfarbe. Bei den inaktiven Tabs ist es umgekehrt
+          if (indexOfTabComponent(c.getParent()) == _tab.getSelectedIndex())
+            label.setForeground(colorProvider.getWhite());
+          else
+            label.setForeground(colorProvider.getDesignerTabColor());
+        }
+      }
       super.paint(g, c);
     }
   }

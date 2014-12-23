@@ -17,19 +17,6 @@
 
   <dependencies>
 
-    <!-- library wrappers -->
-    <dependency>
-      <groupId>de.adito.aditoweb.packages</groupId>
-      <artifactId>lwswingcommon</artifactId>
-      <version>${project.parent.version}</version>
-      <exclusions>
-        <exclusion>
-          <groupId>de.adito.aditoweb</groupId>
-          <artifactId>gui-common</artifactId>
-        </exclusion>
-      </exclusions>
-    </dependency>
-
     <!-- ADITO provider interface -->
     <dependency>
       <groupId>de.adito.aditoweb.modules.nb-ide</groupId>
