@@ -396,7 +396,7 @@ public final class PersistenceManager implements PropertyChangeListener {
         }
     }
 
-    /** Just a method to sendSSL up all calls to TopComponent.getPersistenceType(),
+    /** Just a method to wrap up all calls to TopComponent.getPersistenceType(),
      * so we can do some tricks with the return value in future.
      * 
      * @param tc top component to find persistence type for
