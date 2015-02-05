@@ -167,7 +167,6 @@
                   <preservePath>true</preservePath>
                 </resource>
               </resources>
-              <verbose>false</verbose>
             </configuration>
           </execution>
         </executions>

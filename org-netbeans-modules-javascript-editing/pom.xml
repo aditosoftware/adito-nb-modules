@@ -274,7 +274,6 @@
                       <clean>true</clean>
                     </resource>
                   </resources>
-                  <verbose>false</verbose>
                 </configuration>
               </execution>
             </executions>
