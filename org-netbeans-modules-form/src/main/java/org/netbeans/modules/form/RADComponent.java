@@ -526,9 +526,16 @@ public class RADComponent {
     {
         storedNameAlreadySet = true;
         //Benennt Node um -> Dadurch PropertyListener-Aufruf, der DisplayName ändert
-        _renameNode(name);
-        storedName = name;
-        storedNameAlreadySet = false;
+        try
+        {
+          _renameNode(name);
+          storedName = name;
+        }
+        finally
+        {
+          // Bei Fehlerfall wird sonst das Flag nicht mehr zurückgesetzt und der Name wird nie mehr gesetzt
+          storedNameAlreadySet = false;
+        }
     }
 
   // STRIPPED
