@@ -48,6 +48,7 @@ import de.adito.aditoweb.nbm.nbide.nbaditointerface.NbAditoInterface;
 import de.adito.aditoweb.nbm.nbide.nbaditointerface.common.IAditoNetbeansTranslations;
 import org.netbeans.modules.form.adito.actions.AditoActionObject;
 import org.netbeans.modules.form.adito.components.*;
+import org.netbeans.modules.form.adito.perstistencemanager.NonvisContainerRADComponent;
 import org.netbeans.modules.form.layoutsupport.LayoutNode;
 import org.netbeans.modules.form.palette.PaletteUtils;
 import org.netbeans.spi.search.SearchInfoDefinition;
@@ -339,7 +340,7 @@ public class RADComponentNode extends FormNode
         actions.add(new AditoActionObject(SystemAction.get(MoveUpAction.class), 900));
         actions.add(new AditoActionObject(SystemAction.get(MoveDownAction.class), 1000));
       }
-      if (component instanceof ComponentContainer)
+      if ((component instanceof ComponentContainer) & !(component instanceof NonvisContainerRADComponent))
       {
         actions.add(new AditoActionObject(SystemAction.get(ReorderAction.class), 1100));
       }
