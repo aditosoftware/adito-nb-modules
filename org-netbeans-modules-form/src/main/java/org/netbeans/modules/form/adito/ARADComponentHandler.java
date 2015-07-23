@@ -130,7 +130,7 @@ public class ARADComponentHandler
     }
   }
 
-  public DataObject addChild(RADComponent pToCopy)
+  public DataObject addChild(RADComponent pToCopy) throws IOException
   {
     try
     {
@@ -153,9 +153,8 @@ public class ARADComponentHandler
     }
     catch (IOException e)
     {
-      e.printStackTrace();  // TODO: exceptionHandling
+     throw e;
     }
-    return null;
   }
 
   public void applyValuesFromAditoModel()
