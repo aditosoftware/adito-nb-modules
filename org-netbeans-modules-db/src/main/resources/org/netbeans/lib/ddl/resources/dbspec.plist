@@ -1383,6 +1383,54 @@
     };
   };
 
+  //  ********************************************************************************
+  //
+  //  MariaDB
+  //
+  //  ********************************************************************************/
+
+    "MariaDB" = {
+      DatabaseProductName = "'MariaDB 10 (Experimental)";
+      TypeMap = {
+        java.sql.Types.BIGINT = BIGINT;
+        java.sql.Types.OTHER = BIT; // not true for MySQL prior to 5.0
+        java.sql.Types.BLOB = BLOB;  //JDBC 2.0 A type representing an SQL Binary Large Object
+        java.sql.Types.CHAR = CHAR;
+        java.sql.Types.LONGVARCHAR = TEXT;
+        java.sql.Types.DATE = DATE;
+  //      java.sql.Types.DECIMAL = DECIMAL;
+        java.sql.Types.DOUBLE = "DOUBLE PRECISION";
+        java.sql.Types.FLOAT = FLOAT;
+        java.sql.Types.INTEGER = INT;
+  //      java.sql.Types.NUMERIC = NUMERIC;
+        java.sql.Types.REAL = REAL;
+        java.sql.Types.SMALLINT = SMALLINT;
+        java.sql.Types.TIME = TIME;
+        java.sql.Types.TIMESTAMP = TIMESTAMP;
+        java.sql.Types.TINYINT = TINYINT;
+        java.sql.Types.VARCHAR = VARCHAR;
+      };
+      SizelessTypes = (BIGINT,BLOB,DATE,"DOUBLE PRECISION",FLOAT,INT,REAL,SMALLINT,TIME,TIMESTAMP,TINYINT,TEXT);
+  //    DecimalTypes = (DECIMAL,NUMERIC);
+      CharacterTypes = (CHAR,VARCHAR,TEXT);
+
+      DropIndexCommand = {
+        Class = org.netbeans.lib.ddl.impl.DropIndex;
+        Format = "drop index {object.name} on {object.owner}.{table.name}";
+      };
+
+      DropProcedureCommand = {
+        Class = org.netbeans.lib.ddl.impl.AbstractCommand;
+        Format = "drop procedure [{object.owner}.]{object.name}";
+      };
+
+      SetDefaultDatabaseCommand = {
+        Class = org.netbeans.lib.ddl.impl.SetDefaultDatabase;
+        Format = "use {database}";
+        Supported = true;
+      };
+    };
+
 //  ********************************************************************************
 //
 //  Oracle8 (ODBC - Oracle)
