@@ -7,7 +7,7 @@ import org.openide.filesystems.FileObject;
  */
 public interface IAditoSupply
 {
-  public <T> T getAditoProperty(FileObject pProcessFileObject, String pProperty, Class<T> pType);
+  <T> T getAditoProperty(FileObject pProcessFileObject, String pProperty, Class<T> pType);
 
-  public <T> void setAditoProperty(FileObject pProcessFileObject, String pPropName, T pStrings);
+  <T> void setAditoProperty(FileObject pProcessFileObject, String pPropName, T pStrings);
 }

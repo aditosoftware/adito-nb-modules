@@ -44,6 +44,7 @@
 
 package org.netbeans.modules.form.layoutdesign;
 
+import de.adito.propertly.core.spi.IPropertyPitProvider;
 import org.openide.filesystems.FileObject;
 
 import java.awt.*;
@@ -178,7 +179,7 @@ public class LayoutModel implements LayoutConstants {
             }
         }
     }
-    
+
     void registerComponentImpl(LayoutComponent comp) {
         LayoutComponent lc = idToComponents.put(comp.getId(), comp);
 
@@ -386,7 +387,7 @@ public class LayoutModel implements LayoutConstants {
 
         return interval;
     }
-    
+
     void changeIntervalAttribute(LayoutInterval interval, int attribute, boolean set) {
         int oldAttributes = interval.getAttributes();
         if (set) {
@@ -438,7 +439,7 @@ public class LayoutModel implements LayoutConstants {
             // record undo/redo (don't fire event)
             LayoutEvent.Component ev = new LayoutEvent.Component(this, LayoutEvent.CONTAINER_ATTR_CHANGED);
             ev.setContainer(component, roots);
-            addChange(ev);            
+            addChange(ev);
         }
     }
 
@@ -693,7 +694,7 @@ public class LayoutModel implements LayoutConstants {
             int effDim = -1;
             List<Map<LayoutComponent, Rectangle>> parts = null;
             Map<LayoutComponent, Rectangle> removedCompToBounds = null;
-            do {                
+            do {
                 boolean remove = ((dimension == -1) && (effDim == HORIZONTAL))
                     || ((dimension != -1) && (effDim != -1));
                 if (remove) {
@@ -719,7 +720,7 @@ public class LayoutModel implements LayoutConstants {
                     compToBounds.remove(comp);
                 }
                 Set<Integer> cutSet = createPossibleCuts(effDim);
-                parts = cutIntoParts(cutSet, effDim);            
+                parts = cutIntoParts(cutSet, effDim);
             } while (!compToBounds.isEmpty() && parts.isEmpty());
             dimension = effDim;
             List<RegionInfo> regions = new LinkedList<RegionInfo>();
@@ -755,7 +756,7 @@ public class LayoutModel implements LayoutConstants {
                 }
             }
         }
-        
+
         private SortedSet<Integer> createPossibleCuts(int dimension) {
             SortedSet<Integer> cutSet = new TreeSet<Integer>();
             for (Rectangle bounds : compToBounds.values()) {
@@ -766,7 +767,7 @@ public class LayoutModel implements LayoutConstants {
             cutSet.add(new Integer((dimension == HORIZONTAL) ? maxx : maxy));
             return cutSet;
         }
-        
+
         private List<Map<LayoutComponent,Rectangle>> cutIntoParts(Set<Integer> cutSet, int dimension) {
             List<Map<LayoutComponent,Rectangle>> parts = new LinkedList<Map<LayoutComponent,Rectangle>>();
             Iterator<Integer> iter = cutSet.iterator();
@@ -776,7 +777,7 @@ public class LayoutModel implements LayoutConstants {
                 boolean isCut = true;
                 Map<LayoutComponent, Rectangle> preCompToBounds = new HashMap<LayoutComponent, Rectangle>();
                 Map<LayoutComponent, Rectangle> postCompToBounds = new HashMap<LayoutComponent, Rectangle>();
-                Iterator<Map.Entry<LayoutComponent, Rectangle>> it = compToBounds.entrySet().iterator();                
+                Iterator<Map.Entry<LayoutComponent, Rectangle>> it = compToBounds.entrySet().iterator();
                 while (isCut && it.hasNext()) {
                     Map.Entry<LayoutComponent, Rectangle> entry = it.next();
                     LayoutComponent comp = entry.getKey();
@@ -800,7 +801,7 @@ public class LayoutModel implements LayoutConstants {
             }
             return parts;
         }
-        
+
         private void mergeSubRegions(List regions, int dimension) {
             if (regions.isEmpty()) {
                 horizontal = new LayoutInterval(PARALLEL);
@@ -848,7 +849,7 @@ public class LayoutModel implements LayoutConstants {
                 vertical = seqGroup;
             }
         }
-        
+
         private LayoutInterval prefixByGap(LayoutInterval interval, int size) {
             if (size > 0) {
                 LayoutInterval gap = new LayoutInterval(SINGLE);
@@ -1194,7 +1195,7 @@ public class LayoutModel implements LayoutConstants {
         sb.append("</LayoutModel>\n"); // NOI18N
         return sb.toString();
     }
-    
+
     /**
      * Returns dump of the layout interval.
      *
@@ -1204,7 +1205,7 @@ public class LayoutModel implements LayoutConstants {
     public String dump(LayoutInterval interval, int dimension) {
         return AditoLayoutPersistenceManager.dumpInterval(this, interval, dimension, 2);
     }
-    
+
     /**
      * Saves given layout container into a String.
      *
@@ -1224,10 +1225,10 @@ public class LayoutModel implements LayoutConstants {
      * Loads the layout of the given container.
      *
      * @param containerId ID of the layout container to be loaded
-       * @param pModelComp  component to load from
+     * @param pModelComp  component to load from
      * @param nameToIdMap map from component names to component IDs
      */
-      public void loadContainerLayout(String containerId, FileObject pModelComp, Map<String, String> nameToIdMap)
+      public void loadContainerLayout(String containerId, IPropertyPitProvider<?, ?, ?> pModelComp, Map<String, String> nameToIdMap)
         throws java.io.IOException
     {
         AditoLayoutPersistenceManager.loadContainer(this, containerId, pModelComp, nameToIdMap);
@@ -1250,16 +1251,16 @@ public class LayoutModel implements LayoutConstants {
     /* 
      * LINKSIZE 
      */
-    
+
     // each object in the map is a List and contains list of components within the group
     private Map<Integer,List<String>> linkSizeGroupsH = new HashMap<Integer,List<String>>();
     private Map<Integer,List<String>> linkSizeGroupsV = new HashMap<Integer,List<String>>();
-    
+
     private int maxLinkGroupId = 0;
 
     void addComponentToLinkSizedGroup(int groupId, String compId, int dimension) {
-                
-        if (NOT_EXPLICITLY_DEFINED == groupId) { // 
+
+        if (NOT_EXPLICITLY_DEFINED == groupId) { //
             return;
         }
         if (maxLinkGroupId < groupId) {
@@ -1289,7 +1290,7 @@ public class LayoutModel implements LayoutConstants {
 
         int oldLinkSizeId = lc.getLinkSizeId(dimension);
         lc.setLinkSizeId(groupId, dimension);
-        
+
         // record undo/redo and fire event
         LayoutEvent.Component ev = new LayoutEvent.Component(this, LayoutEvent.INTERVAL_LINKSIZE_CHANGED);
         ev.setLinkSizeGroup(lc, oldLinkSizeId, groupId, dimension);
@@ -1302,21 +1303,21 @@ public class LayoutModel implements LayoutConstants {
         LayoutComponent lc2 = getLayoutComponent(compId2);
         return lc1.getParent().equals(lc2.getParent());
     }
-    
+
     void removeComponentFromLinkSizedGroup(LayoutComponent comp, int dimension) {
 
         if (comp == null) return;
-        
+
         int linkId = comp.getLinkSizeId(dimension);
         if (linkId != NOT_EXPLICITLY_DEFINED) {
 
             Map<Integer,List<String>> map = (dimension == HORIZONTAL) ? linkSizeGroupsH : linkSizeGroupsV;
             Integer linkIdInt = new Integer(linkId);
-            
+
             List<String> l = map.get(linkIdInt);
             l.remove(comp.getId());
             comp.setLinkSizeId(NOT_EXPLICITLY_DEFINED, dimension);
-            
+
             if (l.size() == 1) {
                 LayoutComponent lc = getLayoutComponent(l.get(0));
                 int oldLinkSizeId = lc.getLinkSizeId(dimension);
@@ -1328,7 +1329,7 @@ public class LayoutModel implements LayoutConstants {
                 addChange(ev);
                 fireEvent(ev);
             }
-            
+
             if (l.isEmpty()) {
                 map.remove(linkIdInt);
             }
@@ -1340,7 +1341,7 @@ public class LayoutModel implements LayoutConstants {
             fireEvent(ev);
         }
     }
-    
+
     /**
      * @return returns FALSE if components are not linked, and if so, they are linked in the same group
      *         returns TRUE if all components are in the same linksize group
@@ -1353,7 +1354,7 @@ public class LayoutModel implements LayoutConstants {
             boolean retVal = (getLayoutComponent(id).isLinkSized(dimension));
             return retVal ? TRUE : FALSE;
         }
-        
+
         Iterator i = components.iterator();
         List<Integer> idsFound = new ArrayList<Integer>();
 
@@ -1380,37 +1381,37 @@ public class LayoutModel implements LayoutConstants {
             return INVALID;
         }
     }
-        
+
     Map<Integer,List<String>> getLinkSizeGroups(int dimension) {
         if (HORIZONTAL == dimension) {
             return linkSizeGroupsH;
-        } 
+        }
         if (VERTICAL == dimension) {
             return linkSizeGroupsV;
         }
         return null; // incorrect dimension passed
     }
-    
+
     public void unsetSameSize(List/*<String>*/ components, int dimension) {
         Iterator i = components.iterator();
         while (i.hasNext()) {
             String cid = (String)i.next();
             LayoutComponent lc = getLayoutComponent(cid);
-            removeComponentFromLinkSizedGroup(lc, dimension);            
+            removeComponentFromLinkSizedGroup(lc, dimension);
         }
     }
-    
+
     public void setSameSize(List/*<String>*/ components, int dimension) {
         Iterator i = components.iterator();
         int groupId = findGroupId(components, dimension);
-        
+
         while (i.hasNext()) {
             String cid = (String)i.next();
             LayoutComponent lc = getLayoutComponent(cid);
-            addComponentToLinkSizedGroup(groupId, lc.getId(), dimension); 
+            addComponentToLinkSizedGroup(groupId, lc.getId(), dimension);
         }
     }
-    
+
     private int findGroupId(List/*<String*/ components, int dimension) {
         Iterator i = components.iterator();
         while (i.hasNext()) {

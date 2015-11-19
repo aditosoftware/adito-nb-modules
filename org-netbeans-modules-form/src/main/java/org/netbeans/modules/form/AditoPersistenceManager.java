@@ -6,12 +6,13 @@ import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.layout.common.IAditoLay
 import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.layout.register.IRegisterLayoutPropertyTypes;
 import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.model.IAditoModelDataProvider;
 import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.sync.*;
+import de.adito.propertly.core.common.path.PropertyPath;
+import de.adito.propertly.core.spi.IPropertyPitProvider;
 import org.netbeans.modules.form.adito.*;
 import org.netbeans.modules.form.adito.layout.*;
 import org.netbeans.modules.form.adito.perstistencemanager.*;
 import org.netbeans.modules.form.layoutdesign.LayoutModel;
 import org.netbeans.modules.form.layoutsupport.LayoutSupportManager;
-import org.openide.filesystems.FileObject;
 import org.openide.loaders.DataObject;
 import org.openide.nodes.Node;
 
@@ -54,7 +55,7 @@ public class AditoPersistenceManager extends PersistenceManager
   private void _loadForm(APersistenceManagerInfo pInfo) throws PersistenceException
   {
     FormModel formModel = pInfo.getFormModel();
-    FileObject modelRoot = pInfo.getModelRoot();
+    IPropertyPitProvider<?, ?, ?> modelRoot = pInfo.getModelRoot();
     try
     {
       AComponentInfo componentInfo = AComponentInfo.create(modelRoot, pInfo);
@@ -72,8 +73,8 @@ public class AditoPersistenceManager extends PersistenceManager
       }
 
       List<RADComponent> list = new ArrayList<>();
-      List<FileObject> others = NbAditoInterface.lookup(IAditoModelDataProvider.class).getOthers(modelRoot);
-      for (FileObject other : others)
+      List<IPropertyPitProvider<?, ?, ?>> others = NbAditoInterface.lookup(IAditoModelDataProvider.class).getOthers(modelRoot);
+      for (IPropertyPitProvider<?, ?, ?> other : others)
       {
         RADComponent othersRadComp = _restoreComponent(pInfo, other, null);
         if (othersRadComp != null)
@@ -104,7 +105,7 @@ public class AditoPersistenceManager extends PersistenceManager
   }
 
 
-  private void _loadComponent(APersistenceManagerInfo pInfo, FileObject pModelComp, RADComponent pComponent,
+  private void _loadComponent(APersistenceManagerInfo pInfo, IPropertyPitProvider<?, ?, ?> pModelComp, RADComponent pComponent,
                               RADComponent pParentComponent) throws PersistenceException
   {
 
@@ -141,9 +142,9 @@ public class AditoPersistenceManager extends PersistenceManager
     // load subcomponents
     RADComponent[] childComponents;
 
-    List<FileObject> childModels = NbAditoInterface.lookup(IAditoModelDataProvider.class).getChildModels(pModelComp);
+    List<IPropertyPitProvider<?, ?, ?>> childModels = NbAditoInterface.lookup(IAditoModelDataProvider.class).getChildModels(pModelComp);
     List<RADComponent> list = new ArrayList<>();
-    for (FileObject childModel : childModels)
+    for (IPropertyPitProvider<?, ?, ?> childModel : childModels)
     {
       RADComponent newComp = _restoreComponent(pInfo, childModel, pComponent);
       if (newComp != null)
@@ -340,13 +341,13 @@ public class AditoPersistenceManager extends PersistenceManager
 //      ResourceSupport.loadInjectedResources(pComponent);
   }
 
-  private RADComponent _restoreComponent(APersistenceManagerInfo pInfo, FileObject pChildModel,
+  private RADComponent _restoreComponent(APersistenceManagerInfo pInfo, IPropertyPitProvider<?, ?, ?> pChildModel,
                                          RADComponent pParentComponent) throws PersistenceException
   {
     AComponentInfo componentInfo = AComponentInfo.create(pChildModel, pInfo);
     if (componentInfo == null)
     {
-      new RuntimeException("null for: " + pChildModel.getPath()).printStackTrace();
+      new RuntimeException("null for: " + new PropertyPath(pChildModel.getPit().getOwnProperty()).asString()).printStackTrace();
       return null;
     }
 
@@ -410,7 +411,7 @@ public class AditoPersistenceManager extends PersistenceManager
   }
 
 
-  private int _loadLayout(FileObject pModelComp, LayoutSupportManager layoutSupport)
+  private int _loadLayout(IPropertyPitProvider<?, ?, ?> pModelComp, LayoutSupportManager layoutSupport)
   {
 
     try
@@ -426,7 +427,7 @@ public class AditoPersistenceManager extends PersistenceManager
     return LAYOUT_ABSOLUTE;
   }
 
-  private boolean _loadConstraints(FileObject pModelComp, RADComponent pComponent, RADVisualContainer pParentComponent)
+  private boolean _loadConstraints(IPropertyPitProvider<?, ?, ?> pModelComp, RADComponent pComponent, RADVisualContainer pParentComponent)
   {
     try
     {
@@ -468,12 +469,12 @@ public class AditoPersistenceManager extends PersistenceManager
   private static void _copyValuesFromModelToComponent(RADComponent pComponent)
       throws InvocationTargetException, IllegalAccessException
   {
-    FileObject modelFileObject = pComponent.getARADComponentHandler().getModelFileObject();
-    if (modelFileObject == null)
+    IPropertyPitProvider<?, ?, ?> model = pComponent.getARADComponentHandler().getModel();
+    if (model == null)
       throw new IllegalStateException(pComponent.toString());
 
     IFormComponentInfoProvider compInfoProvider = NbAditoInterface.lookup(IFormComponentInfoProvider.class);
-    IFormComponentInfo componentInfo = compInfoProvider.createComponentInfo(modelFileObject);
+    IFormComponentInfo componentInfo = compInfoProvider.createComponentInfo(model);
     for (Map.Entry<String, Object> entry : componentInfo.getInitialValues().entrySet())
     {
       Node.Property radProperty = pComponent.getPropertyByName(entry.getKey());

@@ -1,7 +1,8 @@
 package de.adito.aditoweb.nbm.nbide.nbaditointerface.form.model;
 
+import de.adito.propertly.core.spi.*;
 import org.openide.filesystems.*;
-import org.openide.loaders.*;
+import org.openide.loaders.DataObject;
 
 import java.io.IOException;
 import java.util.*;
@@ -12,31 +13,31 @@ import java.util.*;
 public interface IFormComponentChildContainer
 {
 
-  void addFileChangeListener(FileChangeListener pChangeListener);
+  void addChangeListener(IPropertyPitEventListener pChangeListener);
 
-  void removeFileChangeListener(FileChangeListener pChangeListener);
+  void removeChangeListener(IPropertyPitEventListener pChangeListener);
 
   boolean canAdd(Class pSource);
 
   boolean reorder(Comparator<String> pChildComparator);
 
-  FileObject createDataModel(Class<?> pComponentClass, String pCreatedName);
+  IPropertyPitProvider<?, ?, ?> createDataModel(String pName, Class<?> pComponentClass);
 
-  List<FileObject> getAllChildren();
+  List<IPropertyPitProvider<?, ?, ?>> getAllChildren();
 
-  DataObject copy(FileObject pSource) throws IOException;
+  IPropertyPitProvider<?, ?, ?> copy(IPropertyPitProvider<?, ?, ?> pSource) throws IOException;
 
   /**
    * Verschiebt ein Datenmodell.
    *
    * @param pSource das Datenmodell.
    */
-  void moveDataModel(FileObject pSource);
+  void moveDataModel(IPropertyPitProvider<?,?,?> pSource);
 
   /**
    * @param pSource das Datenmodell.
    * @return ob ein Datenmodell verschoben werden kann.
    */
-  boolean canMove(FileObject pSource);
+  boolean canMove(IPropertyPitProvider<?,?,?> pSource);
 
 }

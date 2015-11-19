@@ -4,6 +4,7 @@ import com.google.common.base.Objects;
 import de.adito.aditoweb.nbm.nbide.nbaditointerface.NbAditoInterface;
 import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.model.*;
 import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.sync.*;
+import de.adito.propertly.core.spi.IPropertyPitProvider;
 import org.jetbrains.annotations.*;
 import org.netbeans.modules.form.*;
 import org.openide.filesystems.*;
@@ -13,6 +14,7 @@ import org.openide.nodes.Node;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @author J. Boesl, 17.02.11
@@ -23,7 +25,7 @@ public class ARADComponentHandler
   @Nullable
   private RADComponent radComponent;
   @Nullable
-  private FileObject modelFileObject;
+  private IPropertyPitProvider<?, ?, ?> model;
   @Nullable
   private FormDataBridge formDataBridge;
 
@@ -37,7 +39,7 @@ public class ARADComponentHandler
   public void added()
   {
     /**
-     * Wenn modelFileObject und formDataBridge nicht 'null' sind, dann wurde die Komponente im Model hinzugefügt und
+     * Wenn model und formDataBridge nicht 'null' sind, dann wurde die Komponente im Model hinzugefügt und
      * zum FormModel synchronisiert. Muss also nicht mehr weiter behandelt werden.
      */
     if (_isBridgeValid())
@@ -48,10 +50,10 @@ public class ARADComponentHandler
     ARADComponentHandler parentRadHandler = parentRadComponent.getARADComponentHandler();
 
     IAditoModelDataProvider dataProvider = NbAditoInterface.lookup(IAditoModelDataProvider.class);
-    FileObject createdOrRestored;
+    IPropertyPitProvider<?, ?, ?> createdOrRestored;
     try
     {
-      createdOrRestored = dataProvider.createDataModel(parentRadHandler.getModelFileObject(),
+      createdOrRestored = dataProvider.createDataModel(parentRadHandler.getModel(),
                                                        radComponent.getBeanClass(),
                                                        radComponent.getName());
     }
@@ -60,9 +62,9 @@ public class ARADComponentHandler
       throw new EventCouldNotBeProcessedException(e);
     }
 
-    setModelFileObject(createdOrRestored);
-    assert modelFileObject != null;
-    radComponent.setName(modelFileObject.getName());
+    setModel(createdOrRestored);
+    assert model != null;
+    radComponent.setName(model.getPit().getOwnProperty().getName());
 
     if (_isBridgeValid())
     {
@@ -75,15 +77,14 @@ public class ARADComponentHandler
   {
     try
     {
-      if (Objects.equal(pOldName, pNewName) || modelFileObject == null)
+      if (Objects.equal(pOldName, pNewName) || model == null)
         return;
       if (radComponent == null)
         throw new IllegalStateException("oldName: " + pOldName + ", newName: " + pNewName);
-      DataFolder.findFolder(modelFileObject).rename(pNewName);
-    }
-    catch (IOException e)
-    {
-      throw new IllegalArgumentException(e); // TODO: add details
+
+      // TODO: propertly
+      //DataFolder.findFolder(model).rename(pNewName);
+      model.getPit().getOwnProperty().rename(pNewName);
     }
     catch (Exception e)
     {
@@ -93,18 +94,18 @@ public class ARADComponentHandler
 
   public void deleted()
   {
-    FileObject modelFo = getModelFileObject();
+    IPropertyPitProvider<?, ?, ?> curModel = getModel();
     _deinitialize(true);
-    if (modelFo != null && modelFo.isValid())
+    if (curModel != null && curModel.getPit().getOwnProperty().isValid())
     {
       IAditoModelDataProvider dataProvider = NbAditoInterface.lookup(IAditoModelDataProvider.class);
-      dataProvider.removeDataModel(modelFo);
+      dataProvider.removeDataModel(curModel);
     }
   }
 
   public void childrenReordered()
   {
-    if (!(radComponent instanceof ComponentContainer) || modelFileObject == null)
+    if (!(radComponent instanceof ComponentContainer) || model == null)
       return;
     ComponentContainer container = (ComponentContainer) radComponent;
 
@@ -114,14 +115,7 @@ public class ARADComponentHandler
       namePositionMap.put(subBeans[i].getName(), i);
 
     IAditoModelDataProvider modelDataProvider = NbAditoInterface.lookup(IAditoModelDataProvider.class);
-    boolean hasToReorder = modelDataProvider.reorder(modelFileObject, new Comparator<String>()
-    {
-      @Override
-      public int compare(String o1, String o2)
-      {
-        return namePositionMap.get(o1) - namePositionMap.get(o2);
-      }
-    });
+    boolean hasToReorder = modelDataProvider.reorder(model, (o1, o2) -> namePositionMap.get(o1) - namePositionMap.get(o2));
 
     if (_isBridgeValid() && hasToReorder)
     {
@@ -130,30 +124,30 @@ public class ARADComponentHandler
     }
   }
 
-  public DataObject addChild(RADComponent pToCopy) throws IOException
+  public IPropertyPitProvider<?, ?, ?> addChild(RADComponent pToCopy)
   {
     try
     {
       IAditoModelDataProvider modelDataProvider = NbAditoInterface.lookup(IAditoModelDataProvider.class);
-      IFormComponentChildContainer defaultChildContainer = modelDataProvider.getChildContainer(modelFileObject);
+      IFormComponentChildContainer defaultChildContainer = modelDataProvider.getChildContainer(model);
       if (defaultChildContainer == null)
       {
-        assert modelFileObject != null; // wenn defaultChildContainer nicht 'null' ist kann das auch nicht 'null' sein.
-        FileObject fo = modelFileObject;
-        while (!fo.isRoot() & defaultChildContainer == null)
+        assert model != null; // wenn defaultChildContainer nicht 'null' ist kann das auch nicht 'null' sein.
+        IPropertyPitProvider<?, ?, ?> rootModel = this.model;
+        while (rootModel.getPit().getParent() != null && defaultChildContainer == null)
         {
-          fo = fo.getParent();
-          defaultChildContainer = modelDataProvider.getChildContainer(fo);
+          rootModel = rootModel.getPit().getParent();
+          defaultChildContainer = modelDataProvider.getChildContainer(rootModel);
         }
       }
       if (defaultChildContainer != null)
-        return defaultChildContainer.copy(pToCopy.getARADComponentHandler().getModelFileObject());
+        return defaultChildContainer.copy(pToCopy.getARADComponentHandler().getModel());
       else
         throw new RuntimeException(); // TODO: exceptionHandling
     }
     catch (IOException e)
     {
-     throw e;
+     throw new RuntimeException(e);  // TODO: exceptionHandling
     }
   }
 
@@ -173,48 +167,30 @@ public class ARADComponentHandler
    */
   public void addChildren(final List<RADComponent> pComponents)
   {
-    try
-    {
-      modelFileObject.getFileSystem().runAtomicAction(new FileSystem.AtomicAction()
-      {
-        @Override
-        public void run() throws IOException
-        {
-          List<DataObject> dataObjects = new ArrayList<>();
-          for (RADComponent c : pComponents)
-          {
-            dataObjects.add(addChild(c));
-          }
-          IAditoModelDataProvider dataProvider = NbAditoInterface.lookup(IAditoModelDataProvider.class);
-          dataProvider.calcDropLocation(dataObjects);
-        }
-      });
-    }
-    catch (IOException e)
-    {
-      e.printStackTrace();
-    }
+    List<IPropertyPitProvider<?, ?, ?>> ppps = pComponents.stream().map(this::addChild).collect(Collectors.toList());
+    IAditoModelDataProvider dataProvider = NbAditoInterface.lookup(IAditoModelDataProvider.class);
+    dataProvider.calcDropLocation(ppps);
   }
 
   public boolean canMove(RADComponent pTarget)
   {
     IAditoModelDataProvider dataProvider = NbAditoInterface.lookup(IAditoModelDataProvider.class);
     IFormComponentChildContainer childContainer = dataProvider.getChildContainer(
-        pTarget.getARADComponentHandler().getModelFileObject());
-    return childContainer != null && childContainer.canMove(modelFileObject);
+        pTarget.getARADComponentHandler().getModel());
+    return childContainer != null && childContainer.canMove(model);
   }
 
   public boolean canAdd(Class pCls)
   {
     IAditoModelDataProvider dataProvider = NbAditoInterface.lookup(IAditoModelDataProvider.class);
-    return dataProvider.canAdd(getModelFileObject(), pCls);
+    return dataProvider.canAdd(getModel(), pCls);
   }
 
   public void move(RADComponent pTarget, Node.Property[] pProperties)
   {
     IAditoModelDataProvider dataProvider = NbAditoInterface.lookup(IAditoModelDataProvider.class);
     IFormComponentChildContainer childContainer =
-        dataProvider.getChildContainer(pTarget.getARADComponentHandler().getModelFileObject());
+        dataProvider.getChildContainer(pTarget.getARADComponentHandler().getModel());
     if (pProperties != null)
     {
       for (Node.Property property : pProperties)
@@ -228,7 +204,7 @@ public class ARADComponentHandler
         }
     }
     if (childContainer != null)
-      childContainer.moveDataModel(modelFileObject);
+      childContainer.moveDataModel(model);
   }
 
   /**
@@ -239,36 +215,36 @@ public class ARADComponentHandler
   public void reInsert(final List<RADComponent> pComponents)
   {
     IAditoModelDataProvider dataProvider = NbAditoInterface.lookup(IAditoModelDataProvider.class);
-    IFormComponentChildContainer childContainer = dataProvider.getChildContainer(getModelFileObject());
+    IFormComponentChildContainer childContainer = dataProvider.getChildContainer(getModel());
     if (childContainer != null)
     {
       List<String> names = new ArrayList<>();
-      List<DataObject> dataObjects = new ArrayList<>();
+      List<IPropertyPitProvider<?, ?, ?>> ppps = new ArrayList<>();
       for (RADComponent c : pComponents)
       {
         ARADComponentHandler componentHandler = c.getARADComponentHandler();
-        names.add(componentHandler.getModelFileObject().getName());
-        dataObjects.add(0, DataFolder.findFolder(componentHandler.getModelFileObject()));
+        names.add(componentHandler.getModel().getPit().getOwnProperty().getName());
+        ppps.add(0, componentHandler.getModel());
       }
 
-      dataProvider.calcDropLocation(dataObjects);
+      dataProvider.calcDropLocation(ppps);
 
       for (RADComponent c : pComponents)
         c.getARADComponentHandler().move(radComponent, null);
 
-      dataObjects.clear();
-      for (FileObject fo : childContainer.getAllChildren())
-        if (names.contains(fo.getName()))
-          dataObjects.add(DataFolder.findFolder(fo));
-      dataProvider.toFront(getModelFileObject(), dataObjects);
+      ppps.clear();
+      for (IPropertyPitProvider<?, ?, ?> ppp : childContainer.getAllChildren())
+        if (names.contains(ppp.getPit().getOwnProperty().getName()))
+          ppps.add(ppp);
+      dataProvider.toFront(getModel(), ppps);
     }
   }
 
   @NotNull
   public String getName(Class pBeanClass)
   {
-    if (modelFileObject != null)
-      return modelFileObject.getNameExt();
+    if (model != null)
+      return model.getPit().getOwnProperty().getName();
     FileObject configFile = FileUtil.getConfigFile("FormDesignerPalette/Adito/" + pBeanClass.getSimpleName()
         .toLowerCase() + ".palette_item");
     if (configFile != null)
@@ -293,14 +269,14 @@ public class ARADComponentHandler
   }
 
   @Nullable
-  public FileObject getModelFileObject()
+  public IPropertyPitProvider<?, ?, ?> getModel()
   {
-    return modelFileObject;
+    return model;
   }
 
-  public void setModelFileObject(@NotNull FileObject pModelFileObject)
+  public void setModel(@NotNull IPropertyPitProvider<?, ?, ?> pModel)
   {
-    modelFileObject = pModelFileObject;
+    model = pModel;
     _tryInit();
   }
 
@@ -324,23 +300,23 @@ public class ARADComponentHandler
       formDataBridge.unregisterAll();
     if (!pPartly)
       radComponent = null;
-    modelFileObject = null;
+    model = null;
     formDataBridge = null;
   }
 
   private boolean _isBridgeValid()
   {
-    return formDataBridge != null && modelFileObject != null && modelFileObject.isValid();
+    return formDataBridge != null && model != null && model.getPit().isValid();
   }
 
   private void _tryInit()
   {
-    if (radComponent != null && modelFileObject != null && formDataBridge == null)
+    if (radComponent != null && model != null && formDataBridge == null)
     {
       try
       {
         IFormComponentInfoProvider compInfoProvider = NbAditoInterface.lookup(IFormComponentInfoProvider.class);
-        IFormComponentInfo componentInfo = compInfoProvider.createComponentInfo(modelFileObject);
+        IFormComponentInfo componentInfo = compInfoProvider.createComponentInfo(model);
         IFormComponentPropertyMapping propertyMapping = compInfoProvider.getFormPropertyMapping(
             radComponent.getBeanClass());
         if (componentInfo != null && propertyMapping != null)
@@ -351,7 +327,7 @@ public class ARADComponentHandler
       }
       catch (Exception e)
       {
-        throw new RuntimeException("couldn't init. " + modelFileObject, e);
+        throw new RuntimeException("couldn't init. " + model, e);
       }
     }
   }

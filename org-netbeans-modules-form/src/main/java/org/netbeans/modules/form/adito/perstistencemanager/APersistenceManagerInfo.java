@@ -2,8 +2,8 @@ package org.netbeans.modules.form.adito.perstistencemanager;
 
 import de.adito.aditoweb.nbm.nbide.nbaditointerface.NbAditoInterface;
 import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.model.IAditoModelDataProvider;
+import de.adito.propertly.core.spi.IPropertyPitProvider;
 import org.netbeans.modules.form.*;
-import org.openide.filesystems.FileObject;
 import org.openide.loaders.DataObject;
 
 import java.util.*;
@@ -16,7 +16,7 @@ public class APersistenceManagerInfo
   private DataObject formObject;
   private FormModel formModel;
   private List<Throwable> nonfatalErrors;
-  private FileObject modelRoot;
+  private IPropertyPitProvider<?, ?, ?> modelRoot;
 
   private Map<String, RADComponent> loadedComponents;
 
@@ -43,7 +43,7 @@ public class APersistenceManagerInfo
     return nonfatalErrors;
   }
 
-  public FileObject getModelRoot()
+  public IPropertyPitProvider<?, ?, ?> getModelRoot()
   {
     if (modelRoot == null)
     {

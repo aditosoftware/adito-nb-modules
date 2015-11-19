@@ -1,9 +1,10 @@
 package org.netbeans.modules.form.adito;
 
+import de.adito.propertly.core.spi.IPropertyPitProvider;
 import org.netbeans.modules.form.*;
-import org.openide.filesystems.FileObject;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @author J. Boesl, 10.02.11
@@ -20,18 +21,17 @@ public class DMHelper
     return new ARADComponentHandler();
   }
 
-  public static ARADComponentHandler getHandler(FileObject pFo)
+  public static ARADComponentHandler getHandler(IPropertyPitProvider<?, ?, ?> pModel)
   {
     ARADComponentHandler aradComponentHandler = new ARADComponentHandler();
-    aradComponentHandler.setModelFileObject(pFo);
+    aradComponentHandler.setModel(pModel);
     return aradComponentHandler;
   }
 
   static String getFreeName(FormModel pFormModel, String pName)
   {
-    Set<String> names = new HashSet<>();
-    for (RADComponent radComponent : pFormModel.getAllComponents())
-      names.add(radComponent.getName());
+    Set<String> names = pFormModel.getAllComponents().stream()
+        .map(RADComponent::getName).collect(Collectors.toSet());
     return _getFreeName(names, pName, 1);
   }
 

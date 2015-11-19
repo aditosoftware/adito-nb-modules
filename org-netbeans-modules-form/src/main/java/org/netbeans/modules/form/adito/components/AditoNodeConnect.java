@@ -2,10 +2,9 @@ package org.netbeans.modules.form.adito.components;
 
 import de.adito.aditoweb.nbm.nbide.nbaditointerface.NbAditoInterface;
 import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.sync.*;
+import de.adito.propertly.core.spi.IPropertyPitProvider;
 import org.jetbrains.annotations.Nullable;
 import org.netbeans.modules.form.RADComponent;
-import org.openide.filesystems.FileObject;
-import org.openide.loaders.*;
 import org.openide.nodes.*;
 import org.openide.util.*;
 
@@ -30,7 +29,7 @@ public final class AditoNodeConnect
     return _resolve(pComponent, new _NodeC<Image>()
     {
       @Override
-      public Image resolve(Node pNode)
+      public Image resolveNode(Node pNode)
       {
         return pNode.getIcon(pType);
       }
@@ -42,7 +41,7 @@ public final class AditoNodeConnect
     return _resolve(pComponent, new _NodeC<String>()
     {
       @Override
-      public String resolve(Node pNode)
+      public String resolveNode(Node pNode)
       {
         return pNode.getDisplayName();
       }
@@ -54,7 +53,7 @@ public final class AditoNodeConnect
     return _resolve(pComponent, new _NodeC<String>()
     {
       @Override
-      public String resolve(Node pNode)
+      public String resolveNode(Node pNode)
       {
         return pNode.getName();
       }
@@ -64,15 +63,10 @@ public final class AditoNodeConnect
   @Nullable
   public static Sheet getSheet(RADComponent pComponent)
   {
-    return _resolve(pComponent, new _FileObjectC<Sheet>()
-    {
-      @Override
-      public Sheet resolve(FileObject pFileObject)
-      {
-        IFormComponentInfoProvider compInfoProvider = NbAditoInterface.lookup(IFormComponentInfoProvider.class);
-        IFormComponentInfo componentInfo = compInfoProvider.createComponentInfo(pFileObject);
-        return componentInfo.createSheet();
-      }
+    return _resolve(pComponent, pModel -> {
+      IFormComponentInfoProvider compInfoProvider = NbAditoInterface.lookup(IFormComponentInfoProvider.class);
+      IFormComponentInfo componentInfo = compInfoProvider.createComponentInfo(pModel);
+      return componentInfo.createSheet();
     });
   }
 
@@ -81,7 +75,7 @@ public final class AditoNodeConnect
     _resolve(pComponent, new _NodeC<Void>()
     {
       @Override
-      public Void resolve(Node pNode)
+      public Void resolveNode(Node pNode)
       {
         pNode.addPropertyChangeListener(WeakListeners.propertyChange(pListener, pNode));
         return null;
@@ -94,7 +88,7 @@ public final class AditoNodeConnect
     Action[] actions = _resolve(pComponent, new _NodeC<Action[]>()
     {
       @Override
-      public Action[] resolve(Node pNode)
+      public Action[] resolveNode(Node pNode)
       {
         return pNode.getActions(pContext);
       }
@@ -110,9 +104,9 @@ public final class AditoNodeConnect
     return _resolve(pComponent, new _DataObjectC<Lookup>()
     {
       @Override
-      public Lookup resolve(DataObject pDataObject)
+      public Lookup resolveDataObjectLookup(Lookup pDataObjectLookup)
       {
-        return pDataObject.getLookup();
+        return pDataObjectLookup;
       }
     });
   }
@@ -122,32 +116,32 @@ public final class AditoNodeConnect
     return _resolve(pComponent, new _DataObjectC<INodePrivileges>()
     {
       @Override
-      public INodePrivileges resolve(final DataObject pDataObject)
+      public INodePrivileges resolveDataObjectLookup(Lookup pDataObjectLookup)
       {
         return new INodePrivileges()
         {
           @Override
           public boolean canDelete()
           {
-            return pDataObject.isDeleteAllowed();
+            return true; //pDataObject.isDeleteAllowed(); // TODO: propertly
           }
 
           @Override
           public boolean canCopy()
           {
-            return pDataObject.isCopyAllowed();
+            return true; // pDataObject.isCopyAllowed(); // TODO: propertly
           }
 
           @Override
           public boolean canMove()
           {
-            return pDataObject.isMoveAllowed();
+            return true; // pDataObject.isMoveAllowed(); // TODO: propertly
           }
 
           @Override
           public boolean canRename()
           {
-            return pDataObject.isRenameAllowed();
+            return true; // pDataObject.isRenameAllowed(); // TODO: propertly
           }
         };
       }
@@ -155,57 +149,51 @@ public final class AditoNodeConnect
   }
 
 
-  private static <T> T _resolve(RADComponent pComp, _FileObjectC<T> pC)
+  private static <T> T _resolve(RADComponent pComp, _PropertyPitProviderC<T> pC)
   {
-    FileObject modelFileObject = pComp.getARADComponentHandler().getModelFileObject();
-    if (modelFileObject == null)
+    IPropertyPitProvider<?, ?, ?> model = pComp.getARADComponentHandler().getModel();
+    if (model == null)
       return null;
-    return pC.resolve(modelFileObject);
+    return pC.resolvePPP(model);
   }
 
 
   /**
    * Ausführungsbeschreibung auf Nodes.
    */
-  private abstract static class _NodeC<T> extends _DataObjectC<T>
+  private abstract static class _NodeC<T> implements _PropertyPitProviderC<T>
   {
     @Override
-    public T resolve(DataObject pDataObject)
+    public final T resolvePPP(IPropertyPitProvider<?, ?, ?> pModel)
     {
-      return pDataObject != null ? resolve(pDataObject.getNodeDelegate()) : null;
+      return resolveNode(NbAditoInterface.lookup(IFormComponentInfoProvider.class)
+                             .createComponentInfo(pModel).getNode());
     }
 
-    public abstract T resolve(Node pNode);
+    public abstract T resolveNode(Node pNode);
   }
 
   /**
    * Ausführungsbeschreibung auf DataObjects.
    */
-  private abstract static class _DataObjectC<T> implements _FileObjectC<T>
+  private abstract static class _DataObjectC<T> implements _PropertyPitProviderC<T>
   {
     @Override
-    public final T resolve(FileObject pFileObject)
+    public final T resolvePPP(IPropertyPitProvider<?, ?, ?> pModel)
     {
-      try
-      {
-        DataFolder dataFolder = DataFolder.findFolder(pFileObject);
-        return dataFolder != null ? resolve(dataFolder) : null;
-      }
-      catch (IllegalArgumentException e)
-      {
-        return null;
-      }
+      return resolveDataObjectLookup(NbAditoInterface.lookup(IFormComponentInfoProvider.class)
+                                         .createComponentInfo(pModel).getDataObjectLookup());
     }
 
-    public abstract T resolve(DataObject pDataObject);
+    public abstract T resolveDataObjectLookup(Lookup pDataObjectLookup);
   }
 
   /**
    * Ausführungsbeschreibung auf FileObjects.
    */
-  private interface _FileObjectC<T>
+  private interface _PropertyPitProviderC<T>
   {
-    T resolve(FileObject pFileObject);
+    T resolvePPP(IPropertyPitProvider<?, ?, ?> pModel);
   }
 
 }

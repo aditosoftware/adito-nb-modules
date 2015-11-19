@@ -1,6 +1,6 @@
 package de.adito.aditoweb.nbm.nbide.nbaditointerface.form.sync;
 
-import org.openide.filesystems.FileObject;
+import de.adito.propertly.core.spi.IPropertyPitProvider;
 import org.openide.loaders.DataFolder;
 
 /**
@@ -19,15 +19,9 @@ public interface IFormComponentInfoProvider
   IFormComponentPropertyMapping getFormPropertyMapping(Class<?> pBeanClass);
 
   /**
-   * @param pModelDataObject DataObject das das Model repräsentiert.
-   * @return Informationen über die durch das DataObject identifizierte Komponente.
-   */
-  IFormComponentInfo createComponentInfo(DataFolder pModelDataObject);
-
-  /**
-   * @param pModelFileObject FilObject das das Model repräsentiert.
+   * @param pModel FilObject das das Model repräsentiert.
    * @return Informationen über die durch das FileObject identifizierte Komponente.
    */
-  IFormComponentInfo createComponentInfo(FileObject pModelFileObject) throws IllegalArgumentException;
+  IFormComponentInfo createComponentInfo(IPropertyPitProvider<?, ?, ?> pModel) throws IllegalArgumentException;
 
 }

@@ -3,6 +3,7 @@ package de.adito.aditoweb.nbm.nbide.nbaditointerface.form.sync;
 
 import org.jetbrains.annotations.Nullable;
 import org.openide.nodes.*;
+import org.openide.util.Lookup;
 
 import java.awt.*;
 import java.beans.PropertyChangeListener;
@@ -48,5 +49,15 @@ public interface IFormComponentInfo
   void addPropertyListener(PropertyChangeListener pListener);
 
   void removePropertyListener(PropertyChangeListener pListener);
+
+  /**
+   * @return Node dieser IFormComponentInfo
+   */
+  Node getNode();
+
+  /**
+   * @return das DataObject-Lookup dieser IFormComponentInfo
+   */
+  Lookup getDataObjectLookup();
 
 }

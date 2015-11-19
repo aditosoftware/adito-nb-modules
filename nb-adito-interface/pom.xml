@@ -64,6 +64,12 @@
       <version>18.0</version>
     </dependency>
 
+    <dependency>
+      <groupId>de.adito.propertly</groupId>
+      <artifactId>propertly.core</artifactId>
+      <version>0.4-SNAPSHOT</version>
+    </dependency>
+
   </dependencies>
 
 

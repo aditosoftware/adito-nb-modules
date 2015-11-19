@@ -1,5 +1,6 @@
 package de.adito.aditoweb.nbm.nbide.nbaditointerface.form.model;
 
+import de.adito.propertly.core.spi.*;
 import org.jetbrains.annotations.Nullable;
 import org.openide.filesystems.FileObject;
 import org.openide.loaders.DataObject;
@@ -19,25 +20,25 @@ public interface IAditoModelDataProvider
 
   EModelFormType getModelFormType(FileObject pAodFile);
 
-  FileObject loadModel(FileObject pAodFile);
+  IPropertyPitProvider<?, ?, ?> loadModel(FileObject pAodFile);
 
-  List<FileObject> getChildModels(FileObject pFileObject);
+  List<IPropertyPitProvider<?, ?, ?>> getChildModels(IPropertyPitProvider<?, ?, ?> pPropertyPitProvider);
 
   @Nullable
-  IFormComponentChildContainer getChildContainer(FileObject pFileObject);
+  IFormComponentChildContainer getChildContainer(IPropertyPitProvider<?, ?, ?> pModel);
 
-  List<FileObject> getOthers(FileObject pFileObject);
+  List<IPropertyPitProvider<?, ?, ?>> getOthers(IPropertyPitProvider<?, ?, ?> pModel);
 
-  FileObject createDataModel(FileObject pParentData, Class<?> pComponentClass, String pCreatedName);
+  IPropertyPitProvider<?, ?, ?> createDataModel(IPropertyPitProvider<?, ?, ?> pParentModel, Class<?> pComponentClass, String pCreatedName);
 
-  void removeDataModel(FileObject pModelFileObject);
+  void removeDataModel(IPropertyPitProvider<?, ?, ?> pModel);
 
   /**
    * Positioniert die übergebenen Komponenten im linken oberen Bereich
    * des Containers.
    * @param pChildren Komponenten die mit CTRL + V eingefügt werden.
    */
-  void calcDropLocation(List<DataObject> pChildren);
+  void calcDropLocation(List<IPropertyPitProvider<?, ?, ?>> pChildren);
 
   /**
    * Organisiert die interne Auflistung so um, dass die übergebenen
@@ -45,16 +46,16 @@ public interface IAditoModelDataProvider
    * @param pParent der Container
    * @param pChildren Komponenten die in den Vordergrund kommen sollen.
    */
-  void toFront(FileObject pParent, List<DataObject> pChildren);
+  void toFront(IPropertyPitProvider<?, ?, ?> pParent, List<IPropertyPitProvider<?, ?, ?>> pChildren);
 
   /**
    * Prüft ob ein Objekt vom Typ <tt>pSource</tt> unter <tt>pTarget</tt> erstellt werden kann.
    *
-   * @param pTarget das Ziel.
+   * @param pModel das Ziel.
    * @param pSource die Quelle.
    * @return ob 'add' möglich ist.
    */
-  public boolean canAdd(FileObject pTarget, Class pSource);
+  boolean canAdd(IPropertyPitProvider<?, ?, ?> pModel, Class pSource);
 
-  boolean reorder(FileObject pModelFo, Comparator<String> pChildComparator);
+  boolean reorder(IPropertyPitProvider<?, ?, ?> pModel, Comparator<String> pChildComparator);
 }

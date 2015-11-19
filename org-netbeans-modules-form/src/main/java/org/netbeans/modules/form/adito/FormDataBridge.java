@@ -5,6 +5,8 @@ import com.google.common.collect.Lists;
 import de.adito.aditoweb.nbm.nbide.nbaditointerface.NbAditoInterface;
 import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.model.IAditoModelDataProvider;
 import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.sync.*;
+import de.adito.propertly.core.common.path.PropertyPath;
+import de.adito.propertly.core.spi.IPropertyPitProvider;
 import org.jetbrains.annotations.NotNull;
 import org.netbeans.modules.form.*;
 import org.netbeans.modules.form.project.ClassSource;
@@ -186,8 +188,8 @@ public class FormDataBridge
     ComponentContainer cont = (ComponentContainer) radComponent;
 
     IAditoModelDataProvider modelDataProvider = NbAditoInterface.lookup(IAditoModelDataProvider.class);
-    List<FileObject> childModels = modelDataProvider.getChildModels(
-        radComponent.getARADComponentHandler().getModelFileObject());
+    List<IPropertyPitProvider<?, ?, ?>> childModels = modelDataProvider.getChildModels(
+        radComponent.getARADComponentHandler().getModel());
     RADComponent[] subBeans = cont.getSubBeans();
     int[] perm = new int[subBeans.length];
     if (childModels.size() != subBeans.length)
@@ -200,8 +202,8 @@ public class FormDataBridge
       int index = -1;
       for (int j = 0; j < childModels.size(); j++)
       {
-        FileObject childModel = childModels.get(j);
-        if (subBean.getName().equals(childModel.getNameExt()))
+        IPropertyPitProvider<?, ?, ?> childModel = childModels.get(j);
+        if (subBean.getName().equals(childModel.getPit().getOwnProperty().getName()))
         {
           index = j;
           break;
@@ -269,9 +271,9 @@ public class FormDataBridge
     String prop1 = pAditoToForm ? aditoProp : formProp;
     String prop2 = pAditoToForm ? formProp : aditoProp;
     String compDetail = "component " + radComponent.getBeanClass().getSimpleName();
-    FileObject modelFileObject = radComponent.getARADComponentHandler().getModelFileObject();
-    assert modelFileObject != null;
-    String pathDetail = "path " + modelFileObject.getPath();
+    IPropertyPitProvider<?, ?, ?> model = radComponent.getARADComponentHandler().getModel();
+    assert model != null;
+    String pathDetail = "path " + new PropertyPath(model.getPit().getOwnProperty()).asString();
     String detail = pAditoToForm ? compDetail + " with " + pathDetail : pathDetail + " with " + compDetail;
     Logger.getLogger(FormDataBridge.class.getSimpleName()).log(
         Level.WARNING,
@@ -361,7 +363,7 @@ public class FormDataBridge
       switch (propertyName)
       {
         case IFormComponentInfo.PROP_CHILD_ADDED:
-          FileObject created = (FileObject) evt.getNewValue();
+          IPropertyPitProvider<?, ?, ?> created = (IPropertyPitProvider<?, ?, ?>) evt.getNewValue();
 
           if (radComponent instanceof ComponentContainer)
           {
@@ -369,13 +371,13 @@ public class FormDataBridge
             for (RADComponent childComp : container.getSubBeans())
             {
               // Komponente mit dem Namen existiert bereits. Muss nicht synchronisiert werden.
-              if (created.getName().equals(childComp.getName()))
+              if (created.getPit().getOwnProperty().getName().equals(childComp.getName()))
                 return;
             }
 
             IAditoModelDataProvider modelDataProvider = NbAditoInterface.lookup(IAditoModelDataProvider.class);
-            List<FileObject> childModels = modelDataProvider.getChildModels(
-                radComponent.getARADComponentHandler().getModelFileObject());
+            List<IPropertyPitProvider<?, ?, ?>> childModels = modelDataProvider.getChildModels(
+                radComponent.getARADComponentHandler().getModel());
             // wenn das erstellte Objekt nicht bei den 'childModels' dabei ist muss es für die GUI nicht erzeugt werden.
             if (!childModels.contains(created))
               return;
@@ -384,15 +386,15 @@ public class FormDataBridge
             IFormComponentInfo componentInfo = compInfoProvider.createComponentInfo(created);
             IFormComponentPropertyMapping formPropertyMapping = componentInfo.getFormPropertyMapping();
             if (formPropertyMapping == null)
-              throw new RuntimeException("No 'IFormComponentProvider' available for '" + created.getPath() + "'.");
+              throw new RuntimeException("No 'IFormComponentProvider' available for '" + new PropertyPath(created.getPit().getOwnProperty()).asString() + "'.");
             Class<?> createdBean = formPropertyMapping.getComponentClass();
 
             RADComponent component = radComponent.getFormModel().getComponentCreator().createComponent(
                 new ClassSource(createdBean.getCanonicalName()), radComponent, null);
             if (component == null)
               throw new RuntimeException("component could not be created! (Internal Error)");
-            component.setStoredName(created.getName());
-            component.getARADComponentHandler().setModelFileObject(created);
+            component.setStoredName(created.getPit().getOwnProperty().getName());
+            component.getARADComponentHandler().setModel(created);
 
             try
             {

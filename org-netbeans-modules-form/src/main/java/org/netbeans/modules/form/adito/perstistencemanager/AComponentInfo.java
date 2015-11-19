@@ -2,8 +2,8 @@ package org.netbeans.modules.form.adito.perstistencemanager;
 
 import de.adito.aditoweb.nbm.nbide.nbaditointerface.NbAditoInterface;
 import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.sync.*;
+import de.adito.propertly.core.spi.IPropertyPitProvider;
 import org.netbeans.modules.form.*;
-import org.openide.filesystems.FileObject;
 
 /**
  * @author J. Boesl, 26.06.11
@@ -40,14 +40,14 @@ public class AComponentInfo
   /**
    * Factory Methode.
    *
-   * @param pModelFile              das FileObject, das die Modell-Komponenten repräsentiert.
+   * @param pModel                  das FileObject, das die Modell-Komponenten repräsentiert.
    * @param pPersistenceManagerInfo APersistenceManagerInfo-Objekt. Hier werden Fehler abgelegt.
    * @return null, wenn über das FileObjekt kein ComponentInfo erstellt werden konnte.
    */
-  public static AComponentInfo create(FileObject pModelFile, APersistenceManagerInfo pPersistenceManagerInfo)
+  public static AComponentInfo create(IPropertyPitProvider<?, ?, ?> pModel, APersistenceManagerInfo pPersistenceManagerInfo)
   {
     IFormComponentInfoProvider propertyInfo = NbAditoInterface.lookup(IFormComponentInfoProvider.class);
-    IFormComponentInfo modelPropProvider = propertyInfo.createComponentInfo(pModelFile);
+    IFormComponentInfo modelPropProvider = propertyInfo.createComponentInfo(pModel);
     IFormComponentPropertyMapping componentPropertyMapping = modelPropProvider.getFormPropertyMapping();
     String compName;
     String className;
@@ -57,7 +57,7 @@ public class AComponentInfo
       {
         return null;
       }
-      compName = pModelFile.getNameExt(); // entspricht Namen des DatenModels.
+      compName = pModel.getPit().getOwnProperty().getName(); // entspricht Namen des DatenModels.
       className = componentPropertyMapping.getComponentClass().getName();
     }
     catch (Exception e)

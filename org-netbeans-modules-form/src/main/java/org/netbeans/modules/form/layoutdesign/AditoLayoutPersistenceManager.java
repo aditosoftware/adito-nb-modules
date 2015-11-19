@@ -46,7 +46,7 @@ package org.netbeans.modules.form.layoutdesign;
 
 import java.util.*;
 
-import org.openide.filesystems.FileObject;
+import de.adito.propertly.core.spi.IPropertyPitProvider;
 import org.w3c.dom.*;
 
 /**
@@ -373,7 +373,7 @@ class AditoLayoutPersistenceManager implements LayoutConstants {
      * @param nameToIdMap map from component names to component IDs
      */
     static void loadContainer(LayoutModel layoutModel, String containerId,
-                              FileObject pModelComp, Map<String,String> nameToIdMap)
+                              IPropertyPitProvider<?, ?, ?> pModelComp, Map<String,String> nameToIdMap)
         throws java.io.IOException
     {
         AditoLayoutPersistenceManager lpm = new AditoLayoutPersistenceManager(layoutModel);
@@ -383,7 +383,7 @@ class AditoLayoutPersistenceManager implements LayoutConstants {
 
     // should be called only on newly created LayoutPersistenceManager for each
     // loaded container (don't call repeatedly)
-    private void loadLayout(String containerId, FileObject pModelComp)
+    private void loadLayout(String containerId, IPropertyPitProvider<?, ?, ?> pModelComp)
         throws java.io.IOException
     {
         layoutContainer = layoutModel.getLayoutComponent(containerId);
