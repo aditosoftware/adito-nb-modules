@@ -145,6 +145,10 @@ public class RADProperty extends FormProperty {
             writeMethod.invoke(component.getBeanInstance(),
                                new Object[] { value });
         }
+        catch (IllegalArgumentException ex)
+        {
+            ex.printStackTrace();
+        }
         catch (InvocationTargetException ex) {
             // annotate exception
             String message = FormUtils.getFormattedBundleString(

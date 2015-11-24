@@ -255,7 +255,8 @@ public class FormDesigner
         return ur != null ? ur : UndoRedo.NONE;
       }
     };*/
-    lookupContent.add(undoRedoProvider);
+    if (undoRedoProvider != null)
+      lookupContent.add(undoRedoProvider);
 
     initLookup();
 
