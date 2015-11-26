@@ -84,7 +84,8 @@ public class ARADComponentHandler
 
       // TODO: propertly
       //DataFolder.findFolder(model).rename(pNewName);
-      model.getPit().getOwnProperty().rename(pNewName);
+      if (!model.getPit().getOwnProperty().getName().equals(pNewName))
+        model.getPit().getOwnProperty().rename(pNewName);
     }
     catch (Exception e)
     {
