@@ -187,7 +187,7 @@ public class BlobFieldTableCellEditor extends AbstractCellEditor
 
     @Override
     public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row, int column) {
-        currentValue = (java.sql.Blob) value;
+        currentValue = (Blob) value;
         int modelRow = table.convertRowIndexToModel(row);
         int modelColumn = table.convertColumnIndexToModel(column);
         boolean editable = table.getModel().isCellEditable(modelRow, modelColumn);

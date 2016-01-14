@@ -41,27 +41,52 @@
  */
 package org.netbeans.modules.db.dataview.table;
 
-import org.jdesktop.swingx.JXTableHeader;
-import org.jdesktop.swingx.decorator.*;
-import org.jdesktop.swingx.renderer.*;
-import org.netbeans.modules.db.dataview.meta.DBColumn;
-import org.netbeans.modules.db.dataview.table.celleditor.*;
-import org.netbeans.modules.db.dataview.util.*;
-import org.openide.util.*;
-import org.openide.util.datatransfer.ExClipboard;
-
-import javax.swing.*;
-import javax.swing.event.*;
+import java.awt.datatransfer.StringSelection;
+import java.awt.datatransfer.Transferable;
+import java.awt.event.ActionEvent;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
+import java.awt.event.MouseEvent;
+import java.sql.Blob;
+import java.sql.Clob;
+import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.swing.AbstractAction;
+import javax.swing.Action;
+import javax.swing.DefaultRowSorter;
+import javax.swing.JComponent;
+import javax.swing.JLabel;
+import javax.swing.JTextField;
+import javax.swing.RowFilter;
+import javax.swing.RowSorter;
+import javax.swing.TransferHandler;
+import javax.swing.event.TableModelEvent;
+import javax.swing.event.TableModelListener;
 import javax.swing.plaf.UIResource;
 import javax.swing.table.*;
-import java.awt.*;
-import java.awt.datatransfer.*;
-import java.awt.event.*;
-import java.sql.*;
-import java.text.*;
-import java.util.*;
-import java.util.List;
-import java.util.logging.*;
+import org.jdesktop.swingx.JXTableHeader;
+import org.jdesktop.swingx.decorator.ColorHighlighter;
+import org.jdesktop.swingx.decorator.HighlightPredicate;
+import org.jdesktop.swingx.decorator.HighlighterFactory;
+import org.jdesktop.swingx.renderer.CheckBoxProvider;
+import org.jdesktop.swingx.renderer.JRendererCheckBox;
+import org.jdesktop.swingx.renderer.StringValues;
+import org.netbeans.modules.db.dataview.meta.DBColumn;
+import org.netbeans.modules.db.dataview.table.celleditor.*;
+import org.netbeans.modules.db.dataview.util.BinaryToStringConverter;
+import org.netbeans.modules.db.dataview.util.DataViewUtils;
+import org.netbeans.modules.db.dataview.util.DateType;
+import org.netbeans.modules.db.dataview.util.TimeType;
+import org.netbeans.modules.db.dataview.util.TimestampType;
+import org.openide.util.Exceptions;
+import org.openide.util.Lookup;
+import org.openide.util.datatransfer.ExClipboard;
 
 /**
  * A better-looking table than JTable, implements JXTable and a decorator to draw empty rows 
@@ -72,15 +97,14 @@ public class ResultSetJXTable extends JXTableDecorator {
     private static final String data = "WE WILL EITHER FIND A WAY, OR MAKE ONE."; // NOI18N
     private static final Logger mLogger = Logger.getLogger(ResultSetJXTable.class.getName());
     private static final int MAX_COLUMN_WIDTH = 25;
-
+    private static final DateFormat timeFormat = new SimpleDateFormat(TimeType.DEFAULT_FOMAT_PATTERN);
+    private static final DateFormat dateFormat = new SimpleDateFormat(DateType.DEFAULT_FOMAT_PATTERN);
+    private static final DateFormat timestampFormat = new SimpleDateFormat(TimestampType.DEFAULT_FORMAT_PATTERN);
+    
     private final int multiplier;
 
-    private DateFormat timeFormat = new SimpleDateFormat(TimeType.DEFAULT_FOMAT_PATTERN);
-    private DateFormat dateFormat = new SimpleDateFormat(DateType.DEFAULT_FOMAT_PATTERN);
-    private DateFormat timestampFormat = new SimpleDateFormat(TimestampType.DEFAULT_FORMAT_PATTERN);
-
     // If structure changes, enforce relayout
-    private TableModelListener dataExchangedListener = new TableModelListener() {
+    private final TableModelListener dataExchangedListener = new TableModelListener() {
         @Override
         public void tableChanged(TableModelEvent e) {
             if(e.getFirstRow() == TableModelEvent.HEADER_ROW) {
@@ -104,7 +128,7 @@ public class ResultSetJXTable extends JXTableDecorator {
         setHorizontalScrollEnabled(true);
 
         setHighlighters(HighlighterFactory.createAlternateStriping(ROW_COLOR, ALTERNATE_ROW_COLOR));
-      addHighlighter(new ColorHighlighter(HighlightPredicate.ROLLOVER_ROW, ROLLOVER_ROW_COLOR, Color.WHITE));
+        addHighlighter(new ColorHighlighter(HighlightPredicate.ROLLOVER_ROW, ROLLOVER_ROW_COLOR, null));
 
         setDefaultCellRenderers();
         setDefaultCellEditors();
@@ -112,6 +136,13 @@ public class ResultSetJXTable extends JXTableDecorator {
         multiplier = getFontMetrics(getFont()).stringWidth(data) / data.length() + 4;
         putClientProperty("terminateEditOnFocusLost", Boolean.TRUE);
         this.setModel(createDefaultDataModel());
+
+        getActionMap().put("selectNextColumnCell", new EditingAwareAction(getActionMap().get("selectNextColumnCell")));
+        getActionMap().put("selectPreviousColumnCell", new EditingAwareAction(getActionMap().get("selectPreviousColumnCell")));
+        getActionMap().put("selectNextRowCell", new EditingAwareAction(getActionMap().get("selectNextRowCell")));
+        getActionMap().put("selectNextPreviousCell", new EditingAwareAction(getActionMap().get("selectPreviousRowCell")));
+
+        setSurrendersFocusOnKeystroke(true);
     }
 
     @Override
@@ -131,6 +162,7 @@ public class ResultSetJXTable extends JXTableDecorator {
 
     @Override
     @SuppressWarnings("unchecked")
+    // ADITO edited
     public void setRowFilter(RowFilter<? super TableModel, ? super Integer> filter) {
         if(getRowSorter() instanceof DefaultRowSorter) {
             ((DefaultRowSorter) getRowSorter()).setRowFilter(filter);
@@ -140,28 +172,24 @@ public class ResultSetJXTable extends JXTableDecorator {
     }
 
     @Override
-    public ResultSetTableModel getModel()
-    {
-      return (ResultSetTableModel) super.getModel();
+    public void setModel(TableModel dataModel) {
+        if(! (dataModel instanceof ResultSetTableModel)) {
+            throw new IllegalArgumentException(
+                    "TableModel for ResultSetJXTable must be an "  // NOI18N
+                    + " instance of ResultSetTableModel"           // NOI18N
+            );
+        }
+        if(getModel() != null) {
+            getModel().removeTableModelListener(dataExchangedListener);
+        }
+        super.setModel(dataModel);
+        updateHeader();
+        dataModel.addTableModelListener(dataExchangedListener);
     }
 
     @Override
-    public void setModel(TableModel dataModel)
-    {
-      if (!(dataModel instanceof ResultSetTableModel))
-      {
-        throw new IllegalArgumentException(
-            "TableModel for ResultSetJXTable must be an "  // NOI18N
-                + " instance of ResultSetTableModel"           // NOI18N
-        );
-      }
-      if (getModel() != null)
-      {
-        getModel().removeTableModelListener(dataExchangedListener);
-      }
-      super.setModel(dataModel);
-      updateHeader();
-      dataModel.addTableModelListener(dataExchangedListener);
+    public ResultSetTableModel getModel() {
+        return (ResultSetTableModel) super.getModel();
     }
 
     @SuppressWarnings("deprecation")
@@ -172,7 +200,7 @@ public class ResultSetJXTable extends JXTableDecorator {
         setDefaultRenderer(Boolean.class, new ResultSetCellRenderer(new CheckBoxProvider()));
         setDefaultRenderer(java.sql.Date.class, new ResultSetCellRenderer(StringValues.DATE_TO_STRING));
         setDefaultRenderer(java.sql.Time.class, new ResultSetCellRenderer(ResultSetCellRenderer.TIME_TO_STRING));
-        setDefaultRenderer(java.sql.Timestamp.class, new ResultSetCellRenderer(ResultSetCellRenderer.DATETIME_TO_STRING));
+        setDefaultRenderer(Timestamp.class, new ResultSetCellRenderer(ResultSetCellRenderer.DATETIME_TO_STRING));
         setDefaultRenderer(java.util.Date.class, new ResultSetCellRenderer(ResultSetCellRenderer.DATETIME_TO_STRING));
     }
 
@@ -245,8 +273,7 @@ public class ResultSetJXTable extends JXTableDecorator {
             StringBuilder sb = new StringBuilder();
             sb.append("<html>");                                    //NOI18N
             if (col.getDisplayName() != null) {
-                sb.append(DataViewUtils.escapeHTML(
-                        col.getDisplayName().toString()));
+                sb.append(DataViewUtils.escapeHTML(col.getDisplayName()));
             }
             sb.append("</html>");                                  // NOI18N
             tc.setHeaderValue(sb.toString());
@@ -260,7 +287,7 @@ public class ResultSetJXTable extends JXTableDecorator {
     }
 
     private List<Integer> getColumnWidthList(DBColumn[] columns) {
-        List<Integer> result = new ArrayList<Integer>();
+        List<Integer> result = new ArrayList<>();
 
         for (DBColumn col : columns) {
             int fieldWidth = col.getDisplaySize();
@@ -282,10 +309,16 @@ public class ResultSetJXTable extends JXTableDecorator {
         if (getCellEditor(row, column) instanceof AlwaysEnable) {
             return true;
         }
-        if(getModel() != null) {
-            int modelRow = convertRowIndexToModel(row);
-            int modelColumn = convertColumnIndexToModel(column);
-            return getModel().isCellEditable(modelRow, modelColumn);
+        try {
+            if (getModel() != null) {
+                int modelRow = convertRowIndexToModel(row);
+                int modelColumn = convertColumnIndexToModel(column);
+                return getModel().isCellEditable(modelRow, modelColumn);
+            }
+        } catch (IndexOutOfBoundsException ex) {
+            // Swallow it silently - its unclear under which circumstances
+            // the problem happens, but in case an illegal row/column combination
+            // is requested its saver/saner to just mark cell as not editable
         }
         return false;
     }
@@ -333,11 +366,17 @@ public class ResultSetJXTable extends JXTableDecorator {
             } catch (SQLException ex) {
             }
         } else if (o instanceof java.sql.Time) {
-            return timeFormat.format((java.util.Date) o);
+            synchronized(timeFormat) {
+                return timeFormat.format((java.util.Date) o);
+            }
         } else if (o instanceof java.sql.Date) {
-            return dateFormat.format((java.util.Date) o);
+            synchronized(dateFormat) {
+                return dateFormat.format((java.util.Date) o);
+            }
         } else if (o instanceof java.util.Date) {
-            return timestampFormat.format((java.util.Date) o);
+            synchronized(timestampFormat) {
+                return timestampFormat.format((java.util.Date) o);
+            }
         } else if (o == null) {
             return "";  //NOI18N
         }
@@ -459,4 +498,23 @@ public class ResultSetJXTable extends JXTableDecorator {
             return COPY;
         }
     }
+
+    private class EditingAwareAction extends AbstractAction {
+
+        private final Action delegate;
+
+        public EditingAwareAction(Action delegate) {
+            this.delegate = delegate;
+        }
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            boolean editing = isEditing();
+            delegate.actionPerformed(e);
+            if (editing) {
+                editCellAt(getSelectedRow(), getSelectedColumn());
+            }
+        }
+    }
+
 }
