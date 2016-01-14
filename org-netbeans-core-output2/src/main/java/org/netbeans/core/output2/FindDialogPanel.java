@@ -58,7 +58,7 @@ import org.openide.DialogDisplayer;
 import org.openide.awt.Mnemonics;
 import org.openide.util.NbPreferences;
 
-class FindDialogPanel extends javax.swing.JPanel {
+class FindDialogPanel extends JPanel {
 
     static final long serialVersionUID =5048678953767663114L;
     private static final String KEY_REGEXP = "regExp"; // NOI18N
@@ -134,58 +134,58 @@ class FindDialogPanel extends javax.swing.JPanel {
      */
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
-        java.awt.GridBagConstraints gridBagConstraints;
+        GridBagConstraints gridBagConstraints;
 
-        findWhatLabel = new javax.swing.JLabel();
-        findWhat = new javax.swing.JComboBox();
-        chbRegExp = new javax.swing.JCheckBox();
-        chbMatchCase = new javax.swing.JCheckBox();
+        findWhatLabel = new JLabel();
+        findWhat = new JComboBox();
+        chbRegExp = new JCheckBox();
+        chbMatchCase = new JCheckBox();
 
-        setLayout(new java.awt.GridBagLayout());
+        setLayout(new GridBagLayout());
 
         findWhatLabel.setLabelFor(findWhat);
-        findWhatLabel.setText(org.openide.util.NbBundle.getMessage(FindDialogPanel.class, "LBL_Find_What")); // NOI18N
-        gridBagConstraints = new java.awt.GridBagConstraints();
+        findWhatLabel.setText(NbBundle.getMessage(FindDialogPanel.class, "LBL_Find_What")); // NOI18N
+        gridBagConstraints = new GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 1;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-        gridBagConstraints.insets = new java.awt.Insets(5, 12, 5, 5);
+        gridBagConstraints.anchor = GridBagConstraints.WEST;
+        gridBagConstraints.insets = new Insets(5, 12, 5, 5);
         add(findWhatLabel, gridBagConstraints);
 
         findWhat.setEditable(true);
-        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints = new GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 1;
-        gridBagConstraints.gridwidth = java.awt.GridBagConstraints.REMAINDER;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.gridwidth = GridBagConstraints.REMAINDER;
+        gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
         gridBagConstraints.ipadx = 50;
         gridBagConstraints.weightx = 1.0;
-        gridBagConstraints.insets = new java.awt.Insets(5, 12, 5, 5);
+        gridBagConstraints.insets = new Insets(5, 12, 5, 5);
         add(findWhat, gridBagConstraints);
 
         chbRegExp.setSelected(regExp());
-        chbRegExp.setText(org.openide.util.NbBundle.getMessage(FindDialogPanel.class, "LBL_Use_RegExp")); // NOI18N
-        gridBagConstraints = new java.awt.GridBagConstraints();
+        chbRegExp.setText(NbBundle.getMessage(FindDialogPanel.class, "LBL_Use_RegExp")); // NOI18N
+        gridBagConstraints = new GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 2;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-        gridBagConstraints.insets = new java.awt.Insets(5, 12, 5, 5);
+        gridBagConstraints.anchor = GridBagConstraints.WEST;
+        gridBagConstraints.insets = new Insets(5, 12, 5, 5);
         add(chbRegExp, gridBagConstraints);
 
         chbMatchCase.setSelected(matchCase());
-        chbMatchCase.setText(org.openide.util.NbBundle.getMessage(FindDialogPanel.class, "LBL_Match_Case")); // NOI18N
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-        gridBagConstraints.insets = new java.awt.Insets(5, 12, 5, 5);
+        chbMatchCase.setText(NbBundle.getMessage(FindDialogPanel.class, "LBL_Match_Case")); // NOI18N
+        gridBagConstraints = new GridBagConstraints();
+        gridBagConstraints.anchor = GridBagConstraints.WEST;
+        gridBagConstraints.insets = new Insets(5, 12, 5, 5);
         add(chbMatchCase, gridBagConstraints);
     }// </editor-fold>//GEN-END:initComponents
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JCheckBox chbMatchCase;
-    private javax.swing.JCheckBox chbRegExp;
-    protected javax.swing.JComboBox findWhat;
-    protected javax.swing.JLabel findWhatLabel;
+    private JCheckBox chbMatchCase;
+    private JCheckBox chbRegExp;
+    protected JComboBox findWhat;
+    protected JLabel findWhatLabel;
     // End of variables declaration//GEN-END:variables
 
 

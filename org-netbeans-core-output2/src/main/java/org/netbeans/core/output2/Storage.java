@@ -69,7 +69,7 @@ interface Storage {
      * @return A byte buffer
      * @throws IOException if there is a problem reading or allocating the buffer
      */
-    public BufferResource<ByteBuffer> getReadBuffer (int start, int length) throws IOException;
+    public BufferResource<ByteBuffer> getReadBuffer(int start, int length) throws IOException;
     /**
      * Get a buffer for <strong>appending</strong> <code>length</code> bytes to the stored data.  Note that
      * writing into the returned buffer does not automatically write to the file - the returned buffer should
@@ -79,7 +79,7 @@ interface Storage {
      * @return
      * @throws IOException
      */
-    public ByteBuffer getWriteBuffer (int length) throws IOException;
+    public ByteBuffer getWriteBuffer(int length) throws IOException;
     /**
      * Write a ByteBuffer (presumably obtained from getWriteBuffer()) to persistent storage.  The buffer
      * may be underfilled; data will be written to the <code>limit</code> of the ByteBuffer, disregarding any
@@ -89,7 +89,7 @@ interface Storage {
      * @return The byte position of the <strong>start</strong> of data written
      * @throws IOException if there is a problem writing the data
      */
-    public int write (ByteBuffer buf) throws IOException;
+    public int write(ByteBuffer buf) throws IOException;
 
     /**
      * Remove bytes from the end of the file. Only removing characters from the
@@ -105,7 +105,7 @@ interface Storage {
      * be called after it is absolutely certain that nothing will try to write further data to the storage.
      *
      */
-    public void dispose ();
+    public void dispose();
 
     /**
      * The number of bytes currently occupied by written data

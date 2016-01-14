@@ -76,6 +76,7 @@ import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPopupMenu;
+import javax.swing.JSeparator;
 import javax.swing.KeyStroke;
 import javax.swing.RootPaneContainer;
 import javax.swing.SwingUtilities;
@@ -99,6 +100,7 @@ import org.openide.util.Exceptions;
 import org.openide.util.NbBundle;
 import org.openide.windows.IOContainer;
 import org.openide.windows.OutputListener;
+import org.openide.windows.WindowManager;
 import org.openide.xml.XMLUtil;
 
 import static org.netbeans.core.output2.OutputTab.ACTION.*;
@@ -1216,8 +1218,8 @@ final class OutputTab extends AbstractOutputTab implements IOContainer.CallBacks
                         else
                         {
                           final String pattern = getFindDlgResult(getOutputPane().getSelectedText(),
-                                  "LBL_Filter_Title", "LBL_Filter_What", "BTN_Filter"); //NOI18N
-                          if (pattern != null) {
+                                "LBL_Filter_Title", "LBL_Filter_What", "BTN_Filter"); //NOI18N
+                        if (pattern != null) {
                             final boolean regExp = FindDialogPanel.regExp();
                             final boolean matchCase = FindDialogPanel.matchCase();
                             final String finalPattern = (regExp || matchCase) ? pattern : pattern.toLowerCase();

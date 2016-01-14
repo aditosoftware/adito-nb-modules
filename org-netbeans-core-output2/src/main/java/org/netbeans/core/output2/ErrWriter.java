@@ -71,12 +71,12 @@ class ErrWriter extends OutputWriter {
         closed = true;
     }
 
-    public void println(String s, OutputListener l) throws java.io.IOException {
+    public void println(String s, OutputListener l) throws IOException {
         println(s, l, false);
     }
 
     @Override
-    public void println(String s, OutputListener l, boolean important) throws java.io.IOException {
+    public void println(String s, OutputListener l, boolean important) throws IOException {
         closed = false;
         wrapped.print(s, l, important, null, null, OutputKind.ERR, true);
     }

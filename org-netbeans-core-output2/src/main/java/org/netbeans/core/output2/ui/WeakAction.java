@@ -151,7 +151,7 @@ class WeakAction implements Action, PropertyChangeListener {
         }
     }
     
-    public void propertyChange(java.beans.PropertyChangeEvent pce) {
+    public void propertyChange(PropertyChangeEvent pce) {
         firePropertyChange (pce.getPropertyName(), pce.getOldValue(), 
             pce.getNewValue());
         if ("enabled".equals(pce.getPropertyName())) { //NOI18n

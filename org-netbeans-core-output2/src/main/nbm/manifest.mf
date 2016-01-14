@@ -1,13 +1,14 @@
 Manifest-Version: 1.0
 OpenIDE-Module-Java-Dependencies: Java > 1.6
-OpenIDE-Module-Implementation-Version: 201408251540
+OpenIDE-Module-Implementation-Version: 201510222201
 AutoUpdate-Show-In-Client: false
 OpenIDE-Module: org.netbeans.core.output2/1
 OpenIDE-Module-Layer: org/netbeans/core/output2/layer.xml
 OpenIDE-Module-Localizing-Bundle: org/netbeans/core/output2/Bundle.pro
  perties
-OpenIDE-Module-Provides: org.openide.windows.IOProvider
+OpenIDE-Module-Provides: org.openide.windows.IOProvider org.netbeans.s
+ pi.io.InputOutputProvider
 AutoUpdate-Essential-Module: true
-OpenIDE-Module-Specification-Version: 1.37.1
+OpenIDE-Module-Specification-Version: 1.40.1
 OpenIDE-Module-Requires: org.openide.modules.ModuleFormat1
 
