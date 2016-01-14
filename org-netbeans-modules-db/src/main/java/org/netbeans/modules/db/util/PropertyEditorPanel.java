@@ -191,7 +191,7 @@ public class PropertyEditorPanel extends javax.swing.JPanel {
         add(buttonPanel, java.awt.BorderLayout.PAGE_END);
 
         propertyTable.setAutoCreateRowSorter(true);
-        propertyTable.setModel(new javax.swing.table.DefaultTableModel(
+        propertyTable.setModel(new DefaultTableModel(
             new Object [][] {
 
             },
@@ -200,7 +200,7 @@ public class PropertyEditorPanel extends javax.swing.JPanel {
             }
         ) {
             Class[] types = new Class [] {
-                java.lang.String.class, java.lang.String.class
+                String.class, String.class
             };
 
             public Class getColumnClass(int columnIndex) {

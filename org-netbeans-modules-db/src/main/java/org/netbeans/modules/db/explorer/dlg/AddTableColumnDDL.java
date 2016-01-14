@@ -67,7 +67,7 @@ public class AddTableColumnDDL {
 
         AddColumn cmd = spec.createCommandAddColumn(tablename);
         cmd.setObjectOwner(schema);
-        org.netbeans.lib.ddl.impl.TableColumn col = null;
+        TableColumn col = null;
         if (citem.isPrimaryKey()) {
           col = cmd.createPrimaryKeyColumn(colname);
           OracleTableColumnHack.fixPrimaryKeyColumn(spec, col, tablename, colname);

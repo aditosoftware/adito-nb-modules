@@ -58,6 +58,7 @@ import java.beans.PropertyChangeListener;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
@@ -111,7 +112,7 @@ public class AddTableColumnDialog extends JPanel {
         con.gridwidth = 1;
         con.gridheight = 1;
         con.anchor = GridBagConstraints.WEST;
-        con.insets = new java.awt.Insets(0, 0, 0, 0);
+        con.insets = new Insets(0, 0, 0, 0);
         con.weightx = 0.0;
         con.weighty = 0.0;
         add(label, con);
@@ -122,7 +123,7 @@ public class AddTableColumnDialog extends JPanel {
         con.gridwidth = 3;
         con.gridheight = 1;
         con.fill = GridBagConstraints.HORIZONTAL;
-        con.insets = new java.awt.Insets(0, 12, 0, 0);
+        con.insets = new Insets(0, 12, 0, 0);
         con.weightx = 1.0;
         con.weighty = 0.0;
         colnamefield = new JTextField(35);
@@ -152,8 +153,11 @@ public class AddTableColumnDialog extends JPanel {
 
         // Column type
 
-        sizelesstypes = (Collection<String>) spe.getProperties().get("SizelessTypes"); // NOI18N
-        charactertypes = (Collection<String>) spe.getProperties().get("CharacterTypes"); // NOI18N
+        Collection<String> sizelesstypesSpec = (Collection<String>) spe.getProperties().get("SizelessTypes"); // NOI18N
+        Collection<String> charactertypesSpec = (Collection<String>) spe.getProperties().get("CharacterTypes"); // NOI18N
+        
+        sizelesstypes = sizelesstypesSpec != null ? sizelesstypesSpec : Collections.<String>emptyList();
+        charactertypes = charactertypesSpec != null ? charactertypesSpec : Collections.<String>emptyList();
 
         Map<String, String> tmap = spe.getTypeMap();
         List<TypeElement> ttab = new ArrayList<TypeElement>(tmap.size());
@@ -174,7 +178,7 @@ public class AddTableColumnDialog extends JPanel {
         con.gridwidth = 1;
         con.gridheight = 1;
         con.anchor = GridBagConstraints.WEST;
-        con.insets = new java.awt.Insets(12, 0, 0, 0);
+        con.insets = new Insets(12, 0, 0, 0);
         con.weightx = 0.0;
         con.weighty = 0.0;
         add(label, con);
@@ -185,7 +189,7 @@ public class AddTableColumnDialog extends JPanel {
         con.gridwidth = 3;
         con.gridheight = 1;
         con.fill = GridBagConstraints.HORIZONTAL;
-        con.insets = new java.awt.Insets(12, 12, 0, 0);
+        con.insets = new Insets(12, 12, 0, 0);
         con.weightx = 1.0;
         con.weighty = 0.0;
         coltypecombo = new JComboBox(ttab.toArray());
@@ -213,7 +217,7 @@ public class AddTableColumnDialog extends JPanel {
         con.gridwidth = 1;
         con.gridheight = 1;
         con.anchor = GridBagConstraints.WEST;
-        con.insets = new java.awt.Insets(12, 0, 0, 0);
+        con.insets = new Insets(12, 0, 0, 0);
         con.weightx = 0.0;
         con.weighty = 0.0;
         add(label, con);
@@ -224,7 +228,7 @@ public class AddTableColumnDialog extends JPanel {
         con.gridwidth = 1;
         con.gridheight = 1;
         con.fill = GridBagConstraints.HORIZONTAL;
-        con.insets = new java.awt.Insets(12, 12, 0, 0);
+        con.insets = new Insets(12, 12, 0, 0);
         con.weightx = 1.0;
         con.weighty = 0.0;
         colsizefield = new JTextField();
@@ -246,7 +250,7 @@ public class AddTableColumnDialog extends JPanel {
         con.gridwidth = 1;
         con.gridheight = 1;
         con.anchor = GridBagConstraints.WEST;
-        con.insets = new java.awt.Insets(12, 12, 0, 0);
+        con.insets = new Insets(12, 12, 0, 0);
         con.weightx = 0.0;
         con.weighty = 0.0;
         add(label, con);
@@ -257,7 +261,7 @@ public class AddTableColumnDialog extends JPanel {
         con.gridwidth = 1;
         con.gridheight = 1;
         con.fill = GridBagConstraints.HORIZONTAL;
-        con.insets = new java.awt.Insets(12, 12, 0, 0);
+        con.insets = new Insets(12, 12, 0, 0);
         con.weightx = 1.0;
         con.weighty = 0.0;
         colscalefield = new JTextField();
@@ -279,7 +283,7 @@ public class AddTableColumnDialog extends JPanel {
         con.gridwidth = 1;
         con.gridheight = 1;
         con.anchor = GridBagConstraints.WEST;
-        con.insets = new java.awt.Insets(12, 0, 0, 0);
+        con.insets = new Insets(12, 0, 0, 0);
         con.weightx = 0.0;
         con.weighty = 0.0;
         add(label, con);
@@ -290,7 +294,7 @@ public class AddTableColumnDialog extends JPanel {
         con.gridwidth = 3;
         con.gridheight = 1;
         con.fill = GridBagConstraints.HORIZONTAL;
-        con.insets = new java.awt.Insets(12, 12, 0, 0);
+        con.insets = new Insets(12, 12, 0, 0);
         con.weightx = 1.0;
         con.weighty = 0.0;
         defvalfield = new JTextField(35);
@@ -325,7 +329,7 @@ public class AddTableColumnDialog extends JPanel {
         con.gridwidth = 1;
         con.gridheight = 1;
         con.anchor = GridBagConstraints.WEST;
-        con.insets = new java.awt.Insets(0, 0, 0, 0);
+        con.insets = new Insets(0, 0, 0, 0);
         con.weightx = 0.0;
         con.weighty = 0.0;
         pkcheckbox = new JCheckBox();
@@ -341,7 +345,7 @@ public class AddTableColumnDialog extends JPanel {
         con.gridwidth = 1;
         con.gridheight = 1;
         con.anchor = GridBagConstraints.WEST;
-        con.insets = new java.awt.Insets(0, 12, 0, 0);
+        con.insets = new Insets(0, 12, 0, 0);
         con.weightx = 0.0;
         con.weighty = 0.0;
         uniquecheckbox = new JCheckBox();
@@ -357,7 +361,7 @@ public class AddTableColumnDialog extends JPanel {
         con.gridwidth = 1;
         con.gridheight = 1;
         con.anchor = GridBagConstraints.WEST;
-        con.insets = new java.awt.Insets(0, 12, 0, 0);
+        con.insets = new Insets(0, 12, 0, 0);
         con.weightx = 0.0;
         con.weighty = 0.0;
         nullcheckbox = new JCheckBox();
@@ -373,7 +377,7 @@ public class AddTableColumnDialog extends JPanel {
         con.gridwidth = 1;
         con.gridheight = 1;
         con.anchor = GridBagConstraints.WEST;
-        con.insets = new java.awt.Insets(0, 12, 0, 0);
+        con.insets = new Insets(0, 12, 0, 0);
         con.weightx = 0.0;
         con.weighty = 0.0;
         ixcheckbox = new JCheckBox();
@@ -391,7 +395,7 @@ public class AddTableColumnDialog extends JPanel {
         con.gridwidth = 4;
         con.gridheight = 1;
         con.fill = GridBagConstraints.HORIZONTAL;
-        con.insets = new java.awt.Insets(12, 0, 0, 0);
+        con.insets = new Insets(12, 0, 0, 0);
         con.weightx = 1.0;
         con.weighty = 0.0;
         add(subpane, con);
@@ -404,7 +408,7 @@ public class AddTableColumnDialog extends JPanel {
         con.gridwidth = 1;
         con.gridheight = 1;
         con.anchor = GridBagConstraints.NORTHWEST;
-        con.insets = new java.awt.Insets(12, 0, 0, 0);
+        con.insets = new Insets(12, 0, 0, 0);
         con.weightx = 0.0;
         con.weighty = 0.0;
         checkcheckbox = new JCheckBox();
@@ -420,7 +424,7 @@ public class AddTableColumnDialog extends JPanel {
         con.gridwidth = 3;
         con.gridheight = 1;
         con.fill = GridBagConstraints.BOTH;
-        con.insets = new java.awt.Insets(12, 12, 0, 0);
+        con.insets = new Insets(12, 12, 0, 0);
         con.weightx = 1.0;
         con.weighty = 1.0;
         checkfield = new JTextArea(3, 35);

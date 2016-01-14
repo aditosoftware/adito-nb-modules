@@ -85,7 +85,7 @@ public class AddIndexDialog {
             Mnemonics.setLocalizedText(label, NbBundle.getMessage (AddIndexDialog.class, "AddIndexName")); //NOI18N
             label.getAccessibleContext().setAccessibleDescription(NbBundle.getMessage (AddIndexDialog.class, "ACS_AddIndexNameA11yDesc"));
             con.anchor = GridBagConstraints.WEST;
-            con.insets = new java.awt.Insets (2, 2, 2, 2);
+            con.insets = new Insets (2, 2, 2, 2);
             con.gridx = 0;
             con.gridy = 0;
             layout.setConstraints(label, con);
@@ -97,7 +97,7 @@ public class AddIndexDialog {
             con.weightx = 1.0;
             con.gridx = 1;
             con.gridy = 0;
-            con.insets = new java.awt.Insets (2, 2, 2, 2);
+            con.insets = new Insets (2, 2, 2, 2);
             namefld = new JTextField(35);
             namefld.setToolTipText(NbBundle.getMessage (AddIndexDialog.class, "ACS_AddIndexNameTextFieldA11yDesc"));
             namefld.getAccessibleContext().setAccessibleName(NbBundle.getMessage (AddIndexDialog.class, "ACS_AddIndexNameTextFieldA11yName"));
@@ -111,7 +111,7 @@ public class AddIndexDialog {
             label.getAccessibleContext().setAccessibleDescription(NbBundle.getMessage (AddIndexDialog.class, "ACS_AddUniqueIndexA11yDesc"));
             con.weightx = 0.0;
             con.anchor = GridBagConstraints.WEST;
-            con.insets = new java.awt.Insets (2, 2, 2, 2);
+            con.insets = new Insets (2, 2, 2, 2);
             con.gridx = 0;
             con.gridy = 1;
             layout.setConstraints(label_uq, con);
@@ -121,7 +121,7 @@ public class AddIndexDialog {
             con.weightx = 1.0;
             con.gridx = 1;
             con.gridy = 1;
-            con.insets = new java.awt.Insets (2, 2, 2, 2);
+            con.insets = new Insets (2, 2, 2, 2);
             cbx_uq = new JCheckBox();
             Mnemonics.setLocalizedText(cbx_uq, NbBundle.getMessage (AddIndexDialog.class, "AddIndexUnique"));
             cbx_uq.setToolTipText(NbBundle.getMessage (AddIndexDialog.class, "ACS_UniqueA11yDesc"));
@@ -135,7 +135,7 @@ public class AddIndexDialog {
             label.getAccessibleContext().setAccessibleDescription(NbBundle.getMessage (AddIndexDialog.class, "ACS_AddIndexLabelA11yDesc"));
             con.weightx = 0.0;
             con.anchor = GridBagConstraints.WEST;
-            con.insets = new java.awt.Insets (2, 2, 2, 2);
+            con.insets = new Insets (2, 2, 2, 2);
             con.gridx = 0;
             con.gridy = 2;
             con.gridwidth = 2;
@@ -167,7 +167,7 @@ public class AddIndexDialog {
             con.weighty = 1.0; 
             con.gridwidth = 2;
             con.fill = GridBagConstraints.BOTH;
-            con.insets = new java.awt.Insets (0, 0, 0, 0);
+            con.insets = new Insets (0, 0, 0, 0);
             con.gridx = 0;
             con.gridy = 3;
             JScrollPane spane = new JScrollPane(subpane);

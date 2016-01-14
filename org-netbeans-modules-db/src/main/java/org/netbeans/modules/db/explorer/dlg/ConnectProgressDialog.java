@@ -108,7 +108,7 @@ public class ConnectProgressDialog extends javax.swing.JPanel {
     
     
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JProgressBar pbProgressBar;
+    private JProgressBar pbProgressBar;
     private javax.swing.JLabel pleaseWaitLabel;
     // End of variables declaration//GEN-END:variables
     
