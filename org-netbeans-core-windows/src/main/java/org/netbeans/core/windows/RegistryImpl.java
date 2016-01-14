@@ -65,7 +65,7 @@ import java.util.Set;
  *
  * @author Peter Zavadsky
  */
-@org.openide.util.lookup.ServiceProvider(service=org.openide.windows.TopComponent.Registry.class)
+@org.openide.util.lookup.ServiceProvider(service=TopComponent.Registry.class)
 public final class RegistryImpl extends Object implements TopComponent.Registry {
     
     // fields
@@ -280,7 +280,7 @@ public final class RegistryImpl extends Object implements TopComponent.Registry 
         
         for (int i = 0; i < path.length; i++) {
             //      if (newPath[i] != path[i]) return;
-            java.awt.Window w = SwingUtilities.windowForComponent(
+            Window w = SwingUtilities.windowForComponent(
                 path[i].getComponent()
             );
             

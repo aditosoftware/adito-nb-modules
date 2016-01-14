@@ -379,7 +379,7 @@ final public class PersistenceHandler implements PersistenceObserver {
                     WindowManagerImpl.getInstance().setPreviousModeForTopComponent(tcRefConfig.tc_id, mode, previous, tcRefConfig.previousIndex);
                 } else {
                     Logger.getLogger(PersistenceHandler.class.getName()).log(Level.INFO, null,
-                                      new java.lang.NullPointerException("Cannot find previous mode named \'" +
+                                      new NullPointerException("Cannot find previous mode named \'" +
                                                                          tcRefConfig.previousMode +
                                                                          "\'"));
 
@@ -416,7 +416,7 @@ final public class PersistenceHandler implements PersistenceObserver {
             (tcRefConfig.tc_id, mode, previous, tcRefConfig.previousIndex);
         } else {
             Logger.getLogger(PersistenceHandler.class.getName()).log(Level.INFO, null,
-                              new java.lang.NullPointerException("Cannot find previous mode named \'" +
+                              new NullPointerException("Cannot find previous mode named \'" +
                                                                  tcRefConfig.previousMode +
                                                                  "\'"));
         }
@@ -858,7 +858,7 @@ final public class PersistenceHandler implements PersistenceObserver {
             WindowManagerImpl.getInstance().removeMode(mode);
         } else {
             Logger.getLogger(PersistenceHandler.class.getName()).log(Level.WARNING, null,
-                              new java.lang.NullPointerException("Mode for name=" +
+                              new NullPointerException("Mode for name=" +
                                                                  modeName +
                                                                  " was not created")); // NOI18N
         }
@@ -954,7 +954,7 @@ final public class PersistenceHandler implements PersistenceObserver {
             WindowManagerImpl.getInstance().removeTopComponentGroup(group);
         } else {
             Logger.getLogger(PersistenceHandler.class.getName()).log(Level.WARNING, null,
-                              new java.lang.NullPointerException("Null group for name=" +
+                              new NullPointerException("Null group for name=" +
                                                                  groupName));
         }
     }

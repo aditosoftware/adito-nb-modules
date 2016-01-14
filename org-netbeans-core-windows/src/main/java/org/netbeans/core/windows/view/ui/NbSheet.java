@@ -475,7 +475,7 @@ public final class NbSheet extends TopComponent {
     private class Listener extends Object implements Runnable, PropertyChangeListener {
         Listener() {}
         public void propertyChange (PropertyChangeEvent ev) {
-            if (TopComponent.Registry.PROP_ACTIVATED_NODES.equals( ev.getPropertyName() )) {
+            if (Registry.PROP_ACTIVATED_NODES.equals(ev.getPropertyName() )) {
                 activate();
             }
             /*
@@ -558,7 +558,7 @@ public final class NbSheet extends TopComponent {
             // start to listen to all given nodes and map nodes to
             // their listeners
             for (Node n : nodes) {
-                curListener = org.openide.nodes.NodeOp.weakNodeListener(this, n);
+                curListener = NodeOp.weakNodeListener(this, n);
                 pListener = org.openide.util.WeakListeners.propertyChange(this, n);
                 listenerMap.put(n, curListener);
                 pListenerMap.put(n, pListener);

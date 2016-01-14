@@ -60,8 +60,8 @@ interface TopComponentGroupModel {
     public String getName();
 
     public void open(
-            Collection<TopComponent> openedTopComponents, 
-            Collection<TopComponent> openedBeforeTopComponents);
+        Collection<TopComponent> openedTopComponents,
+        Collection<TopComponent> openedBeforeTopComponents);
     public void close();
     public boolean isOpened();
 

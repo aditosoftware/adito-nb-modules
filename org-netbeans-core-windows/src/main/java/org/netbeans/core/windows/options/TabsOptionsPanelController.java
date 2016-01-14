@@ -54,13 +54,12 @@ import org.openide.util.HelpCtx;
 import org.openide.util.Lookup;
 
 @OptionsPanelController.SubRegistration(
-    displayName="#Tabs_DisplayName",
+    displayName="Bundle#Tabs_DisplayName",
     id="DocumentTabs",
-    keywords="#KW_TabsOptions",
+    keywords="Bundle#KW_TabsOptions",
     keywordsCategory="Appearance/Tabs",
     location = "Appearance"
 )
-@org.openide.util.NbBundle.Messages({"KW_TabsOptions=editor tabs, multi-row", "Tabs_DisplayName=Document Tabs"})
 public class TabsOptionsPanelController extends OptionsPanelController {
 
     private TabsPanel panel;

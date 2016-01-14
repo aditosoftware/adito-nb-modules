@@ -54,9 +54,9 @@ import org.openide.util.HelpCtx;
 import org.openide.util.Lookup;
 
 @OptionsPanelController.SubRegistration(
-    displayName="#AdvancedOption_DisplayName_WinSys",
+    displayName="Bundle#AdvancedOption_DisplayName_WinSys",
     id="Windows",
-    keywords="#KW_WindowOptions",
+    keywords="Bundle#KW_WindowOptions",
     keywordsCategory="Appearance/Windows",
     location = "Appearance"
 //    toolTip="#AdvancedOption_Tooltip_WinSys"
