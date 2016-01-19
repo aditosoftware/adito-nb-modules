@@ -433,7 +433,7 @@ final class ModeStructureAccessorImpl implements ModeStructureAccessor {
     private static String dumpSet(Set separateModes) {
         StringBuffer sb = new StringBuffer();
         
-        for(java.util.Iterator it = separateModes.iterator(); it.hasNext(); ) {
+        for(Iterator it = separateModes.iterator(); it.hasNext(); ) {
             sb.append("\nmode=" + it.next());
         }
         

@@ -76,7 +76,7 @@ public abstract class AbstractTabbedImpl extends Tabbed {
     private static final boolean DEBUG = Debug.isLoggable(TabbedAdapter.class);
 
     @Override
-    public final void addTopComponent( String name, javax.swing.Icon icon, TopComponent tc, String toolTip ) {
+    public final void addTopComponent( String name, Icon icon, TopComponent tc, String toolTip ) {
         insertComponent( name, icon, tc, toolTip, getTabCount() );
     }
 
@@ -141,7 +141,7 @@ public abstract class AbstractTabbedImpl extends Tabbed {
     protected abstract void setAttentionHighlight( int tabIndex, boolean highlight );
 
     @Override
-    public final void insertComponent( String name, javax.swing.Icon icon, Component comp, String toolTip, int position ) {
+    public final void insertComponent( String name, Icon icon, Component comp, String toolTip, int position ) {
         TabData td = new TabData( comp, icon, name, toolTip );
 
         if( DEBUG ) {

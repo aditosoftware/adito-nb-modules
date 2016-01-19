@@ -65,21 +65,21 @@ public interface SlideOperation {
     public static final int SLIDE_INTO_DESKTOP = 3;
     public static final int SLIDE_RESIZE = 4;
 
-    public Component getComponent ();
+    public Component getComponent();
     
-    public Rectangle getStartBounds ();
+    public Rectangle getStartBounds();
     
-    public Rectangle getFinishBounds ();
+    public Rectangle getFinishBounds();
     
-    public String getSide ();
+    public String getSide();
 
-    public boolean requestsActivation ();
+    public boolean requestsActivation();
     
-    public void run (JLayeredPane pane, Integer layer);
+    public void run(JLayeredPane pane, Integer layer);
     
-    public void setStartBounds (Rectangle bounds);
+    public void setStartBounds(Rectangle bounds);
     
-    public void setFinishBounds (Rectangle bounds);
+    public void setFinishBounds(Rectangle bounds);
     
     public int getType();
 

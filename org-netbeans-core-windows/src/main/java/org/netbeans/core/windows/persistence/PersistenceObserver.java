@@ -71,7 +71,7 @@ public interface PersistenceObserver {
      * if there is no ordering defined tcRef is appended to end of array
      */
     public void topComponentRefConfigAdded(
-    String modeName, TCRefConfig tcRefConfig, String [] tcRefNames);
+        String modeName, TCRefConfig tcRefConfig, String[] tcRefNames);
     
     /** Handles removing tcRef from model. 
      * @param tc_id unique id of removed tcRef

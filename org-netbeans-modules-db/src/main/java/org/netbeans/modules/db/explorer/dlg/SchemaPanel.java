@@ -128,7 +128,7 @@ public class SchemaPanel extends javax.swing.JPanel {
         commentTextArea.setEditable(false);
         commentTextArea.setFont(javax.swing.UIManager.getFont("Label.font"));
         commentTextArea.setLineWrap(true);
-        commentTextArea.setText(org.openide.util.NbBundle.getMessage(SchemaPanel.class, "MSG_SchemaPanelComment")); // NOI18N
+        commentTextArea.setText(NbBundle.getMessage(SchemaPanel.class, "MSG_SchemaPanelComment")); // NOI18N
         commentTextArea.setWrapStyleWord(true);
         commentTextArea.setDisabledTextColor(javax.swing.UIManager.getColor("Label.foreground"));
         commentTextArea.setEnabled(false);
@@ -140,7 +140,7 @@ public class SchemaPanel extends javax.swing.JPanel {
         add(commentTextArea, gridBagConstraints);
 
         schemaLabel.setLabelFor(schemaComboBox);
-        org.openide.awt.Mnemonics.setLocalizedText(schemaLabel, org.openide.util.NbBundle.getMessage(SchemaPanel.class, "SchemaDialogText")); // NOI18N
+        org.openide.awt.Mnemonics.setLocalizedText(schemaLabel, NbBundle.getMessage(SchemaPanel.class, "SchemaDialogText")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 1;
@@ -149,7 +149,7 @@ public class SchemaPanel extends javax.swing.JPanel {
         gridBagConstraints.insets = new java.awt.Insets(5, 12, 0, 0);
         add(schemaLabel, gridBagConstraints);
 
-        schemaComboBox.setToolTipText(org.openide.util.NbBundle.getMessage(SchemaPanel.class, "ACS_SchemaDialogTextComboBoxA11yDesc")); // NOI18N
+        schemaComboBox.setToolTipText(NbBundle.getMessage(SchemaPanel.class, "ACS_SchemaDialogTextComboBoxA11yDesc")); // NOI18N
         schemaComboBox.setEnabled(false);
         schemaComboBox.setPrototypeDisplayValue("wwwwwwwwww");
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -161,16 +161,16 @@ public class SchemaPanel extends javax.swing.JPanel {
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 0, 5);
         add(schemaComboBox, gridBagConstraints);
 
-        connectProgressPanel.setToolTipText(org.openide.util.NbBundle.getMessage(SchemaPanel.class, "ACS_ConnectionProgressBarA11yDesc")); // NOI18N
-        connectProgressPanel.setLayout(new java.awt.BorderLayout(0, 5));
+        connectProgressPanel.setToolTipText(NbBundle.getMessage(SchemaPanel.class, "ACS_ConnectionProgressBarA11yDesc")); // NOI18N
+        connectProgressPanel.setLayout(new BorderLayout(0, 5));
 
         org.openide.awt.Mnemonics.setLocalizedText(progressMessageLabel, " ");
-        connectProgressPanel.add(progressMessageLabel, java.awt.BorderLayout.NORTH);
+        connectProgressPanel.add(progressMessageLabel, BorderLayout.NORTH);
 
         progressContainerPanel.setMinimumSize(new java.awt.Dimension(20, 20));
         progressContainerPanel.setPreferredSize(new java.awt.Dimension(20, 20));
-        progressContainerPanel.setLayout(new java.awt.BorderLayout());
-        connectProgressPanel.add(progressContainerPanel, java.awt.BorderLayout.CENTER);
+        progressContainerPanel.setLayout(new BorderLayout());
+        connectProgressPanel.add(progressContainerPanel, BorderLayout.CENTER);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;

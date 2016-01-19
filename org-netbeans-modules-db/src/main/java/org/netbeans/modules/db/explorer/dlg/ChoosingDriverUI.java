@@ -52,8 +52,6 @@ import org.netbeans.api.db.explorer.DatabaseException;
 import org.netbeans.api.db.explorer.JDBCDriver;
 import org.netbeans.api.db.explorer.JDBCDriverManager;
 import org.netbeans.modules.db.util.DatabaseExplorerInternalUIs;
-import org.netbeans.modules.db.util.DriverListUtil;
-import org.netbeans.modules.db.util.JdbcUrl;
 import org.openide.util.NbBundle;
 
 /**
@@ -112,9 +110,6 @@ public class ChoosingDriverUI extends javax.swing.JPanel {
                 // any change?
                 if (! Arrays.equals(current.getURLs(), customizeDriverPanel.getDriverURLs())) {
                     JDBCDriver modified = JDBCDriver.create(current.getName(), current.getDisplayName(), current.getClassName(), customizeDriverPanel.getDriverURLs());
-                    for (JdbcUrl url : DriverListUtil.getJdbcUrls(current)) {
-                        url.setDriver(modified);
-                    }
                     try {
                         JDBCDriverManager.getDefault().removeDriver(current);
                         JDBCDriverManager.getDefault().addDriver(modified);
@@ -155,9 +150,9 @@ public class ChoosingDriverUI extends javax.swing.JPanel {
         cbDrivers = new javax.swing.JComboBox();
         pInter = new javax.swing.JPanel();
 
-        org.openide.awt.Mnemonics.setLocalizedText(lDrivers, org.openide.util.NbBundle.getMessage(ChoosingDriverUI.class, "ChoosingDriverUI.lDrivers.text")); // NOI18N
+        org.openide.awt.Mnemonics.setLocalizedText(lDrivers, NbBundle.getMessage(ChoosingDriverUI.class, "ChoosingDriverUI.lDrivers.text")); // NOI18N
 
-        pInter.setLayout(new java.awt.BorderLayout());
+        pInter.setLayout(new BorderLayout());
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
@@ -183,7 +178,7 @@ public class ChoosingDriverUI extends javax.swing.JPanel {
                 .addContainerGap())
         );
 
-        getAccessibleContext().setAccessibleDescription(org.openide.util.NbBundle.getMessage(ChoosingDriverUI.class, "ACD_ChoosingDriverUI")); // NOI18N
+        getAccessibleContext().setAccessibleDescription(NbBundle.getMessage(ChoosingDriverUI.class, "ACD_ChoosingDriverUI")); // NOI18N
     }// </editor-fold>//GEN-END:initComponents
 
 

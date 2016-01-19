@@ -127,7 +127,7 @@ public class DBReadWriteHelper {
                     } else {
                         return new Long(ldata);
                     }
-                } catch (java.sql.SQLDataException ex) {
+                } catch (SQLDataException ex) {
                     // In case of unsigned BIGINT, long is to small to take it
                     // for now getString is asumed to produce greates compatiblity
                     // The returned string is used to create a BigInteger
@@ -176,7 +176,7 @@ public class DBReadWriteHelper {
                     } else {
                         return new Integer(idata);
                     }
-                } catch (java.sql.SQLDataException ex) {
+                } catch (SQLDataException ex) {
                     // in case of an unsigned integer, the java Integer is
                     // to small to hold it => switch to long in that case
                     long ldata = rs.getLong(index);
@@ -223,11 +223,17 @@ public class DBReadWriteHelper {
             case Types.LONGVARBINARY:
             case Types.BLOB: {
                 // Load binary data as stream and hold it internally as a pseudoblob
-                InputStream is = rs.getBinaryStream(index);
-                if (is == null) {
+                try {
+                    InputStream is = rs.getBinaryStream(index);
+                    if (is == null) {
+                        return null;
+                    } else {
+                        return new FileBackedBlob(is);
+                    }
+                } catch (NullPointerException ex) {
+                    // The xerial sqlite-jdbc driver fails to return null and instead throws a NullPointer Exception
+                    // see bug 244313 for details
                     return null;
-                } else {
-                    return new FileBackedBlob(is);
                 }
             }
             case Types.LONGVARCHAR:
@@ -250,7 +256,7 @@ public class DBReadWriteHelper {
                     
                     try {
                         clob.free();
-                    } catch (java.lang.AbstractMethodError err) {
+                    } catch (AbstractMethodError err) {
                         // Blob gained a new method in jdbc4 (drivers compiled
                         // against older jdks don't provide this methid
                     } catch (SQLException ex) {
@@ -263,7 +269,7 @@ public class DBReadWriteHelper {
                     // clob data or can for example not provide a longvarchar
                     // as clob - so fall back to our implementation of clob
                 } catch (SQLException ex) {
-                } catch (java.lang.UnsupportedOperationException ex) {
+                } catch (UnsupportedOperationException ex) {
                 }
                 String sdata = rs.getString(index);
                 if (rs.wasNull()) {

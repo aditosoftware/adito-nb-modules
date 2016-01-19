@@ -251,7 +251,7 @@ public class OutputDocument implements Document, Element, ChangeListener {
         } else if (offset < inputOff) { // cursor before start of input
             off = inputOff;
         } else {
-            off = offset;
+            off = Math.min(offset, inBuffer.length() + inputOff);
         }
         inBuffer.insert(off - inputOff, str);
         final int len = str.length();
@@ -728,20 +728,22 @@ public class OutputDocument implements Document, Element, ChangeListener {
             assert SwingUtilities.isEventDispatchThread() : "Should be accessed from AWT only or we have a synchronization problem"; //NOI18N
             if (!consumed) {
                 consumed = true;
-                
-                // update lastFired info
-                lastFiredLineCount = getLines().getLineCount();
-                lastFiredLength = getLines().getCharCount() + inBuffer.length();
 
-                // fill event info
-                if (first < lastFiredLineCount) {
-                    offset = getLines().getLineStart(first);
-                    lineCount = lastFiredLineCount - first;
-                    length = lastFiredLength - offset;
-                } else {
-                    lineCount = 0;
-                    length = 0;
-                    offset = 0;
+                // update lastFired info
+                synchronized (getLines().readLock()) {
+                    lastFiredLineCount = getLines().getLineCount();
+                    lastFiredLength = getLines().getCharCount() + inBuffer.length();
+
+                    // fill event info
+                    if (first < lastFiredLineCount) {
+                        offset = getLines().getLineStart(first);
+                        lineCount = lastFiredLineCount - first;
+                        length = lastFiredLength - offset;
+                    } else {
+                        lineCount = 0;
+                        length = 0;
+                        offset = 0;
+                    }
                 }
             }
         }
@@ -757,7 +759,7 @@ public class OutputDocument implements Document, Element, ChangeListener {
             return "Event: first=" + first + " linecount=" + lineCount + " offset=" + offset + " length=" + length + " consumed=" + wasConsumed;
         }
         
-        public DocumentEvent.ElementChange getChange(Element element) {
+        public ElementChange getChange(Element element) {
             if (element == OutputDocument.this) {
                 return this;
             } else {
@@ -779,9 +781,9 @@ public class OutputDocument implements Document, Element, ChangeListener {
             return offset;
         }
         
-        public DocumentEvent.EventType getType() {
-            return first == 0 ? DocumentEvent.EventType.CHANGE : 
-                DocumentEvent.EventType.INSERT;
+        public EventType getType() {
+            return first == 0 ? EventType.CHANGE :
+                EventType.INSERT;
         }
         
         public Element[] getChildrenAdded() {

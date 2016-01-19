@@ -160,8 +160,8 @@ public class ProgressPanel extends JPanel {
         java.awt.GridBagConstraints gridBagConstraints;
 
         info = new javax.swing.JLabel();
-        holder = new javax.swing.JPanel();
-        cancelButton = new javax.swing.JButton();
+        holder = new JPanel();
+        cancelButton = new JButton();
 
         setLayout(new java.awt.GridBagLayout());
 
@@ -171,7 +171,7 @@ public class ProgressPanel extends JPanel {
         gridBagConstraints.insets = new java.awt.Insets(12, 12, 11, 11);
         add(info, gridBagConstraints);
 
-        holder.setLayout(new java.awt.BorderLayout());
+        holder.setLayout(new BorderLayout());
 
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
@@ -194,8 +194,8 @@ public class ProgressPanel extends JPanel {
 
 
     // Variables declaration - do not modify                     
-    private javax.swing.JButton cancelButton;
-    private javax.swing.JPanel holder;
+    private JButton cancelButton;
+    private JPanel holder;
     private javax.swing.JLabel info;
     // End of variables declaration                   
 

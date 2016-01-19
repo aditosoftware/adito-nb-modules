@@ -133,6 +133,6 @@ public interface View {
     
     public String guessSlideSide(TopComponent tc);
 
-    public void userStartedKeyboardDragAndDrop( TopComponentDraggable draggable );
+    public void userStartedKeyboardDragAndDrop(TopComponentDraggable draggable);
 }
 

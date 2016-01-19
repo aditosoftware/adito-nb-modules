@@ -476,7 +476,7 @@ public class JXDateTimePicker extends JComponent {
      *    null array is allowed and resets the formatter to use the 
      *    localized default formats.
      * @throws NullPointerException any array element is null.
-     * @see java.text.SimpleDateFormat
+     * @see SimpleDateFormat
      */
     public void setFormats(String... formats) {
         DateFormat[] dateFormats = null;
@@ -617,7 +617,7 @@ public class JXDateTimePicker extends JComponent {
      * 
      * @param linkDay     the Date to set on the LinkPanel 
      * @param linkFormatString String used to format the link
-     * @see java.text.MessageFormat
+     * @see MessageFormat
      */
     public void setLinkDay(java.util.Date linkDay, String linkFormatString) {
         setLinkFormat(new MessageFormat(linkFormatString));
@@ -752,7 +752,7 @@ public class JXDateTimePicker extends JComponent {
      * set as the current value. This has no effect if there is no current
      * AbstractFormatter installed.
      *
-     * @throws java.text.ParseException Throws parse exception if the date
+     * @throws ParseException Throws parse exception if the date
      *                                  can not be parsed.
      */
     public void commitEdit() throws ParseException {

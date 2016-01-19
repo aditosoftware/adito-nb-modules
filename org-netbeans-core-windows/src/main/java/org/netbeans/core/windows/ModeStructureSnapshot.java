@@ -418,7 +418,7 @@ public class ModeStructureSnapshot {
     
     /** */
     public static class EditorSnapshot extends ElementSnapshot {
-        private final ModeStructureSnapshot.ElementSnapshot editorAreaSnapshot;
+        private final ElementSnapshot editorAreaSnapshot;
         private final double resizeWeight;
         
         public EditorSnapshot(ModelElement originator, SplitSnapshot parent,
@@ -501,7 +501,7 @@ public class ModeStructureSnapshot {
     private static String dumpSet(Set separateModes) {
         StringBuffer sb = new StringBuffer();
         
-        for(java.util.Iterator it = separateModes.iterator(); it.hasNext(); ) {
+        for(Iterator it = separateModes.iterator(); it.hasNext(); ) {
             sb.append("\nmode=" + it.next());
         }
         

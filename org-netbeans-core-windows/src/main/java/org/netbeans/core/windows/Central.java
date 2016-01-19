@@ -844,8 +844,10 @@ final class Central implements ControllerHandler {
     
     public boolean addModeClosedTopComponent(ModeImpl mode, TopComponent tc) {
         boolean opened = getModeOpenedTopComponents(mode).contains(tc);
-        
-        if(opened && !AlwaysOpenTopComponentRegistry.canClose(tc)) { // !tc.canClose()
+
+        // ADITO
+        //if(opened && !tc.canClose()) {
+        if(opened && !AlwaysOpenTopComponentRegistry.canClose(tc)) {
             return false;
         }
         
@@ -974,8 +976,10 @@ final class Central implements ControllerHandler {
         }
         
         boolean viewChange = getModeOpenedTopComponents(mode).contains(tc);
-        
-        if(viewChange && !AlwaysOpenTopComponentRegistry.canClose(tc)) { // tc.canClose()
+
+        // ADITO
+        //if(viewChange && !tc.canClose()) {
+        if(viewChange && !AlwaysOpenTopComponentRegistry.canClose(tc)) {
             return false;
         }
         
@@ -2067,7 +2071,7 @@ final class Central implements ControllerHandler {
             SwingUtilities.invokeLater( new Runnable() {
                 @Override
                 public void run() {
-                    java.awt.Frame f = getMainWindow();
+                    Frame f = getMainWindow();
                     if( null != f && f.isVisible() ) {
                         f.invalidate();
                         f.repaint();
@@ -2648,9 +2652,6 @@ final class Central implements ControllerHandler {
                 break;
             }
         }
-        //#232061 
-        if( !tc.isOpened() )
-            tc.open();
         int prevIndex = prevMode != null && (intoSliding || intoSeparate) ? prevMode.getOpenedTopComponentsIDs().indexOf( tcID ) : -1;
         if(removeTopComponentFromOtherModes(mode, tc)) {
             moved = true;
@@ -2696,6 +2697,11 @@ final class Central implements ControllerHandler {
                 // now we have the sliding mode in initial state
                 mode.setBounds(tc.getBounds());
             }            
+        }
+        //#232061 
+        if( null != tc.getClientProperty("windnd_cloned_tc")) {
+            tc.putClientProperty("windnd_cloned_tc", null);
+            WindowManagerImpl.getInstance().notifyTopComponentOpened(tc);
         }
         return moved;
     }

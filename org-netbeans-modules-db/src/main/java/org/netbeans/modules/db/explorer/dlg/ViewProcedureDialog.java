@@ -86,27 +86,27 @@ public class ViewProcedureDialog extends javax.swing.JPanel {
         taBody = new javax.swing.JTextArea();
 
         lName.setLabelFor(tfName);
-        org.openide.awt.Mnemonics.setLocalizedText(lName, org.openide.util.NbBundle.getMessage(ViewProcedureDialog.class, "ViewProcedureDialog.lName.text", new Object[] {})); // NOI18N
+        org.openide.awt.Mnemonics.setLocalizedText(lName, NbBundle.getMessage(ViewProcedureDialog.class, "ViewProcedureDialog.lName.text", new Object[] {})); // NOI18N
 
         tfName.setEditable(false);
 
         lParams.setLabelFor(taParams);
-        org.openide.awt.Mnemonics.setLocalizedText(lParams, org.openide.util.NbBundle.getMessage(ViewProcedureDialog.class, "ViewProcedureDialog.lParams.text", new Object[] {})); // NOI18N
+        org.openide.awt.Mnemonics.setLocalizedText(lParams, NbBundle.getMessage(ViewProcedureDialog.class, "ViewProcedureDialog.lParams.text", new Object[] {})); // NOI18N
 
         taParams.setColumns(20);
         taParams.setEditable(false);
         taParams.setRows(5);
         spParams.setViewportView(taParams);
-        taParams.getAccessibleContext().setAccessibleDescription(org.openide.util.NbBundle.getMessage(ViewProcedureDialog.class, "ViewProcedureDialog.taParams.ACD")); // NOI18N
+        taParams.getAccessibleContext().setAccessibleDescription(NbBundle.getMessage(ViewProcedureDialog.class, "ViewProcedureDialog.taParams.ACD")); // NOI18N
 
         lBody.setLabelFor(taBody);
-        org.openide.awt.Mnemonics.setLocalizedText(lBody, org.openide.util.NbBundle.getMessage(ViewProcedureDialog.class, "ViewProcedureDialog.lBody.text", new Object[] {})); // NOI18N
+        org.openide.awt.Mnemonics.setLocalizedText(lBody, NbBundle.getMessage(ViewProcedureDialog.class, "ViewProcedureDialog.lBody.text", new Object[] {})); // NOI18N
 
         taBody.setColumns(20);
         taBody.setEditable(false);
         taBody.setRows(5);
         spBody.setViewportView(taBody);
-        taBody.getAccessibleContext().setAccessibleDescription(org.openide.util.NbBundle.getMessage(ViewProcedureDialog.class, "ViewProcedureDialog.taBody.ACD")); // NOI18N
+        taBody.getAccessibleContext().setAccessibleDescription(NbBundle.getMessage(ViewProcedureDialog.class, "ViewProcedureDialog.taBody.ACD")); // NOI18N
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
@@ -143,7 +143,7 @@ public class ViewProcedureDialog extends javax.swing.JPanel {
                 .addContainerGap())
         );
 
-        tfName.getAccessibleContext().setAccessibleDescription(org.openide.util.NbBundle.getMessage(ViewProcedureDialog.class, "ViewProcedureDialog.tfName.ACD")); // NOI18N
+        tfName.getAccessibleContext().setAccessibleDescription(NbBundle.getMessage(ViewProcedureDialog.class, "ViewProcedureDialog.tfName.ACD")); // NOI18N
     }// </editor-fold>//GEN-END:initComponents
 
 

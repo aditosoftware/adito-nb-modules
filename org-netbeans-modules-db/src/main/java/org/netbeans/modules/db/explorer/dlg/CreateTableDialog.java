@@ -57,7 +57,9 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.MissingResourceException;
 import java.util.concurrent.Callable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -100,6 +102,7 @@ public class CreateTableDialog {
     JTable table;
     JButton addbtn, delbtn, editBtn, upBtn, downBtn;
     Specification spec;
+    // ADITO
     //private final BaseNode tablesNode;
     private DialogDescriptor descriptor = null;
     private NotificationLineSupport statusLine;
@@ -129,9 +132,14 @@ public class CreateTableDialog {
         return dlgtab;
     }
 
-  public CreateTableDialog(final Specification spe, final String schema, List<ColumnItem> pItems, String pTableName) {
+    /*public CreateTableDialog(final BaseNode node, final String schema) {
+        DatabaseConnection connection = node.getLookup().lookup(DatabaseConnection.class);
+
+        spec = connection.getConnector().getDatabaseSpecification();
+        tablesNode = node;*/
+    // ADITO
+    public CreateTableDialog(final Specification spe, final String schema, List<ColumnItem> pItems, String pTableName) {
         spec = spe;
-        //tablesNode = node;
 
         try {
             JLabel label;
@@ -151,7 +159,7 @@ public class CreateTableDialog {
             constr.weightx = 0.0;
             constr.weighty = 0.0;
             constr.fill = GridBagConstraints.NONE;
-            constr.insets = new java.awt.Insets (2, 2, 2, 2);
+            constr.insets = new Insets (2, 2, 2, 2);
             constr.gridx = 0;
             constr.gridy = 0;
             layout.setConstraints(label, constr);
@@ -162,7 +170,9 @@ public class CreateTableDialog {
             constr.weighty = 0.0;
             constr.gridx = 1;
             constr.gridy = 0;
-            constr.insets = new java.awt.Insets (2, 2, 2, 2);
+            constr.insets = new Insets (2, 2, 2, 2);
+            // ADITO
+            //dbnamefield = new JTextField(getTableUntitledName(), 10);
             dbnamefield = new JTextField(NbBundle.getMessage (CreateTableDialog.class, "CreateTableUntitledName"), 10); // NOI18N
             dbnamefield.setToolTipText(NbBundle.getMessage (CreateTableDialog.class, "ACS_CreateTableNameTextFieldA11yDesc"));
             dbnamefield.getAccessibleContext().setAccessibleName(NbBundle.getMessage (CreateTableDialog.class, "ACS_CreateTableNameTextFieldA11yName"));
@@ -196,7 +206,7 @@ public class CreateTableDialog {
             constr.gridy = 1;
             constr.gridwidth = 4;
             constr.gridheight = 3;
-            constr.insets = new java.awt.Insets (2, 2, 2, 2);
+            constr.insets = new Insets (2, 2, 2, 2);
             table = new DataTable(new DataModel());
             table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
             table.setToolTipText(NbBundle.getMessage (CreateTableDialog.class, "ACS_CreateTableColumnTableA11yDesc"));
@@ -240,7 +250,7 @@ public class CreateTableDialog {
             constr.weighty = 0.0;
             constr.gridx = 4;
             constr.gridy = 1;
-            constr.insets = new java.awt.Insets (2, 8, 2, 2);
+            constr.insets = new Insets (2, 8, 2, 2);
             JPanel btnpane = new JPanel();
             GridLayout btnlay = new GridLayout(5,1,0,5);
             btnpane.setLayout(btnlay);
@@ -400,19 +410,6 @@ public class CreateTableDialog {
         } catch (MissingResourceException ex) {
             LOGGER.log(Level.SEVERE, ex.getLocalizedMessage(), ex);
         }
-
-        String tableName = Objects.toString(pTableName, "").trim();
-        if (tableName.length() > 0)
-          dbnamefield.setText(tableName);
-
-        if ((pItems != null) && (pItems.size() > 0))
-        {
-          DataModel model = (DataModel) table.getModel();
-          for (ColumnItem item : pItems)
-          {
-            model.addRow(item);
-          }
-        }
     }
 
     /**
@@ -421,6 +418,9 @@ public class CreateTableDialog {
      * @param schema DB schema to create table in
      * @return true if new table successfully created, false if cancelled
      */
+    //public static boolean showDialogAndCreate(final BaseNode node, final String schema) {
+    //    final CreateTableDialog dlg = new CreateTableDialog(node, schema);
+    // ADITO
     public static boolean showDialogAndCreate(final Specification spec, final String schema, List<ColumnItem> pItems, String pTableName) {
         final CreateTableDialog dlg = new CreateTableDialog(spec, schema, pItems, pTableName);
         dlg.dialog.setVisible(true);
@@ -429,7 +429,8 @@ public class CreateTableDialog {
         }
         return false;
     }
-    
+
+    // ADITO
     /*private String getTableUntitledName() {
         final String nameBase = NbBundle.getMessage (CreateTableDialog.class, "CreateTableUntitledName"); // NOI18N
         String name = nameBase;

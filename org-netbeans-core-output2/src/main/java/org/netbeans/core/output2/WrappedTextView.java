@@ -557,13 +557,16 @@ public class WrappedTextView extends View implements TabExpander {
         return arrowColor;
     }
 
-    public Shape modelToView(int pos, Shape a, Position.Bias b) throws BadLocationException {
+    public Shape modelToView(int pos, Shape a, Bias b) throws BadLocationException {
         Rectangle result = new Rectangle();
         result.setBounds (0, 0, charWidth, charHeight);
         OutputDocument od = odoc();
         if (od != null) {
-            int line = Math.max(0, od.getLines().getLineAt(pos));
-            int start = od.getLineStart(line);
+            int line, start;
+            synchronized (od.getLines().readLock()) {
+                line = Math.max(0, od.getLines().getLineAt(pos));
+                start = od.getLineStart(line);
+            }
 
             int column = pos - start;
 
@@ -590,7 +593,7 @@ public class WrappedTextView extends View implements TabExpander {
         return result;
     }
 
-    public int viewToModel(float x, float y, Shape a, Position.Bias[] biasReturn) {
+    public int viewToModel(float x, float y, Shape a, Bias[] biasReturn) {
         OutputDocument od = odoc();
         if (od != null) {
             int ix = Math.max((int) x - margin(), 0);
@@ -896,9 +899,11 @@ public class WrappedTextView extends View implements TabExpander {
      * Find position of the last char in line.
      */
     private int getLineEnd(int realLineIndex, Lines lines) {
-        return realLineIndex + 1 < lines.getLineCount()
-                ? lines.getLineStart(realLineIndex + 1) - 1
-                : lines.getCharCount();
+        synchronized (lines.readLock()) {
+            return realLineIndex + 1 < lines.getLineCount()
+                    ? lines.getLineStart(realLineIndex + 1) - 1
+                    : lines.getCharCount();
+        }
     }
 
     /**

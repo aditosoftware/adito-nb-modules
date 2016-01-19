@@ -69,6 +69,7 @@ import org.openide.awt.ActionRegistration;
 import org.openide.filesystems.FileObject;
 import org.openide.util.Lookup;
 import org.openide.windows.Mode;
+import org.openide.windows.RetainLocation;
 import org.openide.windows.TopComponent;
 import org.openide.windows.TopComponentGroup;
 
@@ -79,14 +80,14 @@ import org.openide.windows.TopComponentGroup;
  */
 public class ResetWindowsAction implements ActionListener {
     @ActionID(id = "org.netbeans.core.windows.actions.ResetWindowsAction", category = "Window")
-    @ActionRegistration(displayName = "#CTL_ResetWindows")
+    @ActionRegistration(displayName = "Bundle#CTL_ResetWindows")
     @ActionReference(position = 20200, path = "Menu/Window")
     public static ActionListener reset() {
         return new ResetWindowsAction(true);
     }
     
     @ActionID(id = "org.netbeans.core.windows.actions.ReloadWindowsAction", category = "Window")
-    @ActionRegistration(displayName = "#CTL_ReloadWindows")
+    @ActionRegistration(displayName = "Bundle#CTL_ReloadWindows")
     public static ActionListener reload() {
         return new ResetWindowsAction(false);
     }
@@ -165,8 +166,16 @@ public class ResetWindowsAction implements ActionListener {
                 //re-open editor windows that were opened before the reset
                 for( int i=0; i<editors.length && null != editorMode; i++ ) {
                     ModeImpl mode = ( ModeImpl ) wm.findMode( editors[i] );
-                    if( null == mode )
+                    if( null == mode ) {
+                        RetainLocation retainLocation = editors[i].getClass().getAnnotation(RetainLocation.class);
+                        if( null != retainLocation ) {
+                            String preferedModeName = retainLocation.value();
+                            mode = (ModeImpl) wm.findMode(preferedModeName);
+                        }
+                    }
+                    if( null == mode ) {
                         mode = editorMode;
+                    }
                     if( null != mode )
                         mode.addOpenedTopComponentNoNotify(editors[i]);
                     //#210380 - do not call componentOpened on the editors 

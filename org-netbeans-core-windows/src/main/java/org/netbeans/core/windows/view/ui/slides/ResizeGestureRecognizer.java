@@ -171,7 +171,7 @@ public class ResizeGestureRecognizer implements AWTEventListener {
         return 0;
     }
     
-    public void eventDispatched(java.awt.AWTEvent aWTEvent) {
+    public void eventDispatched(AWTEvent aWTEvent) {
         //#118828
         if (! (aWTEvent.getSource() instanceof Component)) {
             return;

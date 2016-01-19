@@ -54,12 +54,11 @@ import org.openide.util.HelpCtx;
 import org.openide.util.Lookup;
 
 @OptionsPanelController.SubRegistration(
-    displayName="#Laf_DisplayName",
-    keywords="#KW_LafOptions",
+    displayName="Bundle#Laf_DisplayName",
+    keywords="Bundle#KW_LafOptions",
     keywordsCategory="Appearance/LaF",
     location = "Appearance"
 )
-@org.openide.util.NbBundle.Messages({"Laf_DisplayName=Look and Feel", "KW_LafOptions=Look and feel"})
 public class LafOptionsPanelController extends OptionsPanelController {
 
     private LafPanel panel;

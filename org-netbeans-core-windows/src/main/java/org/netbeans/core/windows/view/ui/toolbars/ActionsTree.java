@@ -102,16 +102,16 @@ public class ActionsTree extends BeanTreeView implements DragGestureListener, Dr
     }
 
     @Override
-    public void dragExit(java.awt.dnd.DragSourceEvent dse) {
+    public void dragExit(DragSourceEvent dse) {
         dse.getDragSourceContext().setCursor( dragNoDropCursor );
     }
 
     @Override
-    public void dropActionChanged(java.awt.dnd.DragSourceDragEvent dsde) {
+    public void dropActionChanged(DragSourceDragEvent dsde) {
     }
 
     @Override
-    public void dragOver(java.awt.dnd.DragSourceDragEvent e) {
+    public void dragOver(DragSourceDragEvent e) {
         DragSourceContext context = e.getDragSourceContext();
         int action = e.getDropAction();
         if ((action & DnDConstants.ACTION_MOVE) != 0) {
@@ -122,11 +122,11 @@ public class ActionsTree extends BeanTreeView implements DragGestureListener, Dr
     }
 
     @Override
-    public void dragEnter(java.awt.dnd.DragSourceDragEvent dsde) {
+    public void dragEnter(DragSourceDragEvent dsde) {
         dragOver( dsde );
     }
 
     @Override
-    public void dragDropEnd(java.awt.dnd.DragSourceDropEvent dsde) {
+    public void dragDropEnd(DragSourceDropEvent dsde) {
     }
 }

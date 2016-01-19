@@ -823,7 +823,7 @@ implements PropertyChangeListener, WindowListener, Mutex.Action<Void>, Comparato
             // add final button panel to the dialog
             if ((currentButtonsPanel != null)&&(currentButtonsPanel.getComponentCount() != 0)) {
                 if (currentButtonsPanel.getBorder() == null) {
-                    currentButtonsPanel.setBorder(new javax.swing.border.EmptyBorder(new java.awt.Insets(11, 6, 5, 5)));
+                    currentButtonsPanel.setBorder(new javax.swing.border.EmptyBorder(new Insets(11, 6, 5, 5)));
                 }
                 getContentPane().add(currentButtonsPanel, BorderLayout.SOUTH);
             }
@@ -862,7 +862,7 @@ implements PropertyChangeListener, WindowListener, Mutex.Action<Void>, Comparato
             // add final button panel to the dialog
             if (currentButtonsPanel != null) {
                 if (currentButtonsPanel.getBorder() == null) {
-                    currentButtonsPanel.setBorder(new javax.swing.border.EmptyBorder(new java.awt.Insets(6, 7, 5, 5)));
+                    currentButtonsPanel.setBorder(new javax.swing.border.EmptyBorder(new Insets(6, 7, 5, 5)));
                 }
                 getContentPane().add(currentButtonsPanel, BorderLayout.EAST);
             }
@@ -1035,7 +1035,7 @@ implements PropertyChangeListener, WindowListener, Mutex.Action<Void>, Comparato
         } else {
             // we will have to use dynamic method invocation to add the action listener
             // to generic component (and we succeed only if it has the addActionListener method)
-            java.lang.reflect.Method m = null;
+            Method m = null;
             try {
                 m = comp.getClass().getMethod(add ? "addActionListener" : "removeActionListener", new Class[] { ActionListener.class });// NOI18N
                 try {
@@ -1257,7 +1257,7 @@ implements PropertyChangeListener, WindowListener, Mutex.Action<Void>, Comparato
     }
     public void windowClosing(final java.awt.event.WindowEvent p1) {
         // #81938: special handling WizardDescriptor to avoid close wizard during instantiate
-        if (! (descriptor instanceof WizardDescriptor)) {
+        if (!descriptor.isNoDefaultClose() ) {
             descriptor.setValue(NotifyDescriptor.CLOSED_OPTION);
         }
     }
@@ -1387,7 +1387,7 @@ implements PropertyChangeListener, WindowListener, Mutex.Action<Void>, Comparato
                 // all options should close
                 dispose();
             } else {
-                java.util.List l = java.util.Arrays.asList(arr);
+                List l = Arrays.asList(arr);
                 
                 if (l.contains(pressedOption)) {
                     dispose();
@@ -1480,7 +1480,7 @@ implements PropertyChangeListener, WindowListener, Mutex.Action<Void>, Comparato
             try {
                 markers = DefaultKeyboardFocusManager.class.getDeclaredField("typeAheadMarkers"); // NOI18N
                 markers.setAccessible(true);
-                dequeue = DefaultKeyboardFocusManager.class.getDeclaredMethod("dequeueKeyEvents", new Class[] { Long.TYPE, java.awt.Component.class });
+                dequeue = DefaultKeyboardFocusManager.class.getDeclaredMethod("dequeueKeyEvents", new Class[] { Long.TYPE, Component.class });
                 dequeue.setAccessible(true);
             } catch (Throwable ex) {
                 LOG.log(Level.WARNING, "Not activating workaround for #50423", ex); // NOI18N

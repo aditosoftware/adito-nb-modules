@@ -456,7 +456,7 @@ final class CommandManager implements ActionListener {
     
     private final Action escapeAction = new EscapeAction();
     
-    private final class EscapeAction extends javax.swing.AbstractAction {
+    private final class EscapeAction extends AbstractAction {
         @Override
         public void actionPerformed(ActionEvent e) {
             slideBar.getSelectionModel().setSelectedIndex(-1);

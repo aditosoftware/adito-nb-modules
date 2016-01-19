@@ -100,7 +100,7 @@ public class SuperPatternFilter extends RowFilter<TableModel, Integer> {
         }
     }
 
-    public boolean include(RowFilter.Entry<? extends TableModel, ? extends Integer> entry) {
+    public boolean include(Entry<? extends TableModel, ? extends Integer> entry) {
         return testValue(entry.getStringValue(col));
     }
 

@@ -38,7 +38,7 @@ import java.util.*;
 
 /**
  * This class factors out the DDL logic from the CreateTableDialog
- *
+ * 
  * @author <a href="mailto:david@vancouvering.com>David Van Couvering</a>
  */
 public class CreateTableDDL {
@@ -47,20 +47,20 @@ public class CreateTableDDL {
     private String              tablename;
 
     public CreateTableDDL (
-            Specification spec,
+            Specification spec, 
             String schema,
             String tablename) {
         this.spec       = spec;
         this.schema     = schema;
         this.tablename  = tablename;
     }
-
+    
     /**
-     * Execute the DDL to create a table.
-     *
+     * Execute the DDL to create a table.  
+     * 
      * @param columns - A Vector of ColumnItem representing the columns
      *      in the table
-     *
+     * 
      * @param pkcols A Vector of ColumnItem representing the columns
      *      which are in the primary key for the table.  Can be null
      */
@@ -89,7 +89,7 @@ public class CreateTableDDL {
               }
               else if (col.isUnique()&&!col.isPrimaryKey())
               {
-                cmdcol = cmd.createUniqueColumn(name);
+                  cmdcol = cmd.createUniqueColumn(name);
                 OracleTableColumnHack.fixUniqueColumn(spec, cmdcol, tablename, name);
               }
               else cmdcol = cmd.createColumn(name);
@@ -105,7 +105,7 @@ public class CreateTableDDL {
               if (defval != null && defval.length() > 0)
                   cmdcol.setDefaultValue(defval);
               if (col.hasCheckConstraint()) {
-                // add the TABLE check constraint
+                  // add the TABLE check constraint
                 TableColumn checkConstraintCol = cmd.createCheckConstraint(name, col.getCheckConstraint());
                 OracleTableColumnHack.fixCheckConstraint(spec, checkConstraintCol, tablename, name);
               }
@@ -115,7 +115,7 @@ public class CreateTableDDL {
                   // created now, versus an existing one.  This
                   // means we shouldn't quote it.
                   xcmd.setNewObject(true);
-                  xcmd.setIndexName(tablename + "_" + name + "_idx"); // NOI18N
+                  xcmd.setIndexName(tablename+ "_" + name + "_idx"); // NOI18N
                   xcmd.setIndexType(new String());
                   xcmd.setObjectOwner(schema);
                   xcmd.specifyNewColumn(name);
@@ -139,10 +139,10 @@ public class CreateTableDDL {
 
           //execute DDL command
           cbuff.execute();
-
+          
           return cbuff.wasException();
     }
-
+    
     private boolean hasPrimaryKeys(List<ColumnItem> pkcols) {
         return pkcols != null && pkcols.size() > 0;
     }

@@ -64,7 +64,7 @@ import javax.swing.LookAndFeel;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.UIManager.LookAndFeelInfo;
-import org.netbeans.api.options.OptionsDisplayer;
+
 import org.netbeans.spi.options.OptionsPanelController;
 import org.openide.LifecycleManager;
 import org.openide.awt.Notification;
@@ -74,8 +74,8 @@ import org.openide.util.Lookup;
 import org.openide.util.NbBundle;
 import org.openide.util.NbPreferences;
 
-@OptionsPanelController.Keywords(keywords={"#KW_WindowOptions"}, location=OptionsDisplayer.ADVANCED, tabTitle="#AdvancedOption_DisplayName_WinSys")
-public class LafPanel extends javax.swing.JPanel {
+@OptionsPanelController.Keywords(keywords={"Bundle#KW_LafOptions"}, location="Appearance", tabTitle="Bundle#Laf_DisplayName")
+public class LafPanel extends JPanel {
 
     protected final LafOptionsPanelController controller;
     
@@ -131,21 +131,21 @@ public class LafPanel extends javax.swing.JPanel {
         java.awt.GridBagConstraints gridBagConstraints;
 
         buttonGroup1 = new javax.swing.ButtonGroup();
-        panelLaF = new javax.swing.JPanel();
-        checkMaximizeNativeLaF = new javax.swing.JCheckBox();
-        panelLaFCombo = new javax.swing.JPanel();
+        panelLaF = new JPanel();
+        checkMaximizeNativeLaF = new JCheckBox();
+        panelLaFCombo = new JPanel();
         comboLaf = new javax.swing.JComboBox();
-        lblLaf = new javax.swing.JLabel();
-        lblRestart = new javax.swing.JLabel();
+        lblLaf = new JLabel();
+        lblRestart = new JLabel();
 
         setBorder(javax.swing.BorderFactory.createEmptyBorder(10, 10, 10, 10));
         setLayout(new java.awt.GridBagLayout());
 
-        panelLaF.setLayout(new java.awt.BorderLayout());
+        panelLaF.setLayout(new BorderLayout());
 
-        org.openide.awt.Mnemonics.setLocalizedText(checkMaximizeNativeLaF, org.openide.util.NbBundle.getMessage(LafPanel.class, "LafPanel.checkMaximizeNativeLaF.text")); // NOI18N
-        checkMaximizeNativeLaF.setToolTipText(org.openide.util.NbBundle.getMessage(LafPanel.class, "LafPanel.checkMaximizeNativeLaF.toolTipText")); // NOI18N
-        panelLaF.add(checkMaximizeNativeLaF, java.awt.BorderLayout.WEST);
+        org.openide.awt.Mnemonics.setLocalizedText(checkMaximizeNativeLaF, NbBundle.getMessage(LafPanel.class, "LafPanel.checkMaximizeNativeLaF.text")); // NOI18N
+        checkMaximizeNativeLaF.setToolTipText(NbBundle.getMessage(LafPanel.class, "LafPanel.checkMaximizeNativeLaF.toolTipText")); // NOI18N
+        panelLaF.add(checkMaximizeNativeLaF, BorderLayout.WEST);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
@@ -156,15 +156,15 @@ public class LafPanel extends javax.swing.JPanel {
         gridBagConstraints.insets = new java.awt.Insets(5, 0, 0, 0);
         add(panelLaF, gridBagConstraints);
 
-        panelLaFCombo.setLayout(new java.awt.BorderLayout(3, 0));
-        panelLaFCombo.add(comboLaf, java.awt.BorderLayout.CENTER);
+        panelLaFCombo.setLayout(new BorderLayout(3, 0));
+        panelLaFCombo.add(comboLaf, BorderLayout.CENTER);
 
         lblLaf.setLabelFor(comboLaf);
         org.openide.awt.Mnemonics.setLocalizedText(lblLaf, NbBundle.getMessage(LafPanel.class, "LafPanel.lblLaf.text")); // NOI18N
-        panelLaFCombo.add(lblLaf, java.awt.BorderLayout.WEST);
+        panelLaFCombo.add(lblLaf, BorderLayout.WEST);
 
         org.openide.awt.Mnemonics.setLocalizedText(lblRestart, NbBundle.getMessage(LafPanel.class, "LafPanel.lblRestart.text")); // NOI18N
-        panelLaFCombo.add(lblRestart, java.awt.BorderLayout.LINE_END);
+        panelLaFCombo.add(lblRestart, BorderLayout.LINE_END);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
@@ -203,12 +203,12 @@ public class LafPanel extends javax.swing.JPanel {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.ButtonGroup buttonGroup1;
-    private javax.swing.JCheckBox checkMaximizeNativeLaF;
+    private JCheckBox checkMaximizeNativeLaF;
     private javax.swing.JComboBox comboLaf;
-    private javax.swing.JLabel lblLaf;
-    private javax.swing.JLabel lblRestart;
-    private javax.swing.JPanel panelLaF;
-    private javax.swing.JPanel panelLaFCombo;
+    private JLabel lblLaf;
+    private JLabel lblRestart;
+    private JPanel panelLaF;
+    private JPanel panelLaFCombo;
     // End of variables declaration//GEN-END:variables
 
 
@@ -259,10 +259,10 @@ public class LafPanel extends javax.swing.JPanel {
         if( null != restartNotification ) {
             restartNotification.clear();
         }
-        restartNotification = NotificationDisplayer.getDefault().notify( NbBundle.getMessage(LafPanel.class, "Hint_RESTART_IDE"),
-                ImageUtilities.loadImageIcon( "org/netbeans/core/windows/resources/restart.png", true ), //NOI18N
-                createRestartNotificationDetails(), createRestartNotificationDetails(),
-                NotificationDisplayer.Priority.HIGH, NotificationDisplayer.Category.INFO);
+        restartNotification = NotificationDisplayer.getDefault().notify(                                                                                        NbBundle.getMessage(LafPanel.class, "Hint_RESTART_IDE"),
+                                                                        ImageUtilities.loadImageIcon("org/netbeans/core/windows/resources/restart.png", true ), //NOI18N
+                                                                        createRestartNotificationDetails(),                                                     createRestartNotificationDetails(),
+                                                                        NotificationDisplayer.Priority.HIGH,                                                    NotificationDisplayer.Category.INFO);
     }
 
     void selectDarkLookAndFeel() {
