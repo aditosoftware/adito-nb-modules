@@ -80,14 +80,14 @@ import org.openide.windows.TopComponentGroup;
  */
 public class ResetWindowsAction implements ActionListener {
     @ActionID(id = "org.netbeans.core.windows.actions.ResetWindowsAction", category = "Window")
-    @ActionRegistration(displayName = "Bundle#CTL_ResetWindows")
+    @ActionRegistration(displayName = "#CTL_ResetWindows")
     @ActionReference(position = 20200, path = "Menu/Window")
     public static ActionListener reset() {
         return new ResetWindowsAction(true);
     }
     
     @ActionID(id = "org.netbeans.core.windows.actions.ReloadWindowsAction", category = "Window")
-    @ActionRegistration(displayName = "Bundle#CTL_ReloadWindows")
+    @ActionRegistration(displayName = "#CTL_ReloadWindows")
     public static ActionListener reload() {
         return new ResetWindowsAction(false);
     }

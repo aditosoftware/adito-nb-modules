@@ -54,8 +54,8 @@ import org.openide.util.HelpCtx;
 import org.openide.util.Lookup;
 
 @OptionsPanelController.SubRegistration(
-    displayName="Bundle#Laf_DisplayName",
-    keywords="Bundle#KW_LafOptions",
+    displayName="#Laf_DisplayName",
+    keywords="#KW_LafOptions",
     keywordsCategory="Appearance/LaF",
     location = "Appearance"
 )

@@ -52,7 +52,7 @@ import org.netbeans.spi.options.OptionsPanelController;
 import org.openide.util.NbBundle;
 import org.openide.util.NbPreferences;
 
-@OptionsPanelController.Keywords(keywords={"Bundle#KW_TabsOptions"}, location="Appearance", tabTitle="Bundle#Tabs_DisplayName")
+@OptionsPanelController.Keywords(keywords={"#KW_TabsOptions"}, location="Appearance", tabTitle="#Tabs_DisplayName")
 public class TabsPanel extends JPanel {
 
     protected final TabsOptionsPanelController controller;
