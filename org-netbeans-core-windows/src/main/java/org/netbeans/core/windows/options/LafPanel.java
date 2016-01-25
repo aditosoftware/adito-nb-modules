@@ -74,7 +74,7 @@ import org.openide.util.Lookup;
 import org.openide.util.NbBundle;
 import org.openide.util.NbPreferences;
 
-@OptionsPanelController.Keywords(keywords={"Bundle#KW_LafOptions"}, location="Appearance", tabTitle="Bundle#Laf_DisplayName")
+@OptionsPanelController.Keywords(keywords={"#KW_LafOptions"}, location="Appearance", tabTitle="#Laf_DisplayName")
 public class LafPanel extends JPanel {
 
     protected final LafOptionsPanelController controller;

@@ -54,9 +54,9 @@ import org.openide.util.HelpCtx;
 import org.openide.util.Lookup;
 
 @OptionsPanelController.SubRegistration(
-    displayName="Bundle#Tabs_DisplayName",
+    displayName="#Tabs_DisplayName",
     id="DocumentTabs",
-    keywords="Bundle#KW_TabsOptions",
+    keywords="#KW_TabsOptions",
     keywordsCategory="Appearance/Tabs",
     location = "Appearance"
 )
