@@ -6,11 +6,10 @@ import de.adito.aditoweb.nbm.nbide.nbaditointerface.NbAditoInterface;
 import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.model.IAditoModelDataProvider;
 import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.sync.*;
 import de.adito.propertly.core.common.path.PropertyPath;
-import de.adito.propertly.core.spi.IPropertyPitProvider;
+import de.adito.propertly.core.spi.*;
 import org.jetbrains.annotations.NotNull;
 import org.netbeans.modules.form.*;
 import org.netbeans.modules.form.project.ClassSource;
-import org.openide.filesystems.FileObject;
 import org.openide.nodes.Node;
 import org.openide.util.NotImplementedException;
 
@@ -221,15 +220,7 @@ public class FormDataBridge
 
   void copyValuesFromAdito()
   {
-    _processFromAdito(new Runnable()
-    {
-      @Override
-      public void run()
-      {
-        for (String s : componentInfo.getPropertyNames())
-          _alignFormToAditoProperty(s);
-      }
-    });
+    _processFromAdito(() -> componentInfo.getPropertyNames().forEach(this::_alignFormToAditoProperty));
   }
 
   private void _alignFormToAditoProperty(final String pAditoPropName)
@@ -294,14 +285,7 @@ public class FormDataBridge
     }
     finally
     {
-      SwingUtilities.invokeLater(new Runnable()
-      {
-        @Override
-        public void run()
-        {
-          isProcessingFromAdito.decrementAndGet();
-        }
-      });
+      SwingUtilities.invokeLater(isProcessingFromAdito::decrementAndGet);
     }
   }
 
@@ -346,24 +330,18 @@ public class FormDataBridge
     {
       final FormDataBridge formDataBridge = formDataBridgeRef.get();
       if (formDataBridge != null)
-        formDataBridge._processFromAdito(new Runnable()
-        {
-          @Override
-          public void run()
-          {
-            _apply(formDataBridge, evt);
-          }
-        });
+        formDataBridge._processFromAdito(() -> _apply(formDataBridge, evt));
     }
 
-    private void _apply(final FormDataBridge pFormDataBridge, PropertyChangeEvent evt)
+    private void _apply(final FormDataBridge pFormDataBridge, PropertyChangeEvent pEvt)
     {
-      String propertyName = evt.getPropertyName();
+      String propertyName = pEvt.getPropertyName();
       RADComponent radComponent = pFormDataBridge.radComponent;
       switch (propertyName)
       {
         case IFormComponentInfo.PROP_CHILD_ADDED:
-          IPropertyPitProvider<?, ?, ?> created = (IPropertyPitProvider<?, ?, ?>) evt.getNewValue();
+          IPropertyPitProvider<?, ?, ?> created = (IPropertyPitProvider<?, ?, ?>)
+              ((IPropertyPitProvider) pEvt.getSource()).getPit().getValue((IPropertyDescription) pEvt.getNewValue());
 
           if (radComponent instanceof ComponentContainer)
           {
@@ -412,7 +390,7 @@ public class FormDataBridge
           if (radComponent instanceof ComponentContainer)
           {
             ComponentContainer container = (ComponentContainer) radComponent;
-            String removedName = ((FileObject) evt.getOldValue()).getNameExt();
+            String removedName = ((IPropertyDescription) pEvt.getOldValue()).getName();
             for (RADComponent component : Lists.newArrayList(container.getSubBeans()))
             {
               if (Objects.equal(component.getName(), removedName))
@@ -433,19 +411,13 @@ public class FormDataBridge
           break;
         case IFormComponentInfo.PROP_POSITION_CHANGED:
           // per 'invokeLater', da das Event gefeuert wurde, bevor der Wert im FileSystem steht.
-          EventQueue.invokeLater(new Runnable()
-          {
-            public void run()
-            {
-              pFormDataBridge.syncChildren();
-            }
-          });
+          EventQueue.invokeLater(pFormDataBridge::syncChildren);
           break;
         case IFormComponentInfo.PROP_NAME_CHANGED:
-          radComponent.rename((String) evt.getNewValue());
+          radComponent.rename((String) pEvt.getNewValue());
           break;
         case IFormComponentInfo.PROP_VALUE_CHANGED:
-          pFormDataBridge._alignFormToAditoProperty((String) evt.getNewValue());
+          pFormDataBridge._alignFormToAditoProperty((String) pEvt.getNewValue());
           break;
         default:
           throw new NotImplementedException(propertyName);
