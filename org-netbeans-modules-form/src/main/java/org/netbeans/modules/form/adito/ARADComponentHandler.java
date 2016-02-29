@@ -246,7 +246,7 @@ public class ARADComponentHandler
   {
     if (model != null)
       return model.getPit().getOwnProperty().getName();
-    FileObject configFile = FileUtil.getConfigFile("FormDesignerPalette/Adito/" + pBeanClass.getSimpleName()
+    FileObject configFile = FileUtil.getConfigFile("FormDesignerPalette/BrowserClient/" + pBeanClass.getSimpleName()
         .toLowerCase() + ".palette_item");
     if (configFile != null)
     {

@@ -78,7 +78,7 @@ import org.netbeans.modules.form.project.ClassSource;
  */
 
 public final class PaletteUtils {
-    
+
     private static FileObject paletteFolder;
     private static DataFolder paletteDataFolder;
 
@@ -97,10 +97,10 @@ public final class PaletteUtils {
 
     private PaletteUtils() {
     }
-    
+
     static String getItemComponentDescription(PaletteItem item) {
         ClassSource classSource = item.getComponentClassSource();
-        
+
         if (classSource == null || !classSource.hasEntries()) {
             String className = classSource.getClassName();
             if (className != null) {
@@ -116,11 +116,12 @@ public final class PaletteUtils {
             return NbBundle.getMessage(PaletteUtils.class, "FMT_ComponentFrom", classSource.getEntries().iterator().next().getDisplayName());
         }
     }
-    
+
     public static FileObject getPaletteFolder() {
+
         if (paletteFolder != null)
             return paletteFolder;
-        
+
         try {
             paletteFolder = FileUtil.getConfigFile("FormDesignerPalette"); // NOI18N
             if (paletteFolder == null) // not found, create new folder
@@ -131,7 +132,7 @@ public final class PaletteUtils {
         }
         return paletteFolder;
     }
-    
+
     public static Node getPaletteNode() {
         return getPaletteDataFolder().getNodeDelegate();
     }
@@ -356,17 +357,17 @@ public final class PaletteUtils {
             palette.clearSelection();
         }
     }
-    
+
     public static PaletteItem getSelectedItem() {
         PaletteController palette = getPalette();
         if (palette == null) {
             return null;
         }
         Lookup lkp = palette.getSelectedItem();
-        
+
         return lkp.lookup(PaletteItem.class);
     }
-    
+
     public static void selectItem( PaletteItem item ) {
         if( null == item ) {
             clearPaletteSelection();
@@ -385,7 +386,7 @@ public final class PaletteUtils {
             }
         }
     }
-    
+
     public static Image getIconForClass(String className, String classDetails, int type, boolean optimalResult) {
         Image img = null;
         for (PaletteItem item : getAllItems(optimalResult)) {
@@ -406,11 +407,11 @@ public final class PaletteUtils {
         }
         return img;
     }
-    
+
     public static PaletteItem[] getAllItems() {
         return getAllItems(true);
     }
-    
+
     public static PaletteItem[] getAllItems(boolean optimalResult) {
         HashSet<PaletteItem> uniqueItems = null;
         // collect valid items from all categories (including invisible)
@@ -437,15 +438,15 @@ public final class PaletteUtils {
         }
         return res;
     }
-    
+
     public static String getBundleString(String key) {
         return NbBundle.getBundle(PaletteUtils.class).getString(key);
     }
-    
+
     public static Node[] getItemNodes(Node categoryNode, boolean mustBeValid) {
         return getItemNodes(categoryNode, mustBeValid, true);
     }
-    
+
     /**
      * Get an array of Node for the given category.
      *
@@ -481,7 +482,7 @@ public final class PaletteUtils {
 
         return nodes;
     }
-    
+
     /**
      * Get an array of all categories in the given palette.
      *
@@ -493,7 +494,7 @@ public final class PaletteUtils {
     public static Node[] getCategoryNodes(Node paletteNode, boolean mustBeVisible) {
         return getCategoryNodes(paletteNode, mustBeVisible, mustBeVisible, true, true);
     }
-    
+
     /**
      * Get an array of all categories in the given palette.
      *
@@ -540,7 +541,7 @@ public final class PaletteUtils {
         }
         return nodes;
     }
-    
+
     /**
      * @return True if the given node is a DataFolder and does not have Hidden flag set.
      */
@@ -563,7 +564,7 @@ public final class PaletteUtils {
         DataFolder df = node.getCookie(DataFolder.class);
         return (df != null) && !Boolean.TRUE.equals(df.getPrimaryFile().getAttribute("isNoPaletteCategory")); // NOI18N
     }
-    
+
     // -----
 
     /**
@@ -622,7 +623,7 @@ public final class PaletteUtils {
         boolean isValidItem(PaletteItem item) {
             if (classPath == null)
                 return true;
-            
+
             if (item == null) // Issue 81506
                 return false;
 

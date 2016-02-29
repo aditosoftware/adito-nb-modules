@@ -13,6 +13,8 @@ public interface IAditoLayoutProvider
 
   IAditoLayout<IAnchorLayoutPropertyTypes> getAnchorLayout();
 
+  IAditoLayout getNeonTableLayout();
+
   IAditoLayout getRegisterLayout();
 
 }

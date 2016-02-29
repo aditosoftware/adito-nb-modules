@@ -88,7 +88,7 @@ public class LayoutSupportRegistry {
     public static LayoutSupportRegistry getRegistry(FormModel formModel) {
         LayoutSupportRegistry reg;
         if (instanceMap == null) {
-            instanceMap = new WeakHashMap<FormModel,LayoutSupportRegistry>(); 
+            instanceMap = new WeakHashMap<FormModel,LayoutSupportRegistry>();
             reg = null;
         }
         else reg = instanceMap.get(formModel);
@@ -231,7 +231,7 @@ public class LayoutSupportRegistry {
             FileObject categoryFolder = paletteCategories[i];
             if (!categoryFolder.isFolder())
                 continue;
-           
+
             if (newPaletteListener)
                 categoryFolder.addFileChangeListener(paletteListener);
 
@@ -347,6 +347,9 @@ public class LayoutSupportRegistry {
             containerToLayoutDelegate.put(
                 "de.adito.aditoweb.nbm.nbaditointerfaceimpl.form.components.frame.ARegisterTab", // NOI18N
                 "org.netbeans.modules.form.adito.layout.AditoLayoutSupport"); // NOI18N
+            containerToLayoutDelegate.put(
+                "de.adito.aditoweb.nbm.nbaditointerfaceimpl.form.components.frameneon.ANeonFrame", // NOI18N
+                "org.netbeans.modules.form.adito.layout.neon.AditoNeonLayoutSupport"); // NOI18N
         }
         return containerToLayoutDelegate;
     }
@@ -386,6 +389,9 @@ public class LayoutSupportRegistry {
             layoutToLayoutDelegate.put(
                 "de.adito.aditoweb.swingcommon.layout.aditolayout.AditoAnchorLayout", // NOI18N
                 "org.netbeans.modules.form.adito.layout.AditoLayoutSupport"); // NOI18N
+            layoutToLayoutDelegate.put(
+                "de.adito.aditoweb.swingcommon.layout.tablelayout.TableLayout", // NOI18N
+                "org.netbeans.modules.form.adito.layout.neon.AditoNeonLayoutSupport"); // NOI18N
         }
         return layoutToLayoutDelegate;
     }
