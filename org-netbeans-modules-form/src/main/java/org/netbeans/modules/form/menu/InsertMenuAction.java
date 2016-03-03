@@ -32,6 +32,8 @@ package org.netbeans.modules.form.menu;
 
 import javax.swing.JMenu;
 import javax.swing.SwingUtilities;
+
+import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.model.EModelFormType;
 import org.netbeans.modules.form.RADComponent;
 import org.netbeans.modules.form.RADComponentCookie;
 import org.netbeans.modules.form.palette.PaletteItem;
@@ -47,10 +49,10 @@ import org.openide.util.actions.NodeAction;
 public class InsertMenuAction extends NodeAction {
 
     private static String name;
-    
+
     @Override
     public String getName() {
-        if (name == null) 
+        if (name == null)
             name = org.openide.util.NbBundle.getBundle(InsertMenuAction.class)
                      .getString("ACT_InsertMenu"); // NOI18N/
         return name;
@@ -62,9 +64,9 @@ public class InsertMenuAction extends NodeAction {
             RADComponentCookie radCookie = activatedNodes[0].getCookie(RADComponentCookie.class);
             final RADComponent metacomp = radCookie == null ? null :
                                       radCookie.getRADComponent();
-            
+
             //find the first JMenuBar item in the palette
-            PaletteItem[] items = PaletteUtils.getAllItems();
+            PaletteItem[] items = PaletteUtils.getAllItems(EModelFormType.UNDEFINED);
             for (PaletteItem item : items) {
                 Class clazz = item.getComponentClass();
                 if (clazz != null && JMenu.class.isAssignableFrom(clazz)) {

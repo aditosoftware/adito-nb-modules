@@ -53,6 +53,8 @@ import java.util.Comparator;
 import java.util.List;
 import javax.swing.*;
 import javax.swing.undo.UndoableEdit;
+
+import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.model.EModelFormType;
 import org.openide.util.HelpCtx;
 import org.openide.nodes.Node;
 import org.netbeans.modules.form.*;
@@ -66,11 +68,11 @@ import org.openide.util.actions.NodeAction;
 
 /**
  * Action that encloses selected components in a given container.
- * 
+ *
  * @author Tomas Pavek, Jan Stola
  */
 public class EncloseAction extends NodeAction {
-    
+
     @Override
     public String getName() {
         return NbBundle.getBundle(EncloseAction.class).getString("ACT_EncloseInContainer"); // NOI18N
@@ -132,7 +134,7 @@ public class EncloseAction extends NodeAction {
     }
 
     private static List<CategoryInfo> getCategoryInfos() {
-        Node[] nodes = PaletteUtils.getCategoryNodes(PaletteUtils.getPaletteNode(), true);
+        Node[] nodes = PaletteUtils.getCategoryNodes(PaletteUtils.getPaletteNode(EModelFormType.UNDEFINED), true, EModelFormType.UNDEFINED);
         List<CategoryInfo> infos = new ArrayList<CategoryInfo>(nodes.length);
         for (Node node : nodes) {
             List<PaletteItem> containers = getAllContainers(node);
@@ -146,7 +148,7 @@ public class EncloseAction extends NodeAction {
 
     private static List<PaletteItem> getAllContainers(Node subMenuNode) {
         List<PaletteItem> list = new ArrayList<PaletteItem>();
-        for (Node itemNode : PaletteUtils.getItemNodes(subMenuNode, true)) {
+        for (Node itemNode : PaletteUtils.getItemNodes(subMenuNode, true, EModelFormType.UNDEFINED)) {
             PaletteItem item = itemNode.getLookup().lookup(PaletteItem.class);
             if (item == null) {
                 continue;
@@ -299,7 +301,7 @@ public class EncloseAction extends NodeAction {
                                     });
                                 } else {
                                     String msg = NbBundle.getMessage(EncloseAction.class, "MSG_EncloseInFailed"); // NOI18N
-                                    DialogDisplayer.getDefault().notifyLater(new NotifyDescriptor.Message(msg)); 
+                                    DialogDisplayer.getDefault().notifyLater(new NotifyDescriptor.Message(msg));
                                 }
                             }
                             autoUndo = !success;

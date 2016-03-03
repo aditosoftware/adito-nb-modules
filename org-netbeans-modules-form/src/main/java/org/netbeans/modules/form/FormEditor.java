@@ -44,6 +44,8 @@
 
 package org.netbeans.modules.form;
 
+import de.adito.aditoweb.nbm.nbide.nbaditointerface.NbAditoInterface;
+import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.model.*;
 import org.netbeans.modules.form.actions.*;
 import org.netbeans.modules.form.assistant.AssistantModel;
 import org.netbeans.modules.form.layoutdesign.LayoutDesigner;
@@ -1343,7 +1345,9 @@ public class FormEditor
       }
     };
 
-    PaletteUtils.addPaletteListener(paletteListener, formDataObject.getPrimaryFile());
+
+    EModelFormType modelFormType = NbAditoInterface.lookup(IAditoModelDataProvider.class).getModelFormType(formDataObject.getPrimaryFile());
+    PaletteUtils.addPaletteListener(paletteListener, formDataObject.getPrimaryFile(), modelFormType);
   }
 
   private void detachPaletteListener()

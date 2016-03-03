@@ -61,6 +61,9 @@ import javax.swing.JMenuItem;
 import javax.swing.JRadioButtonMenuItem;
 import javax.swing.JSeparator;
 import javax.swing.SwingUtilities;
+
+import de.adito.aditoweb.nbm.nbide.nbaditointerface.NbAditoInterface;
+import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.model.*;
 import org.netbeans.modules.form.FormEditor;
 import org.netbeans.modules.form.HandleLayer;
 import org.netbeans.modules.form.MetaComponentCreator;
@@ -68,6 +71,7 @@ import org.netbeans.modules.form.RADComponent;
 import org.netbeans.modules.form.RADVisualComponent;
 import org.netbeans.modules.form.palette.PaletteItem;
 import org.netbeans.modules.form.palette.PaletteUtils;
+import org.openide.loaders.DataObject;
 
 /**
  * DragOperation handles all drag operations whether they are drag and drop or pick and plop. It
@@ -86,31 +90,31 @@ class DragOperation {
     private JMenuItem payloadComponent;
     private List<JMenuItem> payloadComponents;
     private PaletteItem currentItem;
-    
+
     public boolean isPickAndPlop() {
         return op == Op.PICK_AND_PLOP_FROM_PALETTE;
     }
-    
+
     public DragOperation(MenuEditLayer menuEditLayer) {
         this.menuEditLayer = menuEditLayer;
         this.started = false;
     }
-    
+
     public JComponent getDragComponent() {
         return dragComponent;
     }
-    
+
     // start a drag from one menu item to another
     void start(JMenuItem item, Point pt) {
         op = Op.INTER_MENU_DRAG;
         started = true;
-        
-        
+
+
         //josh: intial support for dragging multiple items
         //in the future we should use the payloadComponents variable
         //for dragging components instead of the payloadComponent variable.
         List<RADComponent> rads = menuEditLayer.getSelectedRADComponents();
-        
+
         payloadComponents = new ArrayList<JMenuItem>();
         if(rads.size() > 1) {
             for(RADComponent rad : rads) {
@@ -125,7 +129,7 @@ class DragOperation {
         } else {
             payloadComponents.add(item);
         }
-        
+
         dragComponent = (JMenuItem) createDragFeedbackComponent(item, null);
         dragComponent.setSize(dragComponent.getPreferredSize());
         dragComponent.setLocation(pt);
@@ -142,10 +146,11 @@ class DragOperation {
         }
         menuEditLayer.repaint();
     }
-    
+
     private JComponent createDragFeedbackComponent(JMenuItem item, Class type) {
         // get the pre-created component for use as drag feedback
-        PaletteItem paletteItem = PaletteUtils.getSelectedItem();
+
+        PaletteItem paletteItem = PaletteUtils.getSelectedItem(_getModelFormType());
         if(paletteItem != null) {
             MetaComponentCreator creator = menuEditLayer.formDesigner.getFormModel().getComponentCreator();
             RADVisualComponent precreated = null;
@@ -174,10 +179,10 @@ class DragOperation {
                 }
             }
         }
-        
+
         JComponent dragComponent = null;
         dragComponent = new JMenuItem();
-        
+
         if(item == null && type != null && JComponent.class.isAssignableFrom(type)) {
             try {
                 dragComponent = (JComponent)type.newInstance();
@@ -186,15 +191,15 @@ class DragOperation {
                 ex.printStackTrace();
             }
         }
-        if(item instanceof JMenu) { 
-            dragComponent = new JMenu(); 
+        if(item instanceof JMenu) {
+            dragComponent = new JMenu();
         }
-        if(item instanceof JCheckBoxMenuItem) { 
-            dragComponent = new JCheckBoxMenuItem(); 
+        if(item instanceof JCheckBoxMenuItem) {
+            dragComponent = new JCheckBoxMenuItem();
             ((JCheckBoxMenuItem)dragComponent).setSelected(true);
         }
-        if(item instanceof JRadioButtonMenuItem) { 
-            dragComponent = new JRadioButtonMenuItem(); 
+        if(item instanceof JRadioButtonMenuItem) {
+            dragComponent = new JRadioButtonMenuItem();
             ((JRadioButtonMenuItem)dragComponent).setSelected(true);
         }
         if(dragComponent instanceof JMenuItem) {
@@ -217,7 +222,7 @@ class DragOperation {
         return dragComponent;
 
     }
-    
+
     // start a pick and plop from the palette operation
     void start(PaletteItem item, Point pt) {
         // clean up prev is necessary
@@ -225,14 +230,14 @@ class DragOperation {
             menuEditLayer.layers.remove(dragComponent);
             dragComponent = null;
         }
-        
+
         if(!menuEditLayer.doesFormContainMenuBar()) {
             //op = Op.NO_MENUBAR;
             menuEditLayer.showMenubarWarning = true;
             FormEditor.getAssistantModel(menuEditLayer.formDesigner.getFormModel()).setContext("missingMenubar"); // NOI18N
             menuEditLayer.repaint();
         }
-        
+
         op = Op.PICK_AND_PLOP_FROM_PALETTE;
         started = true;
         dragComponent = createDragFeedbackComponent(null, item.getComponentClass());
@@ -243,23 +248,23 @@ class DragOperation {
         currentItem = item;
         menuEditLayer.glassLayer.requestFocusInWindow();
     }
-    
+
     void move(Point pt) {
         if(dragComponent != null) {
             // move the drag component
             dragComponent.setLocation(pt);
-            
-            
+
+
             // look at the rad component under the cursor before checking the popups
             RADComponent rad = menuEditLayer.formDesigner.getHandleLayer().getMetaComponentAt(pt, HandleLayer.COMP_DEEPEST);
-            
+
             // if dragging a JMenu over an open spot in the menu bar
             if(rad != null && JMenuBar.class.isAssignableFrom(rad.getBeanClass()) && JMenu.class.isAssignableFrom(dragComponent.getClass())) {
                 //p("over the menu bar");
                 menuEditLayer.dropTargetLayer.setDropTarget(rad, pt);
                 targetComponent = (JComponent) menuEditLayer.formDesigner.getComponent(rad);
             }
-            
+
             // open any relevant top-level menus
             if(rad != null && JMenu.class.isAssignableFrom(rad.getBeanClass())) {
                 //p("over a menu: " + rad);
@@ -272,11 +277,11 @@ class DragOperation {
                 }
                 return;
             }
-            
+
             //show any drop target markers
             Component child = getDeepestComponentInPopups(pt);
-            
-            
+
+
             if(child instanceof JMenuItem && child != dragComponent) {
                 targetComponent = (JComponent)child;
                 if(targetComponent != null) {
@@ -284,7 +289,7 @@ class DragOperation {
                 }
                 menuEditLayer.repaint();
             }
-            
+
             if(child instanceof JMenu) {
                 Point pt2 = SwingUtilities.convertPoint(menuEditLayer.glassLayer, pt, child);
                 JMenu menu = (JMenu) child;
@@ -298,15 +303,15 @@ class DragOperation {
                 }
                 menuEditLayer.showMenuPopup(menu);
             }
-            
+
             if(child == null) {
                 menuEditLayer.dropTargetLayer.clearDropTarget();
             }
-            
+
         }
     }
-    
-    
+
+
     // The EventObject is needed in order to determine the Shift modifier
     void end(EventObject e) {
         end(e, true);
@@ -321,13 +326,13 @@ class DragOperation {
             menuEditLayer.layers.remove(dragComponent);
             menuEditLayer.dropTargetLayer.clearDropTarget();
         }
-        
+
         switch (op) {
         case PICK_AND_PLOP_FROM_PALETTE: completePickAndPlopFromPalette(pt, clear); break;
         case INTER_MENU_DRAG: completeInterMenuDrag(pt); break ;
         case NO_MENUBAR: /* do nothing */ break;
         }
-        
+
         menuEditLayer.glassLayer.requestFocusInWindow();
         if ((e instanceof DropTargetDropEvent)
                 || ((e instanceof MouseEvent) && !((MouseEvent) e).isShiftDown())) {// #195795: Do not deselect the dropTarget when Shift is pressed
@@ -335,9 +340,9 @@ class DragOperation {
             targetComponent = null;
         }
         menuEditLayer.repaint();
-        
+
     }
-    
+
     void fastEnd() {
         started = false;
         if(dragComponent != null) {
@@ -348,7 +353,7 @@ class DragOperation {
         // #133628: deselect menu-related component in the palette
         menuEditLayer.formDesigner.toggleSelectionMode();
     }
-    
+
     // only looks at JMenu and JMenubar RADComponents as well as anything in the popups
     JComponent getDeepestComponent(Point pt) {
         if(pt == null) return null;
@@ -360,27 +365,27 @@ class DragOperation {
             return getDeepestComponentInPopups(pt);
         }
     }
-    
+
     public JComponent getTargetComponent() {
         return targetComponent;
     }
-    
+
     private void completeInterMenuDrag(Point pt) {
         if(targetComponent == null) return;
-        
+
         //check if it's still a valid target
         JComponent tcomp = getDeepestComponent(pt);
         if(targetComponent != tcomp) {
             menuEditLayer.formDesigner.toggleSelectionMode();
             return;
         }
-        
+
         // conver to target component's coords.
         Point pt2 = SwingUtilities.convertPoint(menuEditLayer.glassLayer, pt, tcomp);
         if(tcomp instanceof JMenu) {
             JMenu menu = (JMenu) tcomp;
-            
-            
+
+
             // if dragging a jmenu onto a toplevel jmenu
             if(menu.getParent() instanceof JMenuBar && isOnlyJMenus(payloadComponents)) { //payloadComponent instanceof JMenu) {
                 if(DropTargetLayer.isMenuLeftEdge(pt2, menu)) {
@@ -405,7 +410,7 @@ class DragOperation {
             }
             return;
         }
-        
+
         if(tcomp instanceof JMenuBar) {
             if(payloadComponent instanceof JMenu) {
                 menuEditLayer.moveRadComponentInto(payloadComponent, targetComponent);
@@ -414,7 +419,7 @@ class DragOperation {
                 return;
             }
         }
-        
+
         //if after or before the current item
         if(DropTargetLayer.isBelowItem(pt2,tcomp)) {
             menuEditLayer.moveRadComponentToAfter(payloadComponent, targetComponent);
@@ -422,11 +427,18 @@ class DragOperation {
             menuEditLayer.moveRadComponentToBefore(payloadComponent, targetComponent);
         }
     }
-    
+
+    private EModelFormType _getModelFormType()
+    {
+        DataObject dObj = menuEditLayer.getFormDesigner().getFormEditor().getFormDataObject();
+        return NbAditoInterface.lookup(IAditoModelDataProvider.class).getModelFormType(dObj.getPrimaryFile());
+    }
+
     private void completePickAndPlopFromPalette(Point pt, boolean clear) {
-        PaletteItem paletteItem = PaletteUtils.getSelectedItem();
+
+        PaletteItem paletteItem = PaletteUtils.getSelectedItem(_getModelFormType());
         if(paletteItem == null) return;
-                
+
         JComponent newComponent = null;
         // get the pre-created component
         MetaComponentCreator creator = menuEditLayer.formDesigner.getFormModel().getComponentCreator();
@@ -450,12 +462,12 @@ class DragOperation {
                 return;
             }
         }
-        
+
         // add new component reference to the form
         creator.getPrecreatedLayoutComponent();
-        
+
         Point pt2 = SwingUtilities.convertPoint(menuEditLayer.glassLayer, pt, targetComponent);
-        
+
         JComponent tcomp = getDeepestComponent(pt);
         // targetComponent was a valid drop-target (paletteItem was above it before)
         // but now pt's position indicates that paletteItem is no longer above it
@@ -476,10 +488,10 @@ class DragOperation {
         }
         // dragged to a menu, add inside the menu instead of next to it
         if(targetComponent instanceof JMenu) {
-            
+
             //toplevel menus
             if(targetComponent.getParent() instanceof JMenuBar) {
-                
+
                 if(DropTargetLayer.isMenuLeftEdge(pt2, targetComponent) && isMenuPayload(creator)) {
                     menuEditLayer.addRadComponentToBefore(targetComponent, creator);
                 } else if(DropTargetLayer.isMenuRightEdge(pt2, targetComponent) && isMenuPayload(creator)) {
@@ -505,13 +517,13 @@ class DragOperation {
                 menuEditLayer.addRadComponentToBefore(targetComponent, creator);
             }
         }
-        
+
         if(clear) {
             menuEditLayer.formDesigner.toggleSelectionMode();
         }
-        
+
     }
-    
+
     private boolean isOnlyJMenus(List<JMenuItem> items) {
         for(JMenuItem item : items) {
             if(item instanceof JMenu) continue;
@@ -519,14 +531,14 @@ class DragOperation {
         }
         return true;
     }
-    
+
     private boolean isMenuPayload(MetaComponentCreator creator) {
         if(JMenu.class.isAssignableFrom(creator.getPrecreatedMetaComponent().getBeanClass())) {
             return true;
         }
         return false;
     }
-    
+
     //josh: this is a very slow way to find the component under the mouse cursor.
     //there must be a faster way to do it
     public JComponent getDeepestComponentInPopups(Point pt) {
@@ -540,12 +552,12 @@ class DragOperation {
         }
         return null;
     }
-    
-    
+
+
     public boolean isStarted() {
         return started;
     }
-    
+
     public PaletteItem getCurrentItem() {
         return currentItem;
     }

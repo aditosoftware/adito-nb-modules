@@ -46,6 +46,7 @@ package org.netbeans.modules.form;
 
 import de.adito.aditoweb.nbm.nbide.nbaditointerface.NbAditoInterface;
 import de.adito.aditoweb.nbm.nbide.nbaditointerface.common.IAditoNetbeansTranslations;
+import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.model.EModelFormType;
 import org.netbeans.modules.form.adito.actions.AditoActionObject;
 import org.netbeans.modules.form.adito.components.*;
 import org.netbeans.modules.form.adito.perstistencemanager.NonvisContainerRADComponent;
@@ -196,7 +197,7 @@ public class RADComponentNode extends FormNode
           @Override
           public void run()
           {
-            Image icon = PaletteUtils.getIconForClass(className, classDetails, iconType, true);
+            Image icon = PaletteUtils.getIconForClass(className, classDetails, iconType, true, EModelFormType.UNDEFINED);
             iconsInitialized = true;
             if (icon != null)
             {
@@ -208,7 +209,7 @@ public class RADComponentNode extends FormNode
       }
       else
       {
-        icon = PaletteUtils.getIconForClass(className, classDetails, iconType, false);
+        icon = PaletteUtils.getIconForClass(className, classDetails, iconType, false, EModelFormType.UNDEFINED);
       }
 
       if (icon == null)

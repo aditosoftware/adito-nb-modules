@@ -52,6 +52,9 @@ import java.awt.event.*;
 import java.beans.BeanInfo;
 import java.util.*;
 
+import de.adito.aditoweb.nbm.nbide.nbaditointerface.NbAditoInterface;
+import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.model.*;
+import org.openide.loaders.DataObject;
 import org.openide.nodes.*;
 
 import org.netbeans.modules.form.palette.*;
@@ -212,12 +215,12 @@ final class FormToolBar {
             initButton(button);
             resButtons[i] = button;
             toolbar.add(button);
-            toolbar.add(Box.createHorizontalStrut(2));        
+            toolbar.add(Box.createHorizontalStrut(2));
         }
     }
-    
+
     // --------
-    
+
     private void initButton(AbstractButton button) {
         if (!("Windows".equals(UIManager.getLookAndFeel().getID()) // NOI18N
             && (button instanceof JToggleButton))) {
@@ -227,14 +230,21 @@ final class FormToolBar {
         button.setFocusPainted(false);
         button.setMargin(new Insets(0, 0, 0, 0));
     }
-    
+
+
+    private EModelFormType _getModelFormType()
+    {
+        DataObject dObj = formDesigner.getFormEditor().getFormDataObject();
+        return NbAditoInterface.lookup(IAditoModelDataProvider.class).getModelFormType(dObj.getPrimaryFile());
+    }
+
     void updateDesignerMode(int mode) {
         selectionButton.setSelected(mode == FormDesigner.MODE_SELECT);
         connectionButton.setSelected(mode == FormDesigner.MODE_CONNECT);
         paletteButton.setSelected(mode == FormDesigner.MODE_ADD);
 
         if (addLabel.isVisible()) {
-            PaletteItem item = PaletteUtils.getSelectedItem();
+            PaletteItem item = PaletteUtils.getSelectedItem(_getModelFormType());
             if (item != null && mode == FormDesigner.MODE_ADD) {
                 addLabel.setIcon(
                     new ImageIcon(item.getNode().getIcon(BeanInfo.ICON_COLOR_16x16)));
@@ -298,7 +308,7 @@ final class FormToolBar {
     {
         // Determines whether palette popup menu should be shown (see issue 46673)
         private boolean showMenu;
-        
+
         /** Action to switch to selection, connection or add mode. */
         @Override
         public void actionPerformed(ActionEvent ev) {
@@ -324,14 +334,14 @@ final class FormToolBar {
                 return false;
 
             PaletteItem item = nodes[0].getCookie(PaletteItem.class);
-            PaletteUtils.selectItem( item );
+            PaletteUtils.selectItem( item,_getModelFormType() );
             return true;
         }
 
         /** Handles closing of PaletteMenuView popup */
         @Override
         public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {
-            if( PaletteUtils.getSelectedItem() == null )
+            if( PaletteUtils.getSelectedItem(_getModelFormType()) == null )
                 formDesigner.toggleSelectionMode();
         }
         @Override
@@ -340,7 +350,7 @@ final class FormToolBar {
         @Override
         public void popupMenuCanceled(PopupMenuEvent e) {
         }
-        
+
         @Override
         public void mousePressed(MouseEvent e) {
             if (e.getSource() == paletteButton) {

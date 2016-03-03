@@ -48,6 +48,8 @@ import java.awt.*;
 import java.util.*;
 import java.lang.ref.*;
 import java.lang.reflect.Modifier;
+
+import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.model.EModelFormType;
 import org.netbeans.modules.form.CreationFactory;
 
 import org.openide.loaders.*;
@@ -200,7 +202,7 @@ public class LayoutSupportRegistry {
     }
 
     private static String scanPalette(String wantedClassName) {
-        FileObject paletteFolder = PaletteUtils.getPaletteFolder();
+        FileObject paletteFolder = PaletteUtils.getPaletteFolder(EModelFormType.UNDEFINED);
 
         // create palette content listener - only once
         boolean newPaletteListener = paletteListener == null;

@@ -46,7 +46,7 @@ package org.netbeans.modules.form.palette;
 
 import javax.swing.*;
 
-import org.netbeans.modules.form.palette.PaletteUtils;
+import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.model.EModelFormType;
 import org.openide.nodes.Node;
 import org.openide.explorer.view.ListView;
 import org.openide.explorer.*;
@@ -66,9 +66,9 @@ class CategorySelector extends JPanel implements ExplorerManager.Provider {
     private ExplorerManager explorerManager;
 
     CategorySelector() {
-        explorerManager = new ExplorerManager();	
-        explorerManager.setRootContext(getCategoryRootNode());	
-	
+        explorerManager = new ExplorerManager();
+        explorerManager.setRootContext(getCategoryRootNode());
+
         ListView listView = new ListView();
         // Issue 50703 - restore the default scroll pane's border
         JScrollPane scrollPane = new JScrollPane();
@@ -77,9 +77,9 @@ class CategorySelector extends JPanel implements ExplorerManager.Provider {
             PaletteUtils.getBundleString("ACSD_CTL_PaletteCategories")); // NOI18N
         listView.setPopupAllowed(false);
         listView.setTraversalAllowed(false);
-	
+
         JLabel categoryLabel = new JLabel();
-        org.openide.awt.Mnemonics.setLocalizedText(categoryLabel, 
+        org.openide.awt.Mnemonics.setLocalizedText(categoryLabel,
                 PaletteUtils.getBundleString("CTL_PaletteCategories")); // NOI18N
         if ((listView.getViewport() != null) && (listView.getViewport().getView() != null)) {
             categoryLabel.setLabelFor(listView.getViewport().getView());
@@ -96,21 +96,21 @@ class CategorySelector extends JPanel implements ExplorerManager.Provider {
     }
 
     private Node getCategoryRootNode() {
-	Node root = new AbstractNode(new Children.Array());	
-	
-	Node[] paleteCategories = PaletteUtils.getCategoryNodes(PaletteUtils.getPaletteNode(), false);
+	Node root = new AbstractNode(new Children.Array());
+
+	Node[] paleteCategories = PaletteUtils.getCategoryNodes(PaletteUtils.getPaletteNode(EModelFormType.UNDEFINED), false, EModelFormType.UNDEFINED);//Keine Info, daher null
 	Node[] categoryNodes = new Node[paleteCategories.length];
-	
+
 	for (int i = 0; i < paleteCategories.length; i++) {
 	    categoryNodes[i] = new FilterNode(paleteCategories[i], Children.LEAF);
-	}		
-	
-	root.getChildren().add(categoryNodes);
-	getExplorerManager().setRootContext(root);	
+	}
 
-	return root;    
+	root.getChildren().add(categoryNodes);
+	getExplorerManager().setRootContext(root);
+
+	return root;
     }
-    
+
     public static String selectCategory() {
         CategorySelector selector = new CategorySelector();
         selector.setBorder(new javax.swing.border.EmptyBorder(12, 12, 0, 11));

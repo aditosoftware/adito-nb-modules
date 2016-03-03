@@ -44,6 +44,7 @@
 
 package org.netbeans.modules.form.actions;
 
+import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.model.EModelFormType;
 import org.netbeans.modules.form.palette.PaletteUtils;
 import org.openide.util.HelpCtx;
 import org.openide.util.actions.CallableSystemAction;
@@ -91,6 +92,6 @@ public class InstallBeanAction extends CallableSystemAction {
      */
     @Override
     public void performAction() {
-        PaletteUtils.showPaletteManager();
+        PaletteUtils.showPaletteManager(EModelFormType.UNDEFINED);
     }
 }

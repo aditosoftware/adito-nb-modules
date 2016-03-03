@@ -55,6 +55,8 @@ import javax.swing.JMenuItem;
 import javax.swing.JSeparator;
 import javax.swing.event.MenuEvent;
 import javax.swing.event.MenuListener;
+
+import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.model.EModelFormType;
 import org.netbeans.modules.form.ComponentInspector;
 import org.netbeans.modules.form.RADComponent;
 import org.netbeans.modules.form.RADComponentNode;
@@ -72,13 +74,13 @@ import org.openide.util.actions.NodeAction;
  * @author Joshua Marinacci, Jan Stola
  */
 public class AddSubItemAction extends NodeAction {
-    
+
     //fix this
     @Override
     protected boolean enable(Node[] nodes) {
-        return true; 
+        return true;
     }
-    
+
     @Override
     public String getName() {
         return NbBundle.getMessage(AddSubItemAction.class, "ACT_AddFromPalette"); // NOI18N
@@ -99,36 +101,36 @@ public class AddSubItemAction extends NodeAction {
 
     /**
      * Returns a JMenuItem that presents this action in a Popup Menu.
-     * 
+     *
      * @return the JMenuItem representation for the action
      */
     @Override
     public JMenuItem getPopupPresenter() {
         JMenu popupMenu = new JMenu(NbBundle.getMessage(AddSubItemAction.class, "ACT_AddFromPalette")); //NOI18N
-        
+
         popupMenu.setEnabled(isEnabled());
         HelpCtx.setHelpIDString(popupMenu, AlignAction.class.getName());
-        
+
         popupMenu.addMenuListener(new MenuListener() {
             @Override
             public void menuSelected(MenuEvent e) {
                 JMenu menu = (JMenu) e.getSource();
                 createInsertSubmenu(menu);
             }
-            
+
             @Override
             public void menuDeselected(MenuEvent e) {}
-            
+
             @Override
             public void menuCanceled(MenuEvent e) {}
         });
         return popupMenu;
     }
 
-    
+
     private class AddListener implements ActionListener {
         private PaletteItem pItem;
-        
+
         public AddListener(PaletteItem pItem) {
             this.pItem = pItem;
         }
@@ -145,8 +147,8 @@ public class AddSubItemAction extends NodeAction {
             }
         }
     };
-    
-    
+
+
     private void createInsertSubmenu(JMenu menu) {
         //only create this menu the first time it is called
         if (!(menu.getMenuComponentCount() > 0)) {
@@ -159,7 +161,7 @@ public class AddSubItemAction extends NodeAction {
                     return name1.compareTo(name2);
                 }
             });
-            for (PaletteItem item : PaletteUtils.getAllItems()) {
+            for (PaletteItem item : PaletteUtils.getAllItems(EModelFormType.UNDEFINED)) {//Keine Informationen, daher null
                 Class clazz = item.getComponentClass();
                 if ((clazz != null) && !classes.contains(clazz) &&
                         (JMenuItem.class.isAssignableFrom(clazz) || JSeparator.class.isAssignableFrom(clazz))) {

@@ -46,6 +46,8 @@ package org.netbeans.modules.form;
 
 import com.google.common.base.*;
 import com.google.common.collect.*;
+import de.adito.aditoweb.nbm.nbide.nbaditointerface.NbAditoInterface;
+import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.model.*;
 import org.netbeans.modules.form.actions.DuplicateAction;
 import org.netbeans.modules.form.adito.components.AditoHandleLayer;
 import org.netbeans.modules.form.adito.perstistencemanager.NonvisContainerRADComponent;
@@ -1397,7 +1399,7 @@ public class HandleLayer extends JPanel implements MouseListener, MouseMotionLis
 
                 if (selected && !forward)
                     toSelect.add(0, comp); // top comp is fine when going backward
-            }            
+            }
 
             RADComponent[] compArray = new RADComponent[toSelect.size()];
             toSelect.toArray(compArray);
@@ -1907,7 +1909,7 @@ public class HandleLayer extends JPanel implements MouseListener, MouseMotionLis
           if (sizeHintFormat == null)
           {
             sizeHintFormat = new MessageFormat(
-                FormUtils.getBundleString("FMT_HINT_DesignerSize")); // NOI18N                                            
+                FormUtils.getBundleString("FMT_HINT_DesignerSize")); // NOI18N
           }
           mf = sizeHintFormat;
         }
@@ -1916,7 +1918,7 @@ public class HandleLayer extends JPanel implements MouseListener, MouseMotionLis
           if (resizingHintFormat == null)
           {
             resizingHintFormat = new MessageFormat(
-                FormUtils.getBundleString("FMT_HINT_DesignerResizing")); // NOI18N                                            
+                FormUtils.getBundleString("FMT_HINT_DesignerResizing")); // NOI18N
           }
           mf = resizingHintFormat;
         }
@@ -2055,7 +2057,7 @@ public class HandleLayer extends JPanel implements MouseListener, MouseMotionLis
   }
 
   // Check how possible component resizing (obtained from layout support)
-  // matches with mouse position on component selection border. 
+  // matches with mouse position on component selection border.
   private int getComponentResizable(Point p, RADVisualComponent metacomp)
   {
 //        RADVisualContainer metacont = metacomp.getParentContainer();
@@ -2423,7 +2425,8 @@ public class HandleLayer extends JPanel implements MouseListener, MouseMotionLis
     if (formDesigner.getDesignerMode() == FormDesigner.MODE_ADD)
     {
       formDesigner.requestActive();
-      PaletteItem item = PaletteUtils.getSelectedItem();
+      PaletteItem item = PaletteUtils.getSelectedItem(_getModelFormType());
+      System.err.println(item);
       if (formDesigner.getMenuEditLayer().isPossibleNewMenuComponent(item))
       {
         formDesigner.getMenuEditLayer().startNewMenuComponentPickAndPlop(item, e.getPoint());
@@ -2631,6 +2634,12 @@ public class HandleLayer extends JPanel implements MouseListener, MouseMotionLis
     e.consume();
   }
 
+  private EModelFormType _getModelFormType()
+  {
+    DataObject dObj = formDesigner.getFormEditor().getFormDataObject();
+    return NbAditoInterface.lookup(IAditoModelDataProvider.class).getModelFormType(dObj.getPrimaryFile());
+  }
+
   @Override
   public void mouseMoved(MouseEvent e)
   {
@@ -2642,7 +2651,7 @@ public class HandleLayer extends JPanel implements MouseListener, MouseMotionLis
     }
     if (formDesigner.getDesignerMode() == FormDesigner.MODE_ADD)
     {
-      PaletteItem item = PaletteUtils.getSelectedItem();
+      PaletteItem item = PaletteUtils.getSelectedItem(_getModelFormType());
       if (null == item)
       {
         if (null != draggedComponent)
@@ -3947,7 +3956,7 @@ public class HandleLayer extends JPanel implements MouseListener, MouseMotionLis
         { // new layout support
           if (!inboundResizing)
           {
-            // make sure the visual component has the current size set 
+            // make sure the visual component has the current size set
             // (as still being in its container the layout manager tries to
             // restore the original size)
             showingComponents[0].setSize(movingBounds[0].width, movingBounds[0].height);
@@ -4339,7 +4348,7 @@ public class HandleLayer extends JPanel implements MouseListener, MouseMotionLis
                 if (layoutComponent.isLayoutContainer())
                 {
                   if (!newLayout)
-                  { // always add layout container to the model 
+                  { // always add layout container to the model
                     getLayoutModel().addRootComponent(layoutComponent);
                   }
                 }

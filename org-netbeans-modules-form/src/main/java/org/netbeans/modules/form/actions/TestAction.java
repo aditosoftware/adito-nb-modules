@@ -54,6 +54,8 @@ import java.awt.event.WindowAdapter;
 import java.util.HashMap;
 import java.util.Map;
 import javax.swing.plaf.synth.SynthLookAndFeel;
+
+import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.model.EModelFormType;
 import org.openide.ErrorManager;
 import org.openide.util.HelpCtx;
 import org.openide.nodes.*;
@@ -94,7 +96,7 @@ public class TestAction extends CallableSystemAction implements Runnable {
     public void updateEnabled() {
         firePropertyChange("enabled", null, null); // NOI18N
     }
-    
+
     @Override
     protected boolean asynchronous() {
         return false;
@@ -154,13 +156,13 @@ public class TestAction extends CallableSystemAction implements Runnable {
         RADVisualFormContainer formContainer =
             topComp instanceof RADVisualFormContainer ?
                 (RADVisualFormContainer) topComp : null;
-        
+
         createPreview(topComp, formContainer);
     }
 
     /**
      * Creates preview of some {@code RADVisualComponent}.
-     * 
+     *
      * @param componentToPreview component to preview.
      * @param formContainer corresponding {@code RADVisualFormContainer} (can be {@code null}).
      * @return preview of {@code componentToPreview}.
@@ -224,7 +226,7 @@ public class TestAction extends CallableSystemAction implements Runnable {
                     }
                 });
             }
- 
+
             // set size
             boolean shouldPack = false;
             if (formContainer != null
@@ -297,11 +299,11 @@ public class TestAction extends CallableSystemAction implements Runnable {
 //        formDesigner = designer;
 //        setEnabled(formDesigner != null && formDesigner.getTopDesignComponent() != null);
 //    }
-    
+
     // LAFMenu
 
     private Class selectedLaf;
-    
+
     private class LAFMenu extends JMenu implements ActionListener {
         private boolean initialized = false;
 
@@ -318,7 +320,7 @@ public class TestAction extends CallableSystemAction implements Runnable {
 
                 boolean isSynthLAF = UIManager.getLookAndFeel() instanceof SynthLookAndFeel;
                 String lafName = UIManager.getLookAndFeel().getClass().getName();
-                
+
                 // Swing L&Fs
                 UIManager.LookAndFeelInfo[] lafs = UIManager.getInstalledLookAndFeels();
                 for (int i=0; i<lafs.length; i++) {
@@ -341,11 +343,11 @@ public class TestAction extends CallableSystemAction implements Runnable {
                 }
 
                 // L&Fs from the Palette
-                Node[] cats = PaletteUtils.getCategoryNodes(PaletteUtils.getPaletteNode(), false);
+                Node[] cats = PaletteUtils.getCategoryNodes(PaletteUtils.getPaletteNode(EModelFormType.UNDEFINED), false, EModelFormType.UNDEFINED);
                 for (int i=0; i<cats.length; i++) {
                     if ("LookAndFeels".equals(cats[i].getName())) { // NOI18N
                         final Node lafNode = cats[i];
-                        Node[] items = PaletteUtils.getItemNodes(lafNode, true);
+                        Node[] items = PaletteUtils.getItemNodes(lafNode, true,EModelFormType.UNDEFINED);
                         if (items.length != 0) {
                             popup.add(new JSeparator());
                         }
@@ -448,7 +450,7 @@ public class TestAction extends CallableSystemAction implements Runnable {
         public int hashCode() {
             return (className == null) ? pitem.hashCode() : className.hashCode();
         }
-        
+
     }
 
 }

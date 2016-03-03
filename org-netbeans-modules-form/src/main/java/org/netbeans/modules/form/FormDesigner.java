@@ -397,7 +397,7 @@ public class FormDesigner
 
       final DataObject formDataObject = formEditor.getFormDataObject();
       EModelFormType modelFormType = NbAditoInterface.lookup(IAditoModelDataProvider.class).getModelFormType(formDataObject.getPrimaryFile());
-      paletteLookup = modelFormType == EModelFormType.FRAME ? PaletteUtils.getPaletteLookup(formDataObject.getPrimaryFile()) : Lookup.EMPTY;
+      paletteLookup = PaletteUtils.getPaletteLookup(formDataObject.getPrimaryFile(), modelFormType);
 
       saveCookieLookup = new Lookup()
       {
@@ -946,7 +946,7 @@ public class FormDesigner
 
     if (mode == MODE_ADD)
     {
-      PaletteItem pitem = PaletteUtils.getSelectedItem();
+      PaletteItem pitem = PaletteUtils.getSelectedItem(_getFormType());
       if (pitem != null && getSelectedDesigner() == this)
       {
         boolean prepared = pitem.prepareComponentInitializer(
@@ -986,19 +986,25 @@ public class FormDesigner
   public void toggleSelectionMode()
   {
     setDesignerMode(MODE_SELECT);
-    PaletteUtils.clearPaletteSelection();
+    PaletteUtils.clearPaletteSelection(_getFormType());
   }
 
   void toggleConnectionMode()
   {
     setDesignerMode(MODE_CONNECT);
-    PaletteUtils.clearPaletteSelection();
+    PaletteUtils.clearPaletteSelection(_getFormType());
   }
 
   void toggleAddMode()
   {
     setDesignerMode(MODE_ADD);
-    PaletteUtils.clearPaletteSelection();
+    PaletteUtils.clearPaletteSelection(_getFormType());
+  }
+
+  private EModelFormType _getFormType()
+  {
+    DataObject dObj = formEditor.getFormDataObject();
+    return NbAditoInterface.lookup(IAditoModelDataProvider.class).getModelFormType(dObj.getPrimaryFile());
   }
 
   // -------

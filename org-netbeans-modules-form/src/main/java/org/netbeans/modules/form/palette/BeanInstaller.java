@@ -56,6 +56,8 @@ import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
+
+import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.model.EModelFormType;
 import org.netbeans.api.project.FileOwnerQuery;
 import org.netbeans.api.project.Project;
 
@@ -97,12 +99,12 @@ public final class BeanInstaller {
         final List<ClassSource> beans = new LinkedList<ClassSource>();
         final List<String> unableToInstall = new LinkedList<String>();
         final List<String> noBeans = new LinkedList<String>();
-        for (int i=0; i < nodes.length; i++) {            
+        for (int i=0; i < nodes.length; i++) {
             DataObject dobj = nodes[i].getCookie(DataObject.class);
             if (dobj == null)
                 continue;
 
-            final FileObject fo = dobj.getPrimaryFile();            
+            final FileObject fo = dobj.getPrimaryFile();
             JavaClassHandler handler = new JavaClassHandler() {
                 @Override
                 public void handle(String className, String problem) {
@@ -118,11 +120,11 @@ public final class BeanInstaller {
                         noBeans.add(className);
                         noBeans.add(problem);
                     }
-                } 
-            };            
+                }
+            };
             scanFileObject(fo.getParent(), fo, handler);
         }
-        
+
         if (unableToInstall.size() > 0) {
             Iterator iter = unableToInstall.iterator();
             StringBuilder sb = new StringBuilder();
@@ -296,7 +298,7 @@ public final class BeanInstaller {
             return;
 
         final FileObject categoryFolder =
-            PaletteUtils.getPaletteFolder().getFileObject(category);
+            PaletteUtils.getPaletteFolder(EModelFormType.UNDEFINED).getFileObject(category);//Methode wird nicht aufgerufen, daher null.
         if (categoryFolder == null)
             return;
 
@@ -336,7 +338,7 @@ public final class BeanInstaller {
                 }
             }
         };
-                    
+
         FileObject[] files = folder.getChildren();
         for (int i=0; i < files.length; i++) {
             FileObject fo = files[i];
@@ -346,14 +348,14 @@ public final class BeanInstaller {
             else try {
                 if ("class".equals(fo.getExt()) // NOI18N
                      && (DataObject.find(fo) != null))
-                {                   
+                {
                     scanFileObject(folder, fo, handler);
                 }
             }
             catch (org.openide.loaders.DataObjectNotFoundException ex) {} // should not happen
         }
-    }    
-    
+    }
+
     private static void scanFileObject(FileObject folder, final FileObject fileObject, final JavaClassHandler handler) {
         // A
         /*if ("class".equals(fileObject.getExt())) { // NOI18N
@@ -361,12 +363,12 @@ public final class BeanInstaller {
         } else if ("java".equals(fileObject.getExt())) { // NOI18N
             processJavaFile(fileObject, handler);
         }*/
-    }     
-    
+    }
+
     /**
      * finds bean's FQN if there is any.
      * @param file file to search a bean
-     * @return null or the fqn 
+     * @return null or the fqn
      */
     public static String findJavaBeanName(FileObject file) {
         final String[] fqn = new String[1];
@@ -404,7 +406,7 @@ public final class BeanInstaller {
                     log(Level.SEVERE, javaFO.toString(), ex);
         }
     }
-    
+
     private static TypeElement findClass(CompilationController ctrl, String className) {
         for (Tree decl : ctrl.getCompilationUnit().getTypeDecls()) {
             if (className.equals(((ClassTree) decl).getSimpleName().toString())) {
@@ -415,7 +417,7 @@ public final class BeanInstaller {
         }
         return null;
     }
-    
+
     private static void processClassFile(FileObject classFO, JavaClassHandler handler) {
         try {
             // XXX rewrite this to use javax.lang.model.element.* as soon as JavaSource introduce .class files support
@@ -436,9 +438,9 @@ public final class BeanInstaller {
             Logger.getLogger(BeanInstaller.class.getClass().getName()).
                     log(Level.SEVERE, classFO.toString(), ex);
         }
-        
+
     }
-        
+
     public static String isDeclaredAsJavaBean(TypeElement clazz) {
         if (ElementKind.CLASS != clazz.getKind()) {
             return PaletteUtils.getBundleString("MSG_notAClass"); // NOI18N
@@ -452,7 +454,7 @@ public final class BeanInstaller {
         if (!mods.contains(javax.lang.model.element.Modifier.PUBLIC)) {
             return PaletteUtils.getBundleString("MSG_notPublic"); // NOI18N
         }
-        
+
         for (Element member : clazz.getEnclosedElements()) {
             mods = member.getModifiers();
             if (ElementKind.CONSTRUCTOR == member.getKind() &&
@@ -461,22 +463,22 @@ public final class BeanInstaller {
                 return null;
             }
         }
-        
+
         return PaletteUtils.getBundleString("MSG_noPublicConstructor"); // NOI18N
     }
-    
+
     public static String isDeclaredAsJavaBean(ClassFile clazz) {
         int access = clazz.getAccess();
-        
+
         if (Modifier.isInterface(access) || clazz.isAnnotation() ||
                 clazz.isEnum() || clazz.isSynthetic()) {
             return PaletteUtils.getBundleString("MSG_notAClass"); // NOI18N
         }
-        
+
         if (Modifier.isAbstract(access)) {
             return PaletteUtils.getBundleString("MSG_abstractClass"); // NOI18N
         }
-        
+
         if (!Modifier.isPublic(access)) {
             return PaletteUtils.getBundleString("MSG_notPublic"); // NOI18N
         }
@@ -490,7 +492,7 @@ public final class BeanInstaller {
         }
         return PaletteUtils.getBundleString("MSG_noPublicConstructor"); // NOI18N
     }
-    
+
     private static AddToPaletteWizard getAddWizard() {
         AddToPaletteWizard wizard = null;
         if (wizardRef != null)
@@ -518,9 +520,9 @@ public final class BeanInstaller {
             return name1.compareTo(name2);
         }
     }
-    
-    private interface JavaClassHandler {        
-        public void handle(String className, String problem);        
+
+    private interface JavaClassHandler {
+        public void handle(String className, String problem);
     }
-    
+
 }

@@ -55,6 +55,8 @@ import java.util.HashMap;
 import java.util.Map;
 import javax.swing.*;
 import javax.swing.border.Border;
+
+import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.model.EModelFormType;
 import org.openide.util.HelpCtx;
 import org.openide.util.NbBundle;
 import org.openide.util.actions.CallableSystemAction;
@@ -149,7 +151,7 @@ public class SelectLayoutAction extends CallableSystemAction {
     }
 
     private static PaletteItem[] getAllLayouts() {
-        PaletteItem[] allItems = PaletteUtils.getAllItems();
+        PaletteItem[] allItems = PaletteUtils.getAllItems(EModelFormType.UNDEFINED);
         java.util.List<PaletteItem> layoutsList = new ArrayList<PaletteItem>();
         for (int i = 0; i < allItems.length; i++) {
             if (allItems[i].isLayout()) {
@@ -267,7 +269,7 @@ public class SelectLayoutAction extends CallableSystemAction {
             java.awt.Font font = mi.getFont();
             mi.setFont(font.deriveFont(font.getStyle() | java.awt.Font.BOLD));
         }
-    
+
         private static void addDefaultToMenuText(JMenuItem mi) {
             mi.setText(NbBundle.getMessage(SelectLayoutAction.class, "FMT_DefaultLayoutSuffix", mi.getText())); // NOI18N
         }

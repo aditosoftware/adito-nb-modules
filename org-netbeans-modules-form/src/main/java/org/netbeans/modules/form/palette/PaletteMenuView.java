@@ -49,6 +49,7 @@ import javax.swing.*;
 import javax.swing.event.*;
 import java.lang.reflect.Field;
 
+import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.model.EModelFormType;
 import org.openide.nodes.*;
 import org.openide.util.*;
 import org.openide.explorer.view.MenuView;
@@ -70,7 +71,7 @@ public class PaletteMenuView extends org.openide.awt.JMenuPlus {
     private static int maxHeight = Utilities.getUsableScreenBounds().height - 25;
 
     public PaletteMenuView(NodeAcceptor acceptor) {
-        this(PaletteUtils.getPaletteNode(), acceptor);
+        this(PaletteUtils.getPaletteNode(EModelFormType.UNDEFINED), acceptor);
     }
 
     public PaletteMenuView(Node node, NodeAcceptor acceptor) {
@@ -151,8 +152,8 @@ public class PaletteMenuView extends org.openide.awt.JMenuPlus {
     }
 
     private Node[] getSubNodes() {
-        return level == 0 ? PaletteUtils.getCategoryNodes(menuNode, true) :
-                            PaletteUtils.getItemNodes(menuNode, true);
+        return level == 0 ? PaletteUtils.getCategoryNodes(menuNode, true, EModelFormType.UNDEFINED) :
+                            PaletteUtils.getItemNodes(menuNode, true, EModelFormType.UNDEFINED);
     }
 
     private class PopupListener implements PopupMenuListener {
@@ -182,7 +183,7 @@ public class PaletteMenuView extends org.openide.awt.JMenuPlus {
         Dimension screenSize =Toolkit.getDefaultToolkit().getScreenSize();
         Dimension s = getSize();
         Dimension pmSize = pm.getSize();
-        // For the first time the menu is popped up, 
+        // For the first time the menu is popped up,
         // the size has not yet been initiated
         if (pmSize.width==0) {
             pmSize = pm.getPreferredSize();
@@ -227,14 +228,14 @@ public class PaletteMenuView extends org.openide.awt.JMenuPlus {
             if( getComponentOrientation().isLeftToRight() ) {
                 // First determine the x:
                 if (position.x+pmSize.width < screenSize.width) {
-                    x = 0;                     // Prefer extending to right 
+                    x = 0;                     // Prefer extending to right
                 } else {
                     x = s.width-pmSize.width;  // Otherwise extend to left
                 }
             } else {
                 // First determine the x:
                 if (position.x+s.width < pmSize.width) {
-                    x = 0;                     // Prefer extending to right 
+                    x = 0;                     // Prefer extending to right
                 } else {
                     x = s.width-pmSize.width;  // Otherwise extend to left
                 }
