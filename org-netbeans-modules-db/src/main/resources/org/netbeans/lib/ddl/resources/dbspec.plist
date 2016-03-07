@@ -1346,7 +1346,7 @@
     TypeMap = {
       java.sql.Types.BIGINT = BIGINT;
       java.sql.Types.OTHER = BIT; // not true for MySQL prior to 5.0
-      java.sql.Types.BLOB = BLOB;  //JDBC 2.0 A type representing an SQL Binary Large Object
+      java.sql.Types.BLOB = LONGBLOB;  //JDBC 2.0 A type representing an SQL Binary Large Object
       java.sql.Types.CHAR = CHAR;
       java.sql.Types.LONGVARCHAR = TEXT;
       java.sql.Types.DATE = DATE;
@@ -1362,7 +1362,7 @@
       java.sql.Types.TINYINT = TINYINT;
       java.sql.Types.VARCHAR = VARCHAR;
     };
-    SizelessTypes = (BIGINT,BLOB,DATE,"DOUBLE PRECISION",FLOAT,INT,REAL,SMALLINT,TIME,TIMESTAMP,TINYINT,TEXT);
+    SizelessTypes = (BIGINT,LONGBLOB,DATE,"DOUBLE PRECISION",FLOAT,INT,REAL,SMALLINT,TIME,TIMESTAMP,TINYINT,TEXT);
 //    DecimalTypes = (DECIMAL,NUMERIC);
     CharacterTypes = (CHAR,VARCHAR,TEXT);
 
