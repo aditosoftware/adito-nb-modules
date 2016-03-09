@@ -6,7 +6,7 @@
   <parent>
     <groupId>de.adito.aditoweb.modules</groupId>
     <artifactId>nb-ide</artifactId>
-    <version>5.0.0</version>
+    <version>${adito.version}</version>
   </parent>
 
   <groupId>org.netbeans.api</groupId>
