@@ -7,14 +7,14 @@
   <parent>
     <groupId>de.adito.aditoweb.modules</groupId>
     <artifactId>nb-ide</artifactId>
-    <version>${adito.version}</version>
+    <version>5.0</version>
   </parent>
 
 
   <groupId>org.netbeans.modules</groupId>
   <artifactId>org-netbeans-modules-javascript-hints</artifactId>
   <packaging>nbm</packaging>
-  <version>${adito.version}-RELEASE721</version>
+  <version>${parent.version}-RELEASE721</version>
   <name>Netbeans IDE module: org-netbeans-modules-javascript-hints</name>
 
 
@@ -54,7 +54,7 @@
     <dependency>
       <groupId>org.netbeans.modules</groupId>
       <artifactId>org-netbeans-modules-javascript-editing</artifactId>
-      <version>${adito.version}-RELEASE721</version>
+      <version>${parent.version}-RELEASE721</version>
     </dependency>
     <dependency>
       <groupId>org.netbeans.api</groupId>
