@@ -181,9 +181,7 @@ public class SpecificationFactory implements DatabaseSpecificationFactory, Drive
         try {
             boolean close = (jdbccon != null ? false : true);
             Connection con = (jdbccon != null ? jdbccon : dbcon.createJDBCConnection());
-            DatabaseMetaData dmd = con.getMetaData();
-            pn = dmd.getDatabaseProductName().trim();
-
+            pn = getDbProductName(con);
             DatabaseSpecification spec = createSpecification(dbcon, pn, con);
             if (close) con.close();
             return spec;
@@ -192,6 +190,29 @@ public class SpecificationFactory implements DatabaseSpecificationFactory, Drive
         } catch (Exception e) {
             throw new DatabaseProductNotFoundException(pn, "unable to create specification, "+e.getMessage());
         }
+    }
+
+    /**
+     * Liefert den Produktnamen des verbundenen DBMS zurück
+     * Das Problem ist, dass sich der MariaDB-JDBC-Treiber als MySQL meldet,
+     * daher wird in dem Falle "MariaDB" als Produktname geliefert, ansonsten das was der Treiber liefert
+     * @param pConnection Die SQL-Connection
+     * @return "MariaDB" oder das was der Treiber als Name liefert
+     */
+    public static String getDbProductName(Connection pConnection)
+    {
+      try
+      {
+        if (pConnection.getMetaData().getDatabaseProductVersion().toLowerCase().contains("mariadb"))
+        {
+          return "MariaDB"; // Ausnahme, weil da "MySQL" zurückkommt sonst...
+        }
+        return pConnection.getMetaData().getDatabaseProductName().trim();
+      }
+      catch (SQLException pE)
+      {
+        return null;
+      }
     }
 
     /** Creates instance of DatabaseSpecification class; a database-specification
