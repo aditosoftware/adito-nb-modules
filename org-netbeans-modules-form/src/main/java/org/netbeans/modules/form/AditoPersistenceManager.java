@@ -352,7 +352,7 @@ public class AditoPersistenceManager extends PersistenceManager
     }
 
     // create a new metacomponent
-    RADComponent newComponent;
+    RADComponent newComponent=null;
     switch (componentInfo.getModelPropProvider().getContainerType())
     {
       case NONE:
@@ -416,6 +416,7 @@ public class AditoPersistenceManager extends PersistenceManager
 
     try
     {
+      // TODO: lade layout abhängig von layout feld
       LayoutManager layout = _getPropertyInfo().createComponentInfo(pModelComp).createLayout();
       layoutSupport.getPrimaryContainer().setLayout(layout);
     }

@@ -2,12 +2,13 @@ package org.netbeans.modules.form.adito;
 
 import com.google.common.base.Objects;
 import de.adito.aditoweb.nbm.nbide.nbaditointerface.NbAditoInterface;
+import de.adito.aditoweb.nbm.nbide.nbaditointerface.common.IAditoColorProvider;
 import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.model.*;
 import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.sync.*;
 import de.adito.propertly.core.spi.IPropertyPitProvider;
 import org.jetbrains.annotations.*;
 import org.netbeans.modules.form.*;
-import org.openide.filesystems.*;
+import org.openide.filesystems.FileObject;
 import org.openide.loaders.*;
 import org.openide.nodes.Node;
 
@@ -148,7 +149,7 @@ public class ARADComponentHandler
     }
     catch (IOException e)
     {
-     throw new RuntimeException(e);  // TODO: exceptionHandling
+      throw new RuntimeException(e);  // TODO: exceptionHandling
     }
   }
 
@@ -246,8 +247,10 @@ public class ARADComponentHandler
   {
     if (model != null)
       return model.getPit().getOwnProperty().getName();
-    FileObject configFile = FileUtil.getConfigFile("FormDesignerPalette/BrowserClient/" + pBeanClass.getSimpleName()
-        .toLowerCase() + ".palette_item");
+
+    IFormComponentInfoProvider compInfoProvider = NbAditoInterface.lookup(IFormComponentInfoProvider.class);
+    IFormComponentPropertyMapping propertyMapping = compInfoProvider.getFormPropertyMapping(pBeanClass);
+    FileObject configFile = propertyMapping.getPaletteConfigItem();
     if (configFile != null)
     {
       DataObject dataObject;

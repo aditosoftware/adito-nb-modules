@@ -5,7 +5,6 @@ import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.layout.IAditoLayoutProv
 import org.netbeans.modules.form.*;
 import org.netbeans.modules.form.adito.layout.AditoComponentConstraints;
 import org.netbeans.modules.form.layoutsupport.*;
-import org.openide.nodes.Node;
 import org.openide.util.ImageUtilities;
 
 import java.awt.*;
@@ -45,7 +44,7 @@ public class AditoNeonLayoutSupport extends AbstractLayoutSupport
   @Override
   public boolean shouldHaveNode()
   {
-    return false;
+    return true;
   }
 
   @Override
@@ -204,27 +203,17 @@ public class AditoNeonLayoutSupport extends AbstractLayoutSupport
         y = y2 - prefSize.height;
     }
 
-    AditoComponentConstraints adConstr;
-    if (constr instanceof AditoComponentConstraints)
-      adConstr = (AditoComponentConstraints) constr.cloneConstraints();
-    else
-    {
-      adConstr = new AditoComponentConstraints();
-    }
-    adConstr.setBounds(new Rectangle(x, y, w, h));
-    return adConstr;
+    NeonConstraints nc = new NeonConstraints();
+    nc.setBounds(new Rectangle(x, y, w, h));
+    return nc;
   }
 
-  @Override
-  public void addComponentsToContainer(Container container, Container containerDelegate, Component[] components, int index)
-  {
-    super.addComponentsToContainer(container, containerDelegate, components, index);
-  }
+
 
   @Override
   protected LayoutConstraints createDefaultConstraints()
   {
-    return new AditoComponentConstraints();
+    return new NeonConstraints();
   }
 
   private static int computeConstraintSize(int newSize, int currSize, int prefSize)

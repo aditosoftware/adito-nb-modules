@@ -61,7 +61,7 @@ import org.netbeans.modules.form.actions.SelectLayoutAction;
  */
 
 public class LayoutNode extends FormNode
-                        implements RADComponentCookie, FormPropertyCookie
+                        implements RADComponentCookie, FormPropertyCookie, ILayoutNode
 {
     private LayoutSupportManager layoutSupport;
 
@@ -154,7 +154,7 @@ public class LayoutNode extends FormNode
             return null;
         }
 
-        if (customizerObject instanceof Component 
+        if (customizerObject instanceof Component
             && customizerObject instanceof Customizer)
         {
             Customizer customizer = (Customizer) customizerObject;

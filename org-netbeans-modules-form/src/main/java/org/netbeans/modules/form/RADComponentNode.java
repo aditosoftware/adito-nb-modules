@@ -50,7 +50,7 @@ import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.model.EModelFormType;
 import org.netbeans.modules.form.adito.actions.AditoActionObject;
 import org.netbeans.modules.form.adito.components.*;
 import org.netbeans.modules.form.adito.perstistencemanager.NonvisContainerRADComponent;
-import org.netbeans.modules.form.layoutsupport.LayoutNode;
+import org.netbeans.modules.form.layoutsupport.*;
 import org.netbeans.modules.form.palette.PaletteUtils;
 import org.netbeans.spi.search.SearchInfoDefinition;
 import org.openide.ErrorManager;
@@ -909,7 +909,14 @@ public class RADComponentNode extends FormNode
     {
       Node node;
       if (key == keyLayout)
-        node = new LayoutNode((RADVisualContainer) container);
+      {
+        RADVisualContainer container = (RADVisualContainer) this.container;
+        final RADComponent layoutRadComponent = container.getLayoutSupport().getLayoutRadComponent();
+        if (layoutRadComponent != null)
+          node = new LayoutRADComponentNode(layoutRadComponent);
+        else
+          node = new LayoutNode(container);
+      }
       else
       {
         node = new RADComponentNode((RADComponent) key);

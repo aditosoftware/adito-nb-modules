@@ -60,7 +60,7 @@ import org.openide.ErrorManager;
 public class RADVisualContainer extends RADVisualComponent implements ComponentContainer {
     private ArrayList<RADVisualComponent> subComponents = new ArrayList<RADVisualComponent>(10);
     private LayoutSupportManager layoutSupport;
-    private LayoutNode layoutNode; // [move to LayoutSupportManager?]
+    private FormNode abstractLayoutNode; // [move to LayoutSupportManager?]
     private LayoutSupportDelegate defaultLayoutDelegate;
     private LayoutManager defaultLayout;
 
@@ -292,19 +292,19 @@ public class RADVisualContainer extends RADVisualComponent implements ComponentC
     String getContainerDelegateGetterName() {
         Object value = getBeanInfo().getBeanDescriptor()
                                         .getValue("containerDelegate"); // NOI18N
-        
+
         if (value instanceof String)
             return (String) value;
         else
             return null;
     }
 
-    public void setLayoutNodeReference(LayoutNode node) {
-        this.layoutNode = node;
+    public <T extends FormNode & ILayoutNode> void setLayoutNodeReference(T node) {
+        this.abstractLayoutNode = node;
     }
 
-    public LayoutNode getLayoutNodeReference() {
-        return layoutNode;
+    public <T extends FormNode & ILayoutNode> T getLayoutNodeReference() {
+        return (T) abstractLayoutNode;
     }
 
     boolean shouldHaveLayoutNode() {
@@ -423,6 +423,9 @@ public class RADVisualContainer extends RADVisualComponent implements ComponentC
             RADComponent metacomp = initComponents[i];
             if (!isMenuTypeComponent() && canHaveMenu(metacomp.getBeanClass())) {
                 containerMenu = metacomp;
+            } else if (LayoutManager.class.isAssignableFrom(metacomp.getBeanClass())) {
+                layoutSupport.setLayoutRadComponent(metacomp);
+                //subComponents.add((RADVisualComponent)metacomp);
             } else {
                 subComponents.add((RADVisualComponent)metacomp);
             }

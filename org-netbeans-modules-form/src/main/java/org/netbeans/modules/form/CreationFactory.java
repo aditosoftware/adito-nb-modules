@@ -67,64 +67,64 @@ public class CreationFactory {
     private static boolean defaultDescriptorsCreated = false;
 
     interface PropertyParameters {
-     
+
         public String getPropertyName();
-        
+
         public String getJavaParametersString(FormProperty prop);
 
         public Object[] getPropertyParametersValues(FormProperty prop);
-        
+
         public Class[] getPropertyParametersTypes();
     }
-    
-    static class Property2ParametersMapper {              
-        
-        private final String propertyName;        
-        private final Class[] propertyType = new Class[1]; 
-        private PropertyParameters parameters; 
-        
+
+    static class Property2ParametersMapper {
+
+        private final String propertyName;
+        private final Class[] propertyType = new Class[1];
+        private PropertyParameters parameters;
+
         Property2ParametersMapper(Class propertyClass, String propertyName) {
             this.propertyType[0] = propertyClass;
-            this.propertyName = propertyName;                  
-        }                
-        
+            this.propertyName = propertyName;
+        }
+
         public String getPropertyName() {
             return  propertyName;
-        }        
+        }
 
         public Class[] getPropertyTypes() {
             if(parameters!=null){
                 return parameters.getPropertyParametersTypes();
-            }            
+            }
             return propertyType;
-        }        
-        
-        public String getJavaParametersString(FormProperty prop) {            
+        }
+
+        public String getJavaParametersString(FormProperty prop) {
             if(parameters!=null){
                 return parameters.getJavaParametersString(prop);
             }
             return prop.getJavaInitializationString();
         }
 
-        public Object[] getPropertyParametersValues(FormProperty prop) {              
+        public Object[] getPropertyParametersValues(FormProperty prop) {
             if(parameters!=null){
                 return parameters.getPropertyParametersValues(prop);
-            }    
+            }
             try{
-                return new Object[] { prop.getRealValue() };   
+                return new Object[] { prop.getRealValue() };
             } catch(InvocationTargetException ite) {
                 ErrorManager.getDefault().notify(ite);
             } catch(IllegalAccessException iae){
                 ErrorManager.getDefault().notify(iae);
-            }                
-            return new Object[] {};   
+            }
+            return new Object[] {};
         }
-        
+
         public void setPropertyParameters(PropertyParameters parameters) {
             this.parameters = parameters;
-        }                        
-    }    
-    
+        }
+    }
+
     private CreationFactory() {}
 
     // -----------
@@ -147,7 +147,7 @@ public class CreationFactory {
     public static void registerDescriptor(CreationDescriptor desc) {
         getRegistry().put(desc.getDescribedClassName(), desc);
     }
-    
+
     public static void unregisterDescriptor(CreationDescriptor desc) {
         if (registry != null)
             registry.remove(desc.getDescribedClassName());
@@ -238,7 +238,7 @@ public class CreationFactory {
 
     // ------------
     // utility methods
-    
+
     public static FormProperty[] getPropertiesForCreator(
                                            CreationDescriptor.Creator creator,
                                            FormProperty[] properties) {
@@ -342,7 +342,7 @@ public class CreationFactory {
 
     /** Evaluates creators for array of properties.
      * (Useful for CreationDescriptor.findBestCreator(...) implementation.)
-     * 
+     *
      * @param creators creators to consider
      * @param properties properties to consider
      * @param changedOnly determines whether to consider changed properties only
@@ -372,7 +372,7 @@ public class CreationFactory {
 
     /** Finds the best creator upon given evaluation.
      * (Useful for CreationDescriptor.findBestCreator(...) implementation.)
-     * 
+     *
      * @param creators creators to consider.
      * @param properties properties to consider.
      * @param placed for each creator a count of placed properties
@@ -507,53 +507,53 @@ public class CreationFactory {
     }
 
     // ---------------------------------------------------
-    // constructors descriptors for some "special" classes...  
+    // constructors descriptors for some "special" classes...
     private static void createDefaultDescriptors() {
         Class[][] constrParamTypes;
         String[][] constrPropertyNames;
         Object[] defaultConstrParams;
-        String methodName;        
+        String methodName;
         CreationDescriptor cd;
-        InsetsPropertyParameters[] insetsPropertyParameters = 
-                new InsetsPropertyParameters[] { new InsetsPropertyParameters("borderInsets") };        
-                
+        InsetsPropertyParameters[] insetsPropertyParameters =
+                new InsetsPropertyParameters[] { new InsetsPropertyParameters("borderInsets") };
+
         try {
         // borders ------------
 
-        // LineBorder                                       
+        // LineBorder
         constrParamTypes = new Class[][] {
             { Color.class, Integer.TYPE , Boolean.TYPE }
 
         };
-        constrPropertyNames = new String[][] {            
+        constrPropertyNames = new String[][] {
             { "lineColor", "thickness" , "roundedCorners" }
         };
-                 
+
         defaultConstrParams = new Object[] { java.awt.Color.black };
         cd = new CreationDescriptor();
-        cd.addConstructorCreators(  
-                javax.swing.border.LineBorder.class, 
+        cd.addConstructorCreators(
+                javax.swing.border.LineBorder.class,
                 constrParamTypes, constrPropertyNames, defaultConstrParams);
-                
+
         constrParamTypes = new Class[][] {
             { Color.class },
             { Color.class, Integer.TYPE }
         };
         constrPropertyNames = new String[][] {
             { "lineColor" },
-            { "lineColor", "thickness" }  
-            
+            { "lineColor", "thickness" }
+
         };
         methodName = "createLineBorder";
-        
+
         cd.addMethodCreators(
                 javax.swing.BorderFactory.class, javax.swing.border.LineBorder.class, methodName,
                 constrParamTypes, constrPropertyNames, null, defaultConstrParams);
         registerDescriptor(cd);
-                
-        
+
+
         // EtchedBorder
-        defaultConstrParams = new Object[] { };        
+        defaultConstrParams = new Object[] { };
         constrParamTypes = new Class[][] {
             { },
             { Color.class, Color.class },
@@ -566,13 +566,13 @@ public class CreationFactory {
             { "etchType" },
             { "etchType", "highlightColor", "shadowColor" }
         };
-        
-        methodName = "createEtchedBorder";    
+
+        methodName = "createEtchedBorder";
         registerDescriptor(new CreationDescriptor(
                 javax.swing.BorderFactory.class, javax.swing.border.EtchedBorder.class, methodName,
                 constrParamTypes, constrPropertyNames, null, defaultConstrParams));
-        
-        // EmptyBorder     
+
+        // EmptyBorder
         constrParamTypes = new Class[][] {
             { Insets.class }
         };
@@ -583,12 +583,12 @@ public class CreationFactory {
         Integer one = Integer.valueOf(1);
         defaultConstrParams = new Object[] { one, one, one, one };
         methodName = "createEmptyBorder";
-        
+
         registerDescriptor(new CreationDescriptor(
-                                   javax.swing.BorderFactory.class, javax.swing.border.EmptyBorder.class, 
+                                   javax.swing.BorderFactory.class, javax.swing.border.EmptyBorder.class,
                                    methodName, constrParamTypes, constrPropertyNames, insetsPropertyParameters, defaultConstrParams));
 
-        // TitledBorder              
+        // TitledBorder
         constrParamTypes = new Class[][] {
             { String.class },
             { Border.class, String.class },
@@ -605,14 +605,14 @@ public class CreationFactory {
             { "border", "title", "titleJustification", "titlePosition", "titleFont", "titleColor" },
             { "border" }
         };
-        
+
         defaultConstrParams = new Object[] { null, "", Integer.valueOf(0), Integer.valueOf(0) };
-        methodName = "createTitledBorder";                      
+        methodName = "createTitledBorder";
         registerDescriptor(new CreationDescriptor(
                 javax.swing.BorderFactory.class, javax.swing.border.TitledBorder.class, methodName,
                 constrParamTypes, constrPropertyNames, null, defaultConstrParams));
 
-        // CompoundBorder          
+        // CompoundBorder
         constrParamTypes = new Class[][] {
             { },
             { Border.class, Border.class }
@@ -620,10 +620,10 @@ public class CreationFactory {
         constrPropertyNames = new String[][] {
             { },
             { "outsideBorder", "insideBorder" }
-        };           
-        
+        };
+
         defaultConstrParams = new Object[0];
-        methodName = "createCompoundBorder";             
+        methodName = "createCompoundBorder";
         registerDescriptor(new CreationDescriptor(
                 javax.swing.BorderFactory.class, javax.swing.border.CompoundBorder.class, methodName,
                 constrParamTypes, constrPropertyNames, null, defaultConstrParams));
@@ -640,13 +640,13 @@ public class CreationFactory {
             { "bevelType", "highlightOuterColor", "highlightInnerColor",
                            "shadowOuterColor", "shadowInnerColor" }
         };
-                      
+
         defaultConstrParams = new Object[] { Integer.valueOf(javax.swing.border.BevelBorder.RAISED) };
-        methodName = "createBevelBorder";                     
+        methodName = "createBevelBorder";
         registerDescriptor(new CreationDescriptor(
-                javax.swing.BorderFactory.class, javax.swing.border.BevelBorder.class, methodName, 
+                javax.swing.BorderFactory.class, javax.swing.border.BevelBorder.class, methodName,
                 constrParamTypes, constrPropertyNames, null, defaultConstrParams));
-                         
+
         // SoftBevelBorder
         constrParamTypes = new Class[][] {
             { Integer.TYPE },
@@ -658,23 +658,23 @@ public class CreationFactory {
             { "bevelType", "highlightOuterColor", "shadowOuterColor" },
             { "bevelType", "highlightOuterColor", "highlightInnerColor",
                            "shadowOuterColor", "shadowInnerColor" }
-        };        
+        };
         registerDescriptor(new CreationDescriptor(
-                javax.swing.border.SoftBevelBorder.class, 
+                javax.swing.border.SoftBevelBorder.class,
                 constrParamTypes, constrPropertyNames, defaultConstrParams));
 
-        // MatteBorder              
+        // MatteBorder
         cd = new CreationDescriptor();
 
         constrParamTypes = new Class[][] {
-            { Icon.class }            
+            { Icon.class }
         };
         constrPropertyNames = new String[][] {
-            { "tileIcon" }        
-        };         
-        cd.addConstructorCreators( javax.swing.border.MatteBorder.class, 
+            { "tileIcon" }
+        };
+        cd.addConstructorCreators( javax.swing.border.MatteBorder.class,
                                    constrParamTypes, constrPropertyNames, defaultConstrParams);
-        
+
         constrParamTypes = new Class[][] {
             { Insets.class, Icon.class },
             { Insets.class, Color.class }
@@ -682,14 +682,14 @@ public class CreationFactory {
         constrPropertyNames = new String[][] {
             { "borderInsets", "tileIcon" },
             { "borderInsets", "matteColor" }
-        };         
-        defaultConstrParams = new Object[] { 
+        };
+        defaultConstrParams = new Object[] {
             one, one, one, one,
             java.awt.Color.black
-        };        
-        methodName = "createMatteBorder";                                
+        };
+        methodName = "createMatteBorder";
         cd.addMethodCreators(javax.swing.BorderFactory.class, javax.swing.border.MatteBorder.class, methodName,
-                                constrParamTypes, constrPropertyNames, insetsPropertyParameters, defaultConstrParams);        
+                                constrParamTypes, constrPropertyNames, insetsPropertyParameters, defaultConstrParams);
         registerDescriptor(cd);
 
         // layouts --------------
@@ -810,33 +810,33 @@ public class CreationFactory {
             ex.printStackTrace();
         }
     }
-    
-    static class InsetsPropertyParameters implements PropertyParameters {              
-           
+
+    static class InsetsPropertyParameters implements PropertyParameters {
+
         private static Class[] parameterTypes = new Class[] {Integer.TYPE, Integer.TYPE, Integer.TYPE, Integer.TYPE};
         private final String propertyName;
-        
+
         public InsetsPropertyParameters(String propertyName) {
             this.propertyName = propertyName;
         }
-        
+
         @Override
         public String getPropertyName() {
             return propertyName;
         }
-        
+
         @Override
-        public String getJavaParametersString(FormProperty prop) {     
-            Insets insets = (Insets) getRealValue (prop);                    
+        public String getJavaParametersString(FormProperty prop) {
+            Insets insets = (Insets) getRealValue (prop);
             if(insets != null) {
                 return insets.top + ", " + insets.left + ", " + insets.bottom + ", " + insets.right;
             } else {
                 return "";
-            }                                                
-        }        
+            }
+        }
         @Override
-        public Object[] getPropertyParametersValues(FormProperty prop) {                        
-            Insets insets = (Insets) getRealValue(prop);                            
+        public Object[] getPropertyParametersValues(FormProperty prop) {
+            Insets insets = (Insets) getRealValue(prop);
             if(insets != null) {
                 return new Object[] {
                     Integer.valueOf(insets.top),
@@ -845,15 +845,15 @@ public class CreationFactory {
                     Integer.valueOf(insets.right)
                 };
             } else {
-                return new Object[] { };                
-            }                    
-        }    
-        
+                return new Object[] { };
+            }
+        }
+
         @Override
         public Class[] getPropertyParametersTypes() {
             return parameterTypes;
         }
-        
+
         private static Object getRealValue(FormProperty prop){
             try {
                 return prop.getRealValue();
@@ -861,10 +861,10 @@ public class CreationFactory {
                 ErrorManager.getDefault().notify(ite);
             } catch(IllegalAccessException iae){
                 ErrorManager.getDefault().notify(iae);
-            }                             
+            }
             return null;
-        }           
+        }
     }
-    
-    
+
+
 }

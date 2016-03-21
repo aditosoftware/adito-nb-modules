@@ -27,6 +27,13 @@ public abstract class AFormModelListener implements FormModelListener
       {
         switch (event.getChangeType())
         {
+          case FormModelEvent.CONTAINER_LAYOUT_CHANGED:
+            if (eventComponent != null)
+            {
+              RADComponent layoutRadComponent = ((RADVisualFormContainer) eventComponent).getLayoutSupport().getLayoutRadComponent();
+              layoutRadComponent.getARADComponentHandler().layoutPropertiesChanged(event.getPropertyName());
+            }
+            break;
           case FormModelEvent.COMPONENT_LAYOUT_CHANGED:
             if (eventComponent != null)
               eventComponent.getARADComponentHandler().layoutPropertiesChanged(event.getPropertyName());

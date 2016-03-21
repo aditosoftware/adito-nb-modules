@@ -58,23 +58,24 @@ public class FormDataBridge
     if (_isProcessingFromAdito())
       return;
 
-    if (radComponent instanceof RADVisualComponent)
+
+    if (pPropertyName == null)
     {
-      if (pPropertyName == null)
+      if (radComponent instanceof RADVisualComponent)
       {
         RADVisualComponent radVisualComponent = (RADVisualComponent) radComponent;
         _radPropertiesChanged(radVisualComponent.getConstraintsProperties());
       }
-      else
+    }
+    else
+    {
+      try
       {
-        try
-        {
-          alignAditoToFormProp(radComponent.getPropertyByName(pPropertyName));
-        }
-        catch (InvocationTargetException e)
-        {
-          radComponent.getFormModel().forceUndoOfCompoundEdit(); // TODO: Fehler dem User mitteilen (output)
-        }
+        alignAditoToFormProp(radComponent.getPropertyByName(pPropertyName));
+      }
+      catch (InvocationTargetException e)
+      {
+        radComponent.getFormModel().forceUndoOfCompoundEdit(); // TODO: Fehler dem User mitteilen (output)
       }
     }
   }
