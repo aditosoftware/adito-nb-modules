@@ -46,11 +46,10 @@ package org.netbeans.modules.form;
 
 import java.awt.*;
 import javax.swing.*;
-import java.util.ArrayList;
+import java.util.*;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.EnumMap;
-import java.util.Map;
+
 import org.netbeans.modules.form.fakepeer.FakePeerSupport;
 
 import org.netbeans.modules.form.layoutsupport.*;
@@ -398,16 +397,15 @@ public class RADVisualContainer extends RADVisualComponent implements ComponentC
     /** @return all subcomponents (including the menu component) */
     @Override
     public RADComponent[] getSubBeans() {
-        int n = subComponents.size();
+        java.util.List<RADComponent> components = new ArrayList<>(subComponents);
         if (containerMenu != null)
-            n++;
+            components.add(containerMenu);
 
-        RADComponent[] components = new RADComponent[n];
-        subComponents.toArray(components);
-        if (containerMenu != null)
-            components[n-1] = containerMenu;
+        RADComponent layoutRadComponent = layoutSupport.getLayoutRadComponent();
+        if (layoutRadComponent != null)
+            components.add(layoutRadComponent);
 
-        return components;
+        return components.toArray(new RADComponent[components.size()]);
     }
 
     @Override
@@ -425,7 +423,6 @@ public class RADVisualContainer extends RADVisualComponent implements ComponentC
                 containerMenu = metacomp;
             } else if (LayoutManager.class.isAssignableFrom(metacomp.getBeanClass())) {
                 layoutSupport.setLayoutRadComponent(metacomp);
-                //subComponents.add((RADVisualComponent)metacomp);
             } else {
                 subComponents.add((RADVisualComponent)metacomp);
             }

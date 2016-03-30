@@ -48,7 +48,6 @@ import java.awt.*;
 import java.beans.*;
 import java.util.*;
 
-import de.adito.propertly.core.spi.*;
 import org.openide.nodes.*;
 
 import org.netbeans.modules.form.*;
@@ -160,7 +159,7 @@ public final class LayoutSupportManager implements LayoutSupportContext {
         if (layoutDelegate != null && needInit) {
             LayoutManager lmInstance = initializeFromInstance ?
                     getPrimaryContainerDelegate().getLayout() : null;
-            layoutDelegate.initialize(this, lmInstance);
+            layoutDelegate.initialize(this, lmInstance, layoutRadComponent);
             fillLayout(null);
             getPropertySets(); // force properties and listeners creation
             needInit = false;
@@ -186,7 +185,7 @@ public final class LayoutSupportManager implements LayoutSupportContext {
 
         if (layoutDelegate != null) {
             try {
-                layoutDelegate.initialize(this, lmInstance);
+                layoutDelegate.initialize(this, lmInstance, layoutRadComponent);
                 fillLayout(oldConstraints);
                 getPropertySets(); // force properties and listeners creation
             }
@@ -400,8 +399,6 @@ public final class LayoutSupportManager implements LayoutSupportContext {
 
     // properties and customizer
     public Node.PropertySet[] getPropertySets() {
-        if (layoutRadComponent != null)
-            return layoutRadComponent.getProperties();
         if (propertySets == null) {
             if (layoutDelegate == null) return new Node.PropertySet[0]; // Issue 63916
             propertySets = layoutDelegate.getPropertySets();
@@ -424,9 +421,8 @@ public final class LayoutSupportManager implements LayoutSupportContext {
             return ((AbstractLayoutSupport)layoutDelegate).getAllProperties();
 
         java.util.List<Node.Property> allPropsList = new ArrayList<Node.Property>();
-        Node.PropertySet[] ps = getPropertySets();
-        for (int i = 0; i < ps.length; i++) {
-            Node.Property[] props = ps[i].getProperties();
+        for (int i=0; i < propertySets.length; i++) {
+            Node.Property[] props = propertySets[i].getProperties();
             for (int j=0; j < props.length; j++)
                 allPropsList.add(props[j]);
         }
@@ -857,10 +853,10 @@ public final class LayoutSupportManager implements LayoutSupportContext {
     public void setLayoutRadComponent(RADComponent pLayoutRadComponent)
     {
         layoutRadComponent = pLayoutRadComponent;
-        IProperty<?, ?> layout = metaContainer.getARADComponentHandler().getModel().getPit().findProperty("layout");
+        /*IProperty<?, ?> layout = metaContainer.getARADComponentHandler().getModel().getPit().findProperty("layout");
 
         IPropertyPitProvider neonLayoutDataModel = (IPropertyPitProvider) layout.getValue();
-        layoutRadComponent.getARADComponentHandler().setModel(neonLayoutDataModel);
+        layoutRadComponent.getARADComponentHandler().setModel(neonLayoutDataModel);*/
     }
 
     public RADComponent getLayoutRadComponent()

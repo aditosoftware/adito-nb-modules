@@ -47,7 +47,7 @@ package org.netbeans.modules.form.layoutsupport;
 import java.awt.*;
 import java.beans.*;
 
-import org.netbeans.modules.form.RADVisualComponent;
+import org.netbeans.modules.form.*;
 import org.openide.nodes.*;
 
 /**
@@ -92,7 +92,7 @@ public interface LayoutSupportDelegate {
      * @exception Exception occurred during initialization
      */
     void initialize(LayoutSupportContext layoutContext,
-                    LayoutManager lmInstance)
+                    LayoutManager lmInstance, RADComponent pMetaLayout)
         throws Exception;
 
     /** Gets the supported layout manager or container class. Container class
@@ -420,7 +420,7 @@ public interface LayoutSupportDelegate {
      *         constraints or index are invalid, or if the painting is not
      *         implemented)
      */
-    boolean paintDragFeedback(Container container, 
+    boolean paintDragFeedback(Container container,
                               Container containerDelegate,
                               Component component,
                               LayoutConstraints newConstraints,

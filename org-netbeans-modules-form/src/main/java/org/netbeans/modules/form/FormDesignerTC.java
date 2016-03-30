@@ -100,7 +100,7 @@ public class FormDesignerTC extends TopComponent implements MultiViewElement {
     public FormDesignerTC(Lookup lkp) {
         this(lkp.lookup(FormEditorSupport.class));
     }
-    
+
     FormDesignerTC(FormEditorSupport formEditorSupport) {
         this.formEditorSupport = formEditorSupport;
         lookup = new FormDesignerLookup();
@@ -240,7 +240,7 @@ public class FormDesignerTC extends TopComponent implements MultiViewElement {
         removeAll();
         JScrollPane scrollPane = new JScrollPane(formDesigner.getDesignCanvas());
         scrollPane.setBorder(null); // disable border, winsys will handle borders itself
-        scrollPane.setViewportBorder(null); // disable also GTK L&F viewport border 
+        scrollPane.setViewportBorder(null); // disable also GTK L&F viewport border
         scrollPane.getVerticalScrollBar().setUnitIncrement(5); // Issue 50054
         scrollPane.getHorizontalScrollBar().setUnitIncrement(5);
         add(scrollPane); // if not yet loaded, the canvas shows "Loading"

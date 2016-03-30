@@ -6,7 +6,6 @@ import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.layout.anchor.IAnchorLa
 import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.layout.common.IAditoLayoutConstraints;
 import org.netbeans.modules.form.adito.layout.AbstractComponentConstraints;
 import org.netbeans.modules.form.layoutsupport.LayoutConstraints;
-import org.openide.nodes.Node;
 
 import java.awt.*;
 
@@ -45,13 +44,13 @@ public class NeonConstraints extends AbstractComponentConstraints<IAnchorLayoutP
     //return new Rectangle(x == null ? 0 : x, y == null ? 0 : y,
     //                     width == null ? -1 : width, height == null ? -1 : height);
 
-    System.err.println("NeonConstraints.getBounds -> fest codiert");
+    //System.err.println("NeonConstraints.getBounds -> fest codiert");
     return new Rectangle(10,10,32,32);
   }
 
   public void setBounds(Rectangle pBounds)
   {
-    System.err.println("NeonConstraints.setBounds ->leer");
+    //System.err.println("NeonConstraints.setBounds ->leer");
     //IAditoLayoutConstraints<IAnchorLayoutPropertyTypes> constraints = getConstraintsObject();
     //constraints.setValue(type().x(), pBounds.x == -1 ? null : pBounds.x);
     //constraints.setValue(type().y(), pBounds.y == -1 ? null : pBounds.y);

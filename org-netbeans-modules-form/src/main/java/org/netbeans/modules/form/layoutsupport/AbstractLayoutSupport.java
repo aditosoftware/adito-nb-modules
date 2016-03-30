@@ -107,7 +107,7 @@ public abstract class AbstractLayoutSupport implements LayoutSupportDelegate
   private java.util.List<LayoutConstraints> componentConstraints = new ArrayList<>();
 
   private MetaLayout initialLayout;
-  protected MetaLayout metaLayout;
+  protected RADComponent metaLayout;
   private FormProperty[] allProperties;
 
   // ------------------
@@ -128,9 +128,16 @@ public abstract class AbstractLayoutSupport implements LayoutSupportDelegate
    * @param initialInstance LayoutManager instance for initialization (may be null)
    * @throws Exception occurred during initialization
    */
-  @Override
   public void initialize(LayoutSupportContext layoutContext,
                          LayoutManager initialInstance)
+      throws Exception
+  {
+    initialize(layoutContext, initialInstance, null);
+  }
+
+  @Override
+  public void initialize(LayoutSupportContext layoutContext,
+                         LayoutManager initialInstance, RADComponent pMetaLayout)
       throws Exception
   {
     if (this.layoutContext == layoutContext)
@@ -140,7 +147,7 @@ public abstract class AbstractLayoutSupport implements LayoutSupportDelegate
     clean();
 
     Class cls = getSupportedClass();
-    if (cls != null && LayoutManager.class.isAssignableFrom(cls))
+    if (pMetaLayout == null && cls != null && LayoutManager.class.isAssignableFrom(cls))
     {
       // create MetaLayout to manage layout manager as a bean
       if (initialInstance != null && !cls.isAssignableFrom(initialInstance.getClass()))
@@ -149,7 +156,8 @@ public abstract class AbstractLayoutSupport implements LayoutSupportDelegate
       }
       initializeInstance(initialInstance);
     }
-    else metaLayout = null;
+    else
+      metaLayout = pMetaLayout;
   }
 
   protected void initializeInstance(LayoutManager initialInstance)
@@ -166,7 +174,7 @@ public abstract class AbstractLayoutSupport implements LayoutSupportDelegate
     deriveChangedPropertiesFromInstance(metaLayout);
   }
 
-  protected void deriveChangedPropertiesFromInstance(MetaLayout metaLayout)
+  protected void deriveChangedPropertiesFromInstance(RADComponent metaLayout)
   {
   }
 

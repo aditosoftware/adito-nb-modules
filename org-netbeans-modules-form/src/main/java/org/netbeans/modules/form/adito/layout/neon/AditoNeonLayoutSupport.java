@@ -44,7 +44,7 @@ public class AditoNeonLayoutSupport extends AbstractLayoutSupport
   @Override
   public boolean shouldHaveNode()
   {
-    return true;
+    return false;
   }
 
   @Override

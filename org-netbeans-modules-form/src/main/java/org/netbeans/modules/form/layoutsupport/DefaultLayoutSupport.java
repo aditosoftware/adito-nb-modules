@@ -47,7 +47,8 @@ package org.netbeans.modules.form.layoutsupport;
 import java.awt.*;
 import java.util.HashMap;
 import java.util.Map;
-import org.netbeans.modules.form.RADProperty;
+
+import org.netbeans.modules.form.*;
 
 /**
  * This class is used internally to provide default support for any layout
@@ -98,11 +99,11 @@ class DefaultLayoutSupport extends AbstractLayoutSupport {
      * The default value of this property is 0, but the default value
      * of gap property of layout obtained from the default instance
      * of JXTaskContainer is 14.
-     * 
+     *
      * @param metaLayout information about the layout.
      */
     @Override
-    protected void deriveChangedPropertiesFromInstance(MetaLayout metaLayout) {
+    protected void deriveChangedPropertiesFromInstance(RADComponent metaLayout) {
         Map<String,Object> map = new HashMap<String,Object>();
         for (RADProperty prop : metaLayout.getAllBeanProperties()) {
             if (prop.canRead() && prop.canWrite()) {
