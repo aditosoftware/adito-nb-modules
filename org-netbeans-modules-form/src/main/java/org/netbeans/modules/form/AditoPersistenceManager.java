@@ -479,8 +479,12 @@ public class AditoPersistenceManager extends PersistenceManager
     for (Map.Entry<String, Object> entry : componentInfo.getInitialValues().entrySet())
     {
       Node.Property radProperty = pComponent.getPropertyByName(entry.getKey());
+
       if (radProperty != null)
+      {
         radProperty.setValue(entry.getValue());
+      }
+
     }
   }
 
