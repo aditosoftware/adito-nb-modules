@@ -18,11 +18,11 @@ import java.util.*;
 public interface IFormComponentInfo
 {
 
-  public static final String PROP_NAME_CHANGED = "propNameChanged";
-  public static final String PROP_VALUE_CHANGED = "propValueChanged";
-  public static final String PROP_CHILD_ADDED = "propChildAdded";
-  public static final String PROP_CHILD_REMOVED = "propChildRemoved";
-  public static final String PROP_POSITION_CHANGED = "propPositionChanged";
+  String PROP_NAME_CHANGED = "propNameChanged";
+  String PROP_VALUE_CHANGED = "propValueChanged";
+  String PROP_CHILD_ADDED = "propChildAdded";
+  String PROP_CHILD_REMOVED = "propChildRemoved";
+  String PROP_POSITION_CHANGED = "propPositionChanged";
 
   Sheet createSheet();
 
@@ -45,6 +45,10 @@ public interface IFormComponentInfo
   List<String> getPropertyNames();
 
   Node.Property getProperty(String pPropertyName);
+
+  String getAditoPropName(String pRadPropName);
+
+  String getRadPropName(String pAditoPropName);
 
   void addPropertyListener(PropertyChangeListener pListener);
 

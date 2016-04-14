@@ -325,7 +325,7 @@ public class ARADComponentHandler
             radComponent.getBeanClass());
         if (componentInfo != null && propertyMapping != null)
         {
-          formDataBridge = new FormDataBridge(radComponent, componentInfo, propertyMapping);
+          formDataBridge = new FormDataBridge(radComponent, componentInfo);
           formDataBridge.registerListeners();
         }
       }

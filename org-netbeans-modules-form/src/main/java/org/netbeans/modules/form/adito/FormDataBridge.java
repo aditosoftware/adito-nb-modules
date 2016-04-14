@@ -33,7 +33,6 @@ public class FormDataBridge
 
   private final RADComponent radComponent;
   private final IFormComponentInfo componentInfo;
-  private final IFormComponentPropertyMapping componentPropertyMapping;
 
   private PropertyChangeListener aditoPropertyChangeListener;
   private PropertyChangeListener formPropertyChangeListener;
@@ -44,12 +43,10 @@ public class FormDataBridge
   private final AtomicInteger isProcessingFromAdito;
 
 
-  public FormDataBridge(@NotNull RADComponent pRadComponent, @NotNull IFormComponentInfo pComponentInfo,
-                        @NotNull IFormComponentPropertyMapping pComponentPropertyMapping)
+  public FormDataBridge(@NotNull RADComponent pRadComponent, @NotNull IFormComponentInfo pComponentInfo)
   {
     radComponent = pRadComponent;
     componentInfo = pComponentInfo;
-    componentPropertyMapping = pComponentPropertyMapping;
     isProcessingFromAdito = new AtomicInteger(0);
   }
 
@@ -109,7 +106,7 @@ public class FormDataBridge
       componentInfo.addPropertyListener(aditoPropertyChangeListener);
       for (String aditoPropName : componentInfo.getPropertyNames())
       {
-        String radPropName = componentPropertyMapping.getRadPropName(aditoPropName);
+        String radPropName = componentInfo.getRadPropName(aditoPropName);
         if (!Strings.isNullOrEmpty(radPropName))
         {
           FormProperty formProperty = _getFormProperty(radPropName);
@@ -125,7 +122,7 @@ public class FormDataBridge
     componentInfo.removePropertyListener(aditoPropertyChangeListener);
     for (String aditoPropName : componentInfo.getPropertyNames())
     {
-      String radPropName = componentPropertyMapping.getRadPropName(aditoPropName);
+      String radPropName = componentInfo.getRadPropName(aditoPropName);
       if (!Strings.isNullOrEmpty(radPropName))
       {
         FormProperty formProperty = _getFormProperty(radPropName);
@@ -158,7 +155,7 @@ public class FormDataBridge
     try
     {
       String formPropName = pFormProperty.getName();
-      String aditoPropName = componentPropertyMapping.getAditoPropName(formPropName);
+      String aditoPropName = componentInfo.getAditoPropName(formPropName);
       if (Strings.isNullOrEmpty(aditoPropName))
         return; // not a mapped value
       Node.Property aditoProperty = componentInfo.getProperty(aditoPropName);
@@ -228,7 +225,7 @@ public class FormDataBridge
   {
     try
     {
-      String mappedName = componentPropertyMapping.getRadPropName(pAditoPropName);
+      String mappedName = componentInfo.getRadPropName(pAditoPropName);
       if (Strings.isNullOrEmpty(mappedName))
         return; // not a mapped value
       Node.Property aditoProperty = componentInfo.getProperty(pAditoPropName);

@@ -20,8 +20,4 @@ public interface IFormComponentPropertyMapping
 
   Class<?> getComponentClass();
 
-  String getAditoPropName(String pRadPropName);
-
-  String getRadPropName(String pAditoPropName);
-
 }
