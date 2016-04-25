@@ -13,14 +13,11 @@ import org.netbeans.modules.form.project.ClassSource;
 import org.openide.nodes.Node;
 import org.openide.util.NotImplementedException;
 
-import javax.swing.*;
-import java.awt.*;
 import java.beans.*;
 import java.io.IOException;
 import java.lang.ref.*;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.*;
 
 /**
@@ -37,25 +34,15 @@ public class FormDataBridge
   private PropertyChangeListener aditoPropertyChangeListener;
   private PropertyChangeListener formPropertyChangeListener;
 
-  // #6286: undo nicht komplett möglich.
-  // Hier wird gemerkt, wenn eine Synchronisation von Adito kommt. Die anschließende Änderung im FormEditor soll nicht
-  // wieder nach Adito synchronisiert werden.
-  private final AtomicInteger isProcessingFromAdito;
-
 
   public FormDataBridge(@NotNull RADComponent pRadComponent, @NotNull IFormComponentInfo pComponentInfo)
   {
     radComponent = pRadComponent;
     componentInfo = pComponentInfo;
-    isProcessingFromAdito = new AtomicInteger(0);
   }
 
   void layoutPropertiesChanged(String pPropertyName)
   {
-    if (_isProcessingFromAdito())
-      return;
-
-
     if (pPropertyName == null)
     {
       if (radComponent instanceof RADVisualComponent)
@@ -149,9 +136,6 @@ public class FormDataBridge
 
   void alignAditoToFormProp(Node.Property pFormProperty) throws InvocationTargetException
   {
-    if (isProcessingFromAdito.get() > 0)
-      return;
-
     try
     {
       String formPropName = pFormProperty.getName();
@@ -212,13 +196,21 @@ public class FormDataBridge
       }
       perm[i] = index;
     }
-    cont.reorderSubComponents(perm);
-    radComponent.getFormModel().fireComponentsReordered(cont, perm);
+    for (int i : perm)
+    {
+      if (perm[i] != i)
+      {
+        // Sortierung ist verschieden
+        cont.reorderSubComponents(perm);
+        radComponent.getFormModel().fireComponentsReordered(cont, perm);
+        break;
+      }
+    }
   }
 
   void copyValuesFromAdito()
   {
-    _processFromAdito(() -> componentInfo.getPropertyNames().forEach(this::_alignFormToAditoProperty));
+    componentInfo.getPropertyNames().forEach(this::_alignFormToAditoProperty);
   }
 
   private void _alignFormToAditoProperty(final String pAditoPropName)
@@ -269,24 +261,6 @@ public class FormDataBridge
         prop1 + " is mapped to " + prop2 + " but doesn't exist at " + detail);
   }
 
-  private boolean _isProcessingFromAdito()
-  {
-    return isProcessingFromAdito.get() > 0;
-  }
-
-  private void _processFromAdito(Runnable pRunnable)
-  {
-    try
-    {
-      isProcessingFromAdito.incrementAndGet();
-      pRunnable.run();
-    }
-    finally
-    {
-      SwingUtilities.invokeLater(isProcessingFromAdito::decrementAndGet);
-    }
-  }
-
   /**
    * PropertyChangeListener-Impl
    */
@@ -303,7 +277,7 @@ public class FormDataBridge
     public void propertyChange(PropertyChangeEvent evt)
     {
       FormDataBridge formDataBridge = formDataBridgeRef.get();
-      if (formDataBridge == null || formDataBridge.isProcessingFromAdito.get() > 0)
+      if (formDataBridge == null)
         return;
 
       Node.Property property = (Node.Property) evt.getSource();
@@ -328,7 +302,7 @@ public class FormDataBridge
     {
       final FormDataBridge formDataBridge = formDataBridgeRef.get();
       if (formDataBridge != null)
-        formDataBridge._processFromAdito(() -> _apply(formDataBridge, evt));
+        _apply(formDataBridge, evt);
     }
 
     private void _apply(final FormDataBridge pFormDataBridge, PropertyChangeEvent pEvt)
@@ -338,8 +312,7 @@ public class FormDataBridge
       switch (propertyName)
       {
         case IFormComponentInfo.PROP_CHILD_ADDED:
-          IPropertyPitProvider<?, ?, ?> created = (IPropertyPitProvider<?, ?, ?>)
-              ((IPropertyPitProvider) pEvt.getSource()).getPit().getValue((IPropertyDescription) pEvt.getNewValue());
+          IPropertyPitProvider<?, ?, ?> created = (IPropertyPitProvider<?, ?, ?>) pEvt.getNewValue();
 
           if (radComponent instanceof ComponentContainer)
           {
@@ -388,7 +361,7 @@ public class FormDataBridge
           if (radComponent instanceof ComponentContainer)
           {
             ComponentContainer container = (ComponentContainer) radComponent;
-            String removedName = ((IPropertyDescription) pEvt.getOldValue()).getName();
+            String removedName = ((IProperty) pEvt.getSource()).getName();
             for (RADComponent component : Lists.newArrayList(container.getSubBeans()))
             {
               if (Objects.equal(component.getName(), removedName))
@@ -409,7 +382,7 @@ public class FormDataBridge
           break;
         case IFormComponentInfo.PROP_POSITION_CHANGED:
           // per 'invokeLater', da das Event gefeuert wurde, bevor der Wert im FileSystem steht.
-          EventQueue.invokeLater(pFormDataBridge::syncChildren);
+          syncChildren();
           break;
         case IFormComponentInfo.PROP_NAME_CHANGED:
           radComponent.rename((String) pEvt.getNewValue());
