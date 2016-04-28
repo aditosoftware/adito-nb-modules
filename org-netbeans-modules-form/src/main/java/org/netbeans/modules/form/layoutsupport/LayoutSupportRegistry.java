@@ -392,7 +392,7 @@ public class LayoutSupportRegistry {
                 "de.adito.aditoweb.swingcommon.layout.aditolayout.AditoAnchorLayout", // NOI18N
                 "org.netbeans.modules.form.adito.layout.AditoLayoutSupport"); // NOI18N
             layoutToLayoutDelegate.put(
-                "de.adito.aditoweb.swingcommon.layout.neonlayout.NeonTableLayout", // NOI18N
+                "de.adito.aditoweb.nbm.nbaditointerfaceimpl.form.layout.neon.NeonFormTableLayout", // NOI18N
                 "org.netbeans.modules.form.adito.layout.neon.AditoNeonLayoutSupport"); // NOI18N
         }
         return layoutToLayoutDelegate;
