@@ -352,7 +352,7 @@ public class AditoPersistenceManager extends PersistenceManager
     }
 
     // create a new metacomponent
-    RADComponent newComponent=null;
+    RADComponent newComponent = null;
     switch (componentInfo.getModelPropProvider().getContainerType())
     {
       case NONE:
