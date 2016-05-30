@@ -8,7 +8,7 @@ import java.awt.*;
  *
  * @author Thomas Tasior 18.04.2016, 13:42
  */
-public interface INeonFrame
+public interface IDropAreaSupport
 {
   /**
    * Ein Aufrufer liefert eine Position im Container und
