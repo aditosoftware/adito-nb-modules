@@ -52,7 +52,7 @@ public class AditoNeonLayoutSupport extends AbstractLayoutSupport
   public LayoutConstraints getNewConstraints(Container container, Container containerDelegate, Component component,
                                              int index, Point posInCont, Point posInComp)
   {
-    INeonFrame neonFrame = (INeonFrame) container;
+    IDropAreaSupport neonFrame = (IDropAreaSupport) container;
     IDropArea area = neonFrame.getDropArea(posInCont);
 
     NeonConstraints constr = new NeonConstraints();
