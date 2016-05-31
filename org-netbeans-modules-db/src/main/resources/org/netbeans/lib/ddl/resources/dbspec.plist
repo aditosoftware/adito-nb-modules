@@ -612,6 +612,8 @@
       java.sql.Types.NUMERIC = NUMERIC;
       java.sql.Types.REAL = REAL;
       java.sql.Types.SMALLINT = SMALLINT;
+      // ADITO: #13290
+      java.sql.Types.TIMESTAMP = TIMESTAMP;
       java.sql.Types.VARCHAR = VARCHAR2;
       java.sql.Types.NVARCHAR = NVARCHAR2;
     };
@@ -1454,6 +1456,8 @@
       java.sql.Types.NUMERIC = NUMERIC;
       java.sql.Types.REAL = REAL;
       java.sql.Types.SMALLINT = SMALLINT;
+      // ADITO: #13290
+      java.sql.Types.TIMESTAMP = TIMESTAMP;
       java.sql.Types.VARCHAR = VARCHAR2;
     };
     ProcedureArgumentMap = {
@@ -1658,6 +1662,8 @@
       java.sql.Types.NUMERIC = NUMERIC;
       java.sql.Types.REAL = REAL;
       java.sql.Types.SMALLINT = SMALLINT;
+      // ADITO: #13290
+      java.sql.Types.TIMESTAMP = TIMESTAMP;
       java.sql.Types.VARCHAR = VARCHAR2;
     };
     ProcedureArgumentMap = {
