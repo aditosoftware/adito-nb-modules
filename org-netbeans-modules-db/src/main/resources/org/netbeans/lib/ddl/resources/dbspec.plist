@@ -1360,11 +1360,11 @@
       java.sql.Types.REAL = REAL;
       java.sql.Types.SMALLINT = SMALLINT;
       java.sql.Types.TIME = TIME;
-      java.sql.Types.TIMESTAMP = TIMESTAMP;
+      java.sql.Types.TIMESTAMP = DATETIME;
       java.sql.Types.TINYINT = TINYINT;
       java.sql.Types.VARCHAR = VARCHAR;
     };
-    SizelessTypes = (BIGINT,LONGBLOB,DATE,"DOUBLE PRECISION",FLOAT,INT,REAL,SMALLINT,TIME,TIMESTAMP,TINYINT,TEXT);
+    SizelessTypes = (BIGINT,LONGBLOB,DATE,"DOUBLE PRECISION",FLOAT,INT,REAL,SMALLINT,TIME,TIMESTAMP,DATETIME,TINYINT,TEXT);
 //    DecimalTypes = (DECIMAL,NUMERIC);
     CharacterTypes = (CHAR,VARCHAR,TEXT);
 
@@ -1408,11 +1408,11 @@
         java.sql.Types.REAL = REAL;
         java.sql.Types.SMALLINT = SMALLINT;
         java.sql.Types.TIME = TIME;
-        java.sql.Types.TIMESTAMP = TIMESTAMP;
+        java.sql.Types.TIMESTAMP = DATETIME;
         java.sql.Types.TINYINT = TINYINT;
         java.sql.Types.VARCHAR = VARCHAR;
       };
-      SizelessTypes = (BIGINT,LONGBLOB,LONGTEXT,DATE,"DOUBLE PRECISION",FLOAT,INT,REAL,SMALLINT,TIME,TIMESTAMP,TINYINT,TEXT);
+      SizelessTypes = (BIGINT,LONGBLOB,LONGTEXT,DATE,"DOUBLE PRECISION",FLOAT,INT,REAL,SMALLINT,TIME,DATETIME,TIMESTAMP,TINYINT,TEXT);
   //    DecimalTypes = (DECIMAL,NUMERIC);
       CharacterTypes = (CHAR,VARCHAR,TEXT);
 
