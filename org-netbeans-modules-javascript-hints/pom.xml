@@ -14,7 +14,7 @@
   <groupId>org.netbeans.modules</groupId>
   <artifactId>org-netbeans-modules-javascript-hints</artifactId>
   <packaging>nbm</packaging>
-  <version>${parent.version}-RELEASE721</version>
+  <version>${project.parent.version}-RELEASE721</version>
   <name>Netbeans IDE module: org-netbeans-modules-javascript-hints</name>
 
 
@@ -54,7 +54,7 @@
     <dependency>
       <groupId>org.netbeans.modules</groupId>
       <artifactId>org-netbeans-modules-javascript-editing</artifactId>
-      <version>${parent.version}-RELEASE721</version>
+      <version>${project.parent.version}-RELEASE721</version>
     </dependency>
     <dependency>
       <groupId>org.netbeans.api</groupId>
