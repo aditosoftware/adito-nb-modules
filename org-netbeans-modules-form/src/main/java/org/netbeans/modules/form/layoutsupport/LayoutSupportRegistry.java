@@ -352,6 +352,9 @@ public class LayoutSupportRegistry {
             containerToLayoutDelegate.put(
                 "de.adito.aditoweb.nbm.nbaditointerfaceimpl.form.components.frameneon.ANeonFrame", // NOI18N
                 "org.netbeans.modules.form.adito.layout.neon.AditoNeonLayoutSupport"); // NOI18N
+            containerToLayoutDelegate.put(
+                "de.adito.aditoweb.nbm.nbaditointerfaceimpl.form.components.frameneon.ANeonRegisterTab", // NOI18N
+                "org.netbeans.modules.form.adito.layout.neon.AditoNeonLayoutSupport"); // NOI18N
         }
         return containerToLayoutDelegate;
     }
