@@ -75,22 +75,15 @@ public class ARADComponentHandler
 
   public void nameIsAboutToChange(String pOldName, String pNewName) throws IllegalStateException
   {
-    try
-    {
-      if (Objects.equal(pOldName, pNewName) || model == null)
-        return;
-      if (radComponent == null)
-        throw new IllegalStateException("oldName: " + pOldName + ", newName: " + pNewName);
+    if (Objects.equal(pOldName, pNewName) || model == null)
+      return;
+    if (radComponent == null)
+      throw new IllegalStateException("oldName: " + pOldName + ", newName: " + pNewName);
 
-      // TODO: propertly
-      //DataFolder.findFolder(model).rename(pNewName);
-      if (!model.getPit().getOwnProperty().getName().equals(pNewName))
-        model.getPit().getOwnProperty().rename(pNewName);
-    }
-    catch (Exception e)
-    {
-      e.printStackTrace();  // TODO: notify exception
-    }
+    // TODO: propertly
+    //DataFolder.findFolder(model).rename(pNewName);
+    if (!model.getPit().getOwnProperty().getName().equals(pNewName))
+      model.getPit().getOwnProperty().rename(pNewName);
   }
 
   public void deleted()
