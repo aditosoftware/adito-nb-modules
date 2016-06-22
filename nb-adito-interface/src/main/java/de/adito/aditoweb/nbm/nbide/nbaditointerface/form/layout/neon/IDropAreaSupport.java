@@ -1,5 +1,6 @@
 package de.adito.aditoweb.nbm.nbide.nbaditointerface.form.layout.neon;
 
+import javax.swing.*;
 import java.awt.*;
 
 /**
@@ -11,11 +12,12 @@ import java.awt.*;
 public interface IDropAreaSupport
 {
   /**
-   * Ein Aufrufer liefert eine Position im Container und
-   * erhält dafür Einfügeinformationen.
    * @param pPosInCont X/Y Koordinaten auf einem Komponentencontainer.
-   *
+   * @param pComponent die einzufügende Komponente
+   * @param pSizeChanges zeigt an, welche Kante einer Komponente mit der Maus
+   *                    verschoben wird. Ist null, wenn die gesamte Komponente
+   *                    verschoben wird.
    * @return Einfügeinformationen für einen Container.
    */
-  IDropArea getDropArea(Point pPosInCont);
+  IDropArea getDropArea(Point pPosInCont, JComponent pComponent, Insets pSizeChanges);
 }

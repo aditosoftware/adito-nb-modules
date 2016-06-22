@@ -8,15 +8,14 @@ import org.netbeans.modules.form.*;
 import org.netbeans.modules.form.layoutsupport.*;
 import org.openide.util.ImageUtilities;
 
+import javax.swing.*;
 import java.awt.*;
 import java.beans.BeanInfo;
+import java.lang.reflect.InvocationTargetException;
 
-/**
- * @author J. Boesl, 07.03.11
- */
+
 public class AditoNeonLayoutSupport extends AbstractLayoutSupport
 {
-
   private static FormLoaderSettings formSettings = FormLoaderSettings.getInstance();
 
 
@@ -52,12 +51,28 @@ public class AditoNeonLayoutSupport extends AbstractLayoutSupport
   public LayoutConstraints getNewConstraints(Container container, Container containerDelegate, Component component,
                                              int index, Point posInCont, Point posInComp)
   {
-    IDropAreaSupport neonFrame = (IDropAreaSupport) container;
-    IDropArea area = neonFrame.getDropArea(posInCont);
+    return _buildConstraints(container, component, null, posInCont);
+  }
 
+  public LayoutConstraints getResizedConstraints(Container container, Container containerDelegate, Component component,
+                                                 int index, Rectangle originalBounds, Insets sizeChanges,
+                                                 Point posInCont)
+  {
+    return _buildConstraints(container, component, sizeChanges, posInCont);
+  }
+
+
+  private LayoutConstraints _buildConstraints(Container container, Component component,
+                                              Insets sizeChanges,
+                                              Point posInCont)
+  {
+    JComponent neonComp = (JComponent) component;
+    IDropAreaSupport support = (IDropAreaSupport) container;
+    IDropArea area = support.getDropArea(posInCont, neonComp, sizeChanges);
     NeonConstraints constr = new NeonConstraints();
     IAditoLayoutConstraints<ICellInfoPropertyTypes> co = constr.getConstraintsObject();
     ICellInfoPropertyTypes typeInfo = co.getTypeInfo();
+
     try
     {
       co.get(typeInfo.startX()).setValue(area.startX());
@@ -66,14 +81,15 @@ public class AditoNeonLayoutSupport extends AbstractLayoutSupport
       co.get(typeInfo.endY()).setValue(area.endY());
       co.get(typeInfo.justify()).setValue(area.justify());
     }
-    catch (Exception pE)
+    catch (IllegalAccessException | InvocationTargetException pE)
     {
-      pE.printStackTrace();//todo Exceptionhandling
+      //Kein Zugriff auf Adito-Exceptions
+      throw new RuntimeException("Cannot fill Constraints Object.", pE);
     }
+
 
     constr.setBounds(area.getPaintingRect());
     return constr;
-
   }
 
   @Override
@@ -100,18 +116,6 @@ public class AditoNeonLayoutSupport extends AbstractLayoutSupport
   {
     return RESIZE_UP | RESIZE_DOWN | RESIZE_LEFT | RESIZE_RIGHT;
   }
-
-  @Override
-  public LayoutConstraints getResizedConstraints(Container container, Container containerDelegate, Component component,
-                                                 int index, Rectangle originalBounds, Insets sizeChanges,
-                                                 Point posInCont)
-  {
-    System.err.println("AditoNeonLayoutSupport.getResizedConstraints Rechteck hartcodiert!!!!!!!!!!");
-    NeonConstraints nc = new NeonConstraints();
-    nc.setBounds(new Rectangle(177, 10, 100, 100));
-    return nc;
-  }
-
 
   @Override
   protected LayoutConstraints createDefaultConstraints()
