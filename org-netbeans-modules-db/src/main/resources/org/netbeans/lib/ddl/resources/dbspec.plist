@@ -1400,7 +1400,7 @@
         java.sql.Types.CHAR = CHAR;
         java.sql.Types.LONGVARCHAR = LONGTEXT;
         java.sql.Types.DATE = DATE;
-  //      java.sql.Types.DECIMAL = DECIMAL;
+        java.sql.Types.DECIMAL = DECIMAL;
         java.sql.Types.DOUBLE = "DOUBLE PRECISION";
         java.sql.Types.FLOAT = FLOAT;
         java.sql.Types.INTEGER = INT;
@@ -1411,8 +1411,9 @@
         java.sql.Types.TIMESTAMP = DATETIME;
         java.sql.Types.TINYINT = TINYINT;
         java.sql.Types.VARCHAR = VARCHAR;
+        java.sql.Types.BOOLEAN = BOOLEAN;
       };
-      SizelessTypes = (BIGINT,LONGBLOB,LONGTEXT,DATE,"DOUBLE PRECISION",FLOAT,INT,REAL,SMALLINT,TIME,DATETIME,TIMESTAMP,TINYINT,TEXT);
+      SizelessTypes = (BIGINT,LONGBLOB,LONGTEXT,DATE,"DOUBLE PRECISION",FLOAT,INT,REAL,SMALLINT,TIME,DATETIME,TIMESTAMP,TINYINT,TEXT,DECIMAL,BOOLEAN);
   //    DecimalTypes = (DECIMAL,NUMERIC);
       CharacterTypes = (CHAR,VARCHAR,TEXT);
 
