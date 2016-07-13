@@ -7,7 +7,7 @@ import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.sync.*;
 import de.adito.propertly.core.spi.IPropertyPitProvider;
 import org.jetbrains.annotations.*;
 import org.netbeans.modules.form.*;
-import org.openide.filesystems.FileObject;
+import org.openide.filesystems.*;
 import org.openide.loaders.*;
 import org.openide.nodes.Node;
 
@@ -80,10 +80,8 @@ public class ARADComponentHandler
     if (radComponent == null)
       throw new IllegalStateException("oldName: " + pOldName + ", newName: " + pNewName);
 
-    // TODO: propertly
-    //DataFolder.findFolder(model).rename(pNewName);
-    if (!model.getPit().getOwnProperty().getName().equals(pNewName))
-      model.getPit().getOwnProperty().rename(pNewName);
+    IAditoModelDataProvider dataProvider = NbAditoInterface.lookup(IAditoModelDataProvider.class);
+    dataProvider.renameDataModel(model, pNewName);
   }
 
   public void deleted()
@@ -109,7 +107,7 @@ public class ARADComponentHandler
       namePositionMap.put(subBeans[i].getName(), i);
 
     IAditoModelDataProvider modelDataProvider = NbAditoInterface.lookup(IAditoModelDataProvider.class);
-    boolean hasToReorder = modelDataProvider.reorder(model, (o1, o2) -> namePositionMap.get(o1) - namePositionMap.get(o2));
+    boolean hasToReorder = modelDataProvider.reorder(model, (o1, o2) -> o1 == null || o2 == null ? 0 : namePositionMap.get(o1) - namePositionMap.get(o2));
 
     if (_isBridgeValid() && hasToReorder)
     {
