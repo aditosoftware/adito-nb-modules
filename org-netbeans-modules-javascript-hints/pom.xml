@@ -14,7 +14,7 @@
   <groupId>org.netbeans.modules</groupId>
   <artifactId>org-netbeans-modules-javascript-hints</artifactId>
   <packaging>nbm</packaging>
-  <version>${project.parent.version}-RELEASE721</version>
+  <version>5.0-RELEASE721</version>
   <name>Netbeans IDE module: org-netbeans-modules-javascript-hints</name>
 
 
