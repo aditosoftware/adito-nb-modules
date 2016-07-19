@@ -707,12 +707,17 @@ public final class JsIndex {
                 }*/
               if (url.endsWith("process/" + imp + "/process.js"))
                 return true;
+              if (imp.startsWith("System.")) {
+                  String systemImport = imp.substring("System.".length());
+                  if (url.endsWith("stub_adito_" + systemImport + ".js"))
+                      return true;
+              }
             }
         }
 
         // the source itself may autoComplete and the 'stubs_' files are always included.
         return result.getSnapshot().getSource().getFileObject().getPath().endsWith(url)
-            || url.startsWith("stub_") && url.endsWith(".js") && !url.contains("/");
+            || url.startsWith("stub_core_") && url.endsWith(".js") && !url.contains("/");
 
     }
 }
