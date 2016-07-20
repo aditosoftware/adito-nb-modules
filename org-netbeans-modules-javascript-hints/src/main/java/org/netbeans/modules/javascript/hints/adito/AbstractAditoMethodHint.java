@@ -1,4 +1,4 @@
-package org.netbeans.modules.javascript.hints;
+package org.netbeans.modules.javascript.hints.adito;
 
 import org.mozilla.nb.javascript.Node;
 import org.netbeans.modules.csl.api.Hint;

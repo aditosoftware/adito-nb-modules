@@ -44,7 +44,6 @@ package org.netbeans.modules.javascript.editing;
 import de.adito.aditoweb.nbm.nbide.nbaditointerface.NbAditoInterface;
 import de.adito.aditoweb.nbm.nbide.nbaditointerface.javascript.IJsDataSupply;
 import org.mozilla.nb.javascript.Node;
-import org.netbeans.api.java.classpath.ClassPath;
 import org.netbeans.api.lexer.*;
 import org.netbeans.editor.*;
 import org.netbeans.editor.Utilities;
@@ -53,17 +52,16 @@ import org.netbeans.modules.csl.spi.*;
 import org.netbeans.modules.html.editor.api.gsf.HtmlParserResult;
 import org.netbeans.modules.html.editor.lib.api.elements.*;
 import org.netbeans.modules.javascript.editing.JsParser.Sanitize;
+import org.netbeans.modules.javascript.editing.adito.AditoLibraryQuery;
 import org.netbeans.modules.javascript.editing.lexer.*;
 import org.netbeans.modules.parsing.api.*;
 import org.netbeans.modules.parsing.spi.ParseException;
 import org.netbeans.modules.parsing.spi.indexing.support.QuerySupport;
 import org.openide.filesystems.FileObject;
-import org.openide.loaders.*;
 import org.openide.util.*;
 
 import javax.swing.*;
 import javax.swing.text.*;
-import java.beans.BeanInfo;
 import java.util.*;
 import java.util.logging.*;
 
@@ -587,64 +585,33 @@ public class JsCodeCompletion implements CodeCompletionHandler {
 
       if (_isAditoImportCompletion(ts))
       {
-        // complete import für System-Prozesse.
-        ClassPath classPath = ClassPath.getClassPath(request.fileObject, JsClassPathProvider.BOOT_CP);
-        for (FileObject fileObject : classPath.getRoots())
+        List<AditoLibraryQuery.Packet> packets = new AditoLibraryQuery().find(request.fileObject);
+
+        for (AditoLibraryQuery.Packet packet : packets)
         {
-          for (FileObject child : fileObject.getChildren())
+          String name = packet.getName();
+          switch (packet.getType())
           {
-            String name = child.getNameExt();
-            if (name.startsWith("stub_adito_") && name.endsWith(".js"))
-            {
-              name = "System." + name.substring("stub_adito_".length(), name.length() - ".js".length());
+            case SYSTEM_ADITO:
               if (startsWith(name, prefix))
                 proposals.add(new GenericItem(name, "", request, ElementKind.MODULE));
-            }
-          }
-        }
-
-        // complete import für Projekt-Prozesse.
-        classPath = ClassPath.getClassPath(request.fileObject, JsClassPathProvider.SOURCE_CP);
-        for (FileObject fileObject : classPath.getRoots())
-        {
-          FileObject processesFolder = fileObject.getFileObject("process");
-          if (processesFolder != null)
-          {
-            for (FileObject processFolder : processesFolder.getChildren())
-            {
-              if (processFolder.isFolder())
+              break;
+            case LIBRARY:
+              if (startsWith(name, prefix))
               {
-                FileObject processFo = processFolder.getFileObject("process.js");
-                if (processFo != null)
+                proposals.add(new GenericItem(name, "", request, ElementKind.GLOBAL)
                 {
-                  final String name = processFolder.getName();
-                  if (startsWith(name, prefix))
+                  @Override
+                  public ImageIcon getIcon()
                   {
-                    proposals.add(new GenericItem(name, "", request, ElementKind.GLOBAL)
-                    {
-                      @Override
-                      public ImageIcon getIcon()
-                      {
-                        try
-                        {
-                          FileObject processAodFo = processFolder.getFileObject(name + ".aod");
-                          DataObject dataObject;
-                          if (processAodFo == null)
-                            dataObject = DataObject.find(processFo);
-                          else
-                            dataObject = DataObject.find(processAodFo);
-                          return new ImageIcon(dataObject.getNodeDelegate().getIcon(BeanInfo.ICON_COLOR_16x16));
-                        }
-                        catch (DataObjectNotFoundException pE)
-                        {
-                          return super.getIcon();
-                        }
-                      }
-                    });
+                    return new ImageIcon(packet.getImage());
                   }
-                }
+                });
               }
-            }
+              break;
+            case SYSTEM_CORE:
+            default:
+              break;
           }
         }
       }

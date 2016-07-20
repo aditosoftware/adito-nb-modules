@@ -217,6 +217,7 @@
         <configuration>
           <publicPackages>
             <publicPackage>org.netbeans.modules.javascript.editing.*</publicPackage>
+            <publicPackage>org.netbeans.modules.javascript.editing.adito.*</publicPackage>
             <publicPackage>org.netbeans.modules.javascript.editing.embedding.*</publicPackage>
             <publicPackage>org.netbeans.modules.javascript.editing.lexer.*</publicPackage>
             <publicPackage>org.netbeans.modules.javascript.editing.spi.*</publicPackage>

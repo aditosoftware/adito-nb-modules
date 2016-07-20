@@ -1,4 +1,4 @@
-package org.netbeans.modules.javascript.hints;
+package org.netbeans.modules.javascript.hints.adito;
 
 import org.mozilla.nb.javascript.Node;
 import org.netbeans.modules.csl.api.*;
@@ -45,7 +45,8 @@ public class FireWorkflowEventMethodHint
 
 
     // already in properties defined?
-    String[] definedEvents = hintSupply.getAditoProperty(info.getSnapshot().getSource().getFileObject().getParent(), "workflowEvents", String[].class);
+    String[] definedEvents = getHintSupply().getAditoProperty(info.getSnapshot().getSource().getFileObject().getParent(),
+                                                              "workflowEvents", String[].class);
     if (definedEvents != null)
       for (String event : definedEvents)
         if (event.equals(eventIdentifier))

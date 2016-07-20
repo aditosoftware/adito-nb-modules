@@ -1,4 +1,4 @@
-package org.netbeans.modules.javascript.hints;
+package org.netbeans.modules.javascript.hints.adito;
 
 import de.adito.aditoweb.nbm.nbide.nbaditointerface.NbAditoInterface;
 import de.adito.aditoweb.nbm.nbide.nbaditointerface.javascript.IJsHintFixSupply;

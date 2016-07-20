@@ -1,4 +1,4 @@
-package org.netbeans.modules.javascript.hints;
+package org.netbeans.modules.javascript.hints.adito;
 
 import org.mozilla.nb.javascript.*;
 import org.netbeans.modules.csl.api.*;
@@ -38,7 +38,7 @@ public class AditoImportHint
     Set<String> process = new HashSet<>();
     if (fileObject != null)
     {
-      for (Parser.Result parserResult : hintSupply.findProcessWithMethod(fileObject))
+      for (Parser.Result parserResult : getHintSupply().findProcessWithMethod(fileObject))
       {
         JsParseResult jsParseResult = (JsParseResult) parserResult;
         ScriptOrFnNode root = (ScriptOrFnNode) jsParseResult.getRootNode();
@@ -51,7 +51,7 @@ public class AditoImportHint
           {
             if (child instanceof FunctionNode)
               if ((((FunctionNode) child).getFunctionName() + "()").equals(callName))
-                process.add(hintSupply.getAditoLibName(jsParseResult.getSnapshot().getSource().getFileObject()));
+                process.add(getHintSupply().getAditoLibName(jsParseResult.getSnapshot().getSource().getFileObject()));
 
             child = child.getNext();
           }
@@ -93,6 +93,6 @@ public class AditoImportHint
     return pCallName.contains(".")
         || pCallName.startsWith("import")
         || pCallName.startsWith("__po__")
-        || hintSupply.isMethodDeclaredInAditoProcess(pInfo.getSnapshot().getText().toString(), pCallName);
+        || getHintSupply().isMethodDeclaredInAditoProcess(pInfo.getSnapshot().getText().toString(), pCallName);
   }
 }

@@ -1,4 +1,4 @@
-package org.netbeans.modules.javascript.hints;
+package org.netbeans.modules.javascript.hints.adito;
 
 import de.adito.aditoweb.nbm.nbide.nbaditointerface.NbAditoInterface;
 import de.adito.aditoweb.nbm.nbide.nbaditointerface.javascript.IJsHintSupply;
@@ -16,11 +16,16 @@ import java.util.prefs.Preferences;
 public abstract class AbstractAditoHint
     extends JsAstRule
 {
-  protected IJsHintSupply hintSupply;
+  private IJsHintSupply hintSupply;
 
   public AbstractAditoHint()
   {
     hintSupply = NbAditoInterface.lookup(IJsHintSupply.class);
+  }
+
+  protected IJsHintSupply getHintSupply()
+  {
+    return hintSupply;
   }
 
   public String getId()
