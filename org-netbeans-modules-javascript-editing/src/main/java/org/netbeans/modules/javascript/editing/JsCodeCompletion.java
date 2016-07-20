@@ -41,71 +41,35 @@
  */
 package org.netbeans.modules.javascript.editing;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.ListIterator;
-import java.util.Map;
-import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javax.swing.ImageIcon;
-import javax.swing.text.BadLocationException;
-import javax.swing.text.Document;
-import javax.swing.text.JTextComponent;
-
 import de.adito.aditoweb.nbm.nbide.nbaditointerface.NbAditoInterface;
 import de.adito.aditoweb.nbm.nbide.nbaditointerface.javascript.IJsDataSupply;
 import org.mozilla.nb.javascript.Node;
-import org.netbeans.modules.csl.api.CodeCompletionHandler;
-import org.netbeans.modules.csl.api.CompletionProposal;
-import org.netbeans.modules.csl.api.ElementHandle;
-import org.netbeans.modules.csl.api.ElementKind;
-import org.netbeans.modules.csl.api.HtmlFormatter;
-import org.netbeans.modules.csl.api.Modifier;
-import org.netbeans.modules.csl.api.ParameterInfo;
-import org.netbeans.api.lexer.Token;
-import org.netbeans.api.lexer.TokenHierarchy;
-import org.netbeans.api.lexer.TokenId;
-import org.netbeans.api.lexer.TokenSequence;
-import org.netbeans.api.lexer.TokenUtilities;
-import org.netbeans.editor.BaseDocument;
+import org.netbeans.api.java.classpath.ClassPath;
+import org.netbeans.api.lexer.*;
+import org.netbeans.editor.*;
 import org.netbeans.editor.Utilities;
-import org.netbeans.modules.html.editor.lib.api.elements.Attribute;
-import org.netbeans.modules.html.editor.lib.api.elements.OpenTag;
-import org.netbeans.modules.csl.api.CodeCompletionContext;
-import org.netbeans.modules.csl.api.CodeCompletionResult;
-import org.netbeans.modules.csl.api.OffsetRange;
-import org.netbeans.modules.csl.api.StructureItem;
-import org.netbeans.modules.csl.spi.DefaultCompletionResult;
-import org.netbeans.modules.csl.spi.ParserResult;
+import org.netbeans.modules.csl.api.*;
+import org.netbeans.modules.csl.spi.*;
 import org.netbeans.modules.html.editor.api.gsf.HtmlParserResult;
-import org.netbeans.modules.html.editor.lib.api.elements.ElementType;
+import org.netbeans.modules.html.editor.lib.api.elements.*;
 import org.netbeans.modules.javascript.editing.JsParser.Sanitize;
-import org.netbeans.modules.javascript.editing.lexer.Call;
-import org.netbeans.modules.javascript.editing.lexer.JsCommentLexer;
-import org.netbeans.modules.javascript.editing.lexer.JsCommentTokenId;
-import org.netbeans.modules.javascript.editing.lexer.JsLexer;
-import org.netbeans.modules.javascript.editing.lexer.JsTokenId;
-import org.netbeans.modules.javascript.editing.lexer.LexUtilities;
-import org.netbeans.modules.parsing.api.Embedding;
-import org.netbeans.modules.parsing.api.ParserManager;
-import org.netbeans.modules.parsing.api.ResultIterator;
-import org.netbeans.modules.parsing.api.Source;
-import org.netbeans.modules.parsing.api.UserTask;
+import org.netbeans.modules.javascript.editing.lexer.*;
+import org.netbeans.modules.parsing.api.*;
 import org.netbeans.modules.parsing.spi.ParseException;
 import org.netbeans.modules.parsing.spi.indexing.support.QuerySupport;
 import org.openide.filesystems.FileObject;
-import org.openide.util.Exceptions;
-import org.openide.util.ImageUtilities;
-import org.openide.util.NbBundle;
+import org.openide.loaders.*;
+import org.openide.util.*;
+
+import javax.swing.*;
+import javax.swing.text.*;
+import java.beans.BeanInfo;
+import java.util.*;
+import java.util.logging.*;
 
 /**
  * Code completion handler for JavaScript
- * 
+ *
  * @todo Do completion on element id's inside $() calls (prototype.js) and $$() calls for CSS rules.
  *   See http://www.sitepoint.com/article/painless-javascript-prototype
  * @todo Track logical classes and inheritance ("extend")
@@ -136,7 +100,7 @@ import org.openide.util.NbBundle;
  *    filtering Java-style?), and explanations for each parameter
  *  @todo Need preindexing support for unit tests - and separate files
  * @todo Insert semicolon too when you insert methods, in custom templates (unless you're in a call), a var block, etc.
- * 
+ *
  * @author Tor Norbye
  */
 public class JsCodeCompletion implements CodeCompletionHandler {
@@ -358,6 +322,33 @@ public class JsCodeCompletion implements CodeCompletionHandler {
             request.anchor = lexOffset - prefix.length();
             request.call = call;
 
+            if (root != null) {
+              int offset = astOffset;
+
+              OffsetRange sanitizedRange = parseResult.getSanitizedRange();
+              if (sanitizedRange != OffsetRange.NONE && sanitizedRange.containsInclusive(offset)) {
+                offset = sanitizedRange.getStart();
+              }
+
+              final AstPath path = new AstPath(root, offset);
+              request.path = path;
+              request.fqn = AstUtilities.getFqn(path, null, null);
+
+              final Node closest = path.leaf();
+
+              //check for regexp ast node. Under some circumstances (see issue #158890)
+              //the text is not lexed as JsTokenId.REGEXP_LITERAL but still represents
+              //a regular expression so we want the right completion there.
+              if (closest.getType() == org.mozilla.nb.javascript.Token.REGEXP) {
+                completeRegexps(proposals, request);
+                completionResult.setFilterable(false);
+                return completionResult;
+              }
+
+              request.root = root;
+              request.node = closest;
+            }
+
             Token<? extends TokenId> token = LexUtilities.getToken(doc, lexOffset);
             if (token == null) {
                 if (JsUtils.isJsFile(fileObject) || JsUtils.isJsonFile(fileObject)) {
@@ -395,7 +386,7 @@ public class JsCodeCompletion implements CodeCompletionHandler {
                     return completionResult;
                 } else if (id == JsTokenId.STRING_LITERAL || id == JsTokenId.STRING_END) {
                     completeStrings(proposals, request);
-                    completeAditoSysConstants(proposals, request);
+                    _completeAdito(proposals, request);
                     completionResult.setFilterable(false);
                     return completionResult;
                 } else if (id == JsTokenId.REGEXP_LITERAL || id == JsTokenId.REGEXP_END) {
@@ -403,33 +394,6 @@ public class JsCodeCompletion implements CodeCompletionHandler {
                     completionResult.setFilterable(false);
                     return completionResult;
                 }
-            }
-
-            if (root != null) {
-                int offset = astOffset;
-
-                OffsetRange sanitizedRange = parseResult.getSanitizedRange();
-                if (sanitizedRange != OffsetRange.NONE && sanitizedRange.containsInclusive(offset)) {
-                    offset = sanitizedRange.getStart();
-                }
-
-                final AstPath path = new AstPath(root, offset);
-                request.path = path;
-                request.fqn = AstUtilities.getFqn(path, null, null);
-
-                final Node closest = path.leaf();
-
-                //check for regexp ast node. Under some circumstances (see issue #158890)
-                //the text is not lexed as JsTokenId.REGEXP_LITERAL but still represents
-                //a regular expression so we want the right completion there.
-                if (closest.getType() == org.mozilla.nb.javascript.Token.REGEXP) {
-                    completeRegexps(proposals, request);
-                    completionResult.setFilterable(false);
-                    return completionResult;
-                }
-
-                request.root = root;
-                request.node = closest;
             }
 
             // If we're in a call, add in some info and help for the code completion call
@@ -591,23 +555,117 @@ public class JsCodeCompletion implements CodeCompletionHandler {
                 : theString.toLowerCase().startsWith(prefix.toLowerCase());
     }
 
-    private void completeAditoSysConstants(List<CompletionProposal> proposals, CompletionRequest request)
+    private static boolean _isAditoImportCompletion(TokenSequence<? extends JsTokenId> pTs)
     {
+      int offset = pTs.offset();
+
+      boolean result = true;
+
+      if (pTs.token().id().equals(JsTokenId.STRING_LITERAL))
+      {
+        if (!pTs.movePrevious())
+          result = false;
+      }
+      result = result
+          && pTs.token().id().equals(JsTokenId.STRING_BEGIN) && pTs.movePrevious()
+          && pTs.token().id().equals(JsTokenId.LPAREN) && pTs.movePrevious()
+          && pTs.token().id().equals(JsTokenId.ANY_KEYWORD) && pTs.token().text().toString().equals("import");
+
+      pTs.move(offset);
+
+      return result;
+    }
+
+    private void _completeAdito(List<CompletionProposal> proposals, CompletionRequest request)
+    {
+      String prefix = "";
+      TokenSequence<? extends JsTokenId> ts = LexUtilities.getPositionedSequence(request.doc, request.lexOffset);
+      if (ts.movePrevious() && ts.token().id() != JsTokenId.STRING_BEGIN)
+        prefix = ts.token().text().toString();
+
       IJsDataSupply jsDataSupply = NbAditoInterface.lookup(IJsDataSupply.class);
-      for (String compVar : jsDataSupply.getCompVars(request.fileObject))
+
+      if (_isAditoImportCompletion(ts))
       {
-        if (startsWith(compVar, request.prefix))
-          proposals.add(new GenericItem(compVar, "", request, ElementKind.CONSTANT));
+        // complete import für System-Prozesse.
+        ClassPath classPath = ClassPath.getClassPath(request.fileObject, JsClassPathProvider.BOOT_CP);
+        for (FileObject fileObject : classPath.getRoots())
+        {
+          for (FileObject child : fileObject.getChildren())
+          {
+            String name = child.getNameExt();
+            if (name.startsWith("stub_adito_") && name.endsWith(".js"))
+            {
+              name = "System." + name.substring("stub_adito_".length(), name.length() - ".js".length());
+              if (startsWith(name, prefix))
+                proposals.add(new GenericItem(name, "", request, ElementKind.MODULE));
+            }
+          }
+        }
+
+        // complete import für Projekt-Prozesse.
+        classPath = ClassPath.getClassPath(request.fileObject, JsClassPathProvider.SOURCE_CP);
+        for (FileObject fileObject : classPath.getRoots())
+        {
+          FileObject processesFolder = fileObject.getFileObject("process");
+          if (processesFolder != null)
+          {
+            for (FileObject processFolder : processesFolder.getChildren())
+            {
+              if (processFolder.isFolder())
+              {
+                FileObject processFo = processFolder.getFileObject("process.js");
+                if (processFo != null)
+                {
+                  final String name = processFolder.getName();
+                  if (startsWith(name, prefix))
+                  {
+                    proposals.add(new GenericItem(name, "", request, ElementKind.GLOBAL)
+                    {
+                      @Override
+                      public ImageIcon getIcon()
+                      {
+                        try
+                        {
+                          FileObject processAodFo = processFolder.getFileObject(name + ".aod");
+                          DataObject dataObject;
+                          if (processAodFo == null)
+                            dataObject = DataObject.find(processFo);
+                          else
+                            dataObject = DataObject.find(processAodFo);
+                          return new ImageIcon(dataObject.getNodeDelegate().getIcon(BeanInfo.ICON_COLOR_16x16));
+                        }
+                        catch (DataObjectNotFoundException pE)
+                        {
+                          return super.getIcon();
+                        }
+                      }
+                    });
+                  }
+                }
+              }
+            }
+          }
+        }
       }
-      for (String sysVar : jsDataSupply.getSysVars())
+      else
       {
-        if (startsWith(sysVar, request.prefix))
-          proposals.add(new GenericItem(sysVar, "", request, ElementKind.CONSTANT));
-      }
-      for (String localVar : jsDataSupply.getLocalVars())
-      {
-        if (startsWith(localVar, request.prefix))
-          proposals.add(new GenericItem(localVar, "", request, ElementKind.CONSTANT));
+        // complete $comp, $sys, $local
+        for (String compVar : jsDataSupply.getCompVars(request.fileObject))
+        {
+          if (startsWith(compVar, prefix))
+            proposals.add(new GenericItem(compVar, "", request, ElementKind.CONSTANT));
+        }
+        for (String sysVar : jsDataSupply.getSysVars())
+        {
+          if (startsWith(sysVar, prefix))
+            proposals.add(new GenericItem(sysVar, "", request, ElementKind.CONSTANT));
+        }
+        for (String localVar : jsDataSupply.getLocalVars())
+        {
+          if (startsWith(localVar, prefix))
+            proposals.add(new GenericItem(localVar, "", request, ElementKind.CONSTANT));
+        }
       }
     }
 
@@ -919,7 +977,7 @@ public class JsCodeCompletion implements CodeCompletionHandler {
                                 htmlResult = (HtmlParserResult) resultIterator.getParserResult();
                             }
                         }
-                        
+
                     }
                     if (htmlResult != null) {
                         Set<Attribute> elementIds = new HashSet<Attribute>();
@@ -1002,7 +1060,8 @@ public class JsCodeCompletion implements CodeCompletionHandler {
                             id == JsTokenId.STRING_LITERAL || id == JsTokenId.REGEXP_LITERAL ||
                             id == JsTokenId.REGEXP_BEGIN || id == JsTokenId.REGEXP_END) {
                         if (lexOffset > 0) {
-                            if (token.text().toString().startsWith("$"))
+                            if (token.text().toString().startsWith("$")
+                                || (_isAditoImportCompletion(ts) && id != JsTokenId.STRING_BEGIN))
                               return token.text().toString();
                             char prevChar = doc.getText(lexOffset - 1, 1).charAt(0);
                             if (prevChar == '\\') {
@@ -1463,7 +1522,7 @@ public class JsCodeCompletion implements CodeCompletionHandler {
                 }
             }
 
-            // Try just the method call (e.g. across all classes). This is ignoring the 
+            // Try just the method call (e.g. across all classes). This is ignoring the
             // left hand side because we can't resolve it.
             if ((elements.size() == 0) && (prefix.length() > 0 || type == null)) {
 //                if (prefix.length() == 0) {
@@ -1742,7 +1801,7 @@ public class JsCodeCompletion implements CodeCompletionHandler {
         // we have these guys on the class itself, not associated with a method parameter.
         // Shall I take this to be a set of constructor properties?
         // In YUI it's different; many of the properties we want to inherit are NOT marked as @config,
-        // such as "animate" in the Editor. 
+        // such as "animate" in the Editor.
         String fqn = null;
         AstPath path = request.path;
         Node leaf = path.leaf();
@@ -1978,6 +2037,9 @@ public class JsCodeCompletion implements CodeCompletionHandler {
             if (JsLexer.COMMENT_CAT.equals(id.primaryCategory()) || // NOI18N
                     JsLexer.STRING_CAT.equals(id.primaryCategory()) || // NOI18N
                     JsLexer.REGEXP_CAT.equals(id.primaryCategory())) { // NOI18N
+              // ADITO completion.
+              if (!Arrays.asList("$sys.", "$local.", "$comp.").contains(token.text().toString())
+                  && !_isAditoImportCompletion(ts))
                 return QueryType.NONE;
             }
 
@@ -2143,7 +2205,7 @@ public class JsCodeCompletion implements CodeCompletionHandler {
     private static int callLineStart = -1;
     private static IndexedFunction callMethod;
 
-    /** Compute the current method call at the given offset. Returns false if we're not in a method call. 
+    /** Compute the current method call at the given offset. Returns false if we're not in a method call.
      * The argument index is returned in parameterIndexHolder[0] and the method being
      * called in methodHolder[0].
      */
@@ -2277,7 +2339,7 @@ public class JsCodeCompletion implements CodeCompletionHandler {
             }
 
             if (call == null) {
-                // Find the call in around the caret. Beware of 
+                // Find the call in around the caret. Beware of
                 // input sanitization which could have completely
                 // removed the current parameter (e.g. with just
                 // a comma, or something like ", @" or ", :")

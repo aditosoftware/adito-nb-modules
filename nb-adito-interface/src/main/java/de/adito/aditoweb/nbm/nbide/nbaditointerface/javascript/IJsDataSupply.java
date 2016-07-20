@@ -2,7 +2,7 @@ package de.adito.aditoweb.nbm.nbide.nbaditointerface.javascript;
 
 import org.openide.filesystems.FileObject;
 
-import java.util.*;
+import java.util.Set;
 
 /**
  * Stellt für JavaScript Daten über Adito bereit.
@@ -15,17 +15,17 @@ public interface IJsDataSupply
   /**
    * @return die <tt>$sys.</tt>-Variablen.
    */
-  List<String> getSysVars();
+  Set<String> getSysVars();
 
   /**
    * @return die <tt>$local.</tt>-Variablen.
    */
-  List<String> getLocalVars();
+  Set<String> getLocalVars();
 
   /**
    * @param pCompletionFile die Datei, in der gerade 'Auto-Vervollständigt' werden soll.
    * @return die <tt>$comp.</tt>-Variablen.
    */
-  Collection<String> getCompVars(FileObject pCompletionFile);
+  Set<String> getCompVars(FileObject pCompletionFile);
 
 }
