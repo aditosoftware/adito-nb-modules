@@ -41,28 +41,21 @@
  */
 package org.netbeans.modules.javascript.editing;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Set;
-import java.util.Map;
-import org.mozilla.nb.javascript.Node;
-import org.mozilla.nb.javascript.Token;
-import org.netbeans.modules.csl.api.ColoringAttributes;
-import org.netbeans.modules.csl.api.OffsetRange;
-import org.netbeans.modules.csl.api.SemanticAnalyzer;
+import org.mozilla.nb.javascript.*;
+import org.netbeans.modules.csl.api.*;
 import org.netbeans.modules.javascript.editing.embedding.JsEmbeddingProvider;
 import org.netbeans.modules.javascript.editing.lexer.LexUtilities;
 import org.netbeans.modules.parsing.spi.Parser.Result;
-import org.netbeans.modules.parsing.spi.Scheduler;
-import org.netbeans.modules.parsing.spi.SchedulerEvent;
+import org.netbeans.modules.parsing.spi.*;
+import org.netbeans.modules.parsing.spi.indexing.support.QuerySupport;
+
+import java.util.*;
 
 /**
  * Semantically analyze a given JavaScript buffer
- * 
+ *
  * @todo E4X XML nodes
- * 
+ *
  * @todo Produce a function call hashmap of bad browser calls, and look up calls in semantic highlighting
  *   against the name map. Only if it matches, do a full FQN check and if so, do a browser delta.
  *
@@ -90,7 +83,7 @@ public class JsSemanticAnalyzer extends SemanticAnalyzer {
         resume();
 
         semanticHighlights = null;
-        
+
         if (isCancelled()) {
             return;
         }
@@ -186,7 +179,7 @@ public class JsSemanticAnalyzer extends SemanticAnalyzer {
                 highlights.put(range, ColoringAttributes.GLOBAL_SET);
             }
         }
-        
+
         List<Node> nodes = new ArrayList<Node>();
         if (JsUtils.isEjsFile(rpr.getSnapshot().getSource().getFileObject())) {
             // No E4X highlights in EJS files
@@ -194,6 +187,11 @@ public class JsSemanticAnalyzer extends SemanticAnalyzer {
         } else {
             AstUtilities.addNodesByType(root, new int[] { Token.REGEXP, Token.FUNCNAME, Token.OBJLITNAME, Token.E4X }, nodes);
         }
+
+        JsIndex jsIndex = JsIndex.get(QuerySupport.findRoots(
+            rpr.getSnapshot().getSource().getFileObject(), Collections.singleton(JsClassPathProvider.SOURCE_CP),
+            Collections.singleton(JsClassPathProvider.BOOT_CP), Collections.emptySet()));
+
         for (Node node : nodes) {
             OffsetRange range = AstUtilities.getNameRange(node);
             if (node.isStringNode() && JsEmbeddingProvider.isGeneratedIdentifier(node.getString())) {
@@ -248,8 +246,38 @@ public class JsSemanticAnalyzer extends SemanticAnalyzer {
 
                 }
             }
+            AstElement element = AstElement.getElement(rpr, node);
+            if (element.getName() != null && element.getModifiers().contains(Modifier.DEPRECATED))
+            {
+                Set<ColoringAttributes> coloringAttributes = highlights.get(range);
+                if (coloringAttributes == null)
+                    highlights.put(range, EnumSet.of(ColoringAttributes.DEPRECATED));
+                else
+                {
+                    coloringAttributes = EnumSet.copyOf(coloringAttributes);
+                    coloringAttributes.add(ColoringAttributes.DEPRECATED);
+                    highlights.put(range, coloringAttributes);
+                }
+            }
         }
-        
+
+        nodes = new ArrayList<>();
+        AstUtilities.addNodesByType(root, new int[]{Token.NEW, Token.CALL}, nodes);
+        for (Node node : nodes)
+        {
+          String callName = AstUtilities.getCallName(node, true);
+          String altName = rpr.getSource().substring(node.getSourceStart(), node.getSourceEnd());
+          if (altName.startsWith(callName))
+          {
+            Set<IndexedElement> elements = jsIndex.getElements(callName, null, QuerySupport.Kind.EXACT, rpr);
+            if (!elements.isEmpty() && elements.iterator().next().isDeprecated())
+            {
+              OffsetRange range = AstUtilities.getNameRange(node);
+              highlights.put(range, EnumSet.of(ColoringAttributes.DEPRECATED));
+            }
+          }
+        }
+
         if (isCancelled()) {
             return null;
         }
