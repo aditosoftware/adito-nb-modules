@@ -10,8 +10,7 @@ import java.util.*;
 /**
  * @author d.poellath, 06.12.12
  */
-public abstract class AbstractAditoMethodHint
-    extends AbstractAditoHint
+public abstract class AbstractAditoMethodHint extends AbstractAditoHint
 {
   public void run(JsRuleContext context, List<Hint> result)
   {

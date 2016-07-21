@@ -585,8 +585,7 @@ public class JsCodeCompletion implements CodeCompletionHandler {
 
       if (_isAditoImportCompletion(ts))
       {
-        List<AditoLibraryQuery.Packet> packets = new AditoLibraryQuery().find(request.fileObject);
-
+        List<AditoLibraryQuery.Packet> packets = new AditoLibraryQuery().find(request.fileObject, AditoLibraryQuery.IMPORT_TYPES);
         for (AditoLibraryQuery.Packet packet : packets)
         {
           String name = packet.getName();
@@ -609,7 +608,6 @@ public class JsCodeCompletion implements CodeCompletionHandler {
                 });
               }
               break;
-            case SYSTEM_CORE:
             default:
               break;
           }

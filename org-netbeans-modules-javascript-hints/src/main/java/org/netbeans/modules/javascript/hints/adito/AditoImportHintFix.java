@@ -7,9 +7,7 @@ import org.netbeans.modules.javascript.hints.infrastructure.JsRuleContext;
 /**
  * @author d.poellath, 06.12.12
  */
-public class AditoImportHintFix
-    extends AbstractAditoHintFix
-    implements PreviewableFix
+public class AditoImportHintFix implements HintFix, PreviewableFix
 {
   private final JsRuleContext context;
   private String importStatement = null;

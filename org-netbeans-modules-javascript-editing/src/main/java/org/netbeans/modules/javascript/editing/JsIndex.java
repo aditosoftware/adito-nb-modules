@@ -55,6 +55,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.naming.directory.SearchResult;
 import org.netbeans.modules.csl.api.ElementKind;
+import org.netbeans.modules.javascript.editing.adito.AditoLibraryQuery;
 import org.netbeans.modules.parsing.api.Source;
 import org.netbeans.modules.parsing.spi.indexing.support.IndexResult;
 import org.netbeans.modules.parsing.spi.indexing.support.QuerySupport;
@@ -707,8 +708,9 @@ public final class JsIndex {
                 }*/
               if (url.endsWith("process/" + imp + "/process.js"))
                 return true;
-              if (imp.startsWith("System.")) {
-                  String systemImport = imp.substring("System.".length());
+                String systemLibPrefix = AditoLibraryQuery.SYSTEM_LIBS + ".";
+                if (imp.startsWith(systemLibPrefix)) {
+                  String systemImport = imp.substring(systemLibPrefix.length());
                   if (url.endsWith("stub_adito_" + systemImport + ".js"))
                       return true;
               }

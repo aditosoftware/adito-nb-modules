@@ -3,8 +3,9 @@ package org.netbeans.modules.javascript.hints.adito;
 import org.mozilla.nb.javascript.*;
 import org.netbeans.modules.csl.api.*;
 import org.netbeans.modules.javascript.editing.*;
+import org.netbeans.modules.javascript.editing.adito.AditoLibraryQuery;
 import org.netbeans.modules.javascript.hints.infrastructure.JsRuleContext;
-import org.netbeans.modules.parsing.spi.Parser;
+import org.netbeans.modules.parsing.spi.indexing.support.QuerySupport;
 import org.openide.filesystems.FileObject;
 
 import java.util.*;
@@ -12,87 +13,59 @@ import java.util.*;
 /**
  * @author d.poellath, 06.12.12
  */
-public class AditoImportHint
-    extends AbstractAditoHint
+public class AditoImportHint extends AbstractAditoHint
 {
-  public void run(JsRuleContext context, List<Hint> result)
+
+  public void run(JsRuleContext pContext, List<Hint> pResultHints)
   {
-    //result.clear();
-    Node node = context.node;
+    Node node = pContext.node;
 
-    JsParseResult info = AstUtilities.getParseResult(context.parserResult);
-    String source = info.getSource();
-    List<HintFix> fixList = null;
-
-    // unwichtige methoden aufrufe filtern
-    // AstUtilities.getCallName(node, true);
-    String callName = info.getSource().substring(node.getSourceStart(), node.getSourceEnd());
-    if (isMethodKnown(context, info, node, callName))
+    JsParseResult info = AstUtilities.getParseResult(pContext.parserResult);
+    FileObject fileObject = info.getSnapshot().getSource().getFileObject();
+    if (fileObject == null)
       return;
 
-    FileObject fileObject = null;
-    if (info != null)
-      fileObject = info.getSnapshot().getSource().getFileObject();
+    JsIndex jsIndex = JsIndex.get(QuerySupport.findRoots(fileObject, Collections.singleton(JsClassPathProvider.SOURCE_CP),
+                                                         Collections.singleton(JsClassPathProvider.BOOT_CP), Collections.emptySet()));
 
-    // finde zugehörige JS process heraus
-    Set<String> process = new HashSet<>();
-    if (fileObject != null)
+    String callName = AstUtilities.getCallName(node, true);
+    String altName = info.getSource().substring(node.getSourceStart(), node.getSourceEnd());
+
+    if (!callName.equals(JsAnalyzer.ADITO_IMPORT) && altName.startsWith(callName))
     {
-      for (Parser.Result parserResult : getHintSupply().findProcessWithMethod(fileObject))
+      Set<IndexedElement> elements = jsIndex.getElements(callName, null, QuerySupport.Kind.EXACT, info);
+      if (elements == null || elements.isEmpty())
       {
-        JsParseResult jsParseResult = (JsParseResult) parserResult;
-        ScriptOrFnNode root = (ScriptOrFnNode) jsParseResult.getRootNode();
-        if (root == null)
-          return;
-        Node child = root.getFirstChild();
-        while (root != null)
+        elements = jsIndex.getElements(callName, null, QuerySupport.Kind.EXACT, null);
+        for (IndexedElement element : elements)
         {
-          while (child != null)
+          if (element.isPublic())
           {
-            if (child instanceof FunctionNode)
-              if ((((FunctionNode) child).getFunctionName() + "()").equals(callName))
-                process.add(getHintSupply().getAditoLibName(jsParseResult.getSnapshot().getSource().getFileObject()));
+            AditoLibraryQuery.Packet packet = new AditoLibraryQuery().getPacket(element.getFileObject());
+            if (packet != null)
+            {
+              String importStatement = "import(\"" + packet.getName() + "\")";
+              List<HintFix> fix = Collections.singletonList(new AditoImportHintFix(pContext, importStatement + ";\n"));
 
-            child = child.getNext();
+              Hint desc = new Hint(this, getDisplayName(), fileObject, AstUtilities.getNameRange(node), fix, 1500);
+              pResultHints.add(desc);
+            }
           }
-          root = (ScriptOrFnNode) root.getNext();
         }
       }
     }
-
-    // nicht gefunden --> ggf. trotzdem warnen, ohne fix?
-    if (process.size() == 0)
-      return;
-
-      // prüfe ob bereits importiert
-      // ggf. hint anzeigen und
-    else
-    {
-      fixList = new ArrayList<>();
-      for (String imports : process)
-      {
-        String importStatement = "import(\"" + imports + "\")";
-        if (source.contains(importStatement) || source.contains("__po__(\"" + imports + "\")"))
-          return;
-
-        fixList.add(new AditoImportHintFix(context, importStatement + ";\n"));
-      }
-
-    }
-
-    // hinweis anzeigen
-    Hint desc = new Hint(this, getDisplayName(),
-                         info.getSnapshot().getSource().getFileObject(),
-                         AstUtilities.getNameRange(node), fixList, 1500);
-    result.add(desc);
   }
 
-  private boolean isMethodKnown(JsRuleContext pContext, JsParseResult pInfo, Node pNode, String pCallName)
+  @Override
+  public String getDisplayName()
   {
-    // Context: pJavaScriptFileObject
-    return pCallName.contains(".")
-        || pCallName.startsWith("import")
-        || pCallName.startsWith("__po__")
-        || getHintSupply().isMethodDeclaredInAditoProcess(pInfo.getSnapshot().getText().toString(), pCallName);
+    return "Adito AutoImport";
   }
+
+  @Override
+  public Set<Integer> getKinds()
+  {
+    return new HashSet<>(Arrays.asList(Token.CALL, Token.NEW));
+  }
+
 }
