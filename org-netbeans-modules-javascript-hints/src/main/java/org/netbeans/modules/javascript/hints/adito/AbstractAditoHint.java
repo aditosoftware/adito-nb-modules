@@ -1,7 +1,7 @@
 package org.netbeans.modules.javascript.hints.adito;
 
-import org.netbeans.modules.csl.api.*;
-import org.netbeans.modules.javascript.hints.infrastructure.JsAstRule;
+import org.netbeans.modules.csl.api.RuleContext;
+import org.netbeans.modules.javascript.hints.infrastructure.*;
 
 import javax.swing.*;
 import java.util.prefs.Preferences;
@@ -16,11 +16,6 @@ public abstract class AbstractAditoHint extends JsAstRule
     return getClass().getSimpleName();
   }
 
-  public String getDescription()
-  {
-    return getId();
-  }
-
   public boolean getDefaultEnabled()
   {
     return true;
@@ -33,16 +28,11 @@ public abstract class AbstractAditoHint extends JsAstRule
 
   public boolean appliesTo(RuleContext context)
   {
-    return true;
+    return context instanceof JsRuleContext;
   }
 
   public JComponent getCustomizer(Preferences node)
   {
     return null;
-  }
-
-  public HintSeverity getDefaultSeverity()
-  {
-    return HintSeverity.WARNING;
   }
 }

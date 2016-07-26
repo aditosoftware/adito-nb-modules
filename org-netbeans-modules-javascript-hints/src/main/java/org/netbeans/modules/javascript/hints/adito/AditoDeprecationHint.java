@@ -57,7 +57,13 @@ public class AditoDeprecationHint extends AbstractAditoHint
   @Override
   public String getDisplayName()
   {
-    return "Adito Deprecation";
+    return "Deprecated reference detected";
   }
 
+  @Override
+  public String getDescription()
+  {
+    return "The referenced method is deprecated and should no longer be used. Deprecated references can be subject of " +
+        "future removals.";
+  }
 }

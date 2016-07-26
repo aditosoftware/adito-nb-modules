@@ -15,7 +15,6 @@ import java.util.*;
  */
 public class AditoImportHint extends AbstractAditoHint
 {
-
   public void run(JsRuleContext pContext, List<Hint> pResultHints)
   {
     Node node = pContext.node;
@@ -47,7 +46,8 @@ public class AditoImportHint extends AbstractAditoHint
               String importStatement = "import(\"" + packet.getName() + "\")";
               List<HintFix> fix = Collections.singletonList(new AditoImportHintFix(pContext, importStatement + ";\n"));
 
-              Hint desc = new Hint(this, getDisplayName(), fileObject, AstUtilities.getNameRange(node), fix, 1500);
+              String description = "Add '" + packet.getName() + "' to imports.";
+              Hint desc = new Hint(this, description, fileObject, AstUtilities.getNameRange(node), fix, 1500);
               pResultHints.add(desc);
             }
           }
@@ -57,9 +57,9 @@ public class AditoImportHint extends AbstractAditoHint
   }
 
   @Override
-  public String getDisplayName()
+  public HintSeverity getDefaultSeverity()
   {
-    return "Adito AutoImport";
+    return HintSeverity.WARNING;
   }
 
   @Override
@@ -68,4 +68,16 @@ public class AditoImportHint extends AbstractAditoHint
     return new HashSet<>(Arrays.asList(Token.CALL, Token.NEW));
   }
 
+  @Override
+  public String getDisplayName()
+  {
+    return "Auto import: the referenced method was found in a library.";
+  }
+
+  @Override
+  public String getDescription()
+  {
+    return "Provides automatic importing for referenced method which weren't found in current context but in other " +
+        "libraries in the current project.";
+  }
 }
