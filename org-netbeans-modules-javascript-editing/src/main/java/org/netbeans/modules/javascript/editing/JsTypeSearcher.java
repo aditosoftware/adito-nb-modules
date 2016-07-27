@@ -51,15 +51,18 @@ import java.util.Set;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
 import javax.swing.Icon;
+
+import de.adito.aditoweb.nbm.nbide.nbaditointerface.NbAditoInterface;
+import de.adito.aditoweb.nbm.nbide.nbaditointerface.common.IEditorContextInfo;
 import org.mozilla.nb.javascript.Node;
 import org.netbeans.modules.csl.api.ElementHandle;
 import org.netbeans.modules.csl.api.IndexSearcher;
-import org.netbeans.modules.csl.api.IndexSearcher.Descriptor;
 import org.netbeans.api.project.FileOwnerQuery;
 import org.netbeans.api.project.Project;
 import org.netbeans.api.project.ProjectInformation;
 import org.netbeans.api.project.ProjectUtils;
 import org.netbeans.modules.csl.spi.GsfUtilities;
+import org.netbeans.modules.javascript.editing.adito.AditoLibraryQuery;
 import org.netbeans.modules.javascript.editing.lexer.LexUtilities;
 import org.netbeans.modules.parsing.spi.indexing.support.QuerySupport;
 import org.openide.filesystems.FileObject;
@@ -450,19 +453,22 @@ public class JsTypeSearcher implements IndexSearcher {
         @Override
         public String getContextName() {
             // XXX This is lame - move formatting logic to the goto action!
-            StringBuilder sb = new StringBuilder();
-//            String require = element.getRequire();
-//            String fqn = element.getFqn();
-            String fqn = element.getIn() != null ? element.getIn() + "." + element.getName() : element.getName();
-            if (element.getName().equals(fqn)) {
-                fqn = null;
-                String url = element.getFilenameUrl();
-                if (url != null) {
-                    return url.substring(url.lastIndexOf('/')+1);
+            String contextName = "";
+
+            AditoLibraryQuery.Packet packet = new AditoLibraryQuery().getPacket(element.getFileObject());
+            if (packet != null) {
+                contextName = packet.getName();
+                if (packet.getType() == AditoLibraryQuery.EPacketType.PROCESS) {
+                    FileObject contextRoot = NbAditoInterface.lookup(IEditorContextInfo.class).getEditorContextRoot(getFileObject());
+                    if (contextRoot != null)
+                        contextName = contextRoot.getNameExt() + " -> " + contextName ;
                 }
             }
-
-            return fqn;
+            String fqn = element.getIn() != null ? element.getIn() + "." + element.getName() : element.getName();
+            if (!element.getName().equals(fqn)) {
+                contextName += (contextName.isEmpty() ? "" : " ") + "[" +fqn + "]";
+            }
+            return contextName;
         }
 
         public ElementHandle getElement() {

@@ -66,6 +66,7 @@ import org.netbeans.api.lexer.TokenSequence;
 import org.netbeans.editor.BaseDocument;
 import org.netbeans.modules.csl.api.ElementKind;
 import org.netbeans.modules.csl.spi.ParserResult;
+import org.netbeans.modules.javascript.editing.adito.AditoLibraryQuery;
 import org.netbeans.modules.javascript.editing.lexer.Call;
 import org.netbeans.modules.javascript.editing.lexer.JsTokenId;
 import org.netbeans.modules.javascript.editing.lexer.LexUtilities;
@@ -392,9 +393,9 @@ public class JsDeclarationFinder implements DeclarationFinder {
 
             if (candidate != null) {
                 boolean invalid = false;
-                if (candidate.getFilenameUrl() != null && candidate.getFilenameUrl().indexOf("jsstubs") != -1 &&
+                if (candidate.getFilenameUrl() != null && candidate.getFilenameUrl().contains("jsstubs") &&
                         // If it's in my sdocs.zip, I've gotta try to find the corresponding element
-                        candidate.getFilenameUrl().indexOf("sdocs.zip") == -1) {
+                    !candidate.getFilenameUrl().contains("sdocs.zip")) {
                     invalid = true;
                 }
                 IndexedElement com = candidate; // TODO - let's not do foreign node computation here!! Not needed yet!
@@ -508,7 +509,7 @@ public class JsDeclarationFinder implements DeclarationFinder {
                 if (url == null) {
                     // Deleted file?
                     // Just leave out the file name
-                } else if (url.indexOf("jsstubs") != -1) {
+                } else if (url.contains("jsstubs")) {
                     filename = NbBundle.getMessage(JsDeclarationFinder.class, "JsLib");
                     
 //                    if (url.indexOf("/stub_") == -1) {
@@ -523,7 +524,9 @@ public class JsDeclarationFinder implements DeclarationFinder {
                 } else {
                     FileObject fo = element.getFileObject();
                     if (fo != null) {
-                        filename = fo.getNameExt();
+                        AditoLibraryQuery.Packet packet = new AditoLibraryQuery().getPacket(fo);
+                        if (packet != null)
+                            filename = packet.getName();
                     } else {
                         // Perhaps a file that isn't present here, such as something in site_Js
                         int lastIndex = url.lastIndexOf('/');
@@ -598,9 +601,9 @@ public class JsDeclarationFinder implements DeclarationFinder {
             }
 
             if (loc != null) {
-                if (element.getFilenameUrl() != null && element.getFilenameUrl().indexOf("jsstubs") != -1 &&
-                        // If it's in my sdocs.zip, I've gotta try to find the corresponding element
-                        element.getFilenameUrl().indexOf("sdocs.zip") == -1) {
+                if (element.getFilenameUrl() != null && element.getFilenameUrl().contains("jsstubs") &&
+                    // If it's in my sdocs.zip, I've gotta try to find the corresponding element
+                    !element.getFilenameUrl().contains("sdocs.zip")) {
                     if (element.isDocOnly()) {
                         loc.setInvalidMessage(NbBundle.getMessage(JsDeclarationFinder.class, "NoSourceDocOnly", element.getName()));
                     } else {

@@ -81,35 +81,33 @@ public class AditoLibraryQuery
     if (pFileObject != null)
     {
       String name = pFileObject.getNameExt();
-      if (FileUtil.getArchiveFile(pFileObject) != null && name.matches("stub_.+_.+\\.js"))
+
+      if (pRequestedTypes.contains(EPacketType.SYSTEM_ADITO) || pRequestedTypes.contains(EPacketType.SYSTEM_CORE))
       {
-        if (name.startsWith("stub_adito_"))
+        if (FileUtil.getArchiveFile(pFileObject) != null && name.matches("stub_.+_.+\\.js"))
         {
-          if (pRequestedTypes.contains(EPacketType.SYSTEM_ADITO))
+          if (name.startsWith("stub_adito_") && pRequestedTypes.contains(EPacketType.SYSTEM_ADITO))
           {
             name = SYSTEM_LIBS + "." + name.substring("stub_adito_".length(), name.length() - ".js".length());
             return new Packet(pFileObject, EPacketType.SYSTEM_ADITO, name, null);
           }
-        }
-        else
-        {
-          if (pRequestedTypes.contains(EPacketType.SYSTEM_CORE))
+          else if (name.startsWith("stub_core_") && pRequestedTypes.contains(EPacketType.SYSTEM_CORE))
           {
-            name = pFileObject.getName();
+            name = name.substring("stub_core_".length(), name.length() - ".js".length());
             return new Packet(pFileObject, EPacketType.SYSTEM_CORE, name, null);
           }
         }
       }
-      else if (pRequestedTypes.contains(EPacketType.LIBRARY))
+
+      if (pRequestedTypes.contains(EPacketType.LIBRARY))
       {
         FileObject processFolder = pFileObject.getParent();
         if (processFolder != null)
         {
-          name = processFolder.getNameExt();
           FileObject grandParent = processFolder.getParent();
           if (grandParent != null && grandParent.getNameExt().equals("process"))
           {
-            return new Packet(pFileObject, EPacketType.LIBRARY, name, null)
+            return new Packet(pFileObject, EPacketType.LIBRARY, processFolder.getNameExt(), null)
             {
               @Override
               public Image getImage()
@@ -131,6 +129,16 @@ public class AditoLibraryQuery
               }
             };
           }
+        }
+      }
+
+      if (pRequestedTypes.contains(EPacketType.PROCESS))
+      {
+        FileObject parent = pFileObject.getParent();
+        if (parent != null)
+        {
+          String packetName = parent.getNameExt() + "/" + pFileObject.getName();
+          return new Packet(pFileObject, EPacketType.PROCESS, packetName, null);
         }
       }
     }
@@ -182,6 +190,7 @@ public class AditoLibraryQuery
   public enum EPacketType
   {
     LIBRARY,
+    PROCESS,
     SYSTEM_ADITO,
     SYSTEM_CORE
   }

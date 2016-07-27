@@ -42,30 +42,20 @@
 
 package org.netbeans.modules.javascript.editing;
 
-import java.net.MalformedURLException;
-import java.net.URL;
-import org.netbeans.modules.csl.api.ElementKind;
-import org.netbeans.modules.csl.api.Modifier;
-import org.netbeans.modules.csl.api.OffsetRange;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.EnumSet;
-import java.util.List;
-import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javax.swing.text.BadLocationException;
-import javax.swing.text.Document;
 import org.netbeans.editor.BaseDocument;
+import org.netbeans.modules.csl.api.*;
 import org.netbeans.modules.csl.spi.GsfUtilities;
+import org.netbeans.modules.javascript.editing.adito.AditoLibraryQuery;
 import org.netbeans.modules.javascript.editing.lexer.LexUtilities;
 import org.netbeans.modules.parsing.api.Source;
-import org.netbeans.modules.parsing.spi.indexing.support.IndexResult;
-import org.netbeans.modules.parsing.spi.indexing.support.QuerySupport;
-import org.openide.filesystems.FileObject;
-import org.openide.filesystems.FileStateInvalidException;
-import org.openide.filesystems.URLMapper;
+import org.netbeans.modules.parsing.spi.indexing.support.*;
+import org.openide.filesystems.*;
 import org.openide.util.Exceptions;
+
+import javax.swing.text.*;
+import java.net.*;
+import java.util.*;
+import java.util.logging.*;
 
 
 /**
@@ -668,33 +658,5 @@ public abstract class IndexedElement extends JsElement {
         hash = 53 * hash + (getSourceFile() != null ? getSourceFile().hashCode() : 0);
         return hash;
     }
-    
-    public String getOrigin() {
-        String filename = getFilenameUrl();
-        if (filename != null) {
-            int lastSlash = filename.lastIndexOf('/');
-            if (lastSlash == -1) {
-                return null;
-            }
-            lastSlash++;
-            if (filename.startsWith("stub_core", lastSlash)) { // NOI18N
-                return "Core JS";
-            /*} else if (filename.startsWith("stub_", lastSlash)) { // NOI18N
-                return "DOM";
-            } else if (filename.startsWith("jquery", lastSlash)) { // NOI18N
-                return "jQuery";
-            } else if (filename.startsWith("dojo", lastSlash)) { // NOI18N
-                return "dojo";
-            } else if (filename.startsWith("yui", lastSlash)) { // NOI18N
-                return "YUI";*/
-            } else if (filename.startsWith("stub_adito", lastSlash)) { // NOI18N
-              return "ADITO JS";
-            }
-            // TODO: Map to sdocs somehow. Tricky because sometimes I get the source
-            // element rather than the sdoc when doing equals
-            //} else if (filename.endsWith("sdoc")) {
-        }
 
-        return null;
-    }
 }

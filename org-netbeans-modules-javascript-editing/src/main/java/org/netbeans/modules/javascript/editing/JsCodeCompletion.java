@@ -2611,46 +2611,19 @@ public class JsCodeCompletion implements CodeCompletionHandler {
         }
 
         public String getRhsHtml(HtmlFormatter formatter) {
-            if (element.getKind() == ElementKind.PACKAGE || element.getKind() == ElementKind.CLASS) {
-                if (element instanceof IndexedElement) {
-                    String origin = ((IndexedElement) element).getOrigin();
-                    if (origin != null) {
-                        formatter.appendText(origin);
-                        return formatter.getText();
-                    }
-                }
-
-                return null;
-            }
-
             String in = element.getIn();
 
             if (in != null) {
                 formatter.appendText(in);
                 return formatter.getText();
-            } else if (element instanceof IndexedElement) {
-                IndexedElement ie = (IndexedElement) element;
-                String filename = ie.getFilenameUrl();
-                if (filename != null) {
-                    if (filename.indexOf("jsstubs") == -1) { // NOI18N
-                        int index = filename.lastIndexOf('/');
-                        if (index != -1) {
-                            filename = filename.substring(index + 1);
-                        }
-                        formatter.appendText(filename);
-                        return formatter.getText();
-                    } else {
-                        String origin = ie.getOrigin();
-                        if (origin != null) {
-                            formatter.appendText(origin);
-                            return formatter.getText();
-                        }
-                    }
-                }
-
-                return null;
             }
-
+            else {
+                AditoLibraryQuery.Packet packet = new AditoLibraryQuery().getPacket(element.getFileObject());
+                if (packet != null) {
+                    formatter.appendText(packet.getName());
+                    return formatter.getText();
+                }
+            }
             return null;
         }
 

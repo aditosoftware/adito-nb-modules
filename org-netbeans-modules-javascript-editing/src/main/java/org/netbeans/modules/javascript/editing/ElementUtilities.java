@@ -45,7 +45,6 @@
 package org.netbeans.modules.javascript.editing;
 
 import java.util.Collection;
-import java.util.EnumSet;
 import java.util.Iterator;
 import java.util.List;
 import org.mozilla.nb.javascript.Node;
@@ -53,7 +52,6 @@ import org.netbeans.api.annotations.common.NonNull;
 import org.netbeans.modules.csl.api.DeclarationFinder.DeclarationLocation;
 import org.netbeans.modules.csl.api.ElementHandle;
 import org.netbeans.modules.javascript.editing.lexer.LexUtilities;
-import org.openide.util.Exceptions;
 import org.openide.util.NbBundle;
 
 /**
@@ -181,11 +179,11 @@ public final class ElementUtilities {
                 if (indexedElement != null) {
                     String url = indexedElement.getFilenameUrl();
                     if (url != null) {
-                        if (url.indexOf("jsstubs/stub_core_") != -1) { // NOI18N
+                        if (url.contains("stub_core_")) { // NOI18N
                             sb.append(" (Core JavaScript)");
-                        } else if (url.indexOf("jsstubs/stub_") != -1) { // NOI18N
+                        } else if (url.contains("stub_")) { // NOI18N
                             //sb.append(" (DOM)");
-                          sb.append(" (Adito)");
+                          sb.append(" (Adito system)");
                         }
                     }
                 }
@@ -277,15 +275,10 @@ public final class ElementUtilities {
         }*/
         sb.append("</tr></table>"); // NOI18N
 
-        if (indexedElement != null && indexedElement.getFilenameUrl() != null && indexedElement.getFilenameUrl().indexOf("jsstubs") == -1) {
+        if (indexedElement != null && indexedElement.getFilenameUrl() != null && !indexedElement.getFilenameUrl().contains("jsstubs")) {
             sb.append(NbBundle.getMessage(JsCodeCompletion.class, "FileLabel"));
             sb.append(" <tt>"); // NOI18N
-            String file = indexedElement.getFilenameUrl();
-            int baseIndex = file.lastIndexOf('/');
-            if (baseIndex != -1) {
-                file = file.substring(baseIndex+1);
-            }
-            sb.append(file);
+            sb.append(indexedElement.getPacket().getName());
             sb.append("</tt><br>"); // NOI18N
         }
         
