@@ -51,6 +51,7 @@ import org.mozilla.nb.javascript.Node;
 import org.netbeans.api.annotations.common.NonNull;
 import org.netbeans.modules.csl.api.DeclarationFinder.DeclarationLocation;
 import org.netbeans.modules.csl.api.ElementHandle;
+import org.netbeans.modules.javascript.editing.adito.AditoLibraryQuery;
 import org.netbeans.modules.javascript.editing.lexer.LexUtilities;
 import org.openide.util.NbBundle;
 
@@ -278,7 +279,8 @@ public final class ElementUtilities {
         if (indexedElement != null && indexedElement.getFilenameUrl() != null && !indexedElement.getFilenameUrl().contains("jsstubs")) {
             sb.append(NbBundle.getMessage(JsCodeCompletion.class, "FileLabel"));
             sb.append(" <tt>"); // NOI18N
-            sb.append(indexedElement.getPacket().getName());
+            AditoLibraryQuery.Packet packet = new AditoLibraryQuery().getPacket(element.getFileObject());
+            sb.append(packet.getName());
             sb.append("</tt><br>"); // NOI18N
         }
         
