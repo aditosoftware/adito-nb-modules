@@ -51,6 +51,7 @@ import org.netbeans.modules.form.adito.actions.AditoActionObject;
 import org.netbeans.modules.form.adito.components.*;
 import org.netbeans.modules.form.adito.perstistencemanager.NonvisContainerRADComponent;
 import org.netbeans.modules.form.layoutsupport.*;
+import org.netbeans.modules.form.layoutsupport.delegates.CardLayoutSupport;
 import org.netbeans.modules.form.palette.PaletteUtils;
 import org.netbeans.spi.search.SearchInfoDefinition;
 import org.openide.ErrorManager;
