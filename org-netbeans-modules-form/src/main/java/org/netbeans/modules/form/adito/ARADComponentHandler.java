@@ -88,7 +88,7 @@ public class ARADComponentHandler
   {
     IPropertyPitProvider<?, ?, ?> curModel = getModel();
     _deinitialize(true);
-    if (curModel != null && curModel.getPit().getOwnProperty().isValid())
+    if (curModel != null && curModel.getPit().isValid() && curModel.getPit().getOwnProperty().isValid())
     {
       IAditoModelDataProvider dataProvider = NbAditoInterface.lookup(IAditoModelDataProvider.class);
       dataProvider.removeDataModel(curModel);

@@ -2426,7 +2426,6 @@ public class HandleLayer extends JPanel implements MouseListener, MouseMotionLis
     {
       formDesigner.requestActive();
       PaletteItem item = PaletteUtils.getSelectedItem(_getModelFormType());
-      System.err.println(item);
       if (formDesigner.getMenuEditLayer().isPossibleNewMenuComponent(item))
       {
         formDesigner.getMenuEditLayer().startNewMenuComponentPickAndPlop(item, e.getPoint());
@@ -3754,11 +3753,7 @@ public class HandleLayer extends JPanel implements MouseListener, MouseMotionLis
           Node.Property[] computedProperties = computedConstraints.get(i).getProperties();
           movingComponent.getARADComponentHandler().move(targetContainer, computedProperties);
         }
-        if (targetContainer == null || targetContainer.getLayoutSupport() != null)
-        {
-          formDesigner.getLayoutDesigner().removeDraggedComponents();
-          oldDragger.dropComponents(p, targetContainer);
-        }
+        formDesigner.getLayoutDesigner().removeDraggedComponents();
 
                 /*if (targetContainer == null || targetContainer.getLayoutSupport() != null) {
                     // dropped in old layout support, or on non-visual area

@@ -51,7 +51,6 @@ import org.netbeans.modules.form.adito.actions.AditoActionObject;
 import org.netbeans.modules.form.adito.components.*;
 import org.netbeans.modules.form.adito.perstistencemanager.NonvisContainerRADComponent;
 import org.netbeans.modules.form.layoutsupport.*;
-import org.netbeans.modules.form.layoutsupport.delegates.CardLayoutSupport;
 import org.netbeans.modules.form.palette.PaletteUtils;
 import org.netbeans.spi.search.SearchInfoDefinition;
 import org.openide.ErrorManager;
@@ -113,17 +112,16 @@ public class RADComponentNode extends FormNode
     updateName();
     updateDisplayName();
 
-    propertyChangeListenerReference = new PropertyChangeListener()
+    propertyChangeListenerReference = evt ->
     {
-      @Override
-      public void propertyChange(PropertyChangeEvent evt)
+      String propertyName = evt.getPropertyName();
+      if (Node.PROP_NAME.equals(propertyName))
       {
-        String propertyName = evt.getPropertyName();
-        if (!"name".equals(propertyName))
-          firePropertyChange(propertyName, null, null);
         updateName();
         updateDisplayName();
       }
+      else
+        firePropertyChange(propertyName, null, null);
     };
     // wenn sich die Properties ändern soll das Sheet aktualisiert werden.
     AditoNodeConnect.addWeakPropertyChangeListener(component, propertyChangeListenerReference);

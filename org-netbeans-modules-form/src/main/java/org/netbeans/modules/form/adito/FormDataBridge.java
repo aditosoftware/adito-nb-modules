@@ -361,7 +361,7 @@ public class FormDataBridge
           if (radComponent instanceof ComponentContainer)
           {
             ComponentContainer container = (ComponentContainer) radComponent;
-            String removedName = ((IProperty) pEvt.getSource()).getName();
+            String removedName = ((IPropertyDescription) pEvt.getSource()).getName();
             for (RADComponent component : Lists.newArrayList(container.getSubBeans()))
             {
               if (Objects.equal(component.getName(), removedName))
