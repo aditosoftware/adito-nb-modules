@@ -3754,6 +3754,7 @@ public class HandleLayer extends JPanel implements MouseListener, MouseMotionLis
           movingComponent.getARADComponentHandler().move(targetContainer, computedProperties);
         }
         formDesigner.getLayoutDesigner().removeDraggedComponents();
+        getFormModel().fireContainerLayoutChanged(targetContainer, null, null, null);
 
                 /*if (targetContainer == null || targetContainer.getLayoutSupport() != null) {
                     // dropped in old layout support, or on non-visual area
