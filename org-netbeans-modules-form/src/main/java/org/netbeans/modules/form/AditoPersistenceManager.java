@@ -347,7 +347,8 @@ public class AditoPersistenceManager extends PersistenceManager
     AComponentInfo componentInfo = AComponentInfo.create(pChildModel, pInfo);
     if (componentInfo == null)
     {
-      new RuntimeException("null for: " + new PropertyPath(pChildModel.getPit().getOwnProperty()).asString()).printStackTrace();
+      String modelPath = pChildModel == null ? null : new PropertyPath(pChildModel).asString();
+      new RuntimeException("null for: " + modelPath).printStackTrace();
       return null;
     }
 
