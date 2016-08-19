@@ -8,7 +8,7 @@
   <parent>
     <groupId>de.adito.aditoweb</groupId>
     <artifactId>modules</artifactId>
-    <version>5.0</version>
+    <version>4.6</version>
   </parent>
 
 
