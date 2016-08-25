@@ -1,7 +1,7 @@
 package org.netbeans.modules.form.adito.components;
 
 import de.adito.aditoweb.nbm.nbide.nbaditointerface.NbAditoInterface;
-import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.sync.IFormComponentInfoProvider;
+import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.sync.*;
 import de.adito.propertly.core.spi.IPropertyPitProvider;
 import org.jetbrains.annotations.Nullable;
 import org.netbeans.modules.form.RADComponent;
@@ -29,9 +29,9 @@ public final class AditoNodeConnect
     return _resolve(pComponent, new _NodeC<Image>()
     {
       @Override
-      public Image resolveNode(Node pNode)
+      public Image resolveNode(@Nullable Node pNode)
       {
-        return pNode.getIcon(pType);
+        return pNode == null ? null : pNode.getIcon(pType);
       }
     });
   }
@@ -41,9 +41,9 @@ public final class AditoNodeConnect
     return _resolve(pComponent, new _NodeC<String>()
     {
       @Override
-      public String resolveNode(Node pNode)
+      public String resolveNode(@Nullable Node pNode)
       {
-        return pNode.getDisplayName();
+        return pNode == null ? null : pNode.getDisplayName();
       }
     });
   }
@@ -53,9 +53,9 @@ public final class AditoNodeConnect
     return _resolve(pComponent, new _NodeC<String>()
     {
       @Override
-      public String resolveNode(Node pNode)
+      public String resolveNode(@Nullable Node pNode)
       {
-        return pNode.getName();
+        return pNode == null ? null : pNode.getName();
       }
     });
   }
@@ -66,9 +66,9 @@ public final class AditoNodeConnect
     return _resolve(pComponent, new _NodeC<Node.PropertySet[]>()
     {
       @Override
-      public Node.PropertySet[] resolveNode(Node pNode)
+      public Node.PropertySet[] resolveNode(@Nullable Node pNode)
       {
-        return pNode.getPropertySets();
+        return pNode == null ? new Node.PropertySet[0] : pNode.getPropertySets();
       }
     });
   }
@@ -78,8 +78,9 @@ public final class AditoNodeConnect
     _resolve(pComponent, new _NodeC<Void>()
     {
       @Override
-      public Void resolveNode(Node pNode)
+      public Void resolveNode(@Nullable Node pNode)
       {
+        Objects.requireNonNull(pNode);
         pNode.addPropertyChangeListener(WeakListeners.propertyChange(pListener, pNode));
         return null;
       }
@@ -91,9 +92,9 @@ public final class AditoNodeConnect
     Action[] actions = _resolve(pComponent, new _NodeC<Action[]>()
     {
       @Override
-      public Action[] resolveNode(Node pNode)
+      public Action[] resolveNode(@Nullable Node pNode)
       {
-        return pNode.getActions(pContext);
+        return pNode == null ? new Action[0] : pNode.getActions(pContext);
       }
     });
     if (actions == null)
@@ -107,7 +108,7 @@ public final class AditoNodeConnect
     return _resolve(pComponent, new _DataObjectC<Lookup>()
     {
       @Override
-      public Lookup resolveDataObjectLookup(Lookup pDataObjectLookup)
+      public Lookup resolveDataObjectLookup(@Nullable Lookup pDataObjectLookup)
       {
         return pDataObjectLookup;
       }
@@ -119,7 +120,7 @@ public final class AditoNodeConnect
     return _resolve(pComponent, new _DataObjectC<INodePrivileges>()
     {
       @Override
-      public INodePrivileges resolveDataObjectLookup(Lookup pDataObjectLookup)
+      public INodePrivileges resolveDataObjectLookup(@Nullable Lookup pDataObjectLookup)
       {
         return new INodePrivileges()
         {
@@ -154,9 +155,7 @@ public final class AditoNodeConnect
 
   private static <T> T _resolve(RADComponent pComp, _PropertyPitProviderC<T> pC)
   {
-    IPropertyPitProvider<?, ?, ?> model = pComp.getARADComponentHandler().getModel();
-    Objects.requireNonNull(model);
-    return pC.resolvePPP(model);
+    return pC.resolvePPP(pComp.getARADComponentHandler().getModel());
   }
 
 
@@ -168,11 +167,12 @@ public final class AditoNodeConnect
     @Override
     public final T resolvePPP(IPropertyPitProvider<?, ?, ?> pModel)
     {
-      return resolveNode(NbAditoInterface.lookup(IFormComponentInfoProvider.class)
-                             .createComponentInfo(pModel).getNode());
+      IFormComponentInfo ci = pModel == null ? null : NbAditoInterface.lookup(IFormComponentInfoProvider.class)
+          .createComponentInfo(pModel);
+      return resolveNode(ci == null ? null : ci.getNode());
     }
 
-    public abstract T resolveNode(Node pNode);
+    public abstract T resolveNode(@Nullable Node pNode);
   }
 
   /**
@@ -183,15 +183,16 @@ public final class AditoNodeConnect
     @Override
     public final T resolvePPP(IPropertyPitProvider<?, ?, ?> pModel)
     {
-      return resolveDataObjectLookup(NbAditoInterface.lookup(IFormComponentInfoProvider.class)
-                                         .createComponentInfo(pModel).getDataObjectLookup());
+      IFormComponentInfo ci = pModel == null ? null : NbAditoInterface.lookup(IFormComponentInfoProvider.class)
+          .createComponentInfo(pModel);
+      return resolveDataObjectLookup(ci == null ? null : ci.getDataObjectLookup());
     }
 
-    public abstract T resolveDataObjectLookup(Lookup pDataObjectLookup);
+    public abstract T resolveDataObjectLookup(@Nullable Lookup pDataObjectLookup);
   }
 
   /**
-   * Ausführungsbeschreibung auf FileObjects.
+   * Ausführungsbeschreibung auf PropertyPitProvider.
    */
   private interface _PropertyPitProviderC<T>
   {
