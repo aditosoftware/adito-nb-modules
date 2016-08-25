@@ -48,7 +48,7 @@ import de.adito.aditoweb.nbm.nbide.nbaditointerface.NbAditoInterface;
 import de.adito.aditoweb.nbm.nbide.nbaditointerface.common.IAditoNetbeansTranslations;
 import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.model.EModelFormType;
 import org.netbeans.modules.form.adito.actions.AditoActionObject;
-import org.netbeans.modules.form.adito.components.*;
+import org.netbeans.modules.form.adito.components.AditoNodeConnect;
 import org.netbeans.modules.form.adito.perstistencemanager.NonvisContainerRADComponent;
 import org.netbeans.modules.form.layoutsupport.*;
 import org.netbeans.modules.form.palette.PaletteUtils;
@@ -191,15 +191,16 @@ public class RADComponentNode extends FormNode
       if (!iconsInitialized)
       {
         // getIconForClass invokes getNodes(true) which cannot be called in Mutex
-        EventQueue.invokeLater(() -> {
-          Image icon1 = PaletteUtils.getIconForClass(className, classDetails, iconType, true, EModelFormType.UNDEFINED);
-          iconsInitialized = true;
-          if (icon1 != null)
-          {
-            img.put(iconType, icon1);
-            fireIconChange();
-          }
-        });
+        EventQueue.invokeLater(() ->
+                               {
+                                 Image icon1 = PaletteUtils.getIconForClass(className, classDetails, iconType, true, EModelFormType.UNDEFINED);
+                                 iconsInitialized = true;
+                                 if (icon1 != null)
+                                 {
+                                   img.put(iconType, icon1);
+                                   fireIconChange();
+                                 }
+                               });
       }
       else
       {
@@ -560,7 +561,7 @@ public class RADComponentNode extends FormNode
   {
     return !component.isReadOnly()
         && component != component.getFormModel().getTopRADComponent()
-        && AditoNodeConnect.getPriveleges(component).canRename();
+        && AditoNodeConnect.getNode(component).map(Node::canRename).orElse(false);
   }
 
   /**
@@ -571,10 +572,9 @@ public class RADComponentNode extends FormNode
   @Override
   public boolean canDestroy()
   {
-    INodePrivileges priveleges = AditoNodeConnect.getPriveleges(component);
     return !component.isReadOnly()
         && component != component.getFormModel().getTopRADComponent()
-        && priveleges != null && priveleges.canDelete();
+        && AditoNodeConnect.getNode(component).map(Node::canDestroy).orElse(false);
   }
 
   /**
@@ -682,23 +682,25 @@ public class RADComponentNode extends FormNode
       ((FormAwareEditor) customizerObject).setContext(component.getFormModel(), (FormProperty) prop);
     }
 
-    customizer.addPropertyChangeListener(evt -> {
-      FormProperty[] properties;
-      if (evt.getPropertyName() != null)
-      {
-        FormProperty changedProperty = component.getBeanProperty(evt.getPropertyName());
-        if (changedProperty != null)
-          properties = new FormProperty[]{changedProperty};
-        else
-          return; // non-existing property?
-      }
-      else
-      {
-        properties = component.getAllBeanProperties();
-        evt = null;
-      }
-      updatePropertiesFromCustomizer(properties, evt);
-    });
+    customizer.addPropertyChangeListener(
+        evt ->
+        {
+          FormProperty[] properties;
+          if (evt.getPropertyName() != null)
+          {
+            FormProperty changedProperty = component.getBeanProperty(evt.getPropertyName());
+            if (changedProperty != null)
+              properties = new FormProperty[]{changedProperty};
+            else
+              return; // non-existing property?
+          }
+          else
+          {
+            properties = component.getAllBeanProperties();
+            evt = null;
+          }
+          updatePropertiesFromCustomizer(properties, evt);
+        });
     // [undo/redo for customizer probably does not work...]
 
     return (Component) customizerObject;
@@ -748,8 +750,7 @@ public class RADComponentNode extends FormNode
   @Override
   public boolean canCopy()
   {
-    INodePrivileges priveleges = AditoNodeConnect.getPriveleges(component);
-    return priveleges != null && priveleges.canCopy();
+    return AditoNodeConnect.getNode(component).map(Node::canCopy).orElse(false);
   }
 
   /**
@@ -761,10 +762,9 @@ public class RADComponentNode extends FormNode
   @Override
   public boolean canCut()
   {
-    INodePrivileges priveleges = AditoNodeConnect.getPriveleges(component);
     return !component.isReadOnly()
         && component != component.getFormModel().getTopRADComponent()
-        && priveleges != null && priveleges.canMove();
+        && AditoNodeConnect.getNode(component).map(Node::canCut).orElse(false);
   }
 
   /**

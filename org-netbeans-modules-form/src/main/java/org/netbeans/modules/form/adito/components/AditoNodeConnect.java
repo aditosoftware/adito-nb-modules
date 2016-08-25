@@ -115,39 +115,14 @@ public final class AditoNodeConnect
     });
   }
 
-  public static INodePrivileges getPriveleges(RADComponent pComponent)
+  public static Optional<Node> getNode(RADComponent pComponent)
   {
-    return _resolve(pComponent, new _DataObjectC<INodePrivileges>()
+    return _resolve(pComponent, new _NodeC<Optional<Node>>()
     {
       @Override
-      public INodePrivileges resolveDataObjectLookup(@Nullable Lookup pDataObjectLookup)
+      public Optional<Node> resolveNode(@Nullable Node pNode)
       {
-        return new INodePrivileges()
-        {
-          @Override
-          public boolean canDelete()
-          {
-            return true; //pDataObject.isDeleteAllowed(); // TODO: propertly
-          }
-
-          @Override
-          public boolean canCopy()
-          {
-            return true; // pDataObject.isCopyAllowed(); // TODO: propertly
-          }
-
-          @Override
-          public boolean canMove()
-          {
-            return true; // pDataObject.isMoveAllowed(); // TODO: propertly
-          }
-
-          @Override
-          public boolean canRename()
-          {
-            return true; // pDataObject.isRenameAllowed(); // TODO: propertly
-          }
-        };
+        return Optional.ofNullable(pNode);
       }
     });
   }
