@@ -853,10 +853,6 @@ public final class LayoutSupportManager implements LayoutSupportContext {
     public void setLayoutRadComponent(RADComponent pLayoutRadComponent)
     {
         layoutRadComponent = pLayoutRadComponent;
-        /*IProperty<?, ?> layout = metaContainer.getARADComponentHandler().getModel().getPit().findProperty("layout");
-
-        IPropertyPitProvider neonLayoutDataModel = (IPropertyPitProvider) layout.getValue();
-        layoutRadComponent.getARADComponentHandler().setModel(neonLayoutDataModel);*/
     }
 
     public RADComponent getLayoutRadComponent()

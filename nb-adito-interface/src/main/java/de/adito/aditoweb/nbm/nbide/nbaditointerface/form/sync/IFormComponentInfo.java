@@ -2,7 +2,7 @@ package de.adito.aditoweb.nbm.nbide.nbaditointerface.form.sync;
 
 
 import org.jetbrains.annotations.Nullable;
-import org.openide.nodes.*;
+import org.openide.nodes.Node;
 import org.openide.util.Lookup;
 
 import java.awt.*;
@@ -24,7 +24,6 @@ public interface IFormComponentInfo
   String PROP_CHILD_REMOVED = "propChildRemoved";
   String PROP_POSITION_CHANGED = "propPositionChanged";
 
-  Sheet createSheet();
 
   Map<String, Object> getInitialValues();
 

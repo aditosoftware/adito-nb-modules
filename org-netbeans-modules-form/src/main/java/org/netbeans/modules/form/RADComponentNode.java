@@ -85,9 +85,9 @@ public class RADComponentNode extends FormNode
 
   private RADComponent component;
   private boolean highlightDisplayName;
-  private Map<Integer, Image> img = new HashMap<Integer, Image>();
+  private Map<Integer, Image> img = new HashMap<>();
   @SuppressWarnings("FieldCanBeLocal")
-  private final PropertyChangeListener propertyChangeListenerReference; // strong reference for weak listener
+  private PropertyChangeListener propertyChangeListenerReference; // strong reference for weak listener
 
   public RADComponentNode(RADComponent component)
   {
@@ -191,18 +191,13 @@ public class RADComponentNode extends FormNode
       if (!iconsInitialized)
       {
         // getIconForClass invokes getNodes(true) which cannot be called in Mutex
-        EventQueue.invokeLater(new Runnable()
-        {
-          @Override
-          public void run()
+        EventQueue.invokeLater(() -> {
+          Image icon1 = PaletteUtils.getIconForClass(className, classDetails, iconType, true, EModelFormType.UNDEFINED);
+          iconsInitialized = true;
+          if (icon1 != null)
           {
-            Image icon = PaletteUtils.getIconForClass(className, classDetails, iconType, true, EModelFormType.UNDEFINED);
-            iconsInitialized = true;
-            if (icon != null)
-            {
-              img.put(iconType, icon);
-              fireIconChange();
-            }
+            img.put(iconType, icon1);
+            fireIconChange();
           }
         });
       }
@@ -244,17 +239,9 @@ public class RADComponentNode extends FormNode
   }
 
   @Override
-  protected Sheet createSheet()
+  public PropertySet[] getPropertySets()
   {
-    try
-    {
-      Sheet sheet = AditoNodeConnect.getSheet(component);
-      return sheet == null ? new Sheet() : sheet;
-    }
-    catch (IllegalArgumentException e)
-    {
-      return new Sheet();
-    }
+    return AditoNodeConnect.getPropertySets(component);
   }
 
   /* List new types that can be created in this node.
@@ -617,16 +604,10 @@ public class RADComponentNode extends FormNode
       }
       else
       {
-        EventQueue.invokeLater(new Runnable()
-        {
-          @Override
-          public void run()
-          {
-            component.getFormModel().removeComponent(component, true);
-          }
-        });
+        EventQueue.invokeLater(() -> component.getFormModel().removeComponent(component, true));
       }
     } // otherwise the component was likely already removed with a parent component
+    propertyChangeListenerReference = null;
     super.destroy();
   }
 
@@ -701,27 +682,22 @@ public class RADComponentNode extends FormNode
       ((FormAwareEditor) customizerObject).setContext(component.getFormModel(), (FormProperty) prop);
     }
 
-    customizer.addPropertyChangeListener(new PropertyChangeListener()
-    {
-      @Override
-      public void propertyChange(PropertyChangeEvent evt)
+    customizer.addPropertyChangeListener(evt -> {
+      FormProperty[] properties;
+      if (evt.getPropertyName() != null)
       {
-        FormProperty[] properties;
-        if (evt.getPropertyName() != null)
-        {
-          FormProperty changedProperty =
-              component.getBeanProperty(evt.getPropertyName());
-          if (changedProperty != null)
-            properties = new FormProperty[]{changedProperty};
-          else return; // non-existing property?
-        }
+        FormProperty changedProperty = component.getBeanProperty(evt.getPropertyName());
+        if (changedProperty != null)
+          properties = new FormProperty[]{changedProperty};
         else
-        {
-          properties = component.getAllBeanProperties();
-          evt = null;
-        }
-        updatePropertiesFromCustomizer(properties, evt);
+          return; // non-existing property?
       }
+      else
+      {
+        properties = component.getAllBeanProperties();
+        evt = null;
+      }
+      updatePropertiesFromCustomizer(properties, evt);
     });
     // [undo/redo for customizer probably does not work...]
 
@@ -742,9 +718,8 @@ public class RADComponentNode extends FormNode
         Object oldValue = evt != null ? evt.getOldValue() : null;
         Object newValue = evt != null ? evt.getNewValue() : null;
 
-        for (int i = 0; i < properties.length; i++)
+        for (FormProperty prop : properties)
         {
-          FormProperty prop = properties[i];
           try
           {
             prop.reinstateProperty();
@@ -890,14 +865,13 @@ public class RADComponentNode extends FormNode
           keys.add(keyLayout);
         }
 
-        for (int i = 0; i < subComps.length; i++)
-          if (subComps[i] != menuComp)
-            keys.add(subComps[i]);
+        for (RADComponent subComp : subComps)
+          if (subComp != menuComp)
+            keys.add(subComp);
       }
       else
       {
-        for (int i = 0; i < subComps.length; i++)
-          keys.add(subComps[i]);
+        Collections.addAll(keys, subComps);
       }
 
       setKeys(keys);

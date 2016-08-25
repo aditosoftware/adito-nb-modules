@@ -3734,14 +3734,8 @@ public class HandleLayer extends JPanel implements MouseListener, MouseMotionLis
         List<LayoutConstraints> computedConstraints = oldDragger.getComputedConstraints(p);
         if (targetContainer == null || computedConstraints == null ||
             Iterables.any(computedConstraints, Predicates.isNull()) ||
-            Iterables.any(Lists.newArrayList(movingComponents), new Predicate<RADVisualComponent>()
-            {
-              @Override
-              public boolean apply(RADVisualComponent pComp)
-              {
-                return !pComp.getARADComponentHandler().canMove(targetContainer);
-              }
-            }))
+            Iterables.any(Lists.newArrayList(movingComponents),
+                          pComp -> !pComp.getARADComponentHandler().canMove(targetContainer)))
         {
           formDesigner.getLayoutDesigner().endMoving(false);
           formDesigner.updateContainerLayout(originalCont);
@@ -3753,8 +3747,8 @@ public class HandleLayer extends JPanel implements MouseListener, MouseMotionLis
           Node.Property[] computedProperties = computedConstraints.get(i).getProperties();
           movingComponent.getARADComponentHandler().move(targetContainer, computedProperties);
         }
-        formDesigner.getLayoutDesigner().removeDraggedComponents();
-        getFormModel().fireContainerLayoutChanged(targetContainer, null, null, null);
+        if (targetContainer == null || targetContainer.getLayoutSupport() != null)
+          formDesigner.getLayoutDesigner().removeDraggedComponents();
 
                 /*if (targetContainer == null || targetContainer.getLayoutSupport() != null) {
                     // dropped in old layout support, or on non-visual area

@@ -1,11 +1,11 @@
 package org.netbeans.modules.form.adito.components;
 
 import de.adito.aditoweb.nbm.nbide.nbaditointerface.NbAditoInterface;
-import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.sync.*;
+import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.sync.IFormComponentInfoProvider;
 import de.adito.propertly.core.spi.IPropertyPitProvider;
 import org.jetbrains.annotations.Nullable;
 import org.netbeans.modules.form.RADComponent;
-import org.openide.nodes.*;
+import org.openide.nodes.Node;
 import org.openide.util.*;
 
 import javax.swing.*;
@@ -61,12 +61,15 @@ public final class AditoNodeConnect
   }
 
   @Nullable
-  public static Sheet getSheet(RADComponent pComponent)
+  public static Node.PropertySet[] getPropertySets(RADComponent pComponent)
   {
-    return _resolve(pComponent, pModel -> {
-      IFormComponentInfoProvider compInfoProvider = NbAditoInterface.lookup(IFormComponentInfoProvider.class);
-      IFormComponentInfo componentInfo = compInfoProvider.createComponentInfo(pModel);
-      return componentInfo.createSheet();
+    return _resolve(pComponent, new _NodeC<Node.PropertySet[]>()
+    {
+      @Override
+      public Node.PropertySet[] resolveNode(Node pNode)
+      {
+        return pNode.getPropertySets();
+      }
     });
   }
 
@@ -152,8 +155,7 @@ public final class AditoNodeConnect
   private static <T> T _resolve(RADComponent pComp, _PropertyPitProviderC<T> pC)
   {
     IPropertyPitProvider<?, ?, ?> model = pComp.getARADComponentHandler().getModel();
-    if (model == null)
-      return null;
+    Objects.requireNonNull(model);
     return pC.resolvePPP(model);
   }
 
