@@ -42,40 +42,28 @@
 
 package org.netbeans.modules.db.explorer.node;
 
-import java.awt.datatransfer.Transferable;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
-import java.io.IOException;
-import java.sql.Connection;
-import java.sql.DatabaseMetaData;
-import java.util.Properties;
-import javax.swing.Action;
-import org.netbeans.api.db.explorer.DatabaseException;
-import org.netbeans.api.db.explorer.DatabaseMetaDataTransfer;
-import org.netbeans.api.db.explorer.node.BaseNode;
-import org.netbeans.api.db.explorer.node.ChildNodeFactory;
-import org.netbeans.api.db.explorer.node.NodeProvider;
+import org.netbeans.api.db.explorer.*;
+import org.netbeans.api.db.explorer.node.*;
 import org.netbeans.lib.ddl.adaptors.DefaultAdaptor;
 import org.netbeans.lib.ddl.impl.Specification;
-import org.netbeans.modules.db.explorer.ConnectionList;
+import org.netbeans.modules.db.explorer.*;
 import org.netbeans.modules.db.explorer.DatabaseConnection;
-import org.netbeans.modules.db.explorer.DatabaseConnectionAccessor;
-import org.netbeans.modules.db.explorer.DatabaseMetaDataTransferAccessor;
 import org.netbeans.modules.db.explorer.action.ConnectAction;
 import org.netbeans.modules.db.explorer.metadata.MetadataModelManager;
-import org.netbeans.modules.db.metadata.model.api.MetadataModel;
-import org.netbeans.modules.db.metadata.model.api.MetadataModels;
+import org.netbeans.modules.db.metadata.model.api.*;
 import org.netbeans.modules.db.util.PropertiesEditor;
-import org.openide.DialogDisplayer;
-import org.openide.NotifyDescriptor;
+import org.openide.*;
 import org.openide.nodes.Sheet;
-import org.openide.util.Exceptions;
-import org.openide.util.HelpCtx;
-import org.openide.util.NbBundle;
-import org.openide.util.RequestProcessor;
-import org.openide.util.WeakListeners;
+import org.openide.util.*;
 import org.openide.util.actions.SystemAction;
 import org.openide.util.datatransfer.ExTransferable;
+
+import javax.swing.Action;
+import java.awt.datatransfer.Transferable;
+import java.beans.*;
+import java.io.IOException;
+import java.sql.*;
+import java.util.Properties;
 
 /**
  *
@@ -119,7 +107,8 @@ public class ConnectionNode extends BaseNode implements PropertyChangeListener {
     private ConnectionNode(NodeDataLookup lookup, NodeProvider provider) {
         super(new ChildNodeFactory(lookup), lookup, FOLDER, provider);
         connection = getLookup().lookup(DatabaseConnection.class);
-        lookup.add(DatabaseConnectionAccessor.DEFAULT.createDatabaseConnection(connection));
+        if(connection != null)
+          lookup.add(connection.getDatabaseConnection());
     }
 
     @Override
