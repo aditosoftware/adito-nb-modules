@@ -4,7 +4,6 @@ import de.adito.aditoweb.nbm.nbide.nbaditointerface.NbAditoInterface;
 import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.layout.IAditoLayoutProvider;
 import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.layout.anchor.IAnchorLayoutPropertyTypes;
 import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.layout.common.IAditoLayoutConstraints;
-import org.netbeans.modules.form.layoutsupport.LayoutConstraints;
 
 import java.awt.*;
 
@@ -52,7 +51,7 @@ public class AditoComponentConstraints extends AbstractComponentConstraints<IAnc
 
 
   @Override
-  public LayoutConstraints cloneConstraints()
+  public AditoComponentConstraints cloneConstraints()
   {
     return new AditoComponentConstraints(getConstraintsObject().cloneConstraints());
   }

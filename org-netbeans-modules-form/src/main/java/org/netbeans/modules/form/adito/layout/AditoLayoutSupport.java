@@ -50,7 +50,8 @@ public class AditoLayoutSupport extends AbstractLayoutSupport
   public LayoutConstraints getNewConstraints(Container container, Container containerDelegate, Component component,
                                              int index, Point posInCont, Point posInComp)
   {
-    AditoComponentConstraints constr = new AditoComponentConstraints();
+    AditoComponentConstraints constr = (AditoComponentConstraints) getConstraints(index);
+    constr = constr == null ? new AditoComponentConstraints() : constr.cloneConstraints();
 
     int x = posInCont.x;
     int y = posInCont.y;
@@ -81,9 +82,8 @@ public class AditoLayoutSupport extends AbstractLayoutSupport
       y = computeGridSize(y, formSettings.getGridY());
     }
 
-    AditoComponentConstraints adConstr = (AditoComponentConstraints) constr.cloneConstraints();
-    adConstr.setBounds(new Rectangle(x, y, w, h));
-    return adConstr;
+    constr.setBounds(new Rectangle(x, y, w, h));
+    return constr;
   }
 
   @Override
