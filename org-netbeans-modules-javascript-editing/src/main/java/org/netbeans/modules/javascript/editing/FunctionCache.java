@@ -64,12 +64,12 @@ public class FunctionCache {
             type = index.getType(fqn);
             if (type == null) {
                 // Special case checks
-                if (fqn.endsWith("Element.getContext")) { // NOI18N
+                /*if (fqn.endsWith("Element.getContext")) { // NOI18N
                     // Probably a call on the HTMLCanvasElement
                     // TODO - check args - see if it's passing in "2d" etc.
                     // At least see if it's an element...
                     return "CanvasRenderingContext2D"; // NOI18N
-                }
+                }*/
                 
                 cache.put(fqn, NONE);
                 return null;

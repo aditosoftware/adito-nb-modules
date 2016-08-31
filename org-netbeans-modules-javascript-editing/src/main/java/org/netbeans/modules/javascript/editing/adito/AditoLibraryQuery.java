@@ -12,6 +12,8 @@ import java.util.*;
 import java.util.List;
 
 /**
+ * Stellt 'Packets' zur Verfügung, die zu Script-Dateien zusätzliche Informationen liefern.
+ *
  * @author j.boesl, 20.07.16
  */
 public class AditoLibraryQuery
@@ -189,9 +191,21 @@ public class AditoLibraryQuery
    */
   public enum EPacketType
   {
+    /**
+     * Prozesse die zur Laufzeit erstellt werden und im JDito importiert werden können.
+     */
     LIBRARY,
+    /**
+     * Prozesse die zur Laufzeit erstellt werden, aber NICHT im JDito importiert werden können.
+     */
     PROCESS,
+    /**
+     * System-Prozesse von ADITO
+     */
     SYSTEM_ADITO,
+    /**
+     * System-Prozesse von JavaScript.
+     */
     SYSTEM_CORE
   }
 

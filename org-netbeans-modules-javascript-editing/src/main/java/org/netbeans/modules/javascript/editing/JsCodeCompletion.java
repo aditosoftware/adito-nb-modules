@@ -1361,7 +1361,7 @@ public class JsCodeCompletion implements CodeCompletionHandler {
                     AstUtilities.addNodesByType(method, new int[]{org.mozilla.nb.javascript.Token.MISSING_DOT}, nodes);
                     if (nodes.size() > 0) {
                         Node exprNode = nodes.get(0);
-                        JsTypeAnalyzer analyzer = new JsTypeAnalyzer(info, /*request.info.getParserResult(),*/ index, method, node, astOffset, lexOffset);
+                        JsTypeAnalyzer analyzer = new JsTypeAnalyzer(info, index, method, node, astOffset, lexOffset);
                         type = analyzer.getType(exprNode.getParentNode());
                     }
                 }
@@ -1385,7 +1385,7 @@ public class JsCodeCompletion implements CodeCompletionHandler {
                             Node method = AstUtilities.findLocalScope(node, path);
 
                             if (method != null) {
-                                JsTypeAnalyzer analyzer = new JsTypeAnalyzer(info, /*request.info.getParserResult(),*/ index, method, node, astOffset, lexOffset);
+                                JsTypeAnalyzer analyzer = new JsTypeAnalyzer(info, index, method, node, astOffset, lexOffset);
                                 type = analyzer.getType(callNode);
                             }
                             break;
@@ -1393,7 +1393,7 @@ public class JsCodeCompletion implements CodeCompletionHandler {
                             Node method = AstUtilities.findLocalScope(node, path);
 
                             if (method != null) {
-                                JsTypeAnalyzer analyzer = new JsTypeAnalyzer(info, /*request.info.getParserResult(),*/ index, method, node, astOffset, lexOffset);
+                                JsTypeAnalyzer analyzer = new JsTypeAnalyzer(info, index, method, node, astOffset, lexOffset);
                                 type = analyzer.getType(callNode);
                             }
                             break;
@@ -1404,7 +1404,7 @@ public class JsCodeCompletion implements CodeCompletionHandler {
                 Node method = AstUtilities.findLocalScope(node, path);
 
                 if (method != null) {
-                    JsTypeAnalyzer analyzer = new JsTypeAnalyzer(info, /*request.info.getParserResult(),*/ index, method, node, astOffset, lexOffset);
+                    JsTypeAnalyzer analyzer = new JsTypeAnalyzer(info, index, method, node, astOffset, lexOffset);
                     type = analyzer.getType(node);
                 }
             }
@@ -1415,7 +1415,7 @@ public class JsCodeCompletion implements CodeCompletionHandler {
                 if (method != null) {
                     // TODO - if the lhs is "foo.bar." I need to split this
                     // up and do it a bit more cleverly
-                    JsTypeAnalyzer analyzer = new JsTypeAnalyzer(info, /*request.info.getParserResult(),*/ index, method, node, astOffset, lexOffset);
+                    JsTypeAnalyzer analyzer = new JsTypeAnalyzer(info, index, method, node, astOffset, lexOffset);
                     type = analyzer.getType(lhs);
                 }
             }

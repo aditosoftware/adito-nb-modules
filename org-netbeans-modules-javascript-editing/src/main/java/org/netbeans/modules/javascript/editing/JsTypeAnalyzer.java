@@ -114,12 +114,13 @@ public class JsTypeAnalyzer {
     private Node target;
     private final JsParseResult info;
     private long startTime;
-    
+
     // Generated with
     //  /bin/grep "^var" *.js  | grep new | awk '{print "BROWSER_BUILTINS.put(\"" $2 "\",\"" $5 "\");"}'
     private static Map<String,String> BROWSER_BUILTINS = new HashMap<String,String>();
     static {
         // Is this obsolete now?
+        // JB: Yes
         BROWSER_BUILTINS.put("java","Java");
         BROWSER_BUILTINS.put("netscape","Netscape");
         BROWSER_BUILTINS.put("sun","Sun");
@@ -575,7 +576,7 @@ public class JsTypeAnalyzer {
             type = types.get(symbol);
         }
     
-        if (type == null) {
+        /*if (type == null) {
             // Look for builtins
             type = BROWSER_BUILTINS.get(symbol);
             
@@ -588,7 +589,7 @@ public class JsTypeAnalyzer {
 //                // limit FQN matches to globals)
 //                type = index.getType(symbol);
             }
-        }
+        }*/
         
         return type;
     }
