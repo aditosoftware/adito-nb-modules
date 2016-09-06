@@ -266,8 +266,7 @@ public final class JsIndex {
                 if (context != null) {
                     String fileUrl = d.getValue(FIELD_SOURCE_NAME);
                     if (searchUrl == null || !searchUrl.equals(fileUrl)) {
-                        boolean isLibrary = fileUrl.indexOf("jsstubs") != -1; // TODO - better algorithm
-                        if (!isLibrary && !isReachable(context, fileUrl)) {
+                        if (!isReachable(context, fileUrl)) {
                             continue;
                         }
                     }
@@ -426,8 +425,7 @@ public final class JsIndex {
                     if (context != null) {
                         String fileUrl = d.getValue(FIELD_SOURCE_NAME);
                         if (searchUrl == null || !searchUrl.equals(fileUrl)) {
-                            boolean isLibrary = fileUrl.indexOf("jsstubs") != -1; // TODO - better algorithm
-                            if (!isLibrary && !isReachable(context, fileUrl)) {
+                            if (!isReachable(context, fileUrl)) {
                                 continue;
                             }
                         }
