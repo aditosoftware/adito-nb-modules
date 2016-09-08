@@ -46,6 +46,7 @@ package org.netbeans.modules.form;
 
 import org.netbeans.api.actions.*;
 import org.netbeans.modules.form.adito.actions.*;
+import org.openide.awt.UndoRedo;
 import org.openide.loaders.DataObject;
 import org.openide.nodes.*;
 import org.openide.util.Lookup;
@@ -104,7 +105,7 @@ public class FormNode extends AbstractNode implements FormCookie
   private static Lookup _createLookup(final FormModel pFormModel, Lookup pInstanceContentLookup, Lookup pAdditional)
   {
     Lookup formModelDelegateLookup = Lookups.fixed(
-        new Object[]{DataObject.class, Closable.class, Printable.class},
+        new Object[]{DataObject.class, Closable.class, Printable.class, UndoRedo.Provider.class}, //ADITO: UndoRedo.Provider.class, #7677
         new InstanceContent.Convertor<Object, Object>()
         {
           @Override

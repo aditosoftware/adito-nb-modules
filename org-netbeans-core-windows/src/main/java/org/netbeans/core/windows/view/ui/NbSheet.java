@@ -63,6 +63,7 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.SwingUtilities;
+import org.openide.awt.UndoRedo;
 import org.openide.explorer.ExplorerManager;
 import org.openide.explorer.propertysheet.PropertySheet;
 import org.openide.nodes.Node;
@@ -152,7 +153,18 @@ public final class NbSheet extends TopComponent {
             NbBundle.getBundle(NbSheet.class).getString ("ACSD_PropertiesSheet"));
         setActivatedNodes(null);
     }
-    
+
+    @Override
+    public UndoRedo getUndoRedo()
+    {
+        // ADITO: UndoRedo.Provider aus Node beziehen, #7677
+        if(nodes == null || nodes.length == 0)
+            return super.getUndoRedo();
+        UndoRedo.Provider provider = nodes[0].getLookup().lookup(UndoRedo.Provider.class);
+        return (provider == null) ? UndoRedo.NONE : provider.getUndoRedo();
+        // ADITO ENDE
+    }
+
     /* Singleton accessor. As NbSheet is persistent singleton this
      * accessor makes sure that NbSheet is deserialized by window system.
      * Uses known unique TopComponent ID "properties" to get NbSheet instance
