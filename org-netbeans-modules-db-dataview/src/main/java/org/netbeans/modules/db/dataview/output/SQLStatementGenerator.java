@@ -487,8 +487,9 @@ class SQLStatementGenerator {
             try {
                 Blob lob = (Blob) val;
                 byte[] result = lob.getBytes(1, (int) lob.length());
-                return "x'" + BinaryToStringConverter.convertToString(
-                        result, 16, false) + "'"; // NOI18N
+
+                return "CAST( x'" + BinaryToStringConverter.convertToString(
+                        result, 16, false) + "' as BLOB)"; // NOI18N
             } catch (SQLException ex) {
                 LOG.log(Level.INFO, "Failed to read BLOB", ex); //NOI18N
             }
