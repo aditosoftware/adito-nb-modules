@@ -20,9 +20,4 @@ public interface IAditoDbTable
    */
   List<IAditoDbColumn> getColumns();
 
-  /**
-   * Liefert die Primärschlüssel dieser Tabelle.
-   * @return in jedem Fall eine Liste.
-   */
-  List<IAditoDbColumn> getPrimaryKeyColumns();
 }

@@ -9,6 +9,7 @@ import org.netbeans.modules.db.explorer.*;
 import org.netbeans.modules.db.explorer.dlg.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Zum Erstellen von Tabellen in einer Datenbank.
@@ -64,11 +65,15 @@ public class AditoDbTableCreator
     try
     {
       List<ColumnItem> primaries = null;
-      List<IAditoDbColumn> primaryC = pTableToCreate.getPrimaryKeyColumns();
+      List<IAditoDbColumn> columns = pTableToCreate.getColumns();
+      List<IAditoDbColumn> primaryC = columns.stream()
+        .filter(IAditoDbColumn::isPrimaryKey)
+        .collect(Collectors.toList());
+
       if (primaryC.size() > 1)
         primaries = ColumnItemCreator.toColumnItems(primaryC, spec);
 
-      ddl.execute(ColumnItemCreator.toColumnItems(pTableToCreate.getColumns(), spec), primaries);
+      ddl.execute(ColumnItemCreator.toColumnItems(columns, spec), primaries);
     }
     catch (Exception e)
     {
