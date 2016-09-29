@@ -1,7 +1,7 @@
 package de.adito.aditoweb.nbm.nbide.nbaditointerface.form.sync;
 
 
-import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.*;
 import org.openide.nodes.Node;
 import org.openide.util.Lookup;
 
@@ -48,6 +48,8 @@ public interface IFormComponentInfo
   String getAditoPropName(String pRadPropName);
 
   String getRadPropName(String pAditoPropName);
+
+  String getPropContext(@NotNull String pPropertyName);
 
   void addPropertyListener(PropertyChangeListener pListener);
 
