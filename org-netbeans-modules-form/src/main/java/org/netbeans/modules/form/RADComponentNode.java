@@ -88,6 +88,7 @@ public class RADComponentNode extends FormNode
   private Map<Integer, Image> img = new HashMap<>();
   @SuppressWarnings("FieldCanBeLocal")
   private PropertyChangeListener propertyChangeListenerReference; // strong reference for weak listener
+  private NodeListener nodeListenerReference; // strong reference for weak listener
 
   public RADComponentNode(RADComponent component)
   {
@@ -112,19 +113,24 @@ public class RADComponentNode extends FormNode
     updateName();
     updateDisplayName();
 
-    propertyChangeListenerReference = evt ->
-    {
-      String propertyName = evt.getPropertyName();
-      if (Node.PROP_NAME.equals(propertyName))
-      {
-        updateName();
-        updateDisplayName();
-      }
-      else
-        firePropertyChange(propertyName, null, null);
-    };
+    propertyChangeListenerReference = evt -> firePropertyChange(evt.getPropertyName(), null, null);
     // wenn sich die Properties ändern soll das Sheet aktualisiert werden.
     AditoNodeConnect.addWeakPropertyChangeListener(component, propertyChangeListenerReference);
+
+    nodeListenerReference = new NodeAdapter()
+    {
+      @Override
+      public void propertyChange(PropertyChangeEvent evt)
+      {
+        if (Node.PROP_NAME.equals(evt.getPropertyName()))
+        {
+          updateName();
+          updateDisplayName();
+        }
+      }
+    };
+    // wenn sich der Name ändert, soll die Node aktualisiert werden
+    AditoNodeConnect.addWeakNodeListener(component, nodeListenerReference);
 
     Node node = pLookup == null ? null : pLookup.lookup(Node.class);
     if (node != null)
@@ -608,6 +614,7 @@ public class RADComponentNode extends FormNode
       }
     } // otherwise the component was likely already removed with a parent component
     propertyChangeListenerReference = null;
+    nodeListenerReference = null;
     super.destroy();
   }
 

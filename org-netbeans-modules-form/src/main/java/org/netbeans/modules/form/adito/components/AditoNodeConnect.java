@@ -5,7 +5,7 @@ import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.sync.*;
 import de.adito.propertly.core.spi.IPropertyPitProvider;
 import org.jetbrains.annotations.Nullable;
 import org.netbeans.modules.form.RADComponent;
-import org.openide.nodes.Node;
+import org.openide.nodes.*;
 import org.openide.util.*;
 
 import javax.swing.*;
@@ -82,6 +82,20 @@ public final class AditoNodeConnect
       {
         Objects.requireNonNull(pNode);
         pNode.addPropertyChangeListener(WeakListeners.propertyChange(pListener, pNode));
+        return null;
+      }
+    });
+  }
+
+  public static void addWeakNodeListener(RADComponent pComponent, final NodeListener pListener)
+  {
+    _resolve(pComponent, new _NodeC<Void>()
+    {
+      @Override
+      public Void resolveNode(@Nullable Node pNode)
+      {
+        Objects.requireNonNull(pNode);
+        pNode.addNodeListener(WeakListeners.create(NodeListener.class, pListener, pNode));
         return null;
       }
     });
