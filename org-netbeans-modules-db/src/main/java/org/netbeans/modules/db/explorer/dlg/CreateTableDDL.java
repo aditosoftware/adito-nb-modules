@@ -52,7 +52,7 @@ public class CreateTableDDL {
             String tablename) {
         this.spec       = spec;
         this.schema     = schema;
-        this.tablename  = tablename;
+        this.tablename  = _unEscapeName(tablename);
     }
     
     /**
@@ -115,7 +115,7 @@ public class CreateTableDDL {
                   // created now, versus an existing one.  This
                   // means we shouldn't quote it.
                   xcmd.setNewObject(true);
-                  xcmd.setIndexName(tablename+ "_" + name + "_idx"); // NOI18N
+                  xcmd.setIndexName(_unEscapeName(OracleTableColumnHack.getValidName(tablename, name, "IDX"))); // NOI18N
                   xcmd.setIndexType(new String());
                   xcmd.setObjectOwner(schema);
                   xcmd.specifyNewColumn(name);
@@ -145,6 +145,11 @@ public class CreateTableDDL {
     
     private boolean hasPrimaryKeys(List<ColumnItem> pkcols) {
         return pkcols != null && pkcols.size() > 0;
+    }
+
+    private String _unEscapeName(String pName)
+    {
+      return pName.replace("\"", "");
     }
 
 }

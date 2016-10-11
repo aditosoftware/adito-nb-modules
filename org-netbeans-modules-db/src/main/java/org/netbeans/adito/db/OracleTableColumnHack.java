@@ -11,6 +11,7 @@ import org.netbeans.lib.ddl.impl.*;
  */
 public class OracleTableColumnHack
 {
+  private static final int MAX_INDEX_NAME_LENGTH = 30;
 
   private OracleTableColumnHack()
   {
@@ -70,12 +71,18 @@ public class OracleTableColumnHack
     String db = pSpecification.getConnection().getDatabase();
     if (db != null && db.toLowerCase().contains("oracle"))
     {
-      String name = pTableName + "_" + pColumnName + "_" + pPostFix;
-      if (name.length() > 30)
-        name = "C" + Math.abs((pTableName + "_" + pColumnName).hashCode()) + "_" + pPostFix;
+      String name = getValidName(pTableName, pColumnName, pPostFix);
       pCol.setObjectName(name);
     }
     return pCol;
   }
 
+  public static String getValidName(String pTableName, String pColumName, String pPostFix)
+  {
+    String name = pTableName + "_" + pColumName + "_" + pPostFix;
+    if (name.length() > MAX_INDEX_NAME_LENGTH)
+      name = "C" + Math.abs((pTableName + "_" + pColumName).hashCode()) + "_" + pPostFix;
+
+    return name;
+  }
 }
