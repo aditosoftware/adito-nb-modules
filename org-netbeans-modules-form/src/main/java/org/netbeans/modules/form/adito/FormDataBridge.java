@@ -3,6 +3,7 @@ package org.netbeans.modules.form.adito;
 import com.google.common.base.*;
 import com.google.common.collect.Lists;
 import de.adito.aditoweb.nbm.nbide.nbaditointerface.NbAditoInterface;
+import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.IAditoFormConstants;
 import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.model.IAditoModelDataProvider;
 import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.sync.*;
 import de.adito.propertly.core.common.path.PropertyPath;
@@ -154,8 +155,16 @@ public class FormDataBridge
       if (!Objects.equal(fieldValue, formPropertyValue) &&
           !(formPropertyValue == null && aditoProperty.isDefaultValue()))
       {
-        //noinspection unchecked
-        aditoProperty.setValue(formPropertyValue);
+        Object oldFailVal = aditoProperty.getValue(IAditoFormConstants.ATR_FAILONVERIFICATIONERROR);
+        try
+        {
+          aditoProperty.setValue(IAditoFormConstants.ATR_FAILONVERIFICATIONERROR, true);
+          aditoProperty.setValue(formPropertyValue);
+        }
+        finally
+        {
+          aditoProperty.setValue(IAditoFormConstants.ATR_FAILONVERIFICATIONERROR, oldFailVal != null ? oldFailVal : false);
+        }
       }
     }
     catch (IllegalAccessException e)
