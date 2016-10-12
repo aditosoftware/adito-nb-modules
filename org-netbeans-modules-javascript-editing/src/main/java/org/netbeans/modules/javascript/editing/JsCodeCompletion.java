@@ -581,40 +581,54 @@ public class JsCodeCompletion implements CodeCompletionHandler {
       if (ts.movePrevious() && ts.token().id() != JsTokenId.STRING_BEGIN)
         prefix = ts.token().text().toString();
 
-      IJsDataSupply jsDataSupply = NbAditoInterface.lookup(IJsDataSupply.class);
-
       if (_isAditoImportCompletion(ts))
       {
-        List<AditoLibraryQuery.Packet> packets = new AditoLibraryQuery().find(request.fileObject, AditoLibraryQuery.IMPORT_TYPES);
-        for (AditoLibraryQuery.Packet packet : packets)
+        for (AditoLibraryQuery.EPacketType packetType : AditoLibraryQuery.IMPORT_TYPES)
         {
-          String name = packet.getName();
-          switch (packet.getType())
+          boolean isSystemPacket = packetType == AditoLibraryQuery.EPacketType.SYSTEM_ADITO;
+
+          for (AditoLibraryQuery.Packet packet : new AditoLibraryQuery().find(request.fileObject, Collections.singleton(packetType)))
           {
-            case SYSTEM_ADITO:
-              if (startsWith(name, prefix))
-                proposals.add(new GenericItem(name, "", request, ElementKind.MODULE));
-              break;
-            case LIBRARY:
-              if (startsWith(name, prefix))
+            String name = packet.getName();
+            if (startsWith(name, prefix))
+            {
+              String varName = isSystemPacket ? name.substring((AditoLibraryQuery.SYSTEM_LIBS + ".").length()) : name;
+
+              Collection<String> sourcePathIds = isSystemPacket ?
+                  Collections.emptySet() : Collections.singleton(JsClassPathProvider.SOURCE_CP);
+              Collection<String> libraryPathIds = isSystemPacket ?
+                  Collections.singleton(JsClassPathProvider.BOOT_CP) : Collections.emptySet();
+              JsIndex jsIndex = JsIndex.get(QuerySupport.findRoots(
+                  packet.getFileObject(), sourcePathIds, libraryPathIds, Collections.emptySet()));
+              Collection<IndexedElement> elements = jsIndex.getElements(varName, null, QuerySupport.Kind.EXACT, null);
+
+              IndexedElement element = elements.isEmpty() ? null : elements.iterator().next();
+              if (element == null || !element.isDeprecated())
               {
-                proposals.add(new GenericItem(name, "", request, ElementKind.GLOBAL)
-                {
-                  @Override
-                  public ImageIcon getIcon()
+                GenericItem item;
+                if (isSystemPacket)
+                  item = new GenericItem(name, "", request, ElementKind.MODULE);
+                else
+                  item = new GenericItem(name, "", request, ElementKind.GLOBAL)
                   {
-                    return new ImageIcon(packet.getImage());
-                  }
-                });
+                    @Override
+                    public ImageIcon getIcon()
+                    {
+                      return new ImageIcon(packet.getImage());
+                    }
+                  };
+                item.element = element;
+                item.indexedElement = element;
+                proposals.add(item);
               }
-              break;
-            default:
-              break;
+            }
           }
         }
       }
       else
       {
+        IJsDataSupply jsDataSupply = NbAditoInterface.lookup(IJsDataSupply.class);
+
         // complete $comp, $sys, $local
         for (String compVar : jsDataSupply.getCompVars(request.fileObject))
         {

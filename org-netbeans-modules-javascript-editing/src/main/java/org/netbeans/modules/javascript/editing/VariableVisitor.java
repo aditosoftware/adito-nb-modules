@@ -553,9 +553,11 @@ public class VariableVisitor implements ParseTreeVisitor {
     private void removeLocals(Scope scope, Set<String> vars) {
         vars.removeAll(scope.locals);
 
-        for (Scope nested : scope) {
+        // #13462: Sinn dieses Aufrufs ist unklar. Dadurch werden Globale variablen entfernt, die in 'nested functions'
+        // als Parameter auftreten.
+        /*for (Scope nested : scope) {
             removeLocals(nested, vars);
-        }
+        }*/
     }
 
     public List<Node> getGlobalVars(boolean writesOnly) {

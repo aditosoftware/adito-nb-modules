@@ -38,17 +38,26 @@ public class AditoImportHint extends AbstractAditoHint
         elements = jsIndex.getElements(callName, null, QuerySupport.Kind.EXACT, null);
         for (IndexedElement element : elements)
         {
-          if (element.isPublic())
+          if (element.isPublic() && !element.isDeprecated())
           {
-            AditoLibraryQuery.Packet packet = new AditoLibraryQuery().getPacket(element.getFileObject());
-            if (packet != null)
+            boolean parentIsDeprecated = false;
+            if (element.getIn() != null)
             {
-              String importStatement = "import(\"" + packet.getName() + "\")";
-              List<HintFix> fix = Collections.singletonList(new AditoImportHintFix(pContext, importStatement + ";\n"));
+              Set<IndexedElement> parentElement = jsIndex.getElements(element.getIn(), null, QuerySupport.Kind.EXACT, null);
+              parentIsDeprecated = !parentElement.isEmpty() && parentElement.iterator().next().isDeprecated();
+            }
+            if (!parentIsDeprecated)
+            {
+              AditoLibraryQuery.Packet packet = new AditoLibraryQuery().getPacket(element.getFileObject());
+              if (packet != null)
+              {
+                String importStatement = "import(\"" + packet.getName() + "\")";
+                List<HintFix> fix = Collections.singletonList(new AditoImportHintFix(pContext, importStatement + ";\n"));
 
-              String description = "Add '" + packet.getName() + "' to imports.";
-              Hint desc = new Hint(this, description, fileObject, AstUtilities.getNameRange(node), fix, 1500);
-              pResultHints.add(desc);
+                String description = "Add '" + packet.getName() + "' to imports.";
+                Hint desc = new Hint(this, description, fileObject, AstUtilities.getNameRange(node), fix, 1500);
+                pResultHints.add(desc);
+              }
             }
           }
         }

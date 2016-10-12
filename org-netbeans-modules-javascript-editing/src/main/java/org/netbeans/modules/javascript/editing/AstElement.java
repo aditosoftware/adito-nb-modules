@@ -91,6 +91,7 @@ public class AstElement extends JsElement {
     AstElement(JsParseResult info, Node node) {
         this.info = info;
         this.node = node;
+        initDocProps(info);
     }
 
     public String getSignature() {
@@ -293,7 +294,6 @@ public class AstElement extends JsElement {
         case Token.FUNCTION:
             if (node instanceof FunctionNode) {
                 AstElement element = new FunctionAstElement(info, (FunctionNode) node);
-                element.initDocProps(info);
                 node.element = element;
                 return element;
             } else {
@@ -301,7 +301,6 @@ public class AstElement extends JsElement {
             }
         default:
             AstElement element = new AstElement(info, node);
-            element.initDocProps(info);
             node.element = element;
             return element;
         }
