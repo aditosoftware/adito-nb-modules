@@ -158,7 +158,7 @@ public class FormDataBridge
         Object oldFailVal = aditoProperty.getValue(IAditoFormConstants.ATR_FAILONVERIFICATIONERROR);
         try
         {
-          aditoProperty.setValue(IAditoFormConstants.ATR_FAILONVERIFICATIONERROR, true);
+          aditoProperty.setValue(IAditoFormConstants.ATR_FAILONVERIFICATIONERROR, true); //#13779
           aditoProperty.setValue(formPropertyValue);
         }
         finally
