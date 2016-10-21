@@ -443,6 +443,16 @@ public class RADVisualContainer extends RADVisualComponent implements ComponentC
         }
         else constraints = null;
 
+        if (perm.length > subComponents.size())
+        {
+            for (int i = subComponents.size(); i < perm.length; i++)
+            {
+                if (perm[i] != i)
+                    throw new IllegalStateException("Can't sort elements that are no subComponents of this RADVisualContainer: " + this);
+            }
+            perm = Arrays.copyOf(perm, subComponents.size());
+        }
+
         for (int i=0; i < perm.length; i++) {
             RADVisualComponent metacomp = subComponents.get(i);
             components[perm[i]] = metacomp;
