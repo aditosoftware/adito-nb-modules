@@ -62,6 +62,8 @@ import org.netbeans.modules.form.*;
  */
 public class EditFormAction extends NodeAction {
 
+    private static String name;
+
     @Override
     protected boolean enable(Node[] nodes) {
         boolean ret = false;
@@ -126,7 +128,10 @@ public class EditFormAction extends NodeAction {
 
     @Override
     public String getName() {
-        return ""; // NOI18N
+        if (name == null)
+            name = org.openide.util.NbBundle.getBundle(EditFormAction.class)
+                .getString("ACT_EditForm"); // NOI18N
+        return name;
     }
 
     @Override
