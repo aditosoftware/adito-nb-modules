@@ -1879,14 +1879,15 @@ public class FormUtils
      * @see java.beans.Introspector.getBeanInfo(Class)
      */
     public static BeanInfo getBeanInfo(Class clazz) throws IntrospectionException {
+        // ADITO: we don't need to reanalyse beans
         try {
-            return Utilities.getBeanInfo(clazz);//, java.beans.Introspector.USE_ALL_BEANINFO);
+            return Introspector.getBeanInfo(clazz);//, java.beans.Introspector.USE_ALL_BEANINFO);
         } catch (Exception ex) {
             org.openide.ErrorManager.getDefault().notify(org.openide.ErrorManager.INFORMATIONAL, ex);
-            return getBeanInfo(clazz, Introspector.IGNORE_IMMEDIATE_BEANINFO);
+            return getBeanInfo(clazz, Introspector.IGNORE_ALL_BEANINFO);
         } catch (Error err) {
             org.openide.ErrorManager.getDefault().notify(org.openide.ErrorManager.INFORMATIONAL, err);
-            return getBeanInfo(clazz, Introspector.IGNORE_IMMEDIATE_BEANINFO);
+            return getBeanInfo(clazz, Introspector.IGNORE_ALL_BEANINFO);
         }
     }
 
