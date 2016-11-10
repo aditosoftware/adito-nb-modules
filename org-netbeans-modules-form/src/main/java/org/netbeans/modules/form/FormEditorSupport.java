@@ -637,6 +637,12 @@ public class FormEditorSupport extends DataEditorSupport implements EditorSuppor
                 FormDesignerTC designerTC = getFormDesignerTC();
                 if (designerTC != null) {
                     formEditor.closeForm();
+
+                    // clear undoRedo on form reset, data has changed -> edits useless and cause errors
+                    UndoRedo undoRedo = designerTC.getUndoRedo();
+                    if(undoRedo instanceof UndoRedo.Manager)
+                        ((UndoRedo.Manager) undoRedo).discardAllEdits();
+
                     designerTC.resetDesigner(true); // will trigger loading
                 }
             }
