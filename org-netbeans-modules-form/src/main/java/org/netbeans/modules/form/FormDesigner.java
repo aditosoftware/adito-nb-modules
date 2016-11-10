@@ -101,6 +101,7 @@ public class FormDesigner
 {
   static final String PROP_DESIGNER_SIZE = "designerSize"; // NOI18N
   public static final String PROP_TOP_DESIGN_COMPONENT = "topDesignComponent"; // NOI18N
+  private final NodeSelectionListener nodeSelectionListener;
 
   // UI components composition
   private JComponent canvasRoot;
@@ -182,7 +183,8 @@ public class FormDesigner
     this.formEditor = formEditor;
 
     explorerManager = new ExplorerManager();
-    explorerManager.addPropertyChangeListener(new NodeSelectionListener());
+    nodeSelectionListener = new NodeSelectionListener();
+    explorerManager.addPropertyChangeListener(nodeSelectionListener);
     // Note: ComponentInspector does some updates on nodes selection as well.
 
     initLookup();
@@ -360,6 +362,7 @@ public class FormDesigner
     connectionSource = null;
     connectionTarget = null;
     formEditor = null;
+    explorerManager.removePropertyChangeListener(nodeSelectionListener);
   }
 
   private void initLookup()
