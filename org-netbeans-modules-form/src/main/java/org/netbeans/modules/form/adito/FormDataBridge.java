@@ -1,5 +1,6 @@
 package org.netbeans.modules.form.adito;
 
+import com.google.common.base.Objects;
 import com.google.common.base.*;
 import com.google.common.collect.Lists;
 import de.adito.aditoweb.nbm.nbide.nbaditointerface.NbAditoInterface;
@@ -18,7 +19,7 @@ import java.beans.*;
 import java.io.IOException;
 import java.lang.ref.*;
 import java.lang.reflect.InvocationTargetException;
-import java.util.List;
+import java.util.*;
 import java.util.logging.*;
 
 /**
@@ -312,6 +313,12 @@ public class FormDataBridge
       final FormDataBridge formDataBridge = formDataBridgeRef.get();
       if (formDataBridge != null)
         _apply(formDataBridge, evt);
+
+      Map<Object, Object> attributes = componentInfo.getPropertyAttributes(String.valueOf(evt.getNewValue()));
+      Object isMixin = attributes.get(IFormComponentInfo.IS_MIXIN_PROPERTY);
+
+      if(isMixin != null && isMixin instanceof Boolean && ((Boolean) isMixin))
+        copyValuesFromAdito();
     }
 
     private void _apply(final FormDataBridge pFormDataBridge, PropertyChangeEvent pEvt)

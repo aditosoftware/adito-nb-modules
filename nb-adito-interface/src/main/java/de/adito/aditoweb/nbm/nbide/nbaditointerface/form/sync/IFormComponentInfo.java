@@ -24,6 +24,7 @@ public interface IFormComponentInfo
   String PROP_CHILD_REMOVED = "propChildRemoved";
   String PROP_POSITION_CHANGED = "propPositionChanged";
 
+  String IS_MIXIN_PROPERTY = "isMixinProperty";
 
   Map<String, Object> getInitialValues();
 
@@ -54,6 +55,14 @@ public interface IFormComponentInfo
   void addPropertyListener(PropertyChangeListener pListener);
 
   void removePropertyListener(PropertyChangeListener pListener);
+
+  /**
+   * Gibt die Attribute für ein beliebiges Property in Form einer Map zurück z.B. isMixin
+   * @param pPropertyName der Name des Properties
+   * @return die Attribute in Form einer Map
+   */
+  @Nullable
+  Map<Object, Object> getPropertyAttributes(String pPropertyName);
 
   /**
    * @return Node dieser IFormComponentInfo
