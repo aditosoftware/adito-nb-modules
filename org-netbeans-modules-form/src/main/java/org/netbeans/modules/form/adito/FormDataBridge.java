@@ -315,10 +315,12 @@ public class FormDataBridge
         _apply(formDataBridge, evt);
 
       Map<Object, Object> attributes = componentInfo.getPropertyAttributes(String.valueOf(evt.getNewValue()));
-      Object isMixin = attributes.get(IFormComponentInfo.IS_MIXIN_PROPERTY);
-
-      if(isMixin != null && isMixin instanceof Boolean && ((Boolean) isMixin))
-        copyValuesFromAdito();
+      if(attributes != null)
+      {
+        Object isMixin = attributes.get(IFormComponentInfo.IS_MIXIN_PROPERTY);
+        if (isMixin != null && isMixin instanceof Boolean && ((Boolean) isMixin))
+          copyValuesFromAdito();
+      }
     }
 
     private void _apply(final FormDataBridge pFormDataBridge, PropertyChangeEvent pEvt)
