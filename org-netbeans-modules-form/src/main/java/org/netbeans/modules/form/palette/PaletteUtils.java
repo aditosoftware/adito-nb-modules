@@ -44,7 +44,6 @@
 
 package org.netbeans.modules.form.palette;
 
-import de.adito.aditoweb.nbm.nbide.nbaditointerface.NbAditoInterface;
 import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.model.*;
 import org.netbeans.api.java.classpath.ClassPath;
 import org.netbeans.api.project.*;
@@ -172,12 +171,18 @@ public final class PaletteUtils {
     public static synchronized void removePaletteListener(PropertyChangeListener listener,
                                                           FileObject context)
     {
+        // listener is removed from each 'ProjectPaletteInfo' for current project, since 'context' can already be
+        // invalid here and thus it might not be possible to identify the 'EModelFormType'.
         Project project = FileOwnerQuery.getOwner(context);
-        EModelFormType modelFormType = NbAditoInterface.lookup(IAditoModelDataProvider.class).getModelFormType(context);
-        ProjectPaletteInfo pInfo = _get(project,modelFormType);//palettes.get(project);
-        if (pInfo != null && pInfo.paletteListeners != null) {
-            pInfo.paletteListeners.remove(listener);
-            pInfo.getPalette().removePropertyChangeListener(listener);
+        List<ProjectPaletteInfo> infoList = palettes.get(project);
+        if (infoList != null)
+        {
+            infoList.stream()
+                .filter(info -> info.paletteListeners != null && info.paletteListeners.contains(listener))
+                .forEach(info -> {
+                    info.paletteListeners.remove(listener);
+                    info.getPalette().removePropertyChangeListener(listener);
+                });
         }
     }
 
@@ -209,23 +214,17 @@ public final class PaletteUtils {
     {
         List<ProjectPaletteInfo> list = palettes.get(pProject);
         if (list == null)
-        {
-            //System.err.println("PaletteUtils._get KEINE LISTE: "+pModelFormType);
             return null;
-        }
         for (ProjectPaletteInfo projectPaletteInfo : list)
         {
             if (projectPaletteInfo.modelFormType.equals(pModelFormType))
-            {
                 return projectPaletteInfo;
-            }
         }
 
-       // System.err.println("PaletteUtils._get NIX GEFUNDEN: "+pModelFormType);
         return null;
     }
 
-    private static void  _add(Project pProject,ProjectPaletteInfo pProjectPaletteInfo)
+    private static void  _add(Project pProject, ProjectPaletteInfo pProjectPaletteInfo)
     {
         List<ProjectPaletteInfo> list = palettes.get(pProject);
         if (list == null)
@@ -235,13 +234,10 @@ public final class PaletteUtils {
         }
         for (ProjectPaletteInfo projectPaletteInfo : list)
         {
-            if (projectPaletteInfo.modelFormType.equals(pProjectPaletteInfo))
-            {
-                return;//Info gibt es schon, nicht nochmal einfügen.
-            }
+            if (projectPaletteInfo.equals(pProjectPaletteInfo))
+                return; // Info gibt es schon, nicht nochmal einfügen.
         }
 
-        //System.err.println("PaletteUtils._add "+pProjectPaletteInfo.modelFormType);
         list.add(pProjectPaletteInfo);
     }
 
@@ -255,7 +251,7 @@ public final class PaletteUtils {
 
         final Project project = FileOwnerQuery.getOwner(context);
 
-        ProjectPaletteInfo pInfo = _get(project, pModelFormType);//palettes.get(project);
+        ProjectPaletteInfo pInfo = _get(project, pModelFormType);
         if (pInfo == null) {
             final ClassPathFilter filter;
             if (project != null) {
@@ -269,16 +265,13 @@ public final class PaletteUtils {
 
             PaletteLookup lookup = new PaletteLookup();
             lookup.setPalette(EventQueue.isDispatchThread() ? createDummyPalette() : createPalette(filter, pModelFormType));
-            //ArrayList<ProjectPaletteInfo> list = new ArrayList<>();
 
             pInfo = new ProjectPaletteInfo();
             pInfo.paletteLookup = lookup;
             pInfo.paletteFilter = filter;
+            _add(project,pInfo);
             pInfo.modelFormType= pModelFormType;
 
-            //list.add(pInfo);
-            _add(project,pInfo);
-            //palettes.put(project, list);
             if (EventQueue.isDispatchThread()) {
                 // Init real palette
                 FormUtils.getRequestProcessor().post(new Runnable() {
@@ -301,7 +294,7 @@ public final class PaletteUtils {
                         }
 
                         // Replace the dummy palette
-                        ProjectPaletteInfo pInfo = _get(project,pModelFormType);//palettes.get(project);
+                        ProjectPaletteInfo pInfo = _get(project, pModelFormType);
                         if (pInfo != null) {
                             PaletteLookup lookup = pInfo.paletteLookup;
                             PaletteController oldPalette = pInfo.getPalette();
@@ -502,8 +495,8 @@ public final class PaletteUtils {
         return NbBundle.getBundle(PaletteUtils.class).getString(key);
     }
 
-    public static Node[] getItemNodes(Node categoryNode, boolean mustBeValid,EModelFormType pModelFormType) {
-        return getItemNodes(categoryNode, mustBeValid, true,pModelFormType);
+    public static Node[] getItemNodes(Node categoryNode, boolean mustBeValid, EModelFormType pModelFormType) {
+        return getItemNodes(categoryNode, mustBeValid, true, pModelFormType);
     }
 
     /**
@@ -513,7 +506,7 @@ public final class PaletteUtils {
      * @param mustBeValid True if all the nodes returned must be valid palette items.
      * @return An array of Nodes for the given category.
      */
-    private static Node[] getItemNodes(Node categoryNode, boolean mustBeValid, boolean optimalResult,EModelFormType pModelFormType) {
+    private static Node[] getItemNodes(Node categoryNode, boolean mustBeValid, boolean optimalResult, EModelFormType pModelFormType) {
         Node[] nodes = categoryNode.getChildren().getNodes(optimalResult);
         if (!mustBeValid)
             return nodes;
@@ -550,8 +543,8 @@ public final class PaletteUtils {
      * categories with Hidden flag.
      * @return An array of categories in the given palette.
      */
-    public static Node[] getCategoryNodes(Node paletteNode, boolean mustBeVisible,EModelFormType pModelFormType) {
-        return getCategoryNodes(paletteNode, mustBeVisible, mustBeVisible, true, true,pModelFormType);
+    public static Node[] getCategoryNodes(Node paletteNode, boolean mustBeVisible, EModelFormType pModelFormType) {
+        return getCategoryNodes(paletteNode, mustBeVisible, mustBeVisible, true, true, pModelFormType);
     }
 
     /**
@@ -733,7 +726,7 @@ public final class PaletteUtils {
                     EventQueue.invokeLater(new Runnable() { // Issue 141326
                         @Override
                         public void run() {
-                            PaletteUtils.bootClassPathChanged(p, classPath, null);//Klasse wird nicht aufgerufen
+                            PaletteUtils.bootClassPathChanged(p, classPath, null); // Klasse wird nicht aufgerufen
                         }
                     });
                 } else {
