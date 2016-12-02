@@ -44,13 +44,7 @@ package org.netbeans.modules.javascript.editing;
 
 import java.io.IOException;
 import java.net.URL;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.naming.directory.SearchResult;
@@ -91,6 +85,8 @@ public final class JsIndex {
     private static final JsIndex EMPTY = new JsIndex(null);
     
     private final QuerySupport querySupport;
+
+    private List<String> autoImports;
 
     /** Creates a new instance of JsIndex */
     private JsIndex(QuerySupport querySupport) {
@@ -673,6 +669,11 @@ public final class JsIndex {
         return null;
     }
 
+    public void setAutoImports(List<String> pImports)
+    {
+        autoImports = pImports;
+    }
+
     /** 
      * Decide whether the given url is included from the current compilation
      * context.
@@ -691,6 +692,11 @@ public final class JsIndex {
             return true;
         }*/
         List<String> imports = result.getStructure().getImports();
+        if (autoImports != null)
+        {
+            imports = new ArrayList<>(imports);
+            imports.addAll(autoImports);
+        }
         if (imports.size() > 0) {
             // TODO - do some heuristics to deal with relative paths here,
             // e.g.   <script src="../../foo.js"></script>
