@@ -47,6 +47,7 @@ import java.net.URL;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.*;
 import javax.naming.directory.SearchResult;
 import org.netbeans.modules.csl.api.ElementKind;
 import org.netbeans.modules.javascript.editing.adito.AditoLibraryQuery;
@@ -87,6 +88,13 @@ public final class JsIndex {
     private final QuerySupport querySupport;
 
     private List<String> autoImports;
+
+  // #13983: Für Module die deprecated sind sollen immer Warnungen angezeigt werden, auch wenn sie nicht explizit
+  // importiert werden.
+  public static final List<String> MARK_AS_DEPRECATED_MODULES =
+      Stream.of("a", "calendar", "date", "emails", "imc", "log", "MODULES", "SYSTEM", "telephony")
+          .map(s -> AditoLibraryQuery.SYSTEM_LIBS + "." + s)
+          .collect(Collectors.toList());
 
     /** Creates a new instance of JsIndex */
     private JsIndex(QuerySupport querySupport) {

@@ -17,14 +17,6 @@ import java.util.stream.*;
 public class AditoDeprecationHint extends AbstractAditoHint
 {
 
-  // #13983: Für Module die deprecated sind sollen immer Warnungen angezeigt werden, auch wenn sie nicht explizit
-  // importiert werden.
-  private List<String> MARK_AS_DEPRECATED_MODULES =
-      Stream.of("a", "calendar", "date", "emails", "imc", "log", "MODULES", "SYSTEM", "telephony")
-      .map(s -> AditoLibraryQuery.SYSTEM_LIBS + "." + s)
-      .collect(Collectors.toList());
-
-
   @Override
   public void run(JsRuleContext pContext, List<Hint> pResultHints)
   {
@@ -37,7 +29,7 @@ public class AditoDeprecationHint extends AbstractAditoHint
 
     JsIndex jsIndex = JsIndex.get(QuerySupport.findRoots(fileObject, Collections.singleton(JsClassPathProvider.SOURCE_CP),
                                                          Collections.singleton(JsClassPathProvider.BOOT_CP), Collections.emptySet()));
-    jsIndex.setAutoImports(MARK_AS_DEPRECATED_MODULES);
+    jsIndex.setAutoImports(JsIndex.MARK_AS_DEPRECATED_MODULES);
 
     String callName = AstUtilities.getCallName(node, true);
     String altName = info.getSource().substring(node.getSourceStart(), node.getSourceEnd());
