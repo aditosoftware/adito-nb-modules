@@ -629,7 +629,7 @@ public class JsCodeCompletion implements CodeCompletionHandler {
       {
         IJsDataSupply jsDataSupply = NbAditoInterface.lookup(IJsDataSupply.class);
 
-        // complete $comp, $sys, $local
+        // complete $comp, $sys, $local, $field
         for (String compVar : jsDataSupply.getCompVars(request.fileObject))
         {
           if (startsWith(compVar, prefix))
@@ -644,6 +644,11 @@ public class JsCodeCompletion implements CodeCompletionHandler {
         {
           if (startsWith(localVar, prefix))
             proposals.add(new GenericItem(localVar, "", request, ElementKind.CONSTANT));
+        }
+        for (String entityFieldVar : jsDataSupply.getEntityFieldVars(request.fileObject))
+        {
+          if (startsWith(entityFieldVar, prefix))
+            proposals.add(new GenericItem(entityFieldVar, "", request, ElementKind.CONSTANT));
         }
       }
     }

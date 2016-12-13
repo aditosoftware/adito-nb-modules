@@ -28,4 +28,10 @@ public interface IJsDataSupply
    */
   Set<String> getCompVars(FileObject pCompletionFile);
 
+  /**
+   * @param pCompletionFile die Datei, in der gerade 'Auto-Vervollständigt' werden soll.
+   * @return die <tt>$field.</tt>-Variablen.
+   */
+  Set<String> getEntityFieldVars(FileObject pCompletionFile);
+
 }
