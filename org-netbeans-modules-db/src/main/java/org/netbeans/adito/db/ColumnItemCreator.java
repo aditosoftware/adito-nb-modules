@@ -37,12 +37,31 @@ public class ColumnItemCreator
       ColumnItem columnItem = new ColumnItem();
       columnItem.setProperty(ColumnItem.NAME, col.getName());
       columnItem.setProperty(ColumnItem.NULLABLE, col.isNullable());
-      columnItem.setProperty(ColumnItem.PRIMARY_KEY, col.isPrimaryKey());
       columnItem.setProperty(ColumnItem.SCALE, col.getScale());
       columnItem.setProperty(ColumnItem.SIZE, col.getSize());
-      columnItem.setProperty(ColumnItem.TYPE, _create(col.getType(), pSpecification));
-      columnItem.setProperty(ColumnItem.UNIQUE, col.isUnique());
-      columnItem.setProperty(ColumnItem.INDEX, col.isIndex());
+
+      TypeElement typeElement = _create(col.getType(), pSpecification);
+      columnItem.setProperty(ColumnItem.TYPE,typeElement);
+
+      Vector<String> noPrimaryKeyTypes = (Vector<String>) pSpecification.getProperties().get("NoPrimaryKeyTypes");
+      if(noPrimaryKeyTypes == null || !noPrimaryKeyTypes.contains(typeElement.getName()))
+        columnItem.setProperty(ColumnItem.PRIMARY_KEY, col.isPrimaryKey());
+      else
+        columnItem.setProperty(ColumnItem.PRIMARY_KEY, false);
+
+      Vector<String> noIndexTypes = (Vector<String>) pSpecification.getProperties().get("NoIndexTypes");
+      if(noIndexTypes == null || !noIndexTypes.contains(typeElement.getName()))
+      {
+        columnItem.setProperty(ColumnItem.UNIQUE, col.isUnique());
+        columnItem.setProperty(ColumnItem.INDEX, col.isIndex());
+      }else
+      {
+        columnItem.setProperty(ColumnItem.UNIQUE, false);
+        columnItem.setProperty(ColumnItem.INDEX, false);
+      }
+
+      //columnItem.setProperty(ColumnItem.UNIQUE, col.isUnique());
+      //columnItem.setProperty(ColumnItem.INDEX, col.isIndex());
       String defVal = col.getDefVal();
       columnItem.setProperty(ColumnItem.DEFVAL, defVal == null ? "" : defVal);
       columnItemList.add(columnItem);

@@ -257,8 +257,9 @@ public class SpecificationFactory implements DatabaseSpecificationFactory, Drive
         return new Specification(specmap, c);
     }
 
-    public DatabaseSpecification createSpecification(Connection c) throws DatabaseProductNotFoundException, SQLException {
-        return createSpecification(c, c.getMetaData().getDatabaseProductName().trim());
+    public DatabaseSpecification createSpecification(Connection c) throws DatabaseProductNotFoundException, SQLException
+    {
+        return createSpecification(c, getDbProductName(c));
     }
 
     public DatabaseSpecification createSpecification(Connection c, String databaseProductName) throws DatabaseProductNotFoundException {
