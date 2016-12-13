@@ -64,38 +64,64 @@ public class CreateTableDDL {
      * @param pkcols A Vector of ColumnItem representing the columns
      *      which are in the primary key for the table.  Can be null
      */
-    public boolean execute(List<ColumnItem> columns, List<ColumnItem> pkcols) throws Exception {
+    public boolean execute(List<ColumnItem> columns, List<ColumnItem> pkcols) throws Exception
+    {
+      CommandBuffer cbuff = _getCommandBuffer(columns, pkcols, spec.getConnection().getDatabase());
+      cbuff.execute();
+      return cbuff.wasException();
+    }
 
-        CommandBuffer cbuff = new CommandBuffer();
-        List<CreateIndex> idxCommands = new ArrayList<CreateIndex>();
+    public boolean execute(List<ColumnItem> columns, List<ColumnItem> pkcols, String pDbName) throws Exception
+    {
+      CommandBuffer cbuff = _getCommandBuffer(columns, pkcols, pDbName);
+      cbuff.execute();
+      return cbuff.wasException();
+    }
 
-          CreateTable cmd = spec.createCommandCreateTable(tablename);
+    public String getDDL(List<ColumnItem> columns, List<ColumnItem> pkcols, String pDbName) throws Exception
+    {
+      return _getCommandBuffer(columns, pkcols, pDbName).getCommands();
+    }
 
-          cmd.setObjectOwner(schema);
+    private CommandBuffer _getCommandBuffer(List<ColumnItem> columns, List<ColumnItem> pkcols, String pDbName) throws Exception
+    {
+      CommandBuffer cbuff = new CommandBuffer();
+      List<CreateIndex> idxCommands = new ArrayList<CreateIndex>();
+
+      CreateTable cmd = spec.createCommandCreateTable(tablename);
+
+      cmd.setObjectOwner(schema);
 
           /* this variables and operation provide support for
            * creating indexes for primary or unique keys,
            * most of database are creating indexes by myself,
            * support was removed */
-          org.netbeans.lib.ddl.impl.TableColumn cmdcol = null;
-          CreateIndex xcmd = null;
-          Iterator it = columns.iterator();
-          while (it.hasNext()) {
-              ColumnItem col = (ColumnItem)it.next();
-              String name = col.getName();
-              if (col.isPrimaryKey()&& !hasPrimaryKeys(pkcols)){
-                  cmdcol = cmd.createPrimaryKeyColumn(name);
-                OracleTableColumnHack.fixPrimaryKeyColumn(spec, cmdcol, tablename, name);
-              }
-              else if (col.isUnique()&&!col.isPrimaryKey())
-              {
-                  cmdcol = cmd.createUniqueColumn(name);
-                OracleTableColumnHack.fixUniqueColumn(spec, cmdcol, tablename, name);
-              }
-              else cmdcol = cmd.createColumn(name);
+      org.netbeans.lib.ddl.impl.TableColumn cmdcol = null;
+      CreateIndex xcmd = null;
+      Iterator it = columns.iterator();
+      while (it.hasNext()) {
+        ColumnItem col = (ColumnItem)it.next();
+        String name = col.getName();
+        if (col.isPrimaryKey()&& !hasPrimaryKeys(pkcols))
+        {
+          if(isPkAllowed(col.getType().getName()))
+          {
+            cmdcol = cmd.createPrimaryKeyColumn(name);
+            OracleTableColumnHack.fixPrimaryKeyColumn(spec, cmdcol, tablename, name, pDbName);
+          }
+        }
+        else if (col.isUnique()&&!col.isPrimaryKey())
+        {
+          if(isIndexAllowed(col.getType().getName()))
+          {
+            cmdcol = cmd.createUniqueColumn(name);
+            OracleTableColumnHack.fixUniqueColumn(spec, cmdcol, tablename, name, pDbName);
+          }
+        }
+        else cmdcol = cmd.createColumn(name);
 
-              //bugfix for #31064
-              //combo.setSelectedItem(combo.getSelectedItem());
+        //bugfix for #31064
+        //combo.setSelectedItem(combo.getSelectedItem());
 
               cmdcol.setColumnType(Specification.getType(col.getType().getType()));
               cmdcol.setColumnSize(col.getSize());
@@ -107,7 +133,7 @@ public class CreateTableDDL {
               if (col.hasCheckConstraint()) {
                   // add the TABLE check constraint
                 TableColumn checkConstraintCol = cmd.createCheckConstraint(name, col.getCheckConstraint());
-                OracleTableColumnHack.fixCheckConstraint(spec, checkConstraintCol, tablename, name);
+                OracleTableColumnHack.fixCheckConstraint(spec, checkConstraintCol, tablename, name, pDbName);
               }
               if (col.isIndexed()&&!col.isPrimaryKey()&&!col.isUnique()) {
                   xcmd = spec.createCommandCreateIndex(tablename);
@@ -130,26 +156,51 @@ public class CreateTableDDL {
               cmdcol.setDecimalSize(0);
               cmdcol.setNullAllowed(true);
 
-          }
-          cbuff.add(cmd);
-          for(int i=0;i<idxCommands.size();i++)
-              cbuff.add(idxCommands.get(i));
-          // index support removed!
-          //if (icmd.getColumns().size()>0) cbuff.add(icmd);
+      }
+      cbuff.add(cmd);
+      for(int i=0;i<idxCommands.size();i++)
+        cbuff.add(idxCommands.get(i));
 
-          //execute DDL command
-          cbuff.execute();
-          
-          return cbuff.wasException();
+      return cbuff;
     }
     
-    private boolean hasPrimaryKeys(List<ColumnItem> pkcols) {
-        return pkcols != null && pkcols.size() > 0;
+    private boolean hasPrimaryKeys(List<ColumnItem> pkcols)
+    {
+      List<ColumnItem> newPkCols = new ArrayList<>();
+      if(pkcols == null)
+        return false;
+
+      for (int i = 0; i < pkcols.size(); i++)
+      {
+        ColumnItem columnItem = pkcols.get(i);
+        if(columnItem.isPrimaryKey())
+          newPkCols.add(columnItem);
+      }
+
+      return newPkCols != null && newPkCols.size() > 0;
     }
 
     private String _unEscapeName(String pName)
     {
       return pName.replace("\"", "");
+    }
+
+    private boolean isPkAllowed(String pTypeName)
+    {
+      Vector<String> noPrimaryKeyTypes = (Vector<String>) spec.getProperties().get("NoPrimaryKeyTypes");
+      if(noPrimaryKeyTypes != null && noPrimaryKeyTypes.contains(pTypeName))
+        return false;
+
+      return true;
+    }
+
+    private boolean isIndexAllowed(String pTypeName)
+    {
+      Vector<String> noIndexTypes = (Vector<String>) spec.getProperties().get("NoIndexTypes");
+      if(noIndexTypes != null && noIndexTypes.contains(pTypeName))
+        return false;
+
+      return true;
     }
 
 }

@@ -70,10 +70,10 @@ public class AddTableColumnDDL {
         TableColumn col = null;
         if (citem.isPrimaryKey()) {
           col = cmd.createPrimaryKeyColumn(colname);
-          OracleTableColumnHack.fixPrimaryKeyColumn(spec, col, tablename, colname);
+          OracleTableColumnHack.fixPrimaryKeyColumn(spec, col, tablename, colname, spec.getConnection().getDatabase());
         } else if (citem.isUnique()) {
           col = cmd.createUniqueColumn(colname);
-          OracleTableColumnHack.fixUniqueColumn(spec, col, tablename, colname);
+          OracleTableColumnHack.fixUniqueColumn(spec, col, tablename, colname, spec.getConnection().getDatabase());
         } else col = (TableColumn)cmd.createColumn(colname);
         col.setColumnType(Specification.getType(citem.getType().getType()));
         col.setColumnSize(citem.getSize());

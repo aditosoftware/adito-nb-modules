@@ -627,9 +627,11 @@
       UPDATE = UPDATE;
       DELETE = DELETE;
     };
-    SizelessTypes = (BIGINT,BLOB,CLOB,DATE,INT,INTEGER,REAL,SMALLINT);
+    SizelessTypes = (BIGINT,BLOB,CLOB,DATE,INT,INTEGER,REAL,SMALLINT, TIMESTAMP);
     DecimalTypes = (DECIMAL,FLOAT,NUMERIC);
-    CharacterTypes = (CHAR,VARCHAR2);
+    CharacterTypes = (CHAR,VARCHAR2,NVARCHAR2);
+    NoPrimaryKeyTypes = (BLOB, CLOB);
+    NoIndexTypes = (BLOB, CLOB);
 
 //
 // Define ADITO
@@ -870,7 +872,6 @@
       java.sql.Types.NUMERIC = NUMERIC;
       java.sql.Types.REAL = REAL;
       java.sql.Types.SMALLINT = SMALLINT;
-      java.sql.Types.TIME = TIME;
       java.sql.Types.TIMESTAMP = TIMESTAMP;
       java.sql.Types.VARCHAR = VARCHAR;
       java.sql.Types.VARBINARY = "VARCHAR FOR BIT DATA";
@@ -885,9 +886,11 @@
 //      UPDATE = UPDATE;
 //      DELETE = DELETE;
 //    };
-    SizelessTypes = (BIGINT,BOOLEAN, CLOB,DATE,DOUBLE,INTEGER,"LONG VARCHAR",REAL,SMALLINT,TIME,TIMESTAMP);
+    SizelessTypes = (BIGINT,BOOLEAN, CLOB,DATE,DOUBLE,INTEGER,"LONG VARCHAR",REAL,SMALLINT,TIMESTAMP);
     DecimalTypes = (DECIMAL,NUMERIC);
     CharacterTypes = (CHAR,VARCHAR);
+    NoPrimaryKeyTypes = ("LONG VARCHAR", BLOB, CLOB);
+    NoIndexTypes = ("LONG VARCHAR", BLOB, CLOB);
 
     TypePrefixSuffixMap = {
       "CHAR FOR BIT DATA" = {
@@ -1337,6 +1340,52 @@
     };
   };
 
+  //  ********************************************************************************
+  //
+  //  Firebird 2.53LI
+  //
+  //  ********************************************************************************/
+
+    "Firebird 2.53LI" = {
+      DatabaseProductName = "Firebird 2.53LI";
+      TypeMap = {
+        java.sql.Types.BLOB = BLOB;  //JDBC 2.0 A type representing an SQL Binary Large Object
+        java.sql.Types.CHAR = CHAR;
+        java.sql.Types.DATE = DATE;
+        java.sql.Types.DECIMAL = DECIMAL;
+        java.sql.Types.DOUBLE = "DOUBLE PRECISION";
+        java.sql.Types.FLOAT = FLOAT;
+        java.sql.Types.INTEGER = INTEGER;
+        java.sql.Types.NUMERIC = NUMERIC;
+        java.sql.Types.SMALLINT = SMALLINT;
+        java.sql.Types.TIMESTAMP = TIMESTAMP;
+        java.sql.Types.VARCHAR = VARCHAR;
+      };
+      SizelessTypes = (BLOB,DATE,"DOUBLE PRECISION",INTEGER,SMALLINT,TIMESTAMP);
+      DecimalTypes = (DECIMAL,FLOAT,NUMERIC);
+      CharacterTypes = (CHAR,VARCHAR);
+      NoPrimaryKeyTypes = (BLOB);
+      NoIndexTypes = (BLOB);
+
+  //////////////////////
+  // Commands definition
+  //////////////////////
+
+      CreateTableCommand = {
+        Class = org.netbeans.lib.ddl.impl.CreateTable;
+        Format = "create table {object.name}\n(\n\t{columns}\n)";
+        Binding = {
+          COLUMN = Column;
+          UNIQUE = UniqueColumn;
+          PRIMARY_KEY = PrimaryKeyColumn;
+          CHECK = CheckColumn;
+          UNIQUE_CONSTRAINT = UniqueConstraint;
+          PRIMARY_KEY_CONSTRAINT = PrimaryKeyConstraint;
+          CHECK_CONSTRAINT = CheckConstraint;
+        };
+      };
+    };
+
 //  ********************************************************************************
 //
 //  MySQL
@@ -1367,6 +1416,8 @@
     SizelessTypes = (BIGINT,LONGBLOB,DATE,"DOUBLE PRECISION",FLOAT,INT,REAL,SMALLINT,TIME,TIMESTAMP,DATETIME,TINYINT,TEXT);
 //    DecimalTypes = (DECIMAL,NUMERIC);
     CharacterTypes = (CHAR,VARCHAR,TEXT);
+      NoPrimaryKeyTypes = (LONGTEXT, LONGBLOB,TEXT);
+      NoIndexTypes = (LONGTEXT, LONGBLOB,TEXT);
 
     DropIndexCommand = {
       Class = org.netbeans.lib.ddl.impl.DropIndex;
@@ -1413,9 +1464,11 @@
         java.sql.Types.VARCHAR = VARCHAR;
         java.sql.Types.BOOLEAN = BOOLEAN;
       };
-      SizelessTypes = (BIGINT,LONGBLOB,LONGTEXT,DATE,"DOUBLE PRECISION",FLOAT,INT,REAL,SMALLINT,TIME,DATETIME,TIMESTAMP,TINYINT,TEXT,DECIMAL,BOOLEAN);
+      SizelessTypes = (BIGINT,LONGBLOB,LONGTEXT,DATE,"DOUBLE PRECISION",FLOAT,INT,REAL,SMALLINT,TIME,DATETIME,TIMESTAMP,TINYINT,DECIMAL,BOOLEAN);
   //    DecimalTypes = (DECIMAL,NUMERIC);
-      CharacterTypes = (CHAR,VARCHAR,TEXT);
+      CharacterTypes = (CHAR,VARCHAR);
+      NoPrimaryKeyTypes = (LONGTEXT, LONGBLOB);
+      NoIndexTypes = (LONGTEXT, LONGBLOB);
 
       DropIndexCommand = {
         Class = org.netbeans.lib.ddl.impl.DropIndex;

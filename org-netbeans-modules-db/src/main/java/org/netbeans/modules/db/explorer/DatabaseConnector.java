@@ -204,10 +204,10 @@ public class DatabaseConnector {
             // we're using
             if (containsColumn(table.getPrimaryKey().getColumns(), column)) {
                 col = cmd.createPrimaryKeyColumn(column.getName());
-                OracleTableColumnHack.fixPrimaryKeyColumn(spec, col, table.getName(), column.getName());
+                OracleTableColumnHack.fixPrimaryKeyColumn(spec, col, table.getName(), column.getName(), spec.getConnection().getDatabase());
             } else if (containsIndexColumn(table.getIndexes(), column)) {
                 col = cmd.createUniqueColumn(column.getName());
-                OracleTableColumnHack.fixUniqueColumn(spec, col, table.getName(), column.getName());
+                OracleTableColumnHack.fixUniqueColumn(spec, col, table.getName(), column.getName(), spec.getConnection().getDatabase());
             } else {
                 col = cmd.createColumn (column.getName ());
             }

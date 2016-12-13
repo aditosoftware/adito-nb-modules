@@ -18,58 +18,57 @@ public class OracleTableColumnHack
   }
 
   public static TableColumn fixUniqueColumn(Specification pSpecification, TableColumn pCol, String pTableName,
-                                            String pColumnName)
+                                            String pColumnName, String pDbName)
   {
-    return _fix(pSpecification, pCol, pTableName, pColumnName, "UQ");
+    return _fix(pSpecification, pCol, pTableName, pColumnName, "UQ", pDbName);
   }
 
   public static TableColumn fixPrimaryKeyColumn(Specification pSpecification, TableColumn pCol, String pTableName,
-                                                String pColumnName)
+                                                String pColumnName, String pDbName)
   {
-    return _fix(pSpecification, pCol, pTableName, pColumnName, "PK");
+    return _fix(pSpecification, pCol, pTableName, pColumnName, "PK", pDbName);
   }
 
   public static TableColumn fixForeignKeyColumn(Specification pSpecification, TableColumn pCol, String pTableName,
-                                                String pColumnName)
+                                                String pColumnName, String pDbName)
   {
-    return _fix(pSpecification, pCol, pTableName, pColumnName, "FK");
+    return _fix(pSpecification, pCol, pTableName, pColumnName, "FK", pDbName);
   }
 
   public static TableColumn fixCheckColumn(Specification pSpecification, TableColumn pCol, String pTableName,
-                                           String pColumnName)
+                                           String pColumnName, String pDbName)
   {
-    return _fix(pSpecification, pCol, pTableName, pColumnName, "CH");
+    return _fix(pSpecification, pCol, pTableName, pColumnName, "CH", pDbName);
   }
 
   public static TableColumn fixUniqueConstraint(Specification pSpecification, TableColumn pCol, String pTableName,
-                                                String pColumnName)
+                                                String pColumnName, String pDbName)
   {
-    return _fix(pSpecification, pCol, pTableName, pColumnName, "UQ");
+    return _fix(pSpecification, pCol, pTableName, pColumnName, "UQ", pDbName);
   }
 
   public static TableColumn fixCheckConstraint(Specification pSpecification, TableColumn pCol, String pTableName,
-                                               String pColumnName)
+                                               String pColumnName, String pDbName)
   {
-    return _fix(pSpecification, pCol, pTableName, pColumnName, "CH");
+    return _fix(pSpecification, pCol, pTableName, pColumnName, "CH", pDbName);
   }
 
   public static TableColumn fixPrimaryKeyConstraint(Specification pSpecification, TableColumn pCol, String pTableName,
-                                                    String pColumnName)
+                                                    String pColumnName, String pDbName)
   {
-    return _fix(pSpecification, pCol, pTableName, pColumnName, "PK");
+    return _fix(pSpecification, pCol, pTableName, pColumnName, "PK", pDbName);
   }
 
   public static TableColumn fixForeignKeyConstraint(Specification pSpecification, TableColumn pCol, String pTableName,
-                                                    String pColumnName)
+                                                    String pColumnName, String pDbName)
   {
-    return _fix(pSpecification, pCol, pTableName, pColumnName, "FK");
+    return _fix(pSpecification, pCol, pTableName, pColumnName, "FK", pDbName);
   }
 
   private static TableColumn _fix(Specification pSpecification, TableColumn pCol, String pTableName, String pColumnName,
-                                  String pPostFix)
+                                  String pPostFix, String pDbName)
   {
-    String db = pSpecification.getConnection().getDatabase();
-    if (db != null && db.toLowerCase().contains("oracle"))
+    if (pDbName != null && pDbName.toLowerCase().contains("oracle"))
     {
       String name = getValidName(pTableName, pColumnName, pPostFix);
       pCol.setObjectName(name);
