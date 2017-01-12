@@ -286,6 +286,7 @@
     SizelessTypes = (BIGINT,BINARY,BIT,IMAGE,DATE,INT,"LONG VARCHAR","LONG BINARY",REAL,SMALLINT,TIME,TIMESTAMP,TINYINT,VARBINARY);
     DecimalTypes = (DECIMAL,FLOAT,NUMERIC);
     CharacterTypes = (CHAR,VARCHAR);
+    Case=Upper;
 
 //
 // Definice sloupcu
@@ -440,6 +441,7 @@
     SizelessTypes = (BIGINT,BINARY,BIT,IMAGE,DATE,INT,"LONG VARCHAR","LONG BINARY",REAL,SMALLINT,TIME,TIMESTAMP,TINYINT,VARBINARY);
     DecimalTypes = (DECIMAL,FLOAT,NUMERIC);
     CharacterTypes = (CHAR,VARCHAR);
+    Case=Upper;
 
 //
 // Definice sloupcu
@@ -632,6 +634,7 @@
     CharacterTypes = (CHAR,VARCHAR2,NVARCHAR2);
     NoPrimaryKeyTypes = (BLOB, CLOB);
     NoIndexTypes = (BLOB, CLOB);
+    Case=Upper;
 
 //
 // Define ADITO
@@ -891,6 +894,7 @@
     CharacterTypes = (CHAR,VARCHAR);
     NoPrimaryKeyTypes = ("LONG VARCHAR", BLOB, CLOB);
     NoIndexTypes = ("LONG VARCHAR", BLOB, CLOB);
+    Case=Upper;
 
     TypePrefixSuffixMap = {
       "CHAR FOR BIT DATA" = {
@@ -973,6 +977,7 @@
     SizelessTypes = (BIT,IMAGE,DATETIME,"DOUBLE PRECISION",INT,REAL,SMALLINT,TEXT,TINYINT);
     DecimalTypes = (DECIMAL,FLOAT,NUMERIC);
     CharacterTypes = (CHAR,VARCHAR,NVARCHAR,NCHAR);
+    Case=Upper;
 
 //////////////////////
 // Commands definition
@@ -1030,6 +1035,7 @@
     SizelessTypes = (BIGINT,DATE,DOUBLE,INTEGER,"LONG VARCHAR",REAL,SMALLINT,TIME,TIMESTAMP);
     DecimalTypes = (DECIMAL,FLOAT,NUMERIC);
     CharacterTypes = (BLOB,CLOB,CHAR,VARCHAR);
+    Case=Upper;
 
     RemoveColumnCommand = {
       Supported = false;
@@ -1070,6 +1076,7 @@
     SizelessTypes = (BIGINT,BINARY,BIT,DATE,DOUBLE,INTEGER,LONGVARBINARY,LONGVARCHAR,REAL,SMALLINT,TIME,TIMESTAMP,TINYINT);
     DecimalTypes = (DECIMAL,NUMERIC);
     CharacterTypes = (CHAR,VARCHAR);
+    Case=Upper;
 
     CreateTableCommand = {
       Class = org.netbeans.lib.ddl.impl.CreateTable;
@@ -1118,6 +1125,7 @@
     SizelessTypes = ("BIG INTEGER",BINARY,BOOLEAN,DATE,DOUBLE,INTEGER,TIME,"TIME STAMP",VARBINARY);
     DecimalTypes = (DECIMAL,FLOAT,NUMERIC);
     CharacterTypes = (CHAR);
+    Case=Upper;
 
   };
 
@@ -1187,6 +1195,7 @@
     SizelessTypes = (BLOB,DATE,"DOUBLE PRECISION",INT,REAL,SMALLINT);
     DecimalTypes = (DECIMAL,FLOAT,NUMERIC);
     CharacterTypes = (CHAR,VARCHAR);
+    Case=Upper;
   };
 
 //  ********************************************************************************
@@ -1216,6 +1225,7 @@
     SizelessTypes = (BOOLEAN,BLOB,DATE,"DOUBLE PRECISION",INT,REAL,SMALLINT);
     DecimalTypes = (DECIMAL,FLOAT,NUMERIC);
     CharacterTypes = (CHAR,VARCHAR);
+    Case=Upper;
   };
 
 //  ********************************************************************************
@@ -1274,6 +1284,7 @@
     SizelessTypes = (BINARY,IMAGE,DATE,DOUBLE,INT,LONGVARBINARY,SMALLINT,TINYINT,VARBINARY);
     DecimalTypes = (DECIMAL,FLOAT,NUMERIC);
     CharacterTypes = (CHAR,VARCHAR);
+    Case=Upper;
 
 //////////////////////
 // Commands definition
@@ -1320,6 +1331,7 @@
     SizelessTypes = (BLOB,DATE,"DOUBLE PRECISION",INTEGER,SMALLINT);
     DecimalTypes = (DECIMAL,FLOAT,NUMERIC);
     CharacterTypes = (CHAR,VARCHAR);
+    Case=Upper;
 
 //////////////////////
 // Commands definition
@@ -1366,6 +1378,7 @@
       CharacterTypes = (CHAR,VARCHAR);
       NoPrimaryKeyTypes = (BLOB);
       NoIndexTypes = (BLOB);
+      Case=Upper;
 
   //////////////////////
   // Commands definition
@@ -1418,6 +1431,7 @@
     CharacterTypes = (CHAR,VARCHAR,TEXT);
       NoPrimaryKeyTypes = (LONGTEXT, LONGBLOB,TEXT);
       NoIndexTypes = (LONGTEXT, LONGBLOB,TEXT);
+      Case=Upper;
 
     DropIndexCommand = {
       Class = org.netbeans.lib.ddl.impl.DropIndex;
@@ -1469,6 +1483,7 @@
       CharacterTypes = (CHAR,VARCHAR);
       NoPrimaryKeyTypes = (LONGTEXT, LONGBLOB);
       NoIndexTypes = (LONGTEXT, LONGBLOB);
+      Case=Upper;
 
       DropIndexCommand = {
         Class = org.netbeans.lib.ddl.impl.DropIndex;
@@ -1926,6 +1941,7 @@
     SizelessTypes = (BOOL,BYTEA,DATE,FLOAT8,FLOAT4,INT4,INT2,TEXT,TIME,TIMESTAMP);
     DecimalTypes = (DECIMAL,NUMERIC);
     CharacterTypes = (CHAR,VARCHAR);
+    Case=Lower;
 
 //////////////////////
 // Commands definition
@@ -2301,6 +2317,7 @@
     SizelessTypes = ("BLOB SUB_TYPE 0","BLOB SUB_TYPE 1",DATE,"DOUBLE PRECISION",INTEGER,SMALLINT);
     DecimalTypes = (DECIMAL,FLOAT,NUMERIC);
     CharacterTypes = (CHAR,VARCHAR);
+    Case=Upper;
   };
 
 //  ********************************************************************************
@@ -2364,6 +2381,7 @@
     SizelessTypes = (BIGINT,BINARY,BIT,DATE,DOUBLE,INTEGER,LONGVARBINARY,REAL,SMALLINT,TIME,TIMESTAMP,TINYINT,VARBINARY);
     DecimalTypes = (DECIMAL,FLOAT,NUMERIC);
     CharacterTypes = (CHAR,LONGVARCHAR,VARCHAR);
+    Case=Upper;
   };
 
 //  ********************************************************************************
@@ -2399,6 +2417,7 @@
     SizelessTypes = (BIGINT,BINARY,BIT,DATE,DOUBLE,INTEGER,LONGVARBINARY,OTHER,REAL,SMALLINT,TIME,TIMESTAMP,TINYINT,VARBINARY);
     DecimalTypes = (DECIMAL,FLOAT,NUMERIC);
     CharacterTypes = (CHAR,LONGVARCHAR,VARCHAR);
+    Case=Upper;
   };
 
 //  ********************************************************************************

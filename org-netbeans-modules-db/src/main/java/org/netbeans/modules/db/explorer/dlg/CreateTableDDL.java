@@ -88,7 +88,7 @@ public class CreateTableDDL {
       CommandBuffer cbuff = new CommandBuffer();
       List<CreateIndex> idxCommands = new ArrayList<CreateIndex>();
 
-      CreateTable cmd = spec.createCommandCreateTable(tablename);
+      CreateTable cmd = spec.createCommandCreateTable(CaseConverter.convertCase(tablename, spec));
 
       cmd.setObjectOwner(schema);
 
@@ -101,7 +101,7 @@ public class CreateTableDDL {
       Iterator it = columns.iterator();
       while (it.hasNext()) {
         ColumnItem col = (ColumnItem)it.next();
-        String name = col.getName();
+        String name = CaseConverter.convertCase(col.getName(), spec);
         if (col.isPrimaryKey()&& !hasPrimaryKeys(pkcols))
         {
           if(isPkAllowed(col.getType().getName()))
