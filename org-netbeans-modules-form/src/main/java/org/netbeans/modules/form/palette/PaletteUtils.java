@@ -348,7 +348,9 @@ public final class PaletteUtils {
      */
     private static PaletteController createPalette(ClassPathFilter filter, EModelFormType pModelFormType) {
         try {
-            return PaletteFactory.createPalette("FormDesignerPalette/" + pModelFormType.getPaletteCategoryName(), // NOI18N
+            String paletteCategoryName = pModelFormType.getPaletteCategoryName();
+            paletteCategoryName = paletteCategoryName != null ? paletteCategoryName : EModelFormType.UNDEFINED.getPaletteCategoryName();
+            return PaletteFactory.createPalette("FormDesignerPalette/" + paletteCategoryName, // NOI18N
                                                 createPaletteActions(),
                                                 filter,
                                                 null);
