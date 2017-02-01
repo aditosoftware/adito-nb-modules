@@ -11,13 +11,10 @@ import de.adito.propertly.core.spi.IPropertyPitProvider;
 import org.netbeans.modules.form.adito.*;
 import org.netbeans.modules.form.adito.layout.*;
 import org.netbeans.modules.form.adito.perstistencemanager.*;
-import org.netbeans.modules.form.layoutdesign.LayoutModel;
 import org.netbeans.modules.form.layoutsupport.LayoutSupportManager;
 import org.openide.loaders.DataObject;
-import org.openide.nodes.Node;
 
 import java.awt.*;
-import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 import java.util.List;
 
@@ -29,7 +26,6 @@ public class AditoPersistenceManager extends PersistenceManager
 
   private static final int LAYOUT_ABSOLUTE = 6;
   private static final int LAYOUT_UNKNOWN = -1;
-  private static final int LAYOUT_NATURAL = -3;
 
 
   @Override
@@ -100,8 +96,6 @@ public class AditoPersistenceManager extends PersistenceManager
         pRADComponent.clearProperties();
       }
     });
-//    FormEditor.updateProjectForNaturalLayout(formModel);
-//    formModel.setFreeDesignDefaultLayout(true);
   }
 
 
@@ -111,17 +105,13 @@ public class AditoPersistenceManager extends PersistenceManager
 
     // if the loaded component is a visual component in a visual container,
     // then load NB 3.1 layout constraints for it
-    if (pComponent instanceof RADVisualComponent && pParentComponent instanceof RADVisualContainer /*&&
-        pModelComp.getFileObject("x") != null && pModelComp.getFileObject("y") != null &&
-        pModelComp.getFileObject("width") != null && pModelComp.getFileObject("height") != null*/)
+    if (pComponent instanceof RADVisualComponent && pParentComponent instanceof RADVisualContainer)
       _loadConstraints(pModelComp, pComponent, (RADVisualContainer) pParentComponent);
 
     ComponentContainer container = // is this component a container?
         pComponent instanceof ComponentContainer ? (ComponentContainer) pComponent : null;
     if (container == null)
     { // this component is not a container
-//      if (pParentComponent == null) // this is a root component - load resource properties
-//        ResourceSupport.loadInjectedResources(pComponent);
       return;
     }
 
@@ -160,29 +150,7 @@ public class AditoPersistenceManager extends PersistenceManager
       boolean layoutInitialized = false;
       LayoutSupportManager layoutSupport = visualContainer.getLayoutSupport();
 
-      if (convIndex == LAYOUT_NATURAL)
-      {
-        LayoutModel layoutModel = pInfo.getFormModel().getLayoutModel();
-        Map<String, String> nameToIdMap = new HashMap<>();
-        for (RADComponent comp : childComponents)
-          nameToIdMap.put(comp.getName(), comp.getId());
-        try
-        {
-          layoutModel.loadContainerLayout(visualContainer.getId(), pModelComp /*layoutNode.getChildNodes()*/, nameToIdMap); // TODO
-          visualContainer.setOldLayoutSupport(false);
-          layoutSupport = null;
-          layoutInitialized = true;
-          //newLayout = Boolean.TRUE;  // TODO?
-        }
-        catch (Exception ex)
-        {
-          // error occurred - treat this container as with unknown layout
-          layoutModel.changeContainerToComponent(visualContainer.getId());
-          layoutEx = ex;
-        }
-        visualContainer.initSubComponents(childComponents);
-      }
-      else if (convIndex >= 0)
+      if (convIndex >= 0)
       {
         // initialize layout support from restored code
         try
@@ -198,70 +166,10 @@ public class AditoPersistenceManager extends PersistenceManager
         {
           layoutEx = ex;
         }
-        // subcomponents are set after reading from code [for some reason...]
-//        visualContainer.initSubComponents(childComponents);
-//        if (layoutInitialized)
-//        { // successfully initialized - build the primary container
-//          try
-//          { // some weird problems might occur - see issue 67890
-//            layoutSupport.updatePrimaryContainer();
-//          }
-//          // can't do anything reasonable on failure, just log stack trace
-//          catch (Exception ex)
-//          {
-//            ErrorManager.getDefault().notify(ErrorManager.INFORMATIONAL, ex);
-//          }
-//          catch (Error ex)
-//          {
-//            ErrorManager.getDefault().notify(ErrorManager.INFORMATIONAL, ex);
-//          }
-//        }
       }
-//      else
-//      { // Issue 63394, 68753: Bean form that is container
-//        // Issue 70369: Container saved with unknown layout
-//        // Swing menus go here as well
-//        // default init - not reading from code - need the subcomponents set
-//        visualContainer.initSubComponents(childComponents);
-//        try
-//        {
-//          // (default init also builds the primary container)
-//          layoutInitialized = layoutSupport.prepareLayoutDelegate(false, true);
-//          if (!layoutInitialized)
-//          { // not known to the old support (e.g. has GroupLayout)
-//            // (but we are sure the container instance is empty)
-//            java.awt.Container cont = layoutSupport.getPrimaryContainerDelegate();
-//            if (SwingLayoutBuilder.isRelevantContainer(cont))
-//            {
-//              // acknowledged by SwingLayoutBuilder - this is new layout
-//              visualContainer.setOldLayoutSupport(false);
-//              pInfo.getFormModel().getLayoutModel().addRootComponent(
-//                  new LayoutComponent(visualContainer.getId(), true));
-//              layoutSupport = null;
-//              //newLayout = Boolean.TRUE; // TODO?
-//            }
-//            else
-//            {
-//              layoutSupport.setUnknownLayoutDelegate(false);
-//              System.err.println("[WARNING] Unknown layout " // TODO ?
-//                                     + " (" + pComponent.getBeanClass().getName() + ")"); // NOI18N
-//            }
-//            layoutInitialized = true;
-//          }
-//        }
-//        catch (Exception ex)
-//        {
-//          layoutEx = ex;
-//        }
-//      }
 
       if (!layoutInitialized)
         layoutSupport.setUnknownLayoutDelegate();
-
-      /*if (layoutSupport != null && newLayout == null)   // TODO ?
-      {
-        newLayout = Boolean.FALSE;
-      */
 
       if (layoutEx != null)
         layoutEx.printStackTrace(); // TODO: error-handling
@@ -271,74 +179,8 @@ public class AditoPersistenceManager extends PersistenceManager
       container.initSubComponents(childComponents);
     }
 
-    try
-    {
-      for (RADComponent childComponent : container.getSubBeans())
-        _copyValuesFromModelToComponent(childComponent);
-    }
-    catch (IllegalAccessException | InvocationTargetException e)
-    {
-      e.printStackTrace();  // TODO: error-handling
-    }
-
-
-//    // hack for properties that can't be set until the component is added
-//    // to the parent container
-//    for (RADComponent childcomp : childComponents)
-//    {
-//      List postProps;
-//      if (parentDependentProperties != null
-//          && (postProps = parentDependentProperties.get(childcomp)) != null)
-//      {
-//        for (Iterator it = postProps.iterator(); it.hasNext();)
-//        {
-//          RADProperty prop = (RADProperty) it.next();
-//          Object propValue = it.next();
-//          try
-//          {
-//            prop.setValue(propValue);
-//          }
-//          catch (Exception ex)
-//          { // ignore
-//            String msg = createLoadingErrorMessage(
-//                FormUtils.getBundleString("MSG_ERR_CannotSetLoadedValue"), // NOI18N
-//                node);
-//            annotateException(ex, msg);
-//            nonfatalErrors.add(ex);
-//          }
-//        }
-//      }
-//      // here it is also safe to load resource properties into sub-component
-//      ResourceSupport.loadInjectedResources(childcomp);
-//    }
-//
-//    // hack for properties that can't be set until all subcomponents
-//    // are added to the container
-//    List postProps;
-//    if (childrenDependentProperties != null
-//        && (postProps = childrenDependentProperties.get(component)) != null)
-//    {
-//      for (Iterator it = postProps.iterator(); it.hasNext();)
-//      {
-//        RADProperty prop = (RADProperty) it.next();
-//        Object propValue = it.next();
-//        try
-//        {
-//          prop.setValue(propValue);
-//        }
-//        catch (Exception ex)
-//        { // ignore
-//          String msg = createLoadingErrorMessage(
-//              FormUtils.getBundleString("MSG_ERR_CannotSetLoadedValue"), // NOI18N
-//              node);
-//          annotateException(ex, msg);
-//          nonfatalErrors.add(ex);
-//        }
-//      }
-//    }
-
-//    if (pParentComponent == null) // this is a root component
-//      ResourceSupport.loadInjectedResources(pComponent);
+    for (RADComponent childComponent : container.getSubBeans())
+      _copyValuesFromModelToComponent(childComponent);
   }
 
   private RADComponent _restoreComponent(APersistenceManagerInfo pInfo, IPropertyPitProvider<?, ?, ?> pChildModel,
@@ -437,10 +279,6 @@ public class AditoPersistenceManager extends PersistenceManager
       {
         IFormComponentInfo formModelPropProvider = _getPropertyInfo().createComponentInfo(pModelComp);
 
-        //Class<?> layoutMgrCls = formModelPropProvider.getParentLayoutClass();
-        //LayoutSupportRegistry registry = LayoutSupportRegistry.getRegistry(pComponent.getFormModel());
-        //registry.createSupportForLayout(layoutMgrCls);
-
         Object realConstraints = formModelPropProvider.createConstraints();
         if (realConstraints instanceof IAditoLayoutConstraints)
         {
@@ -469,24 +307,8 @@ public class AditoPersistenceManager extends PersistenceManager
   }
 
   private static void _copyValuesFromModelToComponent(RADComponent pComponent)
-      throws InvocationTargetException, IllegalAccessException
   {
-    IPropertyPitProvider<?, ?, ?> model = pComponent.getARADComponentHandler().getModel();
-    if (model == null)
-      throw new IllegalStateException(pComponent.toString());
-
-    IFormComponentInfoProvider compInfoProvider = NbAditoInterface.lookup(IFormComponentInfoProvider.class);
-    IFormComponentInfo componentInfo = compInfoProvider.createComponentInfo(model);
-    for (Map.Entry<String, Object> entry : componentInfo.getInitialValues().entrySet())
-    {
-      Node.Property radProperty = pComponent.getPropertyByName(entry.getKey());
-
-      if (radProperty != null)
-      {
-        radProperty.setValue(entry.getValue());
-      }
-
-    }
+    pComponent.getARADComponentHandler().applyValuesFromAditoModel();
   }
 
 }
