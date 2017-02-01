@@ -1,3 +1,4 @@
+Manifest-Version: 1.0
 OpenIDE-Module-Java-Dependencies: Java > 1.6
 OpenIDE-Module-Specification-Version: 1.39.1.4
 AutoUpdate-Show-In-Client: false
@@ -12,4 +13,3 @@ OpenIDE-Module-Needs: javax.script.ScriptEngine.freemarker,
 OpenIDE-Module-Layer: org/netbeans/modules/form/resources/layer.xml
 OpenIDE-Module-Provides: de.adito.aditoweb.nbm.nbide.nbaditointerface.form.dataobject.IAditoFormDataObjectDataProvider
 OpenIDE-Module-Requires: org.openide.modules.InstalledFileLocator, org.openide.modules.ModuleFormat1
-
