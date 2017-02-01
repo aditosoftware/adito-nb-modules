@@ -45,9 +45,7 @@
 package org.netbeans.lib.ddl.impl;
 
 import java.beans.Beans;
-import java.sql.Connection;
-import java.sql.DatabaseMetaData;
-import java.sql.SQLException;
+import java.sql.*;
 import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.Map;
@@ -538,6 +536,8 @@ public class Specification implements DatabaseSpecification {
         case java.sql.Types.SQLXML: typestr = "SQLXML"; break; // NOI18N
         case java.sql.Types.TIME: typestr = "TIME"; break; // NOI18N
         case java.sql.Types.TIMESTAMP: typestr = "TIMESTAMP"; break; // NOI18N
+        case Types.TIME_WITH_TIMEZONE: typestr = "TIME_WITH_TIMEZONE"; break; // NOI18N
+        case Types.TIMESTAMP_WITH_TIMEZONE: typestr = "TIMESTAMP_WITH_TIMEZONE"; break; // NOI18N
         case java.sql.Types.TINYINT: typestr = "TINYINT"; break; // NOI18N
         case java.sql.Types.VARBINARY: typestr = "VARBINARY"; break; // NOI18N
         case java.sql.Types.VARCHAR: typestr = "VARCHAR"; break; // NOI18N
@@ -587,9 +587,11 @@ public class Specification implements DatabaseSpecification {
         if (type.equals("java.sql.Types.SQLXML")) return java.sql.Types.SQLXML; // NOI18N
         if (type.equals("java.sql.Types.TIME")) return java.sql.Types.TIME; // NOI18N
         if (type.equals("java.sql.Types.TIMESTAMP")) return java.sql.Types.TIMESTAMP; // NOI18N
+        if (type.equals("java.sql.Types.TIME_WITH_TIMEZONE")) return Types.TIME_WITH_TIMEZONE; // NOI18N
         if (type.equals("java.sql.Types.TINYINT")) return java.sql.Types.TINYINT; // NOI18N
         if (type.equals("java.sql.Types.VARBINARY")) return java.sql.Types.VARBINARY; // NOI18N
         if (type.equals("java.sql.Types.VARCHAR")) return java.sql.Types.VARCHAR; // NOI18N
+        if (type.equals("java.sql.Types.TIMESTAMP_WITH_TIMEZONE")) return java.sql.Types.TIMESTAMP_WITH_TIMEZONE; // NOI18N
         Logger.getLogger(Specification.class.getName()).log(Level.INFO, "Unknown type name {0}, so return -1", type);
         assert false : "Unknown type name " + type;
         return -1;

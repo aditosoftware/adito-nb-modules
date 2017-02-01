@@ -185,22 +185,27 @@ public class CreateTableDDL {
       return pName.replace("\"", "");
     }
 
-    private boolean isPkAllowed(String pTypeName)
+    public boolean isUniqueAllowed(String pTypeName)
     {
-      Vector<String> noPrimaryKeyTypes = (Vector<String>) spec.getProperties().get("NoPrimaryKeyTypes");
-      if(noPrimaryKeyTypes != null && noPrimaryKeyTypes.contains(pTypeName))
+      return _isTypeAllowed(pTypeName, "NoUniqueTypes");
+    }
+
+    public boolean isPkAllowed(String pTypeName)
+    {
+      return _isTypeAllowed(pTypeName, "NoPrimaryKeyTypes");
+    }
+
+    public boolean isIndexAllowed(String pTypeName)
+    {
+      return _isTypeAllowed(pTypeName, "NoIndexTypes");
+    }
+
+    private boolean _isTypeAllowed(String pTypeName, String pPropertiesGroup)
+    {
+      Vector<String> noWhateverTypes = (Vector<String>) spec.getProperties().get(pPropertiesGroup);
+      if(noWhateverTypes != null && noWhateverTypes.contains(pTypeName))
         return false;
 
       return true;
     }
-
-    private boolean isIndexAllowed(String pTypeName)
-    {
-      Vector<String> noIndexTypes = (Vector<String>) spec.getProperties().get("NoIndexTypes");
-      if(noIndexTypes != null && noIndexTypes.contains(pTypeName))
-        return false;
-
-      return true;
-    }
-
 }

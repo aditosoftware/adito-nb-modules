@@ -601,7 +601,7 @@
     DatabaseProductVersion = 8;
     TriggerEventListDelimiter = " OR ";
     TypeMap = {
-      java.sql.Types.BIGINT = BIGINT;
+      java.sql.Types.BIGINT = "NUMBER(19)";
       java.sql.Types.BLOB = BLOB;  //JDBC 2.0 A type representing an SQL Binary Large Object
 	    java.sql.Types.CLOB = CLOB;
       java.sql.Types.CHAR = CHAR;
@@ -610,7 +610,6 @@
       java.sql.Types.DATE = DATE;
       java.sql.Types.FLOAT = FLOAT;
       java.sql.Types.INTEGER = INT;
-      java.sql.Types.BIGINT = INTEGER;
       java.sql.Types.NUMERIC = NUMERIC;
       java.sql.Types.REAL = REAL;
       java.sql.Types.SMALLINT = SMALLINT;
@@ -618,6 +617,19 @@
       java.sql.Types.TIMESTAMP = TIMESTAMP;
       java.sql.Types.VARCHAR = VARCHAR2;
       java.sql.Types.NVARCHAR = NVARCHAR2;
+      java.sql.Types.BINARY = RAW;
+      java.sql.Types.DOUBLE = NUMBER;
+      java.sql.Types.TINYINT = NUMBER;
+      java.sql.Types.LONGVARCHAR = CLOB;
+      java.sql.Types.LONGNVARCHAR = CLOB;
+      java.sql.Types.TIME = DATE;
+      java.sql.Types.TIME_WITH_TIMEZONE = DATE;
+      java.sql.Types.BIT = "NUMBER(3)";
+      java.sql.Types.BOOLEAN = NUMBER;
+      java.sql.Types.SQLXML = CLOB;
+      java.sql.Types.TIMESTAMP_WITH_TIMEZONE = TIMESTAMP;
+      java.sql.Types.VARBINARY = BLOB;
+      java.sql.Types.LONGVARBINARY = BLOB;
     };
     ProcedureArgumentMap = {
       IN = IN;
@@ -629,12 +641,14 @@
       UPDATE = UPDATE;
       DELETE = DELETE;
     };
-    SizelessTypes = (BIGINT,BLOB,CLOB,DATE,INT,INTEGER,REAL,SMALLINT, TIMESTAMP);
+    SizelessTypes = (BIGINT,BLOB,CLOB,DATE,INT,INTEGER,REAL,SMALLINT,TIMESTAMP,NCLOB,"NUMBER(19)","NUMBER(3)");
     DecimalTypes = (DECIMAL,FLOAT,NUMERIC);
     CharacterTypes = (CHAR,VARCHAR2,NVARCHAR2);
-    NoPrimaryKeyTypes = (BLOB, CLOB);
-    NoIndexTypes = (BLOB, CLOB);
+    NoPrimaryKeyTypes = (BLOB,CLOB,NCLOB);
+    NoIndexTypes = (BLOB,CLOB,NCLOB);
+    NoUniqueTypes = (BLOB,CLOB,NCLOB);
     Case=Upper;
+    MaxObjectNameLength=30;
 
 //
 // Define ADITO
@@ -867,17 +881,24 @@
       java.sql.Types.DATE = DATE;
       java.sql.Types.DECIMAL = DECIMAL;
       java.sql.Types.DOUBLE = DOUBLE;
-//      java.sql.Types.DOUBLE = "DOUBLE PRECISION";
-//      java.sql.Types.DOUBLE = FLOAT;
       java.sql.Types.INTEGER = INTEGER;
       java.sql.Types.LONGVARCHAR = "LONG VARCHAR";
-//      java.sql.Types.VARBINARY = "LONG VARCHAR FOR BIT DATA";
       java.sql.Types.NUMERIC = NUMERIC;
       java.sql.Types.REAL = REAL;
       java.sql.Types.SMALLINT = SMALLINT;
       java.sql.Types.TIMESTAMP = TIMESTAMP;
       java.sql.Types.VARCHAR = VARCHAR;
       java.sql.Types.VARBINARY = "VARCHAR FOR BIT DATA";
+      java.sql.Types.NCHAR = CHAR;
+      java.sql.Types.NVARCHAR = VARCHAR;
+      java.sql.Types.TINYINT = SMALLINT;
+      java.sql.Types.NCLOB = CLOB;
+      java.sql.Types.LONGNVARCHAR = "LONG VARCHAR";
+      java.sql.Types.TIME_WITH_TIMEZONE = TIME;
+      java.sql.Types.BIT = SMALLINT;
+      java.sql.Types.SQLXML = CLOB;
+      java.sql.Types.TIMESTAMP_WITH_TIMEZONE = TIMESTAMP;
+      java.sql.Types.LONGVARBINARY = "VARCHAR FOR BIT DATA";
     };
 //    ProcedureArgumentMap = {
 //      IN = IN;
@@ -889,7 +910,7 @@
 //      UPDATE = UPDATE;
 //      DELETE = DELETE;
 //    };
-    SizelessTypes = (BIGINT,BOOLEAN, CLOB,DATE,DOUBLE,INTEGER,"LONG VARCHAR",REAL,SMALLINT,TIMESTAMP);
+    SizelessTypes = (BIGINT,BOOLEAN, CLOB,DATE,DOUBLE,INTEGER,"LONG VARCHAR",REAL,SMALLINT,TIMESTAMP,TIME,TIME_WITH_TIMEZONE);
     DecimalTypes = (DECIMAL,NUMERIC);
     CharacterTypes = (CHAR,VARCHAR);
     NoPrimaryKeyTypes = ("LONG VARCHAR", BLOB, CLOB);
@@ -1372,12 +1393,28 @@
         java.sql.Types.SMALLINT = SMALLINT;
         java.sql.Types.TIMESTAMP = TIMESTAMP;
         java.sql.Types.VARCHAR = VARCHAR;
+        java.sql.Types.BINARY = BLOB;
+        java.sql.Types.NVARCHAR = VARCHAR;
+        java.sql.Types.TINYINT = SMALLINT;
+        java.sql.Types.CLOB = "BLOB SUB_TYPE TEXT";
+        java.sql.Types.NCLOB = "BLOB SUB_TYPE TEXT";
+        java.sql.Types.LONGVARCHAR = "BLOB SUB_TYPE TEXT";
+        java.sql.Types.LONGNVARCHAR = "BLOB SUB_TYPE TEXT";
+        java.sql.Types.TIME = TIME;
+        java.sql.Types.TIME_WITH_TIMEZONE = TIME;
+        java.sql.Types.BIT = "CHAR(1)";
+        java.sql.Types.BOOLEAN = "CHAR(1)";
+        java.sql.Types.SQLXML = "BLOB SUB_TYPE TEXT";
+        java.sql.Types.REAL = "DOUBLE PRECISION";
+        java.sql.Types.TIMESTAMP_WITH_TIMEZONE = TIMESTAMP;
+        java.sql.Types.VARBINARY = BLOB;
+        java.sql.Types.LONGVARBINARY = BLOB;
       };
-      SizelessTypes = (BLOB,DATE,"DOUBLE PRECISION",INTEGER,SMALLINT,TIMESTAMP);
+      SizelessTypes = (BLOB,DATE,"DOUBLE PRECISION",INTEGER,SMALLINT,TIMESTAMP,"BLOB SUB_TYPE TEXT",BIGINT,TIME,"CHAR(1)");
       DecimalTypes = (DECIMAL,FLOAT,NUMERIC);
       CharacterTypes = (CHAR,VARCHAR);
-      NoPrimaryKeyTypes = (BLOB);
-      NoIndexTypes = (BLOB);
+      NoPrimaryKeyTypes = (BLOB,"BLOB SUB_TYPE TEXT");
+      NoIndexTypes = (BLOB,"BLOB SUB_TYPE TEXT");
       Case=Upper;
 
   //////////////////////
@@ -1411,6 +1448,7 @@
       java.sql.Types.BIGINT = BIGINT;
       java.sql.Types.OTHER = BIT; // not true for MySQL prior to 5.0
       java.sql.Types.BLOB = LONGBLOB;  //JDBC 2.0 A type representing an SQL Binary Large Object
+      java.sql.Types.LONGVARBINARY = LONGBLOB;
       java.sql.Types.CHAR = CHAR;
       java.sql.Types.LONGVARCHAR = TEXT;
       java.sql.Types.DATE = DATE;
@@ -1425,6 +1463,14 @@
       java.sql.Types.TIMESTAMP = DATETIME;
       java.sql.Types.TINYINT = TINYINT;
       java.sql.Types.VARCHAR = VARCHAR;
+      java.sql.Types.NCLOB = TEXT;
+      java.sql.Types.TIME_WITH_TIMEZONE = TIME;
+      java.sql.Types.TIMESTAMP_WITH_TIMEZONE = DATETIME;
+      java.sql.Types.SQLXML = TEXT;
+      java.sql.Types.LONGVARBINARY = LONGBLOB;
+      java.sql.Types.CLOB = TEXT;
+      java.sql.Types.LONGNVARCHAR = TEXT;
+      java.sql.Types.BOOLEAN = TINYINT;
     };
     SizelessTypes = (BIGINT,LONGBLOB,DATE,"DOUBLE PRECISION",FLOAT,INT,REAL,SMALLINT,TIME,TIMESTAMP,DATETIME,TINYINT,TEXT);
 //    DecimalTypes = (DECIMAL,NUMERIC);
@@ -1464,6 +1510,7 @@
         java.sql.Types.BLOB = LONGBLOB;  //JDBC 2.0 A type representing an SQL Binary Large Object
         java.sql.Types.CHAR = CHAR;
         java.sql.Types.LONGVARCHAR = LONGTEXT;
+        java.sql.Types.CLOB = LONGTEXT;
         java.sql.Types.DATE = DATE;
         java.sql.Types.DECIMAL = DECIMAL;
         java.sql.Types.DOUBLE = "DOUBLE PRECISION";
@@ -1477,6 +1524,12 @@
         java.sql.Types.TINYINT = TINYINT;
         java.sql.Types.VARCHAR = VARCHAR;
         java.sql.Types.BOOLEAN = BOOLEAN;
+        java.sql.Types.NCLOB = LONGTEXT;
+        java.sql.Types.LONGNVARCHAR = LONGTEXT;
+        java.sql.Types.TIME_WITH_TIMEZONE = TIME;
+        java.sql.Types.TIMESTAMP_WITH_TIMEZONE = DATETIME;
+        java.sql.Types.SQLXML = LONGTEXT;
+        java.sql.Types.LONGVARBINARY = LONGBLOB;
       };
       SizelessTypes = (BIGINT,LONGBLOB,LONGTEXT,DATE,"DOUBLE PRECISION",FLOAT,INT,REAL,SMALLINT,TIME,DATETIME,TIMESTAMP,TINYINT,DECIMAL,BOOLEAN);
   //    DecimalTypes = (DECIMAL,NUMERIC);
@@ -1937,8 +1990,22 @@
       java.sql.Types.TIME = TIME;
       java.sql.Types.TIMESTAMP = TIMESTAMP;
       java.sql.Types.VARCHAR = VARCHAR;
+      java.sql.Types.BINARY = BYTEA;
+      java.sql.Types.NVARCHAR = VARCHAR;
+      java.sql.Types.TINYINT = SMALLINT;
+      java.sql.Types.NCLOB = TEXT;
+      java.sql.Types.LONGVARCHAR = TEXT;
+      java.sql.Types.LONGNVARCHAR = TEXT;
+      java.sql.Types.BIGINT = BIGINT;
+      java.sql.Types.TIME_WITH_TIMEZONE = TIME;
+      java.sql.Types.TIMESTAMP_WITH_TIMEZONE = TIMESTAMP;
+      java.sql.Types.BOOLEAN = BOOL;
+      java.sql.Types.SQLXML = TEXT;
+      java.sql.Types.REAL = REAL;
+      java.sql.Types.VARBINARY = BYTEA;
+      java.sql.Types.LONGVARBINARY = BYTEA;
     };
-    SizelessTypes = (BOOL,BYTEA,DATE,FLOAT8,FLOAT4,INT4,INT2,TEXT,TIME,TIMESTAMP);
+    SizelessTypes = (BOOL,BYTEA,DATE,FLOAT8,FLOAT4,INT4,INT2,TEXT,TIME,TIMESTAMP,SMALLINT,BIGINT,TIME,REAL);
     DecimalTypes = (DECIMAL,NUMERIC);
     CharacterTypes = (CHAR,VARCHAR);
     Case=Lower;
