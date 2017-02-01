@@ -196,7 +196,7 @@ public class ARADComponentHandler
         }
     }
     if (childContainer != null)
-      childContainer.moveDataModel(model);
+      childContainer.moveDataModel(model, pProperties);
   }
 
   /**

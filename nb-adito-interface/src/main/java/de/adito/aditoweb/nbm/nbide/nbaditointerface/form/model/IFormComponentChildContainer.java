@@ -3,6 +3,7 @@ package de.adito.aditoweb.nbm.nbide.nbaditointerface.form.model;
 import de.adito.propertly.core.spi.*;
 import org.openide.filesystems.*;
 import org.openide.loaders.DataObject;
+import org.openide.nodes.Node;
 
 import java.io.IOException;
 import java.util.*;
@@ -28,11 +29,12 @@ public interface IFormComponentChildContainer
   IPropertyPitProvider<?, ?, ?> copy(IPropertyPitProvider<?, ?, ?> pSource) throws IOException;
 
   /**
-   * Verschiebt ein Datenmodell.
    *
    * @param pSource das Datenmodell.
+   * @param pProperties Eigenschaften die bei
+   *                    diesem Vorgang angepasst werden, oder null
    */
-  void moveDataModel(IPropertyPitProvider<?,?,?> pSource);
+  void moveDataModel(IPropertyPitProvider<?,?,?> pSource, Node.Property[] pProperties);
 
   /**
    * @param pSource das Datenmodell.
