@@ -188,9 +188,10 @@ public class ARADComponentHandler
       for (Node.Property property : pProperties)
         try
         {
-          formDataBridge.alignAditoToFormProp(property);
+          if (property.getValue() != null) // #14435
+            formDataBridge.alignAditoToFormProp(property);
         }
-        catch (InvocationTargetException e)
+        catch (InvocationTargetException | IllegalAccessException e)
         {
           // skip
         }
