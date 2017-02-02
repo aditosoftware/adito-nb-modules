@@ -305,6 +305,9 @@ public class FormDataBridge
         new ClassSource(createdBean.getCanonicalName()), radComponent, null);
     if (component == null)
       throw new RuntimeException("component could not be pCreated! (Internal Error)");
+    if (component.equals(radComponent))
+      return;
+
     component.setStoredName(pCreated.getPit().getOwnProperty().getName());
     component.getARADComponentHandler().setModel(pCreated);
 
