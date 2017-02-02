@@ -30,17 +30,20 @@
  */
 package org.netbeans.modules.db.explorer.dlg;
 
-import java.util.Iterator;
-import java.util.Set;
-import org.netbeans.lib.ddl.impl.CreateIndex;
-import org.netbeans.lib.ddl.impl.Specification;
+import java.util.*;
+
+import org.netbeans.lib.ddl.impl.*;
 
 /**
  * DDL for creating an index, refactored out of the AddIndex dialog
  *
  * @author <a href="mailto:david@vancouvering.com">David Van Couvering</a>
  */
-public class AddIndexDDL {
+public class AddIndexDDL
+{
+  public static final String UNIQUE_STRING = "UNIQUE";
+  public static final String INDEX_STRING = "_IDX";
+
     private Specification       spec;
     private String              schema;
     private String              tablename;
@@ -78,5 +81,44 @@ public class AddIndexDDL {
         icmd.execute();
 
         return icmd.wasException();
-    }    
+    }
+
+  public CreateIndex getDDL(String pColumnName, boolean pIsUnique) throws Exception
+  {
+    CreateIndex index = spec.createCommandCreateIndex(tablename);
+    index.setIndexName(_getIndexName(tablename, pColumnName));
+    if(pIsUnique)
+      index.setIndexType(UNIQUE_STRING);
+    else
+      index.setIndexType("");
+    index.specifyColumn(pColumnName);
+    index.setObjectOwner(schema);
+
+    return index;
+  }
+
+  private String _getIndexName(String pTablename, String pColumnName)
+  {
+    int maxNameLength = Integer.MAX_VALUE;
+    try
+    {
+      maxNameLength = (Integer) spec.getProperties().get("MaxObjectNameLength");
+    }
+    catch (Exception e)
+    {
+      // nix tun. Wenn keine Maxlänge gesetzt, wird auch keine nötig sein.
+    }
+
+    String table = pTablename;
+    String column = pColumnName;
+
+    String indexName = table + "_" + column + INDEX_STRING;
+    while(indexName.length() > maxNameLength)
+    {
+      table = table.substring(0, table.length()-1);
+      column = column.substring(0, column.length()-1);
+      indexName = table + "_" + column + INDEX_STRING;
+    }
+    return indexName;
+  }
 }

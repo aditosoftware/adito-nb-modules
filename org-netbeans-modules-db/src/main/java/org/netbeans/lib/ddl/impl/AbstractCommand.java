@@ -138,6 +138,7 @@ public class AbstractCommand implements Serializable, DDLCommand {
 
     /** Sets name to be used in command
     * @param objectowner New owner.
+    * Wichtige Info: Unter ObjectOwner kann auch das Schema gemeint sein!
     */
     public void setObjectOwner(String objectowner) {
         owner = objectowner;

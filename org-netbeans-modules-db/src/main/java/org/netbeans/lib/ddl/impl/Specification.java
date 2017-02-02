@@ -45,6 +45,7 @@
 package org.netbeans.lib.ddl.impl;
 
 import java.beans.Beans;
+import java.lang.reflect.Field;
 import java.sql.*;
 import java.text.MessageFormat;
 import java.util.HashMap;
@@ -595,5 +596,38 @@ public class Specification implements DatabaseSpecification {
         Logger.getLogger(Specification.class.getName()).log(Level.INFO, "Unknown type name {0}, so return -1", type);
         assert false : "Unknown type name " + type;
         return -1;
+    }
+
+    public static Map<String, Integer> getSqlTypeList()
+    {
+        Class<?> c = java.sql.Types.class;
+        Map<String, Integer> typeList = new HashMap<>();
+        Field[] types = Types.class.getFields();
+        for (Field type : types)
+        {
+            try
+            {
+                Field field = c.getField(type.getName());
+                typeList.put(type.getName(), field.getInt(c));
+            }
+            catch (IllegalAccessException | NoSuchFieldException e)
+            {
+                // kann ned passieren
+            }
+
+            // java.sql.Types die nicht benutzt werden (können):
+            typeList.remove("NULL");
+            typeList.remove("REF_CURSOR");
+            typeList.remove("ARRAY");
+            typeList.remove("JAVA_OBJECT");
+            typeList.remove("DISTINCT");
+            typeList.remove("OTHER");
+            typeList.remove("REF");
+            typeList.remove("REF_CURSOR");
+            typeList.remove("DATALINK");
+            typeList.remove("ROWID");
+            typeList.remove("STRUCT");
+        }
+        return typeList;
     }
 }

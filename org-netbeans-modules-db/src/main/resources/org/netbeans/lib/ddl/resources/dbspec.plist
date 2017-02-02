@@ -144,7 +144,7 @@
 
     ColumnName = {
       Class = org.netbeans.lib.ddl.impl.TableColumn;
-      Format = "{column.name}[ {direction}]";
+      Format = "{column.name}";
     };
 
 //    ProcedureArgument = {
