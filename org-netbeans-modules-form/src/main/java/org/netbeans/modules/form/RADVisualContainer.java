@@ -136,7 +136,7 @@ public class RADVisualContainer extends RADVisualComponent implements ComponentC
         return false;
     }
 
-    void setOldLayoutSupport(boolean old) {
+    public void setOldLayoutSupport(boolean old) { // A
         if (old) {
             if (layoutSupport == null) {
                 layoutSupport = new LayoutSupportManager(this/*, getFormModel().getCodeStructure()*/); // A

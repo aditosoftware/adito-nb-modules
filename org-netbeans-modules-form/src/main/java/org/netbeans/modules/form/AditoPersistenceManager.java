@@ -183,7 +183,7 @@ public class AditoPersistenceManager extends PersistenceManager
       _copyValuesFromModelToComponent(childComponent);
   }
 
-  private RADComponent _restoreComponent(APersistenceManagerInfo pInfo, IPropertyPitProvider<?, ?, ?> pChildModel,
+  public RADComponent _restoreComponent(APersistenceManagerInfo pInfo, IPropertyPitProvider<?, ?, ?> pChildModel,
                                          RADComponent pParentComponent) throws PersistenceException
   {
     AComponentInfo componentInfo = AComponentInfo.create(pChildModel, pInfo);

@@ -9,8 +9,10 @@ import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.model.IAditoModelDataPr
 import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.sync.*;
 import de.adito.propertly.core.common.path.PropertyPath;
 import de.adito.propertly.core.spi.*;
-import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.*;
 import org.netbeans.modules.form.*;
+import org.netbeans.modules.form.adito.perstistencemanager.APersistenceManagerInfo;
+import org.netbeans.modules.form.layoutsupport.*;
 import org.netbeans.modules.form.project.ClassSource;
 import org.openide.nodes.Node;
 import org.openide.util.NotImplementedException;
@@ -20,6 +22,7 @@ import java.io.IOException;
 import java.lang.ref.*;
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
+import java.util.function.BiFunction;
 import java.util.logging.*;
 
 /**
@@ -225,7 +228,55 @@ public class FormDataBridge
     IAditoModelDataProvider modelDataProvider = NbAditoInterface.lookup(IAditoModelDataProvider.class);
     List<IPropertyPitProvider<?, ?, ?>> childModels = modelDataProvider.getChildModels(
         radComponent.getARADComponentHandler().getModel());
-    childModels.forEach(this::_addChild);
+
+    _loadSubComponents(childModels);
+  }
+
+  private void _loadSubComponents(List<IPropertyPitProvider<?, ?, ?>> pChildren)
+  {
+    // Subkomponenten erstellen
+    List<RADComponent> subComps = new ArrayList<>();
+    for (IPropertyPitProvider<?, ?, ?> childModel : pChildren)
+    {
+      AditoPersistenceManager persManagerHacked = new AditoPersistenceManager();
+      RADComponent subComp = _addChild(childModel, (pModel, pParentComp) -> {
+        try
+        {
+          return persManagerHacked._restoreComponent(new APersistenceManagerInfo(null, radComponent.getFormModel(), new ArrayList<>()), pModel, pParentComp);
+        }
+        catch (PersistenceException e)
+        {
+          // Kommt nicht vor
+          e.printStackTrace(); // trotzdem loggen, schadet nicht
+          return null;
+        }
+      });
+      if(subComp != null)
+        subComps.add(subComp);
+    }
+
+    if(radComponent instanceof RADVisualContainer)
+    {
+      RADVisualContainer container = (RADVisualContainer) radComponent;
+
+      // Subkomponenten initialisieren
+      container.initSubComponents(subComps.toArray(new RADComponent[subComps.size()]));
+
+      // Layout laden
+      container.setOldLayoutSupport(true);
+      try
+      {
+        container.getLayoutSupport().getPrimaryContainer().setLayout(componentInfo.createLayout());
+        LayoutSupportDelegate layoutDelegate = LayoutSupportRegistry.getRegistry(radComponent.getFormModel()).createSupportForContainer(container.getBeanClass());
+        if(layoutDelegate != null)
+          radComponent.getFormModel().setContainerLayout(container, layoutDelegate);
+      }
+      catch (Exception e)
+      {
+        // Sollte nicht auftreten
+        throw new RuntimeException(e);
+      }
+    }
   }
 
   private void _alignFormToAditoProperty(final String pAditoPropName)
@@ -276,14 +327,14 @@ public class FormDataBridge
         prop1 + " is mapped to " + prop2 + " but doesn't exist at " + detail);
   }
 
-  private void _addChild(IPropertyPitProvider<?, ?, ?> pCreated)
+  private RADComponent _addChild(IPropertyPitProvider<?, ?, ?> pCreated, @Nullable BiFunction<IPropertyPitProvider<?, ?, ?>, RADComponent, RADComponent> pComponentFactory)
   {
     ComponentContainer container = (ComponentContainer) radComponent;
     for (RADComponent childComp : container.getSubBeans())
     {
       // Komponente mit dem Namen existiert bereits. Muss nicht synchronisiert werden.
       if (pCreated.getPit().getOwnProperty().getName().equals(childComp.getName()))
-        return;
+        return childComp;
     }
 
     IAditoModelDataProvider modelDataProvider = NbAditoInterface.lookup(IAditoModelDataProvider.class);
@@ -291,7 +342,7 @@ public class FormDataBridge
         radComponent.getARADComponentHandler().getModel());
     // wenn das erstellte Objekt nicht bei den 'childModels' dabei ist muss es für die GUI nicht erzeugt werden.
     if (!childModels.contains(pCreated))
-      return;
+      return null;
 
     IFormComponentInfoProvider compInfoProvider = NbAditoInterface.lookup(IFormComponentInfoProvider.class);
     IFormComponentInfo componentInfo = compInfoProvider.createComponentInfo(pCreated);
@@ -301,12 +352,13 @@ public class FormDataBridge
                                      new PropertyPath(pCreated.getPit().getOwnProperty()).asString() + "'.");
     Class<?> createdBean = formPropertyMapping.getComponentClass();
 
-    RADComponent component = radComponent.getFormModel().getComponentCreator().createComponent(
-        new ClassSource(createdBean.getCanonicalName()), radComponent, null);
+    RADComponent component = pComponentFactory != null ?
+          pComponentFactory.apply(pCreated, radComponent) :
+          radComponent.getFormModel().getComponentCreator().createComponent(new ClassSource(createdBean.getCanonicalName()), radComponent, null);
     if (component == null)
       throw new RuntimeException("component could not be pCreated! (Internal Error)");
     if (component.equals(radComponent))
-      return;
+      return null;
 
     component.setStoredName(pCreated.getPit().getOwnProperty().getName());
     component.getARADComponentHandler().setModel(pCreated);
@@ -319,6 +371,8 @@ public class FormDataBridge
     {
       throw new RuntimeException("can't copy values for: '" + component + "'.", e);
     }
+
+    return component;
   }
 
   private void _removeChild(String pRemovedName)
@@ -403,7 +457,7 @@ public class FormDataBridge
         case IFormComponentInfo.PROP_CHILD_ADDED:
           IPropertyPitProvider<?, ?, ?> created = (IPropertyPitProvider<?, ?, ?>) pEvt.getNewValue();
           if (radComponent instanceof ComponentContainer)
-            _addChild(created);
+            _addChild(created, null);
           break;
         case IFormComponentInfo.PROP_CHILD_REMOVED:
           // Delete ist problematisch: dieses Event wird erst erhalten NACHDEM die Datei gelöscht wurde. Das bedeutet
