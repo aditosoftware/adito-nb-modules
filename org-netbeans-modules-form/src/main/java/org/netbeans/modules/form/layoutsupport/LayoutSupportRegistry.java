@@ -358,6 +358,9 @@ public class LayoutSupportRegistry {
             containerToLayoutDelegate.put(
                 "de.adito.aditoweb.nbm.nbaditointerfaceimpl.form.components.frameneon.ANeonCards", // NOI18N
                 "org.netbeans.modules.form.adito.layout.neon.AditoNeonCardLayoutSupport"); // NOI18N
+            containerToLayoutDelegate.put(
+                "de.adito.aditoweb.nbm.nbaditointerfaceimpl.form.components.frameneon.ANeonCardsLayer", // NOI18N
+                "org.netbeans.modules.form.adito.layout.neon.AditoNeonLayoutSupport"); // NOI18N
         }
         return containerToLayoutDelegate;
     }
