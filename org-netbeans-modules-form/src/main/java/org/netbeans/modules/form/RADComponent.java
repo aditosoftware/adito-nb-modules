@@ -370,8 +370,6 @@ public class RADComponent {
                 }
             } catch (Exception ex) {
                 Logger.getLogger(RADComponent.class.getName()).log(Level.WARNING, ex.getMessage(), ex);
-            } catch (LinkageError ex) {
-                Logger.getLogger(RADComponent.class.getName()).log(Level.WARNING, ex.getMessage(), ex);
             }
         }
 

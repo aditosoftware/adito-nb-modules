@@ -112,8 +112,6 @@ public class ClassPathUtils {
         throws ClassNotFoundException
     {
         return Class.forName(name, true, Lookup.getDefault().lookup(ClassLoader.class));
-        //return Class.forName(name, true, getFormClassLoader(fileInProject));
-        // LinkageError left uncaught
     }
 
     public static boolean checkUserClass(String name, FileObject fileInProject) {

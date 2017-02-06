@@ -135,9 +135,6 @@ public abstract class PersistenceManager {
             catch (Exception ex1) {
                 notifyError(ex1, pmClassName);
             }
-            catch (LinkageError ex2) {
-                notifyError(ex2, pmClassName);
-            }
         }
         getManagersNamesList().clear(); // [is it OK to lose unsuccessful managers?]
 

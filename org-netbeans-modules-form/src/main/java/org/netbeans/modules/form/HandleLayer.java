@@ -48,7 +48,6 @@ import com.google.common.base.*;
 import com.google.common.collect.*;
 import de.adito.aditoweb.nbm.nbide.nbaditointerface.NbAditoInterface;
 import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.model.*;
-import org.netbeans.modules.form.actions.DuplicateAction;
 import org.netbeans.modules.form.adito.components.AditoHandleLayer;
 import org.netbeans.modules.form.adito.perstistencemanager.NonvisContainerRADComponent;
 import org.netbeans.modules.form.assistant.AssistantModel;
@@ -1011,19 +1010,6 @@ public class HandleLayer extends JPanel implements MouseListener, MouseMotionLis
         else p = new Point(6, 6);
 
         showContextMenu(p);
-        e.consume();
-        return;
-      }
-    }
-    else if (e.getID() == KeyEvent.KEY_PRESSED
-        && (keyCode == KeyEvent.VK_DOWN || keyCode == KeyEvent.VK_UP
-        || keyCode == KeyEvent.VK_LEFT || keyCode == KeyEvent.VK_RIGHT))
-    {
-      // cursor keys
-      if ((e.isControlDown() || e.isMetaDown()) && !e.isAltDown() && !e.isShiftDown())
-      {
-        // duplicating
-        DuplicateAction.performAction(formDesigner.getSelectedNodes(), keyCode);
         e.consume();
         return;
       }
@@ -4175,9 +4161,6 @@ public class HandleLayer extends JPanel implements MouseListener, MouseMotionLis
       catch (Exception ex)
       { // creation failed, already reported to the user
       }
-      catch (LinkageError ex)
-      { // creation failed, already reported to the user
-      }
 
       if (precreated != null)
       {
@@ -4374,7 +4357,7 @@ public class HandleLayer extends JPanel implements MouseListener, MouseMotionLis
             targetComponent = HandleLayer.this.getMetaComponentAt(p, mode);
           }
           addedComponent = getComponentCreator().createComponent(
-              paletteItem.getComponentClassSource(), targetComponent, null, false);
+              paletteItem.getComponentClassSource(), targetComponent, false);
           if (addedComponent == null)
           {
             repaint();

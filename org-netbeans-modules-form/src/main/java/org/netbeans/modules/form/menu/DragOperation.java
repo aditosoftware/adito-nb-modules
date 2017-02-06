@@ -157,7 +157,6 @@ class DragOperation {
             try {
                 precreated = creator.precreateVisualComponent(paletteItem);
             } catch (Exception ex) {
-            } catch (LinkageError ex) {
             }
             if(precreated != null) {
                 Object comp = precreated.getBeanInstance();
@@ -447,7 +446,6 @@ class DragOperation {
             try {
                 precreated = creator.precreateVisualComponent(paletteItem);
             } catch (Exception ex) {
-            } catch (LinkageError ex) {
             }
             if(precreated != null) {
                 newComponent = (JComponent) precreated.getBeanInstance();

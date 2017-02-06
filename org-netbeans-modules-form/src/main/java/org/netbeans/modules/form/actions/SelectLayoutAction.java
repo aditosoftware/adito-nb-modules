@@ -238,7 +238,6 @@ public class SelectLayoutAction extends CallableSystemAction {
             try {
                 defaultDelegate = metacont.getDefaultLayoutDelegate(false);
             } catch (Exception ex) { // ignore unlikely classloading failure
-            } catch (LinkageError ex) { // ignore unlikely classloading failure
             }
             return sameLayout(defaultDelegate, paletteLayout);
         }
@@ -298,8 +297,7 @@ public class SelectLayoutAction extends CallableSystemAction {
 
                 if (paletteItem != null) {
                     // set the selected layout on the container
-                    container.getFormModel().getComponentCreator().createComponent(
-                        paletteItem, container, null);
+                    container.getFormModel().getComponentCreator().createComponent(paletteItem, container);
                 } else if (defaultLayout) {
                     container.getFormModel().getComponentCreator().restoreDefaultLayout(container);
                 } else if (container.getLayoutSupport() != null) {

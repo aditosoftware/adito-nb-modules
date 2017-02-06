@@ -166,7 +166,6 @@ final public class FormPropertyEditorManager {
                             } // otherwise failed instantiating, continue
                         }
                         catch (Exception e) {} // silently ignore
-                        catch (LinkageError e) {} // silently ignore
                         editorClass = null;
                     }
                 }
@@ -240,7 +239,6 @@ final public class FormPropertyEditorManager {
                         }
                     }
                     catch (Exception e) {} // silently ignore
-                    catch (LinkageError e) {} // silently ignore
                     editorClass = null;
                 }
                 addEditorClassToCache(type, editorClass, cacheKey); // also cache nonexistence
@@ -332,8 +330,6 @@ final public class FormPropertyEditorManager {
         try {
             return (PropertyEditor) cls.newInstance();
         } catch (Exception ex) {
-            log(ex, "Error instantiating property editor: "+cls.getName()); // NOI18N
-        } catch (LinkageError ex) {
             log(ex, "Error instantiating property editor: "+cls.getName()); // NOI18N
         }
         return null;

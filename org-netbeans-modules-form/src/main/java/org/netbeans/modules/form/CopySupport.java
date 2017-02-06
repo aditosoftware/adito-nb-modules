@@ -606,8 +606,7 @@ class CopySupport {
                 NotifyDescriptor nd = new NotifyDescriptor.Message(message, NotifyDescriptor.WARNING_MESSAGE);
                 DialogDisplayer.getDefault().notify(nd);
             } else {
-                targetForm.getComponentCreator().createComponent(
-                                        classSource, targetComponent, null);
+                targetForm.getComponentCreator().createComponent(classSource, targetComponent);
             }
             return transferable;
         }

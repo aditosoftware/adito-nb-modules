@@ -183,8 +183,6 @@ public class FormLAF {
             return info;
         } catch (Exception ex) {
             ErrorManager.getDefault().notify(ErrorManager.INFORMATIONAL, ex);
-        } catch (LinkageError ex) {
-            ErrorManager.getDefault().notify(ErrorManager.INFORMATIONAL, ex);
         }
         return null;
     }

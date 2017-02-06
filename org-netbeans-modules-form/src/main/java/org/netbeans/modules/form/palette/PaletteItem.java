@@ -347,10 +347,6 @@ public final class PaletteItem implements Node.Cookie {
 //            ErrorManager.getDefault().notify(ErrorManager.INFORMATIONAL, ex);
             lastError = ex;
         }
-        catch (LinkageError ex) {
-//            ErrorManager.getDefault().notify(ErrorManager.INFORMATIONAL, ex);
-            lastError = ex;
-        }
         return null;
     }
 
@@ -361,7 +357,6 @@ public final class PaletteItem implements Node.Cookie {
                 return FormUtils.getBeanInfo(compClass);
             }
             catch (Exception ex) {} // ignore failure
-            //catch (LinkageError ex) {}
             catch (Error er) {} // Issue 74002
         }
         return null;
@@ -374,7 +369,6 @@ public final class PaletteItem implements Node.Cookie {
                 return FormUtils.getBeanInfo(compClass).getBeanDescriptor();
             }
             catch (Exception ex) {} // ignore failure
-            //catch (LinkageError ex) {}
             catch (Error er) {} // Issue 74002
         }
         return null;

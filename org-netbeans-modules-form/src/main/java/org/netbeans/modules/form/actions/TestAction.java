@@ -366,8 +366,6 @@ public class TestAction extends CallableSystemAction implements Runnable {
                                 }
                             } catch (Exception ex) {
                                 ErrorManager.getDefault().notify(ErrorManager.INFORMATIONAL, ex);
-                            } catch (LinkageError ex) {
-                                ErrorManager.getDefault().notify(ErrorManager.INFORMATIONAL, ex);
                             }
                             if (supported) {
                                 mi = new JMenuItem(items[j].getDisplayName());

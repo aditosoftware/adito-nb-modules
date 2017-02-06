@@ -90,15 +90,6 @@ public class BeanSupport
                      .log(Level.INFO, "Cannot create default instance of: {0}", beanClass.getName()); // NOI18N
             }
             return null;
-        } catch (LinkageError ex) {
-            if (Logger.getLogger(BeanSupport.class.getName()).isLoggable(Level.FINEST)) {
-                Logger.getLogger(BeanSupport.class.getName())
-                    .log(Level.FINEST, "Cannot create default instance of: "+beanClass.getName(), ex); // NOI18N
-            } else if (!instancesCache.containsKey(beanClass)) {
-                Logger.getLogger(BeanSupport.class.getName())
-                     .log(Level.INFO, "Cannot create default instance of: {0}", beanClass.getName()); // NOI18N
-            }
-            return null;
         }
     }
 

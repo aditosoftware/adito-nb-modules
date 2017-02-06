@@ -45,16 +45,14 @@
 package org.netbeans.modules.form;
 
 import java.util.*;
+import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 import javax.swing.event.UndoableEditEvent;
 import javax.swing.undo.*;
 
-import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.sync.EContainerType;
-import org.netbeans.modules.form.adito.ARADComponentHandler;
-import org.netbeans.modules.form.adito.components.AditoMetaComponentCreatorSupport;
-import org.netbeans.modules.form.adito.perstistencemanager.*;
+import de.adito.propertly.core.spi.IPropertyPitProvider;
 import org.openide.awt.UndoRedo;
 import org.openide.util.Mutex;
 import org.openide.util.MutexException;
@@ -135,115 +133,27 @@ public class FormModel
     FormModel() {
     }
 
-    /** This methods sets the form base class (which is in fact the superclass
-     * of the form class in source java file). It is used for initializing
+    /** This methods sets the form base model. It is used for initializing
      * the top meta component, and is also presented as the top component
      * in designer and inspector.
      * 
-     * @param formClass form base class.
+     * @param pModel form base model.
      * @throws java.lang.Exception if anything goes wrong.
      */
-    public void setFormBaseClass(Class<?> formClass, ARADComponentHandler pComponentHandler) throws Exception {
+    public void setFormBase(IPropertyPitProvider pModel, Consumer<Exception> pExceptionHandler) throws Exception {
         if (formBaseClass != null)
             throw new IllegalStateException("Form type already initialized."); // NOI18N
 
-        EContainerType containerType = AditoMetaComponentCreatorSupport.getContainerType(formClass);
-        RADComponent topComp;
-        if (containerType == EContainerType.VISUAL || containerType == EContainerType.NONE) {
-        if (FormUtils.isVisualizableClass(formClass)) {
-            if (FormUtils.isContainer(formClass)) {
-                topComp = new RADVisualFormContainer();
-            }
-            else {
-                topComp = new RADVisualComponent() {
-                    // top-level component does not have a variable
-                    @Override
-                    public String getName() {
-                        return FormUtils.getBundleString("CTL_FormTopContainerName"); // NOI18N
-                    }
-                    @Override
-                    public void setName(String value) {}
-                };
-            }
-        }
-        else if (java.lang.Object.class != formClass)
-            topComp = new RADFormContainer();
-        else topComp = null;
-        }
-        else if (containerType == EContainerType.NONVISUAL) {
-            if (FormUtils.isVisualizableClass(formClass))
-                topComp = new NonvisContainerRADVisualComponent();
-            else
-                topComp = new NonvisContainerRADComponent();
-        }
-        else
-            topComp = null;
-
-        if (topComp != null) {
-            topRADComponent = topComp;
-            topComp.initialize(this);
-            topComp.initInstance(formClass, pComponentHandler);
-            topComp.setInModel(true);
-        }
-
-        formBaseClass = formClass;
-//        topRADComponent = topComp;
         layoutModel = new LayoutModel();
         layoutModel.setChangeRecording(false);
-    }
 
-    public Class<?> getFormBaseClass() {
-        return formBaseClass;
+        topRADComponent = getComponentCreator().createComponent(pModel, pExceptionHandler);
+        formBaseClass = topRADComponent.getBeanClass();
     }
 
     void setName(String name) {
         formName = name;
     }
-
-    // A
-    ///**
-    // * Requires the form version to be at least 'minVersion'. If the actual
-    // * version is lower, it is upgraded to 'upgradeTo'. If the upgrade exceeds
-    // * the maximum version level set for this form (roughly corresponding
-    // * to the NB version in which the form was created) a confirmation message
-    // * is shown to the user later (see FormEditor.checkFormVersionUpgrade).
-    // * @param minVersion the minimum version level required
-    // * @param upgradeTo version level to upgrade to if the minimum version is not met
-    // */
-    /*public void raiseVersionLevel(FormVersion minVersion, FormVersion upgradeTo) {
-        if (minVersion.ordinal() > currentVersionLevel.ordinal()
-                && (undoRedoRecording || !formLoaded)) {
-            assert upgradeTo.ordinal() >= minVersion.ordinal();
-            setCurrentVersionLevel(upgradeTo);
-        }
-    }
-
-    void setCurrentVersionLevel(FormVersion version) {
-        if (lastConfirmedVersionLevel == null) {
-            lastConfirmedVersionLevel = currentVersionLevel;
-        }
-        currentVersionLevel = version;
-    }
-
-    FormVersion getCurrentVersionLevel() {
-        return currentVersionLevel;
-    }
-
-    void revertVersionLevel() {
-        currentVersionLevel = lastConfirmedVersionLevel;
-    }
-
-    void confirmVersionLevel() {
-        lastConfirmedVersionLevel = currentVersionLevel;
-    }
-
-    void setMaxVersionLevel(FormVersion version) {
-        maxVersionLevel = version;
-    }
-
-    FormVersion getMaxVersionLevel() {
-        return maxVersionLevel;
-    }*/
 
     void setReadOnly(boolean readOnly) {
         this.readOnly = readOnly;

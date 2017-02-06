@@ -6,14 +6,11 @@ import com.google.common.collect.Lists;
 import de.adito.aditoweb.nbm.nbide.nbaditointerface.NbAditoInterface;
 import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.IAditoFormConstants;
 import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.model.IAditoModelDataProvider;
-import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.sync.*;
+import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.sync.IFormComponentInfo;
 import de.adito.propertly.core.common.path.PropertyPath;
 import de.adito.propertly.core.spi.*;
-import org.jetbrains.annotations.*;
+import org.jetbrains.annotations.NotNull;
 import org.netbeans.modules.form.*;
-import org.netbeans.modules.form.adito.perstistencemanager.APersistenceManagerInfo;
-import org.netbeans.modules.form.layoutsupport.*;
-import org.netbeans.modules.form.project.ClassSource;
 import org.openide.nodes.Node;
 import org.openide.util.NotImplementedException;
 
@@ -22,7 +19,6 @@ import java.io.IOException;
 import java.lang.ref.*;
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
-import java.util.function.BiFunction;
 import java.util.logging.*;
 
 /**
@@ -224,59 +220,6 @@ public class FormDataBridge
   void copyValuesFromAdito()
   {
     componentInfo.getPropertyNames().forEach(this::_alignFormToAditoProperty);
-
-    IAditoModelDataProvider modelDataProvider = NbAditoInterface.lookup(IAditoModelDataProvider.class);
-    List<IPropertyPitProvider<?, ?, ?>> childModels = modelDataProvider.getChildModels(
-        radComponent.getARADComponentHandler().getModel());
-
-    _loadSubComponents(childModels);
-  }
-
-  private void _loadSubComponents(List<IPropertyPitProvider<?, ?, ?>> pChildren)
-  {
-    // Subkomponenten erstellen
-    List<RADComponent> subComps = new ArrayList<>();
-    for (IPropertyPitProvider<?, ?, ?> childModel : pChildren)
-    {
-      AditoPersistenceManager persManagerHacked = new AditoPersistenceManager();
-      RADComponent subComp = _addChild(childModel, (pModel, pParentComp) -> {
-        try
-        {
-          return persManagerHacked._restoreComponent(new APersistenceManagerInfo(null, radComponent.getFormModel(), new ArrayList<>()), pModel, pParentComp);
-        }
-        catch (PersistenceException e)
-        {
-          // Kommt nicht vor
-          e.printStackTrace(); // trotzdem loggen, schadet nicht
-          return null;
-        }
-      });
-      if(subComp != null)
-        subComps.add(subComp);
-    }
-
-    if(radComponent instanceof RADVisualContainer)
-    {
-      RADVisualContainer container = (RADVisualContainer) radComponent;
-
-      // Subkomponenten initialisieren
-      container.initSubComponents(subComps.toArray(new RADComponent[subComps.size()]));
-
-      // Layout laden
-      container.setOldLayoutSupport(true);
-      try
-      {
-        container.getLayoutSupport().getPrimaryContainer().setLayout(componentInfo.createLayout());
-        LayoutSupportDelegate layoutDelegate = LayoutSupportRegistry.getRegistry(radComponent.getFormModel()).createSupportForContainer(container.getBeanClass());
-        if(layoutDelegate != null)
-          radComponent.getFormModel().setContainerLayout(container, layoutDelegate);
-      }
-      catch (Exception e)
-      {
-        // Sollte nicht auftreten
-        throw new RuntimeException(e);
-      }
-    }
   }
 
   private void _alignFormToAditoProperty(final String pAditoPropName)
@@ -327,14 +270,14 @@ public class FormDataBridge
         prop1 + " is mapped to " + prop2 + " but doesn't exist at " + detail);
   }
 
-  private RADComponent _addChild(IPropertyPitProvider<?, ?, ?> pCreated, @Nullable BiFunction<IPropertyPitProvider<?, ?, ?>, RADComponent, RADComponent> pComponentFactory)
+  private void _addChild(IPropertyPitProvider<?, ?, ?> pCreated)
   {
     ComponentContainer container = (ComponentContainer) radComponent;
     for (RADComponent childComp : container.getSubBeans())
     {
       // Komponente mit dem Namen existiert bereits. Muss nicht synchronisiert werden.
       if (pCreated.getPit().getOwnProperty().getName().equals(childComp.getName()))
-        return childComp;
+        return;
     }
 
     IAditoModelDataProvider modelDataProvider = NbAditoInterface.lookup(IAditoModelDataProvider.class);
@@ -342,37 +285,17 @@ public class FormDataBridge
         radComponent.getARADComponentHandler().getModel());
     // wenn das erstellte Objekt nicht bei den 'childModels' dabei ist muss es für die GUI nicht erzeugt werden.
     if (!childModels.contains(pCreated))
-      return null;
+      return;
 
-    IFormComponentInfoProvider compInfoProvider = NbAditoInterface.lookup(IFormComponentInfoProvider.class);
-    IFormComponentInfo componentInfo = compInfoProvider.createComponentInfo(pCreated);
-    IFormComponentPropertyMapping formPropertyMapping = componentInfo.getFormPropertyMapping();
-    if (formPropertyMapping == null)
-      throw new RuntimeException("No 'IFormComponentProvider' available for '" +
-                                     new PropertyPath(pCreated.getPit().getOwnProperty()).asString() + "'.");
-    Class<?> createdBean = formPropertyMapping.getComponentClass();
+    FormModel formModel = radComponent.getFormModel();
+    RADComponent component = formModel.getComponentCreator().createComponent(pCreated, null);
 
-    RADComponent component = pComponentFactory != null ?
-          pComponentFactory.apply(pCreated, radComponent) :
-          radComponent.getFormModel().getComponentCreator().createComponent(new ClassSource(createdBean.getCanonicalName()), radComponent, null);
-    if (component == null)
-      throw new RuntimeException("component could not be pCreated! (Internal Error)");
-    if (component.equals(radComponent))
-      return null;
+    if (container instanceof RADVisualContainer && component instanceof RADVisualComponent)
+      formModel.addVisualComponent((RADVisualComponent) component, (RADVisualContainer) container, null, true);
+    else
+      formModel.addComponent(component, container, true);
 
-    component.setStoredName(pCreated.getPit().getOwnProperty().getName());
-    component.getARADComponentHandler().setModel(pCreated);
-
-    try
-    {
-      component.getARADComponentHandler().applyValuesFromAditoModel();
-    }
-    catch (Exception e)
-    {
-      throw new RuntimeException("can't copy values for: '" + component + "'.", e);
-    }
-
-    return component;
+    component.getARADComponentHandler().applyValuesFromAditoModel();
   }
 
   private void _removeChild(String pRemovedName)
@@ -440,7 +363,7 @@ public class FormDataBridge
         _apply(formDataBridge, evt);
 
       Map<Object, Object> attributes = componentInfo.getPropertyAttributes(String.valueOf(evt.getNewValue()));
-      if(attributes != null)
+      if (attributes != null)
       {
         Object isMixin = attributes.get(IFormComponentInfo.IS_MIXIN_PROPERTY);
         if (isMixin != null && isMixin instanceof Boolean && ((Boolean) isMixin))
@@ -457,7 +380,7 @@ public class FormDataBridge
         case IFormComponentInfo.PROP_CHILD_ADDED:
           IPropertyPitProvider<?, ?, ?> created = (IPropertyPitProvider<?, ?, ?>) pEvt.getNewValue();
           if (radComponent instanceof ComponentContainer)
-            _addChild(created, null);
+            _addChild(created);
           break;
         case IFormComponentInfo.PROP_CHILD_REMOVED:
           // Delete ist problematisch: dieses Event wird erst erhalten NACHDEM die Datei gelöscht wurde. Das bedeutet
