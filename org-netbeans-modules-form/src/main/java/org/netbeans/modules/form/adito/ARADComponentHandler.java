@@ -7,7 +7,7 @@ import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.sync.*;
 import de.adito.propertly.core.spi.IPropertyPitProvider;
 import org.jetbrains.annotations.*;
 import org.netbeans.modules.form.*;
-import org.openide.filesystems.*;
+import org.openide.filesystems.FileObject;
 import org.openide.loaders.*;
 import org.openide.nodes.Node;
 
@@ -38,10 +38,8 @@ public class ARADComponentHandler
 
   public void added()
   {
-    /**
-     * Wenn model und formDataBridge nicht 'null' sind, dann wurde die Komponente im Model hinzugefügt und
-     * zum FormModel synchronisiert. Muss also nicht mehr weiter behandelt werden.
-     */
+    // Wenn model und formDataBridge nicht 'null' sind, dann wurde die Komponente im Model hinzugefügt und
+    // zum FormModel synchronisiert. Muss also nicht mehr weiter behandelt werden.
     if (_isBridgeValid())
       return;
 

@@ -42,7 +42,7 @@ public class AditoPersistenceManager extends PersistenceManager
       List<IPropertyPitProvider<?, ?, ?>> others = NbAditoInterface.lookup(IAditoModelDataProvider.class).getOthers(modelRoot);
       for (IPropertyPitProvider<?, ?, ?> other : others)
       {
-        RADComponent othersRadComp = pFormModel.getComponentCreator().createComponent(other, exceptionHandler);
+        RADComponent othersRadComp = new AditoMetaComponentCreator(pFormModel).createComponent(other, exceptionHandler);
         list.add(othersRadComp);
         _copyValuesFromModelToComponent(othersRadComp);
       }

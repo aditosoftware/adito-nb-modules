@@ -122,9 +122,9 @@ public class FormModel
     private MetaComponentCreator metaCreator;
 
     //private CodeStructure codeStructure = new CodeStructure(false);
-    
+
     private FormSettings settings = new FormSettings(this);
-    
+
     private boolean freeDesignDefaultLayout = false;
 
     // -------------
@@ -136,7 +136,7 @@ public class FormModel
     /** This methods sets the form base model. It is used for initializing
      * the top meta component, and is also presented as the top component
      * in designer and inspector.
-     * 
+     *
      * @param pModel form base model.
      * @throws java.lang.Exception if anything goes wrong.
      */
@@ -147,7 +147,7 @@ public class FormModel
         layoutModel = new LayoutModel();
         layoutModel.setChangeRecording(false);
 
-        topRADComponent = getComponentCreator().createComponent(pModel, pExceptionHandler);
+        topRADComponent = new AditoMetaComponentCreator(this).createComponent(pModel, pExceptionHandler);
         formBaseClass = topRADComponent.getBeanClass();
     }
 
@@ -222,7 +222,7 @@ public class FormModel
     /**
      * Returns list of all components in the model. A new List instance is
      * created. The order of the components is random.
-     * 
+     *
      * @return list of components in the model.
      */
     public java.util.List<RADComponent> getComponentList() {
@@ -233,7 +233,7 @@ public class FormModel
      * Returns list of all components in the model. A new instance of list is
      * created and the components are added to the list in the traversal order
      * (used e.g. by code generator or persistence manager).
-     * 
+     *
      * @return list of components in the model.
      */
     public java.util.List<RADComponent> getOrderedComponentList() {
@@ -245,7 +245,7 @@ public class FormModel
     /**
      * Returns an unmodifiable collection of all components in the model
      * in random order.
-     * 
+     *
      * @return list of components in the model.
      */
     public Collection<RADComponent> getAllComponents() {
@@ -322,7 +322,7 @@ public class FormModel
     /** Adds a new component to given (non-visual) container in the model. If
      * the container is not specified, the component is added to the
      * "other components".
-     * 
+     *
      * @param metacomp component to add.
      * @param parentContainer parent of the added component.
      * @param newlyAdded is newly added?
@@ -352,7 +352,7 @@ public class FormModel
 
     /** Adds a new visual component to given container managed by the old
      * layout support.
-     * 
+     *
      * @param metacomp component to add.
      * @param parentContainer parent of the added component.
      * @param constraints layout constraints.
@@ -446,7 +446,7 @@ public class FormModel
             }
         }
     }
-    
+
     void setNaturalContainerLayoutImpl(RADVisualContainer metacont) {
         LayoutSupportDelegate currentDel = metacont.getLayoutSupport().getLayoutDelegate();
         metacont.setOldLayoutSupport(false);
@@ -460,7 +460,7 @@ public class FormModel
         LayoutSupportManager currentLS = metacont.getLayoutSupport();
         if (currentLS == null)
             return; // already set (no old layout support)
-        
+
         setNaturalContainerLayoutImpl(metacont);
         Object layoutStartMark = layoutModel.getChangeMark();
         UndoableEdit ue = layoutModel.getUndoableEdit();
@@ -615,7 +615,7 @@ public class FormModel
         }
         return null;
     }
-    
+
     public void forceUndoOfCompoundEdit() {
         if (compoundEdit != null) {
             undoCompoundEdit = true;
@@ -779,7 +779,7 @@ public class FormModel
 
     /** Fires an event informing about changing layout manager of a container.
      * An undoable edit is created and registered automatically.
-     * 
+     *
      * @param metacont container whose layout has been changed.
      * @param oldLayout old layout.
      * @param newLayout new layout.
@@ -806,7 +806,7 @@ public class FormModel
 
     /** Fires an event informing about changing a property of container layout.
      * An undoable edit is created and registered automatically.
-     * 
+     *
      * @param metacont container whose layout has been changed.
      * @param propName name of the layout property.
      * @param oldValue old value of the property.
@@ -840,7 +840,7 @@ public class FormModel
 
     /** Fires an event informing about changing a property of component layout
      * constraints. An undoable edit is created and registered automatically.
-     * 
+     *
      * @param metacomp component whose layout property has been changed.
      * @param propName name of the layout property.
      * @param oldValue old value of the property.
@@ -873,7 +873,7 @@ public class FormModel
 
     /** Fires an event informing about adding a component to the form.
      * An undoable edit is created and registered automatically.
-     * 
+     *
      * @param metacomp component that has been added.
      * @param addedNew is newly added?
      * @return event that has been fired.
@@ -897,7 +897,7 @@ public class FormModel
 
     /** Fires an event informing about removing a component from the form.
      * An undoable edit is created and registered automatically.
-     * 
+     *
      * @param metacomp component that has been removed.
      * @param metacont container from which the component was removed.
      * @param index index of the component in the container.
@@ -926,7 +926,7 @@ public class FormModel
 
     /** Fires an event informing about reordering components in a container.
      * An undoable edit is created and registered automatically.
-     * 
+     *
      * @param metacont container whose subcomponents has been reordered.
      * @param perm permutation describing the change in order.
      * @return event that has been fired.
@@ -1012,7 +1012,7 @@ public class FormModel
 
     /** Fires an event informing about changing a synthetic property of
      * a component. An undoable edit is created and registered automatically.
-     * 
+     *
      * @param metacomp component whose synthetic property has been changed.
      * @param propName name of the synthetic property that has been changed.
      * @param oldValue old value of the property.
@@ -1045,7 +1045,7 @@ public class FormModel
     /** Fires an event informing about attaching a new event to an event handler
      * (createdNew parameter indicates whether the event handler was created
      * first). An undoable edit is created and registered automatically.
-     * 
+     *
      * @param event event for which the handler was created.
      * @param handler name of the event handler.
      * @param bodyText body of the event handler.
@@ -1076,7 +1076,7 @@ public class FormModel
      * (handlerDeleted parameter indicates whether the handler was deleted as
      * the last event was detached). An undoable edit is created and registered
      * automatically.
-     * 
+     *
      * @param event event for which the handler was removed.
      * @param handler removed event handler.
      * @param handlerDeleted was deleted?
@@ -1102,7 +1102,7 @@ public class FormModel
 
     /** Fires an event informing about renaming an event handler. An undoable
      * edit is created and registered automatically.
-     * 
+     *
      * @param oldHandlerName old name of the event handler.
      * @param newHandlerName new name of the event handler.
      * @return event that has been fired.
@@ -1124,7 +1124,7 @@ public class FormModel
     }
 
     /** Fires an event informing about general form change.
-     * 
+     *
      * @param immediately determines whether the change should be fire immediately.
      * @return event that has been fired.
      */
@@ -1265,11 +1265,11 @@ public class FormModel
     /*public CodeStructure getCodeStructure() {
         return codeStructure;
     }*/
-    
+
     public boolean isFreeDesignDefaultLayout() {
         return freeDesignDefaultLayout;
     }
-    
+
     void setFreeDesignDefaultLayout(boolean freeDesignDefaultLayout) {
         this.freeDesignDefaultLayout = freeDesignDefaultLayout;
     }

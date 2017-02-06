@@ -26,7 +26,7 @@ import java.util.logging.*;
  *
  * @author J. Boesl, 31.03.11
  */
-public class FormDataBridge
+class FormDataBridge
 {
 
   private final RADComponent radComponent;
@@ -36,7 +36,7 @@ public class FormDataBridge
   private PropertyChangeListener formPropertyChangeListener;
 
 
-  public FormDataBridge(@NotNull RADComponent pRadComponent, @NotNull IFormComponentInfo pComponentInfo)
+  FormDataBridge(@NotNull RADComponent pRadComponent, @NotNull IFormComponentInfo pComponentInfo)
   {
     radComponent = pRadComponent;
     componentInfo = pComponentInfo;
@@ -60,13 +60,16 @@ public class FormDataBridge
       }
       catch (InvocationTargetException e)
       {
-        radComponent.getFormModel().forceUndoOfCompoundEdit(); // TODO: Fehler dem User mitteilen (output)
+        _getFormModel().forceUndoOfCompoundEdit(); // TODO: Fehler dem User mitteilen (output)
       }
     }
   }
 
   void newComponentAdded()
   {
+    List<Exception> exceptions = new ArrayList<>();
+    new AditoMetaComponentCreator(_getFormModel()).finishContainerInitialization(radComponent, exceptions::add);
+
     if (radComponent instanceof RADVisualComponent)
     {
       RADVisualComponent radVisualComponent = (RADVisualComponent) radComponent;
@@ -83,6 +86,9 @@ public class FormDataBridge
       }
     }
     copyValuesFromAdito();
+
+    if (!exceptions.isEmpty())
+      throw new RuntimeException(exceptions.get(0));
   }
 
   void registerListeners()
@@ -131,7 +137,7 @@ public class FormDataBridge
     }
     catch (InvocationTargetException e)
     {
-      radComponent.getFormModel().forceUndoOfCompoundEdit(); // TODO: Fehler dem User mitteilen (output)
+      _getFormModel().forceUndoOfCompoundEdit(); // TODO: Fehler dem User mitteilen (output)
     }
   }
 
@@ -211,7 +217,7 @@ public class FormDataBridge
       {
         // Sortierung ist verschieden
         cont.reorderSubComponents(perm);
-        radComponent.getFormModel().fireComponentsReordered(cont, perm);
+        _getFormModel().fireComponentsReordered(cont, perm);
         break;
       }
     }
@@ -287,13 +293,12 @@ public class FormDataBridge
     if (!childModels.contains(pCreated))
       return;
 
-    FormModel formModel = radComponent.getFormModel();
-    RADComponent component = formModel.getComponentCreator().createComponent(pCreated, null);
+    RADComponent component = new AditoMetaComponentCreator(_getFormModel()).createComponent(pCreated, null);
 
     if (container instanceof RADVisualContainer && component instanceof RADVisualComponent)
-      formModel.addVisualComponent((RADVisualComponent) component, (RADVisualContainer) container, null, true);
+      _getFormModel().addVisualComponent((RADVisualComponent) component, (RADVisualContainer) container, null, true);
     else
-      formModel.addComponent(component, container, true);
+      _getFormModel().addComponent(component, container, true);
 
     component.getARADComponentHandler().applyValuesFromAditoModel();
   }
@@ -319,6 +324,12 @@ public class FormDataBridge
     }
   }
 
+  private FormModel _getFormModel()
+  {
+    return radComponent.getFormModel();
+  }
+
+
   /**
    * PropertyChangeListener-Impl
    */
@@ -326,7 +337,7 @@ public class FormDataBridge
   {
     private Reference<FormDataBridge> formDataBridgeRef;
 
-    public _FormPropertyChangeListener(FormDataBridge pFormDataBridge)
+    _FormPropertyChangeListener(FormDataBridge pFormDataBridge)
     {
       formDataBridgeRef = new WeakReference<>(pFormDataBridge);
     }
@@ -350,7 +361,7 @@ public class FormDataBridge
   {
     private Reference<FormDataBridge> formDataBridgeRef;
 
-    public _AditoPropertyChangeListener(FormDataBridge pFormDataBridge)
+    _AditoPropertyChangeListener(FormDataBridge pFormDataBridge)
     {
       formDataBridgeRef = new WeakReference<>(pFormDataBridge);
     }
