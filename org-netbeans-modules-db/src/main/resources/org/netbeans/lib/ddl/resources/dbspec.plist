@@ -994,10 +994,20 @@
       java.sql.Types.VARBINARY = VARBINARY;
       java.sql.Types.VARCHAR = VARCHAR;
       java.sql.Types.NVARCHAR = NVARCHAR;
+      java.sql.Types.NCLOB = TEXT;
+      java.sql.Types.LONGVARCHAR = TEXT;
+      java.sql.Types.LONGNVARCHAR = TEXT;
+      java.sql.Types.TIME_WITH_TIMEZONE = TIME;
+      java.sql.Types.TIMESTAMP_WITH_TIMEZONE = TIMESTAMP;
+      java.sql.Types.BOOLEAN = BIT;
+      java.sql.Types.SQLXML = XML;
+      java.sql.Types.LONGVARBINARY = IMAGE;
     };
-    SizelessTypes = (BIT,IMAGE,DATETIME,"DOUBLE PRECISION",INT,REAL,SMALLINT,TEXT,TINYINT);
+    SizelessTypes = (BIT,IMAGE,DATETIME,"DOUBLE PRECISION",INT,REAL,SMALLINT,TEXT,TINYINT,BIGINT,DATE,XML,TIMESTAMP);
     DecimalTypes = (DECIMAL,FLOAT,NUMERIC);
-    CharacterTypes = (CHAR,VARCHAR,NVARCHAR,NCHAR);
+    CharacterTypes = (CHAR,VARCHAR,NVARCHAR,NCHAR,XML);
+    NoIndexTypes = (BLOB,IMAGE,TEXT,XML);
+    NoPrimaryKeyTypes = (BLOB,IMAGE,TEXT,XML);
     Case=Upper;
 
 //////////////////////
