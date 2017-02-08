@@ -1259,7 +1259,7 @@ public class HandleLayer extends JPanel implements MouseListener, MouseMotionLis
 
     if (hitMetaComp != null)
     {
-      NonvisContainerRADComponent comp = null;
+      RADComponent comp = null;
       comp = AditoHandleLayer.getSubComponent(hitMetaComp, formDesigner, e);
 
       if (comp != null)

@@ -61,11 +61,10 @@ public final class AditoHandleLayer
     }
   }
 
-  public static NonvisContainerRADComponent getSubComponent(RADComponent pComp, FormDesigner pFormDesigner, MouseEvent e)
+  public static RADComponent getSubComponent(RADComponent pComp, FormDesigner pFormDesigner, MouseEvent e)
   {
-
     String compName = null;
-    NonvisContainerRADComponent component = null;
+    RADComponent component = null;
 
     if (pComp instanceof NonvisContainerRADVisualComponent)
     {
@@ -112,6 +111,10 @@ public final class AditoHandleLayer
         }
       }
     }
+
+    if (pComp.getBeanInstance() instanceof IANeonCardsLayerMarker)
+      component = pComp.getParentComponent();
+
     return component;
   }
 
