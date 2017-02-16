@@ -44,6 +44,9 @@
 
 package org.netbeans.modules.form.actions;
 
+import de.adito.aditoweb.nbm.nbide.nbaditointerface.NbAditoInterface;
+import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.sync.*;
+import de.adito.propertly.core.spi.IPropertyPitProvider;
 import org.openide.nodes.Node;
 import org.openide.util.actions.*;
 import org.openide.util.*;
@@ -122,11 +125,23 @@ public class EditContainerAction extends NodeAction {
         if (metacomp instanceof RADVisualComponent) {
             RADVisualComponent visComp = (RADVisualComponent) metacomp;
             RADVisualContainer parent = visComp.getParentContainer();
+
+            // A
+            IPropertyPitProvider<?, ?, ?> model = visComp.getARADComponentHandler().getModel();
+            boolean designable = true;
+            if(model != null)
+            {
+                IFormComponentInfo compInfo = NbAditoInterface.lookup(IFormComponentInfoProvider.class).createComponentInfo(model);
+                if(compInfo != null)
+                    designable = compInfo.isDesignableContainer();
+            }
+
             // can design visual container, or a visual component with no parent
             // can't design menus except the entire menu bar
-            return parent == null
-                   || (visComp instanceof RADVisualContainer
-                       && (!visComp.isMenuComponent() || parent.getContainerMenu() == visComp));
+            //return parent == null
+            //       || (visComp instanceof RADVisualContainer
+            //           && (!visComp.isMenuComponent() || parent.getContainerMenu() == visComp));
+            return designable; // A
         }
         return false;
     }

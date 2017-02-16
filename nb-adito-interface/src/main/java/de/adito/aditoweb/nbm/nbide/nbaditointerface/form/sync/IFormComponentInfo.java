@@ -74,4 +74,9 @@ public interface IFormComponentInfo
    */
   Lookup getDataObjectLookup();
 
+  /**
+   * Gibt zurück, ob dieser Container mit "Design this container" editiert werden kann
+   */
+  boolean isDesignableContainer();
+
 }
