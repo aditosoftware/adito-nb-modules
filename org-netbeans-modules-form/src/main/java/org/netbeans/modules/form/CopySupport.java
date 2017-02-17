@@ -224,7 +224,10 @@ class CopySupport {
                                                                            targetComponent)))
                     // hack needed due to screwed design of menu metacomponents
                     && (!(targetComponent instanceof RADMenuComponent)
-                          || transComp instanceof RADMenuItemComponent))
+                          || transComp instanceof RADMenuItemComponent)
+                    // A
+                    && (targetComponent.getARADComponentHandler().canAdd(transComp.getBeanClass())
+                            && transComp.getARADComponentHandler().canMove(targetComponent)))
                 {   // pasting this meta component is allowed
                     if (sourceComponents == null) {
                         sourceComponents = new LinkedList<RADComponent>();
