@@ -1032,6 +1032,12 @@
       Format = "drop procedure [{object.owner}.]{object.name}";
     };
 
+    PrimaryKeyColumn = {
+      Class = org.netbeans.lib.ddl.impl.TableColumn;
+      Format = "{column.name} {column.type}[({column.size}[,{column.decsize}])][ default {default.value}][ {column.notnull}not null][ check ({check.condition})] primary key NONCLUSTERED";
+    };
+
+
   };
 
 //  ********************************************************************************
@@ -1125,7 +1131,7 @@
 
     PrimaryKeyColumn = {
       Class = org.netbeans.lib.ddl.impl.TableColumn;
-      Format = "{column.name} {column.type}[({column.size}[,{column.decsize}])][ default {default.value}][ {column.notnull}not null][ check ({check.condition})] primary key";
+      Format = "{column.name} {column.type}[({column.size}[,{column.decsize}])][ default {default.value}][ {column.notnull}not null][ check ({check.condition})] primary key NONCLUSTERED";
     };
   };
 
