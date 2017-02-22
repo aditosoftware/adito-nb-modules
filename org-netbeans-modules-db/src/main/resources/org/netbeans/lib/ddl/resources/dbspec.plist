@@ -642,7 +642,7 @@
       DELETE = DELETE;
     };
     SizelessTypes = (BIGINT,BLOB,CLOB,DATE,INT,INTEGER,REAL,SMALLINT,TIMESTAMP,NCLOB,"NUMBER(19)","NUMBER(3)");
-    DecimalTypes = (DECIMAL,FLOAT,NUMERIC);
+    DecimalTypes = (DECIMAL,NUMERIC);
     CharacterTypes = (CHAR,VARCHAR2,NVARCHAR2);
     NoPrimaryKeyTypes = (BLOB,CLOB,NCLOB);
     NoIndexTypes = (BLOB,CLOB,NCLOB);
@@ -1004,7 +1004,7 @@
       java.sql.Types.LONGVARBINARY = IMAGE;
     };
     SizelessTypes = (BIT,IMAGE,DATETIME,"DOUBLE PRECISION",INT,REAL,SMALLINT,TEXT,TINYINT,BIGINT,DATE,XML,TIMESTAMP);
-    DecimalTypes = (DECIMAL,FLOAT,NUMERIC);
+    DecimalTypes = (DECIMAL,NUMERIC);
     CharacterTypes = (CHAR,VARCHAR,NVARCHAR,NCHAR,XML);
     NoIndexTypes = (BLOB,IMAGE,TEXT,XML);
     NoPrimaryKeyTypes = (BLOB,IMAGE,TEXT,XML);
@@ -1427,7 +1427,7 @@
         java.sql.Types.LONGVARBINARY = BLOB;
       };
       SizelessTypes = (BLOB,DATE,"DOUBLE PRECISION",INTEGER,SMALLINT,TIMESTAMP,"BLOB SUB_TYPE TEXT",BIGINT,TIME,"CHAR(1)");
-      DecimalTypes = (DECIMAL,FLOAT,NUMERIC);
+      DecimalTypes = (DECIMAL,NUMERIC);
       CharacterTypes = (CHAR,VARCHAR);
       NoPrimaryKeyTypes = (BLOB,"BLOB SUB_TYPE TEXT");
       NoIndexTypes = (BLOB,"BLOB SUB_TYPE TEXT");
@@ -1532,7 +1532,7 @@
         java.sql.Types.DOUBLE = "DOUBLE PRECISION";
         java.sql.Types.FLOAT = FLOAT;
         java.sql.Types.INTEGER = INT;
-  //      java.sql.Types.NUMERIC = NUMERIC;
+        java.sql.Types.NUMERIC = NUMERIC;
         java.sql.Types.REAL = REAL;
         java.sql.Types.SMALLINT = SMALLINT;
         java.sql.Types.TIME = TIME;
@@ -1547,8 +1547,8 @@
         java.sql.Types.SQLXML = LONGTEXT;
         java.sql.Types.LONGVARBINARY = LONGBLOB;
       };
-      SizelessTypes = (BIGINT,LONGBLOB,LONGTEXT,DATE,"DOUBLE PRECISION",FLOAT,INT,REAL,SMALLINT,TIME,DATETIME,TIMESTAMP,TINYINT,DECIMAL,BOOLEAN);
-  //    DecimalTypes = (DECIMAL,NUMERIC);
+      SizelessTypes = (BIGINT,LONGBLOB,LONGTEXT,DATE,"DOUBLE PRECISION",FLOAT,INT,REAL,SMALLINT,TIME,DATETIME,TIMESTAMP,TINYINT,BOOLEAN);
+      DecimalTypes = (DECIMAL,NUMERIC);
       CharacterTypes = (CHAR,VARCHAR);
       NoPrimaryKeyTypes = (LONGTEXT, LONGBLOB);
       NoIndexTypes = (LONGTEXT, LONGBLOB);

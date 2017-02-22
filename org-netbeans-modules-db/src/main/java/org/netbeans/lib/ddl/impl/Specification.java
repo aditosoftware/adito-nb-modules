@@ -497,6 +497,24 @@ public class Specification implements DatabaseSpecification {
         return (Map)desc.get("TypeMap"); // NOI18N
     }
 
+    /**
+     * Liefert eine Liste der Typen, allerdings jeden Value nur einmal.
+     * Spezialversion für den Designer, damit jeder Value in der ComboBox nur einmal angezeigt wird.
+     * @return Liste ohne redundante Values
+     */
+    public Map getNonRedundantTypeMap()
+    {
+        Map<String, String> typeMap = getTypeMap();
+        Map<String, String> reducedTypeMap = new HashMap();
+        for (String key : typeMap.keySet())
+        {
+            String value = typeMap.get(key);
+            if(!reducedTypeMap.containsValue(value))
+                reducedTypeMap.put(key, value);
+        }
+        return reducedTypeMap;
+    }
+
     /** Returns DBType where maps specified java type */
     @Override
     public String getType(int type)
