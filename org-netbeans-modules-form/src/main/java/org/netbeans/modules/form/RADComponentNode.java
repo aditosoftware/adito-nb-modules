@@ -873,7 +873,7 @@ public class RADComponentNode extends FormNode
         }
 
         for (RADComponent subComp : subComps)
-          if (subComp != menuComp)
+          if (subComp != menuComp && AditoNodeConnect.shouldHaveNode(visualCont, subComp)) //A
             keys.add(subComp);
       }
       else

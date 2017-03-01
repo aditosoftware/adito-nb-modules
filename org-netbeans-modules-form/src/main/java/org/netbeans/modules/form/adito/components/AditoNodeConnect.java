@@ -1,6 +1,7 @@
 package org.netbeans.modules.form.adito.components;
 
 import de.adito.aditoweb.nbm.nbide.nbaditointerface.NbAditoInterface;
+import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.model.*;
 import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.sync.*;
 import de.adito.propertly.core.spi.IPropertyPitProvider;
 import org.jetbrains.annotations.Nullable;
@@ -141,6 +142,12 @@ public final class AditoNodeConnect
     });
   }
 
+  public static boolean shouldHaveNode(RADComponent pParent, RADComponent pComponent)
+  {
+    IAditoModelDataProvider modelDataProvider = NbAditoInterface.lookup(IAditoModelDataProvider.class);
+    IFormComponentChildContainer childContainer = modelDataProvider.getChildContainer(pParent.getARADComponentHandler().getModel());
+    return childContainer == null || childContainer.shouldHaveNode(pComponent.getARADComponentHandler().getModel());
+  }
 
   private static <T> T _resolve(RADComponent pComp, _PropertyPitProviderC<T> pC)
   {

@@ -1,8 +1,6 @@
 package de.adito.aditoweb.nbm.nbide.nbaditointerface.form.model;
 
 import de.adito.propertly.core.spi.*;
-import org.openide.filesystems.*;
-import org.openide.loaders.DataObject;
 import org.openide.nodes.Node;
 
 import java.io.IOException;
@@ -25,6 +23,8 @@ public interface IFormComponentChildContainer
   IPropertyPitProvider<?, ?, ?> createDataModel(String pName, Class<?> pComponentClass);
 
   List<IPropertyPitProvider<?, ?, ?>> getAllChildren();
+
+  boolean shouldHaveNode(IPropertyPitProvider<?, ?, ?> pChild);
 
   IPropertyPitProvider<?, ?, ?> copy(IPropertyPitProvider<?, ?, ?> pSource) throws IOException;
 
