@@ -57,4 +57,9 @@ public class AditoImportHintFix implements HintFix, PreviewableFix
     return false;
   }
 
+  public JsRuleContext getContext()
+  {
+    return context;
+  }
+
 }

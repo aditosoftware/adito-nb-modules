@@ -56,7 +56,34 @@ public class AditoImportHint extends AbstractAditoHint
 
                 String description = "Add '" + packet.getName() + "' to imports.";
                 Hint desc = new Hint(this, description, fileObject, AstUtilities.getNameRange(node), fix, 1500);
-                pResultHints.add(desc);
+
+                boolean hintAllreadyExists = false;
+                for(Hint existHint: pResultHints)
+                  if(existHint.getDescription().equals(description))
+                    for(HintFix existHintFix : existHint.getFixes())
+                      if(existHintFix instanceof AditoImportHintFix)
+                      {
+                        for(HintFix newFix : fix)
+                        {
+                          if(newFix instanceof AditoImportHintFix)
+                          {
+                            if(((AditoImportHintFix)existHintFix).getContext().node.getParentNode().equals(((AditoImportHintFix)newFix).getContext().node.getParentNode()))
+                            {
+                              ((AditoImportHintFix)desc.getFixes().get(0)).getContext().parserResult.getSnapshot().getText();
+                              existHint.getRange().getEnd();
+                              desc.getRange().getStart();
+
+                              String substring = ((AditoImportHintFix)desc.getFixes().get(0)).getContext().parserResult.getSnapshot().getText().subSequence(existHint.getRange().getEnd(), desc.getRange().getStart()).toString();
+
+                              if(!substring.contains("\n"))
+                                hintAllreadyExists = true;
+                            }
+                          }
+                        }
+                      }
+
+                if(!hintAllreadyExists)
+                  pResultHints.add(desc);
               }
             }
           }
