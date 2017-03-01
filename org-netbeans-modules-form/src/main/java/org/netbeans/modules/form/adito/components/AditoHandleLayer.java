@@ -4,12 +4,11 @@ import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.component.*;
 import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.layout.*;
 import org.netbeans.modules.form.*;
 import org.netbeans.modules.form.adito.perstistencemanager.*;
-import org.openide.nodes.Node;
 
 import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Area;
-import java.lang.reflect.InvocationTargetException;
+import java.util.Objects;
 
 /**
  * Funktionen die über die Klasse HandleLayer angeboten werden, aber Erweiterungen von Adito sind.
@@ -112,7 +111,8 @@ public final class AditoHandleLayer
       }
     }
 
-    if (pComp.getBeanInstance() instanceof IANeonCardsLayerMarker)
+    if (pComp.getBeanInstance() instanceof IANeonCardsLayerMarker &&
+        !Objects.equals(pFormDesigner.getTopDesignComponent(), pComp)) // #13836 -> NPE bei Einfachklick
       component = pComp.getParentComponent();
 
     return component;
