@@ -88,6 +88,23 @@ public class DataViewDBTable {
         return dbTables != null && dbTables.length == 1 && !dbTables[0].getName().equals("");
     }
 
+    /**
+     * Ermittelt ob es sich genau eine echte Tabelle handelt.
+     * Hintergrund ist dass beim MSSQL immer eine leere Tabelle ("") mitkommt.
+     * @return Eine echte Tabelle => TRUE
+     */
+    public boolean hasOneRealTable()
+    {
+        int realTableCount = 0;
+        for (DBTable dbTable : dbTables)
+        {
+            if(!dbTable.toString().isEmpty())
+                realTableCount++;
+        }
+
+        return dbTables != null && realTableCount == 1;
+    }
+
     public String getFullyQualifiedName(int index, boolean quoteAlways) {
         return dbTables[index].getFullyQualifiedName(quoteAlways);
     }

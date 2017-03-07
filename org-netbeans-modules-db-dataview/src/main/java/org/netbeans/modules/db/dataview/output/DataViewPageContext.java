@@ -82,7 +82,7 @@ class DataViewPageContext {
     }
 
     void resetEditableState() {
-        model.setEditable(tableMetaData == null ? false : tableMetaData.hasOneTable());
+        model.setEditable(tableMetaData == null ? false : tableMetaData.hasOneRealTable());
     }
 
     int getPageSize() {
