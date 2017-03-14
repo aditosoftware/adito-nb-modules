@@ -456,6 +456,9 @@ public final class NbSheet extends TopComponent {
             if (listen) {
                 TopComponent.getRegistry().addPropertyChangeListener(
                     listener);
+                // Fehler #14649 Focus auf Entity bei Öffnen setzen
+                //Sorgt dafür dass das Sheet auch angezeigt wird.
+                listener.activate();
             } else {
                 TopComponent.getRegistry().removePropertyChangeListener (listener);
             }
