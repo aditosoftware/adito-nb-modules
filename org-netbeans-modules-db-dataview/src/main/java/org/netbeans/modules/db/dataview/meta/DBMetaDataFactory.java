@@ -283,12 +283,32 @@ public final class DBMetaDataFactory {
             table.setQuoter(sqlquoter);
         }
 
-        // Oracle does not return table name for resultsetmetadata.getTableName()
         DBTable table = tables.get(noTableName);
-        if (tables.size() == 1 && table != null && isSelect) {
-            adjustTableMetadata(sql, tables.get(noTableName));
+
+        // MsSQL liefert mehr als einen Tabellennamen...
+        // Daher werden die beiden Ergebnisse zusammengefasst.
+        if(tables.size() > 1 && tables.get(noTableName) != null)
+        {
+            DBTable table2 = tables.get(tables.keySet().toArray()[1]);
+            table.setCatalogName(table2.getCatalog());
+            table.setSchemaName(table2.getSchema());
+            table.setName(table2.getName());
+
             for (DBColumn col : table.getColumns().values()) {
                 col.setEditable(!table.getName().equals("") && !col.isGenerated());
+            }
+
+            for (DBColumn dbColumn : table2.getColumnList())
+                table.addColumn(dbColumn);
+            tables.remove(tables.keySet().toArray()[1]);
+        }else
+        {
+            // Oracle does not return table name for resultsetmetadata.getTableName()
+            if (tables.size() == 1 && table != null && isSelect)
+            {
+                adjustTableMetadata(sql, table);
+                for (DBColumn col : table.getColumns().values())
+                    col.setEditable(!table.getName().equals("") && !col.isGenerated());
             }
         }
 

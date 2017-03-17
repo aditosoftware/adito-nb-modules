@@ -89,20 +89,36 @@ public class DataViewDBTable {
     }
 
     /**
+     * Ermittelt die erste "echte" Tabelle.
+     * Hintergrund ist dass beim MSSQL immer eine leere Tabelle ("") mitkommt.
+     * @return Den Namen der ersten Tabelle die nicht "" ist
+     */
+    public DBTable getFirstRealTable()
+    {
+        for (DBTable dbTable : dbTables)
+        {
+            if(!dbTable.getName().isEmpty())
+                return dbTable;
+        }
+        return getTable(0); // Fallback. Vorherige Version. Sollte nie benötigt werden.
+    }
+
+    /**
      * Ermittelt ob es sich genau eine echte Tabelle handelt.
      * Hintergrund ist dass beim MSSQL immer eine leere Tabelle ("") mitkommt.
      * @return Eine echte Tabelle => TRUE
      */
     public boolean hasOneRealTable()
     {
-        int realTableCount = 0;
+        Map<String, String> realTables = new HashMap();
+
         for (DBTable dbTable : dbTables)
         {
-            if(!dbTable.toString().isEmpty())
-                realTableCount++;
+            if(!dbTable.getName().isEmpty())
+                realTables.put(dbTable.getName(), dbTable.getName());
         }
 
-        return dbTables != null && realTableCount == 1;
+        return dbTables != null && realTables.size() == 1;
     }
 
     public String getFullyQualifiedName(int index, boolean quoteAlways) {
