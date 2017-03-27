@@ -1,5 +1,6 @@
 package org.netbeans.modules.form.adito.layout;
 
+import org.jetbrains.annotations.Nullable;
 import org.netbeans.modules.form.FormProperty;
 import org.openide.nodes.Node;
 
@@ -11,13 +12,17 @@ import java.lang.reflect.InvocationTargetException;
  */
 public class SimpleFormProperty extends FormProperty
 {
-
-  private static final String ADITO_LAYOUT = "ADITO_LAYOUT";
   private Node.Property<Object> property;
 
   public SimpleFormProperty(Node.Property<Object> pProperty)
   {
-    super(pProperty.getName() + ADITO_LAYOUT, pProperty.getValueType(), pProperty.getDisplayName(),
+    this(pProperty, null);
+  }
+
+  public SimpleFormProperty(Node.Property<Object> pProperty, @Nullable String pPostfix)
+  {
+    super(pProperty.getName() + (pPostfix == null ? "" : pPostfix),
+          pProperty.getValueType(), pProperty.getDisplayName(),
           pProperty.getShortDescription());
     property = pProperty;
   }

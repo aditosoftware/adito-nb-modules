@@ -4,10 +4,12 @@ import de.adito.aditoweb.nbm.nbide.nbaditointerface.NbAditoInterface;
 import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.layout.IAditoLayoutProvider;
 import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.layout.common.IAditoLayoutConstraints;
 import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.layout.neon.ICellInfoPropertyTypes;
-import org.netbeans.modules.form.adito.layout.AbstractComponentConstraints;
+import org.netbeans.modules.form.adito.layout.*;
 import org.netbeans.modules.form.layoutsupport.LayoutConstraints;
+import org.openide.nodes.Node;
 
 import java.awt.*;
+import java.util.*;
 
 /**
  *
@@ -50,4 +52,15 @@ public class NeonConstraints extends AbstractComponentConstraints<ICellInfoPrope
     return new NeonConstraints(getConstraintsObject().cloneConstraints());
   }
 
+  @Override
+  protected Node.Property[] createProperties()
+  {
+    Collection<Node.Property> constraintProps = getConstraintsObject().getProperties();
+    int size = constraintProps == null ? 0 : constraintProps.size();
+    java.util.List<Node.Property> newProps = new ArrayList<Node.Property>(size);
+    if (size != 0)
+      for (Node.Property property : constraintProps)
+        newProps.add(new SimpleFormProperty(property));
+    return newProps.toArray(new Node.Property[size]);
+  }
 }
