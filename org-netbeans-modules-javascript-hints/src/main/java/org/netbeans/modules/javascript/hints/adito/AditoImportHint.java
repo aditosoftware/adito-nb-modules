@@ -57,39 +57,36 @@ public class AditoImportHint extends AbstractAditoHint
                 String description = "Add '" + packet.getName() + "' to imports.";
                 Hint desc = new Hint(this, description, fileObject, AstUtilities.getNameRange(node), fix, 1500);
 
-                boolean hintAllreadyExists = false;
-                for(Hint existHint: pResultHints)
-                  if(existHint.getDescription().equals(description))
-                    for(HintFix existHintFix : existHint.getFixes())
-                      if(existHintFix instanceof AditoImportHintFix)
-                      {
-                        for(HintFix newFix : fix)
-                        {
-                          if(newFix instanceof AditoImportHintFix)
-                          {
-                            if(((AditoImportHintFix)existHintFix).getContext().node.getParentNode().equals(((AditoImportHintFix)newFix).getContext().node.getParentNode()))
-                            {
-                              ((AditoImportHintFix)desc.getFixes().get(0)).getContext().parserResult.getSnapshot().getText();
-                              existHint.getRange().getEnd();
-                              desc.getRange().getStart();
-
-                              String substring = ((AditoImportHintFix)desc.getFixes().get(0)).getContext().parserResult.getSnapshot().getText().subSequence(existHint.getRange().getEnd(), desc.getRange().getStart()).toString();
-
-                              if(!substring.contains("\n"))
-                                hintAllreadyExists = true;
-                            }
-                          }
-                        }
-                      }
-
-                if(!hintAllreadyExists)
+                if(!hintAlreadyExistsInLine(desc, pResultHints))
                   pResultHints.add(desc);
+                else
+                  pResultHints.add(new Hint(this, description, fileObject, AstUtilities.getNameRange(node), null, 1500));
               }
             }
           }
         }
       }
     }
+  }
+
+
+  private boolean hintAlreadyExistsInLine(Hint pNewHint, List<Hint> pOldHints)
+  {
+    for(Hint oldHint : pOldHints)
+      if(oldHint.getDescription().equals(pNewHint.getDescription()) && oldHint.getFixes() != null)
+        for(HintFix existHintFix : oldHint.getFixes())   //1
+          if(existHintFix != null && existHintFix instanceof AditoImportHintFix)
+            for(HintFix newFix : pNewHint.getFixes())  //1
+              if(newFix instanceof AditoImportHintFix)
+                if(((AditoImportHintFix)existHintFix).getContext().node.getParentNode().equals(((AditoImportHintFix)newFix).getContext().node.getParentNode()))
+                {
+                  String substring = ((AditoImportHintFix)existHintFix).getContext().parserResult.getSnapshot().getText().subSequence(oldHint.getRange().getEnd(), pNewHint.getRange().getStart()).toString();
+
+                  if(!substring.contains("\n"))
+                    return true;
+                }
+
+    return false;
   }
 
   @Override
