@@ -98,15 +98,27 @@ class FormDataBridge
       aditoPropertyChangeListener = new _AditoPropertyChangeListener(this);
       formPropertyChangeListener = new _FormPropertyChangeListener(this);
       componentInfo.addPropertyListener(aditoPropertyChangeListener);
-      for (String aditoPropName : componentInfo.getPropertyNames())
+      refreshPropertyListeners();
+    }
+  }
+
+  private final WeakHashMap<FormProperty, PropertyChangeListener> registeredProps = new WeakHashMap<>(); //todo
+
+  void refreshPropertyListeners()
+  {
+    if(formPropertyChangeListener == null)
+      return;
+
+    registeredProps.forEach(FormProperty::removePropertyChangeListener);
+
+    for (String aditoPropName : componentInfo.getPropertyNames())
+    {
+      String radPropName = componentInfo.getRadPropName(aditoPropName);
+      if (!Strings.isNullOrEmpty(radPropName))
       {
-        String radPropName = componentInfo.getRadPropName(aditoPropName);
-        if (!Strings.isNullOrEmpty(radPropName))
-        {
-          FormProperty formProperty = _getFormProperty(radPropName);
-          if (formProperty != null)
-            formProperty.addPropertyChangeListener(formPropertyChangeListener);
-        }
+        FormProperty formProperty = _getFormProperty(radPropName);
+        if (formProperty != null)
+          formProperty.addPropertyChangeListener(formPropertyChangeListener);
       }
     }
   }
@@ -408,6 +420,10 @@ class FormDataBridge
           break;
         case IFormComponentInfo.PROP_VALUE_CHANGED:
           pFormDataBridge._alignFormToAditoProperty((String) pEvt.getNewValue());
+          break;
+        case IFormComponentInfo.PROP_SET_CHANGED:
+          refreshPropertyListeners();
+          copyValuesFromAdito();
           break;
         default:
           throw new NotImplementedException(propertyName);

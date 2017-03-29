@@ -23,6 +23,7 @@ public interface IFormComponentInfo
   String PROP_CHILD_ADDED = "propChildAdded";
   String PROP_CHILD_REMOVED = "propChildRemoved";
   String PROP_POSITION_CHANGED = "propPositionChanged";
+  String PROP_SET_CHANGED = "propSetChanged";
 
   String IS_MIXIN_PROPERTY = "isMixinProperty";
 
