@@ -9,10 +9,11 @@ import org.netbeans.modules.form.layoutsupport.LayoutConstraints;
 import org.openide.nodes.Node;
 
 import java.awt.*;
-import java.util.*;
 
 /**
+ * ComponentConstraints für Neon
  *
+ * @author t.tasior, 02.03.2016 (original)
  */
 public class NeonConstraints extends AbstractComponentConstraints<ICellInfoPropertyTypes>
 {
@@ -21,7 +22,6 @@ public class NeonConstraints extends AbstractComponentConstraints<ICellInfoPrope
   public NeonConstraints()
   {
   }
-
 
   public NeonConstraints(IAditoLayoutConstraints<ICellInfoPropertyTypes> pConstraints)
   {
@@ -35,6 +35,12 @@ public class NeonConstraints extends AbstractComponentConstraints<ICellInfoPrope
     return layoutProvider.getNeonTableLayout().createLayoutConstraints();
   }
 
+  @Override
+  public LayoutConstraints cloneConstraints()
+  {
+    return new NeonConstraints(getConstraintsObject().cloneConstraints());
+  }
+  
   public Rectangle getBounds()
   {
     return bounds;
@@ -45,22 +51,12 @@ public class NeonConstraints extends AbstractComponentConstraints<ICellInfoPrope
     bounds.setBounds(pBounds);
   }
 
-
-  @Override
-  public LayoutConstraints cloneConstraints()
-  {
-    return new NeonConstraints(getConstraintsObject().cloneConstraints());
-  }
-
   @Override
   protected Node.Property[] createProperties()
   {
-    Collection<Node.Property> constraintProps = getConstraintsObject().getProperties();
-    int size = constraintProps == null ? 0 : constraintProps.size();
-    java.util.List<Node.Property> newProps = new ArrayList<Node.Property>(size);
-    if (size != 0)
-      for (Node.Property property : constraintProps)
-        newProps.add(new SimpleFormProperty(property));
-    return newProps.toArray(new Node.Property[size]);
+    //noinspection RedundantCast todo WTF JAVA?!
+    return (Node.Property[]) getConstraintsObject().getProperties().stream()
+        .map(SimpleFormProperty::new)
+        .toArray(Node.Property[]::new);
   }
 }

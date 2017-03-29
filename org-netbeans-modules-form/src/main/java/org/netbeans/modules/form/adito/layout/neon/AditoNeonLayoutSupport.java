@@ -4,7 +4,7 @@ import de.adito.aditoweb.nbm.nbide.nbaditointerface.NbAditoInterface;
 import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.layout.IAditoLayoutProvider;
 import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.layout.common.IAditoLayoutConstraints;
 import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.layout.neon.*;
-import org.netbeans.modules.form.*;
+import org.netbeans.modules.form.FormLoaderSettings;
 import org.netbeans.modules.form.layoutsupport.*;
 import org.openide.util.ImageUtilities;
 
@@ -13,11 +13,10 @@ import java.awt.*;
 import java.beans.BeanInfo;
 import java.lang.reflect.InvocationTargetException;
 
-
+@SuppressWarnings("unused") //LayoutSupportRegistry
 public class AditoNeonLayoutSupport extends AbstractLayoutSupport
 {
   private static FormLoaderSettings formSettings = FormLoaderSettings.getInstance();
-
 
   @Override
   public Class getSupportedClass()
@@ -51,25 +50,46 @@ public class AditoNeonLayoutSupport extends AbstractLayoutSupport
   public LayoutConstraints getNewConstraints(Container container, Container containerDelegate, Component component,
                                              int index, Point posInCont, Point posInComp)
   {
-    return _buildConstraints(container, component, null, posInCont);
+    return _buildConstraints(container, component, null, posInCont, index);
   }
 
+  @Override
   public LayoutConstraints getResizedConstraints(Container container, Container containerDelegate, Component component,
                                                  int index, Rectangle originalBounds, Insets sizeChanges,
                                                  Point posInCont)
   {
-    return _buildConstraints(container, component, sizeChanges, posInCont);
+    return _buildConstraints(container, component, sizeChanges, posInCont, index);
   }
 
+  @Override
+  public boolean paintDragFeedback(Container container, Container containerDelegate, Component component,
+                                   LayoutConstraints newConstraints, int newIndex, Graphics g)
+  {
+    Rectangle r = ((NeonConstraints) newConstraints).getBounds();
+    g.drawRect(r.x, r.y, r.width, r.height);
+    return true;
+  }
+
+  @Override
+  public int getResizableDirections(Container container, Container containerDelegate, Component component, int index)
+  {
+    return RESIZE_UP | RESIZE_DOWN | RESIZE_LEFT | RESIZE_RIGHT;
+  }
+
+  @Override
+  protected NeonConstraints createDefaultConstraints()
+  {
+    return new NeonConstraints();
+  }
 
   private LayoutConstraints _buildConstraints(Container container, Component component,
-                                              Insets sizeChanges,
-                                              Point posInCont)
+                                              Insets sizeChanges, Point posInCont, int index)
   {
     JComponent neonComp = (JComponent) component;
     IDropAreaSupport support = (IDropAreaSupport) container;
     IDropArea area = support.getDropArea(posInCont, neonComp, sizeChanges);
-    NeonConstraints constr = new NeonConstraints();
+    NeonConstraints constr = (NeonConstraints) getConstraints(index);
+    constr = constr == null ? createDefaultConstraints(): (NeonConstraints) constr.cloneConstraints();
     IAditoLayoutConstraints<ICellInfoPropertyTypes> co = constr.getConstraintsObject();
     ICellInfoPropertyTypes typeInfo = co.getTypeInfo();
 
@@ -87,39 +107,7 @@ public class AditoNeonLayoutSupport extends AbstractLayoutSupport
       throw new RuntimeException("Cannot fill Constraints Object.", pE);
     }
 
-
     constr.setBounds(area.getPaintingRect());
     return constr;
-  }
-
-  @Override
-  public boolean paintDragFeedback(Container container, Container containerDelegate, Component component,
-                                   LayoutConstraints newConstraints, int newIndex, Graphics g)
-  {
-    Rectangle r = ((NeonConstraints) newConstraints).getBounds();
-    g.drawRect(r.x, r.y, r.width, r.height);
-    return true;
-  }
-
-  @Override
-  public void acceptNewComponents(RADVisualComponent[] components, LayoutConstraints[] constraints, int index)
-  {
-    for (RADVisualComponent component : components)
-    {
-      if (component.getBeanClass().getSimpleName().equals("ARegisterTab"))
-        throw new IllegalArgumentException("RegisterTabs can not be added to this component.");
-    }
-  }
-
-  @Override
-  public int getResizableDirections(Container container, Container containerDelegate, Component component, int index)
-  {
-    return RESIZE_UP | RESIZE_DOWN | RESIZE_LEFT | RESIZE_RIGHT;
-  }
-
-  @Override
-  protected LayoutConstraints createDefaultConstraints()
-  {
-    return new NeonConstraints();
   }
 }
