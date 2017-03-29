@@ -14,6 +14,11 @@ public interface IAditoLayoutConstraints<TypeInfo>
 {
 
   /**
+   * Symbolisiert Properties, die eigentlich zum Layout gehören
+   */
+  String ADITO_LAYOUT = "ADITO_LAYOUT";
+
+  /**
    * Liefert alle Properties, die es für diese Constraints gibt.
    *
    * @return Properties, alle.
