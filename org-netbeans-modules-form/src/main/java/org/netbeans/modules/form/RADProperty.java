@@ -45,11 +45,11 @@
 
 package org.netbeans.modules.form;
 
-import java.beans.*;
-import java.lang.reflect.*;
-
 import org.netbeans.modules.form.fakepeer.FakePeerSupport;
 import org.openide.util.Exceptions;
+
+import java.beans.*;
+import java.lang.reflect.*;
 
 /**
  * Implementation of properties for (meta)components (class RADComponent).
@@ -147,6 +147,7 @@ public class RADProperty extends FormProperty {
         }
         catch (IllegalArgumentException ex)
         {
+            System.err.println("Failed to update property '" + getDisplayName() + "' on component '" + (getRADComponent() != null ? getRADComponent().getName() : "null") + "'"); //A
             ex.printStackTrace();
         }
         catch (InvocationTargetException ex) {
