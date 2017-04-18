@@ -431,6 +431,12 @@ public class JsTypeAnalyzer {
                 }
                 firstType = first.getString();
             }
+
+            if(second.getSourceStart() != first.getSourceEnd())
+            {
+                return firstType;
+            }
+
             String secondStr = second.getString();
             assert second.getType() == Token.STRING;
             String fqn = firstType + "." + secondStr;
