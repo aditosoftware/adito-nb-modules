@@ -141,10 +141,10 @@ class NewGroupPanel extends javax.swing.JPanel {
 
         setBorder(javax.swing.BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
-        org.openide.awt.Mnemonics.setLocalizedText(lblName, NbBundle.getMessage(NewGroupPanel.class, "NewGroupPanel.lblName.text")); // NOI18N
+        org.openide.awt.Mnemonics.setLocalizedText(lblName, org.openide.util.NbBundle.getMessage(NewGroupPanel.class, "NewGroupPanel.lblName.text")); // NOI18N
 
         cbKeepOpenedDocuments.setSelected(true);
-        org.openide.awt.Mnemonics.setLocalizedText(cbKeepOpenedDocuments, NbBundle.getMessage(NewGroupPanel.class, "NewGroupPanel.cbKeepOpenedDocuments.text")); // NOI18N
+        org.openide.awt.Mnemonics.setLocalizedText(cbKeepOpenedDocuments, org.openide.util.NbBundle.getMessage(NewGroupPanel.class, "NewGroupPanel.cbKeepOpenedDocuments.text")); // NOI18N
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);

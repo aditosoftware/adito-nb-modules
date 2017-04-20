@@ -71,7 +71,7 @@ import org.openide.windows.*;
  *
  * @author Peter Zavadsky
  */
-@org.openide.util.lookup.ServiceProvider(service=WindowManager.class)
+@org.openide.util.lookup.ServiceProvider(service=org.openide.windows.WindowManager.class)
 public final class WindowManagerImpl extends WindowManager implements Workspace {
 // XXX Implements Workspace for backward compatibility of old API only,
 // there are no workspaces any more.
@@ -205,7 +205,7 @@ public final class WindowManagerImpl extends WindowManager implements Workspace 
      * @return the manager that handles opening, closing and selecting a component
      * @deprecated Don't use this. */
     @Override
-    protected synchronized Component createTopComponentManager(TopComponent c) {
+    protected synchronized WindowManager.Component createTopComponentManager(TopComponent c) {
         warnIfNotInEDT();
         
         return null;
@@ -679,7 +679,7 @@ public final class WindowManagerImpl extends WindowManager implements Workspace 
         ModeImpl mode = findModeImpl("editor"); // NOI18N
         if(mode == null) {
             Logger.getLogger(WindowManagerImpl.class.getName()).log(Level.FINE, null,
-                              new IllegalStateException("Creating default editor mode. It shouldn\'t happen this way")); // NOI18N
+                              new java.lang.IllegalStateException("Creating default editor mode. It shouldn\'t happen this way")); // NOI18N
             // PENDING should be defined in winsys layer?
             ModeImpl newMode = createModeImpl("editor", Constants.MODE_KIND_EDITOR, true); // NOI18N
             addMode(newMode, new SplitConstraint[0]);
@@ -705,7 +705,7 @@ public final class WindowManagerImpl extends WindowManager implements Workspace 
         ModeImpl mode = findModeImpl("explorer"); // NOI18N
         if(mode == null) {
             Logger.getLogger(WindowManagerImpl.class.getName()).log(Level.INFO, null,
-                              new IllegalStateException("Creating default view mode. It shouldn\'t happen this way")); // NOI18N
+                              new java.lang.IllegalStateException("Creating default view mode. It shouldn\'t happen this way")); // NOI18N
             // PENDING should be defined in winsys layer?
             ModeImpl newMode = createModeImpl("explorer", Constants.MODE_KIND_VIEW, true); // NOI18N
             addMode(newMode, new SplitConstraint[] {
@@ -723,7 +723,7 @@ public final class WindowManagerImpl extends WindowManager implements Workspace 
         ModeImpl mode = findModeImpl("sliding"); // NOI18N
         if(mode == null) {
             Logger.getLogger(WindowManagerImpl.class.getName()).log(Level.INFO, null,
-                              new IllegalStateException("Creating default sliding mode. It shouldn\'t happen this way")); // NOI18N
+                              new java.lang.IllegalStateException("Creating default sliding mode. It shouldn\'t happen this way")); // NOI18N
             // PENDING should be defined in winsys layer?
             ModeImpl newMode = createModeImpl("sliding", Constants.MODE_KIND_SLIDING, true); // NOI18N
             addMode(newMode, new SplitConstraint[] {
@@ -1152,13 +1152,13 @@ public final class WindowManagerImpl extends WindowManager implements Workspace 
     }
     
     public void notifyTopComponentClosed(TopComponent tc) {
-      // ADITO
-      if (!AlwaysOpenTopComponentRegistry.getDefault().contains(tc)) {
-        // Inform component instance.
-        componentCloseNotify(tc);
-        // let others know that top component was closed...
-        notifyRegistryTopComponentClosed(tc);
-      }
+        // ADITO
+        if (!AlwaysOpenTopComponentRegistry.getDefault().contains(tc)) {
+            // Inform component instance.
+            componentCloseNotify(tc);
+            // let others know that top component was closed...
+            notifyRegistryTopComponentClosed(tc);
+        }
     }
     // Notifications<<
     /////////////////////////
@@ -1414,7 +1414,7 @@ public final class WindowManagerImpl extends WindowManager implements Workspace 
         
         if (preferredID == null) {
             Logger.getLogger(WindowManagerImpl.class.getName()).log(Level.WARNING, null,
-                              new IllegalStateException("Assertion failed. " +
+                              new java.lang.IllegalStateException("Assertion failed. " +
                                                                   tc.getClass().getName() +
                                                                   ".preferredID method shouldn\'t be overriden to return null. " +
                                                                   "Please change your impl to return non-null string.")); // NOI18N
@@ -1765,13 +1765,13 @@ public final class WindowManagerImpl extends WindowManager implements Workspace 
             if (!isJDKProblem) {
                 // problem somewhere in NetBeans modules' code
                 Logger.getLogger(WindowManagerImpl.class.getName()).log(level, null,
-                        new IllegalStateException(
+                        new java.lang.IllegalStateException(
                         "Problem in some module which uses Window System: "
                         + ASSERTION_ERROR_MESSAGE));
             } else {
                 // probably known problem in JDK
                 Logger.getLogger(WindowManagerImpl.class.getName()).log(level, null,
-                        new IllegalStateException(
+                        new java.lang.IllegalStateException(
                         "Known problem in JDK occurred. If you are interested, vote and report at:\n" +
                         "http://bugs.sun.com/view_bug.do?bug_id=6424157, http://bugs.sun.com/view_bug.do?bug_id=6553239 \n" +
                         "Also see related discussion at http://www.netbeans.org/issues/show_bug.cgi?id=90590"));

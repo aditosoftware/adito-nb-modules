@@ -1053,9 +1053,12 @@ implements DropTargetGlassPane.Observer, DropTargetGlassPane.Informer {
                     
                     // was probably forgotten to set the lastdrop target, was causing strange repaint side effects when 2 frames overlapped.
                     JComponent cp = (JComponent)droppable.getDropComponent();
-                    Component glass = cp.getRootPane().getGlassPane();
-                    if (glass instanceof DropTargetGlassPane) {
-                        windowDnDManager.setLastDropTarget((DropTargetGlassPane)glass);
+                    JRootPane rootPane = cp.getRootPane();
+                    if (rootPane != null) {
+                        Component glass = rootPane.getGlassPane();
+                        if (glass instanceof DropTargetGlassPane) {
+                            windowDnDManager.setLastDropTarget((DropTargetGlassPane)glass);
+                        }
                     }
                     Point p = new Point(location);
                     SwingUtilities.convertPointFromScreen(p, droppable.getDropComponent());
@@ -1136,7 +1139,7 @@ implements DropTargetGlassPane.Observer, DropTargetGlassPane.Informer {
 
         /** Implements <code>TopComponentDroppable</code>. */
         @Override
-        public Shape getIndicationForLocation(Point p) {
+        public java.awt.Shape getIndicationForLocation(Point p) {
             Rectangle bounds = getDropComponent().getBounds();
             Rectangle res = null;
             double ratio = Constants.DROP_AROUND_RATIO;
@@ -1165,16 +1168,16 @@ implements DropTargetGlassPane.Observer, DropTargetGlassPane.Informer {
             Component bottomSlide = viewAccessor.getSlidingModeComponent(Constants.BOTTOM);
             Component topSlide = viewAccessor.getSlidingModeComponent(Constants.TOP);
             if(null != leftSlide && p.x <  leftSlide.getBounds().width + 10) {
-                return JSplitPane.LEFT;
+                return javax.swing.JSplitPane.LEFT;
             } else if(p.y < bounds.y) {
-                return JSplitPane.TOP;
+                return javax.swing.JSplitPane.TOP;
             } else if(null !=rightSlide && null != leftSlide 
                       && p.x > bounds.width - 10 - rightSlide.getBounds().width - leftSlide.getBounds().width) {
-                return JSplitPane.RIGHT;
+                return javax.swing.JSplitPane.RIGHT;
             } else if(null != bottomSlide && p.y > bounds.height - 10 - bottomSlide.getBounds().height) {
-                return JSplitPane.BOTTOM;
+                return javax.swing.JSplitPane.BOTTOM;
             } else if(null != topSlide && p.y < bounds.y + topSlide.getBounds().height + 10) {
-                return JSplitPane.TOP;
+                return javax.swing.JSplitPane.TOP;
             }
 
             return null;
@@ -1222,7 +1225,7 @@ implements DropTargetGlassPane.Observer, DropTargetGlassPane.Informer {
 
         /** Implements <code>TopComponentDroppable</code>. */
         @Override
-        public Shape getIndicationForLocation(Point p) {
+        public java.awt.Shape getIndicationForLocation(Point p) {
             Rectangle bounds = getDropComponent().getBounds();
             Rectangle res = null;
             double ratio = Constants.DROP_AROUND_EDITOR_RATIO;
@@ -1252,16 +1255,16 @@ implements DropTargetGlassPane.Observer, DropTargetGlassPane.Informer {
             Component bottomSlide = viewAccessor.getSlidingModeComponent(Constants.BOTTOM);
             Component topSlide = viewAccessor.getSlidingModeComponent(Constants.TOP);
             if(null != leftSlide && p.x <  leftSlide.getBounds().width + DROP_BORDER_WIDTH) {
-                return JSplitPane.LEFT;
+                return javax.swing.JSplitPane.LEFT;
             } else if(p.y < bounds.y) {
-                return JSplitPane.TOP;
+                return javax.swing.JSplitPane.TOP;
             } else if(null !=rightSlide && null != leftSlide 
                       && p.x > bounds.width - DROP_BORDER_WIDTH - rightSlide.getBounds().width - leftSlide.getBounds().width) {
-                return JSplitPane.RIGHT;
+                return javax.swing.JSplitPane.RIGHT;
             } else if(null != bottomSlide && p.y > bounds.height - DROP_BORDER_WIDTH - bottomSlide.getBounds().height) {
-                return JSplitPane.BOTTOM;
+                return javax.swing.JSplitPane.BOTTOM;
             } else if(null != topSlide && p.y < bounds.y + topSlide.getBounds().height + DROP_BORDER_WIDTH) {
-                return JSplitPane.TOP;
+                return javax.swing.JSplitPane.TOP;
             }
 
             return null;
@@ -1318,7 +1321,7 @@ implements DropTargetGlassPane.Observer, DropTargetGlassPane.Informer {
         
         /** Implements <code>TopComponentDroppable</code>. */
         @Override
-        public Shape getIndicationForLocation(Point p) {
+        public java.awt.Shape getIndicationForLocation(Point p) {
             return null;
         }
         

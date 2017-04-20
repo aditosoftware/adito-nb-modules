@@ -303,6 +303,7 @@ public final class MainWindow {
            }
        });
        //#38810 end
+        // ADITO
        String title = NbBundle.getMessage(MainWindow.class, "CTL_MainWindow_Title_No_Project", System.getProperty("adito.netbeans.buildnumber")); //NOI18N
        if( !title.isEmpty() )
            frame.setTitle(title);

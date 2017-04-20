@@ -68,7 +68,7 @@ import java.util.Set;
  *
  * @author  Peter Zavadsky
  *
- * @see DropTarget
+ * @see java.awt.dnd.DropTarget
  * @see org.netbeans.core.windows.DefaultContainerImpl
  */
 public final class DropTargetGlassPane extends JPanel implements DropTargetListener {

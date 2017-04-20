@@ -993,7 +993,7 @@ public final class PersistenceManager implements PropertyChangeListener {
             }
 
             topComponent2IDMap.put(tc, srcName);
-            id2TopComponentMap.put(srcName, new TopComponentReference(tc,srcName));
+            id2TopComponentMap.put(srcName, new PersistenceManager.TopComponentReference(tc,srcName));
             globalIDSet.add(srcName.toUpperCase(Locale.ENGLISH));
             if (persistenceType(tc) == TopComponent.PERSISTENCE_ONLY_OPENED) {
                 topComponentPersistentOnlyOpenedID.add(srcName);

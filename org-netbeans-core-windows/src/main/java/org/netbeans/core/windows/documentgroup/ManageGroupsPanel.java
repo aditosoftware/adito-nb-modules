@@ -119,24 +119,24 @@ class ManageGroupsPanel extends javax.swing.JPanel {
 
         scrollGroups = new javax.swing.JScrollPane();
         listGroups = new javax.swing.JList();
-        btnRemove = new JButton();
-        btnRemoveAll = new JButton();
+        btnRemove = new javax.swing.JButton();
+        btnRemoveAll = new javax.swing.JButton();
 
         setBorder(javax.swing.BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
         listGroups.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
         scrollGroups.setViewportView(listGroups);
 
-        org.openide.awt.Mnemonics.setLocalizedText(btnRemove, NbBundle.getMessage(ManageGroupsPanel.class, "ManageGroupsPanel.btnRemove.text")); // NOI18N
-        btnRemove.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent evt) {
+        org.openide.awt.Mnemonics.setLocalizedText(btnRemove, org.openide.util.NbBundle.getMessage(ManageGroupsPanel.class, "ManageGroupsPanel.btnRemove.text")); // NOI18N
+        btnRemove.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnRemoveActionPerformed(evt);
             }
         });
 
-        org.openide.awt.Mnemonics.setLocalizedText(btnRemoveAll, NbBundle.getMessage(ManageGroupsPanel.class, "ManageGroupsPanel.btnRemoveAll.text")); // NOI18N
-        btnRemoveAll.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent evt) {
+        org.openide.awt.Mnemonics.setLocalizedText(btnRemoveAll, org.openide.util.NbBundle.getMessage(ManageGroupsPanel.class, "ManageGroupsPanel.btnRemoveAll.text")); // NOI18N
+        btnRemoveAll.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnRemoveAllActionPerformed(evt);
             }
         });
@@ -162,13 +162,13 @@ class ManageGroupsPanel extends javax.swing.JPanel {
         );
     }// </editor-fold>//GEN-END:initComponents
 
-    private void btnRemoveAllActionPerformed(ActionEvent evt) {//GEN-FIRST:event_btnRemoveAllActionPerformed
+    private void btnRemoveAllActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRemoveAllActionPerformed
         GroupsManager.getDefault().removeAllGroups();
         fillGroups();
         enableButtons();
     }//GEN-LAST:event_btnRemoveAllActionPerformed
 
-    private void btnRemoveActionPerformed(ActionEvent evt) {//GEN-FIRST:event_btnRemoveActionPerformed
+    private void btnRemoveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRemoveActionPerformed
         DocumentGroupImpl group = (DocumentGroupImpl) listGroups.getSelectedValue();
         if( null != group ) {
             GroupsManager.getDefault().removeGroup( group );
@@ -179,8 +179,8 @@ class ManageGroupsPanel extends javax.swing.JPanel {
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private JButton btnRemove;
-    private JButton btnRemoveAll;
+    private javax.swing.JButton btnRemove;
+    private javax.swing.JButton btnRemoveAll;
     private javax.swing.JList listGroups;
     private javax.swing.JScrollPane scrollGroups;
     // End of variables declaration//GEN-END:variables

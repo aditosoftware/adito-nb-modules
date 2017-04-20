@@ -844,7 +844,7 @@ final class Central implements ControllerHandler {
     
     public boolean addModeClosedTopComponent(ModeImpl mode, TopComponent tc) {
         boolean opened = getModeOpenedTopComponents(mode).contains(tc);
-
+        
         // ADITO
         //if(opened && !tc.canClose()) {
         if(opened && !AlwaysOpenTopComponentRegistry.canClose(tc)) {
@@ -976,7 +976,7 @@ final class Central implements ControllerHandler {
         }
         
         boolean viewChange = getModeOpenedTopComponents(mode).contains(tc);
-
+        
         // ADITO
         //if(viewChange && !tc.canClose()) {
         if(viewChange && !AlwaysOpenTopComponentRegistry.canClose(tc)) {
@@ -2071,7 +2071,7 @@ final class Central implements ControllerHandler {
             SwingUtilities.invokeLater( new Runnable() {
                 @Override
                 public void run() {
-                    Frame f = getMainWindow();
+                    java.awt.Frame f = getMainWindow();
                     if( null != f && f.isVisible() ) {
                         f.invalidate();
                         f.repaint();

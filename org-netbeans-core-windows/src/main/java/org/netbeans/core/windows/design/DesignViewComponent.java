@@ -84,7 +84,7 @@ final class DesignViewComponent extends TopComponent implements DocumentListener
         jPanel2 = new javax.swing.JPanel();
         jLabel1 = new javax.swing.JLabel();
 
-        modeName.setText(NbBundle.getMessage(DesignViewComponent.class, "DesignViewComponent.modeName.text", new Object[] {})); // NOI18N
+        modeName.setText(org.openide.util.NbBundle.getMessage(DesignViewComponent.class, "DesignViewComponent.modeName.text", new Object[] {})); // NOI18N
         modeName.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 modeNameActionPerformed(evt);
@@ -113,7 +113,7 @@ final class DesignViewComponent extends TopComponent implements DocumentListener
             .addGap(0, 63, Short.MAX_VALUE)
         );
 
-        org.openide.awt.Mnemonics.setLocalizedText(jLabel1, NbBundle.getMessage(DesignViewComponent.class, "DesignViewComponent.jLabel1.text", new Object[] {})); // NOI18N
+        org.openide.awt.Mnemonics.setLocalizedText(jLabel1, org.openide.util.NbBundle.getMessage(DesignViewComponent.class, "DesignViewComponent.jLabel1.text", new Object[] {})); // NOI18N
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);

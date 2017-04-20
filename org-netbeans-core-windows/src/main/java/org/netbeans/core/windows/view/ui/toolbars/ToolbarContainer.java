@@ -530,7 +530,7 @@ final class ToolbarContainer extends JPanel {
         }
     }
 
-    private static Map<RenderingHints.Key, Object> hintsMap = null;
+    private static java.util.Map<RenderingHints.Key, Object> hintsMap = null;
     @SuppressWarnings("unchecked")
     static final Map getHints() {
         //XXX We REALLY need to put this in a graphics utils lib

@@ -102,7 +102,7 @@ public interface Controller {
     
     public void userDroppedTopComponentsIntoFreeArea(TopComponentDraggable draggable, Rectangle bounds);
     
-    public void userStartedKeyboardDragAndDrop(TopComponentDraggable draggable);
+    public void userStartedKeyboardDragAndDrop( TopComponentDraggable draggable );
 
     // Sliding
     public void userEnabledAutoHide(ModeView modeView, TopComponent tc);

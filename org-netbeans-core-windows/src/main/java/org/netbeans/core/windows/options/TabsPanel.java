@@ -53,7 +53,7 @@ import org.openide.util.NbBundle;
 import org.openide.util.NbPreferences;
 
 @OptionsPanelController.Keywords(keywords={"#KW_TabsOptions"}, location="Appearance", tabTitle="#Tabs_DisplayName")
-public class TabsPanel extends JPanel {
+public class TabsPanel extends javax.swing.JPanel {
 
     protected final TabsOptionsPanelController controller;
     
@@ -80,10 +80,10 @@ public class TabsPanel extends JPanel {
         java.awt.GridBagConstraints gridBagConstraints;
 
         buttonGroup1 = new javax.swing.ButtonGroup();
-        panelDocTabs = new JPanel();
+        panelDocTabs = new javax.swing.JPanel();
         isCloseActivatesMostRecentDocument = new javax.swing.JCheckBox();
         isNewDocumentOpensNextToActiveTab = new javax.swing.JCheckBox();
-        panelTabs = new JPanel();
+        panelTabs = new javax.swing.JPanel();
         jLabel1 = new javax.swing.JLabel();
         radioTop = new javax.swing.JRadioButton();
         radioBottom = new javax.swing.JRadioButton();
@@ -97,8 +97,8 @@ public class TabsPanel extends JPanel {
 
         panelDocTabs.setLayout(new java.awt.GridBagLayout());
 
-        org.openide.awt.Mnemonics.setLocalizedText(isCloseActivatesMostRecentDocument, NbBundle.getMessage(TabsPanel.class, "LBL_CloseActivatesRecentDocument")); // NOI18N
-        isCloseActivatesMostRecentDocument.setToolTipText(NbBundle.getMessage(TabsPanel.class, "TIP_CloseActivatesMostRecentDocument")); // NOI18N
+        org.openide.awt.Mnemonics.setLocalizedText(isCloseActivatesMostRecentDocument, org.openide.util.NbBundle.getMessage(TabsPanel.class, "LBL_CloseActivatesRecentDocument")); // NOI18N
+        isCloseActivatesMostRecentDocument.setToolTipText(org.openide.util.NbBundle.getMessage(TabsPanel.class, "TIP_CloseActivatesMostRecentDocument")); // NOI18N
         isCloseActivatesMostRecentDocument.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 isCloseActivatesMostRecentDocumentActionPerformed(evt);
@@ -112,7 +112,7 @@ public class TabsPanel extends JPanel {
         gridBagConstraints.weighty = 1.0;
         gridBagConstraints.insets = new java.awt.Insets(0, 0, 6, 0);
         panelDocTabs.add(isCloseActivatesMostRecentDocument, gridBagConstraints);
-        isCloseActivatesMostRecentDocument.getAccessibleContext().setAccessibleDescription(NbBundle.getMessage(TabsPanel.class, "TabsPanel.isCloseActivatesMostRecentDocument.AccessibleContext.accessibleDescription")); // NOI18N
+        isCloseActivatesMostRecentDocument.getAccessibleContext().setAccessibleDescription(org.openide.util.NbBundle.getMessage(TabsPanel.class, "TabsPanel.isCloseActivatesMostRecentDocument.AccessibleContext.accessibleDescription")); // NOI18N
 
         org.openide.awt.Mnemonics.setLocalizedText(isNewDocumentOpensNextToActiveTab, NbBundle.getMessage(TabsPanel.class, "TabsPanel.isNewDocumentOpensNextToActiveTab.text")); // NOI18N
         isNewDocumentOpensNextToActiveTab.addActionListener(new java.awt.event.ActionListener() {
@@ -290,8 +290,8 @@ public class TabsPanel extends JPanel {
     private javax.swing.JCheckBox isCloseActivatesMostRecentDocument;
     private javax.swing.JCheckBox isNewDocumentOpensNextToActiveTab;
     private javax.swing.JLabel jLabel1;
-    private JPanel panelDocTabs;
-    private JPanel panelTabs;
+    private javax.swing.JPanel panelDocTabs;
+    private javax.swing.JPanel panelTabs;
     private javax.swing.JRadioButton radioBottom;
     private javax.swing.JRadioButton radioLeft;
     private javax.swing.JRadioButton radioRight;

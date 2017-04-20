@@ -44,9 +44,6 @@
 
 package org.netbeans.core.windows.view.ui;
 
-import de.adito.aditoweb.nbm.nbide.nbaditointerface.INetbeansAditoInterface;
-import de.adito.aditoweb.nbm.nbide.nbaditointerface.common.IAditoColorProvider;
-
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -63,6 +60,8 @@ import javax.swing.*;
 import javax.swing.plaf.UIResource;
 import javax.swing.plaf.basic.BasicLabelUI;
 
+import de.adito.aditoweb.nbm.nbide.nbaditointerface.INetbeansAditoInterface;
+import de.adito.aditoweb.nbm.nbide.nbaditointerface.common.IAditoColorProvider;
 import org.netbeans.core.windows.actions.MaximizeWindowAction;
 import org.openide.awt.CloseButtonFactory;
 import org.openide.awt.TabbedPaneFactory;
@@ -186,7 +185,7 @@ final class CloseButtonTabbedPane extends JTabbedPane implements PropertyChangeL
         super.insertTab(title, icon, component, tip, index);
             component.addPropertyChangeListener(TabbedPaneFactory.NO_CLOSE_BUTTON, this);
             if (!hideCloseButton(component)) {
-                setTabComponentAt(index, new ButtonTab(this));
+                setTabComponentAt(index, new ButtonTab());
             }
         if (title != null) {
             setTitleAt(index, title);
@@ -347,6 +346,11 @@ final class CloseButtonTabbedPane extends JTabbedPane implements PropertyChangeL
         }
     }
 
+    private static boolean isWindows10() {
+        String osName = System.getProperty ("os.name");
+        return osName.indexOf("Windows 10") >= 0
+            || (osName.equals( "Windows NT (unknown)" ) && "10.0".equals( System.getProperty("os.version") ));
+    }
 
     private boolean isWindowsVistaLaF() {
         String osName = System.getProperty ("os.name");
@@ -523,7 +527,7 @@ final class CloseButtonTabbedPane extends JTabbedPane implements PropertyChangeL
             Component c = (Component) evt.getSource();
             int idx = indexOfComponent(c);
             boolean noCloseButton = (Boolean) evt.getNewValue();
-            setTabComponentAt(idx, noCloseButton ? null : new ButtonTab(this));
+            setTabComponentAt(idx, noCloseButton ? null : new ButtonTab());
         }
     }
     
@@ -533,7 +537,7 @@ final class CloseButtonTabbedPane extends JTabbedPane implements PropertyChangeL
     class ButtonTab extends JPanel {
         JLabel label;
 
-        public ButtonTab(JTabbedPane _tab) {
+        public ButtonTab() {
             super(new FlowLayout(FlowLayout.LEFT, 0, 0));
             setOpaque(false);
             label = new JLabel("") {
@@ -553,8 +557,17 @@ final class CloseButtonTabbedPane extends JTabbedPane implements PropertyChangeL
                     lastText = currentText;
                     if (!super.getText().equals(currentText)) {
                         setText(currentText);
-                    }
+                        }
                     return currentText;
+                }
+                
+                @Override
+                public void setText(String text) {
+                    super.setText(text);
+                    if (isWindowsLaF() && isWindows10()) {
+                        int r = text.endsWith(" ") || text.endsWith("&nbsp;</html>") ? 0 : 3; // NOI18N
+                        setBorder(BorderFactory.createEmptyBorder(0, 0, 0, r));
+                    }
                 }
 
                 @Override
@@ -568,7 +581,7 @@ final class CloseButtonTabbedPane extends JTabbedPane implements PropertyChangeL
                 }
             };
 
-            label.setUI(new _LabelUI(_tab));
+            label.setUI(new _LabelUI());
 
             add(label);
             JButton tabCloseButton = CloseButtonFactory.createCloseButton();
@@ -608,13 +621,6 @@ final class CloseButtonTabbedPane extends JTabbedPane implements PropertyChangeL
   // changed by ADITO
   private class _LabelUI extends BasicLabelUI
   {
-    private JTabbedPane _tab;
-
-    private _LabelUI(JTabbedPane pTabPane)
-    {
-      _tab = pTabPane;
-    }
-
     @Override
     public void paint(Graphics g, JComponent c)
     {
@@ -626,7 +632,7 @@ final class CloseButtonTabbedPane extends JTabbedPane implements PropertyChangeL
         if (colorProvider != null)
         {
           // der aktive Tab ist dunkel und bekommt eine helle Schriftfarbe. Bei den inaktiven Tabs ist es umgekehrt
-          if (indexOfTabComponent(c.getParent()) == _tab.getSelectedIndex())
+          if (indexOfTabComponent(c.getParent()) == getSelectedIndex())
             label.setForeground(colorProvider.getWhite());
           else
             label.setForeground(colorProvider.getDesignerTabColor());

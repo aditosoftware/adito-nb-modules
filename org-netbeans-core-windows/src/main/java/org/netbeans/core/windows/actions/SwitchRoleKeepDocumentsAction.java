@@ -56,7 +56,7 @@ import org.openide.util.NbBundle.Messages;
  * to keep all opened document windows in the new role.
  * 
  * @see ActionEvent#getActionCommand() 
- * @see WindowManagerImpl#setRole(String)
+ * @see WindowManagerImpl#setRole(java.lang.String) 
  * 
  * @since 2.34
  * 

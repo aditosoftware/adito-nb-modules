@@ -146,8 +146,8 @@ final class DnDSupport implements DragSourceListener, DragGestureListener, DropT
     public DnDSupport( ToolbarConfiguration config ) {
         this.config = config;
         dragSource.addDragSourceMotionListener(this);
-        dragRemoveCursor = Utilities.createCustomCursor(ToolbarPool.getDefault(),
-                                                        ImageUtilities.loadImage("org/netbeans/core/windows/resources/delete.gif"), "NO_ACTION_MOVE" ); //NOI18N
+        dragRemoveCursor = Utilities.createCustomCursor( ToolbarPool.getDefault(), 
+                ImageUtilities.loadImage( "org/netbeans/core/windows/resources/delete.gif"), "NO_ACTION_MOVE" ); //NOI18N
     }
 
     public void register(Component c) {

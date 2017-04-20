@@ -190,7 +190,7 @@ public final class DefaultSeparateContainer extends AbstractModeContainer {
         public ModeFrame (AbstractModeContainer abstractModeContainer, ModeView view) {
             super();
             // To be able to activate on mouse click.
-            enableEvents(AWTEvent.MOUSE_EVENT_MASK);
+            enableEvents(java.awt.AWTEvent.MOUSE_EVENT_MASK);
             modeBase = new SharedModeUIBaseImpl(abstractModeContainer, view, this);
             setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         }
@@ -285,7 +285,7 @@ public final class DefaultSeparateContainer extends AbstractModeContainer {
         public ModeDialog (Frame owner, AbstractModeContainer abstractModeContainer, ModeView view) {
             super(owner);
             // To be able to activate on mouse click.
-            enableEvents(AWTEvent.MOUSE_EVENT_MASK);
+            enableEvents(java.awt.AWTEvent.MOUSE_EVENT_MASK);
             modeBase = new SharedModeUIBaseImpl(abstractModeContainer, view, this);
             
             try {
@@ -415,7 +415,7 @@ public final class DefaultSeparateContainer extends AbstractModeContainer {
      * in which JDialog and JFrame separate mode differs
      */
     public interface ModeUIBase extends ModeComponent, TopComponentDroppable {
-        public void updateTitle(String title);
+        public void updateTitle (String title);
     }
 
     /** Base impl of separate UI element, used as delegatee for shared things.

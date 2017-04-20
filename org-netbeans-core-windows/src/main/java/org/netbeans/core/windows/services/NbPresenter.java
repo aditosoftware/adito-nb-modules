@@ -47,11 +47,13 @@ package org.netbeans.core.windows.services;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Container;
 import java.awt.DefaultKeyboardFocusManager;
 import java.awt.Dialog;
 import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.FlowLayout;
+import java.awt.FocusTraversalPolicy;
 import java.awt.Frame;
 import java.awt.GraphicsDevice;
 import java.awt.GridBagConstraints;
@@ -84,6 +86,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
+import javax.swing.FocusManager;
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
 import javax.swing.Icon;
@@ -256,7 +259,10 @@ implements PropertyChangeListener, WindowListener, Mutex.Action<Void>, Comparato
             // #55273: Dialogs created by DialogDisplayer are not disposed after close
             setDefaultCloseOperation (WindowConstants.DISPOSE_ON_CLOSE);
         }
-        
+        if (!Constants.AUTO_FOCUS) {
+            setAutoRequestFocus(false);
+        }
+
         descriptor = d;
 
         buttonListener = new ButtonListener();
@@ -283,11 +289,26 @@ implements PropertyChangeListener, WindowListener, Mutex.Action<Void>, Comparato
         if(comp == null) {
             return;
         }
-        
-        if(!(comp instanceof JComponent) 
-            || !((JComponent)comp).requestDefaultFocus()) {
-                
-            comp.requestFocus();
+
+        if (/*!Constants.AUTO_FOCUS &&*/ FocusManager.getCurrentManager().getActiveWindow() == null) {
+            // Do not steal focus if no Java window have it
+            Component defComp = null;
+            Container nearestRoot =
+                (comp instanceof Container && ((Container) comp).isFocusCycleRoot()) ? (Container) comp : comp.getFocusCycleRootAncestor();
+            if (nearestRoot != null) {
+                defComp = nearestRoot.getFocusTraversalPolicy().getDefaultComponent(nearestRoot);
+            }
+            if (defComp != null) {
+                defComp.requestFocusInWindow();
+            } else {
+                comp.requestFocusInWindow();
+            }
+        } else {
+            if (!(comp instanceof JComponent)
+                || !((JComponent)comp).requestDefaultFocus()) {
+
+                comp.requestFocus();
+            }
         }
     }
     
@@ -823,7 +844,7 @@ implements PropertyChangeListener, WindowListener, Mutex.Action<Void>, Comparato
             // add final button panel to the dialog
             if ((currentButtonsPanel != null)&&(currentButtonsPanel.getComponentCount() != 0)) {
                 if (currentButtonsPanel.getBorder() == null) {
-                    currentButtonsPanel.setBorder(new javax.swing.border.EmptyBorder(new Insets(11, 6, 5, 5)));
+                    currentButtonsPanel.setBorder(new javax.swing.border.EmptyBorder(new java.awt.Insets(11, 6, 5, 5)));
                 }
                 getContentPane().add(currentButtonsPanel, BorderLayout.SOUTH);
             }
@@ -862,7 +883,7 @@ implements PropertyChangeListener, WindowListener, Mutex.Action<Void>, Comparato
             // add final button panel to the dialog
             if (currentButtonsPanel != null) {
                 if (currentButtonsPanel.getBorder() == null) {
-                    currentButtonsPanel.setBorder(new javax.swing.border.EmptyBorder(new Insets(6, 7, 5, 5)));
+                    currentButtonsPanel.setBorder(new javax.swing.border.EmptyBorder(new java.awt.Insets(6, 7, 5, 5)));
                 }
                 getContentPane().add(currentButtonsPanel, BorderLayout.EAST);
             }
@@ -1035,7 +1056,7 @@ implements PropertyChangeListener, WindowListener, Mutex.Action<Void>, Comparato
         } else {
             // we will have to use dynamic method invocation to add the action listener
             // to generic component (and we succeed only if it has the addActionListener method)
-            Method m = null;
+            java.lang.reflect.Method m = null;
             try {
                 m = comp.getClass().getMethod(add ? "addActionListener" : "removeActionListener", new Class[] { ActionListener.class });// NOI18N
                 try {
@@ -1387,7 +1408,7 @@ implements PropertyChangeListener, WindowListener, Mutex.Action<Void>, Comparato
                 // all options should close
                 dispose();
             } else {
-                List l = Arrays.asList(arr);
+                java.util.List l = java.util.Arrays.asList(arr);
                 
                 if (l.contains(pressedOption)) {
                     dispose();
@@ -1480,7 +1501,7 @@ implements PropertyChangeListener, WindowListener, Mutex.Action<Void>, Comparato
             try {
                 markers = DefaultKeyboardFocusManager.class.getDeclaredField("typeAheadMarkers"); // NOI18N
                 markers.setAccessible(true);
-                dequeue = DefaultKeyboardFocusManager.class.getDeclaredMethod("dequeueKeyEvents", new Class[] { Long.TYPE, Component.class });
+                dequeue = DefaultKeyboardFocusManager.class.getDeclaredMethod("dequeueKeyEvents", new Class[] { Long.TYPE, java.awt.Component.class });
                 dequeue.setAccessible(true);
             } catch (Throwable ex) {
                 LOG.log(Level.WARNING, "Not activating workaround for #50423", ex); // NOI18N

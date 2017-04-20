@@ -232,7 +232,7 @@ public final class Switches {
     /**
      * @return True to hide and show the main window while switching window layout
      * role.
-     * @see WindowManager#setRole(String)
+     * @see WindowManager#setRole(java.lang.String) 
      * @since 2.34
      */
     public static boolean isShowAndHideMainWindowWhileSwitchingRole() {
