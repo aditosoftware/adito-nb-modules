@@ -12,7 +12,7 @@
   <groupId>org.netbeans.api</groupId>
   <artifactId>org-netbeans-modules-db</artifactId>
   <packaging>nbm</packaging>
-  <version>RELEASE81</version>
+  <version>RELEASE82</version>
   <name>Netbeans IDE module: org-netbeans-modules-db</name>
 
   <dependencies>
@@ -156,7 +156,7 @@
             <dependency>
               <id>org.netbeans.modules:org-netbeans-modules-db-metadata-model</id>
               <type>impl</type>
-              <explicitValue>org.netbeans.modules.db.metadata.model/1 = 201510222201</explicitValue>
+              <explicitValue>org.netbeans.modules.db.metadata.model/1 = 201609300101</explicitValue>
             </dependency>
           </moduleDependencies>
 

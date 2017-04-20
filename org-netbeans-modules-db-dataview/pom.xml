@@ -12,7 +12,7 @@
   <groupId>org.netbeans.modules</groupId>
   <artifactId>org-netbeans-modules-db-dataview</artifactId>
   <packaging>nbm</packaging>
-  <version>RELEASE81</version>
+  <version>RELEASE82</version>
   <name>Netbeans IDE module: org-netbeans-modules-db-dataview</name>
 
   <dependencies>

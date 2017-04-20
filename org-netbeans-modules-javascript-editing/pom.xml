@@ -71,6 +71,11 @@
     </dependency>
     <dependency>
       <groupId>org.netbeans.api</groupId>
+      <artifactId>org-netbeans-modules-csl-types</artifactId>
+      <version>${netbeans.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.netbeans.api</groupId>
       <artifactId>org-netbeans-modules-editor</artifactId>
       <version>${netbeans.version}</version>
     </dependency>
@@ -226,9 +231,14 @@
 
           <moduleDependencies>
             <dependency>
+              <id>org.netbeans.modules:org-netbeans-modules-html-editor</id>
+              <type>impl</type>
+              <explicitValue>org.netbeans.modules.html.editor/2 = 201609300101</explicitValue>
+            </dependency>
+            <dependency>
               <id>org.netbeans.modules:org-netbeans-modules-html-editor-lib</id>
               <type>impl</type>
-              <explicitValue>org.netbeans.modules.html.editor.lib/3 = 201510222201</explicitValue>
+              <explicitValue>org.netbeans.modules.html.editor.lib/3 = 201609300101</explicitValue>
             </dependency>
           </moduleDependencies>
 
