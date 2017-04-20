@@ -94,7 +94,7 @@ class NbIO implements InputOutputExt, IInputOutputFilter, InputOutput, Lookup.Pr
 
     private IOutputTabFilterDescription filterOutputDescription;
 
-    private PropertyChangeSupport changes = new PropertyChangeSupport( this );
+    private PropertyChangeSupport changes = new PropertyChangeSupport(this );
 
     /** Creates a new instance of NbIO
      * @param name The name of the IO
@@ -633,7 +633,11 @@ class NbIO implements InputOutputExt, IInputOutputFilter, InputOutput, Lookup.Pr
 
         @Override
         protected FoldHandleDefinition startFold(boolean expanded) {
-            synchronized (outOrException()) {
+            final OutWriter outWriter = out();
+            if (outWriter == null) {
+                return new DummyFoldHandleDefinition();
+            }
+            synchronized (outWriter) {
                 if (currentFold != null) {
                     throw new IllegalStateException(
                             "The last fold hasn't been finished yet");  //NOI18N
@@ -643,7 +647,26 @@ class NbIO implements InputOutputExt, IInputOutputFilter, InputOutput, Lookup.Pr
             }
         }
 
-        class NbIoFoldHandleDefinition extends FoldHandleDefinition {
+        /**
+         * FoldHandleDefinition used when the output is already closed.
+         */
+        class DummyFoldHandleDefinition extends IOFolding.FoldHandleDefinition {
+
+            @Override
+            public void finish() {
+            }
+
+            @Override
+            public FoldHandleDefinition startFold(boolean expanded) {
+                return new DummyFoldHandleDefinition();
+            }
+
+            @Override
+            public void setExpanded(boolean expanded) {
+            }
+        }
+
+        class NbIoFoldHandleDefinition extends IOFolding.FoldHandleDefinition {
 
             private final NbIoFoldHandleDefinition parent;
             private final int start;
