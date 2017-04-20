@@ -85,7 +85,7 @@ public class TimeType {
     private static final long INCREMENT_DAY = 1 * 24 * 60 * 60 * 1000;
     
     public static long normalizeTime(long rawTimeMillis) {
-        int dstOffset = (TIME_ZONE.inDaylightTime(new Date(rawTimeMillis))) ? TIME_ZONE.getDSTSavings() : 0;
+        int dstOffset = (TIME_ZONE.inDaylightTime(new java.util.Date(rawTimeMillis))) ? TIME_ZONE.getDSTSavings() : 0;
         return (rawTimeMillis < INCREMENT_DAY) ? rawTimeMillis : (rawTimeMillis % INCREMENT_DAY) + dstOffset;
     }
 
@@ -98,7 +98,7 @@ public class TimeType {
     public static Time convert(Object value) throws DBException {
         if (null == value) {
             return null;
-        } else if (value instanceof Time) {
+        } else if (value instanceof java.sql.Time) {
             return (Time) value;
         } else if (value instanceof String) {
             Date dVal = doParse ((String) value);

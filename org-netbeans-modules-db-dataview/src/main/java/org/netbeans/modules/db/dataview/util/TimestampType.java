@@ -90,8 +90,8 @@ public class TimestampType {
             return (Timestamp) value;
         } else if (value instanceof java.sql.Date) {
             return new Timestamp(((java.sql.Date)value).getTime());
-        }  else if (value instanceof Date) {
-            return new Timestamp(((Date)value).getTime());
+        }  else if (value instanceof java.util.Date) {
+            return new Timestamp(((java.util.Date)value).getTime());
         } else if (value instanceof String) {
             Date dVal = doParse ((String) value);
             if (dVal == null) {

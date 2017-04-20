@@ -48,15 +48,7 @@ import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.StringTokenizer;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.netbeans.api.db.sql.support.SQLIdentifiers;
@@ -156,7 +148,9 @@ public final class DBMetaDataFactory {
         try {
             rs = dbmeta.getPrimaryKeys(setToNullIfEmpty(tcatalog), setToNullIfEmpty(tschema), tname);
             return new DBPrimaryKey(rs);
-        } catch (SQLException e) {
+        } catch (SQLException | NullPointerException e) {
+            // NullPointerException is thrown by Microsoft SQL Server when
+            // set showplan_* on is issued
             return null;
         } finally {
             DataViewUtils.closeResources(rs);
@@ -169,7 +163,9 @@ public final class DBMetaDataFactory {
         try {
             rs = dbmeta.getImportedKeys(setToNullIfEmpty(table.getCatalog()), setToNullIfEmpty(table.getSchema()), table.getName());
             fkList = DBForeignKey.createForeignKeyColumnMap(table, rs);
-        } catch (SQLException e) {
+        } catch (SQLException | NullPointerException e) {
+            // NullPointerException is thrown by Microsoft SQL Server when
+            // set showplan_* on is issued
             return null;
         } finally {
             DataViewUtils.closeResources(rs);
@@ -189,6 +185,10 @@ public final class DBMetaDataFactory {
             if (tableName == null) {
                 tableName = noTableName;
             }
+            // ADITO #4458
+            if (Objects.equals(tableName, ""))
+                tableName = _calculateTableName(sql);
+
             String schemaName = rsMeta.getSchemaName(i);
             // although Javadoc admit of returning null, SQLite returns null
             if (schemaName == null) {
@@ -283,8 +283,8 @@ public final class DBMetaDataFactory {
             table.setQuoter(sqlquoter);
         }
 
+        // ADITO
         DBTable table = tables.get(noTableName);
-
         // MsSQL liefert mehr als einen Tabellennamen...
         // Daher werden die beiden Ergebnisse zusammengefasst.
         if(tables.size() > 1 && tables.get(noTableName) != null)
@@ -351,7 +351,9 @@ public final class DBMetaDataFactory {
                     col.setDefaultValue(defaultValue.trim());
                 }
             }
-        } catch (SQLException e) {
+        } catch (SQLException | NullPointerException e) {
+            // NullPointerException is thrown by Microsoft SQL Server when
+            // set showplan_* on is issued
         } finally {
             DataViewUtils.closeResources(rs);
         }
@@ -393,6 +395,36 @@ public final class DBMetaDataFactory {
         } else if (splitByDot.length == 1) {
             table.setName(unQuoteIfNeeded(splitByDot[0]));
         }
+    }
+
+    // ADITO
+    private String _calculateTableName(String sql)
+    {
+      String tableName = "";
+      if (sql.toUpperCase().contains("FROM")) { // NOI18N
+        // User may type "FROM" in either lower, upper or mixed case
+        String[] splitByFrom = sql.toUpperCase().split("FROM"); // NOI18N
+        String fromsql = sql.substring(sql.length() - splitByFrom[1].length());
+        if (fromsql.toUpperCase().contains("WHERE")) { // NOI18N
+          splitByFrom = fromsql.toUpperCase().split("WHERE"); // NOI18N
+          fromsql = fromsql.substring(0, splitByFrom[0].length());
+        } else if (fromsql.toUpperCase().contains("ORDER BY")) { // NOI18N
+          splitByFrom = fromsql.toUpperCase().split("ORDER BY"); // NOI18N
+          fromsql = fromsql.substring(0, splitByFrom[0].length());
+        }
+        if (!sql.toUpperCase().contains("JOIN")) { // NOI18N
+          StringTokenizer t = new StringTokenizer(fromsql, ","); // NOI18N
+
+          if (t.hasMoreTokens()) {
+            tableName = t.nextToken().trim();
+          }
+
+          if (t.hasMoreTokens()) {
+            tableName = "";
+          }
+        }
+      }
+      return tableName;
     }
 
     private String unQuoteIfNeeded(String id) {

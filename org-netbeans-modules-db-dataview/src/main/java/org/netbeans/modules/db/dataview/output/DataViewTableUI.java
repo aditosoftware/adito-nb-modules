@@ -80,6 +80,7 @@ import org.netbeans.modules.db.dataview.meta.DBException;
 import org.netbeans.modules.db.dataview.meta.DBTable;
 import org.netbeans.modules.db.dataview.table.ResultSetCellRenderer;
 import org.netbeans.modules.db.dataview.table.ResultSetJXTable;
+import org.netbeans.modules.db.dataview.util.ColorHelper;
 import org.openide.DialogDisplayer;
 import org.openide.NotifyDescriptor;
 import org.openide.util.Lookup;
@@ -177,16 +178,8 @@ final class DataViewTableUI extends ResultSetJXTable {
         private final JComponent holder = new JComponent() {};
 
         static {
-            Color selectedFgFromMngr = UIManager.getColor(
-                    "nb.dataview.tablecell.edited.selected.foreground"); //NOI18N
-            selectedForeground = selectedFgFromMngr != null
-                    ? selectedFgFromMngr
-                    : new Color(229, 148, 0);
-            Color unselectedFgFromMngr = UIManager.getColor(
-                    "nb.dataview.tablecell.edited.unselected.foreground"); //NOI18N
-            unselectedForeground = unselectedFgFromMngr != null
-                    ? unselectedFgFromMngr
-                    : new Color(0, 128, 0); // green color
+            selectedForeground = ColorHelper.getTablecellEditedSelectedForeground();
+            unselectedForeground = ColorHelper.getTablecellEditedUnselectedForeground();
         }
 
         public UpdatedResultSetCellRenderer() {
@@ -264,27 +257,17 @@ final class DataViewTableUI extends ResultSetJXTable {
         if (dbcol.isGenerated() || !dbcol.isNullable()) {
             Toolkit.getDefaultToolkit().beep();
         } else {
-            Class modelClass = getModel().getColumnClass(modelColumn);
-            if (Blob.class.isAssignableFrom(modelClass)
-                    || Clob.class.isAssignableFrom(modelClass)) {
-                setValueAt(null, row, col);
-            } else {
-                setValueAt("<NULL>", row, col);
-            }
+            setValueAt(null, row, col);
         }
     }
 
     private void setCellToDefault(int row, int col) {
         int modelColumn = convertColumnIndexToModel(col);
         DBColumn dbcol = getModel().getColumn(modelColumn);
-        Object val = getValueAt(row, col);
         if (dbcol.isGenerated() || !dbcol.hasDefault()) {
             Toolkit.getDefaultToolkit().beep();
-        } else if (val != null && val instanceof String
-                && ((String) val).equals("<DEFAULT>")) {
-            setValueAt(null, row, col);
         } else {
-            setValueAt("<DEFAULT>", row, col);
+            setValueAt(SQLConstant.DEFAULT, row, col);
         }
         setRowSelectionInterval(row, row);
     }
@@ -415,6 +398,7 @@ final class DataViewTableUI extends ResultSetJXTable {
             @Override
             public void actionPerformed(ActionEvent e) {
                 try {
+                    // ADITO
                     DBTable table = pageContext.getTableMetaData().getFirstRealTable();
                     String createSQL = dataView.getSQLStatementGenerator().generateCreateStatement(table);
                     ShowSQLDialog dialog = new ShowSQLDialog();

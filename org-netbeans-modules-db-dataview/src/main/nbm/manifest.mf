@@ -1,15 +1,13 @@
 Manifest-Version: 1.0
-Ant-Version: Apache Ant 1.9.2
-Created-By: 1.7.0_25-b15 (Oracle Corporation)
 OpenIDE-Module-Friends: org.netbeans.modules.etl.editor, org.netbeans.
  modules.db.core, org.netbeans.modules.dm.virtual.db, org.netbeans.mod
  ules.edm.editor
 OpenIDE-Module-Java-Dependencies: Java > 1.7
-OpenIDE-Module-Implementation-Version: 201408251540
+OpenIDE-Module-Implementation-Version: 201609300101
 AutoUpdate-Show-In-Client: false
 OpenIDE-Module: org.netbeans.modules.db.dataview
 OpenIDE-Module-Localizing-Bundle: org/netbeans/modules/db/dataview/Bun
  dle.properties
-OpenIDE-Module-Specification-Version: 1.25.1
+OpenIDE-Module-Specification-Version: 1.33.1
 OpenIDE-Module-Requires: org.openide.modules.ModuleFormat1
 

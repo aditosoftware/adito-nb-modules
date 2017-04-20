@@ -1,22 +1,41 @@
 /*
- * $Id: JXDateTimePicker.java,v 1.90 2008/09/04 10:27:06 kleopatra Exp $
- *
- * Copyright 2004 Sun Microsystems, Inc., 4150 Network Circle,
- * Santa Clara, California 95054, U.S.A. All rights reserved.
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Lesser General Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public
- * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+
+Copyright (c) 2008, 2016 Oracle and/or its affiliates. All rights reserved.
+
+Oracle and Java are registered trademarks of Oracle and/or its affiliates.
+Other names may be trademarks of their respective owners.
+
+The contents of this file are subject to the terms of either the GNU
+General Public License Version 2 only ("GPL") or the Common
+Development and Distribution License("CDDL") (collectively, the
+"License"). You may not use this file except in compliance with the
+License. You can obtain a copy of the License at
+http://www.netbeans.org/cddl-gplv2.html
+or nbbuild/licenses/CDDL-GPL-2-CP. See the License for the
+specific language governing permissions and limitations under the
+License.  When distributing the software, include this License Header
+Notice in each file and include the License file at
+nbbuild/licenses/CDDL-GPL-2-CP.  Oracle designates this
+particular file as subject to the "Classpath" exception as provided
+by Oracle in the GPL Version 2 section of the License file that
+accompanied this code. If applicable, add the following below the
+License Header, with the fields enclosed by brackets [] replaced by
+your own identifying information:
+"Portions Copyrighted [year] [name of copyright owner]"
+
+If you wish your version of this file to be governed by only the CDDL
+or only the GPL Version 2, indicate your decision by adding
+"[Contributor] elects to include this software in this distribution
+under the [CDDL or GPL Version 2] license." If you do not indicate a
+single choice of license, a recipient has the option to distribute
+your version of this file under either the CDDL, the GPL Version 2 or
+to extend the choice of license to its licensees as provided above.
+However, if you add GPL Version 2 code and therefore, elected the GPL
+Version 2 license, then the option applies only if the new code is
+made subject to such option by the copyright holder.
+
+Contributor(s):
  */
 package org.netbeans.modules.db.dataview.util;
 
@@ -72,7 +91,7 @@ import org.jdesktop.swingx.util.Contract;
  * JComboBox. The dates can be typed into a text field or selected from a
  * JXMonthView which opens in a JXPopupMenu on user's request.
  * <p>
- * 
+ *
  * The date selection is controlled by the JXMonthView's DateSelectionModel.
  * This allows the use of all its functionality in the JXDateTimePicker as well.
  * F.i. restrict the selection to a date in the current or next week:
@@ -359,30 +378,15 @@ public class JXDateTimePicker extends JComponent {
 //        _monthView.setSelectionModel(new SingleDaySelectionModel());
         _monthView.setTraversable(true);
 
-        if (UIManager.getColor("nb.dataview.jxdatetimepicker.background") != null) { //NOI18N
-            _monthView.setBackground(UIManager.getColor("nb.dataview.jxdatetimepicker.background")); //NOI18N
-        }
-        if (UIManager.getColor("nb.dataview.jxdatetimepicker.foreground") != null) { //NOI18N
-            _monthView.setForeground(UIManager.getColor("nb.dataview.jxdatetimepicker.foreground")); //NOI18N
-        }
-        if (UIManager.getColor("nb.dataview.jxdatetimepicker.selectedBackground") != null) { //NOI18N
-            _monthView.setSelectionBackground(UIManager.getColor("nb.dataview.jxdatetimepicker.selectedBackground")); //NOI18N
-        }
-        if (UIManager.getColor("nb.dataview.jxdatetimepicker.selectedForeground") != null) { //NOI18N
-            _monthView.setSelectionForeground(UIManager.getColor("nb.dataview.jxdatetimepicker.selectedForeground")); //NOI18N
-        }
-        if (UIManager.getColor("nb.dataview.jxdatetimepicker.monthStringBackground") != null) {
-            _monthView.setMonthStringBackground(UIManager.getColor("nb.dataview.jxdatetimepicker.monthStringBackground")); //NOI18N
-        }
-        if (UIManager.getColor("nb.dataview.jxdatetimepicker.monthStringForeground") != null) { //NOI18N
-            _monthView.setMonthStringForeground(UIManager.getColor("nb.dataview.jxdatetimepicker.monthStringForeground")); //NOI18N
-        }
-        if (UIManager.getColor("nb.dataview.jxdatetimepicker.daysOfTheWeekForeground") != null) { //NOI18N
-            _monthView.setDaysOfTheWeekForeground(UIManager.getColor("nb.dataview.jxdatetimepicker.daysOfTheWeekForeground")); //NOI18N
-        }
-        if (UIManager.getColor("nb.dataview.jxdatetimepicker.todayBackground") != null) { //NOI18N
-            _monthView.setTodayBackground(UIManager.getColor("nb.dataview.jxdatetimepicker.todayBackground")); //NOI18N
-        }
+        _monthView.setBackground(ColorHelper.getJxdatetimepickerBackground());
+        _monthView.setForeground(ColorHelper.getJxdatetimepickerForeground());
+        _monthView.setSelectionBackground(ColorHelper.getJxdatetimepickerSelectedBackground()); //NOI18N
+        _monthView.setSelectionForeground(ColorHelper.getJxdatetimepickerSelectedForeground()); //NOI18N
+        _monthView.setMonthStringBackground(ColorHelper.getJxdatetimepickerMonthStringBackground()); //NOI18N
+        _monthView.setMonthStringForeground(ColorHelper.getJxdatetimepickerMonthStringForeground()); //NOI18N
+        _monthView.setDaysOfTheWeekForeground(ColorHelper.getJxdatetimepickerDaysOfTheWeekForeground()); //NOI18N
+        _monthView.setTodayBackground(ColorHelper.getJxdatetimepickerTodayBackground()); //NOI18N
+
         _monthView.addPropertyChangeListener(getMonthViewListener());
     }
 
@@ -476,7 +480,7 @@ public class JXDateTimePicker extends JComponent {
      *    null array is allowed and resets the formatter to use the 
      *    localized default formats.
      * @throws NullPointerException any array element is null.
-     * @see SimpleDateFormat
+     * @see java.text.SimpleDateFormat
      */
     public void setFormats(String... formats) {
         DateFormat[] dateFormats = null;
@@ -617,7 +621,7 @@ public class JXDateTimePicker extends JComponent {
      * 
      * @param linkDay     the Date to set on the LinkPanel 
      * @param linkFormatString String used to format the link
-     * @see MessageFormat
+     * @see java.text.MessageFormat
      */
     public void setLinkDay(java.util.Date linkDay, String linkFormatString) {
         setLinkFormat(new MessageFormat(linkFormatString));
@@ -752,7 +756,7 @@ public class JXDateTimePicker extends JComponent {
      * set as the current value. This has no effect if there is no current
      * AbstractFormatter installed.
      *
-     * @throws ParseException Throws parse exception if the date
+     * @throws java.text.ParseException Throws parse exception if the date
      *                                  can not be parsed.
      */
     public void commitEdit() throws ParseException {
@@ -943,19 +947,13 @@ public class JXDateTimePicker extends JComponent {
         @SuppressWarnings("rawtypes")
         TodayPanel() {
             super(new FlowLayout());
-            Color gradientStart = UIManager.getColor("nb.dataview.jxdatetimepicker.todayPanel.background.gradient.start") != null //NOI18N
-                    ? UIManager.getColor("nb.dataview.jxdatetimepicker.todayPanel.background.gradient.start") //NOI18N
-                    : new Color(238, 238, 238);
-            Color gradientEnd = UIManager.getColor("nb.dataview.jxdatetimepicker.todayPanel.background.gradient.end") != null //NOI18N
-                    ? UIManager.getColor("nb.dataview.jxdatetimepicker.todayPanel.background.gradient.end") //NOI18N
-                    : Color.WHITE;
+            Color gradientStart = ColorHelper.getJxdatetimepickerTodayPanelBackgroundGradientStart();
+            Color gradientEnd = ColorHelper.getJxdatetimepickerTodayPanelBackgroundGradientEnd();
             setBackgroundPainter(new MattePainter(new GradientPaint(0, 0, gradientStart, 0, 1, gradientEnd)));
             todayAction = new TodayAction();
             todayLink = new JXHyperlink(todayAction);
             todayLink.addMouseListener(createDoubleClickListener());
-            Color textColor = UIManager.getColor("nb.dataview.jxdatetimepicker.todayPanel.linkForeground") != null //NOI18N
-                    ? UIManager.getColor("nb.dataview.jxdatetimepicker.todayPanel.linkForeground") //NOI18N
-                    : new Color(16, 66, 104);
+            Color textColor = ColorHelper.getJxdatetimepickerTodayPanelLinkForeground();
             todayLink.setUnclickedColor(textColor);
             todayLink.setClickedColor(textColor);
             add(todayLink);

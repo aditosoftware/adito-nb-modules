@@ -127,7 +127,7 @@ public class DBReadWriteHelper {
                     } else {
                         return new Long(ldata);
                     }
-                } catch (SQLDataException ex) {
+                } catch (java.sql.SQLDataException ex) {
                     // In case of unsigned BIGINT, long is to small to take it
                     // for now getString is asumed to produce greates compatiblity
                     // The returned string is used to create a BigInteger
@@ -176,7 +176,7 @@ public class DBReadWriteHelper {
                     } else {
                         return new Integer(idata);
                     }
-                } catch (SQLDataException ex) {
+                } catch (java.sql.SQLDataException ex) {
                     // in case of an unsigned integer, the java Integer is
                     // to small to hold it => switch to long in that case
                     long ldata = rs.getLong(index);
@@ -256,7 +256,7 @@ public class DBReadWriteHelper {
                     
                     try {
                         clob.free();
-                    } catch (AbstractMethodError err) {
+                    } catch (java.lang.AbstractMethodError err) {
                         // Blob gained a new method in jdbc4 (drivers compiled
                         // against older jdks don't provide this methid
                     } catch (SQLException ex) {
@@ -269,7 +269,7 @@ public class DBReadWriteHelper {
                     // clob data or can for example not provide a longvarchar
                     // as clob - so fall back to our implementation of clob
                 } catch (SQLException ex) {
-                } catch (UnsupportedOperationException ex) {
+                } catch (java.lang.UnsupportedOperationException ex) {
                 }
                 String sdata = rs.getString(index);
                 if (rs.wasNull()) {

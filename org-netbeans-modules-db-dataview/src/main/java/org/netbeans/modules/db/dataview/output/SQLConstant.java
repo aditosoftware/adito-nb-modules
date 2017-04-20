@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2011 Oracle and/or its affiliates. All rights reserved.
+ * Copyright 2016 Oracle and/or its affiliates. All rights reserved.
  *
  * Oracle and Java are registered trademarks of Oracle and/or its affiliates.
  * Other names may be trademarks of their respective owners.
@@ -37,39 +37,14 @@
  *
  * Contributor(s):
  *
- * Portions Copyrighted 2011 Sun Microsystems, Inc.
+ * Portions Copyrighted 2016 Sun Microsystems, Inc.
  */
-package org.netbeans.modules.db.dataview.util;
+package org.netbeans.modules.db.dataview.output;
 
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.RandomAccessFile;
-
-class RandomAccessOutputStream extends OutputStream {
-
-    private RandomAccessFile raf;
-
-    public RandomAccessOutputStream(RandomAccessFile raf) {
-        this.raf = raf;
-    }
-
-    @Override
-    public void write(byte[] b, int off, int len) throws IOException {
-        raf.write(b, off, len);
-    }
-
-    @Override
-    public void write(byte[] b) throws IOException {
-        raf.write(b);
-    }
-
-    @Override
-    public void write(int b) throws IOException {
-        raf.write(b);
-    }
-
-    @Override
-    public void close() throws IOException {
-        raf.close();
-    }
+public enum SQLConstant {
+    GENERATED,
+    DEFAULT,
+    CURRENT_TIMESTAMP,
+    CURRENT_DATE,
+    CURRENT_TIME
 }

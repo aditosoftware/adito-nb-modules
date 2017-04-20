@@ -277,8 +277,8 @@ public final class JXTableRowHeader extends JComponent {
                 Border origBorder = ((JComponent) comp).getBorder();
                 Border border = new CompoundBorder(origBorder, iconBorder);
                 ((JComponent) comp).setBorder(border);
-                comp.setBackground(UIManager.getColor("Table.selectionBackground"));
-                comp.setForeground(UIManager.getColor("Table.selectionForeground"));
+                comp.setBackground(table.getSelectionBackground());
+                comp.setForeground(table.getSelectionForeground());
             }
             return comp;
         }
@@ -305,7 +305,7 @@ public final class JXTableRowHeader extends JComponent {
         ctm = new CountingTableModel(backingTable);
 
         headerTable = new JXTableDecorator(ctm,
-                new InternalTableColumnModel());
+                new JXTableRowHeader.InternalTableColumnModel());
 
         backingTable.addPropertyChangeListener(backingTableListener);
         headerTable.setRowHeight(backingTable.getRowHeight());
@@ -350,7 +350,7 @@ public final class JXTableRowHeader extends JComponent {
     protected TableCellRenderer createDefaultRenderer() {
         // TODO get a rollover enabled renderer
         //return new ColumnHeaderRenderer();
-        return new RowHeaderColumnRenderer();
+        return new JXTableRowHeader.RowHeaderColumnRenderer();
     }
 
     @Override

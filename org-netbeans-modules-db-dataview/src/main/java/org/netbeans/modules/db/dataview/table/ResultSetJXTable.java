@@ -41,6 +41,7 @@
  */
 package org.netbeans.modules.db.dataview.table;
 
+import java.awt.*;
 import java.awt.datatransfer.StringSelection;
 import java.awt.datatransfer.Transferable;
 import java.awt.event.ActionEvent;
@@ -128,7 +129,8 @@ public class ResultSetJXTable extends JXTableDecorator {
         setHorizontalScrollEnabled(true);
 
         setHighlighters(HighlighterFactory.createAlternateStriping(ROW_COLOR, ALTERNATE_ROW_COLOR));
-        addHighlighter(new ColorHighlighter(HighlightPredicate.ROLLOVER_ROW, ROLLOVER_ROW_COLOR, null));
+        // ADITO
+      addHighlighter(new ColorHighlighter(HighlightPredicate.ROLLOVER_ROW, ROLLOVER_ROW_COLOR, Color.WHITE));
 
         setDefaultCellRenderers();
         setDefaultCellEditors();
@@ -200,7 +202,7 @@ public class ResultSetJXTable extends JXTableDecorator {
         setDefaultRenderer(Boolean.class, new ResultSetCellRenderer(new CheckBoxProvider()));
         setDefaultRenderer(java.sql.Date.class, new ResultSetCellRenderer(StringValues.DATE_TO_STRING));
         setDefaultRenderer(java.sql.Time.class, new ResultSetCellRenderer(ResultSetCellRenderer.TIME_TO_STRING));
-        setDefaultRenderer(Timestamp.class, new ResultSetCellRenderer(ResultSetCellRenderer.DATETIME_TO_STRING));
+        setDefaultRenderer(java.sql.Timestamp.class, new ResultSetCellRenderer(ResultSetCellRenderer.DATETIME_TO_STRING));
         setDefaultRenderer(java.util.Date.class, new ResultSetCellRenderer(ResultSetCellRenderer.DATETIME_TO_STRING));
     }
 
