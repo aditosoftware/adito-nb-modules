@@ -221,7 +221,7 @@ public class SchemaNodeProvider extends NodeProvider implements PropertyChangeLi
     private static class OtherSchemasNode extends AbstractNode {
 
         private static final String ICON_BASE =
-            "org/netbeans/modules/db/resources/schema.png";         //NOI18N
+                "org/netbeans/modules/db/resources/schema.png";         //NOI18N
 
         public OtherSchemasNode(List<Node> otherList) {
             super(createChildren(otherList));

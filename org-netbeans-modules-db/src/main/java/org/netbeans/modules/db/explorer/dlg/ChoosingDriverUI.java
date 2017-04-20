@@ -150,9 +150,9 @@ public class ChoosingDriverUI extends javax.swing.JPanel {
         cbDrivers = new javax.swing.JComboBox();
         pInter = new javax.swing.JPanel();
 
-        org.openide.awt.Mnemonics.setLocalizedText(lDrivers, NbBundle.getMessage(ChoosingDriverUI.class, "ChoosingDriverUI.lDrivers.text")); // NOI18N
+        org.openide.awt.Mnemonics.setLocalizedText(lDrivers, org.openide.util.NbBundle.getMessage(ChoosingDriverUI.class, "ChoosingDriverUI.lDrivers.text")); // NOI18N
 
-        pInter.setLayout(new BorderLayout());
+        pInter.setLayout(new java.awt.BorderLayout());
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
@@ -178,7 +178,7 @@ public class ChoosingDriverUI extends javax.swing.JPanel {
                 .addContainerGap())
         );
 
-        getAccessibleContext().setAccessibleDescription(NbBundle.getMessage(ChoosingDriverUI.class, "ACD_ChoosingDriverUI")); // NOI18N
+        getAccessibleContext().setAccessibleDescription(org.openide.util.NbBundle.getMessage(ChoosingDriverUI.class, "ACD_ChoosingDriverUI")); // NOI18N
     }// </editor-fold>//GEN-END:initComponents
 
 

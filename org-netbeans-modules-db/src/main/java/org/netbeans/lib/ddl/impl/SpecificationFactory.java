@@ -181,7 +181,11 @@ public class SpecificationFactory implements DatabaseSpecificationFactory, Drive
         try {
             boolean close = (jdbccon != null ? false : true);
             Connection con = (jdbccon != null ? jdbccon : dbcon.createJDBCConnection());
+            // ADITO
             pn = getDbProductName(con);
+            //DatabaseMetaData dmd = con.getMetaData();
+            //pn = dmd.getDatabaseProductName().trim();
+
             DatabaseSpecification spec = createSpecification(dbcon, pn, con);
             if (close) con.close();
             return spec;
@@ -193,6 +197,7 @@ public class SpecificationFactory implements DatabaseSpecificationFactory, Drive
     }
 
     /**
+     * ADITO
      * Liefert den Produktnamen des verbundenen DBMS zurück
      * Das Problem ist, dass sich der MariaDB-JDBC-Treiber als MySQL meldet,
      * daher wird in dem Falle "MariaDB" als Produktname geliefert, ansonsten das was der Treiber liefert
@@ -257,8 +262,9 @@ public class SpecificationFactory implements DatabaseSpecificationFactory, Drive
         return new Specification(specmap, c);
     }
 
-    public DatabaseSpecification createSpecification(Connection c) throws DatabaseProductNotFoundException, SQLException
-    {
+    public DatabaseSpecification createSpecification(Connection c) throws DatabaseProductNotFoundException, SQLException {
+        // ADITO
+        //return createSpecification(c, c.getMetaData().getDatabaseProductName().trim());
         return createSpecification(c, getDbProductName(c));
     }
 
@@ -273,18 +279,6 @@ public class SpecificationFactory implements DatabaseSpecificationFactory, Drive
         DatabaseSpecification spec = new Specification(specmap, c);
         spec.setSpecificationFactory(this);
         return spec;
-    }
-
-    /** Returns debug-mode flag
-    */
-    public boolean isDebugMode() {
-        return debug;
-    }
-
-    /** Sets debug-mode flag
-    */
-    public void setDebugMode(boolean mode) {
-        debug = mode;
     }
 
     /** Returns array of driver products supported by system.

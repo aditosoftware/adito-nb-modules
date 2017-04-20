@@ -98,6 +98,8 @@ public class CreateTableAction extends BaseAction {
     private void perform(final BaseNode node) {
         String schema = findSchemaWorkingName(node.getLookup());
 
+        // ADITO
+        //boolean tableCreated = CreateTableDialog.showDialogAndCreate(node, schema);
         DatabaseConnection connection = node.getLookup().lookup(DatabaseConnection.class);
         Specification spec = connection.getConnector().getDatabaseSpecification();
 

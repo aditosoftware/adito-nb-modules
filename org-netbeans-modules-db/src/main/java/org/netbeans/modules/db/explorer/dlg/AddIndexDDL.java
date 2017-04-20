@@ -30,9 +30,10 @@
  */
 package org.netbeans.modules.db.explorer.dlg;
 
-import java.util.*;
-
-import org.netbeans.lib.ddl.impl.*;
+import java.util.Iterator;
+import java.util.Set;
+import org.netbeans.lib.ddl.impl.CreateIndex;
+import org.netbeans.lib.ddl.impl.Specification;
 
 /**
  * DDL for creating an index, refactored out of the AddIndex dialog
@@ -41,6 +42,7 @@ import org.netbeans.lib.ddl.impl.*;
  */
 public class AddIndexDDL
 {
+  // ADITO
   public static final String UNIQUE_STRING = "UNIQUE";
   public static final String INDEX_STRING = "_IDX";
 
@@ -81,8 +83,9 @@ public class AddIndexDDL
         icmd.execute();
 
         return icmd.wasException();
-    }
+    }    
 
+  // ADITO
   public CreateIndex getDDL(String pColumnName, boolean pIsUnique) throws Exception
   {
     CreateIndex index = spec.createCommandCreateIndex(tablename);
@@ -97,6 +100,7 @@ public class AddIndexDDL
     return index;
   }
 
+  // ADITO
   private String _getIndexName(String pTablename, String pColumnName)
   {
     int maxNameLength = Integer.MAX_VALUE;

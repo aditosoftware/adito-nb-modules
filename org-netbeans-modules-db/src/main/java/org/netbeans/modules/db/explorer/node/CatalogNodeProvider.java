@@ -127,7 +127,7 @@ public class CatalogNodeProvider extends NodeProvider implements PropertyChangeL
                         nodes.addAll(otherList);
 
                         if (!otherList.isEmpty()) {
-                            newList.add(new OtherCatalogsNode(
+                            newList.add(new CatalogNodeProvider.OtherCatalogsNode(
                                     otherList));
                         }
 
@@ -212,7 +212,7 @@ public class CatalogNodeProvider extends NodeProvider implements PropertyChangeL
     private static class OtherCatalogsNode extends AbstractNode {
 
         private static final String ICON_BASE =
-            "org/netbeans/modules/db/resources/database.gif";       //NOI18N
+                "org/netbeans/modules/db/resources/database.gif";       //NOI18N
 
         public OtherCatalogsNode(List<Node> otherList) {
             super(createChildren(otherList));

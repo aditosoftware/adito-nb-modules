@@ -75,7 +75,7 @@ public class GrabTableProgressPanel extends javax.swing.JPanel {
 
         messageLabel.setText(org.openide.util.NbBundle.getMessage(GrabTableProgressPanel.class, "GrabTableProgressDialogMessage")); // NOI18N
 
-        progressPlaceHolderPanel.setLayout(new BorderLayout());
+        progressPlaceHolderPanel.setLayout(new java.awt.BorderLayout());
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);

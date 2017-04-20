@@ -126,6 +126,8 @@ public class DbDriverManager {
             // a Unicode/utf8 connection
             if ( driver.getClass().getName().equals("com.mysql.jdbc.Driver") ) { // NOI18N
                 props.put("useUnicode", "true");
+                // ADITO
+                //props.put("characterEncoding", "utf8");
             }
             Connection conn = driver.connect(databaseURL, props);
             if (conn == null) {

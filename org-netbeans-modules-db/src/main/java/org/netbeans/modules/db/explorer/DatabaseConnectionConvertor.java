@@ -186,7 +186,7 @@ public class DatabaseConnectionConvertor implements Environment.Provider, Instan
     }
 
     @Override
-    public Object instanceCreate() throws IOException, ClassNotFoundException {
+    public Object instanceCreate() throws java.io.IOException, ClassNotFoundException {
         synchronized (this) {
             Object o = refConnection.get();
             if (o != null) {
@@ -211,10 +211,10 @@ public class DatabaseConnectionConvertor implements Environment.Provider, Instan
             } catch (SAXException ex) {
                 Exception x = ex.getException();
                 LOGGER.log(Level.FINE, "Cannot read " + obj + ". Cause: " + ex.getLocalizedMessage(), ex);
-                if (x instanceof IOException) {
+                if (x instanceof java.io.IOException) {
                     throw (IOException)x;
                 } else {
-                    throw new IOException(ex.getMessage());
+                    throw new java.io.IOException(ex.getMessage());
             }
             }
 
@@ -366,7 +366,7 @@ public class DatabaseConnectionConvertor implements Environment.Provider, Instan
         }
 
         @Override
-        public void run() throws IOException {
+        public void run() throws java.io.IOException {
             FileLock lck;
             FileObject data;
 

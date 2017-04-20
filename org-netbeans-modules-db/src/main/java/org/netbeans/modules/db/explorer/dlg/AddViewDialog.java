@@ -90,7 +90,7 @@ public class AddViewDialog {
             Mnemonics.setLocalizedText(label, NbBundle.getMessage (AddViewDialog.class, "AddViewName"));
             label.getAccessibleContext().setAccessibleDescription(NbBundle.getMessage (AddViewDialog.class, "ACS_AddViewNameA11yDesc"));
             con.anchor = GridBagConstraints.WEST;
-            con.insets = new Insets (2, 2, 2, 2);
+            con.insets = new java.awt.Insets (2, 2, 2, 2);
             con.gridx = 0;
             con.gridy = 0;
             layout.setConstraints(label, con);
@@ -102,7 +102,7 @@ public class AddViewDialog {
             con.weightx = 1.0;
             con.gridx = 1;
             con.gridy = 0;
-            con.insets = new Insets (2, 2, 2, 2);
+            con.insets = new java.awt.Insets (2, 2, 2, 2);
             namefld = new JTextField(35);
             namefld.setToolTipText(NbBundle.getMessage (AddViewDialog.class, "ACS_AddViewNameTextFieldA11yDesc"));
             namefld.getAccessibleContext().setAccessibleName(NbBundle.getMessage (AddViewDialog.class, "ACS_AddViewNameTextFieldA11yName"));
@@ -135,7 +135,7 @@ public class AddViewDialog {
             label.getAccessibleContext().setAccessibleDescription(NbBundle.getMessage (AddViewDialog.class, "ACS_AddViewLabelA11yDesc"));
             con.weightx = 0.0;
             con.anchor = GridBagConstraints.WEST;
-            con.insets = new Insets (2, 2, 2, 2);
+            con.insets = new java.awt.Insets (2, 2, 2, 2);
             con.gridx = 0;
             con.gridy = 1;
             con.gridwidth = 2;
@@ -154,7 +154,7 @@ public class AddViewDialog {
             con.weighty = 1.0;
             con.gridwidth = 2;
             con.fill = GridBagConstraints.BOTH;
-            con.insets = new Insets (0, 0, 0, 0);
+            con.insets = new java.awt.Insets (0, 0, 0, 0);
             con.gridx = 0;
             con.gridy = 2;
             JScrollPane spane = new JScrollPane(tarea);

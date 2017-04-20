@@ -50,7 +50,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.swing.event.ChangeListener;
+
 import org.netbeans.adito.db.OracleTableColumnHack;
 import org.netbeans.api.db.explorer.DatabaseException;
 import org.netbeans.lib.ddl.DDLException;
@@ -148,7 +148,7 @@ public class DatabaseConnector {
      * method gets called by the DatabaseConnection itself, and should not be called
      * directly by any other object.
      *
-     * @throws DatabaseException
+     * @throws org.netbeans.api.db.explorer.DatabaseException
      */
     public void performDisconnect() throws DatabaseException {
                 driverSpecCache.clear();
@@ -204,9 +204,11 @@ public class DatabaseConnector {
             // we're using
             if (containsColumn(table.getPrimaryKey().getColumns(), column)) {
                 col = cmd.createPrimaryKeyColumn(column.getName());
+                // ADITO
                 OracleTableColumnHack.fixPrimaryKeyColumn(spec, col, table.getName(), column.getName(), spec.getConnection().getDatabase());
             } else if (containsIndexColumn(table.getIndexes(), column)) {
                 col = cmd.createUniqueColumn(column.getName());
+                // ADITO
                 OracleTableColumnHack.fixUniqueColumn(spec, col, table.getName(), column.getName(), spec.getConnection().getDatabase());
             } else {
                 col = cmd.createColumn (column.getName ());

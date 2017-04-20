@@ -56,7 +56,7 @@ import org.netbeans.modules.db.explorer.*;
 *
 * @author Slavek Psenicka
 */
-
+// ADITO
 public class TypeElement
 {
     private String tstr, tname;

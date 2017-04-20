@@ -56,20 +56,19 @@ import java.util.logging.Logger;
 import org.openide.DialogDisplayer;
 import org.openide.NotifyDescriptor;
 import org.openide.util.NbBundle;
-import org.openide.windows.IOProvider;
-import org.openide.windows.OutputWriter;
 
 import org.netbeans.lib.ddl.DatabaseSpecification;
 import org.netbeans.lib.ddl.DDLCommand;
 import org.netbeans.lib.ddl.DDLException;
 import org.netbeans.lib.ddl.util.CommandFormatter;
-import org.openide.windows.InputOutput;
 
 /**
 * Basic implementation of DDLCommand. This class can be used for really simple
 * commands with format and without arguments. Heavilly subclassed.
 */
 public class AbstractCommand implements Serializable, DDLCommand {
+    private static final Logger LOG = Logger.getLogger(AbstractCommand.class.getName());
+    
     /** Command owner */
     private DatabaseSpecification spec;
 
@@ -138,7 +137,6 @@ public class AbstractCommand implements Serializable, DDLCommand {
 
     /** Sets name to be used in command
     * @param objectowner New owner.
-    * Wichtige Info: Unter ObjectOwner kann auch das Schema gemeint sein!
     */
     public void setObjectOwner(String objectowner) {
         owner = objectowner;
@@ -209,23 +207,9 @@ public class AbstractCommand implements Serializable, DDLCommand {
             return;
         }
 
-        //In case of debug mode print command
-        if (spec.getSpecificationFactory().isDebugMode()) {
-
-            try {
-                InputOutput io = IOProvider.getDefault().getIO(NbBundle.getBundle("org.netbeans.lib.ddl.resources.Bundle").getString("LBL_Output_Window"), false);
-                io.select();
-                OutputWriter ow = io.getOut(); //NOI18N
-                if (ow != null) {
-                    ow.println(fcmd);
-                    ow.println(" "); //NOI18N
-                } else
-                    throw new Exception();
-
-            } catch (Exception e) {
-                Logger.getLogger("global").log(Level.INFO, e.getMessage() + "\n" + fcmd); //NOI18N
-            }
-        }
+        // Output command to log -- log function contain short circuit filters, so 
+        // the call should be cheap not to need another guard
+        LOG.fine(fcmd);
 
         try {
             fcon = spec.getJDBCConnection();
@@ -279,7 +263,7 @@ public class AbstractCommand implements Serializable, DDLCommand {
             //Firebird patch (commands don't work with quoted names)
             if (getSpecification().getJDBCConnection().getMetaData().getDatabaseProductName().indexOf("Firebird") != -1) //NOI18N
                 quoteStr = "";
-        } catch (Exception exc) {
+        } catch (SQLException exc) {
             //PENDING
         }
         if (quoteStr == null)

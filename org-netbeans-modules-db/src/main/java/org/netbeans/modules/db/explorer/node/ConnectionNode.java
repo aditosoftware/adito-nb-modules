@@ -42,34 +42,50 @@
 
 package org.netbeans.modules.db.explorer.node;
 
-import org.netbeans.api.db.explorer.*;
-import org.netbeans.api.db.explorer.node.*;
+import java.awt.datatransfer.Transferable;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+import java.io.IOException;
+import java.sql.Connection;
+import java.sql.DatabaseMetaData;
+import java.util.Properties;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.swing.Action;
+import org.netbeans.api.db.explorer.DatabaseException;
+import org.netbeans.api.db.explorer.DatabaseMetaDataTransfer;
+import org.netbeans.api.db.explorer.node.BaseNode;
+import org.netbeans.api.db.explorer.node.ChildNodeFactory;
+import org.netbeans.api.db.explorer.node.NodeProvider;
 import org.netbeans.lib.ddl.adaptors.DefaultAdaptor;
 import org.netbeans.lib.ddl.impl.Specification;
-import org.netbeans.modules.db.explorer.*;
+import org.netbeans.modules.db.explorer.ConnectionList;
 import org.netbeans.modules.db.explorer.DatabaseConnection;
+import org.netbeans.modules.db.explorer.DatabaseConnectionAccessor;
+import org.netbeans.modules.db.explorer.DatabaseMetaDataTransferAccessor;
 import org.netbeans.modules.db.explorer.action.ConnectAction;
 import org.netbeans.modules.db.explorer.metadata.MetadataModelManager;
-import org.netbeans.modules.db.metadata.model.api.*;
+import org.netbeans.modules.db.metadata.model.api.MetadataModel;
+import org.netbeans.modules.db.metadata.model.api.MetadataModels;
 import org.netbeans.modules.db.util.PropertiesEditor;
-import org.openide.*;
+import org.openide.DialogDisplayer;
+import org.openide.NotifyDescriptor;
 import org.openide.nodes.Sheet;
-import org.openide.util.*;
+import org.openide.util.Exceptions;
+import org.openide.util.HelpCtx;
+import org.openide.util.NbBundle;
+import org.openide.util.RequestProcessor;
+import org.openide.util.WeakListeners;
 import org.openide.util.actions.SystemAction;
 import org.openide.util.datatransfer.ExTransferable;
-
-import javax.swing.Action;
-import java.awt.datatransfer.Transferable;
-import java.beans.*;
-import java.io.IOException;
-import java.sql.*;
-import java.util.Properties;
 
 /**
  *
  * @author Rob Englander
  */
 public class ConnectionNode extends BaseNode implements PropertyChangeListener {
+
+    private static final Logger LOG = Logger.getLogger(ConnectionNode.class.getName());
     
     private static final String CONNECTEDICONBASE = "org/netbeans/modules/db/resources/connection.gif"; // NOI18N
     private static final String DISCONNECTEDICONBASE = "org/netbeans/modules/db/resources/connectionDisconnected.gif"; // NOI18N
@@ -107,6 +123,8 @@ public class ConnectionNode extends BaseNode implements PropertyChangeListener {
     private ConnectionNode(NodeDataLookup lookup, NodeProvider provider) {
         super(new ChildNodeFactory(lookup), lookup, FOLDER, provider);
         connection = getLookup().lookup(DatabaseConnection.class);
+        // ADITO
+        //lookup.add(DatabaseConnectionAccessor.DEFAULT.createDatabaseConnection(connection));
         if(connection != null)
           lookup.add(connection.getDatabaseConnection());
     }
@@ -182,11 +200,15 @@ public class ConnectionNode extends BaseNode implements PropertyChangeListener {
     }
 
     private void updateLocalProperties() {
+        String displayName = null;
+        
         try {
             clearProperties();
             boolean connected = connection.isConnected();
-
-            addProperty(DISPLAYNAME, DISPLAYNAMEDESC, String.class, true, connection.getDisplayName());
+            
+            displayName = connection.getDisplayName();
+            
+            addProperty(DISPLAYNAME, DISPLAYNAMEDESC, String.class, true, displayName);
             addProperty(DATABASEURL, DATABASEURLDESC, String.class, !connected, connection.getDatabase());
             addProperty(NBDRIVER, NBDRIVERDESC, String.class, !connected, connection.getDriverName());
             addProperty(DRIVER, DRIVERDESC, String.class, !connected, connection.getDriver());
@@ -319,7 +341,7 @@ public class ConnectionNode extends BaseNode implements PropertyChangeListener {
                 addProperty(DefaultAdaptor.PROP_CATALOGS_SEPARATOR, null, String.class, false, md.getCatalogSeparator());
             }
         } catch (Exception e) {
-            Exceptions.printStackTrace(e);
+            LOG.log(Level.INFO, "Failed to update properties of ConnectionNode '" + displayName + "'", e);
         }
     }
 
