@@ -28,7 +28,6 @@
     <dependency>
       <groupId>com.google.guava</groupId>
       <artifactId>guava</artifactId>
-      <version>21.0</version>
     </dependency>
 
 
@@ -42,26 +41,14 @@
     <dependency>
       <groupId>de.adito.propertly</groupId>
       <artifactId>propertly.core</artifactId>
-      <version>0.4</version>
     </dependency>
 
     <!-- Netbeans dependencies -->
-
-    <!--<dependency>-->
-    <!--<groupId>org.netbeans.api</groupId>-->
-    <!--<artifactId>org-jdesktop-beansbinding</artifactId>-->
-    <!--<version>RELEASE82</version>-->
-    <!--</dependency>-->
     <dependency>
       <groupId>org.netbeans.api</groupId>
       <artifactId>org-jdesktop-layout</artifactId>
       <version>RELEASE82</version>
     </dependency>
-    <!--<dependency>-->
-    <!--<groupId>org.netbeans.api</groupId>-->
-    <!--<artifactId>org-netbeans-api-java</artifactId>-->
-    <!--<version>RELEASE82</version>-->
-    <!--</dependency>-->
     <dependency>
       <groupId>org.netbeans.api</groupId>
       <artifactId>org-netbeans-api-java-classpath</artifactId>
@@ -82,21 +69,6 @@
       <artifactId>org-netbeans-core-multiview</artifactId>
       <version>RELEASE82</version>
     </dependency>
-    <!--<dependency>-->
-    <!--<groupId>org.netbeans.api</groupId>-->
-    <!--<artifactId>org-netbeans-libs-javacapi</artifactId>-->
-    <!--<version>RELEASE82</version>-->
-    <!--</dependency>-->
-    <!--<dependency>-->
-    <!--<groupId>org.netbeans.api</groupId>-->
-    <!--<artifactId>org-netbeans-libs-xerces</artifactId>-->
-    <!--<version>RELEASE82</version>-->
-    <!--</dependency>-->
-    <!--<dependency>-->
-    <!--<groupId>org.netbeans.api</groupId>-->
-    <!--<artifactId>org-netbeans-modules-classfile</artifactId>-->
-    <!--<version>RELEASE82</version>-->
-    <!--</dependency>-->
     <dependency>
       <groupId>org.netbeans.api</groupId>
       <artifactId>org-netbeans-modules-editor-fold</artifactId>
@@ -122,22 +94,6 @@
       <artifactId>org-netbeans-spi-navigator</artifactId>
       <version>RELEASE82</version>
     </dependency>
-    <!--<dependency>-->
-    <!--<groupId>org.netbeans.api</groupId>-->
-    <!--<artifactId>org-netbeans-modules-java-project</artifactId>-->
-    <!--<version>RELEASE82</version>-->
-    <!--</dependency>-->
-    <!--<dependency>-->
-    <!--<groupId>org.netbeans.api</groupId>-->
-    <!--<artifactId>org-netbeans-modules-java-source</artifactId>-->
-    <!--<version>RELEASE82</version>-->
-    <!--<scope>test</scope>-->
-    <!--</dependency>-->
-    <!--<dependency>-->
-    <!--<groupId>org.netbeans.api</groupId>-->
-    <!--<artifactId>org-netbeans-modules-javahelp</artifactId>-->
-    <!--<version>RELEASE82</version>-->
-    <!--</dependency>-->
     <dependency>
       <groupId>org.netbeans.api</groupId>
       <artifactId>org-netbeans-modules-options-api</artifactId>
