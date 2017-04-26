@@ -169,6 +169,38 @@ public class MetaComponentCreator
     return true;
   }
 
+  /** Creates a copy of a metacomponent and adds it to FormModel. The new
+   * component is added or applied to the specified target component.
+   * @param sourceComp component to be copied
+   * @param targetComp target component (where the new component is added)
+   * @return the component if it was successfully created and added (all
+   *         errors are reported immediately)
+   */
+  public RADComponent copyComponent(final RADComponent sourceComp,
+                                    final RADComponent targetComp)
+  {
+    final TargetInfo target = getTargetInfo(sourceComp.getBeanClass(), targetComp,
+                                            false, false);
+    if (target == null) {
+      return null;
+    }
+
+    try { // Look&Feel UI defaults remapping needed
+      return (RADComponent) FormLAF.executeWithLookAndFeel(formModel,
+                                                           new Mutex.ExceptionAction() {
+                                                             @Override
+                                                             public Object run() throws Exception {
+                                                               return copyComponent2(sourceComp, null, target);
+                                                             }
+                                                           }
+      );
+    }
+    catch (Exception ex) { // should not happen
+      ErrorManager.getDefault().notify(ErrorManager.INFORMATIONAL, ex);
+      return null;
+    }
+  }
+
   static boolean canAddComponent(Class beanClass, RADComponent targetComp)
   {
     TargetInfo target = getTargetInfo(beanClass, targetComp, false, false);
