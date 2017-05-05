@@ -106,6 +106,7 @@ import org.openide.util.Exceptions;
 import org.openide.util.Lookup;
 import org.openide.util.Mutex;
 import org.openide.util.UserQuestionException;
+import org.openide.util.lookup.*;
 import org.openide.windows.CloneableOpenSupport;
 import org.openide.windows.CloneableTopComponent;
 import org.openide.windows.Mode;
@@ -177,11 +178,11 @@ public class FormEditorSupport extends DataEditorSupport implements EditorSuppor
     // constructor
     
     public FormEditorSupport(DataObject formDataObject) {
-        super(formDataObject, new Environment(formDataObject));
+        super(formDataObject, Lookups.proxy(formDataObject)/*ADITO*/, new Environment(formDataObject));
         setMIMEType("text/aod+xml"); // NOI18N
         this.formDataObject = formDataObject;
     }
-    
+
     // ----------
     // opening & saving interface methods
     
