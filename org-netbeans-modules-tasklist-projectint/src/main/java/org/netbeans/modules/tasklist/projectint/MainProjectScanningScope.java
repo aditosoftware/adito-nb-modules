@@ -225,6 +225,15 @@ public class MainProjectScanningScope extends TaskScanningScope
                         return null;
                 }
             }
+            //A
+            for( FileObject fob : n.getLookup().lookupAll(FileObject.class) ) {
+                Project p = FileOwnerQuery.getOwner(fob);
+                if ( p != null ) {
+                    result.add( p );
+                    if( result.size() > 1 )
+                        return null;
+                }
+            }
         }
         return result.isEmpty() ? null : new ArrayList<Project>(result).get(0);
     }
