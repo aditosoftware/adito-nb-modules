@@ -127,6 +127,8 @@ public class RADComponentNode extends FormNode
           updateName();
           updateDisplayName();
         }
+        else if(Node.PROP_PROPERTY_SETS.equals(evt.getPropertyName()))
+          firePropertySetsChange(null, null);
       }
     };
     // wenn sich der Name ändert, soll die Node aktualisiert werden
