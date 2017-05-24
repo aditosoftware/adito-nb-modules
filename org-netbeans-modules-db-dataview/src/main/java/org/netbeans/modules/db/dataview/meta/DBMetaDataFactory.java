@@ -187,7 +187,11 @@ public final class DBMetaDataFactory {
             }
             // ADITO #4458
             if (Objects.equals(tableName, ""))
-                tableName = _calculateTableName(sql);
+            {
+                DBTable tmpTable = new DBTable(null, null, null);
+                adjustTableMetadata(sql, tmpTable);
+                tableName = tmpTable.getName();
+            }
 
             String schemaName = rsMeta.getSchemaName(i);
             // although Javadoc admit of returning null, SQLite returns null
@@ -204,6 +208,15 @@ public final class DBMetaDataFactory {
                 // suppose the catalog shouldn't be same if schema is not supported
                 catalogName = ""; // NOI18N
             }
+
+            //ADITO
+            if (Objects.equals(schemaName, ""))
+            {
+                DBTable tmpTable = new DBTable(tableName, schemaName, catalogName);
+                adjustTableMetadata(sql, tmpTable);
+                schemaName = tmpTable.getSchema();
+            }
+
             String key = catalogName + schemaName + tableName;
             if (key.equals("")) {
                 key = noTableName;
@@ -289,10 +302,10 @@ public final class DBMetaDataFactory {
         // Daher werden die beiden Ergebnisse zusammengefasst.
         if(tables.size() > 1 && tables.get(noTableName) != null)
         {
-            DBTable table2 = tables.get(tables.keySet().toArray()[1]);
+            String key = tables.keySet().stream().filter(pS -> !Objects.equals(pS, noTableName)).findFirst().orElseThrow(NullPointerException::new);
+            DBTable table2 = tables.get(key);
             table.setCatalogName(table2.getCatalog());
             table.setSchemaName(table2.getSchema());
-            table.setName(table2.getName());
 
             for (DBColumn col : table.getColumns().values()) {
                 col.setEditable(!table.getName().equals("") && !col.isGenerated());
@@ -300,7 +313,7 @@ public final class DBMetaDataFactory {
 
             for (DBColumn dbColumn : table2.getColumnList())
                 table.addColumn(dbColumn);
-            tables.remove(tables.keySet().toArray()[1]);
+            tables.remove(key);
         }else
         {
             // Oracle does not return table name for resultsetmetadata.getTableName()
@@ -395,36 +408,6 @@ public final class DBMetaDataFactory {
         } else if (splitByDot.length == 1) {
             table.setName(unQuoteIfNeeded(splitByDot[0]));
         }
-    }
-
-    // ADITO
-    private String _calculateTableName(String sql)
-    {
-      String tableName = "";
-      if (sql.toUpperCase().contains("FROM")) { // NOI18N
-        // User may type "FROM" in either lower, upper or mixed case
-        String[] splitByFrom = sql.toUpperCase().split("FROM"); // NOI18N
-        String fromsql = sql.substring(sql.length() - splitByFrom[1].length());
-        if (fromsql.toUpperCase().contains("WHERE")) { // NOI18N
-          splitByFrom = fromsql.toUpperCase().split("WHERE"); // NOI18N
-          fromsql = fromsql.substring(0, splitByFrom[0].length());
-        } else if (fromsql.toUpperCase().contains("ORDER BY")) { // NOI18N
-          splitByFrom = fromsql.toUpperCase().split("ORDER BY"); // NOI18N
-          fromsql = fromsql.substring(0, splitByFrom[0].length());
-        }
-        if (!sql.toUpperCase().contains("JOIN")) { // NOI18N
-          StringTokenizer t = new StringTokenizer(fromsql, ","); // NOI18N
-
-          if (t.hasMoreTokens()) {
-            tableName = t.nextToken().trim();
-          }
-
-          if (t.hasMoreTokens()) {
-            tableName = "";
-          }
-        }
-      }
-      return tableName;
     }
 
     private String unQuoteIfNeeded(String id) {
