@@ -1,0 +1,20 @@
+OpenIDE-Module-Public-Packages: -
+OpenIDE-Module-Module-Dependencies: org.netbeans.api.progress/1 > 1.40
+ , org.netbeans.api.progress.nb > 1.40, org.netbeans.modules.options.a
+ pi/1 > 1.5, org.netbeans.modules.parsing.api/1 > 9.0, org.netbeans.mo
+ dules.parsing.indexing > 9.0, org.netbeans.modules.projectapi/1 > 1.2
+ 4, org.netbeans.spi.tasklist/1 = 1, org.openide.awt > 6.8, org.openid
+ e.dialogs > 7.1, org.openide.filesystems > 9.0, org.openide.loaders >
+  7.61, org.openide.nodes > 7.0, org.openide.text > 6.16, org.openide.
+ util.ui > 9.3, org.openide.util > 9.3, org.openide.util.lookup > 8.0,
+  org.openide.windows > 6.12
+OpenIDE-Module-Java-Dependencies: Java > 1.6
+OpenIDE-Module-Build-Version: 201609300101
+OpenIDE-Module-Specification-Version: 1.31.1.1.1
+AutoUpdate-Show-In-Client: false
+OpenIDE-Module: org.netbeans.modules.tasklist.ui/1
+OpenIDE-Module-Implementation-Version: 1
+OpenIDE-Module-Layer: org/netbeans/modules/tasklist/ui/layer.xml
+OpenIDE-Module-Localizing-Bundle: org/netbeans/modules/tasklist/ui/Bun
+ dle.properties
+OpenIDE-Module-Requires: org.openide.modules.ModuleFormat1

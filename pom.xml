@@ -29,6 +29,7 @@
     <module>org-netbeans-modules-javascript-hints</module>
     <module>org-netbeans-modules-javascript-refactoring</module>
     <module>org-netbeans-modules-tasklist-projectint</module>
+    <module>org-netbeans-modules-tasklist-ui</module>
   </modules>
 
 
