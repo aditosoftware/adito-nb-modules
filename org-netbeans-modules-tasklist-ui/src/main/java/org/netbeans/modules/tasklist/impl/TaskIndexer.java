@@ -42,13 +42,15 @@
 
 package org.netbeans.modules.tasklist.impl;
 
-import java.io.IOException;
+import java.io.*;
+import java.lang.reflect.Field;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.*;
+
 import org.netbeans.modules.parsing.spi.indexing.Context;
 import org.netbeans.modules.parsing.spi.indexing.CustomIndexer;
 import org.netbeans.modules.parsing.spi.indexing.Indexable;
@@ -59,7 +61,11 @@ import org.netbeans.modules.tasklist.trampoline.Accessor;
 import org.netbeans.spi.tasklist.FileTaskScanner;
 import org.netbeans.spi.tasklist.Task;
 import org.netbeans.spi.tasklist.TaskScanningScope;
+import org.openide.awt.*;
 import org.openide.filesystems.FileObject;
+import org.openide.util.ContextAwareAction;
+
+import javax.swing.*;
 
 /**
  * Called from Indexing API framework. Simply asks all registered and active
@@ -193,6 +199,13 @@ public class TaskIndexer extends CustomIndexer {
             res.append(url.toExternalForm());
         res.append("\n");
         res.append( Accessor.DEFAULT.getLine(t) );
+
+        // A
+        res.append("\n");
+        Action[] actions = Accessor.DEFAULT.getActions(t);
+        if(actions != null)
+            res.append(_encodeActions(actions));
+
         res.append("\n");
         res.append( Accessor.DEFAULT.getGroup(t).getName() );
         res.append("\n");
@@ -218,10 +231,124 @@ public class TaskIndexer extends CustomIndexer {
         encodedTask = encodedTask.substring(delimIndex+1);
         delimIndex = encodedTask.indexOf("\n");
 
+        //A
+        Action[] actionInstances = _decodeActions(encodedTask.substring(0, delimIndex), fo);
+        encodedTask = encodedTask.substring(delimIndex+1);
+        delimIndex = encodedTask.indexOf("\n");
+
         String groupName = encodedTask.substring(0, delimIndex);
         String description = encodedTask.substring(delimIndex+1);
         if( null != url )
             return Task.create(url, groupName, description);
-        return Task.create(fo, groupName, description, lineNumber);
+
+        // A
+        Task task = Task.create(fo, groupName, description, lineNumber);
+        try
+        {
+            if(Stream.of(actionInstances).anyMatch(Objects::nonNull))
+            {
+                Field actionsField = task.getClass().getDeclaredField("actions");
+                actionsField.setAccessible(true);
+                actionsField.set(task, actionInstances);
+            }
+        }
+        catch(Exception e)
+        {
+            throw new RuntimeException(e);
+        }
+
+        return task;
+    }
+
+    //A
+    private static String _encodeActions(Action[] pActions)
+    {
+        StringBuilder res = new StringBuilder();
+        for (Action action : pActions)
+        {
+            if (action != null)
+            {
+                res.append(action.getClass().getName().replaceAll("\\$", ".")).append(";");
+                try
+                {
+                    for (Field field : action.getClass().getDeclaredFields())
+                    {
+                        field.setAccessible(true);
+                        if (Serializable.class.isAssignableFrom(field.getType()))
+                        {
+                            String fieldName = field.getName();
+
+                            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                            ObjectOutputStream oos = new ObjectOutputStream(baos);
+                            oos.writeObject(field.get(action));
+                            oos.close();
+                            String fieldValue = Base64.getEncoder().encodeToString(baos.toByteArray());
+                            res.append(fieldName).append(";").append(fieldValue).append(";");
+                        }
+                    }
+
+                }
+                catch (Exception e)
+                {
+                    LOG.log(Level.INFO, "Error while encoding actions.", e);
+                }
+                res.append(";");
+            }
+        }
+
+        return res.toString();
+    }
+
+    // A
+    private static Action[] _decodeActions(String pActions, FileObject pFileObject)
+    {
+        String[] actionClassesWithArguments = pActions.split(";;");
+        Action[] actionInstances = new Action[actionClassesWithArguments.length];
+        for (int i = 0; i < actionClassesWithArguments.length; i++)
+        {
+            String actionClassWithArgument = actionClassesWithArguments[i];
+            String[] actionClassWithArgumentSplit = actionClassWithArgument.split(";");
+            String actionClass = actionClassWithArgumentSplit[0];
+            if (actionClass != null && !actionClass.trim().isEmpty())
+            {
+                Action action = Actions.forID("adito/scan", actionClass);
+                if(action != null)
+                {
+                    if (action instanceof ContextAwareAction)
+                        action = ((ContextAwareAction) action).createContextAwareInstance(pFileObject.getLookup());
+
+                    try
+                    {
+                        for (int argI = 1; argI < actionClassWithArgumentSplit.length; argI = argI + 2)
+                        {
+                            try
+                            {
+                                String fieldName = actionClassWithArgumentSplit[argI];
+                                Field field = action.getClass().getDeclaredField(fieldName);
+                                field.setAccessible(true);
+
+                                String fieldValueBase64 = actionClassWithArgumentSplit[argI + 1];
+                                byte[] fieldValueBytes = Base64.getDecoder().decode(fieldValueBase64);
+                                ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(fieldValueBytes));
+                                Object fieldValue = ois.readObject();
+                                ois.close();
+
+                                field.set(action, fieldValue);
+                            }
+                            catch (NoSuchFieldException ignored)
+                            {
+                            }
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        LOG.log(Level.INFO, "Error while decoding actions.", e);
+                    }
+                    actionInstances[i] = action;
+                }
+            }
+        }
+
+        return actionInstances;
     }
 }
