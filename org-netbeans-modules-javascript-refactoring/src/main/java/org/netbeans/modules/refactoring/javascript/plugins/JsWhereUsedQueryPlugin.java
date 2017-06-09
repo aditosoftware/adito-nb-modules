@@ -43,46 +43,25 @@
  */
 package org.netbeans.modules.refactoring.javascript.plugins;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import javax.swing.Icon;
-import javax.swing.text.Document;
 import org.mozilla.nb.javascript.Node;
-import org.netbeans.modules.csl.api.ElementKind;
-import org.netbeans.modules.csl.api.Error;
-import org.netbeans.modules.csl.api.Modifier;
-import org.netbeans.modules.csl.api.OffsetRange;
-import org.netbeans.modules.csl.api.Severity;
-import org.netbeans.api.lexer.Token;
-import org.netbeans.api.lexer.TokenHierarchy;
-import org.netbeans.api.lexer.TokenId;
-import org.netbeans.api.lexer.TokenSequence;
-import org.netbeans.api.lexer.TokenUtilities;
+import org.netbeans.api.lexer.*;
 import org.netbeans.editor.BaseDocument;
-import org.netbeans.modules.csl.api.UiUtils;
+import org.netbeans.modules.csl.api.*;
+import org.netbeans.modules.csl.api.Error;
 import org.netbeans.modules.csl.spi.GsfUtilities;
 import org.netbeans.modules.csl.spi.support.ModificationResult;
-import org.netbeans.modules.javascript.editing.JsParseResult;
-import org.netbeans.modules.refactoring.javascript.RetoucheUtils;
-import org.netbeans.modules.refactoring.javascript.WhereUsedElement;
-import org.netbeans.modules.refactoring.api.Problem;
-import org.netbeans.modules.refactoring.api.ProgressEvent;
-import org.netbeans.modules.refactoring.api.WhereUsedQuery;
-import org.netbeans.modules.refactoring.javascript.JsElementCtx;
+import org.netbeans.modules.javascript.editing.*;
+import org.netbeans.modules.javascript.editing.lexer.LexUtilities;
+import org.netbeans.modules.refactoring.api.*;
+import org.netbeans.modules.refactoring.javascript.*;
 import org.netbeans.modules.refactoring.javascript.api.WhereUsedQueryConstants;
 import org.netbeans.modules.refactoring.spi.RefactoringElementsBag;
-import org.netbeans.modules.javascript.editing.AstPath;
-import org.netbeans.modules.javascript.editing.AstUtilities;
-import org.netbeans.modules.javascript.editing.Element;
-import org.netbeans.modules.javascript.editing.AstElement;
-import org.netbeans.modules.javascript.editing.ParseTreeWalker;
-import org.netbeans.modules.javascript.editing.VariableVisitor;
-import org.netbeans.modules.javascript.editing.lexer.LexUtilities;
 import org.openide.filesystems.FileObject;
 import org.openide.util.NbBundle;
+
+import javax.swing.*;
+import javax.swing.text.Document;
+import java.util.*;
 
 /**
  * Actual implementation of Find Usages query search for Ruby
@@ -354,7 +333,7 @@ public class JsWhereUsedQueryPlugin extends JsRefactoringPlugin {
 
         protected Collection<ModificationResult> process(JsParseResult jspr) {
             if (isCancelled()) {
-                return null;
+                return Collections.<ModificationResult>emptySet();
             }
 
             Error error = null;
