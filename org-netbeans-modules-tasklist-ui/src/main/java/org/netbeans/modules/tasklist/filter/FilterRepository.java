@@ -51,6 +51,8 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
+
+import org.netbeans.modules.tasklist.ui.Settings;
 import org.openide.util.NbBundle;
 import org.openide.util.NbPreferences;
 
@@ -188,14 +190,19 @@ public final class FilterRepository {
         if( prefs.getBoolean( "firstTimeStartWithIssue", true ) ) { //NOI18N
             prefs.putBoolean( "firstTimeStartWithIssue", false ); //NOI18N
             TaskFilter filter = createNewFilter();
-            filter.setName( NbBundle.getMessage( FilterRepository.class, "LBL_TodoFilter" ) ); //NOI18N
+
+            // A
+            filter.setName("ADITO"); //NOI18N
             TypesFilter types = new TypesFilter();
             types.clear();
-            types.setEnabled("org.netbeans.modules.tasklist.todo.TodoTaskScanner", true); //NOI18N
-            types.setTaskCountLimit( 100 );
+            types.setEnabled("de.adito.aditoweb.nbm.tasks.scanners.datamodelscan.DataModelScanner", true); //NOI18N
+            types.setTaskCountLimit( 9999 );
             filter.setTypesFilter( types );
             filter.setKeywordsFilter( new KeywordsFilter() );
             filters.add( filter );
+            setActive(filter);
+            Settings.getDefault().setGroupTasksByCategory(true);
+
             shouldSave = true;
         }
         if( shouldSave )
