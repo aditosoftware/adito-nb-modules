@@ -34,7 +34,7 @@ public interface IFormComponentChildContainer
    * @param pProperties Eigenschaften die bei
    *                    diesem Vorgang angepasst werden, oder null
    */
-  void moveDataModel(IPropertyPitProvider<?,?,?> pSource, Node.Property[] pProperties);
+  IPropertyPitProvider<?, ?, ?> moveDataModel(IPropertyPitProvider<?,?,?> pSource, Node.Property[] pProperties);
 
   /**
    * @param pSource das Datenmodell.

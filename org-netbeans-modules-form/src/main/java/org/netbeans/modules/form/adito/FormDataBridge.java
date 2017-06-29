@@ -313,6 +313,9 @@ class FormDataBridge
       _getFormModel().addComponent(component, container, true);
 
     component.getARADComponentHandler().applyValuesFromAditoModel();
+
+    // Positionen der Kinder anpassen
+    syncChildren();
   }
 
   private void _removeChild(String pRemovedName)

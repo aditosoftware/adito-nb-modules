@@ -14,7 +14,7 @@ import org.openide.nodes.Node;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
-import java.util.stream.Collectors;
+import java.util.stream.*;
 
 /**
  * @author J. Boesl, 17.02.11
@@ -181,21 +181,31 @@ public class ARADComponentHandler
     IAditoModelDataProvider dataProvider = NbAditoInterface.lookup(IAditoModelDataProvider.class);
     IFormComponentChildContainer childContainer =
         dataProvider.getChildContainer(pTarget.getARADComponentHandler().getModel());
-    if (pProperties != null)
-    {
-      for (Node.Property property : pProperties)
-        try
-        {
-          if (property.getValue() != null) // #14435
-            formDataBridge.alignAditoToFormProp(property);
-        }
-        catch (InvocationTargetException | IllegalAccessException e)
-        {
-          // skip
-        }
-    }
     if (childContainer != null)
-      childContainer.moveDataModel(model, pProperties);
+    {
+      IPropertyPitProvider<?, ?, ?> moved = childContainer.moveDataModel(model, pProperties);
+
+      if (pProperties != null)
+      {
+        RADVisualComponent comp = Stream.of(((RADVisualContainer) pTarget).getSubComponents())
+            .filter(pComp -> Objects.equal(pComp.getARADComponentHandler().getModel(), moved))
+            .findAny().orElseThrow(() -> new NullPointerException("No target component found (pit=" + moved + ")"));
+        FormDataBridge targetFormDataBridge = comp.getARADComponentHandler().formDataBridge;
+        if(targetFormDataBridge != null)
+        {
+          for (Node.Property property : pProperties)
+            try
+            {
+              if (property.getValue() != null) // #14435
+                targetFormDataBridge.alignAditoToFormProp(property);
+            }
+            catch (InvocationTargetException | IllegalAccessException e)
+            {
+              // skip
+            }
+        }
+      }
+    }
   }
 
   /**
