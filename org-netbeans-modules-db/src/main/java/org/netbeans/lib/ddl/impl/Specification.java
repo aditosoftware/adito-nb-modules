@@ -44,19 +44,17 @@
 
 package org.netbeans.lib.ddl.impl;
 
+import org.netbeans.lib.ddl.*;
+import org.netbeans.lib.ddl.adaptors.DatabaseMetaDataAdaptor;
+import org.netbeans.modules.db.explorer.dlg.TypeElement;
+import org.openide.util.NbBundle;
+
 import java.beans.Beans;
 import java.lang.reflect.Field;
 import java.sql.*;
 import java.text.MessageFormat;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import org.openide.util.NbBundle;
-
-import org.netbeans.lib.ddl.*;
-import org.netbeans.lib.ddl.adaptors.DatabaseMetaDataAdaptor;
+import java.util.*;
+import java.util.logging.*;
 
 
 public class Specification implements DatabaseSpecification {
@@ -506,15 +504,25 @@ public class Specification implements DatabaseSpecification {
      */
     public Map getNonRedundantTypeMap()
     {
-        Map<String, String> typeMap = getTypeMap();
-        Map<String, String> reducedTypeMap = new HashMap();
-        for (String key : typeMap.keySet())
-        {
-            String value = typeMap.get(key);
-            if(!reducedTypeMap.containsValue(value))
-                reducedTypeMap.put(key, value);
-        }
+        Map<String, String> reducedTypeMap = new LinkedHashMap<>();
+        ((Map<String, String>) getTypeMap()).entrySet().stream()
+            .sorted(Comparator.comparing(pEntry -> pEntry.getValue() + "-" + pEntry.getKey()))
+            .forEachOrdered(pEntry -> {
+                if(!reducedTypeMap.containsValue(pEntry.getValue()))
+                    reducedTypeMap.put(pEntry.getKey(), pEntry.getValue());
+            });
         return reducedTypeMap;
+    }
+
+    /**
+     * @return Liefert den Eintrag, der auch in der nonRedundantTypeMap drin ist
+     */
+    public TypeElement getNonRedundantTypeMapEntry(TypeElement pElement)
+    {
+        return ((Map<String,String>) getNonRedundantTypeMap()).entrySet().stream()
+            .filter(pEntry -> pElement.getName().equals(pEntry.getValue()))
+            .map(pEntry -> new TypeElement(pEntry.getKey(), pEntry.getValue()))
+            .findFirst().orElse(null);
     }
 
     /** Returns DBType where maps specified java type */

@@ -44,41 +44,25 @@
 
 package org.netbeans.modules.db.explorer.dlg;
 
-import java.awt.Dialog;
-import java.awt.Dimension;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
-import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.Callable;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javax.swing.*;
-import javax.swing.border.EmptyBorder;
-import javax.swing.border.TitledBorder;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
 import org.netbeans.lib.ddl.DDLException;
 import org.netbeans.lib.ddl.impl.Specification;
 import org.netbeans.modules.db.explorer.DbUtilities;
 import org.netbeans.modules.db.explorer.node.TableNode;
-import org.openide.DialogDescriptor;
-import org.openide.DialogDisplayer;
-import org.openide.NotificationLineSupport;
-import org.openide.NotifyDescriptor;
+import org.openide.*;
 import org.openide.awt.Mnemonics;
 import org.openide.util.NbBundle;
+
+import javax.swing.*;
+import javax.swing.border.*;
+import javax.swing.event.*;
+import java.awt.*;
+import java.awt.event.*;
+import java.beans.*;
+import java.lang.reflect.InvocationTargetException;
+import java.util.*;
+import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.logging.*;
 
 
 public class AddTableColumnDialog extends JPanel {
@@ -596,9 +580,9 @@ public class AddTableColumnDialog extends JPanel {
     }
 
     /** Sets UI controls according to given ColumnItem. */
-    private void setValues(ColumnItem columnItem) {
+    private void setValues(ColumnItem columnItem, Specification spec) { //A
         colnamefield.setText(columnItem.getName());
-        coltypecombo.setSelectedItem(columnItem.getType());
+        coltypecombo.setSelectedItem(spec.getNonRedundantTypeMapEntry(columnItem.getType())); //A
         if (!sizelesstypes.contains(columnItem.getType().toString())) {
             colsizefield.setText(String.valueOf(columnItem.getSize()));
             colscalefield.setText(String.valueOf(columnItem.getScale()));
@@ -619,13 +603,13 @@ public class AddTableColumnDialog extends JPanel {
      * @param columnItem column item to be edited or null
      * @return ColumnItem instance or null if cancelled
      */
-    public static ColumnItem showDialog(Specification spec, ColumnItem columnItem) {
+    public static ColumnItem showDialog(Specification spec, ColumnItem columnItem) { //A
         AddTableColumnDialog panel = new AddTableColumnDialog(spec);
         DialogDescriptor descriptor = new DialogDescriptor(panel, NbBundle.getMessage(AddTableColumnDialog.class, "AddColumnDialogTitle")); //NOI18N
         descriptor.createNotificationLineSupport();
         panel.setDescriptor(descriptor);
         if (columnItem != null) {
-            panel.setValues(columnItem);
+            panel.setValues(columnItem, spec);
         }
         Dialog dialog = DialogDisplayer.getDefault().createDialog(descriptor);
         dialog.setVisible(true);
