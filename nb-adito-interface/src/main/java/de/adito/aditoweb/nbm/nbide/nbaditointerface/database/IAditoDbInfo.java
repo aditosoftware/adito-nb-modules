@@ -14,7 +14,6 @@ public interface IAditoDbInfo
   public final String CALENDAR = "CALENDAR";
   public final String FARM = "FARM";
   public final String MAILREPOSIT = "MAILREPOSIT";
-  public final String WORKFLOW = "WORKFLOW";
   public final String XMPP = "XMPP";
 
   /**
