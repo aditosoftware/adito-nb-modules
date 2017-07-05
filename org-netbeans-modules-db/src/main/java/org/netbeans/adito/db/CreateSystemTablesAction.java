@@ -294,7 +294,6 @@ public class CreateSystemTablesAction extends BaseAction
                          IAditoDbInfo.CALENDAR,
                          IAditoDbInfo.FARM,
                          IAditoDbInfo.MAILREPOSIT,
-                         IAditoDbInfo.WORKFLOW,
                          IAditoDbInfo.XMPP);
       List<String> tableNames = new ArrayList<>();
       TreePath[] paths = cbModel.getSelectionPaths();
