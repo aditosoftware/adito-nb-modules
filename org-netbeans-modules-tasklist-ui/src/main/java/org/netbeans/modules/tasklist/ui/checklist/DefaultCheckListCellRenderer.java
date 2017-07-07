@@ -44,11 +44,8 @@
 
 package org.netbeans.modules.tasklist.ui.checklist;
 
-import java.awt.Component;
-import javax.swing.JCheckBox;
-import javax.swing.JList;
-import javax.swing.ListCellRenderer;
-import javax.swing.UIManager;
+import java.awt.*;
+import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
 
@@ -78,6 +75,7 @@ public class DefaultCheckListCellRenderer extends JCheckBox
     public Component getListCellRendererComponent(JList list, Object value,
         int index, boolean isSelected, boolean cellHasFocus) {
         setComponentOrientation(list.getComponentOrientation());
+        setOpaque(true); //A
         if (isSelected) {
             setBackground(list.getSelectionBackground());
             setForeground(list.getSelectionForeground());
