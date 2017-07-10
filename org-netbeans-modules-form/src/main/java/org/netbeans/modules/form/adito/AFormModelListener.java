@@ -1,6 +1,7 @@
 package org.netbeans.modules.form.adito;
 
 import org.netbeans.modules.form.*;
+import org.openide.util.RequestProcessor;
 
 import java.util.Collection;
 import java.util.logging.*;
@@ -53,13 +54,15 @@ public abstract class AFormModelListener implements FormModelListener
               eventComponent.getARADComponentHandler().added();
             break;
           case FormModelEvent.FORM_TO_BE_CLOSED:
-            Collection<RADComponent> allComponents = event.getFormModel().getAllComponents();
-            for (RADComponent component : allComponents)
-            {
-              ARADComponentHandler aradComponentHandler = component.getARADComponentHandler();
-              if (aradComponentHandler != null)
-                aradComponentHandler.deinitialize();
-            }
+            RequestProcessor.getDefault().submit(() -> {
+              Collection<RADComponent> allComponents = event.getFormModel().getAllComponents();
+              for (RADComponent component : allComponents)
+              {
+                ARADComponentHandler aradComponentHandler = component.getARADComponentHandler();
+                if (aradComponentHandler != null)
+                  aradComponentHandler.deinitialize();
+              }
+            });
             event.getFormModel().removeFormModelListener(this);
           default:
             break;
