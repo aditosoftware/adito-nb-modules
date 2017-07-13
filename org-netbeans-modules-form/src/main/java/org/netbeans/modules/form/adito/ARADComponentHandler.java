@@ -71,15 +71,15 @@ public class ARADComponentHandler
     }
   }
 
-  public void nameIsAboutToChange(String pOldName, String pNewName) throws IllegalStateException
+  public boolean nameIsAboutToChange(String pOldName, String pNewName) throws IllegalStateException
   {
     if (Objects.equal(pOldName, pNewName) || model == null)
-      return;
+      return true;
     if (radComponent == null)
       throw new IllegalStateException("oldName: " + pOldName + ", newName: " + pNewName);
 
     IAditoModelDataProvider dataProvider = NbAditoInterface.lookup(IAditoModelDataProvider.class);
-    dataProvider.renameDataModel(model, pNewName);
+    return dataProvider.renameDataModel(model, pNewName);
   }
 
   public void deleted()

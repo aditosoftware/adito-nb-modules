@@ -471,7 +471,7 @@ public class RADComponent {
         {
             try
             {
-                nameProperty.setValue(name);
+                nameProperty.setValue(storedName);
             }
             catch (Exception e)
             {
@@ -514,10 +514,11 @@ public class RADComponent {
         return (!storedNameAlreadySet && (storedName == null || !storedName.equals(name)));
     }
 
-    private void _renameNode(String name)
+    private boolean _renameNode(String name)
     {
         if (aRADComponentHandler != null)
-            aRADComponentHandler.nameIsAboutToChange(storedName, name);
+            return aRADComponentHandler.nameIsAboutToChange(storedName, name);
+        return true;
     }
 
     public void setStoredName(String name)
@@ -526,8 +527,8 @@ public class RADComponent {
         //Benennt Node um -> Dadurch PropertyListener-Aufruf, der DisplayName ändert
         try
         {
-          _renameNode(name);
-          storedName = name;
+          if(_renameNode(name))
+            storedName = name;
         }
         finally
         {

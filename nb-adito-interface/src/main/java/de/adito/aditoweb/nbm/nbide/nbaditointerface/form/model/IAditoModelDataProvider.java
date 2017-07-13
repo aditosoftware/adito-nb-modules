@@ -33,7 +33,7 @@ public interface IAditoModelDataProvider
 
   void removeDataModel(IPropertyPitProvider<?, ?, ?> pModel);
 
-  void renameDataModel(IPropertyPitProvider<?, ?, ?> pModel, String pNewName);
+  boolean renameDataModel(IPropertyPitProvider<?, ?, ?> pModel, String pNewName);
 
   /**
    * Positioniert die übergebenen Komponenten im linken oberen Bereich
