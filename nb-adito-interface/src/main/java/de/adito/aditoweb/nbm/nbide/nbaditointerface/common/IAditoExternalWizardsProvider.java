@@ -2,6 +2,8 @@ package de.adito.aditoweb.nbm.nbide.nbaditointerface.common;
 
 import org.openide.util.Lookup;
 
+import java.util.function.Function;
+
 /**
  * Interface für von außen erreichbare Wizards
  *
@@ -10,6 +12,9 @@ import org.openide.util.Lookup;
 public interface IAditoExternalWizardsProvider
 {
 
-  void createSystemTableWizard(Lookup pLookup, String pSchema);
+  /**
+   * @param pTableExistsFn Function um festzustellen, ob eine Tabelle bereits im Schema existiert
+   */
+  void createSystemTableWizard(Lookup pLookup, String pSchema, Function<String, Boolean> pTableExistsFn);
 
 }
