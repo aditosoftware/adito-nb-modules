@@ -258,11 +258,16 @@ public class AbstractCommand implements Serializable, DDLCommand {
 
     private String getQuoteString() {
         try {
-            quoteStr = getSpecification().getJDBCConnection().getMetaData().getIdentifierQuoteString();
-            
-            //Firebird patch (commands don't work with quoted names)
-            if (getSpecification().getJDBCConnection().getMetaData().getDatabaseProductName().indexOf("Firebird") != -1) //NOI18N
-                quoteStr = "";
+            if(getSpecification().getJDBCConnection() != null)
+            {
+                quoteStr = getSpecification().getJDBCConnection().getMetaData().getIdentifierQuoteString();
+
+                //Firebird patch (commands don't work with quoted names)
+                if (getSpecification().getJDBCConnection().getMetaData().getDatabaseProductName().indexOf("Firebird") != -1) //NOI18N
+                    quoteStr = "";
+            }
+            else
+                quoteStr = null;
         } catch (SQLException exc) {
             //PENDING
         }
