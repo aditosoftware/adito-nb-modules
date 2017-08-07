@@ -291,19 +291,23 @@ public class RADComponentNode extends FormNode
     // Liefert Actions der Oberklasse
     super.getActions(context);
     for (Object a : super.getSortedActionList().toArray())
-      actions.add((AditoActionObject) a);
+      if(a != null)
+        actions.add((AditoActionObject) a);
 
     // all actions from our own node.
     for (Action action : AditoNodeConnect.getActions(component, true))
     {
-      Object position = action.getValue("position");
-      if (position instanceof Integer)
+      if(action != null)
       {
-        actions.add(new AditoActionObject(action, (Integer) position));
-        actions.add(new AditoActionObject(null, (Integer) position + 1));
+        Object position = action.getValue("position");
+        if (position instanceof Integer)
+        {
+          actions.add(new AditoActionObject(action, (Integer) position));
+          actions.add(new AditoActionObject(null, (Integer) position + 1));
+        }
+        else
+          actions.add(new AditoActionObject(action, Integer.MAX_VALUE));
       }
-      else
-        actions.add(new AditoActionObject(action, Integer.MAX_VALUE));
     }
     actions.add(new AditoActionObject(null, 100));
 
