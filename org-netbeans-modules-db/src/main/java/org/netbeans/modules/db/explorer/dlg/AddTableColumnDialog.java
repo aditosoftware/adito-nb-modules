@@ -143,7 +143,7 @@ public class AddTableColumnDialog extends JPanel {
         sizelesstypes = sizelesstypesSpec != null ? sizelesstypesSpec : Collections.<String>emptyList();
         charactertypes = charactertypesSpec != null ? charactertypesSpec : Collections.<String>emptyList();
 
-        Map<String, String> tmap = spe.getTypeMap();
+        Map<String, String> tmap = spe.getNonRedundantTypeMap();
         List<TypeElement> ttab = new ArrayList<TypeElement>(tmap.size());
         for (String key : tmap.keySet()) {
             ttab.add(new TypeElement(key, tmap.get(key)));
