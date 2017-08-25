@@ -1483,12 +1483,11 @@
       java.sql.Types.TIME_WITH_TIMEZONE = TIME;
       java.sql.Types.TIMESTAMP_WITH_TIMEZONE = DATETIME;
       java.sql.Types.SQLXML = TEXT;
-      java.sql.Types.LONGVARBINARY = LONGBLOB;
-      java.sql.Types.CLOB = TEXT;
+      java.sql.Types.CLOB = LONGTEXT;
       java.sql.Types.LONGNVARCHAR = TEXT;
       java.sql.Types.BOOLEAN = TINYINT;
     };
-    SizelessTypes = (BIGINT,LONGBLOB,DATE,"DOUBLE PRECISION",FLOAT,INT,REAL,SMALLINT,TIME,TIMESTAMP,DATETIME,TINYINT,TEXT);
+    SizelessTypes = (BIGINT,LONGBLOB,DATE,"DOUBLE PRECISION",FLOAT,INT,REAL,SMALLINT,TIME,TIMESTAMP,DATETIME,TINYINT,TEXT,LONGTEXT);
 //    DecimalTypes = (DECIMAL,NUMERIC);
     CharacterTypes = (CHAR,VARCHAR,TEXT);
       NoPrimaryKeyTypes = (LONGTEXT, LONGBLOB,TEXT);
