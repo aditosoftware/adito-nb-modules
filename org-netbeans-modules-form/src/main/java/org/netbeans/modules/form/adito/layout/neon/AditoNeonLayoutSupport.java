@@ -2,7 +2,7 @@ package org.netbeans.modules.form.adito.layout.neon;
 
 import de.adito.aditoweb.nbm.nbide.nbaditointerface.NbAditoInterface;
 import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.layout.IAditoLayoutProvider;
-import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.layout.common.IAditoLayoutConstraints;
+import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.layout.common.*;
 import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.layout.neon.*;
 import org.netbeans.modules.form.FormLoaderSettings;
 import org.netbeans.modules.form.layoutsupport.*;
@@ -73,6 +73,24 @@ public class AditoNeonLayoutSupport extends AbstractLayoutSupport
   @Override
   public int getResizableDirections(Container container, Container containerDelegate, Component component, int index)
   {
+    Object directions = ((JComponent) component).getClientProperty(IResizeConstants.class);
+    if (directions != null)
+    {
+      Integer aditoDirections = (Integer) directions;
+      Integer layoutDirections = 0;
+
+      if ((aditoDirections & IResizeConstants.RESIZE_LEFT) != 0)
+        layoutDirections = layoutDirections | RESIZE_LEFT;
+      if ((aditoDirections & IResizeConstants.RESIZE_RIGHT) != 0)
+        layoutDirections = layoutDirections | RESIZE_RIGHT;
+      if ((aditoDirections & IResizeConstants.RESIZE_UP) != 0)
+        layoutDirections = layoutDirections | RESIZE_UP;
+      if ((aditoDirections & IResizeConstants.RESIZE_DOWN) != 0)
+        layoutDirections = layoutDirections | RESIZE_DOWN;
+      
+      return layoutDirections;
+    }
+    
     return RESIZE_UP | RESIZE_DOWN | RESIZE_LEFT | RESIZE_RIGHT;
   }
 
