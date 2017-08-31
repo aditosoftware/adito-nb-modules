@@ -34,4 +34,13 @@ public interface IJsDataSupply
    */
   Set<String> getEntityFieldVars(FileObject pCompletionFile);
 
+  /**
+   * Liefert die Namen von Parameter Entities.
+   *
+   * @param pCompletionFile FileObject eines Adito Prozesses.
+   * @return eine Liste mit Namen von Parameter Entities erweitert
+   * um das Prafix "$param.", oder eine leere Liste.
+   */
+  Set<String> parameterVars(FileObject pCompletionFile);
+
 }

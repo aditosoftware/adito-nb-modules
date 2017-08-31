@@ -65,6 +65,8 @@ import javax.swing.text.*;
 import java.util.*;
 import java.util.logging.*;
 
+import org.netbeans.modules.javascript.editing.Element;
+
 /**
  * Code completion handler for JavaScript
  *
@@ -650,6 +652,12 @@ public class JsCodeCompletion implements CodeCompletionHandler {
           if (startsWith(entityFieldVar, prefix))
             proposals.add(new GenericItem(entityFieldVar, "", request, ElementKind.CONSTANT));
         }
+        for (String paramVar : jsDataSupply.parameterVars(request.fileObject))
+        {
+          if (startsWith(paramVar, prefix))
+            proposals.add(new GenericItem(paramVar, "", request, ElementKind.CONSTANT));
+        }
+
       }
     }
 
