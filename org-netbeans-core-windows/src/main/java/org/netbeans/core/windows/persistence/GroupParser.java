@@ -611,16 +611,17 @@ class GroupParser {
         private void handleState (Attributes attrs) throws SAXException {
             String opened = attrs.getValue("opened"); // NOI18N
             if (opened != null) {
-                if ("true".equals(opened)) { // NOI18N
-                    groupConfig.opened = true;
-                } else if ("false".equals(opened)) { // NOI18N
-                    groupConfig.opened = false;
-                } else {
-                    PersistenceManager.LOG.log(Level.INFO,
-                    "[WinSys.GroupParser.handleState]" // NOI18N
-                    + " Warning: Invalid value of attribute \"opened\" of element \"state\"."); // NOI18N
-                    groupConfig.opened = false;
-                }
+                // A (#15008)
+                //if ("true".equals(opened)) { // NOI18N
+                //    groupConfig.opened = true;
+                //} else if ("false".equals(opened)) { // NOI18N
+                //    groupConfig.opened = false;
+                //} else {
+                //    PersistenceManager.LOG.log(Level.INFO,
+                //    "[WinSys.GroupParser.handleState]" // NOI18N
+                //    + " Warning: Invalid value of attribute \"opened\" of element \"state\"."); // NOI18N
+                //    groupConfig.opened = false;
+                //}
             } else {
                  PersistenceManager.LOG.log(Level.INFO,
                 "[WinSys.GroupParser.handleState]" // NOI18N
