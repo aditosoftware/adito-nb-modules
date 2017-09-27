@@ -70,13 +70,19 @@ public class AditoLibraryQuery
 
     return packets;
   }
-
+  
   @Nullable
   public Packet getPacket(FileObject pFileObject)
   {
-    return _getPacket(pFileObject, new HashSet<>(Arrays.asList(EPacketType.values())));
+    return getPacket(pFileObject, EPacketType.values());
   }
 
+  @Nullable
+  public Packet getPacket(FileObject pFileObject, EPacketType... pRequestedTypes)
+  {
+    return _getPacket(pFileObject, new HashSet<>(Arrays.asList(pRequestedTypes)));
+  }
+  
   @Nullable
   private Packet _getPacket(FileObject pFileObject, Set<EPacketType> pRequestedTypes)
   {

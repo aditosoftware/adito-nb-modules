@@ -10,6 +10,8 @@ import org.openide.filesystems.FileObject;
 
 import java.util.*;
 
+import static org.netbeans.modules.javascript.editing.adito.AditoLibraryQuery.*;
+
 /**
  * @author d.poellath, 06.12.12
  */
@@ -48,7 +50,11 @@ public class AditoImportHint extends AbstractAditoHint
             }
             if (!parentIsDeprecated)
             {
-              AditoLibraryQuery.Packet packet = new AditoLibraryQuery().getPacket(element.getFileObject());
+              Packet packet = new AditoLibraryQuery().getPacket(element.getFileObject(), 
+                                                                EPacketType.SYSTEM_ADITO,
+                                                                EPacketType.SYSTEM_CORE,
+                                                                EPacketType.LIBRARY);
+                                                                                  
               if (packet != null)
               {
                 String importStatement = "import(\"" + packet.getName() + "\")";
@@ -57,7 +63,7 @@ public class AditoImportHint extends AbstractAditoHint
                 String description = "Add '" + packet.getName() + "' to imports.";
                 Hint desc = new Hint(this, description, fileObject, AstUtilities.getNameRange(node), fix, 1500);
 
-                if(!hintAlreadyExistsInLine(desc, pResultHints))
+                if (!hintAlreadyExistsInLine(desc, pResultHints))
                   pResultHints.add(desc);
                 else
                   pResultHints.add(new Hint(this, description, fileObject, AstUtilities.getNameRange(node), null, 1500));
@@ -72,17 +78,17 @@ public class AditoImportHint extends AbstractAditoHint
 
   private boolean hintAlreadyExistsInLine(Hint pNewHint, List<Hint> pOldHints)
   {
-    for(Hint oldHint : pOldHints)
-      if(oldHint.getDescription().equals(pNewHint.getDescription()) && oldHint.getFixes() != null)
-        for(HintFix existHintFix : oldHint.getFixes())   //1
-          if(existHintFix != null && existHintFix instanceof AditoImportHintFix)
-            for(HintFix newFix : pNewHint.getFixes())  //1
-              if(newFix instanceof AditoImportHintFix)
-                if(((AditoImportHintFix)existHintFix).getContext().node.getParentNode().equals(((AditoImportHintFix)newFix).getContext().node.getParentNode()))
+    for (Hint oldHint : pOldHints)
+      if (oldHint.getDescription().equals(pNewHint.getDescription()) && oldHint.getFixes() != null)
+        for (HintFix existHintFix : oldHint.getFixes())   //1
+          if (existHintFix != null && existHintFix instanceof AditoImportHintFix)
+            for (HintFix newFix : pNewHint.getFixes())  //1
+              if (newFix instanceof AditoImportHintFix)
+                if (((AditoImportHintFix) existHintFix).getContext().node.getParentNode().equals(((AditoImportHintFix) newFix).getContext().node.getParentNode()))
                 {
-                  String substring = ((AditoImportHintFix)existHintFix).getContext().parserResult.getSnapshot().getText().subSequence(oldHint.getRange().getEnd(), pNewHint.getRange().getStart()).toString();
+                  String substring = ((AditoImportHintFix) existHintFix).getContext().parserResult.getSnapshot().getText().subSequence(oldHint.getRange().getEnd(), pNewHint.getRange().getStart()).toString();
 
-                  if(!substring.contains("\n"))
+                  if (!substring.contains("\n"))
                     return true;
                 }
 
