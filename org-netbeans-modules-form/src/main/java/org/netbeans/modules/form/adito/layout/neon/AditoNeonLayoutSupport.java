@@ -50,7 +50,7 @@ public class AditoNeonLayoutSupport extends AbstractLayoutSupport
   public LayoutConstraints getNewConstraints(Container container, Container containerDelegate, Component component,
                                              int index, Point posInCont, Point posInComp)
   {
-    return _buildConstraints(container, component, null, posInCont, index);
+    return _buildConstraints(container, component, null, posInCont, index, posInComp);
   }
 
   @Override
@@ -58,7 +58,7 @@ public class AditoNeonLayoutSupport extends AbstractLayoutSupport
                                                  int index, Rectangle originalBounds, Insets sizeChanges,
                                                  Point posInCont)
   {
-    return _buildConstraints(container, component, sizeChanges, posInCont, index);
+    return _buildConstraints(container, component, sizeChanges, posInCont, index, null);
   }
 
   @Override
@@ -87,10 +87,10 @@ public class AditoNeonLayoutSupport extends AbstractLayoutSupport
         layoutDirections = layoutDirections | RESIZE_UP;
       if ((aditoDirections & IResizeConstants.RESIZE_DOWN) != 0)
         layoutDirections = layoutDirections | RESIZE_DOWN;
-      
+
       return layoutDirections;
     }
-    
+
     return RESIZE_UP | RESIZE_DOWN | RESIZE_LEFT | RESIZE_RIGHT;
   }
 
@@ -101,13 +101,13 @@ public class AditoNeonLayoutSupport extends AbstractLayoutSupport
   }
 
   private LayoutConstraints _buildConstraints(Container container, Component component,
-                                              Insets sizeChanges, Point posInCont, int index)
+                                              Insets sizeChanges, Point posInCont, int index, Point pPosInComp)
   {
     JComponent neonComp = (JComponent) component;
     IDropAreaSupport support = (IDropAreaSupport) container;
-    IDropArea area = support.getDropArea(posInCont, neonComp, sizeChanges);
+    IDropArea area = support.getDropArea(posInCont, neonComp, sizeChanges, pPosInComp);
     NeonConstraints constr = (NeonConstraints) getConstraints(index);
-    constr = constr == null ? createDefaultConstraints(): (NeonConstraints) constr.cloneConstraints();
+    constr = constr == null ? createDefaultConstraints() : (NeonConstraints) constr.cloneConstraints();
     IAditoLayoutConstraints<ICellInfoPropertyTypes> co = constr.getConstraintsObject();
     ICellInfoPropertyTypes typeInfo = co.getTypeInfo();
 

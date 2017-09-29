@@ -17,7 +17,8 @@ public interface IDropAreaSupport
    * @param pSizeChanges zeigt an, welche Kante einer Komponente mit der Maus
    *                    verschoben wird. Ist null, wenn die gesamte Komponente
    *                    verschoben wird.
+   * @param pPosInComp  X/Y Koordinaten in einer Komponente.
    * @return Einfügeinformationen für einen Container.
    */
-  IDropArea getDropArea(Point pPosInCont, JComponent pComponent, Insets pSizeChanges);
+  IDropArea getDropArea(Point pPosInCont, JComponent pComponent, Insets pSizeChanges, Point pPosInComp);
 }
