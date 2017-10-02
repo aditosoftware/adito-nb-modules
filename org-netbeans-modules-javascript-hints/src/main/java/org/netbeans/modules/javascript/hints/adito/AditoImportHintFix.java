@@ -2,12 +2,13 @@ package org.netbeans.modules.javascript.hints.adito;
 
 import org.netbeans.editor.BaseDocument;
 import org.netbeans.modules.csl.api.*;
+import org.netbeans.modules.javascript.editing.AstUtilities;
 import org.netbeans.modules.javascript.hints.infrastructure.JsRuleContext;
 
 /**
  * @author d.poellath, 06.12.12
  */
-public class AditoImportHintFix implements HintFix, PreviewableFix
+public class AditoImportHintFix implements HintFix, PreviewableFix, AditoHintUtility.IFixAllFixable
 {
   private final JsRuleContext context;
   private String importStatement = null;
@@ -62,4 +63,10 @@ public class AditoImportHintFix implements HintFix, PreviewableFix
     return context;
   }
 
+  @Override
+  public Object getID()
+  {
+    String path = AstUtilities.getParseResult(context.parserResult).getSnapshot().getSource().getFileObject().getPath();
+    return path + " " + importStatement;
+  }
 }
