@@ -50,9 +50,15 @@ public class AditoLayoutSupport extends AbstractLayoutSupport
   public LayoutConstraints getNewConstraints(Container container, Container containerDelegate, Component component,
                                              int index, Point posInCont, Point posInComp)
   {
-    AditoComponentConstraints constr = (AditoComponentConstraints) getConstraints(index);
-    constr = constr == null ? new AditoComponentConstraints() : constr.cloneConstraints();
-
+    AditoComponentConstraints constr;
+    if ((component != null) && (component.getParent() != container))
+      constr = new AditoComponentConstraints();
+    else
+    {
+      constr = (AditoComponentConstraints) getConstraints(index);
+      constr = constr == null ? new AditoComponentConstraints() : constr.cloneConstraints();
+    }
+    
     int x = posInCont.x;
     int y = posInCont.y;
     int w = -1;
