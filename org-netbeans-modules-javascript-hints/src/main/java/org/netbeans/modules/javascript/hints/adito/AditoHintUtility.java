@@ -1,6 +1,7 @@
 package org.netbeans.modules.javascript.hints.adito;
 
 import org.jetbrains.annotations.*;
+import org.mozilla.nb.javascript.Node;
 import org.netbeans.api.progress.*;
 import org.netbeans.api.project.Project;
 import org.netbeans.editor.BaseDocument;
@@ -17,6 +18,7 @@ import org.openide.*;
 import org.openide.filesystems.FileObject;
 import org.openide.util.*;
 
+import javax.swing.text.*;
 import java.lang.reflect.Field;
 import java.text.MessageFormat;
 import java.util.*;
@@ -55,6 +57,32 @@ class AditoHintUtility
         });
       });
     }
+  }
+
+  /**
+   * @return Wandelt eine Node in einen lesbaren String um, bei dem die Typen ausgegeben werden
+   */
+  public static String toDebugString(Node pNode, int pLevel, Document pDocument) throws BadLocationException
+  {
+    StringBuilder result = new StringBuilder();
+
+    // meine Node printen
+    for(int i = 0; i < pLevel; i++)
+      result.append("  ");
+    result.append(pNode.getType())
+        .append(" -> '")
+        .append(pDocument.getText(pNode.getSourceStart(), pNode.getSourceEnd() - pNode.getSourceStart()).replaceAll("\n", " \\\\n"))
+        .append("'\n");
+
+    // Kinder
+    Node child = pNode.getFirstChild();
+    while(child != null)
+    {
+      result.append(toDebugString(child, pLevel+1, pDocument));
+      child = child.getNext();
+    }
+
+    return result.toString();
   }
 
   private static void _runImplement(Source pSource, List<Object> pFixesAlreadyImplemented, CancellableImpl pCancellable, @NotNull Predicate<HintFix> pShouldResolveHintFix, @Nullable Consumer<Exception> pExceptionConsumer, @Nullable Runnable pRunAfterFix)
@@ -307,12 +335,14 @@ class AditoHintUtility
   public abstract static class ImplementAllOfTypeFix implements HintFix
   {
     private final Project project;
+    private final boolean showConfirmDialog;
     private final Class<? extends HintFix>[] fixes;
 
     @SafeVarargs
-    public ImplementAllOfTypeFix(Project pProject, Class<? extends HintFix>... pFixes)
+    public ImplementAllOfTypeFix(Project pProject, boolean pShowConfirmDialog, Class<? extends HintFix>... pFixes)
     {
       project = pProject;
+      showConfirmDialog = pShowConfirmDialog;
       fixes = pFixes;
     }
 
@@ -342,7 +372,16 @@ class AditoHintUtility
       AditoHintUtility.CancellableImpl cancellable = new AditoHintUtility.CancellableImpl();
       ProgressHandle handle = ProgressHandleFactory.createSystemHandle(BUNDLE.getString("LBL_FixingHints"), cancellable);
       List<Class<? extends HintFix>> fixesList = Arrays.asList(pTypesToFix);
-      BaseProgressUtils.showProgressDialogAndRun(new _ProgressRunnable(project, handle, cancellable, pFix -> fixesList.contains(pFix.getClass())), handle, true);
+      BaseProgressUtils.showProgressDialogAndRun(new _ProgressRunnable(project, handle, cancellable, pFix -> fixesList.contains(pFix.getClass()), () -> getFileObjects(project), showConfirmDialog), handle, true);
+    }
+
+    /**
+     * @return <tt>null</tt> = alle FileObjects des Projektes
+     */
+    @Nullable
+    protected List<FileObject> getFileObjects(@NotNull Project pProject)
+    {
+      return null;
     }
 
     private static class _ProgressRunnable implements Runnable
@@ -351,13 +390,18 @@ class AditoHintUtility
       private final ProgressHandle handle;
       private final AditoHintUtility.CancellableImpl cancellable;
       private final Predicate<HintFix> shouldResolveHintFix;
+      private final Supplier<List<FileObject>> fileObjectGetter;
+      private final boolean showConfirmDialog;
 
-      public _ProgressRunnable(Project pProject, ProgressHandle pHandle, AditoHintUtility.CancellableImpl pCancellable, @NotNull Predicate<HintFix> pShouldResolveHintFix)
+      public _ProgressRunnable(Project pProject, ProgressHandle pHandle, AditoHintUtility.CancellableImpl pCancellable,
+                               @NotNull Predicate<HintFix> pShouldResolveHintFix, @NotNull Supplier<List<FileObject>> pFileObjectGetter, boolean pShowConfirmDialog)
       {
         project = pProject;
         handle = pHandle;
         cancellable = pCancellable;
         shouldResolveHintFix = pShouldResolveHintFix;
+        fileObjectGetter = pFileObjectGetter;
+        showConfirmDialog = pShowConfirmDialog;
       }
 
       @Override
@@ -365,16 +409,20 @@ class AditoHintUtility
       {
         handle.start();
         handle.switchToIndeterminate();
-        List<FileObject> javascriptFOs = _searchFileObject(project.getProjectDirectory(), pFo -> pFo.getMIMEType().equals("text/javascript"), cancellable);
-        List<Source> sources = new ArrayList<>();
-        sources.addAll(javascriptFOs.stream().map(Source::create).collect(Collectors.toSet()));
+        List<FileObject> fileObjects = fileObjectGetter.get();
+        List<Source> sources = (fileObjects != null ? fileObjects.stream() : _searchFileObject(project.getProjectDirectory(), pFo -> pFo.getMIMEType().equals("text/javascript"), cancellable).stream())
+            .map(Source::create)
+            .collect(Collectors.toList());
         int initSize = sources.size();
 
-        // Sicherheitsabfrage
-        String lbl_confirmFullFix = MessageFormat.format(BUNDLE.getString("LBL_ConfirmFullFix"), initSize, project.getProjectDirectory().getName());
-        NotifyDescriptor.Confirmation confDescr = new DialogDescriptor.Confirmation(lbl_confirmFullFix, NotifyDescriptor.YES_NO_OPTION);
-        if(DialogDisplayer.getDefault().notify(confDescr) != NotifyDescriptor.YES_OPTION)
-          cancellable.cancel();
+        // Sicherheitsabfrage, wenn gewünscht
+        if(showConfirmDialog)
+        {
+          String lbl_confirmFullFix = MessageFormat.format(BUNDLE.getString("LBL_ConfirmFullFix"), initSize, project.getProjectDirectory().getName());
+          NotifyDescriptor.Confirmation confDescr = new DialogDescriptor.Confirmation(lbl_confirmFullFix, NotifyDescriptor.YES_NO_OPTION);
+          if (DialogDisplayer.getDefault().notify(confDescr) != NotifyDescriptor.YES_OPTION)
+            cancellable.cancel();
+        }
 
         if(cancellable.isCancelled())
           handle.finish();

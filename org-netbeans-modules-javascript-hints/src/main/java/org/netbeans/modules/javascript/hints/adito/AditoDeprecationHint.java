@@ -1,6 +1,7 @@
 package org.netbeans.modules.javascript.hints.adito;
 
 import de.adito.aditoweb.nbm.nbide.nbaditointerface.javascript.IJsUpgrade;
+import org.jetbrains.annotations.*;
 import org.mozilla.nb.javascript.*;
 import org.netbeans.api.project.*;
 import org.netbeans.modules.csl.api.*;
@@ -13,6 +14,7 @@ import org.openide.util.*;
 
 import javax.swing.text.Document;
 import java.util.*;
+import java.util.stream.*;
 
 /**
  * @author j.boesl, 22.07.16
@@ -30,20 +32,31 @@ public class AditoDeprecationHint extends AbstractAditoHint
     if (fileObject == null)
       return;
 
-    JsIndex jsIndex = JsIndex.get(QuerySupport.findRoots(fileObject, Collections.singleton(JsClassPathProvider.SOURCE_CP),
-                                                         Collections.singleton(JsClassPathProvider.BOOT_CP), Collections.emptySet()));
-    jsIndex.setAutoImports(JsIndex.MARK_AS_DEPRECATED_MODULES);
-
-    String callName = AstUtilities.getCallName(node, true);
     String altName = info.getSource().substring(node.getSourceStart(), node.getSourceEnd());
-    if (altName.startsWith(callName))
+    String callName = node.getType() == Token.CALL || node.getType() == Token.NEW ? AstUtilities.getCallName(node, true) : altName;
+    if (altName.startsWith(callName) && callName.split("\\.").length >= 2)
     {
+      JsIndex jsIndex = JsIndex.get(QuerySupport.findRoots(fileObject, Collections.singleton(JsClassPathProvider.SOURCE_CP),
+                                                           Collections.singleton(JsClassPathProvider.BOOT_CP), Collections.emptySet()));
+      jsIndex.setAutoImports(JsIndex.MARK_AS_DEPRECATED_MODULES);
+
       Set<IndexedElement> elements = jsIndex.getElements(callName, null, QuerySupport.Kind.EXACT, info);
       if (!elements.isEmpty() && elements.iterator().next().isDeprecated())
       {
         String description = "'" + callName + "' is deprecated an should no longer be used.";
-        Hint desc = new Hint(this, description, fileObject, AstUtilities.getNameRange(node), Arrays.asList(new _DeprecationFixSingle(fileObject, info.getSnapshot().getSource().getDocument(false), node),
-                                                                                                           new _DeprecationFixAll(FileOwnerQuery.getOwner(fileObject))), 5000);
+        List<HintFix> fixes = new ArrayList<>();
+        fixes.add(new _DeprecationFixSingle(fileObject, info.getSnapshot().getSource().getDocument(true), node, callName));
+
+        // Noch kein Fix-All-Eintrag vorhanden? Dann einen hinzufügen
+        if(_getFixes(pResultHints, _DeprecationFixAll.class).isEmpty())
+        {
+          Project project = FileOwnerQuery.getOwner(fileObject);
+          fixes.add(new _DeprecationFixInFile(project, fileObject));
+          fixes.add(new _DeprecationFixAll(project));
+        }
+
+        int priority = 10000 - _getFixes(pResultHints, _DeprecationFixSingle.class).size();
+        Hint desc = new Hint(this, description, fileObject, AstUtilities.getNameRange(node), fixes, priority);
         pResultHints.add(desc);
       }
     }
@@ -58,20 +71,27 @@ public class AditoDeprecationHint extends AbstractAditoHint
   @Override
   public Set<Integer> getKinds()
   {
-    return new HashSet<>(Arrays.asList(Token.CALL, Token.NEW));
+    return new HashSet<>(Arrays.asList(Token.CALL, Token.NEW, Token.GETPROP));
   }
 
   @Override
   public String getDisplayName()
   {
-    return "Deprecated reference detected";
+    return NbBundle.getMessage(AditoDeprecationHint.class, "LBL_DeprecationHint_Name");
   }
 
   @Override
   public String getDescription()
   {
-    return "The referenced method is deprecated and should no longer be used. Deprecated references can be subject of " +
-        "future removals.";
+    return NbBundle.getMessage(AditoDeprecationHint.class, "LBL_DeprecationHint_Descr");
+  }
+
+  private List<HintFix> _getFixes(List<Hint> pResultHints, Class<? extends HintFix> pFilterFix)
+  {
+    return pResultHints.stream()
+        .flatMap(pHint -> pHint.getFixes() == null ? Stream.empty() : pHint.getFixes().stream())
+        .filter(pFix -> pFilterFix.isAssignableFrom(pFix.getClass()))
+        .collect(Collectors.toList());
   }
 
   private static class _DeprecationFixSingle implements HintFix, AditoHintUtility.IFixAllFixable
@@ -79,25 +99,27 @@ public class AditoDeprecationHint extends AbstractAditoHint
     private final FileObject fileObject;
     private final Document document;
     private final Node node;
+    private final String accessorName;
 
-    public _DeprecationFixSingle(FileObject pFileObject, Document pDocument, Node pNode)
+    public _DeprecationFixSingle(FileObject pFileObject, Document pDocument, Node pNode, String pAccessorName)
     {
       fileObject = pFileObject;
       document = pDocument;
       node = pNode;
+      accessorName = pAccessorName;
     }
 
     @Override
     public String getDescription()
     {
-      return "Fix deprecation warning";
+      return NbBundle.getMessage(_DeprecationFixSingle.class, "LBL_DeprecationFixSingle_Descr", accessorName);
     }
 
     @Override
     public void implement() throws Exception
     {
       Lookup.getDefault().lookup(IJsUpgrade.class).upgrade(node, document, true);
-      AditoHintUtility.implementHintFixes(Collections.singletonList(Source.create(fileObject)),pFix -> pFix instanceof AditoImportHintFix, null, null, null);
+      AditoHintUtility.implementHintFixes(Collections.singletonList(Source.create(fileObject)), pFix -> pFix instanceof AditoImportHintFix, null, null, null);
     }
 
     @Override
@@ -119,17 +141,41 @@ public class AditoDeprecationHint extends AbstractAditoHint
     }
   }
 
-  private static class _DeprecationFixAll extends AditoHintUtility.ImplementAllOfTypeFix
+  private static class _DeprecationFixInFile extends AditoHintUtility.ImplementAllOfTypeFix
   {
-    public _DeprecationFixAll(Project pProject)
+    private final FileObject currentFO;
+
+    public _DeprecationFixInFile(Project pProject, FileObject pCurrentFO)
     {
-      super(pProject, _DeprecationFixSingle.class);
+      super(pProject, false, _DeprecationFixSingle.class);
+      currentFO = pCurrentFO;
     }
 
     @Override
     public String getDescription()
     {
-      return "Fix all deprecation warnings";
+      return NbBundle.getMessage(_DeprecationFixAll.class, "LBL_DeprecationFixInFile_Descr");
+    }
+
+    @Nullable
+    @Override
+    protected List<FileObject> getFileObjects(@NotNull Project pProject)
+    {
+      return Collections.singletonList(currentFO);
+    }
+  }
+
+  private static class _DeprecationFixAll extends AditoHintUtility.ImplementAllOfTypeFix
+  {
+    public _DeprecationFixAll(Project pProject)
+    {
+      super(pProject, true, _DeprecationFixSingle.class);
+    }
+
+    @Override
+    public String getDescription()
+    {
+      return NbBundle.getMessage(_DeprecationFixAll.class, "LBL_DeprecationFixAll_Descr");
     }
   }
 
