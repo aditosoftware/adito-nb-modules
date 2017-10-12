@@ -10,6 +10,6 @@ import javax.swing.text.Document;
 public interface IJsUpgrade
 {
 
-  void upgrade(Object pNode, Document pDocument, boolean pGenerateTodo) throws Exception;
+  boolean upgrade(Object pNode, Document pDocument, boolean pGenerateTodo) throws Exception;
 
 }

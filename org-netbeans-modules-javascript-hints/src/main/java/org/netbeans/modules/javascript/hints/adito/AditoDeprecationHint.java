@@ -118,8 +118,16 @@ public class AditoDeprecationHint extends AbstractAditoHint
     @Override
     public void implement() throws Exception
     {
-      Lookup.getDefault().lookup(IJsUpgrade.class).upgrade(node, document, true);
-      AditoHintUtility.implementHintFixes(Collections.singletonList(Source.create(fileObject)), pFix -> pFix instanceof AditoImportHintFix, null, null, null);
+      implementAndReturn();
+    }
+
+    @Override
+    public boolean implementAndReturn() throws Exception
+    {
+      boolean result = Lookup.getDefault().lookup(IJsUpgrade.class).upgrade(node, document, true);
+      if(result)
+        AditoHintUtility.implementHintFixes(Collections.singletonList(Source.create(fileObject)), pFix -> pFix instanceof AditoImportHintFix, null, null, null);
+      return result;
     }
 
     @Override
@@ -147,7 +155,7 @@ public class AditoDeprecationHint extends AbstractAditoHint
 
     public _DeprecationFixInFile(Project pProject, FileObject pCurrentFO)
     {
-      super(pProject, false, _DeprecationFixSingle.class);
+      super(pProject, false, true, _DeprecationFixSingle.class);
       currentFO = pCurrentFO;
     }
 
@@ -169,7 +177,7 @@ public class AditoDeprecationHint extends AbstractAditoHint
   {
     public _DeprecationFixAll(Project pProject)
     {
-      super(pProject, true, _DeprecationFixSingle.class);
+      super(pProject, true, true, _DeprecationFixSingle.class);
     }
 
     @Override
