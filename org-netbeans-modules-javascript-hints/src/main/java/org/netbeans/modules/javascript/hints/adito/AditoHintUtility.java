@@ -514,7 +514,7 @@ class AditoHintUtility
         if(!displayFailedFixes)
           return;
 
-        NotifyDescriptor.Confirmation confirmation = new NotifyDescriptor.Confirmation(NbBundle.getMessage(_ProgressRunnable.class, "LBL_FailedFixes", pFailedFixes.size()));
+        NotifyDescriptor confirmation = new NotifyDescriptor.Message(NbBundle.getMessage(_ProgressRunnable.class, "LBL_FailedFixes", pFailedFixes.size()));
         DialogDisplayer.getDefault().notify(confirmation);
       }
     }
