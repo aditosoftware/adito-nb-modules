@@ -1,7 +1,9 @@
 package org.netbeans.modules.javascript.hints.adito;
 
+import com.google.common.base.Objects;
 import de.adito.aditoweb.nbm.nbide.nbaditointerface.javascript.IJsUpgrade;
 import org.jetbrains.annotations.*;
+import org.mozilla.nb.javascript.Node;
 import org.mozilla.nb.javascript.*;
 import org.netbeans.api.project.*;
 import org.netbeans.modules.csl.api.*;
@@ -12,7 +14,7 @@ import org.netbeans.modules.parsing.spi.indexing.support.QuerySupport;
 import org.openide.filesystems.FileObject;
 import org.openide.util.*;
 
-import javax.swing.text.Document;
+import javax.swing.text.*;
 import java.util.*;
 import java.util.stream.*;
 
@@ -45,17 +47,21 @@ public class AditoDeprecationHint extends AbstractAditoHint
       {
         String description = "'" + callName + "' is deprecated an should no longer be used.";
         List<HintFix> fixes = new ArrayList<>();
-        fixes.add(new _DeprecationFixSingle(fileObject, info.getSnapshot().getSource().getDocument(true), node, callName));
+        Document document = info.getSnapshot().getSource().getDocument(true);
+        fixes.add(new _DeprecationFixSingle(fileObject, document, node, callName));
+
+        // Fixes für diese Zeile
+        List<HintFix> hintFixes = _getFixes(pResultHints, _DeprecationFixAll.class, document, node);
 
         // Noch kein Fix-All-Eintrag vorhanden? Dann einen hinzufügen
-        if(_getFixes(pResultHints, _DeprecationFixAll.class).isEmpty())
+        if(hintFixes.isEmpty())
         {
           Project project = FileOwnerQuery.getOwner(fileObject);
           fixes.add(new _DeprecationFixInFile(project, fileObject));
           fixes.add(new _DeprecationFixAll(project));
         }
 
-        int priority = 10000 - _getFixes(pResultHints, _DeprecationFixSingle.class).size();
+        int priority = 100000 - hintFixes.size();
         Hint desc = new Hint(this, description, fileObject, AstUtilities.getNameRange(node), fixes, priority);
         pResultHints.add(desc);
       }
@@ -86,12 +92,26 @@ public class AditoDeprecationHint extends AbstractAditoHint
     return NbBundle.getMessage(AditoDeprecationHint.class, "LBL_DeprecationHint_Descr");
   }
 
-  private List<HintFix> _getFixes(List<Hint> pResultHints, Class<? extends HintFix> pFilterFix)
+  private List<HintFix> _getFixes(List<Hint> pResultHints, Class<? extends HintFix> pFilterFix, Document pDocument, Node pNode)
   {
     return pResultHints.stream()
+        .filter(pHint -> _getLineIndex(pDocument, pHint.getRange().getStart()) == _getLineIndex(pDocument, pNode.getSourceStart()))
         .flatMap(pHint -> pHint.getFixes() == null ? Stream.empty() : pHint.getFixes().stream())
         .filter(pFix -> pFilterFix.isAssignableFrom(pFix.getClass()))
         .collect(Collectors.toList());
+  }
+
+  private int _getLineIndex(Document pDocument, int pPosition)
+  {
+    try
+    {
+      String text = pDocument.getText(0, pPosition);
+      return text.split("\n").length;
+    }
+    catch (BadLocationException pE)
+    {
+      return -1;
+    }
   }
 
   private static class _DeprecationFixSingle implements HintFix, AditoHintUtility.IFixAllFixable
@@ -175,15 +195,33 @@ public class AditoDeprecationHint extends AbstractAditoHint
 
   private static class _DeprecationFixAll extends AditoHintUtility.ImplementAllOfTypeFix
   {
+    private final FileObject projectDirectory;
+
     public _DeprecationFixAll(Project pProject)
     {
       super(pProject, true, true, _DeprecationFixSingle.class);
+      projectDirectory = pProject.getProjectDirectory();
     }
 
     @Override
     public String getDescription()
     {
       return NbBundle.getMessage(_DeprecationFixAll.class, "LBL_DeprecationFixAll_Descr");
+    }
+
+    @Override
+    public boolean equals(Object pO)
+    {
+      if (this == pO) return true;
+      if (pO == null || getClass() != pO.getClass()) return false;
+      _DeprecationFixAll that = (_DeprecationFixAll) pO;
+      return Objects.equal(projectDirectory, that.projectDirectory);
+    }
+
+    @Override
+    public int hashCode()
+    {
+      return Objects.hashCode(projectDirectory);
     }
   }
 
