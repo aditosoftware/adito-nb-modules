@@ -139,15 +139,18 @@ public class AditoDeprecationHint extends AbstractAditoHint
     @Override
     public void implement() throws Exception
     {
-      implementAndReturn(DocumentModification.create(document, node));
+      Set<Class<? extends HintFix>> fixes = new HashSet<>();
+      implementAndReturn(DocumentModification.create(document, node), fixes);
+      if(fixes.size() > 0)
+        AditoHintUtility.implementHintFixes(Collections.singletonList(Source.create(fileObject)), pFix -> fixes.stream().anyMatch(fixFilter -> pFix.getClass().isAssignableFrom(fixFilter)), null, null);
     }
 
     @Override
-    public boolean implementAndReturn(@NotNull IJsUpgrade.IDocumentModification<Node> pDocumentModification) throws Exception
+    public boolean implementAndReturn(@NotNull IJsUpgrade.IDocumentModification<Node> pDocumentModification, Set<Class<? extends HintFix>> pFixesAfterClass) throws Exception
     {
       boolean result = Lookup.getDefault().lookup(IJsUpgrade.class).upgrade(node, pDocumentModification, true);
       if(result)
-        AditoHintUtility.implementHintFixes(Collections.singletonList(Source.create(fileObject)), pFix -> pFix instanceof AditoImportHintFix, null, null);
+        pFixesAfterClass.add(AditoImportHintFix.class);
       return result;
     }
 

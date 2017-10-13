@@ -25,7 +25,7 @@ import org.openide.util.*;
 import java.lang.reflect.Field;
 import java.text.MessageFormat;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.*;
 import java.util.function.*;
 import java.util.stream.*;
 
@@ -72,8 +72,6 @@ class AditoHintUtility
             ArrayList<ErrorDescription> errors = new ArrayList<>();
             _collectHints(resultIterator, errors, resultIterator.getSnapshot());
 
-            IJsUpgrade.IDocumentModification<Node> modification = DocumentModification.create(resultIterator.getSnapshot().getSource().getDocument(true), ((JsParseResult) resultIterator.getParserResult()).getRootNode());
-
             Comparator<PositionBounds> objectComparator = Comparator.comparingInt(pBound -> pBound.getBegin().getOffset());
             SortedMap<PositionBounds, List<HintFix>> fixesToImplementReverseOrder = new TreeMap<>(objectComparator.reversed());
             for (ErrorDescription description : errors)
@@ -94,10 +92,15 @@ class AditoHintUtility
               }
             }
 
+            AtomicReference<IJsUpgrade.IDocumentModification<Node>> modificationRef = new AtomicReference<>();
+            Set<Class<? extends HintFix>> fixesToFixAfterThis = new HashSet<>();
             fixesToImplementReverseOrder.forEach((pBounds, pFixList) -> pFixList.forEach(pFix -> {
               try
               {
-                boolean result = _implementHintFix(pFix, modification);
+                if(modificationRef.get() == null)
+                  modificationRef.set(DocumentModification.create(resultIterator.getSnapshot().getSource().getDocument(true), ((JsParseResult) resultIterator.getParserResult()).getRootNode()));
+
+                boolean result = _implementHintFix(pFix, modificationRef.get(), fixesToFixAfterThis);
                 if (!result)
                   notImplementableFixes.add(pFix);
               }
@@ -107,6 +110,9 @@ class AditoHintUtility
                   pExceptionConsumer.accept(new RuntimeException(resultIterator.getSnapshot().getSource().getFileObject().getPath(), e));
               }
             }));
+
+            if(!fixesToFixAfterThis.isEmpty())
+              implementHintFixes(pSource, pFix -> fixesToFixAfterThis.stream().anyMatch(fixFilter -> pFix.getClass().isAssignableFrom(fixFilter)), pProgressHandle, pExceptionConsumer);
 
             if(pProgressHandle != null)
               pProgressHandle.progress(sourceCounter.getAndIncrement());
@@ -128,14 +134,14 @@ class AditoHintUtility
     return notImplementableFixes;
   }
 
-  private static boolean _implementHintFix(HintFix pFix, IJsUpgrade.IDocumentModification<Node> pDocumentModification) throws Exception
+  private static boolean _implementHintFix(HintFix pFix, IJsUpgrade.IDocumentModification<Node> pDocumentModification, Set<Class<? extends HintFix>> pFixesToFixAfterThis) throws Exception
   {
     if (pFix == null)
       return true;
 
     boolean result = true;
     if (pFix instanceof IFixAllFixable)
-      result = ((IFixAllFixable) pFix).implementAndReturn(pDocumentModification);
+      result = ((IFixAllFixable) pFix).implementAndReturn(pDocumentModification, pFixesToFixAfterThis);
     else
       pFix.implement();
     return result;
@@ -293,7 +299,9 @@ class AditoHintUtility
     @Override
     public void implement()
     {
+      long time = System.currentTimeMillis();
       implementOfType(fixes);
+      System.out.println(System.currentTimeMillis() - time);
     }
 
     @Override
@@ -404,7 +412,7 @@ class AditoHintUtility
    */
   public interface IFixAllFixable
   {
-    default boolean implementAndReturn(@NotNull IJsUpgrade.IDocumentModification<Node> pDocumentModification) throws Exception
+    default boolean implementAndReturn(@NotNull IJsUpgrade.IDocumentModification<Node> pDocumentModification, Set<Class<? extends HintFix>> pFixesToFixAfterImplementation) throws Exception
     {
       return true;
     }
