@@ -1,6 +1,9 @@
 package de.adito.aditoweb.nbm.nbide.nbaditointerface.javascript;
 
-import javax.swing.text.Document;
+import org.jetbrains.annotations.*;
+
+import javax.swing.text.*;
+import java.util.Map;
 
 /**
  * Brückte zwischen NetBeans und ADITO für den JavaScript-Upgrader/Converter des JavaScripts
@@ -10,6 +13,25 @@ import javax.swing.text.Document;
 public interface IJsUpgrade
 {
 
-  boolean upgrade(Object pNode, Document pDocument, boolean pGenerateTodo) throws Exception;
+  boolean upgrade(@NotNull Object pNode, @NotNull IDocumentModification<?> pDocument, boolean pGenerateTodo) throws Exception;
+
+  /**
+   * Das DocumentModification-Interface beschreibt ein Objekt, das die Positionen seiner
+   * UserObjects speichert und beim insert/remove so anpasst, dass der gleiche Text + der neu eingefügte Text
+   * im Objekt present ist.
+   */
+  interface IDocumentModification<USEROBJECT>
+  {
+    @NotNull
+    Map.Entry<Integer, Integer> getPositionOfObj(USEROBJECT pObject);
+
+    void insertString(int pIndex, @Nullable USEROBJECT pObject, String pString) throws BadLocationException;
+
+    void remove(int pIndex, int pLength) throws BadLocationException;
+
+    int getLength();
+
+    String getText(int pIndex, int pLength) throws BadLocationException;
+  }
 
 }

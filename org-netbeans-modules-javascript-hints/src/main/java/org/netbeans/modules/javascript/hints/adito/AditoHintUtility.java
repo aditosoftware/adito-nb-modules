@@ -1,5 +1,6 @@
 package org.netbeans.modules.javascript.hints.adito;
 
+import de.adito.aditoweb.nbm.nbide.nbaditointerface.javascript.IJsUpgrade;
 import org.jetbrains.annotations.*;
 import org.mozilla.nb.javascript.Node;
 import org.netbeans.api.progress.*;
@@ -10,22 +11,23 @@ import org.netbeans.modules.csl.core.*;
 import org.netbeans.modules.csl.hints.GsfHintsFactory;
 import org.netbeans.modules.csl.hints.infrastructure.GsfHintsManager;
 import org.netbeans.modules.csl.spi.ParserResult;
+import org.netbeans.modules.javascript.editing.JsParseResult;
+import org.netbeans.modules.javascript.hints.adito.doc.DocumentModification;
 import org.netbeans.modules.javascript.hints.infrastructure.JsHintsProvider;
 import org.netbeans.modules.parsing.api.*;
 import org.netbeans.modules.parsing.spi.*;
 import org.netbeans.spi.editor.hints.*;
 import org.openide.*;
 import org.openide.filesystems.FileObject;
+import org.openide.text.PositionBounds;
 import org.openide.util.*;
 
-import javax.swing.text.*;
 import java.lang.reflect.Field;
 import java.text.MessageFormat;
 import java.util.*;
-import java.util.List;
-import java.util.concurrent.atomic.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.*;
-import java.util.stream.Collectors;
+import java.util.stream.*;
 
 /**
  * @author W.Glanzer, 01.10.2017
@@ -34,110 +36,55 @@ class AditoHintUtility
 {
 
   private static final ResourceBundle BUNDLE = NbBundle.getBundle(AditoHintUtility.class);
-  private static final RequestProcessor PROC = new RequestProcessor("AditoHintUtility");
 
   /**
    * Implementiert alle HintFixes für eine Liste aus Sources
    *
-   * @param pFileObjects          Sources, deren Fixe implementiert werden sollen
+   * @param pSource               Sources, deren Fixe implementiert werden sollen
    * @param pShouldResolveHintFix Predicate um auszusagen, welche HintFixes implementiert werden sollen
-   * @param pExceptionConsumer    Consumer wenn eine Exception auftritt
-   * @param pRunAfterFix          Runnable das ausgeführt wird, wenn die implementierung fertig ist / abgebrochen wurde (auch bei Exception)
-   * @param pCancellable          Cancellable das angibt, ob abgebrochen werden soll
+   * @param pProgressHandle       ProgressHandle das angeben kann, wie viel Sources schon angefasst wurden. Pro Source wird eine WorkUnit addiert.
+   * @return Liste aus HintFixes die nicht implementiert werden konnten
    */
-  public static void implementHintFixes(List<Source> pFileObjects, @NotNull Predicate<HintFix> pShouldResolveHintFix, @Nullable Consumer<Exception> pExceptionConsumer, @Nullable Consumer<List<HintFix>> pRunAfterFix, @Nullable CancellableImpl pCancellable)
+  public static List<HintFix> implementHintFixes(@NotNull List<Source> pSource, @NotNull Predicate<HintFix> pShouldResolveHintFix,
+                                                 @Nullable ProgressHandle pProgressHandle, @Nullable Consumer<Exception> pExceptionConsumer)
   {
-    CancellableImpl cancel = pCancellable != null ? pCancellable : new CancellableImpl();
-    ArrayList<HintFix> notImplementableFixes = new ArrayList<>();
-    for (Source source : new ArrayList<>(pFileObjects))
-    {
-      PROC.submit(() -> {
-        _runImplement(source, new ArrayList<>(), cancel, pShouldResolveHintFix, pExceptionConsumer, () -> {
-          pFileObjects.remove(source);
-          if(pFileObjects.size() == 0 && pRunAfterFix != null)
-            pRunAfterFix.accept(notImplementableFixes);
-        }, notImplementableFixes);
-      });
-    }
-  }
+    List<HintFix> notImplementableFixes = new ArrayList<>();
+    AtomicInteger sourceCounter = new AtomicInteger(0);
 
-  /**
-   * @return Wandelt eine Node in einen lesbaren String um, bei dem die Typen ausgegeben werden
-   */
-  public static String toDebugString(Node pNode, int pLevel, Document pDocument) throws BadLocationException
-  {
-    StringBuilder result = new StringBuilder();
-
-    // meine Node printen
-    for(int i = 0; i < pLevel; i++)
-      result.append("  ");
-    result.append(pNode.getType())
-        .append(" -> '")
-        .append(pDocument.getText(pNode.getSourceStart(), pNode.getSourceEnd() - pNode.getSourceStart()).replaceAll("\n", " \\\\n"))
-        .append("'\n");
-
-    // Kinder
-    Node child = pNode.getFirstChild();
-    while(child != null)
-    {
-      result.append(toDebugString(child, pLevel+1, pDocument));
-      child = child.getNext();
-    }
-
-    return result.toString();
-  }
-
-  private static void _runImplement(Source pSource, List<Object> pFixesAlreadyImplemented, CancellableImpl pCancellable, @NotNull Predicate<HintFix> pShouldResolveHintFix,
-                                    @Nullable Consumer<Exception> pExceptionConsumer, @Nullable Runnable pRunAfterFix, @NotNull List<HintFix> pNotImplementableFixes)
-  {
     try
     {
-      ParserManager.parse(Collections.singletonList(pSource), new UserTask()
+      ParserManager.parse(pSource, new UserTask()
       {
         @Override
         public void run(ResultIterator resultIterator)
         {
-          if(!pCancellable.isCancelled())
+          try
           {
-            try
+            if (resultIterator == null)
+              return;
+
+            for (Embedding e : resultIterator.getEmbeddings())
+              run(resultIterator.getResultIterator(e));
+
+            if(pProgressHandle != null)
+              pProgressHandle.progress(MessageFormat.format(BUNDLE.getString("LBL_HandleDetails"), sourceCounter.get(), pSource.size(), resultIterator.getSnapshot().getSource().getFileObject().getPath()));
+
+            ArrayList<ErrorDescription> errors = new ArrayList<>();
+            _collectHints(resultIterator, errors, resultIterator.getSnapshot());
+
+            IJsUpgrade.IDocumentModification<Node> modification = DocumentModification.create(resultIterator.getSnapshot().getSource().getDocument(true), ((JsParseResult) resultIterator.getParserResult()).getRootNode());
+
+            Comparator<PositionBounds> objectComparator = Comparator.comparingInt(pBound -> pBound.getBegin().getOffset());
+            SortedMap<PositionBounds, List<HintFix>> fixesToImplementReverseOrder = new TreeMap<>(objectComparator.reversed());
+            for (ErrorDescription description : errors)
             {
-              if (resultIterator == null)
-                return;
-
-              for (Embedding e : resultIterator.getEmbeddings())
-                run(resultIterator.getResultIterator(e));
-
-              AbstractMap.SimpleImmutableEntry<Fix, Object> fixToImplement = _getFirstFixToImplement(resultIterator, pFixesAlreadyImplemented, pShouldResolveHintFix);
-              if (fixToImplement != null)
+              for (Fix fix : description.getFixes().getFixes())
               {
                 try
                 {
-                  pFixesAlreadyImplemented.add(fixToImplement.getValue());
-
-                  /*
-                   * Fix lösen
-                   */
-                  HintFix hintFix = _getHintFix(fixToImplement.getKey());
-                  boolean result = true;
-                  if(hintFix != null && hintFix instanceof IFixAllFixable)
-                    result = ((IFixAllFixable) hintFix).implementAndReturn();
-                  else
-                    fixToImplement.getKey().implement();
-                  if(!result)
-                    pNotImplementableFixes.add(hintFix);
-
-                  PROC.submit(() -> {
-                    try
-                    {
-                      _runImplement(pSource, pFixesAlreadyImplemented, pCancellable, pShouldResolveHintFix, pExceptionConsumer, pRunAfterFix, pNotImplementableFixes);
-                    }
-                    catch (Exception e)
-                    {
-                      if (pExceptionConsumer != null)
-                        pExceptionConsumer.accept(e);
-                    }
-                  });
-                  return; // es gibt etwas neues zu tun -> Schleife abbrechen
+                  HintFix hintFix = _getHintFix(fix);
+                  if (hintFix != null && pShouldResolveHintFix.test(hintFix))
+                    fixesToImplementReverseOrder.computeIfAbsent(description.getRange(), pRange -> new ArrayList<>()).add(hintFix);
                 }
                 catch (Exception e)
                 {
@@ -146,16 +93,29 @@ class AditoHintUtility
                 }
               }
             }
-            catch(Exception e)
-            {
-              if (pExceptionConsumer != null)
-                pExceptionConsumer.accept(e);
-            }
-          }
 
-          // Nichts mehr zu tun -> Fertig
-          if (pRunAfterFix != null)
-            pRunAfterFix.run();
+            fixesToImplementReverseOrder.forEach((pBounds, pFixList) -> pFixList.forEach(pFix -> {
+              try
+              {
+                boolean result = _implementHintFix(pFix, modification);
+                if (!result)
+                  notImplementableFixes.add(pFix);
+              }
+              catch (Exception e)
+              {
+                if (pExceptionConsumer != null)
+                  pExceptionConsumer.accept(new RuntimeException(resultIterator.getSnapshot().getSource().getFileObject().getPath(), e));
+              }
+            }));
+
+            if(pProgressHandle != null)
+              pProgressHandle.progress(sourceCounter.getAndIncrement());
+          }
+          catch (Exception e)
+          {
+            if (pExceptionConsumer != null)
+              pExceptionConsumer.accept(e);
+          }
         }
       });
     }
@@ -163,33 +123,22 @@ class AditoHintUtility
     {
       if (pExceptionConsumer != null)
         pExceptionConsumer.accept(e);
-      
-      if (pRunAfterFix != null)
-        pRunAfterFix.run();
     }
+
+    return notImplementableFixes;
   }
 
-  /**
-   * @return Liefert den nächsten Fix, der abgearbeitet werden muss. <tt>null</tt> wenn kein Fix mehr vorhanden ist.
-   * Verkleinert pFileObjects, wenn nötig
-   */
-  @Nullable
-  private static AbstractMap.SimpleImmutableEntry<Fix, Object> _getFirstFixToImplement(ResultIterator resultIterator, List<Object> pFixesAlreadyImplemented, @NotNull Predicate<HintFix> pShouldResolveHintFix)
+  private static boolean _implementHintFix(HintFix pFix, IJsUpgrade.IDocumentModification<Node> pDocumentModification) throws Exception
   {
-    ArrayList<ErrorDescription> errors = new ArrayList<>();
-    _collectHints(resultIterator, errors, resultIterator.getSnapshot());
+    if (pFix == null)
+      return true;
 
-    for (ErrorDescription description : errors)
-    {
-      for (Fix fix : description.getFixes().getFixes())
-      {
-        Object fixID = _getHintFixId(fix, pShouldResolveHintFix);
-        if(fixID != null && !pFixesAlreadyImplemented.contains(fixID))
-          return new AbstractMap.SimpleImmutableEntry<>(fix, fixID);
-      }
-    }
-
-    return null;
+    boolean result = true;
+    if (pFix instanceof IFixAllFixable)
+      result = ((IFixAllFixable) pFix).implementAndReturn(pDocumentModification);
+    else
+      pFix.implement();
+    return result;
   }
 
   /**
@@ -209,19 +158,6 @@ class AditoHintUtility
     {
       // Wenn kein "fix"-Feld vorhanden ist, dann handelt es sich nicht um einen gewöhnlichen HintFix und es kann nichts getan werden..
     }
-
-    return null;
-  }
-
-  /**
-   * @return Liefert die ID eines HintFixes um die Identität eines Fixes Instanzübergreifend feststellen zu können
-   */
-  @Nullable
-  private static Object _getHintFixId(Fix pFix, @NotNull Predicate<HintFix> pShouldResolveHintFix)
-  {
-    HintFix hintFix = _getHintFix(pFix);
-    if (hintFix instanceof IFixAllFixable && pShouldResolveHintFix.test(hintFix))
-      return ((IFixAllFixable) hintFix).getID();
 
     return null;
   }
@@ -266,7 +202,7 @@ class AditoHintUtility
     context.selectionStart = -1;
     context.selectionEnd = -1;
     context.doc = (BaseDocument) parserResult.getSnapshot().getSource().getDocument(true);
-    if(context.doc == null)
+    if (context.doc == null)
       return;
 
     List<ErrorDescription>[] hints = new List[3];
@@ -336,26 +272,6 @@ class AditoHintUtility
   }
 
   /**
-   * Cancellable-Reference
-   */
-  public static class CancellableImpl implements Cancellable
-  {
-    private final AtomicBoolean cancelled = new AtomicBoolean(false);
-
-    @Override
-    public boolean cancel()
-    {
-      cancelled.set(true);
-      return true;
-    }
-
-    public boolean isCancelled()
-    {
-      return cancelled.get();
-    }
-  }
-
-  /**
    * HintFix um über ein gesammtes Projekt bestimmte Hints zu fixen
    */
   public abstract static class ImplementAllOfTypeFix implements HintFix
@@ -394,13 +310,13 @@ class AditoHintUtility
 
     protected void implementOfType(Class<? extends HintFix>[] pTypesToFix)
     {
-      if(project == null)
+      if (project == null)
         return;
 
-      AditoHintUtility.CancellableImpl cancellable = new AditoHintUtility.CancellableImpl();
-      ProgressHandle handle = ProgressHandleFactory.createSystemHandle(BUNDLE.getString("LBL_FixingHints"), cancellable);
+      ProgressHandle handle = ProgressHandleFactory.createSystemHandle(BUNDLE.getString("LBL_FixingHints"));
       List<Class<? extends HintFix>> fixesList = Arrays.asList(pTypesToFix);
-      BaseProgressUtils.showProgressDialogAndRun(new _ProgressRunnable(project, handle, cancellable, pFix -> fixesList.contains(pFix.getClass()), () -> getFileObjects(project), showConfirmDialog, displayFailedFixes), handle, true);
+      _ProgressRunnable runnable = new _ProgressRunnable(project, handle, pFix -> fixesList.contains(pFix.getClass()), () -> getFileObjects(project), showConfirmDialog, displayFailedFixes);
+      BaseProgressUtils.showProgressDialogAndRun(runnable, handle, true);
     }
 
     /**
@@ -416,19 +332,16 @@ class AditoHintUtility
     {
       private final Project project;
       private final ProgressHandle handle;
-      private final AditoHintUtility.CancellableImpl cancellable;
       private final Predicate<HintFix> shouldResolveHintFix;
       private final Supplier<List<FileObject>> fileObjectGetter;
       private final boolean showConfirmDialog;
       private final boolean displayFailedFixes;
 
-      public _ProgressRunnable(Project pProject, ProgressHandle pHandle, AditoHintUtility.CancellableImpl pCancellable,
-                               @NotNull Predicate<HintFix> pShouldResolveHintFix, @NotNull Supplier<List<FileObject>> pFileObjectGetter,
+      public _ProgressRunnable(Project pProject, ProgressHandle pHandle, @NotNull Predicate<HintFix> pShouldResolveHintFix, @NotNull Supplier<List<FileObject>> pFileObjectGetter,
                                boolean pShowConfirmDialog, boolean pDisplayFailedFixes)
       {
         project = pProject;
         handle = pHandle;
-        cancellable = pCancellable;
         shouldResolveHintFix = pShouldResolveHintFix;
         fileObjectGetter = pFileObjectGetter;
         showConfirmDialog = pShowConfirmDialog;
@@ -441,77 +354,43 @@ class AditoHintUtility
         handle.start();
         handle.switchToIndeterminate();
         List<FileObject> fileObjects = fileObjectGetter.get();
-        List<Source> sources = (fileObjects != null ? fileObjects.stream() : _searchFileObject(project.getProjectDirectory(), pFo -> pFo.getMIMEType().equals("text/javascript"), cancellable).stream())
+        List<Source> sources = (fileObjects != null ? fileObjects.stream() : _searchFileObject(project.getProjectDirectory(), pFo -> pFo.getMIMEType().equals("text/javascript")).stream())
             .map(Source::create)
             .collect(Collectors.toList());
         int initSize = sources.size();
 
         // Sicherheitsabfrage, wenn gewünscht
-        if(showConfirmDialog)
+        if (showConfirmDialog)
         {
           String lbl_confirmFullFix = MessageFormat.format(BUNDLE.getString("LBL_ConfirmFullFix"), initSize, project.getProjectDirectory().getName());
           NotifyDescriptor.Confirmation confDescr = new DialogDescriptor.Confirmation(lbl_confirmFullFix, NotifyDescriptor.YES_NO_OPTION);
           if (DialogDisplayer.getDefault().notify(confDescr) != NotifyDescriptor.YES_OPTION)
-            cancellable.cancel();
+            return;
         }
 
-        if(cancellable.isCancelled())
-          handle.finish();
-        else
-        {
-          handle.switchToDeterminate(initSize);
-          AtomicBoolean running = new AtomicBoolean(true);
-          AtomicReference<List<HintFix>> fixesFailed = new AtomicReference<>();
-          implementHintFixes(sources, shouldResolveHintFix, Throwable::printStackTrace, (pFixesNotImplementable) -> {
-            fixesFailed.set(pFixesNotImplementable);
-            running.set(false);
-            synchronized (running)
-            {
-              running.notifyAll();
-            }
-          }, cancellable);
+        handle.switchToDeterminate(initSize);
+        List<HintFix> fixesFailed = implementHintFixes(sources, shouldResolveHintFix, handle, Throwable::printStackTrace); //todo
 
-          synchronized (running)
-          {
-            while (running.get())
-            {
-              try
-              {
-                running.wait(500);
-              }
-              catch (InterruptedException ignored)
-              {
-              }
-
-              int actualDone = initSize - sources.size();
-              handle.progress(MessageFormat.format(BUNDLE.getString("LBL_HandleDetails"), actualDone, initSize), actualDone);
-            }
-          }
-
-          // Fixes die gefailed sind auswerten
-          if(!cancellable.isCancelled() && fixesFailed.get() != null && !fixesFailed.get().isEmpty())
-            _displayFailedFixes(fixesFailed.get());
-        }
+        // Fixes die gefailed sind auswerten
+        if (fixesFailed != null && !fixesFailed.isEmpty())
+          _displayFailedFixes(fixesFailed);
       }
 
-      private List<FileObject> _searchFileObject(FileObject pRoot, Predicate<FileObject> pPredicate, AditoHintUtility.CancellableImpl pCancellable)
+      private List<FileObject> _searchFileObject(FileObject pRoot, Predicate<FileObject> pPredicate)
       {
         ArrayList<FileObject> result = new ArrayList<>();
         for (FileObject child : pRoot.getChildren())
         {
-          if(pCancellable.isCancelled())
-            return result;
-
-          if(pPredicate.test(child))
+          if (pPredicate.test(child))
             result.add(child);
-          result.addAll(_searchFileObject(child, pPredicate, pCancellable));
+          result.addAll(_searchFileObject(child, pPredicate));
         }
         return result;
       }
 
       private void _displayFailedFixes(List<HintFix> pFailedFixes)
       {
-        if(!displayFailedFixes)
+        if (!displayFailedFixes)
           return;
 
         NotifyDescriptor confirmation = new NotifyDescriptor.Message(NbBundle.getMessage(_ProgressRunnable.class, "LBL_FailedFixes", pFailedFixes.size()));
@@ -525,9 +404,7 @@ class AditoHintUtility
    */
   public interface IFixAllFixable
   {
-    Object getID();
-
-    default boolean implementAndReturn() throws Exception
+    default boolean implementAndReturn(@NotNull IJsUpgrade.IDocumentModification<Node> pDocumentModification) throws Exception
     {
       return true;
     }

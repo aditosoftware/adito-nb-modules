@@ -8,6 +8,7 @@ import org.mozilla.nb.javascript.*;
 import org.netbeans.api.project.*;
 import org.netbeans.modules.csl.api.*;
 import org.netbeans.modules.javascript.editing.*;
+import org.netbeans.modules.javascript.hints.adito.doc.DocumentModification;
 import org.netbeans.modules.javascript.hints.infrastructure.JsRuleContext;
 import org.netbeans.modules.parsing.api.Source;
 import org.netbeans.modules.parsing.spi.indexing.support.QuerySupport;
@@ -138,15 +139,15 @@ public class AditoDeprecationHint extends AbstractAditoHint
     @Override
     public void implement() throws Exception
     {
-      implementAndReturn();
+      implementAndReturn(DocumentModification.create(document, node));
     }
 
     @Override
-    public boolean implementAndReturn() throws Exception
+    public boolean implementAndReturn(@NotNull IJsUpgrade.IDocumentModification<Node> pDocumentModification) throws Exception
     {
-      boolean result = Lookup.getDefault().lookup(IJsUpgrade.class).upgrade(node, document, true);
+      boolean result = Lookup.getDefault().lookup(IJsUpgrade.class).upgrade(node, pDocumentModification, true);
       if(result)
-        AditoHintUtility.implementHintFixes(Collections.singletonList(Source.create(fileObject)), pFix -> pFix instanceof AditoImportHintFix, null, null, null);
+        AditoHintUtility.implementHintFixes(Collections.singletonList(Source.create(fileObject)), pFix -> pFix instanceof AditoImportHintFix, null, null);
       return result;
     }
 
@@ -160,12 +161,6 @@ public class AditoDeprecationHint extends AbstractAditoHint
     public boolean isInteractive()
     {
       return false;
-    }
-
-    @Override
-    public Object getID()
-    {
-      return node.getSourceStart() + " " + node.getSourceEnd() + " " + node.getType();
     }
   }
 
