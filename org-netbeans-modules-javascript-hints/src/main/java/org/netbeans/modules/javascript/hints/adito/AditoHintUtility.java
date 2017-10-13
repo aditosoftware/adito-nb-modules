@@ -27,7 +27,7 @@ import java.text.MessageFormat;
 import java.util.*;
 import java.util.concurrent.atomic.*;
 import java.util.function.*;
-import java.util.stream.*;
+import java.util.stream.Collectors;
 
 /**
  * @author W.Glanzer, 01.10.2017
@@ -36,6 +36,32 @@ class AditoHintUtility
 {
 
   private static final ResourceBundle BUNDLE = NbBundle.getBundle(AditoHintUtility.class);
+
+  /**
+   * Implementiert alle HintFixes für eine Liste aus Sources
+   *
+   * @param pSource         Sources, deren Fixe implementiert werden sollen
+   * @param pProgressHandle ProgressHandle das angeben kann, wie viel Sources schon angefasst wurden. Pro Source wird eine WorkUnit addiert.
+   * @return Liste aus HintFixes die nicht implementiert werden konnten
+   */
+  public static List<HintFix> implementHintFixes(@NotNull List<Source> pSource, @NotNull Set<Class<? extends HintFix>> pHintFixesToSolve,
+                                                 @Nullable ProgressHandle pProgressHandle, @Nullable Consumer<Exception> pExceptionConsumer)
+  {
+    return implementHintFixes(pSource, new Predicate<HintFix>()
+    {
+      private List<String> doneFixes = new ArrayList<>();
+
+      @Override
+      public boolean test(HintFix pFix)
+      {
+        if (doneFixes.contains(pFix.getDescription()))
+          return false;
+
+        doneFixes.add(pFix.getDescription());
+        return pHintFixesToSolve.stream().anyMatch(fixFilter -> pFix.getClass().isAssignableFrom(fixFilter));
+      }
+    }, pProgressHandle, pExceptionConsumer);
+  }
 
   /**
    * Implementiert alle HintFixes für eine Liste aus Sources
@@ -50,6 +76,7 @@ class AditoHintUtility
   {
     List<HintFix> notImplementableFixes = new ArrayList<>();
     AtomicInteger sourceCounter = new AtomicInteger(0);
+    Set<Class<? extends HintFix>> fixesToFixAfterThis = new HashSet<>();
 
     try
     {
@@ -66,7 +93,7 @@ class AditoHintUtility
             for (Embedding e : resultIterator.getEmbeddings())
               run(resultIterator.getResultIterator(e));
 
-            if(pProgressHandle != null)
+            if (pProgressHandle != null)
               pProgressHandle.progress(MessageFormat.format(BUNDLE.getString("LBL_HandleDetails"), sourceCounter.get(), pSource.size(), resultIterator.getSnapshot().getSource().getFileObject().getPath()));
 
             ArrayList<ErrorDescription> errors = new ArrayList<>();
@@ -93,11 +120,10 @@ class AditoHintUtility
             }
 
             AtomicReference<IJsUpgrade.IDocumentModification<Node>> modificationRef = new AtomicReference<>();
-            Set<Class<? extends HintFix>> fixesToFixAfterThis = new HashSet<>();
             fixesToImplementReverseOrder.forEach((pBounds, pFixList) -> pFixList.forEach(pFix -> {
               try
               {
-                if(modificationRef.get() == null)
+                if (modificationRef.get() == null)
                   modificationRef.set(DocumentModification.create(resultIterator.getSnapshot().getSource().getDocument(true), ((JsParseResult) resultIterator.getParserResult()).getRootNode()));
 
                 boolean result = _implementHintFix(pFix, modificationRef.get(), fixesToFixAfterThis);
@@ -111,10 +137,7 @@ class AditoHintUtility
               }
             }));
 
-            if(!fixesToFixAfterThis.isEmpty())
-              implementHintFixes(pSource, pFix -> fixesToFixAfterThis.stream().anyMatch(fixFilter -> pFix.getClass().isAssignableFrom(fixFilter)), pProgressHandle, pExceptionConsumer);
-
-            if(pProgressHandle != null)
+            if (pProgressHandle != null)
               pProgressHandle.progress(sourceCounter.getAndIncrement());
           }
           catch (Exception e)
@@ -124,6 +147,10 @@ class AditoHintUtility
           }
         }
       });
+
+      // Alle Fixes, die noch gefixt werden müssen, hier abhandeln
+      if (!fixesToFixAfterThis.isEmpty())
+        notImplementableFixes.addAll(implementHintFixes(pSource, fixesToFixAfterThis, pProgressHandle, pExceptionConsumer));
     }
     catch (Exception e)
     {
@@ -140,8 +167,8 @@ class AditoHintUtility
       return true;
 
     boolean result = true;
-    if (pFix instanceof IFixAllFixable)
-      result = ((IFixAllFixable) pFix).implementAndReturn(pDocumentModification, pFixesToFixAfterThis);
+    if (pFix instanceof IFixExtendedContext)
+      result = ((IFixExtendedContext) pFix).implementAndReturn(pDocumentModification, pFixesToFixAfterThis);
     else
       pFix.implement();
     return result;
@@ -410,7 +437,7 @@ class AditoHintUtility
   /**
    * Gibt an, dass ein HintFix von einer Fix-All-Action gefixt werden kann
    */
-  public interface IFixAllFixable
+  public interface IFixExtendedContext
   {
     default boolean implementAndReturn(@NotNull IJsUpgrade.IDocumentModification<Node> pDocumentModification, Set<Class<? extends HintFix>> pFixesToFixAfterImplementation) throws Exception
     {

@@ -115,7 +115,7 @@ public class AditoDeprecationHint extends AbstractAditoHint
     }
   }
 
-  private static class _DeprecationFixSingle implements HintFix, AditoHintUtility.IFixAllFixable
+  private static class _DeprecationFixSingle implements HintFix, AditoHintUtility.IFixExtendedContext
   {
     private final FileObject fileObject;
     private final Document document;
@@ -142,7 +142,7 @@ public class AditoDeprecationHint extends AbstractAditoHint
       Set<Class<? extends HintFix>> fixes = new HashSet<>();
       implementAndReturn(DocumentModification.create(document, node), fixes);
       if(fixes.size() > 0)
-        AditoHintUtility.implementHintFixes(Collections.singletonList(Source.create(fileObject)), pFix -> fixes.stream().anyMatch(fixFilter -> pFix.getClass().isAssignableFrom(fixFilter)), null, null);
+        AditoHintUtility.implementHintFixes(Collections.singletonList(Source.create(fileObject)), fixes, null, null);
     }
 
     @Override
