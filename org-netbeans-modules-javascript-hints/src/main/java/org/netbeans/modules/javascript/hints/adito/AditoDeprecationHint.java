@@ -148,7 +148,7 @@ public class AditoDeprecationHint extends AbstractAditoHint
     @Override
     public boolean implementAndReturn(@NotNull IJsUpgrade.IDocumentModification<Node> pDocumentModification, Set<Class<? extends HintFix>> pFixesAfterClass) throws Exception
     {
-      boolean result = Lookup.getDefault().lookup(IJsUpgrade.class).upgrade(node, pDocumentModification, true);
+      boolean result = Lookup.getDefault().lookup(IJsUpgrade.class).upgrade(node, pDocumentModification, true, true);
       if(result)
         pFixesAfterClass.add(AditoImportHintFix.class);
       return result;

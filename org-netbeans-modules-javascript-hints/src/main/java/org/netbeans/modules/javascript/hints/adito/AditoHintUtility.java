@@ -326,9 +326,7 @@ class AditoHintUtility
     @Override
     public void implement()
     {
-      long time = System.currentTimeMillis();
       implementOfType(fixes);
-      System.out.println(System.currentTimeMillis() - time);
     }
 
     @Override

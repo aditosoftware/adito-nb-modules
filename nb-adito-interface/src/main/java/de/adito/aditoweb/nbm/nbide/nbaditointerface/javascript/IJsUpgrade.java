@@ -13,7 +13,7 @@ import java.util.Map;
 public interface IJsUpgrade
 {
 
-  boolean upgrade(@NotNull Object pNode, @NotNull IDocumentModification<?> pDocument, boolean pGenerateTodo) throws Exception;
+  boolean upgrade(@NotNull Object pNode, @NotNull IDocumentModification<?> pDocument, boolean pGenerateTodo, boolean pGenerateTodoOnReturntypeChanged) throws Exception;
 
   /**
    * Das DocumentModification-Interface beschreibt ein Objekt, das die Positionen seiner
