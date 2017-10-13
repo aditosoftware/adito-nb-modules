@@ -156,6 +156,11 @@
       <artifactId>org-netbeans-api-progress-nb</artifactId>
       <version>${netbeans.version}</version>
     </dependency>
+
+    <dependency>
+      <groupId>com.google.guava</groupId>
+      <artifactId>guava</artifactId>
+    </dependency>
   </dependencies>
 
 
