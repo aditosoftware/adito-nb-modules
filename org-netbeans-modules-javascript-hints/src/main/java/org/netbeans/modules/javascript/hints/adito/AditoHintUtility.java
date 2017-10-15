@@ -18,12 +18,12 @@ import org.netbeans.modules.parsing.api.*;
 import org.netbeans.modules.parsing.spi.*;
 import org.netbeans.spi.editor.hints.*;
 import org.openide.*;
+import org.openide.awt.*;
 import org.openide.filesystems.FileObject;
 import org.openide.text.PositionBounds;
 import org.openide.util.*;
 
 import javax.swing.*;
-import javax.swing.text.Document;
 import java.awt.*;
 import java.lang.reflect.Field;
 import java.text.MessageFormat;
@@ -31,6 +31,7 @@ import java.util.*;
 import java.util.List;
 import java.util.concurrent.atomic.*;
 import java.util.function.*;
+import java.util.logging.*;
 import java.util.stream.Collectors;
 
 /**
@@ -453,7 +454,7 @@ class AditoHintUtility
         sessionObjects.put(AditoDeprecationHint._DeprecationFixSingle._GENERATE_TODOS_KEY, shouldGenerateToDos);
 
         pHandle.switchToDeterminate(initSize);
-        List<HintFix> fixesFailed = implementHintFixes(sources, shouldResolveHintFix, pHandle, Throwable::printStackTrace, sessionObjects, () -> isCancelled); //todo printStackTrace raus
+        List<HintFix> fixesFailed = implementHintFixes(sources, shouldResolveHintFix, pHandle, this::_onError, sessionObjects, () -> isCancelled);
 
         // Fixes die gefailed sind auswerten
         if (fixesFailed != null && !fixesFailed.isEmpty())
@@ -479,6 +480,11 @@ class AditoHintUtility
           result.addAll(_searchFileObject(child, pPredicate));
         }
         return result;
+      }
+
+      private void _onError(Exception pEx)
+      {
+        Logger.getLogger(AditoHintUtility.class.getName()).log(Level.WARNING, pEx, () -> null);
       }
 
       private void _displayFailedFixes(List<HintFix> pFailedFixes, boolean pToDosGenerated)
