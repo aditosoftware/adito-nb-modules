@@ -22,9 +22,12 @@ import org.openide.filesystems.FileObject;
 import org.openide.text.PositionBounds;
 import org.openide.util.*;
 
+import javax.swing.*;
+import java.awt.*;
 import java.lang.reflect.Field;
 import java.text.MessageFormat;
 import java.util.*;
+import java.util.List;
 import java.util.concurrent.atomic.*;
 import java.util.function.*;
 import java.util.stream.Collectors;
@@ -45,7 +48,7 @@ class AditoHintUtility
    * @return Liste aus HintFixes die nicht implementiert werden konnten
    */
   public static List<HintFix> implementHintFixes(@NotNull List<Source> pSource, @NotNull Set<Class<? extends HintFix>> pHintFixesToSolve,
-                                                 @Nullable ProgressHandle pProgressHandle, @Nullable Consumer<Exception> pExceptionConsumer)
+                                                 @Nullable ProgressHandle pProgressHandle, @Nullable Consumer<Exception> pExceptionConsumer, @Nullable Map<Object, Object> pSessionObjects)
   {
     return implementHintFixes(pSource, new Predicate<HintFix>()
     {
@@ -60,7 +63,7 @@ class AditoHintUtility
         doneFixes.add(pFix.getDescription());
         return pHintFixesToSolve.stream().anyMatch(fixFilter -> pFix.getClass().isAssignableFrom(fixFilter));
       }
-    }, pProgressHandle, pExceptionConsumer);
+    }, pProgressHandle, pExceptionConsumer, pSessionObjects);
   }
 
   /**
@@ -72,11 +75,13 @@ class AditoHintUtility
    * @return Liste aus HintFixes die nicht implementiert werden konnten
    */
   public static List<HintFix> implementHintFixes(@NotNull List<Source> pSource, @NotNull Predicate<HintFix> pShouldResolveHintFix,
-                                                 @Nullable ProgressHandle pProgressHandle, @Nullable Consumer<Exception> pExceptionConsumer)
+                                                 @Nullable ProgressHandle pProgressHandle, @Nullable Consumer<Exception> pExceptionConsumer, @Nullable Map<Object, Object> pSessionObjects)
   {
     List<HintFix> notImplementableFixes = new ArrayList<>();
     AtomicInteger sourceCounter = new AtomicInteger(0);
     Set<Class<? extends HintFix>> fixesToFixAfterThis = new HashSet<>();
+    Map<Object, Object> sessionObjects = pSessionObjects != null ? pSessionObjects : new HashMap<>();
+    long time = System.currentTimeMillis();
 
     try
     {
@@ -126,7 +131,7 @@ class AditoHintUtility
                 if (modificationRef.get() == null)
                   modificationRef.set(DocumentModification.create(resultIterator.getSnapshot().getSource().getDocument(true), ((JsParseResult) resultIterator.getParserResult()).getRootNode()));
 
-                boolean result = _implementHintFix(pFix, modificationRef.get(), fixesToFixAfterThis);
+                boolean result = _implementHintFix(pFix, modificationRef.get(), fixesToFixAfterThis, sessionObjects);
                 if (!result)
                   notImplementableFixes.add(pFix);
               }
@@ -150,7 +155,13 @@ class AditoHintUtility
 
       // Alle Fixes, die noch gefixt werden müssen, hier abhandeln
       if (!fixesToFixAfterThis.isEmpty())
-        notImplementableFixes.addAll(implementHintFixes(pSource, fixesToFixAfterThis, pProgressHandle, pExceptionConsumer));
+      {
+        // ProgressHandle "zurücksetzen", damit ein neuer Progress angezeigt werden kann
+        if(pProgressHandle != null)
+          pProgressHandle.switchToDeterminate(pSource.size(), System.currentTimeMillis() - time);
+
+        notImplementableFixes.addAll(implementHintFixes(pSource, fixesToFixAfterThis, pProgressHandle, pExceptionConsumer, sessionObjects));
+      }
     }
     catch (Exception e)
     {
@@ -161,14 +172,14 @@ class AditoHintUtility
     return notImplementableFixes;
   }
 
-  private static boolean _implementHintFix(HintFix pFix, IJsUpgrade.IDocumentModification<Node> pDocumentModification, Set<Class<? extends HintFix>> pFixesToFixAfterThis) throws Exception
+  private static boolean _implementHintFix(HintFix pFix, IJsUpgrade.IDocumentModification<Node> pDocumentModification, Set<Class<? extends HintFix>> pFixesToFixAfterThis, Map<Object, Object> pSessionObjects) throws Exception
   {
     if (pFix == null)
       return true;
 
     boolean result = true;
     if (pFix instanceof IFixExtendedContext)
-      result = ((IFixExtendedContext) pFix).implementAndReturn(pDocumentModification, pFixesToFixAfterThis);
+      result = ((IFixExtendedContext) pFix).implementAndReturn(pDocumentModification, pFixesToFixAfterThis, pSessionObjects);
     else
       pFix.implement();
     return result;
@@ -384,6 +395,9 @@ class AditoHintUtility
       @Override
       public void run()
       {
+        Map<Object, Object> sessionObjects = new HashMap<>();
+        boolean shouldGenerateToDos = true;
+
         handle.start();
         handle.switchToIndeterminate();
         List<FileObject> fileObjects = fileObjectGetter.get();
@@ -395,18 +409,20 @@ class AditoHintUtility
         // Sicherheitsabfrage, wenn gewünscht
         if (showConfirmDialog)
         {
-          String lbl_confirmFullFix = MessageFormat.format(BUNDLE.getString("LBL_ConfirmFullFix"), initSize, project.getProjectDirectory().getName());
-          NotifyDescriptor.Confirmation confDescr = new DialogDescriptor.Confirmation(lbl_confirmFullFix, NotifyDescriptor.YES_NO_OPTION);
-          if (DialogDisplayer.getDefault().notify(confDescr) != NotifyDescriptor.YES_OPTION)
+          Object[] confirmDialogResult = _displayConfirmDialog(initSize);
+          if(confirmDialogResult[0] != Boolean.TRUE)
             return;
+          shouldGenerateToDos = Boolean.TRUE.equals(confirmDialogResult[1]);
         }
 
+        sessionObjects.put(AditoDeprecationHint._DeprecationFixSingle._GENERATE_TODOS_KEY, shouldGenerateToDos);
+
         handle.switchToDeterminate(initSize);
-        List<HintFix> fixesFailed = implementHintFixes(sources, shouldResolveHintFix, handle, Throwable::printStackTrace); //todo
+        List<HintFix> fixesFailed = implementHintFixes(sources, shouldResolveHintFix, handle, Throwable::printStackTrace, sessionObjects); //todo printStackTrace raus
 
         // Fixes die gefailed sind auswerten
         if (fixesFailed != null && !fixesFailed.isEmpty())
-          _displayFailedFixes(fixesFailed);
+          _displayFailedFixes(fixesFailed, shouldGenerateToDos);
       }
 
       private List<FileObject> _searchFileObject(FileObject pRoot, Predicate<FileObject> pPredicate)
@@ -421,13 +437,40 @@ class AditoHintUtility
         return result;
       }
 
-      private void _displayFailedFixes(List<HintFix> pFailedFixes)
+      private void _displayFailedFixes(List<HintFix> pFailedFixes, boolean pToDosGenerated)
       {
         if (!displayFailedFixes)
           return;
 
-        NotifyDescriptor confirmation = new NotifyDescriptor.Message(NbBundle.getMessage(_ProgressRunnable.class, "LBL_FailedFixes", pFailedFixes.size()));
+        String msg = pToDosGenerated ? "LBL_FailedFixesAndMarked" : "LBL_FailedFixes";
+        NotifyDescriptor confirmation = new NotifyDescriptor.Message(NbBundle.getMessage(_ProgressRunnable.class, msg, pFailedFixes.size()));
         DialogDisplayer.getDefault().notify(confirmation);
+      }
+
+      private Object[] _displayConfirmDialog(int pInitScanSize)
+      {
+        String lbl_confirmFullFix = MessageFormat.format(BUNDLE.getString("LBL_ConfirmFullFix"), pInitScanSize, project.getProjectDirectory().getName());
+        JTextArea area = new JTextArea(lbl_confirmFullFix);
+        area.setBorder(BorderFactory.createEmptyBorder());
+        area.setWrapStyleWord(true);
+        area.setEditable(false);
+        JPanel optionsPane = new JPanel();
+        optionsPane.setLayout(new BoxLayout(optionsPane, BoxLayout.Y_AXIS));
+        JCheckBox cbx_generateTodos = new JCheckBox(BUNDLE.getString("LBL_GenerateTODos"));
+        cbx_generateTodos.setSelected(true);
+        optionsPane.add(cbx_generateTodos);
+
+        JPanel pane = new JPanel(new BorderLayout(5, 5));
+        pane.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+        pane.add(area, BorderLayout.CENTER);
+        pane.add(optionsPane, BorderLayout.SOUTH);
+
+        DialogDescriptor dialogDescriptor = new DialogDescriptor(pane, null, true, NotifyDescriptor.YES_NO_OPTION, NotifyDescriptor.YES_OPTION, null);
+        dialogDescriptor.setMessageType(NotifyDescriptor.QUESTION_MESSAGE);
+        Object[] result = new Object[2];
+        result[0] = DialogDisplayer.getDefault().notify(dialogDescriptor);
+        result[1] = cbx_generateTodos.isSelected();
+        return result;
       }
     }
   }
@@ -437,7 +480,8 @@ class AditoHintUtility
    */
   public interface IFixExtendedContext
   {
-    default boolean implementAndReturn(@NotNull IJsUpgrade.IDocumentModification<Node> pDocumentModification, Set<Class<? extends HintFix>> pFixesToFixAfterImplementation) throws Exception
+    default boolean implementAndReturn(@NotNull IJsUpgrade.IDocumentModification<Node> pDocumentModification, Set<Class<? extends HintFix>> pFixesToFixAfterImplementation,
+                                       @NotNull Map<Object, Object> pSessionObjects) throws Exception
     {
       return true;
     }

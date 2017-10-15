@@ -115,8 +115,10 @@ public class AditoDeprecationHint extends AbstractAditoHint
     }
   }
 
-  private static class _DeprecationFixSingle implements HintFix, AditoHintUtility.IFixExtendedContext
+  protected static class _DeprecationFixSingle implements HintFix, AditoHintUtility.IFixExtendedContext
   {
+    public static final String _GENERATE_TODOS_KEY = "_FixSingle-GenerateToDos";
+
     private final FileObject fileObject;
     private final Document document;
     private final Node node;
@@ -140,15 +142,18 @@ public class AditoDeprecationHint extends AbstractAditoHint
     public void implement() throws Exception
     {
       Set<Class<? extends HintFix>> fixes = new HashSet<>();
-      implementAndReturn(DocumentModification.create(document, node), fixes);
+      HashMap<Object, Object> map = new HashMap<>();
+      map.put(_GENERATE_TODOS_KEY, true); //Todos hier immer erzeugen, is besser so
+      implementAndReturn(DocumentModification.create(document, node), fixes, map);
       if(fixes.size() > 0)
-        AditoHintUtility.implementHintFixes(Collections.singletonList(Source.create(fileObject)), fixes, null, null);
+        AditoHintUtility.implementHintFixes(Collections.singletonList(Source.create(fileObject)), fixes, null, null, null);
     }
 
     @Override
-    public boolean implementAndReturn(@NotNull IJsUpgrade.IDocumentModification<Node> pDocumentModification, Set<Class<? extends HintFix>> pFixesAfterClass) throws Exception
+    public boolean implementAndReturn(@NotNull IJsUpgrade.IDocumentModification<Node> pDocumentModification, Set<Class<? extends HintFix>> pFixesAfterClass, @NotNull Map<Object, Object> pSessionObjects) throws Exception
     {
-      boolean result = Lookup.getDefault().lookup(IJsUpgrade.class).upgrade(node, pDocumentModification, true, true);
+      boolean generateTodos = Boolean.TRUE.equals(pSessionObjects.get(_GENERATE_TODOS_KEY));
+      boolean result = Lookup.getDefault().lookup(IJsUpgrade.class).upgrade(node, pDocumentModification, generateTodos, generateTodos);
       if(result)
         pFixesAfterClass.add(AditoImportHintFix.class);
       return result;
