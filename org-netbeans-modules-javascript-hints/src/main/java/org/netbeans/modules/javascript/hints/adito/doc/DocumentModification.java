@@ -40,6 +40,19 @@ public class DocumentModification
     {
       document = pDocument;
       _register(pRootNode);
+
+      // Den Rest mit den RootNodes auffüllen. Dies wird zb benötigt, da
+      // Kommentare in der letzten Zeile nicht als sourceEnd in der rootNode bekannt sind.
+      if(positions.size() < getLength())
+      {
+        int oldSize = getLength() - positions.size();
+        for(int i = 0; i < oldSize; i++)
+        {
+          ArrayList<Node> list = new ArrayList<>();
+          list.add(pRootNode);
+          positions.add(list);
+        }
+      }
     }
 
     @NotNull

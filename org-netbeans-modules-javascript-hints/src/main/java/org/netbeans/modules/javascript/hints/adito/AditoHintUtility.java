@@ -23,12 +23,12 @@ import org.openide.text.PositionBounds;
 import org.openide.util.*;
 
 import javax.swing.*;
+import javax.swing.text.Document;
 import java.awt.*;
 import java.lang.reflect.Field;
 import java.text.MessageFormat;
 import java.util.*;
 import java.util.List;
-import java.util.concurrent.Future;
 import java.util.concurrent.atomic.*;
 import java.util.function.*;
 import java.util.stream.Collectors;
@@ -53,7 +53,7 @@ class AditoHintUtility
                                                  @Nullable ProgressHandle pProgressHandle, @Nullable Consumer<Exception> pExceptionConsumer,
                                                  @Nullable Map<Object, Object> pSessionObjects, @Nullable Supplier<Boolean> pIsCancelledSupplier)
   {
-    return implementHintFixes(pSource, new Predicate<HintFix>()
+    return implementHintFixes(pSource, new IResetablePredicate<HintFix>()
     {
       private List<String> doneFixes = new ArrayList<>();
 
@@ -65,6 +65,12 @@ class AditoHintUtility
 
         doneFixes.add(pFix.getDescription());
         return pHintFixesToSolve.stream().anyMatch(fixFilter -> pFix.getClass().isAssignableFrom(fixFilter));
+      }
+
+      @Override
+      public void reset()
+      {
+        doneFixes.clear();
       }
     }, pProgressHandle, pExceptionConsumer, pSessionObjects, pIsCancelledSupplier);
   }
@@ -87,7 +93,6 @@ class AditoHintUtility
     Set<Class<? extends HintFix>> fixesToFixAfterThis = new HashSet<>();
     Map<Object, Object> sessionObjects = pSessionObjects != null ? pSessionObjects : new HashMap<>();
     Supplier<Boolean> cancelledSupplier = pIsCancelledSupplier != null ? pIsCancelledSupplier : () -> false;
-    long time = System.currentTimeMillis();
 
     if(cancelledSupplier.get())
       return null;
@@ -163,6 +168,10 @@ class AditoHintUtility
               }
             }));
 
+            // Das Predicate zurücksetzen damit klar ist, dass wir nun in einem anderen File sind
+            if(pShouldResolveHintFix instanceof IResetablePredicate)
+              ((IResetablePredicate) pShouldResolveHintFix).reset();
+
             if (pProgressHandle != null)
               pProgressHandle.progress(sourceCounter.getAndIncrement());
           }
@@ -182,7 +191,7 @@ class AditoHintUtility
       {
         // ProgressHandle "zurücksetzen", damit ein neuer Progress angezeigt werden kann
         if(pProgressHandle != null)
-          pProgressHandle.switchToDeterminate(pSource.size(), System.currentTimeMillis() - time);
+          pProgressHandle.switchToDeterminate(pSource.size());
 
         List<HintFix> fixes = implementHintFixes(pSource, fixesToFixAfterThis, pProgressHandle, pExceptionConsumer, sessionObjects, pIsCancelledSupplier);
         if(fixes != null && !fixes.isEmpty())
@@ -388,7 +397,7 @@ class AditoHintUtility
 
       List<Class<? extends HintFix>> fixesList = Arrays.asList(pTypesToFix);
       _ProgressRunnable runnable = new _ProgressRunnable(project, pFix -> fixesList.contains(pFix.getClass()), () -> getFileObjects(project), showConfirmDialog, displayFailedFixes);
-      BaseProgressUtils.showProgressDialogAndRun(runnable, "", true);
+      BaseProgressUtils.showProgressDialogAndRun(runnable, BUNDLE.getString("LBL_FixingHints"), true);
     }
 
     /**
@@ -500,7 +509,7 @@ class AditoHintUtility
         pane.add(area, BorderLayout.CENTER);
         pane.add(optionsPane, BorderLayout.SOUTH);
 
-        DialogDescriptor dialogDescriptor = new DialogDescriptor(pane, BUNDLE.getString("LBL_FixingHints"), true, NotifyDescriptor.YES_NO_OPTION, NotifyDescriptor.YES_OPTION, null);
+        DialogDescriptor dialogDescriptor = new DialogDescriptor(pane, null, true, NotifyDescriptor.YES_NO_OPTION, NotifyDescriptor.YES_OPTION, null);
         dialogDescriptor.setMessageType(NotifyDescriptor.QUESTION_MESSAGE);
         Object[] result = new Object[2];
         result[0] = DialogDisplayer.getDefault().notify(dialogDescriptor) == NotifyDescriptor.YES_OPTION;
@@ -522,4 +531,13 @@ class AditoHintUtility
     }
   }
 
+  /**
+   * Ein normales Predicate mit einer reset Funktion
+   */
+  public interface IResetablePredicate<T> extends Predicate<T>
+  {
+    default void reset()
+    {
+    }
+  }
 }
