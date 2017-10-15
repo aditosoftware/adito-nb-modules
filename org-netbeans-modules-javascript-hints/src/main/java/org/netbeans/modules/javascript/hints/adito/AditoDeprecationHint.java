@@ -146,7 +146,7 @@ public class AditoDeprecationHint extends AbstractAditoHint
       map.put(_GENERATE_TODOS_KEY, true); //Todos hier immer erzeugen, is besser so
       implementAndReturn(DocumentModification.create(document, node), fixes, map);
       if(fixes.size() > 0)
-        AditoHintUtility.implementHintFixes(Collections.singletonList(Source.create(fileObject)), fixes, null, null, null);
+        AditoHintUtility.implementHintFixes(Collections.singletonList(Source.create(fileObject)), fixes, null, null, null, null);
     }
 
     @Override

@@ -28,6 +28,7 @@ import java.lang.reflect.Field;
 import java.text.MessageFormat;
 import java.util.*;
 import java.util.List;
+import java.util.concurrent.Future;
 import java.util.concurrent.atomic.*;
 import java.util.function.*;
 import java.util.stream.Collectors;
@@ -45,10 +46,12 @@ class AditoHintUtility
    *
    * @param pSource         Sources, deren Fixe implementiert werden sollen
    * @param pProgressHandle ProgressHandle das angeben kann, wie viel Sources schon angefasst wurden. Pro Source wird eine WorkUnit addiert.
-   * @return Liste aus HintFixes die nicht implementiert werden konnten
+   * @return Liste aus HintFixes die nicht implementiert werden konnten, <tt>null</tt> wenn gecancelled
    */
+  @Nullable
   public static List<HintFix> implementHintFixes(@NotNull List<Source> pSource, @NotNull Set<Class<? extends HintFix>> pHintFixesToSolve,
-                                                 @Nullable ProgressHandle pProgressHandle, @Nullable Consumer<Exception> pExceptionConsumer, @Nullable Map<Object, Object> pSessionObjects)
+                                                 @Nullable ProgressHandle pProgressHandle, @Nullable Consumer<Exception> pExceptionConsumer,
+                                                 @Nullable Map<Object, Object> pSessionObjects, @Nullable Supplier<Boolean> pIsCancelledSupplier)
   {
     return implementHintFixes(pSource, new Predicate<HintFix>()
     {
@@ -63,7 +66,7 @@ class AditoHintUtility
         doneFixes.add(pFix.getDescription());
         return pHintFixesToSolve.stream().anyMatch(fixFilter -> pFix.getClass().isAssignableFrom(fixFilter));
       }
-    }, pProgressHandle, pExceptionConsumer, pSessionObjects);
+    }, pProgressHandle, pExceptionConsumer, pSessionObjects, pIsCancelledSupplier);
   }
 
   /**
@@ -72,16 +75,22 @@ class AditoHintUtility
    * @param pSource               Sources, deren Fixe implementiert werden sollen
    * @param pShouldResolveHintFix Predicate um auszusagen, welche HintFixes implementiert werden sollen
    * @param pProgressHandle       ProgressHandle das angeben kann, wie viel Sources schon angefasst wurden. Pro Source wird eine WorkUnit addiert.
-   * @return Liste aus HintFixes die nicht implementiert werden konnten
+   * @return Liste aus HintFixes die nicht implementiert werden konnten, <tt>null</tt> wenn gecancelled
    */
+  @Nullable
   public static List<HintFix> implementHintFixes(@NotNull List<Source> pSource, @NotNull Predicate<HintFix> pShouldResolveHintFix,
-                                                 @Nullable ProgressHandle pProgressHandle, @Nullable Consumer<Exception> pExceptionConsumer, @Nullable Map<Object, Object> pSessionObjects)
+                                                 @Nullable ProgressHandle pProgressHandle, @Nullable Consumer<Exception> pExceptionConsumer,
+                                                 @Nullable Map<Object, Object> pSessionObjects, @Nullable Supplier<Boolean> pIsCancelledSupplier)
   {
     List<HintFix> notImplementableFixes = new ArrayList<>();
     AtomicInteger sourceCounter = new AtomicInteger(0);
     Set<Class<? extends HintFix>> fixesToFixAfterThis = new HashSet<>();
     Map<Object, Object> sessionObjects = pSessionObjects != null ? pSessionObjects : new HashMap<>();
+    Supplier<Boolean> cancelledSupplier = pIsCancelledSupplier != null ? pIsCancelledSupplier : () -> false;
     long time = System.currentTimeMillis();
+
+    if(cancelledSupplier.get())
+      return null;
 
     try
     {
@@ -93,6 +102,9 @@ class AditoHintUtility
           try
           {
             if (resultIterator == null)
+              return;
+
+            if(cancelledSupplier.get())
               return;
 
             for (Embedding e : resultIterator.getEmbeddings())
@@ -112,6 +124,9 @@ class AditoHintUtility
               {
                 try
                 {
+                  if(cancelledSupplier.get())
+                    return;
+
                   HintFix hintFix = _getHintFix(fix);
                   if (hintFix != null && pShouldResolveHintFix.test(hintFix))
                     fixesToImplementReverseOrder.computeIfAbsent(description.getRange(), pRange -> new ArrayList<>()).add(hintFix);
@@ -124,12 +139,18 @@ class AditoHintUtility
               }
             }
 
+            if(cancelledSupplier.get())
+              return;
+
             AtomicReference<IJsUpgrade.IDocumentModification<Node>> modificationRef = new AtomicReference<>();
             fixesToImplementReverseOrder.forEach((pBounds, pFixList) -> pFixList.forEach(pFix -> {
               try
               {
                 if (modificationRef.get() == null)
                   modificationRef.set(DocumentModification.create(resultIterator.getSnapshot().getSource().getDocument(true), ((JsParseResult) resultIterator.getParserResult()).getRootNode()));
+
+                if(cancelledSupplier.get())
+                  return;
 
                 boolean result = _implementHintFix(pFix, modificationRef.get(), fixesToFixAfterThis, sessionObjects);
                 if (!result)
@@ -153,6 +174,9 @@ class AditoHintUtility
         }
       });
 
+      if(cancelledSupplier.get())
+        return null;
+
       // Alle Fixes, die noch gefixt werden müssen, hier abhandeln
       if (!fixesToFixAfterThis.isEmpty())
       {
@@ -160,7 +184,9 @@ class AditoHintUtility
         if(pProgressHandle != null)
           pProgressHandle.switchToDeterminate(pSource.size(), System.currentTimeMillis() - time);
 
-        notImplementableFixes.addAll(implementHintFixes(pSource, fixesToFixAfterThis, pProgressHandle, pExceptionConsumer, sessionObjects));
+        List<HintFix> fixes = implementHintFixes(pSource, fixesToFixAfterThis, pProgressHandle, pExceptionConsumer, sessionObjects, pIsCancelledSupplier);
+        if(fixes != null && !fixes.isEmpty())
+          notImplementableFixes.addAll(fixes);
       }
     }
     catch (Exception e)
@@ -168,6 +194,9 @@ class AditoHintUtility
       if (pExceptionConsumer != null)
         pExceptionConsumer.accept(e);
     }
+
+    if(cancelledSupplier.get())
+      return null;
 
     return notImplementableFixes;
   }
@@ -357,10 +386,9 @@ class AditoHintUtility
       if (project == null)
         return;
 
-      ProgressHandle handle = ProgressHandleFactory.createSystemHandle(BUNDLE.getString("LBL_FixingHints"));
       List<Class<? extends HintFix>> fixesList = Arrays.asList(pTypesToFix);
-      _ProgressRunnable runnable = new _ProgressRunnable(project, handle, pFix -> fixesList.contains(pFix.getClass()), () -> getFileObjects(project), showConfirmDialog, displayFailedFixes);
-      BaseProgressUtils.showProgressDialogAndRun(runnable, handle, true);
+      _ProgressRunnable runnable = new _ProgressRunnable(project, pFix -> fixesList.contains(pFix.getClass()), () -> getFileObjects(project), showConfirmDialog, displayFailedFixes);
+      BaseProgressUtils.showProgressDialogAndRun(runnable, "", true);
     }
 
     /**
@@ -372,20 +400,19 @@ class AditoHintUtility
       return null;
     }
 
-    private static class _ProgressRunnable implements Runnable
+    private static class _ProgressRunnable implements ProgressRunnable<Void>, Cancellable
     {
       private final Project project;
-      private final ProgressHandle handle;
       private final Predicate<HintFix> shouldResolveHintFix;
       private final Supplier<List<FileObject>> fileObjectGetter;
       private final boolean showConfirmDialog;
       private final boolean displayFailedFixes;
+      private boolean isCancelled = false;
 
-      public _ProgressRunnable(Project pProject, ProgressHandle pHandle, @NotNull Predicate<HintFix> pShouldResolveHintFix, @NotNull Supplier<List<FileObject>> pFileObjectGetter,
+      public _ProgressRunnable(Project pProject, @NotNull Predicate<HintFix> pShouldResolveHintFix, @NotNull Supplier<List<FileObject>> pFileObjectGetter,
                                boolean pShowConfirmDialog, boolean pDisplayFailedFixes)
       {
         project = pProject;
-        handle = pHandle;
         shouldResolveHintFix = pShouldResolveHintFix;
         fileObjectGetter = pFileObjectGetter;
         showConfirmDialog = pShowConfirmDialog;
@@ -393,13 +420,12 @@ class AditoHintUtility
       }
 
       @Override
-      public void run()
+      public Void run(ProgressHandle pHandle)
       {
         Map<Object, Object> sessionObjects = new HashMap<>();
         boolean shouldGenerateToDos = true;
 
-        handle.start();
-        handle.switchToIndeterminate();
+        pHandle.switchToIndeterminate();
         List<FileObject> fileObjects = fileObjectGetter.get();
         List<Source> sources = (fileObjects != null ? fileObjects.stream() : _searchFileObject(project.getProjectDirectory(), pFo -> pFo.getMIMEType().equals("text/javascript")).stream())
             .map(Source::create)
@@ -411,18 +437,27 @@ class AditoHintUtility
         {
           Object[] confirmDialogResult = _displayConfirmDialog(initSize);
           if(confirmDialogResult[0] != Boolean.TRUE)
-            return;
+            return null;
           shouldGenerateToDos = Boolean.TRUE.equals(confirmDialogResult[1]);
         }
 
         sessionObjects.put(AditoDeprecationHint._DeprecationFixSingle._GENERATE_TODOS_KEY, shouldGenerateToDos);
 
-        handle.switchToDeterminate(initSize);
-        List<HintFix> fixesFailed = implementHintFixes(sources, shouldResolveHintFix, handle, Throwable::printStackTrace, sessionObjects); //todo printStackTrace raus
+        pHandle.switchToDeterminate(initSize);
+        List<HintFix> fixesFailed = implementHintFixes(sources, shouldResolveHintFix, pHandle, Throwable::printStackTrace, sessionObjects, () -> isCancelled); //todo printStackTrace raus
 
         // Fixes die gefailed sind auswerten
         if (fixesFailed != null && !fixesFailed.isEmpty())
           _displayFailedFixes(fixesFailed, shouldGenerateToDos);
+
+        return null;
+      }
+
+      @Override
+      public boolean cancel()
+      {
+        isCancelled = true;
+        return true;
       }
 
       private List<FileObject> _searchFileObject(FileObject pRoot, Predicate<FileObject> pPredicate)
@@ -465,10 +500,10 @@ class AditoHintUtility
         pane.add(area, BorderLayout.CENTER);
         pane.add(optionsPane, BorderLayout.SOUTH);
 
-        DialogDescriptor dialogDescriptor = new DialogDescriptor(pane, null, true, NotifyDescriptor.YES_NO_OPTION, NotifyDescriptor.YES_OPTION, null);
+        DialogDescriptor dialogDescriptor = new DialogDescriptor(pane, BUNDLE.getString("LBL_FixingHints"), true, NotifyDescriptor.YES_NO_OPTION, NotifyDescriptor.YES_OPTION, null);
         dialogDescriptor.setMessageType(NotifyDescriptor.QUESTION_MESSAGE);
         Object[] result = new Object[2];
-        result[0] = DialogDisplayer.getDefault().notify(dialogDescriptor);
+        result[0] = DialogDisplayer.getDefault().notify(dialogDescriptor) == NotifyDescriptor.YES_OPTION;
         result[1] = cbx_generateTodos.isSelected();
         return result;
       }
