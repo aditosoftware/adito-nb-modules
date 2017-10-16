@@ -178,7 +178,7 @@ public class AditoDeprecationHint extends AbstractAditoHint
 
     public _DeprecationFixInFile(Project pProject, FileObject pCurrentFO)
     {
-      super(pProject, false, true, _DeprecationFixSingle.class);
+      super(pProject, false, true, NbBundle.getMessage(_DeprecationFixSingle.class, "LBL_FixingDeprecationHints"), _DeprecationFixSingle.class);
       currentFO = pCurrentFO;
     }
 
@@ -202,7 +202,7 @@ public class AditoDeprecationHint extends AbstractAditoHint
 
     public _DeprecationFixAll(Project pProject)
     {
-      super(pProject, true, true, _DeprecationFixSingle.class);
+      super(pProject, true, true, NbBundle.getMessage(_DeprecationFixSingle.class, "LBL_FixingDeprecationHints"), _DeprecationFixSingle.class);
       projectDirectory = pProject.getProjectDirectory();
     }
 

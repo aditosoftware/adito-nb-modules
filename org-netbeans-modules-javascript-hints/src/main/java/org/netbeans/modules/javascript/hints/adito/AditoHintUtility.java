@@ -54,24 +54,21 @@ class AditoHintUtility
                                                  @Nullable ProgressHandle pProgressHandle, @Nullable Consumer<Exception> pExceptionConsumer,
                                                  @Nullable Map<Object, Object> pSessionObjects, @Nullable Supplier<Boolean> pIsCancelledSupplier)
   {
-    return implementHintFixes(pSource, new IResetablePredicate<HintFix>()
+    return implementHintFixes(pSource, new Predicate<HintFix>()
     {
-      private List<String> doneFixes = new ArrayList<>();
+      private List<ISingletonFix> doneFixes = new ArrayList<>();
 
       @Override
       public boolean test(HintFix pFix)
       {
-        if (doneFixes.contains(pFix.getDescription()))
-          return false;
+        if(pFix instanceof ISingletonFix)
+        {
+          if(doneFixes.stream().anyMatch(pStreamFix -> pStreamFix.equalTo(pFix))) // = contains
+            return false;
+          doneFixes.add((ISingletonFix) pFix);
+        }
 
-        doneFixes.add(pFix.getDescription());
         return pHintFixesToSolve.stream().anyMatch(fixFilter -> pFix.getClass().isAssignableFrom(fixFilter));
-      }
-
-      @Override
-      public void reset()
-      {
-        doneFixes.clear();
       }
     }, pProgressHandle, pExceptionConsumer, pSessionObjects, pIsCancelledSupplier);
   }
@@ -168,10 +165,6 @@ class AditoHintUtility
                   pExceptionConsumer.accept(new RuntimeException(resultIterator.getSnapshot().getSource().getFileObject().getPath(), e));
               }
             }));
-
-            // Das Predicate zurücksetzen damit klar ist, dass wir nun in einem anderen File sind
-            if(pShouldResolveHintFix instanceof IResetablePredicate)
-              ((IResetablePredicate) pShouldResolveHintFix).reset();
 
             if (pProgressHandle != null)
               pProgressHandle.progress(sourceCounter.getAndIncrement());
@@ -362,14 +355,17 @@ class AditoHintUtility
     private final Project project;
     private final boolean showConfirmDialog;
     private final boolean displayFailedFixes;
+    private final String progressTitle;
     private final Class<? extends HintFix>[] fixes;
 
     @SafeVarargs
-    public ImplementAllOfTypeFix(Project pProject, boolean pShowConfirmDialog, boolean pDisplayFailedFixes, Class<? extends HintFix>... pFixes)
+    public ImplementAllOfTypeFix(Project pProject, boolean pShowConfirmDialog, boolean pDisplayFailedFixes,
+                                 String pProgressTitle, Class<? extends HintFix>... pFixes)
     {
       project = pProject;
       showConfirmDialog = pShowConfirmDialog;
       displayFailedFixes = pDisplayFailedFixes;
+      progressTitle = pProgressTitle;
       fixes = pFixes;
     }
 
@@ -398,7 +394,7 @@ class AditoHintUtility
 
       List<Class<? extends HintFix>> fixesList = Arrays.asList(pTypesToFix);
       _ProgressRunnable runnable = new _ProgressRunnable(project, pFix -> fixesList.contains(pFix.getClass()), () -> getFileObjects(project), showConfirmDialog, displayFailedFixes);
-      BaseProgressUtils.showProgressDialogAndRun(runnable, BUNDLE.getString("LBL_FixingHints"), true);
+      BaseProgressUtils.showProgressDialogAndRun(runnable, progressTitle, true);
     }
 
     /**
@@ -538,12 +534,10 @@ class AditoHintUtility
   }
 
   /**
-   * Ein normales Predicate mit einer reset Funktion
+   * Gibt an, dass ein Fix gleich mit einem anderen zu setzen ist
    */
-  public interface IResetablePredicate<T> extends Predicate<T>
+  public interface ISingletonFix
   {
-    default void reset()
-    {
-    }
+    boolean equalTo(HintFix pFix);
   }
 }
