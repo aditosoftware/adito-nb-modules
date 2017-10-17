@@ -4,10 +4,12 @@ import org.netbeans.editor.BaseDocument;
 import org.netbeans.modules.csl.api.*;
 import org.netbeans.modules.javascript.hints.infrastructure.JsRuleContext;
 
+import java.util.Objects;
+
 /**
  * @author d.poellath, 06.12.12
  */
-public class AditoImportHintFix implements HintFix, PreviewableFix
+public class AditoImportHintFix implements HintFix, PreviewableFix, AditoHintUtility.ISingletonFix
 {
   private final JsRuleContext context;
   private String importStatement = null;
@@ -62,4 +64,12 @@ public class AditoImportHintFix implements HintFix, PreviewableFix
     return context;
   }
 
+  @Override
+  public boolean equalTo(HintFix pFix)
+  {
+    return pFix instanceof AditoImportHintFix &&
+        Objects.equals(pFix.getDescription(), getDescription()) &&
+        Objects.equals(context.doc, ((AditoImportHintFix) pFix).context.doc);
+
+  }
 }
