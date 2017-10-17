@@ -47,27 +47,27 @@ public class Test_DocumentModification
   public void test_insert() throws Exception
   {
     modification.insertString(0, "insertedString");
-    _assertPositionEquals(modification.getPositionOfObj(child1), 0, 23);
-    _assertPositionEquals(modification.getPositionOfObj(child21), 54, 73);
+    _assertPositionEquals(modification.getPositionOfObj(child1), 0, 24);
+    _assertPositionEquals(modification.getPositionOfObj(child21), 54, 74);
 
     modification.insertString(60, "fifty");
-    _assertPositionEquals(modification.getPositionOfObj(root), 0, 118);
-    _assertPositionEquals(modification.getPositionOfObj(child21), 54, 78);
-    _assertPositionEquals(modification.getPositionOfObj(child22), 79, 88);
+    _assertPositionEquals(modification.getPositionOfObj(root), 0, 119);
+    _assertPositionEquals(modification.getPositionOfObj(child21), 54, 79);
+    _assertPositionEquals(modification.getPositionOfObj(child22), 79, 89);
   }
 
   @Test
   public void test_remove() throws Exception
   {
     modification.remove(0, 5);
-    _assertPositionEquals(modification.getPositionOfObj(root), 0, 94);
-    _assertPositionEquals(modification.getPositionOfObj(child1), 0, 4);
-    _assertPositionEquals(modification.getPositionOfObj(child2), 25, 94);
-    _assertPositionEquals(modification.getPositionOfObj(child22), 55, 64);
+    _assertPositionEquals(modification.getPositionOfObj(root), 0, 95);
+    _assertPositionEquals(modification.getPositionOfObj(child1), 0, 5);
+    _assertPositionEquals(modification.getPositionOfObj(child2), 25, 95);
+    _assertPositionEquals(modification.getPositionOfObj(child22), 55, 65);
 
     modification.remove(55, 10);
     _assertPositionEquals(modification.getPositionOfObj(child22), -1, -1);
-    _assertPositionEquals(modification.getPositionOfObj(root), 0, 84);
+    _assertPositionEquals(modification.getPositionOfObj(root), 0, 85);
 
   }
 
