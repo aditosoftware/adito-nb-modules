@@ -25,9 +25,11 @@ public interface IJsUpgrade
     @NotNull
     Map.Entry<Integer, Integer> getPositionOfObj(USEROBJECT pObject);
 
-    void insertString(int pIndex, @Nullable USEROBJECT pObject, String pString) throws BadLocationException;
+    void insertString(int pIndex, String pString) throws BadLocationException;
 
     void remove(int pIndex, int pLength) throws BadLocationException;
+
+    void replace(int pIndex, int pLength, String pString) throws BadLocationException;
 
     int getLength();
 

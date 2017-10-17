@@ -46,11 +46,11 @@ public class Test_DocumentModification
   @Test
   public void test_insert() throws Exception
   {
-    modification.insertString(0, null, "insertedString");
+    modification.insertString(0, "insertedString");
     _assertPositionEquals(modification.getPositionOfObj(child1), 0, 23);
     _assertPositionEquals(modification.getPositionOfObj(child21), 54, 73);
 
-    modification.insertString(60, null, "fifty");
+    modification.insertString(60, "fifty");
     _assertPositionEquals(modification.getPositionOfObj(root), 0, 118);
     _assertPositionEquals(modification.getPositionOfObj(child21), 54, 78);
     _assertPositionEquals(modification.getPositionOfObj(child22), 79, 88);
