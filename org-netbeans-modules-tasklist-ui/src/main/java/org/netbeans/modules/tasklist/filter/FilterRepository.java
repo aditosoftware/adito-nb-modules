@@ -187,24 +187,46 @@ public final class FilterRepository {
         }
         boolean shouldSave = false;
         //TODO remove this filter after dahboard is introduced
-        if( prefs.getBoolean( "firstTimeStartWithIssue", true ) ) { //NOI18N
-            prefs.putBoolean( "firstTimeStartWithIssue", false ); //NOI18N
-            TaskFilter filter = createNewFilter();
+        //if( prefs.getBoolean( "firstTimeStartWithIssue", true ) ) { //NOI18N
+        //    prefs.putBoolean( "firstTimeStartWithIssue", false ); //NOI18N
+        //    TaskFilter filter = createNewFilter();
+        //    filter.setName( NbBundle.getMessage( FilterRepository.class, "LBL_TodoFilter" ) ); //NOI18N
+        //    TypesFilter types = new TypesFilter();
+        //    types.clear();
+        //    types.setEnabled("org.netbeans.modules.tasklist.todo.TodoTaskScanner", true); //NOI18N
+        //    types.setTaskCountLimit( 100 );
+        //    filter.setTypesFilter( types );
+        //    filter.setKeywordsFilter( new KeywordsFilter() );
+        //    filters.add( filter );
+        //    shouldSave = true;
+        //}
 
-            // A
+        // A
+        if(!prefs.getBoolean("aditoFilterInstalled_1", false)) // Version hochziehen, wenn filter geändert
+        {
+            prefs.putBoolean( "aditoFilterInstalled_1", true ); //NOI18N
+            // Alte ADITO-Filter löschen und mit neuen ersetzen
+            new ArrayList<>(filters).forEach(pFilter -> {
+                if(pFilter.getName().equals("ADITO"))
+                    filters.remove(pFilter);
+            });
+
+            TaskFilter filter = createNewFilter();
             filter.setName("ADITO"); //NOI18N
             TypesFilter types = new TypesFilter();
             types.clear();
             types.setEnabled("de.adito.aditoweb.nbm.tasks.scanners.datamodelscan.DataModelScanner", true); //NOI18N
             types.setTaskCountLimit( 9999 );
             filter.setTypesFilter( types );
-            filter.setKeywordsFilter( new KeywordsFilter() );
+            List<AppliedFilterCondition> conditions = new ArrayList<>();
+            conditions.add(new AppliedFilterCondition(TaskProperties.getProperty("file"), new StringFilterCondition(StringFilterCondition.NOTEQUALS, "metadata.js")));
+            filter.setKeywordsFilter( new KeywordsFilter(false, conditions) );
             filters.add( filter );
             setActive(filter);
             Settings.getDefault().setGroupTasksByCategory(true);
-
             shouldSave = true;
         }
+
         if( shouldSave )
             save();
     }
