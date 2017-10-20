@@ -7,6 +7,7 @@ import org.netbeans.modules.javascript.editing.adito.AditoLibraryQuery;
 import org.netbeans.modules.javascript.hints.infrastructure.JsRuleContext;
 import org.netbeans.modules.parsing.spi.indexing.support.QuerySupport;
 import org.openide.filesystems.FileObject;
+import org.openide.util.NbBundle;
 
 import java.util.*;
 
@@ -26,14 +27,14 @@ public class AditoImportHint extends AbstractAditoHint
     if (fileObject == null)
       return;
 
-    JsIndex jsIndex = JsIndex.get(QuerySupport.findRoots(fileObject, Collections.singleton(JsClassPathProvider.SOURCE_CP),
-                                                         Collections.singleton(JsClassPathProvider.BOOT_CP), Collections.emptySet()));
-
-    String callName = AstUtilities.getCallName(node, true);
     String altName = info.getSource().substring(node.getSourceStart(), node.getSourceEnd());
+    String callName = node.getType() == Token.CALL || node.getType() == Token.NEW ? AstUtilities.getCallName(node, true) : altName;
 
     if (!callName.equals(JsAnalyzer.ADITO_IMPORT) && altName.startsWith(callName))
     {
+      JsIndex jsIndex = JsIndex.get(QuerySupport.findRoots(fileObject, Collections.singleton(JsClassPathProvider.SOURCE_CP),
+                                                           Collections.singleton(JsClassPathProvider.BOOT_CP), Collections.emptySet()));
+
       Set<IndexedElement> elements = jsIndex.getElements(callName, null, QuerySupport.Kind.EXACT, info);
       if (elements == null || elements.isEmpty())
       {
@@ -58,15 +59,17 @@ public class AditoImportHint extends AbstractAditoHint
               if (packet != null)
               {
                 String importStatement = "import(\"" + packet.getName() + "\")";
+                String description = "Add '" + packet.getName() + "' to imports.";
                 List<HintFix> fix = Collections.singletonList(new AditoImportHintFix(pContext, importStatement + ";\n"));
 
-                String description = "Add '" + packet.getName() + "' to imports.";
-                Hint desc = new Hint(this, description, fileObject, AstUtilities.getNameRange(node), fix, 1500);
+                // Nur das Paket markieren, da eigentlich nur das importiert wird und nicht die Funktion
+                OffsetRange packetRange = new OffsetRange(node.getSourceStart(), callName.contains(".") ? node.getSourceStart() + callName.indexOf(".") : node.getSourceEnd());
+                Hint desc = new Hint(this, description, fileObject, packetRange, fix, 1500);
 
                 if (!hintAlreadyExistsInLine(desc, pResultHints))
                   pResultHints.add(desc);
                 else
-                  pResultHints.add(new Hint(this, description, fileObject, AstUtilities.getNameRange(node), null, 1500));
+                  pResultHints.add(new Hint(this, description, fileObject, packetRange, null, 1500));
               }
             }
           }
@@ -104,19 +107,18 @@ public class AditoImportHint extends AbstractAditoHint
   @Override
   public Set<Integer> getKinds()
   {
-    return new HashSet<>(Arrays.asList(Token.CALL, Token.NEW));
+    return new HashSet<>(Arrays.asList(Token.CALL, Token.NEW, Token.GETPROP));
   }
 
   @Override
   public String getDisplayName()
   {
-    return "Auto import: the referenced method was found in a library.";
+    return NbBundle.getMessage(AditoImportHint.class, "LBL_ImportHint_Name");
   }
 
   @Override
   public String getDescription()
   {
-    return "Provides automatic importing for referenced method which weren't found in current context but in other " +
-        "libraries in the current project.";
+    return NbBundle.getMessage(AditoImportHint.class, "LBL_ImportHint_Descr");
   }
 }
