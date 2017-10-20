@@ -1,4 +1,3 @@
-OpenIDE-Module-Public-Packages: -
 OpenIDE-Module-Java-Dependencies: Java > 1.6
 OpenIDE-Module-Implementation-Version: 201207171143
 AutoUpdate-Show-In-Client: false
