@@ -52,6 +52,7 @@ import org.openide.util.NbBundle;
 
 import org.netbeans.lib.ddl.DDLException;
 import org.netbeans.lib.ddl.util.CommandFormatter;
+import org.netbeans.adito.db.spec.*;
 
 /**
 * Default implementation of database column. It handles name, column name, it's
@@ -228,6 +229,7 @@ public class AbstractTableColumn implements Serializable {
         if (format == null) throw new DDLException(NbBundle.getBundle("org.netbeans.lib.ddl.resources.Bundle").getString("EXC_NoFormatSpec")); //NOI18N
         try {
             cprops = getColumnProperties(cmd);
+            cprops = TableColumnSpecifierFactory.getTableColumnSpecifier(cmd.getSpecification()).optimizeColumnProps(cprops);
             return CommandFormatter.format(format, cprops);
         } catch (Exception e) {
             throw new DDLException(e.getMessage());
