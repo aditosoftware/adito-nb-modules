@@ -18,13 +18,9 @@ public class TableColumnSpecifierFactory
     mssql = null;
   }
 
-  public static ITableColumnSpecifier getTableColumnSpecifier(DatabaseSpecification pDbSpec)
+  static ITableColumnSpecifier getTableColumnSpecifier(String pDbName)
   {
-    if (pDbSpec == null)
-      return def;
-
-    String dbName = (String) pDbSpec.getProperties().get("DatabaseProductName");  // NOI18N
-    switch (dbName)
+    switch (pDbName)
     {
       case TableColumnSpecifierMS_SQL.DBMS_NAME:
       {
@@ -35,5 +31,14 @@ public class TableColumnSpecifierFactory
       default:
         return def;
     }
+  }
+
+  public static ITableColumnSpecifier getTableColumnSpecifier(DatabaseSpecification pDbSpec)
+  {
+    if (pDbSpec == null)
+      return def;
+
+    String dbName = (String) pDbSpec.getProperties().get("DatabaseProductName");  // NOI18N
+    return getTableColumnSpecifier(dbName);
   }
 }
