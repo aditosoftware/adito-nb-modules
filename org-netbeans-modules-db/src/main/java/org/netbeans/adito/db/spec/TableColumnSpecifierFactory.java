@@ -15,7 +15,7 @@ public class TableColumnSpecifierFactory
   static
   {
     def = pProps -> pProps;
-    mssql = new TableColumnSpecifierMS_SQL();
+    mssql = null;
   }
 
   public static ITableColumnSpecifier getTableColumnSpecifier(DatabaseSpecification pDbSpec)
@@ -27,7 +27,11 @@ public class TableColumnSpecifierFactory
     switch (dbName)
     {
       case TableColumnSpecifierMS_SQL.DBMS_NAME:
+      {
+        if (mssql == null)
+          mssql = new TableColumnSpecifierMS_SQL();
         return mssql;
+      }
       default:
         return def;
     }
