@@ -894,7 +894,7 @@
       java.sql.Types.TINYINT = SMALLINT;
       java.sql.Types.NCLOB = CLOB;
       java.sql.Types.LONGNVARCHAR = "LONG VARCHAR";
-      java.sql.Types.TIME_WITH_TIMEZONE = TIME;
+      java.sql.Types.TIME = TIME;
       java.sql.Types.BIT = SMALLINT;
       java.sql.Types.SQLXML = CLOB;
       java.sql.Types.TIMESTAMP_WITH_TIMEZONE = TIMESTAMP;
@@ -997,7 +997,7 @@
       java.sql.Types.NCLOB = TEXT;
       java.sql.Types.LONGVARCHAR = TEXT;
       java.sql.Types.LONGNVARCHAR = TEXT;
-      java.sql.Types.TIME_WITH_TIMEZONE = TIME;
+      java.sql.Types.TIME = TIME;
       java.sql.Types.TIMESTAMP_WITH_TIMEZONE = TIMESTAMP;
       java.sql.Types.BOOLEAN = BIT;
       java.sql.Types.SQLXML = XML;
@@ -1517,7 +1517,7 @@
   //
   //  ********************************************************************************/
 
-    "MariaDB" = {
+    "'MariaDB 10 (Experimental)" = {
       DatabaseProductName = "'MariaDB 10 (Experimental)";
       TypeMap = {
         java.sql.Types.BIGINT = BIGINT;

@@ -80,6 +80,7 @@
             <publicPackage>de.adito.aditoweb.nbm.nbide.nbaditointerface.*</publicPackage>
             <publicPackage>de.adito.aditoweb.nbm.nbide.nbaditointerface.common.*</publicPackage>
             <publicPackage>de.adito.aditoweb.nbm.nbide.nbaditointerface.database.*</publicPackage>
+            <publicPackage>de.adito.aditoweb.nbm.nbide.nbaditointerface.database.specifier.*</publicPackage>
             <publicPackage>de.adito.aditoweb.nbm.nbide.nbaditointerface.javascript.*</publicPackage>
             <publicPackage>de.adito.aditoweb.nbm.nbide.nbaditointerface.form.*</publicPackage>
             <publicPackage>de.adito.aditoweb.nbm.nbide.nbaditointerface.windowsystem.*</publicPackage>

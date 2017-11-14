@@ -344,7 +344,7 @@ public class DataView {
         return execHelper;
     }
 
-    SQLStatementGenerator getSQLStatementGenerator() {
+    public SQLStatementGenerator getSQLStatementGenerator() {
         if (stmtGenerator == null) {
             stmtGenerator = new SQLStatementGenerator();
         }

@@ -43,17 +43,15 @@
  */
 package org.netbeans.modules.db.dataview.meta;
 
-import java.sql.Connection;
-import java.sql.DatabaseMetaData;
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
-import java.util.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import de.adito.aditoweb.nbm.nbide.nbaditointerface.database.specifier.*;
 import org.netbeans.api.db.sql.support.SQLIdentifiers;
 import org.netbeans.api.db.sql.support.SQLIdentifiers.Quoter;
 import org.netbeans.modules.db.dataview.util.DataViewUtils;
+import org.openide.util.Lookup;
+
+import java.sql.*;
+import java.util.*;
+import java.util.logging.*;
 
 /**
  * Extracts database metadata information (table names and constraints, their
@@ -68,11 +66,12 @@ public final class DBMetaDataFactory {
     public static final int SQLSERVER = 2;
     public static final int JDBC = 3;
     public static final int PostgreSQL = 4;
-    public static final int MYSQL = 5;
+    public static final int MYSQL = 5; // MySQL and MariaDB
     public static final int DERBY = 6;
     public static final int SYBASE = 7;
     public static final int AXION = 8;
     public static final int POINTBASE = 9;
+    public static final int FIREBIRD = 10;
     private final int dbType;
     private final DatabaseMetaData dbmeta;
     private final Quoter sqlquoter;
@@ -136,6 +135,8 @@ public final class DBMetaDataFactory {
             dbtype = MYSQL;
         } else if (url.contains("pointbase")) { // NOI18N
             dbtype = POINTBASE;
+        } else if (url.contains("firebird")) { // NOI18N
+            dbtype = FIREBIRD;
         } else {
             dbtype = JDBC;
         }
@@ -275,6 +276,13 @@ public final class DBMetaDataFactory {
                     sqlTypeCode = java.sql.Types.BIT;
                 }
             }
+
+            ITableColumnSpecifier speci = Lookup.getDefault().lookup(ITableColumnSpecifierFactory.class).getTableColumnSpecifier(dbmeta.getDatabaseProductName());
+
+            displaySize = speci.getDisplySize(sqlTypeCode, displaySize, precision);
+            precision = speci.getPrecision(sqlTypeCode, displaySize, precision);
+            sqlTypeCode = speci.getTypeCode(sqlTypeCode, sqlTypeStr);
+            sqlTypeStr = speci.getTypeString(sqlTypeCode, sqlTypeStr);
 
             // The SQL Server timestamp type is a JDBC BINARY type with the fixed length of 8 bytes.
             // A Transact-SQL timestamp != an ANSI SQL-92 timestamp.

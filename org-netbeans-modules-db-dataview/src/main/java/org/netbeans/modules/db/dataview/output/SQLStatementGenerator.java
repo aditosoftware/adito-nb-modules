@@ -55,6 +55,7 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.SwingUtilities;
+
 import org.netbeans.modules.db.dataview.meta.DBColumn;
 import org.netbeans.modules.db.dataview.meta.DBException;
 import org.netbeans.modules.db.dataview.meta.DBMetaDataFactory;
@@ -69,7 +70,7 @@ import org.openide.util.NbBundle;
  *
  * @author Ahimanikya Satapathy
  */
-class SQLStatementGenerator {
+public class SQLStatementGenerator {
     private static final Logger LOG =
             Logger.getLogger(SQLStatementGenerator.class.getName());
 
@@ -264,7 +265,7 @@ class SQLStatementGenerator {
     }
 
     // TODO: Support for FK, and other constraint and Index recreation.
-    String generateCreateStatement(DBTable table) throws DBException, Exception {
+    public String generateCreateStatement(DBTable table) throws DBException, Exception {
         boolean isdb2 = table.getParentObject().getDBType() == DBMetaDataFactory.DB2;
 
         StringBuilder sql = new StringBuilder();

@@ -88,6 +88,12 @@
     </dependency>
 
     <dependency>
+      <groupId>de.adito.aditoweb.modules.nb-ide</groupId>
+      <artifactId>nb-adito-interface</artifactId>
+      <version>${project.parent.version}</version>
+    </dependency>
+
+    <dependency>
       <groupId>de.adito.aditoweb.packages.external</groupId>
       <artifactId>lwswingx</artifactId>
       <version>1.6.2</version>

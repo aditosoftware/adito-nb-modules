@@ -48,11 +48,11 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.openide.util.NbBundle;
+import de.adito.aditoweb.nbm.nbide.nbaditointerface.database.specifier.ITableColumnSpecifierFactory;
+import org.openide.util.*;
 
 import org.netbeans.lib.ddl.DDLException;
 import org.netbeans.lib.ddl.util.CommandFormatter;
-import org.netbeans.adito.db.spec.*;
 
 /**
 * Default implementation of database column. It handles name, column name, it's
@@ -229,7 +229,8 @@ public class AbstractTableColumn implements Serializable {
         if (format == null) throw new DDLException(NbBundle.getBundle("org.netbeans.lib.ddl.resources.Bundle").getString("EXC_NoFormatSpec")); //NOI18N
         try {
             cprops = getColumnProperties(cmd);
-            cprops = TableColumnSpecifierFactory.getTableColumnSpecifier(cmd.getSpecification()).optimizeColumnProps(cprops);
+            String databaseProductName = cmd.getSpecification().getProperties().get("DatabaseProductName").toString();
+            cprops = Lookup.getDefault().lookup(ITableColumnSpecifierFactory.class).getTableColumnSpecifier(databaseProductName).optimizeColumnProps(cprops);
             return CommandFormatter.format(format, cprops);
         } catch (Exception e) {
             throw new DDLException(e.getMessage());
