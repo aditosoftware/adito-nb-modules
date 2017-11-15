@@ -1517,8 +1517,8 @@
   //
   //  ********************************************************************************/
 
-    "'MariaDB 10 (Experimental)" = {
-      DatabaseProductName = "'MariaDB 10 (Experimental)";
+    "MariaDB" = {
+      DatabaseProductName = "MariaDB";
       TypeMap = {
         java.sql.Types.BIGINT = BIGINT;
         java.sql.Types.OTHER = BIT; // not true for MySQL prior to 5.0
