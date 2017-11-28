@@ -42,21 +42,19 @@
 
 package org.netbeans.modules.javascript.editing;
 
-import java.io.IOException;
-import java.net.URL;
-import java.util.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import java.util.stream.*;
-import javax.naming.directory.SearchResult;
 import org.netbeans.modules.csl.api.ElementKind;
 import org.netbeans.modules.javascript.editing.adito.AditoLibraryQuery;
 import org.netbeans.modules.parsing.api.Source;
-import org.netbeans.modules.parsing.spi.indexing.support.IndexResult;
-import org.netbeans.modules.parsing.spi.indexing.support.QuerySupport;
-import org.openide.filesystems.FileObject;
-import org.openide.filesystems.FileStateInvalidException;
+import org.netbeans.modules.parsing.spi.indexing.support.*;
+import org.openide.filesystems.*;
 import org.openide.util.Exceptions;
+
+import javax.naming.directory.SearchResult;
+import java.io.IOException;
+import java.net.URL;
+import java.util.*;
+import java.util.logging.*;
+import java.util.stream.*;
 
 /**
  *
@@ -67,7 +65,7 @@ public final class JsIndex {
     private static final Logger LOG = Logger.getLogger(JsIndex.class.getName());
     
     // Non-final for test suite
-    static int MAX_SEARCH_ITEMS = 160;
+    static int MAX_SEARCH_ITEMS = 2323;//Siehe auch https://de.wikipedia.org/wiki/23_–_Nichts_ist_so_wie_es_scheint
     
     /** Set property to true to find ALL functions regardless of file includes */
     //private static final boolean ALL_REACHABLE = Boolean.getBoolean("javascript.findall");
