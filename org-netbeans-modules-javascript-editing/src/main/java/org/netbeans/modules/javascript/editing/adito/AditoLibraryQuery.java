@@ -2,7 +2,8 @@ package org.netbeans.modules.javascript.editing.adito;
 
 import org.jetbrains.annotations.Nullable;
 import org.netbeans.api.java.classpath.ClassPath;
-import org.netbeans.modules.javascript.editing.JsClassPathProvider;
+import org.netbeans.modules.javascript.editing.*;
+import org.netbeans.modules.parsing.spi.indexing.support.QuerySupport;
 import org.openide.filesystems.*;
 import org.openide.loaders.*;
 
@@ -84,7 +85,7 @@ public class AditoLibraryQuery
   }
   
   @Nullable
-  private Packet _getPacket(FileObject pFileObject, Set<EPacketType> pRequestedTypes)
+  private static Packet _getPacket(FileObject pFileObject, Set<EPacketType> pRequestedTypes)
   {
     if (pFileObject != null)
     {
@@ -171,6 +172,23 @@ public class AditoLibraryQuery
       image = pImage;
     }
 
+    public boolean isAvailableInContext(JsIndex pIndex, JsParseResult pResult, boolean pIgnoreDeprecation)
+    {
+      if(pIndex == null || pResult == null)
+        return false;
+
+      Set<IndexedElement> elements = pIndex.getElements(getRawName(), null, QuerySupport.Kind.EXACT, pResult);
+      Set<EPacketType> type = Collections.singleton(getType());
+      for (IndexedElement element : elements)
+      {
+        Packet packet = _getPacket(element.getFileObject(), type);
+        if(packet != null && getFileObject().equals(packet.getFileObject()) && (pIgnoreDeprecation || !element.isDeprecated()))
+          return true;
+      }
+
+      return false;
+    }
+
     public FileObject getFileObject()
     {
       return fileObject;
@@ -184,6 +202,14 @@ public class AditoLibraryQuery
     public String getName()
     {
       return name;
+    }
+
+    public String getRawName()
+    {
+      if(name == null || !name.startsWith(AditoLibraryQuery.SYSTEM_LIBS + "."))
+        return name;
+
+      return name.substring((AditoLibraryQuery.SYSTEM_LIBS + ".").length());
     }
 
     public Image getImage()
