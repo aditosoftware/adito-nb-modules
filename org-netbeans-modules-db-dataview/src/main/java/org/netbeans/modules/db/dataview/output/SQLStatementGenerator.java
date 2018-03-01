@@ -283,8 +283,7 @@ public class SQLStatementGenerator {
             int scale = col.getScale();
             int precision = col.getPrecision();
 
-            if(table.getParentObject() != null && table.getParentObject().getDBType() == DBMetaDataFactory.MYSQL)          //Bei MariaDB ist precision die Anzahl der benötigten Bytes
-                precision = col.getDisplaySize();
+            precision = adjustPrecisionForMySql(table, col, precision);
 
             if (precision > 0 && DataViewUtils.isPrecisionRequired(col.getJdbcType(), isdb2)) {
                 if (typeName.contains("(")) { // Handle MySQL Binary Type // NOI18N
@@ -333,6 +332,13 @@ public class SQLStatementGenerator {
         sql.append(")"); // NOI18N
 
         return sql.toString();
+    }
+
+    // ADITO
+    protected int adjustPrecisionForMySql(DBTable pTable, DBColumn pCol, int pPrecision)
+    {
+        // default verhalten
+        return pPrecision;
     }
 
     private boolean addSeparator(boolean and, StringBuilder sql, String sep) {

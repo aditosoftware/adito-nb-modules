@@ -122,7 +122,8 @@ public class DataView {
         try {
             dv.execHelper = new SQLExecutionHelper(dv);
             dv.execHelper.initialDataLoad();
-            dv.stmtGenerator = new SQLStatementGenerator();
+            // ADITO
+            dv.stmtGenerator = new AditoSQLStatementGenerator(dbConn.getJDBCDriver().getDisplayName());
         } catch (Exception ex) {
             dv.setErrorStatusText(null, null, ex);
         }
@@ -346,7 +347,8 @@ public class DataView {
 
     public SQLStatementGenerator getSQLStatementGenerator() {
         if (stmtGenerator == null) {
-            stmtGenerator = new SQLStatementGenerator();
+            // ADITO
+            stmtGenerator = new AditoSQLStatementGenerator(dbConn.getJDBCDriver().getDisplayName());
         }
         return stmtGenerator;
     }
