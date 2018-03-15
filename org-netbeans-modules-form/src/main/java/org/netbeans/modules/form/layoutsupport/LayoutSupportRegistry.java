@@ -403,9 +403,6 @@ public class LayoutSupportRegistry {
             layoutToLayoutDelegate.put(
                 "de.adito.aditoweb.nbm.nbaditointerfaceimpl.form.layout.neon.NeonFormTableLayout", // NOI18N
                 "org.netbeans.modules.form.adito.layout.neon.AditoNeonLayoutSupport"); // NOI18N
-            layoutToLayoutDelegate.put(
-                "de.adito.aditoweb.nbm.nbaditointerfaceimpl.form.layout.neon.view.NeonViewLayout", // NOI18N
-                "org.netbeans.modules.form.adito.layout.neon.AditoNeonViewLayoutSupport"); // NOI18N
         }
         return layoutToLayoutDelegate;
     }

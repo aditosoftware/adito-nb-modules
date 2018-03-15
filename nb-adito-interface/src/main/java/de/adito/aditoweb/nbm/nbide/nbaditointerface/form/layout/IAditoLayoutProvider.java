@@ -17,6 +17,4 @@ public interface IAditoLayoutProvider
 
   IAditoLayout getRegisterLayout();
 
-  IAditoLayout getNeonViewLayout();
-
 }
