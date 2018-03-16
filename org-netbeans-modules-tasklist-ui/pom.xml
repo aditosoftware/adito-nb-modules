@@ -14,7 +14,11 @@
   <packaging>nbm</packaging>
   <version>RELEASE82</version>
   <name>Netbeans IDE module: org-netbeans-modules-tasklist-ui</name>
-  
+
+  <properties>
+    <sonar.skip>true</sonar.skip>
+  </properties>
+
   <dependencies>
     <dependency>
       <groupId>org.netbeans.api</groupId>

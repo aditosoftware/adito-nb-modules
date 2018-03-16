@@ -15,6 +15,10 @@
   <version>RELEASE82</version>
   <name>Netbeans IDE module: org-netbeans-core-output2</name>
 
+  <properties>
+    <sonar.skip>true</sonar.skip>
+  </properties>
+
 
   <dependencies>
     <dependency>

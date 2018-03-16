@@ -3,13 +3,11 @@
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-
   <parent>
     <groupId>de.adito.aditoweb.modules</groupId>
     <artifactId>nb-ide</artifactId>
     <version>5.1</version>
   </parent>
-
 
   <groupId>org.netbeans.modules</groupId>
   <artifactId>org-netbeans-modules-javascript-hints</artifactId>
@@ -17,6 +15,9 @@
   <version>5.1-RELEASE721</version>
   <name>Netbeans IDE module: org-netbeans-modules-javascript-hints</name>
 
+  <properties>
+    <sonar.skip>true</sonar.skip>
+  </properties>
 
   <dependencies>
     <dependency>
