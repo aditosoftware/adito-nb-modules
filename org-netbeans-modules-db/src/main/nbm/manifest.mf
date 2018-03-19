@@ -8,6 +8,7 @@ OpenIDE-Module-Layer: org/netbeans/modules/db/resources/mf-layer.xml
 OpenIDE-Module-Install: org/netbeans/modules/db/DatabaseModule.class
 AutoUpdate-Show-In-Client: false
 OpenIDE-Module-Requires: org.openide.modules.ModuleFormat1
-OpenIDE-Module-Needs: de.adito.aditoweb.nbm.nbide.nbaditointerface.database.IAditoDbTableCreator
+OpenIDE-Module-Needs: de.adito.aditoweb.nbm.nbide.nbaditointerface.database.IAditoDbTableCreator,
+ de.adito.aditoweb.nbm.nbide.nbaditointerface.database.specifier.ITableColumnSpecifierFactory
 OpenIDE-Module: org.netbeans.modules.db/1
 OpenIDE-Module-Specification-Version: 1.66.1.30

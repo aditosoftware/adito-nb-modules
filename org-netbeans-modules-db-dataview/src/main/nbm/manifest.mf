@@ -10,4 +10,5 @@ OpenIDE-Module-Localizing-Bundle: org/netbeans/modules/db/dataview/Bun
  dle.properties
 OpenIDE-Module-Specification-Version: 1.33.1
 OpenIDE-Module-Requires: org.openide.modules.ModuleFormat1
+OpenIDE-Module-Needs: de.adito.aditoweb.nbm.nbide.nbaditointerface.database.specifier.ITableColumnSpecifierFactory
 
