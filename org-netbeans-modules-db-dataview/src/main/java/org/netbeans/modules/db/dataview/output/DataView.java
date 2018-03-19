@@ -348,6 +348,10 @@ public class DataView {
     public SQLStatementGenerator getSQLStatementGenerator() {
         if (stmtGenerator == null) {
             // ADITO
+            if (dbConn == null)
+                throw new IllegalStateException("Couldn't obtain database connection.");
+            if (dbConn.getJDBCDriver() == null)
+                throw new IllegalStateException("Couldn't obtain jdbc driver instance.");
             stmtGenerator = new AditoSQLStatementGenerator(dbConn.getJDBCDriver().getDisplayName());
         }
         return stmtGenerator;
