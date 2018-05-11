@@ -25,10 +25,12 @@ public class AditoPersistenceManager extends PersistenceManager
   public synchronized void loadForm(DataObject pFormObject, FormModel pFormModel, List<Throwable> pNonFatalErrors)
       throws PersistenceException
   {
-    IAditoModelDataProvider aditoModelDataProvider = NbAditoInterface.lookup(IAditoModelDataProvider.class);
-    IPropertyPitProvider<?, ?, ?> modelRoot = aditoModelDataProvider.loadModel(pFormObject.getPrimaryFile());
     try
     {
+      // Muss im Try-Catch sein, da sonst etwaige Fehler nicht dazu führen, dass die Invalid-Komponente angezeigt wird.
+      IAditoModelDataProvider aditoModelDataProvider = NbAditoInterface.lookup(IAditoModelDataProvider.class);
+      IPropertyPitProvider<?, ?, ?> modelRoot = aditoModelDataProvider.loadModel(pFormObject.getPrimaryFile());
+
       Consumer<Exception> exceptionHandler = pNonFatalErrors::add;
       pFormModel.setFormBase(modelRoot, exceptionHandler);
 
@@ -53,6 +55,7 @@ public class AditoPersistenceManager extends PersistenceManager
     catch (Exception e)
     {
       e.printStackTrace();
+      pNonFatalErrors.add(e);
     }
 
     pFormModel.addFormModelListener(new AFormModelListener()
