@@ -202,9 +202,9 @@ public final class FilterRepository {
         //}
 
         // A
-        if(!prefs.getBoolean("aditoFilterInstalled_2", false)) // Version hochziehen, wenn filter geändert
+        if(!prefs.getBoolean("aditoFilterInstalled_3", false)) // Version hochziehen, wenn filter geändert
         {
-            prefs.putBoolean( "aditoFilterInstalled_2", true ); //NOI18N
+            prefs.putBoolean( "aditoFilterInstalled_3", true ); //NOI18N
             // Alte ADITO-Filter löschen und mit neuen ersetzen
             new ArrayList<>(filters).forEach(pFilter -> {
                 if(pFilter.getName().equals("ADITO"))
@@ -216,6 +216,7 @@ public final class FilterRepository {
             TypesFilter types = new TypesFilter();
             types.clear();
             types.setEnabled("de.adito.aditoweb.nbm.tasks.scanners.datamodelscan.DataModelScanner", true); //NOI18N
+            types.setEnabled("de.adito.aditoweb.nbm.jditohints.util.AditoHintTaskScanner", true); //NOI18N
             types.setEnabled("org.netbeans.modules.parsing.impl.indexing.errors.TaskProvider", true); //NOI18N
             types.setEnabled("org.netbeans.modules.tasklist.todo.TodoTaskScanner", true); //NOI18N
             types.setTaskCountLimit( 9999 );
