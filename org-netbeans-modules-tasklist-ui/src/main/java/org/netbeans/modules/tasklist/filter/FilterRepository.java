@@ -44,228 +44,230 @@
 
 package org.netbeans.modules.tasklist.filter;
 
-import java.io.IOException;
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.prefs.BackingStoreException;
-import java.util.prefs.Preferences;
-
 import org.netbeans.modules.tasklist.ui.Settings;
-import org.openide.util.NbBundle;
-import org.openide.util.NbPreferences;
+import org.openide.util.*;
+
+import java.io.IOException;
+import java.util.*;
+import java.util.prefs.*;
 
 /**
  * Set of filters
  */
 public final class FilterRepository {
-    
-    private static FilterRepository theInstance;
-    
-    /** the set of filters of this repository **/
-    private LinkedList<TaskFilter> filters = new LinkedList<TaskFilter>();
-    private int active = -1;   // index of the active filter
-    
-    /**
-     * Constructor, default.
-     */
-    FilterRepository() {
-    }
-    
-    public static FilterRepository getDefault() {
-        if( null == theInstance ) {
-            theInstance = new FilterRepository();
-        }
-        return theInstance;
-    }
-    
-    public void assign( final FilterRepository fr ) {
-        if( fr != this ) {
-            filters.clear();
-            Iterator<TaskFilter> it = fr.filters.iterator();
-            while( it.hasNext() ) {
-                filters.add( (TaskFilter)it.next().clone() );
-            }
-            
-            active = fr.active;
-        }
-    }
-    
-    @Override
-    public Object clone() {
-        FilterRepository ret = new FilterRepository();
-        ret.assign(this);
-        return ret;
-    }
-    
-    public List<TaskFilter> getAllFilters() {
-        return new ArrayList<TaskFilter>( filters );
-    }
-    
-    
-    // Implementation of java.util.Set
-    
-    /**
-     * Adds a new filter to the collection, if it was not present
-     * already.
-     * @param f the Filter to be added
-     * @return true iff it was not member before and was added
-     */
-    void add( TaskFilter f ) {
-        filters.add( f );
-    }
-    
-    /**
-     * Remove the filter specified by parameter from the collection.
-     *
-     * @param filter the Filter to remove
-     * @return true iff the filter was found and removed
-     */
-    void remove( TaskFilter f ) {
-        if( f == getActive() ) 
-            setActive( null );
-        filters.remove( f );
-    }
-    
-    Iterator<TaskFilter> iterator() {
-        return filters.iterator();
-    }
-    
-    int size() { 
-        return filters.size();
-    }
-    
-    /**
-     * Returns a filter with the given name or null if not found.
-     * @param name name of the filter to look up
-     * @return Filter with name or null
-     */
-    TaskFilter getFilterByName( String name ) {
-        Iterator<TaskFilter> it = filters.iterator();
-        while (it.hasNext()) {
-            TaskFilter f = it.next();
-            if( f.getName().equals( name ) ) 
-                return f;
-        }
-        return null;
-    }
-    
-    public TaskFilter getActive() {
-        return (active == -1 || filters.isEmpty()) ? null : filters.get( active );
-    }
-    
-    public void setActive( TaskFilter newactive ) {
-        if( newactive == null ) {
-            this.active = -1;
-        } else {
-            int i = filters.indexOf( newactive );
-            if( i != -1 ) {
-                this.active = i;
-            }
-        }
-    }
-    
-    public void load() throws IOException {
-        filters.clear();
-        active = -1;
-        Preferences prefs = NbPreferences.forModule( FilterRepository.class );
-        prefs = prefs.node( "Filters" ); //NOI18N
-        active = prefs.getInt( "active", -1 );
-        
-        int count = prefs.getInt( "count", 0 ); //NOI18N
-        for( int i=0; i<count; i++ ) {
-            TaskFilter filter = new TaskFilter();
-            try {
-                filter.load( prefs, "Filter_" + i ); //NOI18N
-            } catch( BackingStoreException bsE ) {
-                IOException ioE = new IOException( "Cannot load filter repository" ); //NOI18N
-                ioE.initCause( bsE );
-                throw ioE;
-            }
-            filters.add( filter );
-        }
-        boolean shouldSave = false;
-        //TODO remove this filter after dahboard is introduced
-        //if( prefs.getBoolean( "firstTimeStartWithIssue", true ) ) { //NOI18N
-        //    prefs.putBoolean( "firstTimeStartWithIssue", false ); //NOI18N
-        //    TaskFilter filter = createNewFilter();
-        //    filter.setName( NbBundle.getMessage( FilterRepository.class, "LBL_TodoFilter" ) ); //NOI18N
-        //    TypesFilter types = new TypesFilter();
-        //    types.clear();
-        //    types.setEnabled("org.netbeans.modules.tasklist.todo.TodoTaskScanner", true); //NOI18N
-        //    types.setTaskCountLimit( 100 );
-        //    filter.setTypesFilter( types );
-        //    filter.setKeywordsFilter( new KeywordsFilter() );
-        //    filters.add( filter );
-        //    shouldSave = true;
-        //}
 
-        // A
-        if(!prefs.getBoolean("aditoFilterInstalled_3", false)) // Version hochziehen, wenn filter geändert
-        {
-            prefs.putBoolean( "aditoFilterInstalled_3", true ); //NOI18N
-            // Alte ADITO-Filter löschen und mit neuen ersetzen
-            new ArrayList<>(filters).forEach(pFilter -> {
-                if(pFilter.getName().equals("ADITO"))
-                    filters.remove(pFilter);
-            });
+  private static FilterRepository theInstance;
 
-            TaskFilter filter = createNewFilter();
-            filter.setName("ADITO"); //NOI18N
-            TypesFilter types = new TypesFilter();
-            types.clear();
-            types.setEnabled("de.adito.aditoweb.nbm.tasks.scanners.datamodelscan.DataModelScanner", true); //NOI18N
-            types.setEnabled("de.adito.aditoweb.nbm.jditohints.util.AditoHintTaskScanner", true); //NOI18N
-            types.setEnabled("org.netbeans.modules.parsing.impl.indexing.errors.TaskProvider", true); //NOI18N
-            types.setEnabled("org.netbeans.modules.tasklist.todo.TodoTaskScanner", true); //NOI18N
-            types.setTaskCountLimit( 9999 );
-            filter.setTypesFilter( types );
-            List<AppliedFilterCondition> conditions = new ArrayList<>();
-            conditions.add(new AppliedFilterCondition(TaskProperties.getProperty("file"), new StringFilterCondition(StringFilterCondition.NOTEQUALS, "metadata.js")));
-            filter.setKeywordsFilter( new KeywordsFilter(false, conditions) );
-            filters.add( filter );
-            setActive(filter);
-            Settings.getDefault().setGroupTasksByCategory(true);
-            shouldSave = true;
-        }
+  /** the set of filters of this repository **/
+  private LinkedList<TaskFilter> filters = new LinkedList<TaskFilter>();
+  private int active = -1;   // index of the active filter  
+  private final String aditoFilterInstalled_3 = "aditoFilterInstalled_3";
 
-        if( shouldSave )
-            save();
-    }
-    
-    public void save() throws IOException {
-        try {
-            Preferences prefs = NbPreferences.forModule( FilterRepository.class );
-            prefs = prefs.node( "Filters" ); //NOI18N
-            prefs.clear();
-            prefs.putBoolean( "firstTimeStart", false ); //NOI18N
-            prefs.putBoolean( "firstTimeStartWithIssue", false ); //NOI18N
+  /**
+   * Constructor, default.
+   */
+  FilterRepository() {
+  }
 
-            prefs.putInt( "count", filters.size() ); //NOI18N
-            prefs.putInt( "active", active ); //NOI18N
-            for( int i=0; i<filters.size(); i++ ) {
-                TaskFilter filter = filters.get( i );
-                filter.save( prefs, "Filter_" + i ); //NOI18N
-            }
-        } catch( BackingStoreException bsE ) {
-            IOException ioE = new IOException( "Cannot save filter repository" ); //NOI18N
-            ioE.initCause( bsE );
-            throw ioE;
-        }
+  public static FilterRepository getDefault() {
+    if( null == theInstance ) {
+      theInstance = new FilterRepository();
     }
-    
-    TaskFilter createNewFilter() {
-        return new TaskFilter( NbBundle.getMessage( FilterRepository.class, "LBL_NewFilter" ) ); //NOI18N
+    return theInstance;
+  }
+
+  public void assign( final FilterRepository fr ) {
+    if( fr != this ) {
+      filters.clear();
+      Iterator<TaskFilter> it = fr.filters.iterator();
+      while( it.hasNext() ) {
+        filters.add( (TaskFilter)it.next().clone() );
+      }
+
+      active = fr.active;
     }
-    
-    void clear() {
-        filters.clear();
-        setActive( null );
+  }
+
+  @Override
+  public Object clone() {
+    FilterRepository ret = new FilterRepository();
+    ret.assign(this);
+    return ret;
+  }
+
+  public List<TaskFilter> getAllFilters() {
+    return new ArrayList<TaskFilter>( filters );
+  }
+
+
+  // Implementation of java.util.Set
+
+  /**
+   * Adds a new filter to the collection, if it was not present
+   * already.
+   * @param f the Filter to be added
+   * @return true iff it was not member before and was added
+   */
+  void add( TaskFilter f ) {
+    filters.add( f );
+  }
+
+  /**
+   * Remove the filter specified by parameter from the collection.
+   *
+   * @param filter the Filter to remove
+   * @return true iff the filter was found and removed
+   */
+  void remove( TaskFilter f ) {
+    if( f == getActive() )
+      setActive( null );
+    filters.remove( f );
+  }
+
+  Iterator<TaskFilter> iterator() {
+    return filters.iterator();
+  }
+
+  int size() {
+    return filters.size();
+  }
+
+  /**
+   * Returns a filter with the given name or null if not found.
+   * @param name name of the filter to look up
+   * @return Filter with name or null
+   */
+  TaskFilter getFilterByName( String name ) {
+    Iterator<TaskFilter> it = filters.iterator();
+    while (it.hasNext()) {
+      TaskFilter f = it.next();
+      if( f.getName().equals( name ) )
+        return f;
     }
-    
-    List<TaskFilter> getFilters() {
-        return new ArrayList<TaskFilter>( filters );
+    return null;
+  }
+
+  public TaskFilter getActive() {
+    return (active == -1 || filters.isEmpty()) ? null : filters.get( active );
+  }
+
+  public void setActive( TaskFilter newactive ) {
+    if( newactive == null ) {
+      this.active = -1;
+    } else {
+      int i = filters.indexOf( newactive );
+      if( i != -1 ) {
+        this.active = i;
+      }
     }
+  }
+
+  public void load() throws IOException {
+    filters.clear();
+    active = -1;
+    Preferences prefs = NbPreferences.forModule( FilterRepository.class );
+    prefs = prefs.node( "Filters" ); //NOI18N
+    active = prefs.getInt( "active", -1 );
+
+    int count = prefs.getInt( "count", 0 ); //NOI18N
+    for( int i=0; i<count; i++ ) {
+      TaskFilter filter = new TaskFilter();
+      try {
+        filter.load( prefs, "Filter_" + i ); //NOI18N
+      } catch( BackingStoreException bsE ) {
+        IOException ioE = new IOException( "Cannot load filter repository" ); //NOI18N
+        ioE.initCause( bsE );
+        throw ioE;
+      }
+      filters.add( filter );
+    }
+    boolean shouldSave = false;
+    //TODO remove this filter after dahboard is introduced
+    //if( prefs.getBoolean( "firstTimeStartWithIssue", true ) ) { //NOI18N
+    //    prefs.putBoolean( "firstTimeStartWithIssue", false ); //NOI18N
+    //    TaskFilter filter = createNewFilter();
+    //    filter.setName( NbBundle.getMessage( FilterRepository.class, "LBL_TodoFilter" ) ); //NOI18N
+    //    TypesFilter types = new TypesFilter();
+    //    types.clear();
+    //    types.setEnabled("org.netbeans.modules.tasklist.todo.TodoTaskScanner", true); //NOI18N
+    //    types.setTaskCountLimit( 100 );
+    //    filter.setTypesFilter( types );
+    //    filter.setKeywordsFilter( new KeywordsFilter() );
+    //    filters.add( filter );
+    //    shouldSave = true;
+    //}
+
+    // A
+    if(!_isAditoFilterInstalled_3(prefs)) // Version hochziehen, wenn filter geändert
+    {
+      prefs.putBoolean(aditoFilterInstalled_3, true ); //NOI18N
+      // Alte ADITO-Filter löschen und mit neuen ersetzen
+      new ArrayList<>(filters).forEach(pFilter -> {
+        if(pFilter.getName().equals("ADITO"))
+          filters.remove(pFilter);
+      });
+
+      TaskFilter filter = createNewFilter();
+      filter.setName("ADITO"); //NOI18N
+      TypesFilter types = new TypesFilter();
+      types.clear();
+      types.setEnabled("de.adito.aditoweb.nbm.tasks.scanners.datamodelscan.DataModelScanner", true); //NOI18N
+      types.setEnabled("org.netbeans.modules.parsing.impl.indexing.errors.TaskProvider", true); //NOI18N
+      types.setEnabled("org.netbeans.modules.tasklist.todo.TodoTaskScanner", true); //NOI18N
+      types.setTaskCountLimit( 9999 );
+      filter.setTypesFilter( types );
+      List<AppliedFilterCondition> conditions = new ArrayList<>();
+      conditions.add(new AppliedFilterCondition(TaskProperties.getProperty("file"), new StringFilterCondition(StringFilterCondition.NOTEQUALS, "metadata.js")));
+      filter.setKeywordsFilter( new KeywordsFilter(false, conditions) );
+      filters.add( filter );
+      setActive(filter);
+      Settings.getDefault().setGroupTasksByCategory(true);
+      shouldSave = true;
+    }
+
+    if( shouldSave )
+      save();
+  }
+
+  private boolean _isAditoFilterInstalled_3(Preferences pFilters)
+  {
+    return pFilters.getBoolean(aditoFilterInstalled_3, false);
+  }
+
+  public void save() throws IOException {
+    try {
+      Preferences prefs = NbPreferences.forModule( FilterRepository.class );
+      prefs = prefs.node( "Filters" ); //NOI18N
+      boolean aditoFilterFlag = _isAditoFilterInstalled_3(prefs);
+      prefs.clear();
+      prefs.putBoolean(aditoFilterInstalled_3, aditoFilterFlag ); //NOI18N
+      prefs.putBoolean( "firstTimeStart", false ); //NOI18N
+      prefs.putBoolean( "firstTimeStartWithIssue", false ); //NOI18N
+
+      prefs.putInt( "count", filters.size() ); //NOI18N
+      prefs.putInt( "active", active ); //NOI18N
+      for( int i=0; i<filters.size(); i++ ) {
+        TaskFilter filter = filters.get( i );
+        filter.save( prefs, "Filter_" + i ); //NOI18N
+      }
+    } catch( BackingStoreException bsE ) {
+      IOException ioE = new IOException( "Cannot save filter repository" ); //NOI18N
+      ioE.initCause( bsE );
+      throw ioE;
+    }
+  }
+
+  TaskFilter createNewFilter() {
+    return new TaskFilter( NbBundle.getMessage( FilterRepository.class, "LBL_NewFilter" ) ); //NOI18N
+  }
+
+  void clear() {
+    filters.clear();
+    setActive( null );
+  }
+
+  List<TaskFilter> getFilters() {
+    return new ArrayList<TaskFilter>( filters );
+  }
 }
 
