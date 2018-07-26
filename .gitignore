@@ -1,0 +1,6 @@
+
+#	Allgemeine Ignores
+
+*.iml
+/.idea/*
+!/.idea/vcs.xml

@@ -4,19 +4,26 @@
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-
   <parent>
-    <groupId>de.adito.aditoweb</groupId>
-    <artifactId>modules</artifactId>
-    <version>5.1</version>
+    <groupId>de.adito</groupId>
+    <artifactId>adito-parent</artifactId>
+    <version>1.1.1</version>
   </parent>
 
 
   <groupId>de.adito.aditoweb.modules</groupId>
   <artifactId>nb-ide</artifactId>
+  <version>5.1</version>
+
   <packaging>pom</packaging>
   <name>Netbeans IDE modules</name>
 
+  <properties>
+    <!-- Netbeans-Versionen -->
+    <netbeans.version>RELEASE82</netbeans.version>
+    <!-- gibt das Encoding das wir im SourceCode verwenden vor -->
+    <project.build.sourceEncoding>Cp1252</project.build.sourceEncoding>
+  </properties>
 
   <modules>
     <module>nb-adito-interface</module>
@@ -31,6 +38,129 @@
     <module>org-netbeans-modules-tasklist-projectint</module>
     <module>org-netbeans-modules-tasklist-ui</module>
   </modules>
+
+  <dependencyManagement>
+    <dependencies>
+      <!-- Google Guava -->
+      <dependency>
+        <groupId>com.google.guava</groupId>
+        <artifactId>guava</artifactId>
+        <version>23.6.1-jre</version>
+      </dependency>
+      <!-- Propertly -->
+      <dependency>
+        <groupId>de.adito.propertly</groupId>
+        <artifactId>propertly.core</artifactId>
+        <version>0.4.1</version>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+
+  <dependencies>
+    <!-- für @NotNull-Annotations -->
+    <dependency>
+      <groupId>org.jetbrains</groupId>
+      <artifactId>annotations</artifactId>
+      <version>13.0</version>
+      <scope>provided</scope>
+      <optional>true</optional>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.codehaus.mojo</groupId>
+          <artifactId>nbm-maven-plugin</artifactId>
+          <version>4.1</version>
+          <extensions>true</extensions>
+          <configuration>
+            <useOSGiDependencies>true</useOSGiDependencies>
+          </configuration>
+        </plugin>
+
+        <!-- copy-plugin zum Kopieren von resources. -->
+        <plugin>
+          <groupId>com.github.goldin</groupId>
+          <artifactId>copy-maven-plugin</artifactId>
+          <version>0.3-adito</version>
+          <configuration>
+            <verbose>false</verbose>
+          </configuration>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+
+    <plugins>
+      <!-- NetBeans-Plugin -->
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>nbm-maven-plugin</artifactId>
+        <configuration>
+          <moduleType>eager</moduleType>
+        </configuration>
+      </plugin>
+
+      <!-- Plugin: Compiler -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <configuration>
+          <source>1.8</source>
+          <target>1.8</target>
+        </configuration>
+      </plugin>
+
+      <!--Plugin: Jar-Plugin to exclude maven descriptors and add manifest entries -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <configuration>
+          <archive>
+            <manifest>
+              <useUniqueVersions>true</useUniqueVersions>
+              <addClasspath>true</addClasspath>
+              <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+              <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
+            </manifest>
+            <addMavenDescriptor>false</addMavenDescriptor>
+          </archive>
+        </configuration>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-source-plugin</artifactId>
+        <version>3.0.1</version>
+        <executions>
+          <execution>
+            <id>attach-sources</id>
+            <goals>
+              <goal>jar-no-fork</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-javadoc-plugin</artifactId>
+        <version>2.10.3</version>
+        <configuration>
+          <additionalparam>-Xdoclint:none</additionalparam>
+        </configuration>
+        <executions>
+          <execution>
+            <id>attach-javadocs</id>
+            <goals>
+              <goal>jar</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
 
 
 </project>
