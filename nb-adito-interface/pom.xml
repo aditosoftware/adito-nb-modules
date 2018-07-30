@@ -4,13 +4,14 @@
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <groupId>de.adito.aditoweb.modules</groupId>
-    <artifactId>nb-ide</artifactId>
-    <version>5.1</version>
+    <groupId>de.adito</groupId>
+    <artifactId>nb-modules</artifactId>
+    <version>1.0.0</version>
   </parent>
 
-  <groupId>de.adito.aditoweb.modules.nb-ide</groupId>
+  <groupId>de.adito.nb-modules</groupId>
   <artifactId>nb-adito-interface</artifactId>
+  <version>1.0.0</version>
   <packaging>nbm</packaging>
   <name>Netbeans IDE module interface: nb-adito-interface</name>
 

@@ -5,16 +5,16 @@
 
 
   <parent>
-    <groupId>de.adito.aditoweb.modules</groupId>
-    <artifactId>nb-ide</artifactId>
-    <version>5.1</version>
+    <groupId>de.adito</groupId>
+    <artifactId>nb-modules</artifactId>
+    <version>1.0.0</version>
   </parent>
 
 
   <groupId>org.netbeans.modules</groupId>
   <artifactId>org-netbeans-modules-javascript-editing</artifactId>
   <packaging>nbm</packaging>
-  <version>5.1-RELEASE721</version>
+  <version>RELEASE721-1.0.0</version> <!-- HINT: Change Version in Root-Pom -> DependencyManagement! -->
   <name>Netbeans IDE module: org-netbeans-modules-javascript-editing</name>
 
   <properties>
@@ -25,9 +25,9 @@
 
     <!-- supplies adito stuff -->
     <dependency>
-      <groupId>de.adito.aditoweb.modules.nb-ide</groupId>
+      <groupId>de.adito.nb-modules</groupId>
       <artifactId>nb-adito-interface</artifactId>
-      <version>${project.parent.version}</version>
+      <version>1.0.0</version>
     </dependency>
 
     <dependency>

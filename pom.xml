@@ -10,13 +10,11 @@
     <version>1.1.1</version>
   </parent>
 
-
-  <groupId>de.adito.aditoweb.modules</groupId>
-  <artifactId>nb-ide</artifactId>
-  <version>5.1</version>
+  <artifactId>nb-modules</artifactId>
+  <version>1.0.0</version>
 
   <packaging>pom</packaging>
-  <name>Netbeans IDE modules</name>
+  <name>Custom Netbeans Modules</name>
 
   <properties>
     <!-- Netbeans-Versionen -->
@@ -53,6 +51,58 @@
         <artifactId>propertly.core</artifactId>
         <version>0.4.1</version>
       </dependency>
+
+       <!--NetBeans-->
+      <dependency>
+        <groupId>org.netbeans.modules</groupId>
+        <artifactId>org-netbeans-core-output2</artifactId>
+        <version>[RELEASE82-1.0.0]</version>
+      </dependency>
+      <dependency>
+        <groupId>org.netbeans.modules</groupId>
+        <artifactId>org-netbeans-core-windows</artifactId>
+        <version>[RELEASE82-1.0.0]</version>
+      </dependency>
+      <dependency>
+        <groupId>org.netbeans.api</groupId>
+        <artifactId>org-netbeans-modules-db</artifactId>
+        <version>[RELEASE82-1.0.0]</version>
+      </dependency>
+      <dependency>
+        <groupId>org.netbeans.modules</groupId>
+        <artifactId>org-netbeans-modules-db-dataview</artifactId>
+        <version>[RELEASE82-1.0.0]</version>
+      </dependency>
+      <dependency>
+        <groupId>org.netbeans.modules</groupId>
+        <artifactId>org-netbeans-modules-form</artifactId>
+        <version>[RELEASE82-1.0.0]</version>
+      </dependency>
+      <dependency>
+        <groupId>org.netbeans.modules</groupId>
+        <artifactId>org-netbeans-modules-javascript-editing</artifactId>
+        <version>[RELEASE721-1.0.0]</version>
+      </dependency>
+      <dependency>
+        <groupId>org.netbeans.modules</groupId>
+        <artifactId>org-netbeans-modules-javascript-hints</artifactId>
+        <version>[RELEASE721-1.0.0]</version>
+      </dependency>
+      <dependency>
+        <groupId>org.netbeans.modules</groupId>
+        <artifactId>org-netbeans-modules-javascript-refactoring</artifactId>
+        <version>[RELEASE721-1.0.0]</version>
+      </dependency>
+      <dependency>
+        <groupId>org.netbeans.modules</groupId>
+        <artifactId>org-netbeans-modules-tasklist-projectint</artifactId>
+        <version>[RELEASE82-1.0.0]</version>
+      </dependency>
+      <dependency>
+        <groupId>org.netbeans.modules</groupId>
+        <artifactId>org-netbeans-modules-tasklist-ui</artifactId>
+        <version>[RELEASE82-1.0.0]</version>
+      </dependency>
     </dependencies>
   </dependencyManagement>
 
@@ -77,16 +127,6 @@
           <extensions>true</extensions>
           <configuration>
             <useOSGiDependencies>true</useOSGiDependencies>
-          </configuration>
-        </plugin>
-
-        <!-- copy-plugin zum Kopieren von resources. -->
-        <plugin>
-          <groupId>com.github.goldin</groupId>
-          <artifactId>copy-maven-plugin</artifactId>
-          <version>0.3-adito</version>
-          <configuration>
-            <verbose>false</verbose>
           </configuration>
         </plugin>
       </plugins>
@@ -120,9 +160,9 @@
           <archive>
             <manifest>
               <useUniqueVersions>true</useUniqueVersions>
-              <addClasspath>true</addClasspath>
-              <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
-              <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
+              <addClasspath>false</addClasspath>
+              <addDefaultImplementationEntries>false</addDefaultImplementationEntries>
+              <addDefaultSpecificationEntries>false</addDefaultSpecificationEntries>
             </manifest>
             <addMavenDescriptor>false</addMavenDescriptor>
           </archive>
@@ -161,6 +201,5 @@
       </plugin>
     </plugins>
   </build>
-
 
 </project>

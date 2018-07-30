@@ -4,15 +4,15 @@
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <groupId>de.adito.aditoweb.modules</groupId>
-    <artifactId>nb-ide</artifactId>
-    <version>5.1</version>
+    <groupId>de.adito</groupId>
+    <artifactId>nb-modules</artifactId>
+    <version>1.0.0</version>
   </parent>
 
   <groupId>org.netbeans.api</groupId>
   <artifactId>org-netbeans-modules-db</artifactId>
   <packaging>nbm</packaging>
-  <version>RELEASE82</version>
+  <version>RELEASE82-1.0.0</version> <!-- HINT: Change Version in Root-Pom -> DependencyManagement! -->
   <name>Netbeans IDE module: org-netbeans-modules-db</name>
 
   <properties>
@@ -123,9 +123,9 @@
     </dependency>
 
     <dependency>
-      <groupId>de.adito.aditoweb.modules.nb-ide</groupId>
+      <groupId>de.adito.nb-modules</groupId>
       <artifactId>nb-adito-interface</artifactId>
-      <version>${project.parent.version}</version>
+      <version>1.0.0</version>
     </dependency>
 
     <dependency>
