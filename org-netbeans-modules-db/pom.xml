@@ -12,7 +12,7 @@
   <groupId>org.netbeans.api</groupId>
   <artifactId>org-netbeans-modules-db</artifactId>
   <packaging>nbm</packaging>
-  <version>RELEASE82-1.0.0</version> <!-- HINT: Change Version in Root-Pom -> DependencyManagement! -->
+  <version>RELEASE82-1.0.1</version> <!-- HINT: Change Version in Root-Pom -> DependencyManagement! -->
   <name>Netbeans IDE module: org-netbeans-modules-db</name>
 
   <properties>
@@ -129,9 +129,8 @@
     </dependency>
 
     <dependency>
-      <groupId>de.adito.aditoweb.packages</groupId>
+      <groupId>de.adito.nbm.wrappers</groupId>
       <artifactId>lwjidecommonlayer</artifactId>
-      <version>3.2.4</version>
     </dependency>
   </dependencies>
 
