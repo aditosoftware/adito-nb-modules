@@ -105,6 +105,7 @@ import javax.swing.MenuSelectionManager;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.WindowConstants;
+import javax.swing.border.EmptyBorder;
 import javax.swing.event.ChangeListener;
 import javax.swing.plaf.basic.BasicLookAndFeel;
 import javax.swing.plaf.metal.MetalLookAndFeel;
@@ -808,6 +809,7 @@ implements PropertyChangeListener, WindowListener, Mutex.Action<Void>, Comparato
 
             if (currentPrimaryButtons != null) {
                 panelForPrimary = new JPanel();
+                panelForPrimary.setBorder(new EmptyBorder(0,0,9,9));
 
                 if (currentAlign == -1) {
                     panelForPrimary.setLayout(new org.openide.awt.EqualFlowLayout());
@@ -822,6 +824,7 @@ implements PropertyChangeListener, WindowListener, Mutex.Action<Void>, Comparato
             
             if (currentSecondaryButtons != null) {
                 panelForSecondary = new JPanel();
+                panelForSecondary.setBorder(new EmptyBorder(0,9,9,0));
                 panelForSecondary.setLayout(new org.openide.awt.EqualFlowLayout(FlowLayout.LEFT));
                 for (int i = 0; i < currentSecondaryButtons.length; i++) {
                     modifyListener(currentSecondaryButtons[i], buttonListener, true); // add button listener
