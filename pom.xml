@@ -138,6 +138,7 @@
           <extensions>true</extensions>
           <configuration>
             <useOSGiDependencies>true</useOSGiDependencies>
+            <cluster>platform</cluster>
           </configuration>
         </plugin>
       </plugins>
