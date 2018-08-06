@@ -7,14 +7,14 @@
   <parent>
     <groupId>de.adito</groupId>
     <artifactId>nb-modules</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.1</version>
   </parent>
 
 
   <groupId>org.netbeans.modules</groupId>
   <artifactId>org-netbeans-modules-javascript-editing</artifactId>
   <packaging>nbm</packaging>
-  <version>RELEASE721-1.0.0</version> <!-- HINT: Change Version in Root-Pom -> DependencyManagement! -->
+  <version>RELEASE721-1.0.1</version> <!-- HINT: Change Version in Root-Pom -> DependencyManagement! -->
   <name>Netbeans IDE module: org-netbeans-modules-javascript-editing</name>
 
   <properties>
@@ -27,7 +27,6 @@
     <dependency>
       <groupId>de.adito.nb-modules</groupId>
       <artifactId>nb-adito-interface</artifactId>
-      <version>1.0.0</version>
     </dependency>
 
     <dependency>
@@ -249,84 +248,6 @@
       </plugin>
     </plugins>
   </build>
-
-
-  <profiles>
-    <profile>
-      <id>adito.maven.resources</id>
-      <build>
-        <plugins>
-          <!-- Kopiert die JsStubs. Wird nur im 'Resources'-Profil ausgeführt. -->
-          <plugin>
-            <groupId>com.github.goldin</groupId>
-            <artifactId>copy-maven-plugin</artifactId>
-            <executions>
-              <execution>
-                <id>create-archive</id>
-                <phase>prepare-package</phase>
-                <goals>
-                  <goal>copy</goal>
-                </goals>
-                <configuration>
-                  <resources>
-                    <!-- ~~~~ -->
-                    <!-- Copy -->
-                    <!-- ~~~~ -->
-                    <resource>
-                      <directory>${project.parent.parent.parent.basedir}/library/server/target/generated-sources/annotations/jsdoc</directory>
-                      <include>stub_adito_*.js</include>
-                      <targetPath>${project.build.directory}/nbm/netbeans/aditoonline/jsstubs</targetPath>
-                    </resource>
-                    <resource>
-                      <directory>${project.parent.parent.parent.basedir}/library/server/target/classes/de/adito/aditoweb/server/application/jdito/jscript</directory>
-                      <include>stub_adito_*.js</include>
-                      <targetPath>${project.build.directory}/nbm/netbeans/aditoonline/jsstubs</targetPath>
-                    </resource>
-                    <resource>
-                      <directory>${project.basedir}/src/main/nbm/jsstubs</directory>
-                      <targetPath>${project.build.directory}/nbm/netbeans/aditoonline/jsstubs</targetPath>
-                    </resource>
-                    <!-- ~~~~ -->
-                    <!-- Pack -->
-                    <!-- ~~~~ -->
-                    <resource>
-                      <directory>${project.build.directory}/nbm/netbeans/aditoonline/jsstubs</directory>
-                      <targetPath>${project.build.directory}/nbm/netbeans/aditoonline/jsstubs/allstubs.zip</targetPath>
-                      <pack>true</pack>
-                    </resource>
-                    <!-- ~~~~~ -->
-                    <!-- Clean -->
-                    <!-- ~~~~~ -->
-                    <resource>
-                      <directory>${project.build.directory}/nbm/netbeans/aditoonline/jsstubs</directory>
-                      <exclude>allstubs.zip</exclude>
-                      <clean>true</clean>
-                    </resource>
-                  </resources>
-                </configuration>
-              </execution>
-            </executions>
-            <dependencies>
-              <!-- ist Abhängig vom Server, weil dort erst die JsStubs beim Kompilieren vom Annotation-Prozessor erzeugt
-              werden müssen. -->
-              <dependency>
-                <groupId>de.adito.aditoweb</groupId>
-                <artifactId>server</artifactId>
-                <version>${project.parent.version}</version>
-                <exclusions>
-                  <!-- 'copy-maven-plugin' benötigt eine andere guava Version. -->
-                  <exclusion>
-                    <groupId>*</groupId>
-                    <artifactId>*</artifactId>
-                  </exclusion>
-                </exclusions>
-              </dependency>
-            </dependencies>
-          </plugin>
-        </plugins>
-      </build>
-    </profile>
-  </profiles>
 
 
 </project>

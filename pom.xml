@@ -11,7 +11,7 @@
   </parent>
 
   <artifactId>nb-modules</artifactId>
-  <version>1.0.0</version>
+  <version>1.0.1</version>
 
   <packaging>pom</packaging>
   <name>Custom Netbeans Modules</name>
@@ -45,6 +45,7 @@
         <artifactId>guava</artifactId>
         <version>23.6.1-jre</version>
       </dependency>
+
       <!-- Propertly -->
       <dependency>
         <groupId>de.adito.propertly</groupId>
@@ -52,67 +53,74 @@
         <version>0.4.1</version>
       </dependency>
 
+      <!-- NB-Adito-Interface for providing ADITO-Specific stuff -->
       <dependency>
-        <groupId>de.adito.nbm.wrappers</groupId>
-        <artifactId>lwswingx</artifactId>
-        <version>1.6.2</version>
-      </dependency>
-      <dependency>
-        <groupId>de.adito.nbm.wrappers</groupId>
-        <artifactId>lwjidecommonlayer</artifactId>
-        <version>3.2.4</version>
+        <groupId>de.adito.nb-modules</groupId>
+        <artifactId>nb-adito-interface</artifactId>
+        <version>[1.0.1]</version>
       </dependency>
 
-       <!--NetBeans-->
+      <!--NetBeans-->
       <dependency>
         <groupId>org.netbeans.modules</groupId>
         <artifactId>org-netbeans-core-output2</artifactId>
-        <version>[RELEASE82-1.0.0]</version>
+        <version>[RELEASE82-1.0.1]</version>
       </dependency>
       <dependency>
         <groupId>org.netbeans.modules</groupId>
         <artifactId>org-netbeans-core-windows</artifactId>
-        <version>[RELEASE82-1.0.1]</version>
+        <version>[RELEASE82-1.0.2]</version>
       </dependency>
       <dependency>
         <groupId>org.netbeans.api</groupId>
         <artifactId>org-netbeans-modules-db</artifactId>
-        <version>[RELEASE82-1.0.1]</version>
+        <version>[RELEASE82-1.0.2]</version>
       </dependency>
       <dependency>
         <groupId>org.netbeans.modules</groupId>
         <artifactId>org-netbeans-modules-db-dataview</artifactId>
-        <version>[RELEASE82-1.0.1]</version>
+        <version>[RELEASE82-1.0.2]</version>
       </dependency>
       <dependency>
         <groupId>org.netbeans.modules</groupId>
         <artifactId>org-netbeans-modules-form</artifactId>
-        <version>[RELEASE82-1.0.0]</version>
+        <version>[RELEASE82-1.0.1]</version>
       </dependency>
       <dependency>
         <groupId>org.netbeans.modules</groupId>
         <artifactId>org-netbeans-modules-javascript-editing</artifactId>
-        <version>[RELEASE721-1.0.0]</version>
+        <version>[RELEASE721-1.0.1]</version>
       </dependency>
       <dependency>
         <groupId>org.netbeans.modules</groupId>
         <artifactId>org-netbeans-modules-javascript-hints</artifactId>
-        <version>[RELEASE721-1.0.0]</version>
+        <version>[RELEASE721-1.0.1]</version>
       </dependency>
       <dependency>
         <groupId>org.netbeans.modules</groupId>
         <artifactId>org-netbeans-modules-javascript-refactoring</artifactId>
-        <version>[RELEASE721-1.0.0]</version>
+        <version>[RELEASE721-1.0.1]</version>
       </dependency>
       <dependency>
         <groupId>org.netbeans.modules</groupId>
         <artifactId>org-netbeans-modules-tasklist-projectint</artifactId>
-        <version>[RELEASE82-1.0.0]</version>
+        <version>[RELEASE82-1.0.1]</version>
       </dependency>
       <dependency>
         <groupId>org.netbeans.modules</groupId>
         <artifactId>org-netbeans-modules-tasklist-ui</artifactId>
-        <version>[RELEASE82-1.0.0]</version>
+        <version>[RELEASE82-1.0.1]</version>
+      </dependency>
+
+      <dependency>
+        <groupId>de.adito.nbm.wrappers</groupId>
+        <artifactId>lwswingx</artifactId>
+        <version>1.6.2-1.0.0</version>
+      </dependency>
+      <dependency>
+        <groupId>de.adito.nbm.wrappers</groupId>
+        <artifactId>lwjidecommonlayer</artifactId>
+        <version>3.2.4-1.0.0</version>
       </dependency>
     </dependencies>
   </dependencyManagement>

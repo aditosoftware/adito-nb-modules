@@ -6,13 +6,13 @@
   <parent>
     <groupId>de.adito</groupId>
     <artifactId>nb-modules</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.1</version>
   </parent>
 
   <groupId>org.netbeans.modules</groupId>
   <artifactId>org-netbeans-core-output2</artifactId>
   <packaging>nbm</packaging>
-  <version>RELEASE82-1.0.0</version> <!-- HINT: Change Version in Root-Pom -> DependencyManagement! -->
+  <version>RELEASE82-1.0.1</version> <!-- HINT: Change Version in Root-Pom -> DependencyManagement! -->
   <name>Netbeans IDE module: org-netbeans-core-output2</name>
 
   <properties>
