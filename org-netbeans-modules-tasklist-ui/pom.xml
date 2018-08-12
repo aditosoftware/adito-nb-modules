@@ -6,13 +6,13 @@
   <parent>
     <groupId>de.adito</groupId>
     <artifactId>nb-modules</artifactId>
-    <version>1.0.2</version>
+    <version>1.0.3</version>
   </parent>
 
   <groupId>org.netbeans.modules</groupId>
   <artifactId>org-netbeans-modules-tasklist-ui</artifactId>
   <packaging>nbm</packaging>
-  <version>RELEASE82-1.0.2</version> <!-- HINT: Change Version in Root-Pom -> DependencyManagement! -->
+  <version>RELEASE82-1.0.3</version> <!-- HINT: Change Version in Root-Pom -> DependencyManagement! -->
   <name>Netbeans IDE module: org-netbeans-modules-tasklist-ui</name>
 
   <properties>

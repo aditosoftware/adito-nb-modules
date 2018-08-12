@@ -191,7 +191,7 @@ public final class DBMetaDataFactory {
             {
                 DBTable tmpTable = new DBTable(null, null, null);
                 adjustTableMetadata(sql, tmpTable);
-                tableName = tmpTable.getName();
+                tableName = tmpTable.getName() == null ? "" : tmpTable.getName();
             }
 
             String schemaName = rsMeta.getSchemaName(i);
@@ -215,7 +215,7 @@ public final class DBMetaDataFactory {
             {
                 DBTable tmpTable = new DBTable(tableName, schemaName, catalogName);
                 adjustTableMetadata(sql, tmpTable);
-                schemaName = tmpTable.getSchema();
+                schemaName = tmpTable.getSchema() == null ? "" : tmpTable.getSchema();
             }
 
             String key = catalogName + schemaName + tableName;
@@ -382,6 +382,7 @@ public final class DBMetaDataFactory {
 
     private void adjustTableMetadata(String sql, DBTable table) {
         String tableName = "";
+        sql = _removeAllInBrackets(sql); //ADITO Ingore ALL SUBSELECTS!
         if (sql.toUpperCase().contains("FROM")) { // NOI18N
             // User may type "FROM" in either lower, upper or mixed case
             String[] splitByFrom = sql.toUpperCase().split("FROM"); // NOI18N
@@ -417,6 +418,30 @@ public final class DBMetaDataFactory {
             table.setName(unQuoteIfNeeded(splitByDot[0]));
         }
     }
+
+    //ADITO #1022673
+    private String _removeAllInBrackets(String pString)
+    {
+        StringBuilder result = new StringBuilder();
+        int level = 0;
+        for (char c : pString.toCharArray()) {
+            switch(c)
+            {
+                case '(':
+                    level++;
+                    break;
+                case ')':
+                    level = level == 0 ? 0 : level -1; //not under zero
+                    break;
+                default:
+                    if(level == 0)
+                        result.append(c);
+                    break;
+            }
+        }
+        return result.toString();
+    }
+    //END ADITO
 
     private String unQuoteIfNeeded(String id) {
         return id.replaceAll(identifierQuoteString, "");
