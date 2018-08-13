@@ -96,8 +96,8 @@
     </dependency>
 
     <dependency>
-      <groupId>de.adito.nbm.wrappers</groupId>
-      <artifactId>lwswingx</artifactId>
+      <groupId>org.swinglabs</groupId>
+      <artifactId>swingx-core</artifactId>
     </dependency>
 
   </dependencies>

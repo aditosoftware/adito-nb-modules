@@ -128,8 +128,8 @@
     </dependency>
 
     <dependency>
-      <groupId>de.adito.nbm.wrappers</groupId>
-      <artifactId>lwjidecommonlayer</artifactId>
+      <groupId>com.jidesoft</groupId>
+      <artifactId>jide-common-layer</artifactId>
     </dependency>
   </dependencies>
 
