@@ -4,17 +4,23 @@
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <parent>
-    <groupId>de.adito</groupId>
-    <artifactId>adito-parent</artifactId>
-    <version>1.1.1</version>
-  </parent>
-
   <artifactId>nb-modules</artifactId>
   <version>1.0.3</version>
-
   <packaging>pom</packaging>
   <name>Custom Netbeans Modules</name>
+
+  <!-- ADITO -->
+  <organization>
+    <name>ADITO Software GmbH</name>
+    <url>http://www.adito.de</url>
+  </organization>
+
+  <!-- basic license info -->
+  <licenses>
+    <license>
+      <name>ADITO Software GmbH</name>
+    </license>
+  </licenses>
 
   <properties>
     <!-- Netbeans-Versionen -->
@@ -22,6 +28,20 @@
     <!-- gibt das Encoding das wir im SourceCode verwenden vor -->
     <project.build.sourceEncoding>Cp1252</project.build.sourceEncoding>
   </properties>
+
+  <distributionManagement>
+    <repository>
+      <id>adito.m2</id>
+      <name>releases</name>
+      <url>${repository.releases}</url>
+    </repository>
+    <snapshotRepository>
+      <id>adito.m2</id>
+      <name>snapshots</name>
+      <url>${repository.snapshots}</url>
+      <uniqueVersion>false</uniqueVersion>
+    </snapshotRepository>
+  </distributionManagement>
 
   <modules>
     <module>nb-adito-interface</module>
