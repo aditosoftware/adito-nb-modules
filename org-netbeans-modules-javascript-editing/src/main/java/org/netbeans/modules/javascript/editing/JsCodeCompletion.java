@@ -631,33 +631,14 @@ public class JsCodeCompletion implements CodeCompletionHandler {
       {
         IJsDataSupply jsDataSupply = NbAditoInterface.lookup(IJsDataSupply.class);
 
-        // complete $comp, $sys, $local, $field
-        for (String compVar : jsDataSupply.getCompVars(request.fileObject))
-        {
-          if (startsWith(compVar, prefix))
-            proposals.add(new GenericItem(compVar, "", request, ElementKind.CONSTANT));
+        // complete $comp, $sys, $local, $field, ...
+        if(jsDataSupply != null) {
+          String finalPrefix = prefix;
+          jsDataSupply.getVariables(request.fileObject)
+              .filter(pVar -> startsWith(pVar, finalPrefix))
+              .sorted()
+              .forEachOrdered(pVar -> proposals.add(new GenericItem(pVar, "", request, ElementKind.CONSTANT)));
         }
-        for (String sysVar : jsDataSupply.getSysVars())
-        {
-          if (startsWith(sysVar, prefix))
-            proposals.add(new GenericItem(sysVar, "", request, ElementKind.CONSTANT));
-        }
-        for (String localVar : jsDataSupply.getLocalVars())
-        {
-          if (startsWith(localVar, prefix))
-            proposals.add(new GenericItem(localVar, "", request, ElementKind.CONSTANT));
-        }
-        for (String entityFieldVar : jsDataSupply.getEntityFieldVars(request.fileObject))
-        {
-          if (startsWith(entityFieldVar, prefix))
-            proposals.add(new GenericItem(entityFieldVar, "", request, ElementKind.CONSTANT));
-        }
-        for (String paramVar : jsDataSupply.parameterVars(request.fileObject))
-        {
-          if (startsWith(paramVar, prefix))
-            proposals.add(new GenericItem(paramVar, "", request, ElementKind.CONSTANT));
-        }
-
       }
     }
 
