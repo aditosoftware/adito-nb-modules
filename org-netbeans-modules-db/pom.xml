@@ -161,29 +161,27 @@
       </plugin>
 
       <plugin>
-        <groupId>com.github.goldin</groupId>
-        <artifactId>copy-maven-plugin</artifactId>
+        <artifactId>maven-resources-plugin</artifactId>
+        <version>3.1.0</version>
         <executions>
           <execution>
-            <id>create-archive</id>
+            <id>copy-resources</id>
             <phase>generate-resources</phase>
             <goals>
-              <goal>copy</goal>
+              <goal>copy-resources</goal>
             </goals>
             <configuration>
+              <outputDirectory>target/nbm/netbeans/ide/modules/patches</outputDirectory>
               <resources>
-                <!-- Copy -->
                 <resource>
-                  <directory>${project.build.sourceDirectory}/../patches</directory>
-                  <targetPath>${project.build.outputDirectory}/../nbm/netbeans/ide/modules/patches</targetPath>
-                  <preservePath>true</preservePath>
+                  <directory>src/main/patches</directory>
+                  <filtering>true</filtering>
                 </resource>
               </resources>
             </configuration>
           </execution>
         </executions>
       </plugin>
-
     </plugins>
   </build>
 
