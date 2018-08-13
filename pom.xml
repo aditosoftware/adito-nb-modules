@@ -4,6 +4,7 @@
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
+  <groupId>de.adito</groupId>
   <artifactId>nb-modules</artifactId>
   <version>1.0.3</version>
   <packaging>pom</packaging>
@@ -42,6 +43,14 @@
       <uniqueVersion>false</uniqueVersion>
     </snapshotRepository>
   </distributionManagement>
+
+  <repositories>
+    <repository>
+      <id>netbeans</id>
+      <name>NetBeans</name>
+      <url>http://bits.netbeans.org/nexus/content/groups/netbeans/</url>
+    </repository>
+  </repositories>
 
   <modules>
     <module>nb-adito-interface</module>
@@ -188,6 +197,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.5.1</version>
         <configuration>
           <source>1.8</source>
           <target>1.8</target>
@@ -198,8 +208,10 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-jar-plugin</artifactId>
+        <version>2.6</version>
         <configuration>
           <archive>
+            <manifestFile>${project.build.outputDirectory}/META-INF/MANIFEST.MF</manifestFile>
             <manifest>
               <useUniqueVersions>true</useUniqueVersions>
               <addClasspath>false</addClasspath>
