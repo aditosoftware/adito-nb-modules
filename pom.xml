@@ -147,12 +147,6 @@
         <version>1.6.2-2</version>
         <scope>provided</scope>
       </dependency>
-      <dependency>
-        <groupId>com.jidesoft</groupId>
-        <artifactId>jide-common-layer</artifactId>
-        <version>3.2.4</version>
-        <scope>provided</scope>
-      </dependency>
     </dependencies>
   </dependencyManagement>
 

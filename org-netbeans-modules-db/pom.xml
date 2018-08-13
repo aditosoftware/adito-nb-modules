@@ -126,11 +126,6 @@
       <groupId>de.adito.nb-modules</groupId>
       <artifactId>nb-adito-interface</artifactId>
     </dependency>
-
-    <dependency>
-      <groupId>com.jidesoft</groupId>
-      <artifactId>jide-common-layer</artifactId>
-    </dependency>
   </dependencies>
 
 
