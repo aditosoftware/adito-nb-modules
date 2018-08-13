@@ -6,13 +6,13 @@
   <parent>
     <groupId>de.adito</groupId>
     <artifactId>nb-modules</artifactId>
-    <version>1.0.3</version>
+    <version>1.0.4</version>
   </parent>
 
   <groupId>org.netbeans.modules</groupId>
   <artifactId>org-netbeans-core-windows</artifactId>
   <packaging>nbm</packaging>
-  <version>RELEASE82-1.0.4</version> <!-- HINT: Change Version in Root-Pom -> DependencyManagement! -->
+  <version>RELEASE82-1.0.5</version> <!-- HINT: Change Version in Root-Pom -> DependencyManagement! -->
   <name>Netbeans IDE module: org-netbeans-modules-core-windows</name>
 
   <properties>
