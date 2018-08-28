@@ -6,7 +6,7 @@
 
   <groupId>de.adito</groupId>
   <artifactId>nb-modules</artifactId>
-  <version>1.0.4</version>
+  <version>1.0.5</version>
   <packaging>pom</packaging>
   <name>Custom Netbeans Modules</name>
 
@@ -93,52 +93,52 @@
       <dependency>
         <groupId>org.netbeans.modules</groupId>
         <artifactId>org-netbeans-core-output2</artifactId>
-        <version>[RELEASE82-1.0.4]</version>
+        <version>[RELEASE82-1.0.5]</version>
       </dependency>
       <dependency>
         <groupId>org.netbeans.modules</groupId>
         <artifactId>org-netbeans-core-windows</artifactId>
-        <version>[RELEASE82-1.0.5]</version>
+        <version>[RELEASE82-1.0.6]</version>
       </dependency>
       <dependency>
         <groupId>org.netbeans.api</groupId>
         <artifactId>org-netbeans-modules-db</artifactId>
-        <version>[RELEASE82-1.0.5]</version>
+        <version>[RELEASE82-1.0.6]</version>
       </dependency>
       <dependency>
         <groupId>org.netbeans.modules</groupId>
         <artifactId>org-netbeans-modules-db-dataview</artifactId>
-        <version>[RELEASE82-1.0.5]</version>
+        <version>[RELEASE82-1.0.6]</version>
       </dependency>
       <dependency>
         <groupId>org.netbeans.modules</groupId>
         <artifactId>org-netbeans-modules-form</artifactId>
-        <version>[RELEASE82-1.0.4]</version>
+        <version>[RELEASE82-1.0.5]</version>
       </dependency>
       <dependency>
         <groupId>org.netbeans.modules</groupId>
         <artifactId>org-netbeans-modules-javascript-editing</artifactId>
-        <version>[RELEASE721-1.0.4]</version>
+        <version>[RELEASE721-1.0.5]</version>
       </dependency>
       <dependency>
         <groupId>org.netbeans.modules</groupId>
         <artifactId>org-netbeans-modules-javascript-hints</artifactId>
-        <version>[RELEASE721-1.0.4]</version>
+        <version>[RELEASE721-1.0.5]</version>
       </dependency>
       <dependency>
         <groupId>org.netbeans.modules</groupId>
         <artifactId>org-netbeans-modules-javascript-refactoring</artifactId>
-        <version>[RELEASE721-1.0.4]</version>
+        <version>[RELEASE721-1.0.5]</version>
       </dependency>
       <dependency>
         <groupId>org.netbeans.modules</groupId>
         <artifactId>org-netbeans-modules-tasklist-projectint</artifactId>
-        <version>[RELEASE82-1.0.4]</version>
+        <version>[RELEASE82-1.0.5]</version>
       </dependency>
       <dependency>
         <groupId>org.netbeans.modules</groupId>
         <artifactId>org-netbeans-modules-tasklist-ui</artifactId>
-        <version>[RELEASE82-1.0.4]</version>
+        <version>[RELEASE82-1.0.5]</version>
       </dependency>
 
       <dependency>

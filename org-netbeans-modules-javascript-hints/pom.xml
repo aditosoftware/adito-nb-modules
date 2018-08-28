@@ -6,13 +6,13 @@
   <parent>
     <groupId>de.adito</groupId>
     <artifactId>nb-modules</artifactId>
-    <version>1.0.4</version>
+    <version>1.0.5</version>
   </parent>
 
   <groupId>org.netbeans.modules</groupId>
   <artifactId>org-netbeans-modules-javascript-hints</artifactId>
   <packaging>nbm</packaging>
-  <version>RELEASE721-1.0.4</version>
+  <version>RELEASE721-1.0.5</version>
   <name>Netbeans IDE module: org-netbeans-modules-javascript-hints</name>
 
   <properties>
