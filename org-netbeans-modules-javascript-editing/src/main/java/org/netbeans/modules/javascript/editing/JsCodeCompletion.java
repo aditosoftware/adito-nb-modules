@@ -1035,7 +1035,12 @@ public class JsCodeCompletion implements CodeCompletionHandler {
                         if (lexOffset > 0) {
                             if (token.text().toString().startsWith("$")
                                 || (_isAditoImportCompletion(ts) && id != JsTokenId.STRING_BEGIN))
-                              return token.text().toString();
+                                // If the caret is somewhere in the middle of the string only return the part in front of the caret
+                                if(ts.offset() + token.text().toString().length() > lexOffset){
+                                    return token.text().toString().substring(0, lexOffset - ts.offset());
+                                } else {
+                                    return token.text().toString();
+                                }
                             char prevChar = doc.getText(lexOffset - 1, 1).charAt(0);
                             if (prevChar == '\\') {
                                 return "\\";
