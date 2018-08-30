@@ -108,7 +108,7 @@
       <dependency>
         <groupId>org.netbeans.modules</groupId>
         <artifactId>org-netbeans-modules-db-dataview</artifactId>
-        <version>[RELEASE82-1.0.6]</version>
+        <version>[RELEASE82-1.0.7]</version>
       </dependency>
       <dependency>
         <groupId>org.netbeans.modules</groupId>
