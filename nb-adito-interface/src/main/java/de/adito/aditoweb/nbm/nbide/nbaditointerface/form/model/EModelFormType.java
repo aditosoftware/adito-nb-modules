@@ -10,6 +10,7 @@ public enum EModelFormType
 
   FRAME("swing"),
   NEON("neon"),
+  DASHBOARD("dashboard"),
   UNDEFINED("!!UNDEFINED!!"),//Als Marker für die Stellen, wo kein Fileobjekt zur Verfügung steht.
   REPORT,
   APPLICATION,
