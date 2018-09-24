@@ -17,6 +17,7 @@ public interface IAditoLayoutProvider
 
   IAditoLayout getRegisterLayout();
 
+  
   IAditoLayout getDashboardLayout();
 
 }
