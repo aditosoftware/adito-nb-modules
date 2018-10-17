@@ -44,21 +44,16 @@
 
 package org.netbeans.modules.form.layoutsupport;
 
+import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.model.EModelFormType;
+import org.netbeans.modules.form.*;
+import org.netbeans.modules.form.palette.*;
+import org.openide.filesystems.*;
+import org.openide.loaders.*;
+
 import java.awt.*;
-import java.util.*;
 import java.lang.ref.*;
 import java.lang.reflect.Modifier;
-
-import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.model.EModelFormType;
-import org.netbeans.modules.form.CreationFactory;
-
-import org.openide.loaders.*;
-import org.openide.filesystems.*;
-
-import org.netbeans.modules.form.FormModel;
-import org.netbeans.modules.form.FormUtils;
-import org.netbeans.modules.form.palette.PaletteItem;
-import org.netbeans.modules.form.palette.PaletteUtils;
+import java.util.*;
 
 /**
  * Registry and factory class for LayoutSupportDelegate implementations.
@@ -361,6 +356,9 @@ public class LayoutSupportRegistry {
             containerToLayoutDelegate.put(
                 "de.adito.aditoweb.nbm.nbaditointerfaceimpl.form.components.frameneon.ANeonCardsLayer", // NOI18N
                 "org.netbeans.modules.form.adito.layout.neon.AditoNeonLayoutSupport"); // NOI18N
+            containerToLayoutDelegate.put(
+                "de.adito.aditoweb.nbm.nbaditointerfaceimpl.form.components.dashboard.ANeonDashboard",
+                "org.netbeans.modules.form.adito.layout.neon.AditoDashboardLayoutSupport");
         }
         return containerToLayoutDelegate;
     }
@@ -403,6 +401,9 @@ public class LayoutSupportRegistry {
             layoutToLayoutDelegate.put(
                 "de.adito.aditoweb.nbm.nbaditointerfaceimpl.form.layout.neon.NeonFormTableLayout", // NOI18N
                 "org.netbeans.modules.form.adito.layout.neon.AditoNeonLayoutSupport"); // NOI18N
+            layoutToLayoutDelegate.put(
+                "de.adito.aditoweb.nbm.nbaditointerfaceimpl.form.layout.neon.dashboard.NeonDashboardLayout",
+                "org.netbeans.modules.form.adito.layout.neon.AditoDashboardLayoutSupport");
         }
         return layoutToLayoutDelegate;
     }
