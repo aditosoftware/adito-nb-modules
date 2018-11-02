@@ -16,35 +16,21 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.netbeans.modules.db.dataview.table;
+package org.netbeans.modules.db.dataview.util;
 
-import javax.swing.RowFilter;
-import javax.swing.table.TableModel;
+import java.text.Format;
 
-/**
- *
- * @author ahimanikya
- */
-public class MultiColPatternFilter extends SuperPatternFilter {
-
-    private final int[] cols;
-
-    public MultiColPatternFilter(final int... cols) {
-        super(0);
-        final int numCols = cols.length;
-        this.cols = new int[numCols];
-        System.arraycopy(cols, 0, this.cols, 0, numCols);
+public class FormatStringValue implements StringValue {
+    private final Format format;
+    
+    public FormatStringValue (Format format) {
+        if(format == null) {
+            throw new IllegalArgumentException("FormatStringValue constructed with NULL value for format.");
+        }
+        this.format = format;
     }
-
-    @Override
-    public boolean include(Entry<? extends TableModel,? extends Integer> entry)  {
-        for (int colIdx : cols) {
-            Object val = entry.getValue(colIdx);
-            if (testValue(val)) {
-                    return true;
-                }
-            }
-        return false;
+    
+    public String getString(Object o) {
+        return this.format.format(o);
     }
 }
-

@@ -12,7 +12,7 @@
   <groupId>org.netbeans.modules</groupId>
   <artifactId>org-netbeans-modules-db-dataview</artifactId>
   <packaging>nbm</packaging>
-  <version>RELEASE82-1.0.9</version> <!-- HINT: Change Version in Root-Pom -> DependencyManagement! -->
+  <version>RELEASE90a-1.0.9</version> <!-- HINT: Change Version in Root-Pom -> DependencyManagement! -->
   <name>Netbeans IDE module: org-netbeans-modules-db-dataview</name>
 
   <properties>
@@ -30,14 +30,10 @@
       <artifactId>org-netbeans-api-progress-nb</artifactId>
       <version>${netbeans.version}</version>
     </dependency>
-    <!--<dependency>
-    <groupId>org.netbeans.modules</groupId>
-    <artifactId>org-netbeans-libs-swingx</artifactId>
-    <version>${netbeans.version}</version>
-    </dependency>-->
     <dependency>
       <groupId>org.netbeans.api</groupId>
       <artifactId>org-netbeans-modules-db</artifactId>
+      <version>${netbeans.version}</version>
     </dependency>
     <dependency>
       <groupId>org.netbeans.api</groupId>
@@ -71,17 +67,17 @@
     </dependency>
     <dependency>
       <groupId>org.netbeans.api</groupId>
+      <artifactId>org-openide-util-ui</artifactId>
+      <version>${netbeans.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.netbeans.api</groupId>
       <artifactId>org-openide-util</artifactId>
       <version>${netbeans.version}</version>
     </dependency>
     <dependency>
       <groupId>org.netbeans.api</groupId>
       <artifactId>org-openide-util-lookup</artifactId>
-      <version>${netbeans.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.netbeans.api</groupId>
-      <artifactId>org-openide-util-ui</artifactId>
       <version>${netbeans.version}</version>
     </dependency>
     <dependency>
@@ -93,11 +89,6 @@
     <dependency>
       <groupId>de.adito.nb-modules</groupId>
       <artifactId>nb-adito-interface</artifactId>
-    </dependency>
-
-    <dependency>
-      <groupId>org.swinglabs</groupId>
-      <artifactId>swingx-core</artifactId>
     </dependency>
 
   </dependencies>

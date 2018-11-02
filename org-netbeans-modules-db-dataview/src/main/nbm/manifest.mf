@@ -1,29 +1,9 @@
 Manifest-Version: 1.0
+OpenIDE-Module: org.netbeans.modules.db.dataview
+OpenIDE-Module-Localizing-Bundle: org/netbeans/modules/db/dataview/Bundle.properties
+OpenIDE-Module-Specification-Version: 1.35.1
+AutoUpdate-Show-In-Client: false
+OpenIDE-Module-Recommends: de.adito.aditoweb.nbm.nbide.nbaditointerface.database.specifier.ITableColumnSpecifierFactory
 OpenIDE-Module-Friends: org.netbeans.modules.etl.editor, org.netbeans.
  modules.db.core, org.netbeans.modules.dm.virtual.db, org.netbeans.mod
  ules.edm.editor
-OpenIDE-Module-Java-Dependencies: Java > 1.7
-OpenIDE-Module-Implementation-Version: 201609300101
-AutoUpdate-Show-In-Client: false
-OpenIDE-Module: org.netbeans.modules.db.dataview
-OpenIDE-Module-Localizing-Bundle: org/netbeans/modules/db/dataview/Bun
- dle.properties
-OpenIDE-Module-Specification-Version: 1.33.1
-OpenIDE-Module-Requires: org.openide.modules.ModuleFormat1
-OpenIDE-Module-Needs: de.adito.aditoweb.nbm.nbide.nbaditointerface.dat
- abase.specifier.ITableColumnSpecifierFactory
-OpenIDE-Module-Module-Dependencies: org.netbeans.api.progress/1 > 1.47.1,
- org.netbeans.api.progress.nb > 1.47.1,
- org.netbeans.modules.db/1 > 1.66.1.30,
- org.openide.awt > 7.67.1,
- org.openide.dialogs > 7.42.1,
- org.openide.filesystems > 9.10.1,
- org.openide.loaders > 7.66.1,
- org.openide.nodes > 7.45.1,
- org.openide.text > 6.67.1,
- org.openide.util > 9.7.1,
- org.openide.util.lookup > 8.33.1,
- org.openide.util.ui > 9.6.1,
- org.openide.windows > 6.75.1,
- de.adito.aditoweb.modules.nbide.nbaditointerface > 1.0.5,
- de.adito.nbm.wrappers.lwswingx > 1.0.0

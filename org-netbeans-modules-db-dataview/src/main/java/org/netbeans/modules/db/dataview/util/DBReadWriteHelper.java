@@ -1,45 +1,20 @@
 /*
- * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
- * Copyright 1997-2012 Oracle and/or its affiliates. All rights reserved.
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * Oracle and Java are registered trademarks of Oracle and/or its affiliates.
- * Other names may be trademarks of their respective owners.
- *
- * The contents of this file are subject to the terms of either the GNU
- * General Public License Version 2 only ("GPL") or the Common
- * Development and Distribution License("CDDL") (collectively, the
- * "License"). You may not use this file except in compliance with the
- * License. You can obtain a copy of the License at
- * http://www.netbeans.org/cddl-gplv2.html
- * or nbbuild/licenses/CDDL-GPL-2-CP. See the License for the
- * specific language governing permissions and limitations under the
- * License.  When distributing the software, include this License Header
- * Notice in each file and include the License file at
- * nbbuild/licenses/CDDL-GPL-2-CP.  Oracle designates this
- * particular file as subject to the "Classpath" exception as provided
- * by Oracle in the GPL Version 2 section of the License file that
- * accompanied this code. If applicable, add the following below the
- * License Header, with the fields enclosed by brackets [] replaced by
- * your own identifying information:
- * "Portions Copyrighted [year] [name of copyright owner]"
- *
- * Contributor(s):
- *
- * The Original Software is NetBeans. The Initial Developer of the Original
- * Software is Sun Microsystems, Inc. Portions Copyright 1997-2009 Sun
- * Microsystems, Inc. All Rights Reserved.
- *
- * If you wish your version of this file to be governed by only the CDDL
- * or only the GPL Version 2, indicate your decision by adding
- * "[Contributor] elects to include this software in this distribution
- * under the [CDDL or GPL Version 2] license." If you do not indicate a
- * single choice of license, a recipient has the option to distribute
- * your version of this file under either the CDDL, the GPL Version 2 or
- * to extend the choice of license to its licensees as provided above.
- * However, if you add GPL Version 2 code and therefore, elected the GPL
- * Version 2 license, then the option applies only if the new code is
- * made subject to such option by the copyright holder.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 package org.netbeans.modules.db.dataview.util;
 
@@ -59,6 +34,8 @@ import org.openide.util.NbBundle;
  * @author Ahimanikya Satapathy
  */
 public class DBReadWriteHelper {
+    public static final int SQL_TYPE_ORACLE_TIMESTAMP = -100; // Oracle Timestamp
+    public static final int SQL_TYPE_ORACLE_TIMESTAMP_WITH_TZ = -101; // Oracle Timestamp with Timezone
     private static final BigInteger maxUnsignedLong = new BigInteger("18446744073709551615");
     private static final BigInteger maxLong = BigInteger.valueOf(Long.MAX_VALUE);
     private static final BigInteger minLong = BigInteger.valueOf(Long.MIN_VALUE);
@@ -101,7 +78,8 @@ public class DBReadWriteHelper {
                 }
             }
             case Types.TIMESTAMP:
-            case -100: // -100 = Oracle timestamp
+            case SQL_TYPE_ORACLE_TIMESTAMP:
+            case SQL_TYPE_ORACLE_TIMESTAMP_WITH_TZ:
             {
                 try {
                     Timestamp tsdata = rs.getTimestamp(index);
@@ -125,9 +103,9 @@ public class DBReadWriteHelper {
                     if (rs.wasNull()) {
                         return null;
                     } else {
-                        return new Long(ldata);
+                        return ldata;
                     }
-                } catch (java.sql.SQLDataException ex) {
+                } catch (SQLDataException ex) {
                     // In case of unsigned BIGINT, long is to small to take it
                     // for now getString is asumed to produce greates compatiblity
                     // The returned string is used to create a BigInteger
@@ -144,7 +122,7 @@ public class DBReadWriteHelper {
                 if (rs.wasNull()) {
                     return null;
                 } else {
-                    return new Double(fdata);
+                    return fdata;
                 }
             }
 
@@ -154,7 +132,7 @@ public class DBReadWriteHelper {
                 if (rs.wasNull()) {
                     return null;
                 } else {
-                    return new Float(rdata);
+                    return rdata;
                 }
             }
             case Types.DECIMAL:
@@ -174,28 +152,25 @@ public class DBReadWriteHelper {
                     if (rs.wasNull()) {
                         return null;
                     } else {
-                        return new Integer(idata);
+                        return idata;
                     }
-                } catch (java.sql.SQLDataException ex) {
+                } catch (SQLDataException ex) {
                     // in case of an unsigned integer, the java Integer is
                     // to small to hold it => switch to long in that case
                     long ldata = rs.getLong(index);
                     if (rs.wasNull()) {
                         return null;
                     } else {
-                        return new Long(ldata);
+                        return ldata;
                     }
                 }
             }
-            // JDBC/ODBC bridge JDK1.4 brings back -9 for nvarchar columns in
-            // MS SQL Server tables.
-            // -8 is ROWID in Oracle.
-            // JDBC introduced NCHAR(-15), and NVARCHAR (-9), NLONGVARCHAR (-16)
+
             case Types.CHAR:
             case Types.VARCHAR:
-            case -15:
-            case -9:
-            case -8: {
+            case Types.NCHAR:
+            case Types.NVARCHAR:
+            case Types.ROWID: {
                 String sdata = rs.getString(index);
                 if (rs.wasNull()) {
                     return null;
@@ -208,11 +183,7 @@ public class DBReadWriteHelper {
                 if (rs.wasNull() || bdata == null) {
                     return null;
                 } else {
-                    byte[] internal = new byte[bdata.length];
-                    for (int i = 0; i < bdata.length; i++) {
-                        internal[i] = new Byte(bdata[i]);
-                    }
-                    String bStr = BinaryToStringConverter.convertToString(internal, BinaryToStringConverter.BINARY, true);
+                    String bStr = BinaryToStringConverter.convertToString(bdata, BinaryToStringConverter.BINARY, true);
                     if (colType == Types.BIT && col.getPrecision() != 0 && col.getPrecision() < bStr.length()) {
                         return bStr.substring(bStr.length() - col.getPrecision());
                     }
@@ -237,9 +208,9 @@ public class DBReadWriteHelper {
                 }
             }
             case Types.LONGVARCHAR:
-            case -16:
+            case Types.LONGNVARCHAR:
             case Types.CLOB:
-            case 2011: /*NCLOB */ {
+            case Types.NCLOB: {
                 // Try to get a clob object
                 try {
                     Clob clob = rs.getClob(index);
@@ -256,7 +227,7 @@ public class DBReadWriteHelper {
                     
                     try {
                         clob.free();
-                    } catch (java.lang.AbstractMethodError err) {
+                    } catch (AbstractMethodError err) {
                         // Blob gained a new method in jdbc4 (drivers compiled
                         // against older jdks don't provide this methid
                     } catch (SQLException ex) {
@@ -268,8 +239,7 @@ public class DBReadWriteHelper {
                     // Ok - can happen - the jdbc driver might not support
                     // clob data or can for example not provide a longvarchar
                     // as clob - so fall back to our implementation of clob
-                } catch (SQLException ex) {
-                } catch (java.lang.UnsupportedOperationException ex) {
+                } catch (SQLException | UnsupportedOperationException ex) {
                 }
                 String sdata = rs.getString(index);
                 if (rs.wasNull()) {
@@ -299,12 +269,24 @@ public class DBReadWriteHelper {
             }
 
             switch (jdbcType) {
-
-                case Types.DOUBLE:
-                    numberObj = (valueObj instanceof Number) ? (Number) valueObj : Double.valueOf(valueObj.toString());
-                    ps.setDouble(index, numberObj.doubleValue());
+                case Types.BOOLEAN:
+                    ps.setBoolean(index, (Boolean) valueObj);
                     break;
-
+                    
+                case Types.TIME:
+                    ps.setTime(index, TimeType.convert (valueObj));
+                    break;
+                    
+                case Types.DATE:
+                    ps.setDate(index, DateType.convert(valueObj));
+                    break;
+                    
+                case Types.TIMESTAMP:
+                case SQL_TYPE_ORACLE_TIMESTAMP:
+                case SQL_TYPE_ORACLE_TIMESTAMP_WITH_TZ:
+                    ps.setTimestamp(index, TimestampType.convert (valueObj));
+                    break;
+                    
                 case Types.BIGINT:
                     if(valueObj instanceof BigInteger) {
                         BigInteger biValue = (BigInteger) valueObj;
@@ -325,19 +307,24 @@ public class DBReadWriteHelper {
                         }
                     }
                     break;
-
-                case Types.NUMERIC:
-                case Types.DECIMAL:
-                    BigDecimal bigDec = (valueObj instanceof BigDecimal)
-                            ? (BigDecimal) valueObj
-                            : new BigDecimal(valueObj.toString());
-                    ps.setBigDecimal(index, bigDec);
+                    
+                case Types.DOUBLE:
+                    numberObj = (valueObj instanceof Number) ? (Number) valueObj : Double.valueOf(valueObj.toString());
+                    ps.setDouble(index, numberObj.doubleValue());
                     break;
 
                 case Types.FLOAT:
                 case Types.REAL:
                     numberObj = (valueObj instanceof Number) ? (Number) valueObj : Float.valueOf(valueObj.toString());
                     ps.setFloat(index, numberObj.floatValue());
+                    break;
+                    
+                case Types.NUMERIC:
+                case Types.DECIMAL:
+                    BigDecimal bigDec = (valueObj instanceof BigDecimal)
+                            ? (BigDecimal) valueObj
+                            : new BigDecimal(valueObj.toString());
+                    ps.setBigDecimal(index, bigDec);
                     break;
 
                 case Types.INTEGER:
@@ -367,18 +354,14 @@ public class DBReadWriteHelper {
                     }
                     break;
 
-                case Types.TIMESTAMP:
-                    ps.setTimestamp(index, TimestampType.convert (valueObj));
+                case Types.CHAR:
+                case Types.VARCHAR:
+                case Types.NCHAR:
+                case Types.NVARCHAR:
+                case Types.ROWID:
+                    ps.setString(index, valueObj.toString());
                     break;
-
-                case Types.DATE:
-                    ps.setDate(index, DateType.convert(valueObj));
-                    break;
-
-                case Types.TIME:
-                    ps.setTime(index, TimeType.convert (valueObj));
-                    break;
-
+                    
                 case Types.BIT:
                     ps.setBytes(index, BinaryToStringConverter.convertBitStringToBytes(valueObj.toString()));
                     break;
@@ -390,25 +373,17 @@ public class DBReadWriteHelper {
                     ps.setBinaryStream(index, ((Blob) valueObj).getBinaryStream(), (int) ((Blob) valueObj).length());
                     break;
 
-                case Types.CHAR:
-                case Types.VARCHAR:
-                case -15:
-                case -9:
-                case -8:
-                    ps.setString(index, valueObj.toString());
-                    break;
-
                 case Types.LONGVARCHAR:
-                case -16:
+                case Types.LONGNVARCHAR:
                 case Types.CLOB:
-                case 2011: /*NCLOB */
+                case Types.NCLOB: /*NCLOB */
                     ps.setCharacterStream(index, ((Clob) valueObj).getCharacterStream(), (int) ((Clob) valueObj).length());
                     break;
 
                 default:
                     ps.setObject(index, valueObj, jdbcType);
             }
-        } catch (Exception e) {
+        } catch (RuntimeException | SQLException | DBException e) {
             mLogger.log(Level.SEVERE, "Invalid Data for" + jdbcType + "type -- ", e); // NOI18N
             throw new DBException(NbBundle.getMessage(DBReadWriteHelper.class, "DBReadWriteHelper_Validate_InvalidType", jdbcType, e)); // NOI18N
         }
@@ -442,15 +417,17 @@ public class DBReadWriteHelper {
                     }
                 }
 
-                case Types.TIMESTAMP:
-                    return TimestampType.convert(valueObj);
-
+                case Types.TIME:
+                    return TimeType.convert(valueObj);
+                
                 case Types.DATE:
                     return DateType.convert(valueObj);
 
-                case Types.TIME:
-                    return TimeType.convert(valueObj);
-
+                case Types.TIMESTAMP:
+                case SQL_TYPE_ORACLE_TIMESTAMP:
+                case SQL_TYPE_ORACLE_TIMESTAMP_WITH_TZ:
+                    return TimestampType.convert(valueObj);
+                    
                 case Types.BIGINT:
                     if(valueObj instanceof Long) {
                         return valueObj;
@@ -488,9 +465,9 @@ public class DBReadWriteHelper {
                 case Types.SMALLINT: {
                     int idata = Integer.parseInt(valueObj.toString());
                         if(idata >= ((int) Short.MIN_VALUE) && idata <= ((int) Short.MAX_VALUE)) {
-                        return new Short((short) idata);
+                        return (short) idata;
                         } else if ( idata < maxUnsignedShort ) {
-                        return new Integer(idata);
+                        return idata;
                     } else {
                         throw new NumberFormatException("Illegal value for java.sql.Type.SMALLINT");
                     }
@@ -499,9 +476,9 @@ public class DBReadWriteHelper {
                 case Types.TINYINT: {
                     short sdata = Short.parseShort(valueObj.toString());
                         if(sdata >= ((short) Byte.MIN_VALUE) && sdata <= ((short) Byte.MAX_VALUE)) {
-                        return new Byte((byte) sdata);
+                        return (byte) sdata;
                         } else if ( sdata < maxUnsignedByte ) {
-                        return new Short(sdata);
+                        return sdata;
                     } else {
                         throw new NumberFormatException("Illegal value for java.sql.Type.TINYINT");
                     }
@@ -510,9 +487,9 @@ public class DBReadWriteHelper {
                 case Types.CHAR:
                 case Types.VARCHAR:
                 case Types.LONGVARCHAR:
-                case -9:  //NVARCHAR
-                case -8:  //ROWID
-                case -15: //NCHAR
+                case Types.NVARCHAR:  //NVARCHAR
+                case Types.ROWID:  //ROWID
+                case Types.NCHAR: //NCHAR
                     if (col.getPrecision() > 0 && valueObj.toString().length() > col.getPrecision()) {
                         String colName = col.getQualifiedName(false);
                         throw new DBException(NbBundle.getMessage(DBReadWriteHelper.class, "DBReadWriteHelper_Validate_TooLarge", valueObj, colName)); // NOI18N
@@ -535,12 +512,14 @@ public class DBReadWriteHelper {
                 case Types.VARBINARY:
                 case Types.LONGVARBINARY:
                 case Types.BLOB:
+                case Types.LONGNVARCHAR:
                 case Types.CLOB:
                 case Types.OTHER:
+                case Types.NCLOB:
                 default:
                     return valueObj;
             }
-        } catch (Exception e) {
+        } catch (RuntimeException | DBException e) {
             String type = col.getTypeName();
             String colName = col.getQualifiedName(false);
             int precision = col.getPrecision();

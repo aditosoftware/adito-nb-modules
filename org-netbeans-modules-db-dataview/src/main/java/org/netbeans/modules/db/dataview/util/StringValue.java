@@ -16,35 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.netbeans.modules.db.dataview.table;
+package org.netbeans.modules.db.dataview.util;
 
-import javax.swing.RowFilter;
-import javax.swing.table.TableModel;
-
-/**
- *
- * @author ahimanikya
- */
-public class MultiColPatternFilter extends SuperPatternFilter {
-
-    private final int[] cols;
-
-    public MultiColPatternFilter(final int... cols) {
-        super(0);
-        final int numCols = cols.length;
-        this.cols = new int[numCols];
-        System.arraycopy(cols, 0, this.cols, 0, numCols);
-    }
-
-    @Override
-    public boolean include(Entry<? extends TableModel,? extends Integer> entry)  {
-        for (int colIdx : cols) {
-            Object val = entry.getValue(colIdx);
-            if (testValue(val)) {
-                    return true;
-                }
-            }
-        return false;
-    }
+public interface StringValue {
+    public String getString(Object o);
 }
-

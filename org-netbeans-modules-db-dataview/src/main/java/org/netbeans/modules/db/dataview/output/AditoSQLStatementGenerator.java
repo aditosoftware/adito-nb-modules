@@ -3,8 +3,8 @@ package org.netbeans.modules.db.dataview.output;
 import org.netbeans.modules.db.dataview.meta.*;
 
 /**
- * Wrapper-Klasse für den SQLStatementGenerator von Netbeans.
- * Diese Klasse soll möglichst wenig verändert werden, die sie aus der Bibliothek übernommen wurde.
+ * Wrapper-Klasse fÃ¼r den SQLStatementGenerator von Netbeans.
+ * Diese Klasse soll mÃ¶glichst wenig verÃ¤ndert werden, die sie aus der Bibliothek Ã¼bernommen wurde.
  *
  * @author a.mayr, 01.03.2018.
  */
@@ -23,18 +23,18 @@ public class AditoSQLStatementGenerator extends SQLStatementGenerator
   }
 
   /**
-   * Sonderbehandlung für MySQL Datenbanken.
-   * Für den Fall dass eine MySQL Datenbank mit dem MariaDB Treiber verwendet wird,
-   * muss die Länge von VARCHAR Spalten beschränkt werden.
+   * Sonderbehandlung fÃ¼r MySQL Datenbanken.
+   * FÃ¼r den Fall dass eine MySQL Datenbank mit dem MariaDB Treiber verwendet wird,
+   * muss die LÃ¤nge von VARCHAR Spalten beschrÃ¤nkt werden.
    */
   protected int adjustPrecisionForMySql(DBTable pTable, DBColumn pColumn, int pPrecision)
   {
     int precision = pPrecision;
 
-    // Bei MariaDB ist precision die Anzahl der benötigten Bytes
+    // Bei MariaDB ist precision die Anzahl der benÃ¶tigten Bytes
     if(pTable.getParentObject() != null && pTable.getParentObject().getDBType() == DBMetaDataFactory.MYSQL)
     {
-      // multi-byte charsets brauchen 4 bytes, deswegen beschränken auf 65535 / 4 = 16383
+      // multi-byte charsets brauchen 4 bytes, deswegen beschrÃ¤nken auf 65535 / 4 = 16383
       precision = _getPrecision(pColumn);
     }
     return precision;
