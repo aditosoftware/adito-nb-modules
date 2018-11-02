@@ -1,43 +1,20 @@
 /*
- * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
- * Copyright 2012 Oracle and/or its affiliates. All rights reserved.
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * Oracle and Java are registered trademarks of Oracle and/or its affiliates.
- * Other names may be trademarks of their respective owners.
- *
- * The contents of this file are subject to the terms of either the GNU
- * General Public License Version 2 only ("GPL") or the Common
- * Development and Distribution License("CDDL") (collectively, the
- * "License"). You may not use this file except in compliance with the
- * License. You can obtain a copy of the License at
- * http://www.netbeans.org/cddl-gplv2.html
- * or nbbuild/licenses/CDDL-GPL-2-CP. See the License for the
- * specific language governing permissions and limitations under the
- * License.  When distributing the software, include this License Header
- * Notice in each file and include the License file at
- * nbbuild/licenses/CDDL-GPL-2-CP.  Oracle designates this
- * particular file as subject to the "Classpath" exception as provided
- * by Oracle in the GPL Version 2 section of the License file that
- * accompanied this code. If applicable, add the following below the
- * License Header, with the fields enclosed by brackets [] replaced by
- * your own identifying information:
- * "Portions Copyrighted [year] [name of copyright owner]"
- *
- * If you wish your version of this file to be governed by only the CDDL
- * or only the GPL Version 2, indicate your decision by adding
- * "[Contributor] elects to include this software in this distribution
- * under the [CDDL or GPL Version 2] license." If you do not indicate a
- * single choice of license, a recipient has the option to distribute
- * your version of this file under either the CDDL, the GPL Version 2 or
- * to extend the choice of license to its licensees as provided above.
- * However, if you add GPL Version 2 code and therefore, elected the GPL
- * Version 2 license, then the option applies only if the new code is
- * made subject to such option by the copyright holder.
- *
- * Contributor(s):
- *
- * Portions Copyrighted 2012 Sun Microsystems, Inc.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 package org.netbeans.core.output2.options;
 
@@ -115,7 +92,7 @@ public final class OutputSettingsPanel extends javax.swing.JPanel {
         lblFontSize = new javax.swing.JLabel();
         spnFontSize = new javax.swing.JSpinner();
         btnSelectFont = new javax.swing.JButton();
-        cmbLinkStyle = new javax.swing.JComboBox();
+        cmbLinkStyle = new JComboBox();
         lblLinkStyle = new javax.swing.JLabel();
         fldFontFamily = new javax.swing.JTextField();
         cmbImportantLinkColor = new ColorComboBox();
@@ -134,45 +111,45 @@ public final class OutputSettingsPanel extends javax.swing.JPanel {
         previewPanel = new javax.swing.JPanel();
         btnRestore = new javax.swing.JButton();
 
-        org.openide.awt.Mnemonics.setLocalizedText(lblTitle, org.openide.util.NbBundle.getMessage(OutputSettingsPanel.class, "OutputSettingsPanel.lblTitle.text")); // NOI18N
+        org.openide.awt.Mnemonics.setLocalizedText(lblTitle, NbBundle.getMessage(OutputSettingsPanel.class, "OutputSettingsPanel.lblTitle.text")); // NOI18N
 
         lblFontFamily.setLabelFor(btnSelectFont);
-        org.openide.awt.Mnemonics.setLocalizedText(lblFontFamily, org.openide.util.NbBundle.getMessage(OutputSettingsPanel.class, "OutputSettingsPanel.lblFontFamily.text")); // NOI18N
+        org.openide.awt.Mnemonics.setLocalizedText(lblFontFamily, NbBundle.getMessage(OutputSettingsPanel.class, "OutputSettingsPanel.lblFontFamily.text")); // NOI18N
 
         lblStandardColor.setLabelFor(cmbStandardColor);
-        org.openide.awt.Mnemonics.setLocalizedText(lblStandardColor, org.openide.util.NbBundle.getMessage(OutputSettingsPanel.class, "OutputSettingsPanel.lblStandardColor.text")); // NOI18N
+        org.openide.awt.Mnemonics.setLocalizedText(lblStandardColor, NbBundle.getMessage(OutputSettingsPanel.class, "OutputSettingsPanel.lblStandardColor.text")); // NOI18N
 
         lblErrorColor.setLabelFor(cmbErrorColor);
-        org.openide.awt.Mnemonics.setLocalizedText(lblErrorColor, org.openide.util.NbBundle.getMessage(OutputSettingsPanel.class, "OutputSettingsPanel.lblErrorColor.text")); // NOI18N
+        org.openide.awt.Mnemonics.setLocalizedText(lblErrorColor, NbBundle.getMessage(OutputSettingsPanel.class, "OutputSettingsPanel.lblErrorColor.text")); // NOI18N
 
         lblBackgroundColor.setLabelFor(cmbBackgroundColor);
-        org.openide.awt.Mnemonics.setLocalizedText(lblBackgroundColor, org.openide.util.NbBundle.getMessage(OutputSettingsPanel.class, "OutputSettingsPanel.lblBackgroundColor.text")); // NOI18N
+        org.openide.awt.Mnemonics.setLocalizedText(lblBackgroundColor, NbBundle.getMessage(OutputSettingsPanel.class, "OutputSettingsPanel.lblBackgroundColor.text")); // NOI18N
 
         lblLinkColor.setLabelFor(cmbLinkColor);
-        org.openide.awt.Mnemonics.setLocalizedText(lblLinkColor, org.openide.util.NbBundle.getMessage(OutputSettingsPanel.class, "OutputSettingsPanel.lblLinkColor.text")); // NOI18N
+        org.openide.awt.Mnemonics.setLocalizedText(lblLinkColor, NbBundle.getMessage(OutputSettingsPanel.class, "OutputSettingsPanel.lblLinkColor.text")); // NOI18N
 
-        cmbLinkColor.setToolTipText(org.openide.util.NbBundle.getMessage(OutputSettingsPanel.class, "OutputSettingsPanel.cmbLinkColor.toolTipText")); // NOI18N
+        cmbLinkColor.setToolTipText(NbBundle.getMessage(OutputSettingsPanel.class, "OutputSettingsPanel.cmbLinkColor.toolTipText")); // NOI18N
         cmbLinkColor.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 cmbLinkColorActionPerformed(evt);
             }
         });
 
-        cmbBackgroundColor.setToolTipText(org.openide.util.NbBundle.getMessage(OutputSettingsPanel.class, "OutputSettingsPanel.cmbBackgroundColor.toolTipText")); // NOI18N
+        cmbBackgroundColor.setToolTipText(NbBundle.getMessage(OutputSettingsPanel.class, "OutputSettingsPanel.cmbBackgroundColor.toolTipText")); // NOI18N
         cmbBackgroundColor.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 cmbBackgroundColorActionPerformed(evt);
             }
         });
 
-        cmbErrorColor.setToolTipText(org.openide.util.NbBundle.getMessage(OutputSettingsPanel.class, "OutputSettingsPanel.cmbErrorColor.toolTipText")); // NOI18N
+        cmbErrorColor.setToolTipText(NbBundle.getMessage(OutputSettingsPanel.class, "OutputSettingsPanel.cmbErrorColor.toolTipText")); // NOI18N
         cmbErrorColor.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 cmbErrorColorActionPerformed(evt);
             }
         });
 
-        cmbStandardColor.setToolTipText(org.openide.util.NbBundle.getMessage(OutputSettingsPanel.class, "OutputSettingsPanel.cmbStandardColor.toolTipText")); // NOI18N
+        cmbStandardColor.setToolTipText(NbBundle.getMessage(OutputSettingsPanel.class, "OutputSettingsPanel.cmbStandardColor.toolTipText")); // NOI18N
         cmbStandardColor.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 cmbStandardColorActionPerformed(evt);
@@ -180,17 +157,17 @@ public final class OutputSettingsPanel extends javax.swing.JPanel {
         });
 
         lblFontSize.setLabelFor(spnFontSize);
-        org.openide.awt.Mnemonics.setLocalizedText(lblFontSize, org.openide.util.NbBundle.getMessage(OutputSettingsPanel.class, "OutputSettingsPanel.lblFontSize.text")); // NOI18N
+        org.openide.awt.Mnemonics.setLocalizedText(lblFontSize, NbBundle.getMessage(OutputSettingsPanel.class, "OutputSettingsPanel.lblFontSize.text")); // NOI18N
 
-        spnFontSize.setToolTipText(org.openide.util.NbBundle.getMessage(OutputSettingsPanel.class, "OutputSettingsPanel.spnFontSize.toolTipText")); // NOI18N
+        spnFontSize.setToolTipText(NbBundle.getMessage(OutputSettingsPanel.class, "OutputSettingsPanel.spnFontSize.toolTipText")); // NOI18N
         spnFontSize.addChangeListener(new javax.swing.event.ChangeListener() {
             public void stateChanged(javax.swing.event.ChangeEvent evt) {
                 spnFontSizeStateChanged(evt);
             }
         });
 
-        org.openide.awt.Mnemonics.setLocalizedText(btnSelectFont, org.openide.util.NbBundle.getMessage(OutputSettingsPanel.class, "OutputSettingsPanel.btnSelectFont.text")); // NOI18N
-        btnSelectFont.setToolTipText(org.openide.util.NbBundle.getMessage(OutputSettingsPanel.class, "OutputSettingsPanel.btnSelectFont.toolTipText")); // NOI18N
+        org.openide.awt.Mnemonics.setLocalizedText(btnSelectFont, NbBundle.getMessage(OutputSettingsPanel.class, "OutputSettingsPanel.btnSelectFont.text")); // NOI18N
+        btnSelectFont.setToolTipText(NbBundle.getMessage(OutputSettingsPanel.class, "OutputSettingsPanel.btnSelectFont.toolTipText")); // NOI18N
         btnSelectFont.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnSelectFontActionPerformed(evt);
@@ -199,7 +176,7 @@ public final class OutputSettingsPanel extends javax.swing.JPanel {
 
         cmbLinkStyle.setModel(linkStyleModel);
         cmbLinkStyle.setSelectedIndex(0);
-        cmbLinkStyle.setToolTipText(org.openide.util.NbBundle.getMessage(OutputSettingsPanel.class, "OutputSettingsPanel.cmbLinkStyle.toolTipText")); // NOI18N
+        cmbLinkStyle.setToolTipText(NbBundle.getMessage(OutputSettingsPanel.class, "OutputSettingsPanel.cmbLinkStyle.toolTipText")); // NOI18N
         cmbLinkStyle.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 cmbLinkStyleActionPerformed(evt);
@@ -207,12 +184,12 @@ public final class OutputSettingsPanel extends javax.swing.JPanel {
         });
 
         lblLinkStyle.setLabelFor(cmbLinkStyle);
-        org.openide.awt.Mnemonics.setLocalizedText(lblLinkStyle, org.openide.util.NbBundle.getMessage(OutputSettingsPanel.class, "OutputSettingsPanel.lblLinkStyle.text")); // NOI18N
+        org.openide.awt.Mnemonics.setLocalizedText(lblLinkStyle, NbBundle.getMessage(OutputSettingsPanel.class, "OutputSettingsPanel.lblLinkStyle.text")); // NOI18N
 
         fldFontFamily.setEditable(false);
-        fldFontFamily.setText(org.openide.util.NbBundle.getMessage(OutputSettingsPanel.class, "OutputSettingsPanel.fldFontFamily.text")); // NOI18N
+        fldFontFamily.setText(NbBundle.getMessage(OutputSettingsPanel.class, "OutputSettingsPanel.fldFontFamily.text")); // NOI18N
 
-        cmbImportantLinkColor.setToolTipText(org.openide.util.NbBundle.getMessage(OutputSettingsPanel.class, "OutputSettingsPanel.cmbImportantLinkColor.toolTipText")); // NOI18N
+        cmbImportantLinkColor.setToolTipText(NbBundle.getMessage(OutputSettingsPanel.class, "OutputSettingsPanel.cmbImportantLinkColor.toolTipText")); // NOI18N
         cmbImportantLinkColor.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 cmbImportantLinkColorActionPerformed(evt);
@@ -220,26 +197,26 @@ public final class OutputSettingsPanel extends javax.swing.JPanel {
         });
 
         jLabel1.setLabelFor(cmbImportantLinkColor);
-        org.openide.awt.Mnemonics.setLocalizedText(jLabel1, org.openide.util.NbBundle.getMessage(OutputSettingsPanel.class, "OutputSettingsPanel.jLabel1.text")); // NOI18N
+        org.openide.awt.Mnemonics.setLocalizedText(jLabel1, NbBundle.getMessage(OutputSettingsPanel.class, "OutputSettingsPanel.jLabel1.text")); // NOI18N
 
-        org.openide.awt.Mnemonics.setLocalizedText(lblUnwrappedOnly, org.openide.util.NbBundle.getMessage(OutputSettingsPanel.class, "OutputSettingsPanel.lblUnwrappedOnly.text")); // NOI18N
+        org.openide.awt.Mnemonics.setLocalizedText(lblUnwrappedOnly, NbBundle.getMessage(OutputSettingsPanel.class, "OutputSettingsPanel.lblUnwrappedOnly.text")); // NOI18N
 
-        org.openide.awt.Mnemonics.setLocalizedText(lblInputColor, org.openide.util.NbBundle.getMessage(OutputSettingsPanel.class, "OutputSettingsPanel.lblInputColor.text")); // NOI18N
+        org.openide.awt.Mnemonics.setLocalizedText(lblInputColor, NbBundle.getMessage(OutputSettingsPanel.class, "OutputSettingsPanel.lblInputColor.text")); // NOI18N
 
-        cmbInputColor.setToolTipText(org.openide.util.NbBundle.getMessage(OutputSettingsPanel.class, "OutputSettingsPanel.cmbInputColor.toolTipText")); // NOI18N
+        cmbInputColor.setToolTipText(NbBundle.getMessage(OutputSettingsPanel.class, "OutputSettingsPanel.cmbInputColor.toolTipText")); // NOI18N
         cmbInputColor.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 cmbInputColorActionPerformed(evt);
             }
         });
 
-        org.openide.awt.Mnemonics.setLocalizedText(jLabel2, org.openide.util.NbBundle.getMessage(OutputSettingsPanel.class, "OutputSettingsPanel.jLabel2.text")); // NOI18N
+        org.openide.awt.Mnemonics.setLocalizedText(jLabel2, NbBundle.getMessage(OutputSettingsPanel.class, "OutputSettingsPanel.jLabel2.text")); // NOI18N
 
-        org.openide.awt.Mnemonics.setLocalizedText(jLabel3, org.openide.util.NbBundle.getMessage(OutputSettingsPanel.class, "OutputSettingsPanel.jLabel3.text")); // NOI18N
+        org.openide.awt.Mnemonics.setLocalizedText(jLabel3, NbBundle.getMessage(OutputSettingsPanel.class, "OutputSettingsPanel.jLabel3.text")); // NOI18N
 
-        org.openide.awt.Mnemonics.setLocalizedText(jLabel4, org.openide.util.NbBundle.getMessage(OutputSettingsPanel.class, "OutputSettingsPanel.jLabel4.text")); // NOI18N
+        org.openide.awt.Mnemonics.setLocalizedText(jLabel4, NbBundle.getMessage(OutputSettingsPanel.class, "OutputSettingsPanel.jLabel4.text")); // NOI18N
 
-        org.openide.awt.Mnemonics.setLocalizedText(jLabel5, org.openide.util.NbBundle.getMessage(OutputSettingsPanel.class, "OutputSettingsPanel.jLabel5.text")); // NOI18N
+        org.openide.awt.Mnemonics.setLocalizedText(jLabel5, NbBundle.getMessage(OutputSettingsPanel.class, "OutputSettingsPanel.jLabel5.text")); // NOI18N
 
         cmbDebugColor.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -314,7 +291,7 @@ public final class OutputSettingsPanel extends javax.swing.JPanel {
                 .addGap(1, 1, 1))
         );
 
-        jPanel2Layout.linkSize(javax.swing.SwingConstants.HORIZONTAL, new java.awt.Component[] {cmbBackgroundColor, cmbDebugColor});
+        jPanel2Layout.linkSize(javax.swing.SwingConstants.HORIZONTAL, new Component[] {cmbBackgroundColor, cmbDebugColor});
 
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -372,8 +349,8 @@ public final class OutputSettingsPanel extends javax.swing.JPanel {
         previewPanel.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.LOWERED));
         previewPanel.setLayout(new javax.swing.BoxLayout(previewPanel, javax.swing.BoxLayout.LINE_AXIS));
 
-        org.openide.awt.Mnemonics.setLocalizedText(btnRestore, org.openide.util.NbBundle.getMessage(OutputSettingsPanel.class, "OutputSettingsPanel.btnRestore.text")); // NOI18N
-        btnRestore.setToolTipText(org.openide.util.NbBundle.getMessage(OutputSettingsPanel.class, "OutputSettingsPanel.btnRestore.toolTipText")); // NOI18N
+        org.openide.awt.Mnemonics.setLocalizedText(btnRestore, NbBundle.getMessage(OutputSettingsPanel.class, "OutputSettingsPanel.btnRestore.text")); // NOI18N
+        btnRestore.setToolTipText(NbBundle.getMessage(OutputSettingsPanel.class, "OutputSettingsPanel.btnRestore.toolTipText")); // NOI18N
         btnRestore.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnRestoreActionPerformed(evt);
@@ -553,17 +530,17 @@ public final class OutputSettingsPanel extends javax.swing.JPanel {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnRestore;
     private javax.swing.JButton btnSelectFont;
-    private javax.swing.JComboBox cmbBackgroundColor;
-    private javax.swing.JComboBox cmbDebugColor;
-    private javax.swing.JComboBox cmbErrorColor;
-    private javax.swing.JComboBox cmbFailureColor;
-    private javax.swing.JComboBox cmbImportantLinkColor;
-    private javax.swing.JComboBox cmbInputColor;
-    private javax.swing.JComboBox cmbLinkColor;
-    private javax.swing.JComboBox cmbLinkStyle;
-    private javax.swing.JComboBox cmbStandardColor;
-    private javax.swing.JComboBox cmbSuccessColor;
-    private javax.swing.JComboBox cmbWarningColor;
+    private JComboBox cmbBackgroundColor;
+    private JComboBox cmbDebugColor;
+    private JComboBox cmbErrorColor;
+    private JComboBox cmbFailureColor;
+    private JComboBox cmbImportantLinkColor;
+    private JComboBox cmbInputColor;
+    private JComboBox cmbLinkColor;
+    private JComboBox cmbLinkStyle;
+    private JComboBox cmbStandardColor;
+    private JComboBox cmbSuccessColor;
+    private JComboBox cmbWarningColor;
     private javax.swing.JTextField fldFontFamily;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;

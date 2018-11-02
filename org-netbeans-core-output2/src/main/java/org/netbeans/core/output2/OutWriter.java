@@ -1,45 +1,20 @@
 /*
- * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
- * Copyright 1997-2010 Oracle and/or its affiliates. All rights reserved.
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * Oracle and Java are registered trademarks of Oracle and/or its affiliates.
- * Other names may be trademarks of their respective owners.
- *
- * The contents of this file are subject to the terms of either the GNU
- * General Public License Version 2 only ("GPL") or the Common
- * Development and Distribution License("CDDL") (collectively, the
- * "License"). You may not use this file except in compliance with the
- * License. You can obtain a copy of the License at
- * http://www.netbeans.org/cddl-gplv2.html
- * or nbbuild/licenses/CDDL-GPL-2-CP. See the License for the
- * specific language governing permissions and limitations under the
- * License.  When distributing the software, include this License Header
- * Notice in each file and include the License file at
- * nbbuild/licenses/CDDL-GPL-2-CP.  Oracle designates this
- * particular file as subject to the "Classpath" exception as provided
- * by Oracle in the GPL Version 2 section of the License file that
- * accompanied this code. If applicable, add the following below the
- * License Header, with the fields enclosed by brackets [] replaced by
- * your own identifying information:
- * "Portions Copyrighted [year] [name of copyright owner]"
- *
- * Contributor(s):
- *
- * The Original Software is NetBeans. The Initial Developer of the Original
- * Software is Sun Microsystems, Inc. Portions Copyright 1997-2006 Sun
- * Microsystems, Inc. All Rights Reserved.
- *
- * If you wish your version of this file to be governed by only the CDDL
- * or only the GPL Version 2, indicate your decision by adding
- * "[Contributor] elects to include this software in this distribution
- * under the [CDDL or GPL Version 2] license." If you do not indicate a
- * single choice of license, a recipient has the option to distribute
- * your version of this file under either the CDDL, the GPL Version 2 or
- * to extend the choice of license to its licensees as provided above.
- * However, if you add GPL Version 2 code and therefore, elected the GPL
- * Version 2 license, then the option applies only if the new code is
- * made subject to such option by the copyright holder.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 
 package org.netbeans.core.output2;
@@ -341,7 +316,7 @@ class OutWriter extends PrintWriter {
 
     @Override
     public synchronized void println(String s) {
-        doWrite(s, 0, s.length());
+        doWrite(s, null, 0, s.length());
         println();
     }
 
@@ -399,7 +374,7 @@ class OutWriter extends PrintWriter {
 
     @Override
     public synchronized void write(int c) {
-        doWrite(new String(new char[]{(char)c}), 0, 1);
+        doWrite(new String(new char[]{(char)c}), null, 0, 1);
         checkLimits();
     }
 
@@ -412,19 +387,19 @@ class OutWriter extends PrintWriter {
     
     @Override
     public synchronized void write(char data[], int off, int len) {
-        doWrite(new CharArrayWrapper(data), off, len);
+        doWrite(new CharArrayWrapper(data), null, off, len);
         checkLimits();
     }
     
     /** write buffer size in chars */
     private static final int WRITE_BUFF_SIZE = 16*1024;
-    private synchronized void doWrite(CharSequence s, int off, int len) {
+    private synchronized void doWrite(CharSequence s, OutputListener l, int off, int len) {
         if (checkError() || len == 0) {
             return;
         }
         
         // XXX will not pick up ANSI sequences broken across write blocks, but this is likely rare
-        if (printANSI(s.subSequence(off, off + len), false, OutputKind.OUT, false)) {
+        if (printANSI(s.subSequence(off, off + len), l, false, OutputKind.OUT, false)) {
             return;
         }
         /* XXX causes stack overflow
@@ -546,7 +521,7 @@ class OutWriter extends PrintWriter {
 
     @Override
     public synchronized void write(char data[]) {
-        doWrite(new CharArrayWrapper(data), 0, data.length);
+        doWrite(new CharArrayWrapper(data), null, 0, data.length);
         checkLimits();
     }
 
@@ -557,7 +532,7 @@ class OutWriter extends PrintWriter {
     }
 
     private void printLineEnd() {
-        doWrite("\n", 0, 1);
+        doWrite("\n", null, 0, 1);
     }
 
     /**
@@ -568,13 +543,13 @@ class OutWriter extends PrintWriter {
      */
     @Override
     public synchronized void write(String s, int off, int len) {
-        doWrite(s, off, len);
+        doWrite(s, null, off, len);
         checkLimits();
     }
 
     @Override
     public synchronized void write(String s) {
-        doWrite(s, 0, s.length());
+        doWrite(s, null, 0, s.length());
         checkLimits();
     }
 
@@ -588,14 +563,14 @@ class OutWriter extends PrintWriter {
 
     synchronized void print(CharSequence s, OutputListener l, boolean important, Color c, Color b, OutputKind outKind, boolean addLS) {
         if (c == null) {
-            if (l == null && printANSI(s, important, outKind, addLS)) {
+            if (l == null && printANSI(s, null, important, outKind, addLS)) {
                 return;
             }
             c = ansiColor; // carry over from previous line
         }
         int lastLine = lines.getLineCount() - 1;
         int lastPos = lines.getCharCount();
-        doWrite(s, 0, s.length());
+        doWrite(s, l, 0, s.length());
         if (addLS) {
             printLineEnd();
         }
@@ -628,7 +603,7 @@ class OutWriter extends PrintWriter {
         new Color(0, 255, 255),
         new Color(255, 255, 255),
     };
-    private boolean printANSI(CharSequence s, boolean important, OutputKind outKind, boolean addLS) { // #192779
+    private boolean printANSI(CharSequence s, OutputListener l, boolean important, OutputKind outKind, boolean addLS) { // #192779
         int len = s.length();
         boolean hasEscape = false; // fast initial check
         for (int i = 0; i < len - 1; i++) {
@@ -645,7 +620,7 @@ class OutWriter extends PrintWriter {
         while (m.find()) {
             int esc = m.start();
             if (esc > text) {
-                print(s.subSequence(text, esc), null, important, ansiColor, ansiBackground, outKind, false);
+                print(s.subSequence(text, esc), l, important, ansiColor, ansiBackground, outKind, false);
             }
             text = m.end();
             if ("K".equals(m.group(3)) && "2".equals(m.group(1))) {     //NOI18N
@@ -709,7 +684,7 @@ class OutWriter extends PrintWriter {
             return false;
         }
         if (text < len) { // final segment
-            print(s.subSequence(text, len), null, important, ansiColor, ansiBackground, outKind, addLS);
+            print(s.subSequence(text, len), l, important, ansiColor, ansiBackground, outKind, addLS);
         } else if (addLS) { // line ended w/ control seq
             printLineEnd();
         }
@@ -734,7 +709,7 @@ class OutWriter extends PrintWriter {
 
     synchronized void print(CharSequence s, LineInfo info, boolean important) {
         int line = lines.getLineCount() - 1;
-        doWrite(s, 0, s.length());
+        doWrite(s, null, 0, s.length());
         if (info != null) {
             lines.addLineInfo(line, info, important);
         }

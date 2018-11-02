@@ -12,7 +12,7 @@ public interface InputOutputExt extends InputOutput
 {
   /*
    Listener auf ein InputOutput-Fenster
-   Gibt Rückmeldung wenn Ausgabefenster geschlossen wird
+   Gibt RÃ¼ckmeldung wenn Ausgabefenster geschlossen wird
    */
   abstract public void addPropertyChangeListener( PropertyChangeListener l );
 

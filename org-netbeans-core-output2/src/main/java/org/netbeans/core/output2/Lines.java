@@ -1,45 +1,20 @@
 /*
- * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
- * Copyright 1997-2010 Oracle and/or its affiliates. All rights reserved.
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * Oracle and Java are registered trademarks of Oracle and/or its affiliates.
- * Other names may be trademarks of their respective owners.
- *
- * The contents of this file are subject to the terms of either the GNU
- * General Public License Version 2 only ("GPL") or the Common
- * Development and Distribution License("CDDL") (collectively, the
- * "License"). You may not use this file except in compliance with the
- * License. You can obtain a copy of the License at
- * http://www.netbeans.org/cddl-gplv2.html
- * or nbbuild/licenses/CDDL-GPL-2-CP. See the License for the
- * specific language governing permissions and limitations under the
- * License.  When distributing the software, include this License Header
- * Notice in each file and include the License file at
- * nbbuild/licenses/CDDL-GPL-2-CP.  Oracle designates this
- * particular file as subject to the "Classpath" exception as provided
- * by Oracle in the GPL Version 2 section of the License file that
- * accompanied this code. If applicable, add the following below the
- * License Header, with the fields enclosed by brackets [] replaced by
- * your own identifying information:
- * "Portions Copyrighted [year] [name of copyright owner]"
- *
- * Contributor(s):
- *
- * The Original Software is NetBeans. The Initial Developer of the Original
- * Software is Sun Microsystems, Inc. Portions Copyright 1997-2006 Sun
- * Microsystems, Inc. All Rights Reserved.
- *
- * If you wish your version of this file to be governed by only the CDDL
- * or only the GPL Version 2, indicate your decision by adding
- * "[Contributor] elects to include this software in this distribution
- * under the [CDDL or GPL Version 2] license." If you do not indicate a
- * single choice of license, a recipient has the option to distribute
- * your version of this file under either the CDDL, the GPL Version 2 or
- * to extend the choice of license to its licensees as provided above.
- * However, if you add GPL Version 2 code and therefore, elected the GPL
- * Version 2 license, then the option applies only if the new code is
- * made subject to such option by the copyright holder.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 package org.netbeans.core.output2;
 
@@ -69,9 +44,9 @@ public interface Lines {
      * @param idx the line number
      * @return the length
      */
-    int length (int idx);
+    int length(int idx);
 
-    int lengthWithTabs (int idx);
+    int lengthWithTabs(int idx);
 
     /**
      * Get the character position corresponding to the start of a line
@@ -79,7 +54,7 @@ public interface Lines {
      * @param line A line number
      * @return The character in the total text at which this line starts
      */
-    int getLineStart (int line);
+    int getLineStart(int line);
 
     /**
      * Get the line index of the nearest line start to this character position in the
@@ -87,7 +62,7 @@ public interface Lines {
      * @param position
      * @return The line on which this character position occurs
      */
-    int getLineAt (int position);
+    int getLineAt(int position);
 
     /**
      * Get the number of lines in the stored text
@@ -127,7 +102,7 @@ public interface Lines {
      * Get the index of the first line which has a listener
      * @return A line number, or -1 if there are no listeners
      */
-    int firstListenerLine ();
+    int firstListenerLine();
     
     /**
      * Get the index of the first line which has an important listener
@@ -166,7 +141,7 @@ public interface Lines {
      * @param charCount The number of characters at which line wrapping happens
      * @return The number of  logical lines above this one.
      */
-    int getLogicalLineCountAbove (int logicalLine, int charCount);
+    int getLogicalLineCountAbove(int logicalLine, int charCount);
 
     /**
      * Get the total number of logical lines required to display the stored text if wrapped at the specified
@@ -174,7 +149,7 @@ public interface Lines {
      * @param charCount The number of characters at which line wrapping happens
      * @return The number of logical lines needed to fit all of the text
      */
-    int getLogicalLineCountIfWrappedAt (int charCount);
+    int getLogicalLineCountIfWrappedAt(int charCount);
 
     /**
      * Get number of physical characters for the given logical (expanded TABs) length.
@@ -193,7 +168,7 @@ public interface Lines {
      * @param chpos A character index in the stored text
      * @return Whether or not it's the first character of a line
      */
-    boolean isLineStart (int chpos);
+    boolean isLineStart(int chpos);
 
     /**
      * Get a line of text
@@ -202,7 +177,7 @@ public interface Lines {
      * @return The text
      * @throws IOException If an error occurs and the text cannot be read
      */
-    String getLine (int idx) throws IOException;
+    String getLine(int idx) throws IOException;
 
     /**
      * Determine if there are any lines with associated output listeners
@@ -240,7 +215,7 @@ public interface Lines {
      * @param end A character position > start
      * @return A String representation of the text between these points, including newlines
      */
-    String getText (int start, int end);
+    String getText(int start, int end);
 
     /**
      * Fetch a getText of the entire text into a character array
@@ -249,7 +224,7 @@ public interface Lines {
      * @param chars A character array at least as large as end-start, or null
      * @return A character array containing the range of text specified
      */
-    char[] getText (int start, int end, char[] chars);
+    char[] getText(int start, int end, char[] chars);
 
     /**
       * Get a physical (real) line index for logical (wrapped) line index.
@@ -268,7 +243,7 @@ public interface Lines {
       *         <li>[2] The total number of line wraps for the physical line</li>
       *         </ul>
       */
-    void toPhysicalLineIndex (int[] info, int charsPerLine);
+    void toPhysicalLineIndex(int[] info, int charsPerLine);
 
     /**
      * Save the contents of the buffer to a file, in platform default encoding.
@@ -315,14 +290,14 @@ public interface Lines {
      *
      * @param cl A change listener
      */
-    void addChangeListener (ChangeListener cl);
+    void addChangeListener(ChangeListener cl);
 
     /**
      * Remove a change listener.
      *
      * @param cl
      */
-    void removeChangeListener (ChangeListener cl);
+    void removeChangeListener(ChangeListener cl);
 
     /**
      * Allows clients that wish to poll to see if there is new output to do
