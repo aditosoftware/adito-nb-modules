@@ -6,7 +6,7 @@
 
   <groupId>de.adito</groupId>
   <artifactId>nb-modules</artifactId>
-  <version>1.0.7</version>
+  <version>1.1.0</version>
   <packaging>pom</packaging>
   <name>Custom Netbeans Modules</name>
 
@@ -25,7 +25,7 @@
 
   <properties>
     <!-- Netbeans-Versionen -->
-    <netbeans.version>RELEASE82</netbeans.version>
+    <netbeans.version>RELEASE90a</netbeans.version>
     <!-- gibt das Encoding das wir im SourceCode verwenden vor -->
     <project.build.sourceEncoding>Cp1252</project.build.sourceEncoding>
   </properties>
@@ -86,59 +86,59 @@
       <dependency>
         <groupId>de.adito.nb-modules</groupId>
         <artifactId>nb-adito-interface</artifactId>
-        <version>[1.0.7]</version>
+        <version>[1.0.8]</version>
       </dependency>
 
       <!--NetBeans-->
       <dependency>
         <groupId>org.netbeans.modules</groupId>
         <artifactId>org-netbeans-core-output2</artifactId>
-        <version>[RELEASE82-1.0.7]</version>
+        <version>[RELEASE90a-1.0.7]</version>
       </dependency>
       <dependency>
         <groupId>org.netbeans.modules</groupId>
         <artifactId>org-netbeans-core-windows</artifactId>
-        <version>[RELEASE82-1.0.8]</version>
+        <version>[RELEASE90a-1.0.8]</version>
       </dependency>
       <dependency>
         <groupId>org.netbeans.api</groupId>
         <artifactId>org-netbeans-modules-db</artifactId>
-        <version>[RELEASE82-1.0.8]</version>
+        <version>[RELEASE90a-1.0.8]</version>
       </dependency>
       <dependency>
         <groupId>org.netbeans.modules</groupId>
         <artifactId>org-netbeans-modules-db-dataview</artifactId>
-        <version>[RELEASE82-1.0.9]</version>
+        <version>[RELEASE90a-1.0.9]</version>
       </dependency>
       <dependency>
         <groupId>org.netbeans.modules</groupId>
         <artifactId>org-netbeans-modules-form</artifactId>
-        <version>[RELEASE82-1.0.7]</version>
+        <version>[RELEASE90a-1.0.7]</version>
       </dependency>
       <dependency>
         <groupId>org.netbeans.modules</groupId>
         <artifactId>org-netbeans-modules-javascript-editing</artifactId>
-        <version>[RELEASE721-1.0.7]</version>
+        <version>[RELEASE90a-1.0.7]</version>
       </dependency>
       <dependency>
         <groupId>org.netbeans.modules</groupId>
         <artifactId>org-netbeans-modules-javascript-hints</artifactId>
-        <version>[RELEASE721-1.0.7]</version>
+        <version>[RELEASE90a-1.0.7]</version>
       </dependency>
       <dependency>
         <groupId>org.netbeans.modules</groupId>
         <artifactId>org-netbeans-modules-javascript-refactoring</artifactId>
-        <version>[RELEASE721-1.0.7]</version>
+        <version>[RELEASE90a-1.0.7]</version>
       </dependency>
       <dependency>
         <groupId>org.netbeans.modules</groupId>
         <artifactId>org-netbeans-modules-tasklist-projectint</artifactId>
-        <version>[RELEASE82-1.0.7]</version>
+        <version>[RELEASE90a-1.0.7]</version>
       </dependency>
       <dependency>
         <groupId>org.netbeans.modules</groupId>
         <artifactId>org-netbeans-modules-tasklist-ui</artifactId>
-        <version>[RELEASE82-1.0.7]</version>
+        <version>[RELEASE90a-1.0.7]</version>
       </dependency>
 
       <dependency>
@@ -167,7 +167,7 @@
         <plugin>
           <groupId>org.codehaus.mojo</groupId>
           <artifactId>nbm-maven-plugin</artifactId>
-          <version>4.1</version>
+          <version>4.2-adito-SNAPSHOT</version>
           <extensions>true</extensions>
           <configuration>
             <useOSGiDependencies>true</useOSGiDependencies>
@@ -191,7 +191,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
-        <version>3.5.1</version>
+        <version>3.6.2</version>
         <configuration>
           <source>1.8</source>
           <target>1.8</target>
@@ -202,9 +202,10 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-jar-plugin</artifactId>
-        <version>2.6</version>
+        <version>3.0.2</version>
         <configuration>
           <archive>
+            <index>true</index>
             <manifestFile>${project.build.outputDirectory}/META-INF/MANIFEST.MF</manifestFile>
             <manifest>
               <useUniqueVersions>true</useUniqueVersions>
@@ -232,20 +233,14 @@
       </plugin>
 
       <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-javadoc-plugin</artifactId>
-        <version>2.10.3</version>
+        <version>3.0.1</version>
         <configuration>
           <additionalparam>-Xdoclint:none</additionalparam>
+          <jdkToolchain>
+            <version>9</version>
+          </jdkToolchain>
         </configuration>
-        <executions>
-          <execution>
-            <id>attach-javadocs</id>
-            <goals>
-              <goal>jar</goal>
-            </goals>
-          </execution>
-        </executions>
       </plugin>
     </plugins>
   </build>

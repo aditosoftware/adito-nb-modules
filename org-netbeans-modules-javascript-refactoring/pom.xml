@@ -12,7 +12,7 @@
   <groupId>org.netbeans.modules</groupId>
   <artifactId>org-netbeans-modules-javascript-refactoring</artifactId>
   <packaging>nbm</packaging>
-  <version>RELEASE721-1.0.7</version> <!-- HINT: Change Version in Root-Pom -> DependencyManagement! -->
+  <version>RELEASE90a-1.0.7</version> <!-- HINT: Change Version in Root-Pom -> DependencyManagement! -->
   <name>Netbeans IDE module: org-netbeans-modules-javascript-refactoring</name>
 
   <properties>

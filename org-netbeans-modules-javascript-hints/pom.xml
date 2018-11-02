@@ -12,7 +12,7 @@
   <groupId>org.netbeans.modules</groupId>
   <artifactId>org-netbeans-modules-javascript-hints</artifactId>
   <packaging>nbm</packaging>
-  <version>RELEASE721-1.0.7</version>
+  <version>RELEASE90a-1.0.7</version>
   <name>Netbeans IDE module: org-netbeans-modules-javascript-hints</name>
 
   <properties>
