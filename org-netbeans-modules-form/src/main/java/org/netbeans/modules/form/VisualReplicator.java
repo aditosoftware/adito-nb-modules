@@ -56,7 +56,6 @@ import javax.swing.text.PlainDocument;
 import org.netbeans.modules.form.adito.components.AditoVisualReplicator;
 import org.openide.ErrorManager;
 
-import org.netbeans.modules.form.fakepeer.FakePeerSupport;
 import org.netbeans.modules.form.layoutsupport.*;
 import org.netbeans.modules.form.layoutdesign.support.SwingLayoutBuilder;
 
@@ -356,11 +355,6 @@ public class VisualReplicator {
                 comp.setVisible(visible.booleanValue());
             }
 
-            // re-attach fake peer
-            FakePeerSupport.attachFakePeer(comp);
-            if (comp instanceof Container)
-                FakePeerSupport.attachFakePeerRecursively((Container)comp);
-
             comps[i] = comp;
             compIds[i] = metacomp.getId();
         }
@@ -377,11 +371,6 @@ public class VisualReplicator {
         else { // new layout support
             // Re-attach fake peers
             contDelegate.removeAll();
-            for (int i=0; i<comps.length; i++) {
-                FakePeerSupport.attachFakePeer(comps[i]);
-                if (comps[i] instanceof Container)
-                    FakePeerSupport.attachFakePeerRecursively((Container)comps[i]);
-            }
 
             setupContainerLayout(metacont, comps, compIds);
         }
@@ -550,12 +539,6 @@ public class VisualReplicator {
                             Component[] comps = new Component[metacomps.length];
                             for (int i=0; i < metacomps.length; i++) {
                                 comp = (Component) getClonedComponent(metacomps[i]);
-                                // becaues the components were removed, we must
-                                // re-attach their fake peers (if needed)
-                                FakePeerSupport.attachFakePeer(comp);
-                                if (comp instanceof Container)
-                                    FakePeerSupport.attachFakePeerRecursively(
-                                                               (Container)comp);
                                 comps[i] = comp;
                             }
                             laysup.addComponentsToContainer(cont, contDelegate, comps, 0);
@@ -565,13 +548,6 @@ public class VisualReplicator {
                 else { // new layout support
                     // Re-attach fake peers
                     contDelegate.removeAll();
-                    RADVisualComponent[] metacomps = parentCont.getSubComponents();
-                    for (int i=0; i<metacomps.length; i++) {
-                        Component component = (Component)getClonedComponent(metacomps[i]);
-                        FakePeerSupport.attachFakePeer(component);
-                        if (component instanceof Container)
-                            FakePeerSupport.attachFakePeerRecursively((Container)component);
-                    }
 
                     getLayoutBuilder(parentCont.getId()).removeComponentsFromContainer(
                         new Component[] { comp },
@@ -884,9 +860,6 @@ public class VisualReplicator {
 
         if (clone instanceof Component && getDesignRestrictions()) {
             Component comp = (Component) clone;
-            FakePeerSupport.attachFakePeer(comp);
-            if (clone instanceof Container)
-                FakePeerSupport.attachFakePeerRecursively((Container)clone);
 
             if (clone instanceof JComponent) {
                 // turn off double buffering for JComponent in fake peer container

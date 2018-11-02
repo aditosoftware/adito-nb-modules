@@ -51,7 +51,6 @@ import javax.swing.*;
 import javax.swing.border.Border;
 import org.openide.ErrorManager;
 
-import org.netbeans.modules.form.fakepeer.FakePeerSupport;
 
 /**
  * Factory class for creating objects, providing java creation code,
@@ -498,11 +497,9 @@ public class CreationFactory {
                  && !(instance instanceof javax.swing.RootPaneContainer))
         {
             ((Component)instance).setName(null);
-            ((Component)instance).setFont(FakePeerSupport.getDefaultAWTFont());
         }
         else if (instance instanceof MenuComponent) {
             ((MenuComponent)instance).setName(null);
-            ((MenuComponent)instance).setFont(FakePeerSupport.getDefaultAWTFont());
         }
     }
 

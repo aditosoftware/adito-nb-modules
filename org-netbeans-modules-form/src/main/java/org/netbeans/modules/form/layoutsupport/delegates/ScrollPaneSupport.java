@@ -47,7 +47,6 @@ package org.netbeans.modules.form.layoutsupport.delegates;
 import java.awt.*;
 
 import org.netbeans.modules.form.layoutsupport.*;
-import org.netbeans.modules.form.fakepeer.FakePeerSupport;
 
 /**
  * Dedicated layout support class for ScrollPane.
@@ -147,9 +146,6 @@ public class ScrollPaneSupport extends AbstractLayoutSupport {
         if (container instanceof ScrollPane) {
             // [do not allow adding a component when some already added??]
             ScrollPane scroll = (ScrollPane) container;
-            Component removedComp = null;
-            if (scroll.getComponentCount() > 0)
-                removedComp = scroll.getComponent(0);
             try {
                 scroll.add(components[0]);
             } catch (NullPointerException npex) {
@@ -159,9 +155,6 @@ public class ScrollPaneSupport extends AbstractLayoutSupport {
                 // in a NPE on JDK1.5. The correct peer for this
                 // Panel used to be set below.
             }
-            // hack for AWT components - we must attach the fake peer again
-            // to the component that was removed by adding new component
-            ensureFakePeerAttached(removedComp);
         }
     }
 
@@ -180,9 +173,4 @@ public class ScrollPaneSupport extends AbstractLayoutSupport {
         return false; // cannot remove component from JSplitPane
     }
 
-    static private void ensureFakePeerAttached(Component comp) {
-        FakePeerSupport.attachFakePeer(comp);
-        if (comp instanceof Container)
-            FakePeerSupport.attachFakePeerRecursively((Container)comp);
-    }
 }

@@ -50,7 +50,6 @@ import java.util.*;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
-import org.netbeans.modules.form.fakepeer.FakePeerSupport;
 
 import org.netbeans.modules.form.layoutsupport.*;
 import org.openide.ErrorManager;
@@ -162,9 +161,6 @@ public class RADVisualContainer extends RADVisualComponent implements ComponentC
         cont.setLayout(null); // Issue 77904
         for (RADVisualComponent sub : subComponents) {
             Component comp = (Component) sub.getBeanInstance();
-            FakePeerSupport.attachFakePeer(comp);
-            if (comp instanceof Container)
-                FakePeerSupport.attachFakePeerRecursively((Container)comp);
             cont.add(comp);
         }
     }
@@ -490,9 +486,6 @@ public class RADVisualContainer extends RADVisualComponent implements ComponentC
             }
             if (layoutSupport == null) {
                 Component comp = (Component) visual.getBeanInstance();
-                FakePeerSupport.attachFakePeer(comp);
-                if (comp instanceof Container)
-                    FakePeerSupport.attachFakePeerRecursively((Container)comp);
                 getContainerDelegate(getBeanInstance()).add(comp, index);
             }
         }

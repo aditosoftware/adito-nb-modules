@@ -12,7 +12,7 @@
   <groupId>org.netbeans.modules</groupId>
   <artifactId>org-netbeans-modules-form</artifactId>
   <packaging>nbm</packaging>
-  <version>RELEASE82-1.0.7</version> <!-- HINT: Change Version in Root-Pom -> DependencyManagement! -->
+  <version>RELEASE82-1.0.8</version> <!-- HINT: Change Version in Root-Pom -> DependencyManagement! -->
   <name>Netbeans IDE module: org-netbeans-modules-form</name>
 
   <properties>
@@ -38,7 +38,7 @@
     <dependency>
       <groupId>org.netbeans.api</groupId>
       <artifactId>org-netbeans-api-search</artifactId>
-      <version>RELEASE82</version>
+      <version>${netbeans.version}</version>
     </dependency>
 
     <dependency>
@@ -49,164 +49,159 @@
     <!-- Netbeans dependencies -->
     <dependency>
       <groupId>org.netbeans.api</groupId>
-      <artifactId>org-jdesktop-layout</artifactId>
-      <version>RELEASE82</version>
-    </dependency>
-    <dependency>
-      <groupId>org.netbeans.api</groupId>
       <artifactId>org-netbeans-api-java-classpath</artifactId>
-      <version>RELEASE82</version>
+      <version>${netbeans.version}</version>
     </dependency>
     <dependency>
       <groupId>org.netbeans.api</groupId>
       <artifactId>org-netbeans-api-progress</artifactId>
-      <version>RELEASE82</version>
+      <version>${netbeans.version}</version>
     </dependency>
     <dependency>
       <groupId>org.netbeans.api</groupId>
       <artifactId>org-netbeans-api-progress-nb</artifactId>
-      <version>RELEASE82</version>
+      <version>${netbeans.version}</version>
     </dependency>
     <dependency>
       <groupId>org.netbeans.api</groupId>
       <artifactId>org-netbeans-core-multiview</artifactId>
-      <version>RELEASE82</version>
+      <version>${netbeans.version}</version>
     </dependency>
     <dependency>
       <groupId>org.netbeans.api</groupId>
       <artifactId>org-netbeans-modules-editor-fold</artifactId>
-      <version>RELEASE82</version>
+      <version>${netbeans.version}</version>
     </dependency>
     <dependency>
       <groupId>org.netbeans.api</groupId>
       <artifactId>org-netbeans-modules-editor-guards</artifactId>
-      <version>RELEASE82</version>
+      <version>${netbeans.version}</version>
     </dependency>
     <dependency>
       <groupId>org.netbeans.api</groupId>
       <artifactId>org-netbeans-modules-editor-lib</artifactId>
-      <version>RELEASE82</version>
+      <version>${netbeans.version}</version>
     </dependency>
     <dependency>
       <groupId>org.netbeans.api</groupId>
       <artifactId>org-netbeans-modules-editor-lib2</artifactId>
-      <version>RELEASE82</version>
+      <version>${netbeans.version}</version>
     </dependency>
     <dependency>
       <groupId>org.netbeans.api</groupId>
       <artifactId>org-netbeans-spi-navigator</artifactId>
-      <version>RELEASE82</version>
+      <version>${netbeans.version}</version>
     </dependency>
     <dependency>
       <groupId>org.netbeans.api</groupId>
       <artifactId>org-netbeans-modules-options-api</artifactId>
-      <version>RELEASE82</version>
+      <version>${netbeans.version}</version>
     </dependency>
     <dependency>
       <groupId>org.netbeans.api</groupId>
       <artifactId>org-netbeans-modules-project-ant</artifactId>
-      <version>RELEASE82</version>
+      <version>${netbeans.version}</version>
     </dependency>
     <dependency>
       <groupId>org.netbeans.api</groupId>
       <artifactId>org-netbeans-modules-project-libraries</artifactId>
-      <version>RELEASE82</version>
+      <version>${netbeans.version}</version>
     </dependency>
     <dependency>
       <groupId>org.netbeans.api</groupId>
       <artifactId>org-netbeans-modules-projectapi</artifactId>
-      <version>RELEASE82</version>
+      <version>${netbeans.version}</version>
     </dependency>
     <dependency>
       <groupId>org.netbeans.api</groupId>
       <artifactId>org-netbeans-modules-projectuiapi</artifactId>
-      <version>RELEASE82</version>
+      <version>${netbeans.version}</version>
     </dependency>
     <dependency>
       <groupId>org.netbeans.api</groupId>
       <artifactId>org-netbeans-modules-queries</artifactId>
-      <version>RELEASE82</version>
+      <version>${netbeans.version}</version>
     </dependency>
     <dependency>
       <groupId>org.netbeans.api</groupId>
       <artifactId>org-netbeans-modules-refactoring-api</artifactId>
-      <version>RELEASE82</version>
+      <version>${netbeans.version}</version>
     </dependency>
     <dependency>
       <groupId>org.netbeans.api</groupId>
       <artifactId>org-netbeans-spi-palette</artifactId>
-      <version>RELEASE82</version>
+      <version>${netbeans.version}</version>
     </dependency>
     <dependency>
       <groupId>org.netbeans.api</groupId>
       <artifactId>org-openide-actions</artifactId>
-      <version>RELEASE82</version>
+      <version>${netbeans.version}</version>
     </dependency>
     <dependency>
       <groupId>org.netbeans.api</groupId>
       <artifactId>org-openide-awt</artifactId>
-      <version>RELEASE82</version>
+      <version>${netbeans.version}</version>
     </dependency>
     <dependency>
       <groupId>org.netbeans.api</groupId>
       <artifactId>org-openide-dialogs</artifactId>
-      <version>RELEASE82</version>
+      <version>${netbeans.version}</version>
     </dependency>
     <dependency>
       <groupId>org.netbeans.api</groupId>
       <artifactId>org-openide-explorer</artifactId>
-      <version>RELEASE82</version>
+      <version>${netbeans.version}</version>
     </dependency>
     <dependency>
       <groupId>org.netbeans.api</groupId>
       <artifactId>org-openide-filesystems</artifactId>
-      <version>RELEASE82</version>
+      <version>${netbeans.version}</version>
     </dependency>
     <dependency>
       <groupId>org.netbeans.api</groupId>
       <artifactId>org-openide-loaders</artifactId>
-      <version>RELEASE82</version>
+      <version>${netbeans.version}</version>
     </dependency>
     <dependency>
       <groupId>org.netbeans.api</groupId>
       <artifactId>org-openide-modules</artifactId>
-      <version>RELEASE82</version>
+      <version>${netbeans.version}</version>
     </dependency>
     <dependency>
       <groupId>org.netbeans.api</groupId>
       <artifactId>org-openide-nodes</artifactId>
-      <version>RELEASE82</version>
+      <version>${netbeans.version}</version>
     </dependency>
     <dependency>
       <groupId>org.netbeans.api</groupId>
       <artifactId>org-openide-text</artifactId>
-      <version>RELEASE82</version>
+      <version>${netbeans.version}</version>
     </dependency>
     <dependency>
       <groupId>org.netbeans.api</groupId>
       <artifactId>org-openide-util</artifactId>
-      <version>RELEASE82</version>
+      <version>${netbeans.version}</version>
     </dependency>
     <dependency>
       <groupId>org.netbeans.api</groupId>
       <artifactId>org-openide-util-lookup</artifactId>
-      <version>RELEASE82</version>
+      <version>${netbeans.version}</version>
     </dependency>
     <dependency>
       <groupId>org.netbeans.api</groupId>
       <artifactId>org-openide-util-ui</artifactId>
-      <version>RELEASE82</version>
+      <version>${netbeans.version}</version>
     </dependency>
     <dependency>
       <groupId>org.netbeans.api</groupId>
       <artifactId>org-openide-windows</artifactId>
-      <version>RELEASE82</version>
+      <version>${netbeans.version}</version>
     </dependency>
 
     <dependency>
       <groupId>org.netbeans.external</groupId>
       <artifactId>AbsoluteLayout</artifactId>
-      <version>RELEASE82</version>
+      <version>${netbeans.version}</version>
       <scope>provided</scope>
     </dependency>
 

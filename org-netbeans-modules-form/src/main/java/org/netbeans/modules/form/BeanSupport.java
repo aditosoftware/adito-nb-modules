@@ -51,7 +51,6 @@ import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.netbeans.modules.form.fakepeer.FakePeerSupport;
 
 /**
  * BeanSupport is a utility class with various static methods supporting
@@ -106,12 +105,6 @@ public class BeanSupport
         Object defInstance = instancesCache.get(beanClass);
         if (defInstance == null) {
             defInstance = createBeanInstance(beanClass);
-            if (defInstance instanceof Component) {
-                FakePeerSupport.attachFakePeer((Component)defInstance);
-                if (defInstance instanceof Container)
-                    FakePeerSupport.attachFakePeerRecursively(
-                                                    (Container)defInstance);
-            }
             instancesCache.put(beanClass, defInstance);
         }
         return defInstance;

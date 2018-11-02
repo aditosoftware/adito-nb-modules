@@ -52,7 +52,6 @@ import org.openide.nodes.*;
 
 import org.netbeans.modules.form.*;
 import org.netbeans.modules.form.layoutsupport.delegates.NullLayoutSupport;
-import org.netbeans.modules.form.fakepeer.FakePeerSupport;
 
 /**
  * Main class of general layout support infrastructure. Connects form editor
@@ -907,8 +906,5 @@ public final class LayoutSupportManager implements LayoutSupportContext {
         if (comp != null && comp.getParent() != null) {
             comp.getParent().remove(comp);
         }
-        FakePeerSupport.attachFakePeer(comp);
-        if (comp instanceof Container)
-            FakePeerSupport.attachFakePeerRecursively((Container)comp);
     }
 }

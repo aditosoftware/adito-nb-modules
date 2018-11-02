@@ -49,9 +49,7 @@ import com.google.common.collect.*;
 import de.adito.aditoweb.nbm.nbide.nbaditointerface.NbAditoInterface;
 import de.adito.aditoweb.nbm.nbide.nbaditointerface.form.model.*;
 import org.netbeans.modules.form.adito.components.AditoHandleLayer;
-import org.netbeans.modules.form.adito.perstistencemanager.NonvisContainerRADComponent;
 import org.netbeans.modules.form.assistant.AssistantModel;
-import org.netbeans.modules.form.fakepeer.FakePeerSupport;
 import org.netbeans.modules.form.layoutdesign.*;
 import org.netbeans.modules.form.layoutsupport.*;
 import org.netbeans.modules.form.menu.MenuEditLayer;
@@ -3530,7 +3528,6 @@ public class HandleLayer extends JPanel implements MouseListener, MouseMotionLis
           Image image = comp.createImage(width, height);
           Graphics gImage = image.getGraphics();
           gImage.setClip(0, 0, width, height);
-          comp.getPeer().paint(gImage);
           g.drawImage(image, 0, 0, null);
         }
       }
@@ -4179,15 +4176,6 @@ public class HandleLayer extends JPanel implements MouseListener, MouseMotionLis
         // the visual component which is used below)
 
         showingComponents[0] = (Component) precreated.getBeanInstance();
-        // Force creation of peer - AWT components don't have preferred size otherwise
-        if (!(showingComponents[0] instanceof JComponent))
-        {
-          FakePeerSupport.attachFakePeer(showingComponents[0]);
-          if (showingComponents[0] instanceof Container)
-          {
-            FakePeerSupport.attachFakePeerRecursively((Container) showingComponents[0]);
-          }
-        }
 
         Dimension size = showingComponents[0].getPreferredSize();
         if (originalBounds == null)

@@ -49,7 +49,6 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import javax.swing.*;
 
-import org.netbeans.modules.form.fakepeer.*;
 import org.openide.ErrorManager;
 import org.openide.util.NbBundle;
 
@@ -83,10 +82,9 @@ class ComponentLayer extends JPanel
     private DesignerPanel designerPanel;
 
     ComponentLayer(FormModel formModel) {
-        componentContainer = new FakePeerContainer();
+        componentContainer = new JPanel();
         componentContainer.setLayout(new BorderLayout());
         componentContainer.setBackground(FormLoaderSettings.getInstance().getFormDesignerBackgroundColor());
-        componentContainer.setFont(FakePeerSupport.getDefaultAWTFont());
 
         designerPanel = new DesignerPanel(formModel);
         designerPanel.setLayout(new BorderLayout());
