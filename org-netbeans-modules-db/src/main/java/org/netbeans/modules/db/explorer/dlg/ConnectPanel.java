@@ -1,45 +1,20 @@
 /*
- * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
- * Copyright 1997-2010 Oracle and/or its affiliates. All rights reserved.
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * Oracle and Java are registered trademarks of Oracle and/or its affiliates.
- * Other names may be trademarks of their respective owners.
- *
- * The contents of this file are subject to the terms of either the GNU
- * General Public License Version 2 only ("GPL") or the Common
- * Development and Distribution License("CDDL") (collectively, the
- * "License"). You may not use this file except in compliance with the
- * License. You can obtain a copy of the License at
- * http://www.netbeans.org/cddl-gplv2.html
- * or nbbuild/licenses/CDDL-GPL-2-CP. See the License for the
- * specific language governing permissions and limitations under the
- * License.  When distributing the software, include this License Header
- * Notice in each file and include the License file at
- * nbbuild/licenses/CDDL-GPL-2-CP.  Oracle designates this
- * particular file as subject to the "Classpath" exception as provided
- * by Oracle in the GPL Version 2 section of the License file that
- * accompanied this code. If applicable, add the following below the
- * License Header, with the fields enclosed by brackets [] replaced by
- * your own identifying information:
- * "Portions Copyrighted [year] [name of copyright owner]"
- *
- * Contributor(s):
- *
- * The Original Software is NetBeans. The Initial Developer of the Original
- * Software is Sun Microsystems, Inc. Portions Copyright 1997-2010 Sun
- * Microsystems, Inc. All Rights Reserved.
- *
- * If you wish your version of this file to be governed by only the CDDL
- * or only the GPL Version 2, indicate your decision by adding
- * "[Contributor] elects to include this software in this distribution
- * under the [CDDL or GPL Version 2] license." If you do not indicate a
- * single choice of license, a recipient has the option to distribute
- * your version of this file under either the CDDL, the GPL Version 2 or
- * to extend the choice of license to its licensees as provided above.
- * However, if you add GPL Version 2 code and therefore, elected the GPL
- * Version 2 license, then the option applies only if the new code is
- * made subject to such option by the copyright holder.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 
 package org.netbeans.modules.db.explorer.dlg;
@@ -151,7 +126,7 @@ public class ConnectPanel extends ConnectionDialog.FocusablePanel implements Doc
         setLayout(new java.awt.GridBagLayout());
 
         userLabel.setLabelFor(userTextField);
-        org.openide.awt.Mnemonics.setLocalizedText(userLabel, org.openide.util.NbBundle.getMessage(ConnectPanel.class, "ConnectDialogUserName")); // NOI18N
+        org.openide.awt.Mnemonics.setLocalizedText(userLabel, NbBundle.getMessage(ConnectPanel.class, "ConnectDialogUserName")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
@@ -159,7 +134,7 @@ public class ConnectPanel extends ConnectionDialog.FocusablePanel implements Doc
         add(userLabel, gridBagConstraints);
 
         passwordLabel.setLabelFor(passwordField);
-        org.openide.awt.Mnemonics.setLocalizedText(passwordLabel, org.openide.util.NbBundle.getMessage(ConnectPanel.class, "ConnectDialogPassword")); // NOI18N
+        org.openide.awt.Mnemonics.setLocalizedText(passwordLabel, NbBundle.getMessage(ConnectPanel.class, "ConnectDialogPassword")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 1;
@@ -168,8 +143,8 @@ public class ConnectPanel extends ConnectionDialog.FocusablePanel implements Doc
         gridBagConstraints.insets = new java.awt.Insets(5, 12, 0, 0);
         add(passwordLabel, gridBagConstraints);
 
-        org.openide.awt.Mnemonics.setLocalizedText(passwordCheckBox, org.openide.util.NbBundle.getMessage(ConnectPanel.class, "ConnectDialogRememberPassword")); // NOI18N
-        passwordCheckBox.setToolTipText(org.openide.util.NbBundle.getMessage(ConnectPanel.class, "ACS_ConnectDialogRememberPasswordA11yDesc")); // NOI18N
+        org.openide.awt.Mnemonics.setLocalizedText(passwordCheckBox, NbBundle.getMessage(ConnectPanel.class, "ConnectDialogRememberPassword")); // NOI18N
+        passwordCheckBox.setToolTipText(NbBundle.getMessage(ConnectPanel.class, "ACS_ConnectDialogRememberPasswordA11yDesc")); // NOI18N
         passwordCheckBox.setVerticalTextPosition(javax.swing.SwingConstants.TOP);
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
@@ -180,7 +155,7 @@ public class ConnectPanel extends ConnectionDialog.FocusablePanel implements Doc
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 0, 11);
         add(passwordCheckBox, gridBagConstraints);
 
-        passwordField.setToolTipText(org.openide.util.NbBundle.getMessage(ConnectPanel.class, "ACS_ConnectDialogPasswordTextFieldA11yDesc")); // NOI18N
+        passwordField.setToolTipText(NbBundle.getMessage(ConnectPanel.class, "ACS_ConnectDialogPasswordTextFieldA11yDesc")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 1;
@@ -189,7 +164,7 @@ public class ConnectPanel extends ConnectionDialog.FocusablePanel implements Doc
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 0, 11);
         add(passwordField, gridBagConstraints);
 
-        userTextField.setToolTipText(org.openide.util.NbBundle.getMessage(ConnectPanel.class, "ACS_ConnectDialogUserNameTextFieldA11yDesc")); // NOI18N
+        userTextField.setToolTipText(NbBundle.getMessage(ConnectPanel.class, "ACS_ConnectDialogUserNameTextFieldA11yDesc")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 0;
@@ -198,16 +173,16 @@ public class ConnectPanel extends ConnectionDialog.FocusablePanel implements Doc
         gridBagConstraints.insets = new java.awt.Insets(12, 5, 0, 11);
         add(userTextField, gridBagConstraints);
 
-        connectProgressPanel.setToolTipText(org.openide.util.NbBundle.getMessage(ConnectPanel.class, "ACS_ConnectionProgressBarA11yDesc")); // NOI18N
-        connectProgressPanel.setLayout(new java.awt.BorderLayout(0, 5));
+        connectProgressPanel.setToolTipText(NbBundle.getMessage(ConnectPanel.class, "ACS_ConnectionProgressBarA11yDesc")); // NOI18N
+        connectProgressPanel.setLayout(new BorderLayout(0, 5));
 
         org.openide.awt.Mnemonics.setLocalizedText(progressMessageLabel, " ");
-        connectProgressPanel.add(progressMessageLabel, java.awt.BorderLayout.NORTH);
+        connectProgressPanel.add(progressMessageLabel, BorderLayout.NORTH);
 
         progressContainerPanel.setMinimumSize(new java.awt.Dimension(20, 20));
         progressContainerPanel.setPreferredSize(new java.awt.Dimension(20, 20));
-        progressContainerPanel.setLayout(new java.awt.BorderLayout());
-        connectProgressPanel.add(progressContainerPanel, java.awt.BorderLayout.CENTER);
+        progressContainerPanel.setLayout(new BorderLayout());
+        connectProgressPanel.add(progressContainerPanel, BorderLayout.CENTER);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;

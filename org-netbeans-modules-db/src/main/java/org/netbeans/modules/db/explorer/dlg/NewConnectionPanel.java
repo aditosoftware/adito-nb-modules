@@ -1,45 +1,20 @@
 /*
- * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
- * Copyright 1997-2011 Oracle and/or its affiliates. All rights reserved.
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * Oracle and Java are registered trademarks of Oracle and/or its affiliates.
- * Other names may be trademarks of their respective owners.
- *
- * The contents of this file are subject to the terms of either the GNU
- * General Public License Version 2 only ("GPL") or the Common
- * Development and Distribution License("CDDL") (collectively, the
- * "License"). You may not use this file except in compliance with the
- * License. You can obtain a copy of the License at
- * http://www.netbeans.org/cddl-gplv2.html
- * or nbbuild/licenses/CDDL-GPL-2-CP. See the License for the
- * specific language governing permissions and limitations under the
- * License.  When distributing the software, include this License Header
- * Notice in each file and include the License file at
- * nbbuild/licenses/CDDL-GPL-2-CP.  Oracle designates this
- * particular file as subject to the "Classpath" exception as provided
- * by Oracle in the GPL Version 2 section of the License file that
- * accompanied this code. If applicable, add the following below the
- * License Header, with the fields enclosed by brackets [] replaced by
- * your own identifying information:
- * "Portions Copyrighted [year] [name of copyright owner]"
- *
- * Contributor(s):
- *
- * The Original Software is NetBeans. The Initial Developer of the Original
- * Software is Sun Microsystems, Inc. Portions Copyright 1997-2010 Sun
- * Microsystems, Inc. All Rights Reserved.
- *
- * If you wish your version of this file to be governed by only the CDDL
- * or only the GPL Version 2, indicate your decision by adding
- * "[Contributor] elects to include this software in this distribution
- * under the [CDDL or GPL Version 2] license." If you do not indicate a
- * single choice of license, a recipient has the option to distribute
- * your version of this file under either the CDDL, the GPL Version 2 or
- * to extend the choice of license to its licensees as provided above.
- * However, if you add GPL Version 2 code and therefore, elected the GPL
- * Version 2 license, then the option applies only if the new code is
- * made subject to such option by the copyright holder.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 package org.netbeans.modules.db.explorer.dlg;
 
@@ -302,116 +277,116 @@ public class NewConnectionPanel extends ConnectionDialog.FocusablePanel {
     private void initComponents() {
 
         inputModeButtonGroup = new javax.swing.ButtonGroup();
-        templateComboBox = new javax.swing.JComboBox();
-        hostField = new javax.swing.JTextField();
-        templateLabel = new javax.swing.JLabel();
-        hostLabel = new javax.swing.JLabel();
-        portLabel = new javax.swing.JLabel();
-        portField = new javax.swing.JTextField();
-        databaseLabel = new javax.swing.JLabel();
-        databaseField = new javax.swing.JTextField();
-        sidLabel = new javax.swing.JLabel();
-        sidField = new javax.swing.JTextField();
-        serviceLabel = new javax.swing.JLabel();
-        serviceField = new javax.swing.JTextField();
-        tnsLabel = new javax.swing.JLabel();
-        tnsField = new javax.swing.JTextField();
-        serverNameLabel = new javax.swing.JLabel();
-        serverNameField = new javax.swing.JTextField();
-        instanceLabel = new javax.swing.JLabel();
-        instanceField = new javax.swing.JTextField();
-        userLabel = new javax.swing.JLabel();
-        userField = new javax.swing.JTextField();
-        passwordLabel = new javax.swing.JLabel();
+        templateComboBox = new JComboBox();
+        hostField = new JTextField();
+        templateLabel = new JLabel();
+        hostLabel = new JLabel();
+        portLabel = new JLabel();
+        portField = new JTextField();
+        databaseLabel = new JLabel();
+        databaseField = new JTextField();
+        sidLabel = new JLabel();
+        sidField = new JTextField();
+        serviceLabel = new JLabel();
+        serviceField = new JTextField();
+        tnsLabel = new JLabel();
+        tnsField = new JTextField();
+        serverNameLabel = new JLabel();
+        serverNameField = new JTextField();
+        instanceLabel = new JLabel();
+        instanceField = new JTextField();
+        userLabel = new JLabel();
+        userField = new JTextField();
+        passwordLabel = new JLabel();
         passwordField = new javax.swing.JPasswordField();
-        dsnLabel = new javax.swing.JLabel();
-        dsnField = new javax.swing.JTextField();
-        urlField = new javax.swing.JTextField();
+        dsnLabel = new JLabel();
+        dsnField = new JTextField();
+        urlField = new JTextField();
         passwordCheckBox = new javax.swing.JCheckBox();
-        directUrlLabel = new javax.swing.JLabel();
+        directUrlLabel = new JLabel();
         bTestConnection = new javax.swing.JButton();
         bConnectionProperties = new javax.swing.JButton();
 
         FormListener formListener = new FormListener();
 
-        templateComboBox.setToolTipText(org.openide.util.NbBundle.getMessage(NewConnectionPanel.class, "ACS_NewConnectionDriverClassComboBoxA11yDesc")); // NOI18N
+        templateComboBox.setToolTipText(NbBundle.getMessage(NewConnectionPanel.class, "ACS_NewConnectionDriverClassComboBoxA11yDesc")); // NOI18N
         templateComboBox.addItemListener(formListener);
         templateComboBox.addActionListener(formListener);
 
-        hostField.setToolTipText(org.openide.util.NbBundle.getMessage(NewConnectionPanel.class, "ACS_NewConnectionHostA11yDesc")); // NOI18N
+        hostField.setToolTipText(NbBundle.getMessage(NewConnectionPanel.class, "ACS_NewConnectionHostA11yDesc")); // NOI18N
 
         templateLabel.setLabelFor(templateComboBox);
-        org.openide.awt.Mnemonics.setLocalizedText(templateLabel, org.openide.util.NbBundle.getMessage(NewConnectionPanel.class, "NewConnectionDriverName")); // NOI18N
+        org.openide.awt.Mnemonics.setLocalizedText(templateLabel, NbBundle.getMessage(NewConnectionPanel.class, "NewConnectionDriverName")); // NOI18N
 
         hostLabel.setLabelFor(hostField);
-        org.openide.awt.Mnemonics.setLocalizedText(hostLabel, org.openide.util.NbBundle.getMessage(NewConnectionPanel.class, "NewConnectionHost")); // NOI18N
+        org.openide.awt.Mnemonics.setLocalizedText(hostLabel, NbBundle.getMessage(NewConnectionPanel.class, "NewConnectionHost")); // NOI18N
 
         portLabel.setLabelFor(portField);
-        org.openide.awt.Mnemonics.setLocalizedText(portLabel, org.openide.util.NbBundle.getMessage(NewConnectionPanel.class, "NewConnectionPort")); // NOI18N
+        org.openide.awt.Mnemonics.setLocalizedText(portLabel, NbBundle.getMessage(NewConnectionPanel.class, "NewConnectionPort")); // NOI18N
 
-        portField.setToolTipText(org.openide.util.NbBundle.getMessage(NewConnectionPanel.class, "ACS_NewConnectionPortA11yDesc")); // NOI18N
+        portField.setToolTipText(NbBundle.getMessage(NewConnectionPanel.class, "ACS_NewConnectionPortA11yDesc")); // NOI18N
 
         databaseLabel.setLabelFor(databaseField);
-        org.openide.awt.Mnemonics.setLocalizedText(databaseLabel, org.openide.util.NbBundle.getMessage(NewConnectionPanel.class, "NewConnectionDatabase")); // NOI18N
+        org.openide.awt.Mnemonics.setLocalizedText(databaseLabel, NbBundle.getMessage(NewConnectionPanel.class, "NewConnectionDatabase")); // NOI18N
 
-        databaseField.setToolTipText(org.openide.util.NbBundle.getMessage(NewConnectionPanel.class, "ACS_NewConnectionDatabaseNameA11yDesc")); // NOI18N
+        databaseField.setToolTipText(NbBundle.getMessage(NewConnectionPanel.class, "ACS_NewConnectionDatabaseNameA11yDesc")); // NOI18N
 
         sidLabel.setLabelFor(sidField);
-        org.openide.awt.Mnemonics.setLocalizedText(sidLabel, org.openide.util.NbBundle.getMessage(NewConnectionPanel.class, "NewConnectionSID")); // NOI18N
+        org.openide.awt.Mnemonics.setLocalizedText(sidLabel, NbBundle.getMessage(NewConnectionPanel.class, "NewConnectionSID")); // NOI18N
 
-        sidField.setToolTipText(org.openide.util.NbBundle.getMessage(NewConnectionPanel.class, "ACS_NewConnectionSIDA11yDesc")); // NOI18N
+        sidField.setToolTipText(NbBundle.getMessage(NewConnectionPanel.class, "ACS_NewConnectionSIDA11yDesc")); // NOI18N
 
         serviceLabel.setLabelFor(serviceField);
-        org.openide.awt.Mnemonics.setLocalizedText(serviceLabel, org.openide.util.NbBundle.getMessage(NewConnectionPanel.class, "NewConnectionServiceName")); // NOI18N
+        org.openide.awt.Mnemonics.setLocalizedText(serviceLabel, NbBundle.getMessage(NewConnectionPanel.class, "NewConnectionServiceName")); // NOI18N
 
-        serviceField.setToolTipText(org.openide.util.NbBundle.getMessage(NewConnectionPanel.class, "ACS_NewConnectionServiceNameA11yDesc")); // NOI18N
+        serviceField.setToolTipText(NbBundle.getMessage(NewConnectionPanel.class, "ACS_NewConnectionServiceNameA11yDesc")); // NOI18N
 
         tnsLabel.setLabelFor(tnsField);
-        org.openide.awt.Mnemonics.setLocalizedText(tnsLabel, org.openide.util.NbBundle.getMessage(NewConnectionPanel.class, "NewConnectionTNSName")); // NOI18N
+        org.openide.awt.Mnemonics.setLocalizedText(tnsLabel, NbBundle.getMessage(NewConnectionPanel.class, "NewConnectionTNSName")); // NOI18N
 
-        tnsField.setToolTipText(org.openide.util.NbBundle.getMessage(NewConnectionPanel.class, "ACS_NewConnectionTNSNameA11yDesc")); // NOI18N
+        tnsField.setToolTipText(NbBundle.getMessage(NewConnectionPanel.class, "ACS_NewConnectionTNSNameA11yDesc")); // NOI18N
 
         serverNameLabel.setLabelFor(serverNameField);
-        org.openide.awt.Mnemonics.setLocalizedText(serverNameLabel, org.openide.util.NbBundle.getMessage(NewConnectionPanel.class, "NewConnectionServerName")); // NOI18N
+        org.openide.awt.Mnemonics.setLocalizedText(serverNameLabel, NbBundle.getMessage(NewConnectionPanel.class, "NewConnectionServerName")); // NOI18N
 
-        serverNameField.setToolTipText(org.openide.util.NbBundle.getMessage(NewConnectionPanel.class, "ACS_NewConnectionServerNameA11yDesc")); // NOI18N
+        serverNameField.setToolTipText(NbBundle.getMessage(NewConnectionPanel.class, "ACS_NewConnectionServerNameA11yDesc")); // NOI18N
 
         instanceLabel.setLabelFor(instanceField);
-        org.openide.awt.Mnemonics.setLocalizedText(instanceLabel, org.openide.util.NbBundle.getMessage(NewConnectionPanel.class, "NewConnectionInstanceName")); // NOI18N
+        org.openide.awt.Mnemonics.setLocalizedText(instanceLabel, NbBundle.getMessage(NewConnectionPanel.class, "NewConnectionInstanceName")); // NOI18N
 
-        instanceField.setToolTipText(org.openide.util.NbBundle.getMessage(NewConnectionPanel.class, "ACS_NewConnectionInstanceNameA11yDesc")); // NOI18N
+        instanceField.setToolTipText(NbBundle.getMessage(NewConnectionPanel.class, "ACS_NewConnectionInstanceNameA11yDesc")); // NOI18N
 
         userLabel.setLabelFor(userField);
-        org.openide.awt.Mnemonics.setLocalizedText(userLabel, org.openide.util.NbBundle.getMessage(NewConnectionPanel.class, "NewConnectionUserName")); // NOI18N
+        org.openide.awt.Mnemonics.setLocalizedText(userLabel, NbBundle.getMessage(NewConnectionPanel.class, "NewConnectionUserName")); // NOI18N
 
-        userField.setToolTipText(org.openide.util.NbBundle.getMessage(NewConnectionPanel.class, "ACS_NewConnectionUserNameA11yDesc")); // NOI18N
+        userField.setToolTipText(NbBundle.getMessage(NewConnectionPanel.class, "ACS_NewConnectionUserNameA11yDesc")); // NOI18N
 
         passwordLabel.setLabelFor(passwordField);
-        org.openide.awt.Mnemonics.setLocalizedText(passwordLabel, org.openide.util.NbBundle.getMessage(NewConnectionPanel.class, "NewConnectionPassword")); // NOI18N
+        org.openide.awt.Mnemonics.setLocalizedText(passwordLabel, NbBundle.getMessage(NewConnectionPanel.class, "NewConnectionPassword")); // NOI18N
 
-        passwordField.setToolTipText(org.openide.util.NbBundle.getMessage(NewConnectionPanel.class, "ACS_NewConnectionPasswordA11yDesc")); // NOI18N
+        passwordField.setToolTipText(NbBundle.getMessage(NewConnectionPanel.class, "ACS_NewConnectionPasswordA11yDesc")); // NOI18N
 
         dsnLabel.setLabelFor(dsnField);
-        org.openide.awt.Mnemonics.setLocalizedText(dsnLabel, org.openide.util.NbBundle.getMessage(NewConnectionPanel.class, "NewConnectionDSN")); // NOI18N
+        org.openide.awt.Mnemonics.setLocalizedText(dsnLabel, NbBundle.getMessage(NewConnectionPanel.class, "NewConnectionDSN")); // NOI18N
 
-        dsnField.setToolTipText(org.openide.util.NbBundle.getMessage(NewConnectionPanel.class, "ACS_NewConnectionDSNA11yDesc")); // NOI18N
+        dsnField.setToolTipText(NbBundle.getMessage(NewConnectionPanel.class, "ACS_NewConnectionDSNA11yDesc")); // NOI18N
 
-        urlField.setToolTipText(org.openide.util.NbBundle.getMessage(NewConnectionPanel.class, "ACS_NewConnectionJDBCURLA11yDesc")); // NOI18N
+        urlField.setToolTipText(NbBundle.getMessage(NewConnectionPanel.class, "ACS_NewConnectionJDBCURLA11yDesc")); // NOI18N
         urlField.addActionListener(formListener);
         urlField.addFocusListener(formListener);
         urlField.addKeyListener(formListener);
 
-        org.openide.awt.Mnemonics.setLocalizedText(passwordCheckBox, org.openide.util.NbBundle.getMessage(NewConnectionPanel.class, "NewConnectionRememberPassword")); // NOI18N
-        passwordCheckBox.setToolTipText(org.openide.util.NbBundle.getMessage(NewConnectionPanel.class, "ACS_NewConnectionRememberPasswordA11yDesc")); // NOI18N
+        org.openide.awt.Mnemonics.setLocalizedText(passwordCheckBox, NbBundle.getMessage(NewConnectionPanel.class, "NewConnectionRememberPassword")); // NOI18N
+        passwordCheckBox.setToolTipText(NbBundle.getMessage(NewConnectionPanel.class, "ACS_NewConnectionRememberPasswordA11yDesc")); // NOI18N
         passwordCheckBox.setMargin(new java.awt.Insets(3, 0, 1, 1));
 
         directUrlLabel.setLabelFor(urlField);
-        org.openide.awt.Mnemonics.setLocalizedText(directUrlLabel, org.openide.util.NbBundle.getMessage(NewConnectionPanel.class, "NewConnectionDirectURL")); // NOI18N
+        org.openide.awt.Mnemonics.setLocalizedText(directUrlLabel, NbBundle.getMessage(NewConnectionPanel.class, "NewConnectionDirectURL")); // NOI18N
 
-        org.openide.awt.Mnemonics.setLocalizedText(bTestConnection, org.openide.util.NbBundle.getMessage(NewConnectionPanel.class, "NewConnectionPanel.bTestConnection")); // NOI18N
+        org.openide.awt.Mnemonics.setLocalizedText(bTestConnection, NbBundle.getMessage(NewConnectionPanel.class, "NewConnectionPanel.bTestConnection")); // NOI18N
         bTestConnection.addActionListener(formListener);
 
-        org.openide.awt.Mnemonics.setLocalizedText(bConnectionProperties, org.openide.util.NbBundle.getMessage(NewConnectionPanel.class, "NewConnectionPanel.bConnectionProperties")); // NOI18N
+        org.openide.awt.Mnemonics.setLocalizedText(bConnectionProperties, NbBundle.getMessage(NewConnectionPanel.class, "NewConnectionPanel.bConnectionProperties")); // NOI18N
         bConnectionProperties.addActionListener(formListener);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
@@ -530,14 +505,14 @@ public class NewConnectionPanel extends ConnectionDialog.FocusablePanel {
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
-        bTestConnection.getAccessibleContext().setAccessibleDescription(org.openide.util.NbBundle.getMessage(NewConnectionPanel.class, "NewConnectionWizard.bTestConnection.ACD")); // NOI18N
+        bTestConnection.getAccessibleContext().setAccessibleDescription(NbBundle.getMessage(NewConnectionPanel.class, "NewConnectionWizard.bTestConnection.ACD")); // NOI18N
 
-        getAccessibleContext().setAccessibleDescription(org.openide.util.NbBundle.getMessage(NewConnectionPanel.class, "ACD_NewConnectionPanel")); // NOI18N
+        getAccessibleContext().setAccessibleDescription(NbBundle.getMessage(NewConnectionPanel.class, "ACD_NewConnectionPanel")); // NOI18N
     }
 
     // Code for dispatching events from components to event handlers.
 
-    private class FormListener implements java.awt.event.ActionListener, java.awt.event.FocusListener, java.awt.event.ItemListener, java.awt.event.KeyListener {
+    private class FormListener implements java.awt.event.ActionListener, FocusListener, java.awt.event.ItemListener, java.awt.event.KeyListener {
         FormListener() {}
         public void actionPerformed(java.awt.event.ActionEvent evt) {
             if (evt.getSource() == templateComboBox) {
@@ -554,16 +529,16 @@ public class NewConnectionPanel extends ConnectionDialog.FocusablePanel {
             }
         }
 
-        public void focusGained(java.awt.event.FocusEvent evt) {
+        public void focusGained(FocusEvent evt) {
         }
 
-        public void focusLost(java.awt.event.FocusEvent evt) {
+        public void focusLost(FocusEvent evt) {
             if (evt.getSource() == urlField) {
                 NewConnectionPanel.this.urlFieldFocusLost(evt);
             }
         }
 
-        public void itemStateChanged(java.awt.event.ItemEvent evt) {
+        public void itemStateChanged(ItemEvent evt) {
             if (evt.getSource() == templateComboBox) {
                 NewConnectionPanel.this.templateComboBoxItemStateChanged(evt);
             }
@@ -585,7 +560,7 @@ public class NewConnectionPanel extends ConnectionDialog.FocusablePanel {
     private void urlFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_urlFieldActionPerformed
     }//GEN-LAST:event_urlFieldActionPerformed
 
-    private void urlFieldFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_urlFieldFocusLost
+    private void urlFieldFocusLost(FocusEvent evt) {//GEN-FIRST:event_urlFieldFocusLost
     }//GEN-LAST:event_urlFieldFocusLost
 
     private void urlFieldKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_urlFieldKeyPressed
@@ -594,7 +569,7 @@ public class NewConnectionPanel extends ConnectionDialog.FocusablePanel {
     private void templateComboBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_templateComboBoxActionPerformed
     }//GEN-LAST:event_templateComboBoxActionPerformed
 
-    private void templateComboBoxItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_templateComboBoxItemStateChanged
+    private void templateComboBoxItemStateChanged(ItemEvent evt) {//GEN-FIRST:event_templateComboBoxItemStateChanged
         if (evt.getStateChange() == ItemEvent.SELECTED) {
             Object item = evt.getItem();
             if (item != null && !(item instanceof JdbcUrl)) {
@@ -640,34 +615,34 @@ public class NewConnectionPanel extends ConnectionDialog.FocusablePanel {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton bConnectionProperties;
     private javax.swing.JButton bTestConnection;
-    private javax.swing.JTextField databaseField;
-    private javax.swing.JLabel databaseLabel;
-    private javax.swing.JLabel directUrlLabel;
-    private javax.swing.JTextField dsnField;
-    private javax.swing.JLabel dsnLabel;
-    private javax.swing.JTextField hostField;
-    private javax.swing.JLabel hostLabel;
+    private JTextField databaseField;
+    private JLabel databaseLabel;
+    private JLabel directUrlLabel;
+    private JTextField dsnField;
+    private JLabel dsnLabel;
+    private JTextField hostField;
+    private JLabel hostLabel;
     private javax.swing.ButtonGroup inputModeButtonGroup;
-    private javax.swing.JTextField instanceField;
-    private javax.swing.JLabel instanceLabel;
+    private JTextField instanceField;
+    private JLabel instanceLabel;
     private javax.swing.JCheckBox passwordCheckBox;
     private javax.swing.JPasswordField passwordField;
-    private javax.swing.JLabel passwordLabel;
-    private javax.swing.JTextField portField;
-    private javax.swing.JLabel portLabel;
-    private javax.swing.JTextField serverNameField;
-    private javax.swing.JLabel serverNameLabel;
-    private javax.swing.JTextField serviceField;
-    private javax.swing.JLabel serviceLabel;
-    private javax.swing.JTextField sidField;
-    private javax.swing.JLabel sidLabel;
-    private javax.swing.JComboBox templateComboBox;
-    private javax.swing.JLabel templateLabel;
-    private javax.swing.JTextField tnsField;
-    private javax.swing.JLabel tnsLabel;
-    private javax.swing.JTextField urlField;
-    private javax.swing.JTextField userField;
-    private javax.swing.JLabel userLabel;
+    private JLabel passwordLabel;
+    private JTextField portField;
+    private JLabel portLabel;
+    private JTextField serverNameField;
+    private JLabel serverNameLabel;
+    private JTextField serviceField;
+    private JLabel serviceLabel;
+    private JTextField sidField;
+    private JLabel sidLabel;
+    private JComboBox templateComboBox;
+    private JLabel templateLabel;
+    private JTextField tnsField;
+    private JLabel tnsLabel;
+    private JTextField urlField;
+    private JTextField userField;
+    private JLabel userLabel;
     // End of variables declaration//GEN-END:variables
 
     public void setConnectionInfo() {

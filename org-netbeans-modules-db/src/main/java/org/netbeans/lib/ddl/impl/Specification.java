@@ -1,60 +1,37 @@
 /*
- * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
- * Copyright 1997-2010 Oracle and/or its affiliates. All rights reserved.
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * Oracle and Java are registered trademarks of Oracle and/or its affiliates.
- * Other names may be trademarks of their respective owners.
- *
- * The contents of this file are subject to the terms of either the GNU
- * General Public License Version 2 only ("GPL") or the Common
- * Development and Distribution License("CDDL") (collectively, the
- * "License"). You may not use this file except in compliance with the
- * License. You can obtain a copy of the License at
- * http://www.netbeans.org/cddl-gplv2.html
- * or nbbuild/licenses/CDDL-GPL-2-CP. See the License for the
- * specific language governing permissions and limitations under the
- * License.  When distributing the software, include this License Header
- * Notice in each file and include the License file at
- * nbbuild/licenses/CDDL-GPL-2-CP.  Oracle designates this
- * particular file as subject to the "Classpath" exception as provided
- * by Oracle in the GPL Version 2 section of the License file that
- * accompanied this code. If applicable, add the following below the
- * License Header, with the fields enclosed by brackets [] replaced by
- * your own identifying information:
- * "Portions Copyrighted [year] [name of copyright owner]"
- *
- * Contributor(s):
- *
- * The Original Software is NetBeans. The Initial Developer of the Original
- * Software is Sun Microsystems, Inc. Portions Copyright 1997-2006 Sun
- * Microsystems, Inc. All Rights Reserved.
- *
- * If you wish your version of this file to be governed by only the CDDL
- * or only the GPL Version 2, indicate your decision by adding
- * "[Contributor] elects to include this software in this distribution
- * under the [CDDL or GPL Version 2] license." If you do not indicate a
- * single choice of license, a recipient has the option to distribute
- * your version of this file under either the CDDL, the GPL Version 2 or
- * to extend the choice of license to its licensees as provided above.
- * However, if you add GPL Version 2 code and therefore, elected the GPL
- * Version 2 license, then the option applies only if the new code is
- * made subject to such option by the copyright holder.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 
 package org.netbeans.lib.ddl.impl;
-
-import org.netbeans.lib.ddl.*;
-import org.netbeans.lib.ddl.adaptors.DatabaseMetaDataAdaptor;
-import org.netbeans.modules.db.explorer.dlg.TypeElement;
-import org.openide.util.NbBundle;
 
 import java.beans.Beans;
 import java.lang.reflect.Field;
 import java.sql.*;
 import java.text.MessageFormat;
 import java.util.*;
-import java.util.logging.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import org.netbeans.modules.db.explorer.dlg.TypeElement;
+import org.openide.util.NbBundle;
+
+import org.netbeans.lib.ddl.*;
+import org.netbeans.lib.ddl.adaptors.DatabaseMetaDataAdaptor;
 
 
 public class Specification implements DatabaseSpecification {
@@ -498,7 +475,7 @@ public class Specification implements DatabaseSpecification {
     /**
      * ADITO
      * Liefert eine Liste der Typen, allerdings jeden Value nur einmal.
-     * Spezialversion für den Designer, damit jeder Value in der ComboBox nur einmal angezeigt wird.
+     * Spezialversion fÃ¼r den Designer, damit jeder Value in der ComboBox nur einmal angezeigt wird.
      *
      * @return Liste ohne redundante Values
      */
@@ -644,7 +621,7 @@ public class Specification implements DatabaseSpecification {
                 // kann ned passieren
             }
 
-            // java.sql.Types die nicht benutzt werden (können):
+            // java.sql.Types die nicht benutzt werden (kï¿½nnen):
             typeList.remove("NULL");
             typeList.remove("REF_CURSOR");
             typeList.remove("ARRAY");

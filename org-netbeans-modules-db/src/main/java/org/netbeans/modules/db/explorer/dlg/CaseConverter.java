@@ -3,8 +3,8 @@ package org.netbeans.modules.db.explorer.dlg;
 import org.netbeans.lib.ddl.impl.Specification;
 
 /**
- * Konvertiert einen übergebeneen Namen (meist Tabelle oder Spalte) in groß oder klein.
- * Je nachdem wie es in der Date dbspec.plist im SchlüsselWort "Case" für das jeweilige DBMS hinterlegt ist.
+ * Konvertiert einen Ã¼bergebeneen Namen (meist Tabelle oder Spalte) in groÃŸ oder klein.
+ * Je nachdem wie es in der Date dbspec.plist im SchlÃ¼sselWort "Case" fÃ¼r das jeweilige DBMS hinterlegt ist.
  * @author c.stadler 11.01.2017
  */
 public class CaseConverter

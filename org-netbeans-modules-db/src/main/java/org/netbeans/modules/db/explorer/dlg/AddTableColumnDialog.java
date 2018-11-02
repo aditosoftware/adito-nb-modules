@@ -1,68 +1,59 @@
 /*
- * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
- * Copyright 1997-2011 Oracle and/or its affiliates. All rights reserved.
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * Oracle and Java are registered trademarks of Oracle and/or its affiliates.
- * Other names may be trademarks of their respective owners.
- *
- * The contents of this file are subject to the terms of either the GNU
- * General Public License Version 2 only ("GPL") or the Common
- * Development and Distribution License("CDDL") (collectively, the
- * "License"). You may not use this file except in compliance with the
- * License. You can obtain a copy of the License at
- * http://www.netbeans.org/cddl-gplv2.html
- * or nbbuild/licenses/CDDL-GPL-2-CP. See the License for the
- * specific language governing permissions and limitations under the
- * License.  When distributing the software, include this License Header
- * Notice in each file and include the License file at
- * nbbuild/licenses/CDDL-GPL-2-CP.  Oracle designates this
- * particular file as subject to the "Classpath" exception as provided
- * by Oracle in the GPL Version 2 section of the License file that
- * accompanied this code. If applicable, add the following below the
- * License Header, with the fields enclosed by brackets [] replaced by
- * your own identifying information:
- * "Portions Copyrighted [year] [name of copyright owner]"
- *
- * Contributor(s):
- *
- * The Original Software is NetBeans. The Initial Developer of the Original
- * Software is Sun Microsystems, Inc. Portions Copyright 1997-2010 Sun
- * Microsystems, Inc. All Rights Reserved.
- *
- * If you wish your version of this file to be governed by only the CDDL
- * or only the GPL Version 2, indicate your decision by adding
- * "[Contributor] elects to include this software in this distribution
- * under the [CDDL or GPL Version 2] license." If you do not indicate a
- * single choice of license, a recipient has the option to distribute
- * your version of this file under either the CDDL, the GPL Version 2 or
- * to extend the choice of license to its licensees as provided above.
- * However, if you add GPL Version 2 code and therefore, elected the GPL
- * Version 2 license, then the option applies only if the new code is
- * made subject to such option by the copyright holder.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 
 package org.netbeans.modules.db.explorer.dlg;
 
+import java.awt.Dialog;
+import java.awt.Dimension;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.Callable;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.swing.*;
+import javax.swing.border.EmptyBorder;
+import javax.swing.border.TitledBorder;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import org.netbeans.lib.ddl.DDLException;
 import org.netbeans.lib.ddl.impl.Specification;
 import org.netbeans.modules.db.explorer.DbUtilities;
 import org.netbeans.modules.db.explorer.node.TableNode;
-import org.openide.*;
+import org.openide.DialogDescriptor;
+import org.openide.DialogDisplayer;
+import org.openide.NotificationLineSupport;
+import org.openide.NotifyDescriptor;
 import org.openide.awt.Mnemonics;
 import org.openide.util.NbBundle;
-
-import javax.swing.*;
-import javax.swing.border.*;
-import javax.swing.event.*;
-import java.awt.*;
-import java.awt.event.*;
-import java.beans.*;
-import java.lang.reflect.InvocationTargetException;
-import java.util.*;
-import java.util.List;
-import java.util.concurrent.Callable;
-import java.util.logging.*;
 
 
 public class AddTableColumnDialog extends JPanel {
@@ -96,7 +87,7 @@ public class AddTableColumnDialog extends JPanel {
         con.gridwidth = 1;
         con.gridheight = 1;
         con.anchor = GridBagConstraints.WEST;
-        con.insets = new java.awt.Insets(0, 0, 0, 0);
+        con.insets = new Insets(0, 0, 0, 0);
         con.weightx = 0.0;
         con.weighty = 0.0;
         add(label, con);
@@ -107,7 +98,7 @@ public class AddTableColumnDialog extends JPanel {
         con.gridwidth = 3;
         con.gridheight = 1;
         con.fill = GridBagConstraints.HORIZONTAL;
-        con.insets = new java.awt.Insets(0, 12, 0, 0);
+        con.insets = new Insets(0, 12, 0, 0);
         con.weightx = 1.0;
         con.weighty = 0.0;
         colnamefield = new JTextField(35);
@@ -143,7 +134,7 @@ public class AddTableColumnDialog extends JPanel {
         sizelesstypes = sizelesstypesSpec != null ? sizelesstypesSpec : Collections.<String>emptyList();
         charactertypes = charactertypesSpec != null ? charactertypesSpec : Collections.<String>emptyList();
 
-        Map<String, String> tmap = spe.getNonRedundantTypeMap();
+        Map<String, String> tmap = spe.getTypeMap();
         List<TypeElement> ttab = new ArrayList<TypeElement>(tmap.size());
         for (String key : tmap.keySet()) {
             ttab.add(new TypeElement(key, tmap.get(key)));
@@ -162,7 +153,7 @@ public class AddTableColumnDialog extends JPanel {
         con.gridwidth = 1;
         con.gridheight = 1;
         con.anchor = GridBagConstraints.WEST;
-        con.insets = new java.awt.Insets(12, 0, 0, 0);
+        con.insets = new Insets(12, 0, 0, 0);
         con.weightx = 0.0;
         con.weighty = 0.0;
         add(label, con);
@@ -173,7 +164,7 @@ public class AddTableColumnDialog extends JPanel {
         con.gridwidth = 3;
         con.gridheight = 1;
         con.fill = GridBagConstraints.HORIZONTAL;
-        con.insets = new java.awt.Insets(12, 12, 0, 0);
+        con.insets = new Insets(12, 12, 0, 0);
         con.weightx = 1.0;
         con.weighty = 0.0;
         coltypecombo = new JComboBox(ttab.toArray());
@@ -201,7 +192,7 @@ public class AddTableColumnDialog extends JPanel {
         con.gridwidth = 1;
         con.gridheight = 1;
         con.anchor = GridBagConstraints.WEST;
-        con.insets = new java.awt.Insets(12, 0, 0, 0);
+        con.insets = new Insets(12, 0, 0, 0);
         con.weightx = 0.0;
         con.weighty = 0.0;
         add(label, con);
@@ -212,7 +203,7 @@ public class AddTableColumnDialog extends JPanel {
         con.gridwidth = 1;
         con.gridheight = 1;
         con.fill = GridBagConstraints.HORIZONTAL;
-        con.insets = new java.awt.Insets(12, 12, 0, 0);
+        con.insets = new Insets(12, 12, 0, 0);
         con.weightx = 1.0;
         con.weighty = 0.0;
         colsizefield = new JTextField();
@@ -234,7 +225,7 @@ public class AddTableColumnDialog extends JPanel {
         con.gridwidth = 1;
         con.gridheight = 1;
         con.anchor = GridBagConstraints.WEST;
-        con.insets = new java.awt.Insets(12, 12, 0, 0);
+        con.insets = new Insets(12, 12, 0, 0);
         con.weightx = 0.0;
         con.weighty = 0.0;
         add(label, con);
@@ -245,7 +236,7 @@ public class AddTableColumnDialog extends JPanel {
         con.gridwidth = 1;
         con.gridheight = 1;
         con.fill = GridBagConstraints.HORIZONTAL;
-        con.insets = new java.awt.Insets(12, 12, 0, 0);
+        con.insets = new Insets(12, 12, 0, 0);
         con.weightx = 1.0;
         con.weighty = 0.0;
         colscalefield = new JTextField();
@@ -267,7 +258,7 @@ public class AddTableColumnDialog extends JPanel {
         con.gridwidth = 1;
         con.gridheight = 1;
         con.anchor = GridBagConstraints.WEST;
-        con.insets = new java.awt.Insets(12, 0, 0, 0);
+        con.insets = new Insets(12, 0, 0, 0);
         con.weightx = 0.0;
         con.weighty = 0.0;
         add(label, con);
@@ -278,7 +269,7 @@ public class AddTableColumnDialog extends JPanel {
         con.gridwidth = 3;
         con.gridheight = 1;
         con.fill = GridBagConstraints.HORIZONTAL;
-        con.insets = new java.awt.Insets(12, 12, 0, 0);
+        con.insets = new Insets(12, 12, 0, 0);
         con.weightx = 1.0;
         con.weighty = 0.0;
         defvalfield = new JTextField(35);
@@ -313,7 +304,7 @@ public class AddTableColumnDialog extends JPanel {
         con.gridwidth = 1;
         con.gridheight = 1;
         con.anchor = GridBagConstraints.WEST;
-        con.insets = new java.awt.Insets(0, 0, 0, 0);
+        con.insets = new Insets(0, 0, 0, 0);
         con.weightx = 0.0;
         con.weighty = 0.0;
         pkcheckbox = new JCheckBox();
@@ -329,7 +320,7 @@ public class AddTableColumnDialog extends JPanel {
         con.gridwidth = 1;
         con.gridheight = 1;
         con.anchor = GridBagConstraints.WEST;
-        con.insets = new java.awt.Insets(0, 12, 0, 0);
+        con.insets = new Insets(0, 12, 0, 0);
         con.weightx = 0.0;
         con.weighty = 0.0;
         uniquecheckbox = new JCheckBox();
@@ -345,7 +336,7 @@ public class AddTableColumnDialog extends JPanel {
         con.gridwidth = 1;
         con.gridheight = 1;
         con.anchor = GridBagConstraints.WEST;
-        con.insets = new java.awt.Insets(0, 12, 0, 0);
+        con.insets = new Insets(0, 12, 0, 0);
         con.weightx = 0.0;
         con.weighty = 0.0;
         nullcheckbox = new JCheckBox();
@@ -361,7 +352,7 @@ public class AddTableColumnDialog extends JPanel {
         con.gridwidth = 1;
         con.gridheight = 1;
         con.anchor = GridBagConstraints.WEST;
-        con.insets = new java.awt.Insets(0, 12, 0, 0);
+        con.insets = new Insets(0, 12, 0, 0);
         con.weightx = 0.0;
         con.weighty = 0.0;
         ixcheckbox = new JCheckBox();
@@ -379,7 +370,7 @@ public class AddTableColumnDialog extends JPanel {
         con.gridwidth = 4;
         con.gridheight = 1;
         con.fill = GridBagConstraints.HORIZONTAL;
-        con.insets = new java.awt.Insets(12, 0, 0, 0);
+        con.insets = new Insets(12, 0, 0, 0);
         con.weightx = 1.0;
         con.weighty = 0.0;
         add(subpane, con);
@@ -392,7 +383,7 @@ public class AddTableColumnDialog extends JPanel {
         con.gridwidth = 1;
         con.gridheight = 1;
         con.anchor = GridBagConstraints.NORTHWEST;
-        con.insets = new java.awt.Insets(12, 0, 0, 0);
+        con.insets = new Insets(12, 0, 0, 0);
         con.weightx = 0.0;
         con.weighty = 0.0;
         checkcheckbox = new JCheckBox();
@@ -408,7 +399,7 @@ public class AddTableColumnDialog extends JPanel {
         con.gridwidth = 3;
         con.gridheight = 1;
         con.fill = GridBagConstraints.BOTH;
-        con.insets = new java.awt.Insets(12, 12, 0, 0);
+        con.insets = new Insets(12, 12, 0, 0);
         con.weightx = 1.0;
         con.weighty = 1.0;
         checkfield = new JTextArea(3, 35);

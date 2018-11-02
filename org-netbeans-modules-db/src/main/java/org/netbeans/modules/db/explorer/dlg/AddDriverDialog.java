@@ -1,45 +1,20 @@
 /*
- * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
- * Copyright 1997-2011 Oracle and/or its affiliates. All rights reserved.
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * Oracle and Java are registered trademarks of Oracle and/or its affiliates.
- * Other names may be trademarks of their respective owners.
- *
- * The contents of this file are subject to the terms of either the GNU
- * General Public License Version 2 only ("GPL") or the Common
- * Development and Distribution License("CDDL") (collectively, the
- * "License"). You may not use this file except in compliance with the
- * License. You can obtain a copy of the License at
- * http://www.netbeans.org/cddl-gplv2.html
- * or nbbuild/licenses/CDDL-GPL-2-CP. See the License for the
- * specific language governing permissions and limitations under the
- * License.  When distributing the software, include this License Header
- * Notice in each file and include the License file at
- * nbbuild/licenses/CDDL-GPL-2-CP.  Oracle designates this
- * particular file as subject to the "Classpath" exception as provided
- * by Oracle in the GPL Version 2 section of the License file that
- * accompanied this code. If applicable, add the following below the
- * License Header, with the fields enclosed by brackets [] replaced by
- * your own identifying information:
- * "Portions Copyrighted [year] [name of copyright owner]"
- *
- * Contributor(s):
- *
- * The Original Software is NetBeans. The Initial Developer of the Original
- * Software is Sun Microsystems, Inc. Portions Copyright 1997-2010 Sun
- * Microsystems, Inc. All Rights Reserved.
- *
- * If you wish your version of this file to be governed by only the CDDL
- * or only the GPL Version 2, indicate your decision by adding
- * "[Contributor] elects to include this software in this distribution
- * under the [CDDL or GPL Version 2] license." If you do not indicate a
- * single choice of license, a recipient has the option to distribute
- * your version of this file under either the CDDL, the GPL Version 2 or
- * to extend the choice of license to its licensees as provided above.
- * However, if you add GPL Version 2 code and therefore, elected the GPL
- * Version 2 license, then the option applies only if the new code is
- * made subject to such option by the copyright holder.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 
 package org.netbeans.modules.db.explorer.dlg;
@@ -86,7 +61,7 @@ import org.openide.util.HelpCtx;
 import org.openide.util.NbBundle;
 import org.openide.util.RequestProcessor;
 
-public final class AddDriverDialog extends javax.swing.JPanel {
+public final class AddDriverDialog extends JPanel {
     private static HelpCtx ADD_DRIVER_DIALOG_HELPCTX = new HelpCtx(AddDriverDialog.class);
 
     public static HelpCtx getHelpCtx() {
@@ -255,105 +230,105 @@ public final class AddDriverDialog extends javax.swing.JPanel {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        drvListLabel = new javax.swing.JLabel();
-        drvListScrollPane = new javax.swing.JScrollPane();
-        drvList = new javax.swing.JList();
-        browseButton = new javax.swing.JButton();
-        removeButton = new javax.swing.JButton();
-        drvClassLabel = new javax.swing.JLabel();
-        drvClassComboBox = new javax.swing.JComboBox();
-        findButton = new javax.swing.JButton();
-        nameLabel = new javax.swing.JLabel();
-        nameTextField = new javax.swing.JTextField();
-        progressMessageLabel = new javax.swing.JLabel();
-        progressContainerPanel = new javax.swing.JPanel();
+        drvListLabel = new JLabel();
+        drvListScrollPane = new JScrollPane();
+        drvList = new JList();
+        browseButton = new JButton();
+        removeButton = new JButton();
+        drvClassLabel = new JLabel();
+        drvClassComboBox = new JComboBox();
+        findButton = new JButton();
+        nameLabel = new JLabel();
+        nameTextField = new JTextField();
+        progressMessageLabel = new JLabel();
+        progressContainerPanel = new JPanel();
 
         FormListener formListener = new FormListener();
 
         drvListLabel.setLabelFor(drvList);
-        org.openide.awt.Mnemonics.setLocalizedText(drvListLabel, org.openide.util.NbBundle.getMessage(AddDriverDialog.class, "AddDriverDriverFile")); // NOI18N
+        org.openide.awt.Mnemonics.setLocalizedText(drvListLabel, NbBundle.getMessage(AddDriverDialog.class, "AddDriverDriverFile")); // NOI18N
 
         drvList.setModel(new DefaultListModel());
         drvList.addListSelectionListener(formListener);
         drvListScrollPane.setViewportView(drvList);
 
-        org.openide.awt.Mnemonics.setLocalizedText(browseButton, org.openide.util.NbBundle.getMessage(AddDriverDialog.class, "AddDriverDriverAdd")); // NOI18N
+        org.openide.awt.Mnemonics.setLocalizedText(browseButton, NbBundle.getMessage(AddDriverDialog.class, "AddDriverDriverAdd")); // NOI18N
         browseButton.addActionListener(formListener);
 
-        org.openide.awt.Mnemonics.setLocalizedText(removeButton, org.openide.util.NbBundle.getMessage(AddDriverDialog.class, "AddDriverDriverRemove")); // NOI18N
+        org.openide.awt.Mnemonics.setLocalizedText(removeButton, NbBundle.getMessage(AddDriverDialog.class, "AddDriverDriverRemove")); // NOI18N
         removeButton.addActionListener(formListener);
 
         drvClassLabel.setLabelFor(drvClassComboBox);
-        org.openide.awt.Mnemonics.setLocalizedText(drvClassLabel, org.openide.util.NbBundle.getMessage(AddDriverDialog.class, "AddDriverDriverClass")); // NOI18N
+        org.openide.awt.Mnemonics.setLocalizedText(drvClassLabel, NbBundle.getMessage(AddDriverDialog.class, "AddDriverDriverClass")); // NOI18N
 
         drvClassComboBox.setEditable(true);
         drvClassComboBox.addActionListener(formListener);
 
-        org.openide.awt.Mnemonics.setLocalizedText(findButton, org.openide.util.NbBundle.getMessage(AddDriverDialog.class, "AddDriverDriverFind")); // NOI18N
+        org.openide.awt.Mnemonics.setLocalizedText(findButton, NbBundle.getMessage(AddDriverDialog.class, "AddDriverDriverFind")); // NOI18N
         findButton.addActionListener(formListener);
 
         nameLabel.setLabelFor(nameTextField);
-        org.openide.awt.Mnemonics.setLocalizedText(nameLabel, org.openide.util.NbBundle.getMessage(AddDriverDialog.class, "AddDriverDriverName")); // NOI18N
+        org.openide.awt.Mnemonics.setLocalizedText(nameLabel, NbBundle.getMessage(AddDriverDialog.class, "AddDriverDriverName")); // NOI18N
 
         org.openide.awt.Mnemonics.setLocalizedText(progressMessageLabel, " ");
 
         progressContainerPanel.setMinimumSize(new java.awt.Dimension(20, 20));
         progressContainerPanel.setPreferredSize(new java.awt.Dimension(20, 20));
-        progressContainerPanel.setLayout(new java.awt.BorderLayout());
+        progressContainerPanel.setLayout(new BorderLayout());
 
-        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
+        GroupLayout layout = new GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            layout.createParallelGroup(GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
+                    .addGroup(GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                        .addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
                             .addComponent(drvListLabel)
                             .addComponent(drvClassLabel)
                             .addComponent(nameLabel))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(nameTextField, javax.swing.GroupLayout.DEFAULT_SIZE, 258, Short.MAX_VALUE)
+                        .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
+                            .addComponent(nameTextField, GroupLayout.DEFAULT_SIZE, 258, Short.MAX_VALUE)
                             .addComponent(drvClassComboBox, 0, 258, Short.MAX_VALUE)
                             .addComponent(drvListScrollPane))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
                             .addComponent(removeButton)
                             .addComponent(browseButton)
                             .addComponent(findButton)))
-                    .addComponent(progressMessageLabel, javax.swing.GroupLayout.DEFAULT_SIZE, 424, Short.MAX_VALUE)
-                    .addComponent(progressContainerPanel, javax.swing.GroupLayout.DEFAULT_SIZE, 424, Short.MAX_VALUE))
+                    .addComponent(progressMessageLabel, GroupLayout.DEFAULT_SIZE, 424, Short.MAX_VALUE)
+                    .addComponent(progressContainerPanel, GroupLayout.DEFAULT_SIZE, 424, Short.MAX_VALUE))
                 .addContainerGap())
         );
 
-        layout.linkSize(javax.swing.SwingConstants.HORIZONTAL, new java.awt.Component[] {browseButton, findButton, removeButton});
+        layout.linkSize(SwingConstants.HORIZONTAL, new Component[] {browseButton, findButton, removeButton});
 
         layout.setVerticalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            layout.createParallelGroup(GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(drvListScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 64, Short.MAX_VALUE)
+                .addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
+                    .addComponent(drvListScrollPane, GroupLayout.DEFAULT_SIZE, 64, Short.MAX_VALUE)
                     .addComponent(drvListLabel)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(browseButton)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(removeButton)))
                 .addGap(24, 24, 24)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(drvClassComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+                    .addComponent(drvClassComboBox, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
                     .addComponent(drvClassLabel)
                     .addComponent(findButton))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(nameTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+                    .addComponent(nameTextField, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
                     .addComponent(nameLabel))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(progressMessageLabel)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(progressContainerPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(progressContainerPanel, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
         );
     }
@@ -503,18 +478,18 @@ public final class AddDriverDialog extends javax.swing.JPanel {
             
     
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton browseButton;
-    private javax.swing.JComboBox drvClassComboBox;
-    private javax.swing.JLabel drvClassLabel;
-    private javax.swing.JList drvList;
-    private javax.swing.JLabel drvListLabel;
-    private javax.swing.JScrollPane drvListScrollPane;
-    private javax.swing.JButton findButton;
-    private javax.swing.JLabel nameLabel;
-    private javax.swing.JTextField nameTextField;
-    private javax.swing.JPanel progressContainerPanel;
-    private javax.swing.JLabel progressMessageLabel;
-    private javax.swing.JButton removeButton;
+    private JButton browseButton;
+    private JComboBox drvClassComboBox;
+    private JLabel drvClassLabel;
+    private JList drvList;
+    private JLabel drvListLabel;
+    private JScrollPane drvListScrollPane;
+    private JButton findButton;
+    private JLabel nameLabel;
+    private JTextField nameTextField;
+    private JPanel progressContainerPanel;
+    private JLabel progressMessageLabel;
+    private JButton removeButton;
     // End of variables declaration//GEN-END:variables
     
     private boolean isDriverClass(URLClassLoader jarloader, String className) {

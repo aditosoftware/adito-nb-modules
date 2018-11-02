@@ -12,7 +12,7 @@
   <groupId>org.netbeans.api</groupId>
   <artifactId>org-netbeans-modules-db</artifactId>
   <packaging>nbm</packaging>
-  <version>RELEASE82-1.0.8</version> <!-- HINT: Change Version in Root-Pom -> DependencyManagement! -->
+  <version>RELEASE90a-1.0.8</version> <!-- HINT: Change Version in Root-Pom -> DependencyManagement! -->
   <name>Netbeans IDE module: org-netbeans-modules-db</name>
 
   <properties>
@@ -103,17 +103,17 @@
     </dependency>
     <dependency>
       <groupId>org.netbeans.api</groupId>
+      <artifactId>org-openide-util-ui</artifactId>
+      <version>${netbeans.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.netbeans.api</groupId>
       <artifactId>org-openide-util</artifactId>
       <version>${netbeans.version}</version>
     </dependency>
     <dependency>
       <groupId>org.netbeans.api</groupId>
       <artifactId>org-openide-util-lookup</artifactId>
-      <version>${netbeans.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.netbeans.api</groupId>
-      <artifactId>org-openide-util-ui</artifactId>
       <version>${netbeans.version}</version>
     </dependency>
     <dependency>
@@ -153,7 +153,7 @@
             <dependency>
               <id>org.netbeans.modules:org-netbeans-modules-db-metadata-model</id>
               <type>impl</type>
-              <explicitValue>org.netbeans.modules.db.metadata.model/1 = 201609300101</explicitValue>
+              <explicitValue>org.netbeans.modules.db.metadata.model/1 = 20181030-19e5871a24d5</explicitValue>
             </dependency>
           </moduleDependencies>
 

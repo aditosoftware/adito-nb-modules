@@ -1,69 +1,73 @@
 /*
- * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
- * Copyright 1997-2010 Oracle and/or its affiliates. All rights reserved.
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * Oracle and Java are registered trademarks of Oracle and/or its affiliates.
- * Other names may be trademarks of their respective owners.
- *
- * The contents of this file are subject to the terms of either the GNU
- * General Public License Version 2 only ("GPL") or the Common
- * Development and Distribution License("CDDL") (collectively, the
- * "License"). You may not use this file except in compliance with the
- * License. You can obtain a copy of the License at
- * http://www.netbeans.org/cddl-gplv2.html
- * or nbbuild/licenses/CDDL-GPL-2-CP. See the License for the
- * specific language governing permissions and limitations under the
- * License.  When distributing the software, include this License Header
- * Notice in each file and include the License file at
- * nbbuild/licenses/CDDL-GPL-2-CP.  Oracle designates this
- * particular file as subject to the "Classpath" exception as provided
- * by Oracle in the GPL Version 2 section of the License file that
- * accompanied this code. If applicable, add the following below the
- * License Header, with the fields enclosed by brackets [] replaced by
- * your own identifying information:
- * "Portions Copyrighted [year] [name of copyright owner]"
- *
- * Contributor(s):
- *
- * The Original Software is NetBeans. The Initial Developer of the Original
- * Software is Sun Microsystems, Inc. Portions Copyright 1997-2009 Sun
- * Microsystems, Inc. All Rights Reserved.
- *
- * If you wish your version of this file to be governed by only the CDDL
- * or only the GPL Version 2, indicate your decision by adding
- * "[Contributor] elects to include this software in this distribution
- * under the [CDDL or GPL Version 2] license." If you do not indicate a
- * single choice of license, a recipient has the option to distribute
- * your version of this file under either the CDDL, the GPL Version 2 or
- * to extend the choice of license to its licensees as provided above.
- * However, if you add GPL Version 2 code and therefore, elected the GPL
- * Version 2 license, then the option applies only if the new code is
- * made subject to such option by the copyright holder.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 
 package org.netbeans.modules.db.explorer.dlg;
 
-import org.netbeans.lib.ddl.DDLException;
-import org.netbeans.lib.ddl.impl.Specification;
-import org.netbeans.lib.ddl.util.PListReader;
-import org.netbeans.modules.db.explorer.DbUtilities;
-import org.openide.*;
-import org.openide.awt.Mnemonics;
-import org.openide.util.*;
-
-import javax.swing.*;
-import javax.swing.border.*;
-import javax.swing.event.*;
-import javax.swing.table.*;
-import java.awt.*;
-import java.awt.event.*;
+import java.awt.Dialog;
+import java.awt.Dimension;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.GridLayout;
+import java.awt.Insets;
+import java.awt.Toolkit;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
-import java.util.List;
 import java.util.*;
 import java.util.concurrent.Callable;
-import java.util.logging.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.swing.JButton;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import javax.swing.JTextField;
+import javax.swing.border.BevelBorder;
+import javax.swing.border.EmptyBorder;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
+import javax.swing.event.TableModelEvent;
+import javax.swing.event.TableModelListener;
+import javax.swing.table.TableColumn;
+import javax.swing.table.TableColumnModel;
+import javax.swing.table.TableModel;
+import org.netbeans.api.db.explorer.node.BaseNode;
+import org.netbeans.lib.ddl.DDLException;
+import org.openide.DialogDescriptor;
+import org.openide.DialogDisplayer;
+import org.openide.NotifyDescriptor;
+import org.openide.util.NbBundle;
+import org.netbeans.lib.ddl.impl.Specification;
+import org.netbeans.lib.ddl.util.PListReader;
+import org.netbeans.modules.db.explorer.DatabaseConnection;
+import org.netbeans.modules.db.explorer.DbUtilities;
+import org.netbeans.modules.db.explorer.node.TableNode;
+import org.openide.NotificationLineSupport;
+import org.openide.awt.Mnemonics;
+import org.openide.nodes.Node;
+import org.openide.util.HelpCtx;
 
 public class CreateTableDialog {
     Dialog dialog = null;
@@ -128,7 +132,7 @@ public class CreateTableDialog {
             constr.weightx = 0.0;
             constr.weighty = 0.0;
             constr.fill = GridBagConstraints.NONE;
-            constr.insets = new java.awt.Insets (2, 2, 2, 2);
+            constr.insets = new Insets (2, 2, 2, 2);
             constr.gridx = 0;
             constr.gridy = 0;
             layout.setConstraints(label, constr);
@@ -139,7 +143,7 @@ public class CreateTableDialog {
             constr.weighty = 0.0;
             constr.gridx = 1;
             constr.gridy = 0;
-            constr.insets = new java.awt.Insets (2, 2, 2, 2);
+            constr.insets = new Insets (2, 2, 2, 2);
             // ADITO
             //dbnamefield = new JTextField(getTableUntitledName(), 10);
             dbnamefield = new JTextField(NbBundle.getMessage (CreateTableDialog.class, "CreateTableUntitledName"), 10); // NOI18N
@@ -175,7 +179,7 @@ public class CreateTableDialog {
             constr.gridy = 1;
             constr.gridwidth = 4;
             constr.gridheight = 3;
-            constr.insets = new java.awt.Insets (2, 2, 2, 2);
+            constr.insets = new Insets (2, 2, 2, 2);
             table = new DataTable(new DataModel());
             table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
             table.setToolTipText(NbBundle.getMessage (CreateTableDialog.class, "ACS_CreateTableColumnTableA11yDesc"));
@@ -219,7 +223,7 @@ public class CreateTableDialog {
             constr.weighty = 0.0;
             constr.gridx = 4;
             constr.gridy = 1;
-            constr.insets = new java.awt.Insets (2, 8, 2, 2);
+            constr.insets = new Insets (2, 8, 2, 2);
             JPanel btnpane = new JPanel();
             GridLayout btnlay = new GridLayout(5,1,0,5);
             btnpane.setLayout(btnlay);
@@ -417,7 +421,7 @@ public class CreateTableDialog {
     {
         return new CreateTableDialog(spec, schema, pItems, pTableName).descriptor;
     }
-    
+
     // ADITO
     /*private String getTableUntitledName() {
         final String nameBase = NbBundle.getMessage (CreateTableDialog.class, "CreateTableUntitledName"); // NOI18N
