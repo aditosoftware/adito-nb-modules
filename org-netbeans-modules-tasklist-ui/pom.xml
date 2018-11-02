@@ -12,7 +12,7 @@
   <groupId>org.netbeans.modules</groupId>
   <artifactId>org-netbeans-modules-tasklist-ui</artifactId>
   <packaging>nbm</packaging>
-  <version>RELEASE82-1.0.7</version> <!-- HINT: Change Version in Root-Pom -> DependencyManagement! -->
+  <version>RELEASE90a-1.0.7</version> <!-- HINT: Change Version in Root-Pom -> DependencyManagement! -->
   <name>Netbeans IDE module: org-netbeans-modules-tasklist-ui</name>
 
   <properties>
@@ -118,7 +118,7 @@
             <dependency>
               <id>org.netbeans.api:org-netbeans-spi-tasklist</id>
               <type>impl</type>
-              <explicitValue>org.netbeans.spi.tasklist/1 = 201609300101</explicitValue>
+              <explicitValue>org.netbeans.spi.tasklist/1 = 20181030-19e5871a24d5</explicitValue>
             </dependency>
           </moduleDependencies>
           <cluster>ide</cluster>
