@@ -1,45 +1,20 @@
 /*
- * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
- * Copyright 1997-2010 Oracle and/or its affiliates. All rights reserved.
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * Oracle and Java are registered trademarks of Oracle and/or its affiliates.
- * Other names may be trademarks of their respective owners.
- *
- * The contents of this file are subject to the terms of either the GNU
- * General Public License Version 2 only ("GPL") or the Common
- * Development and Distribution License("CDDL") (collectively, the
- * "License"). You may not use this file except in compliance with the
- * License. You can obtain a copy of the License at
- * http://www.netbeans.org/cddl-gplv2.html
- * or nbbuild/licenses/CDDL-GPL-2-CP. See the License for the
- * specific language governing permissions and limitations under the
- * License.  When distributing the software, include this License Header
- * Notice in each file and include the License file at
- * nbbuild/licenses/CDDL-GPL-2-CP.  Oracle designates this
- * particular file as subject to the "Classpath" exception as provided
- * by Oracle in the GPL Version 2 section of the License file that
- * accompanied this code. If applicable, add the following below the
- * License Header, with the fields enclosed by brackets [] replaced by
- * your own identifying information:
- * "Portions Copyrighted [year] [name of copyright owner]"
- *
- * Contributor(s):
- *
- * The Original Software is NetBeans. The Initial Developer of the Original
- * Software is Sun Microsystems, Inc. Portions Copyright 1997-2006 Sun
- * Microsystems, Inc. All Rights Reserved.
- *
- * If you wish your version of this file to be governed by only the CDDL
- * or only the GPL Version 2, indicate your decision by adding
- * "[Contributor] elects to include this software in this distribution
- * under the [CDDL or GPL Version 2] license." If you do not indicate a
- * single choice of license, a recipient has the option to distribute
- * your version of this file under either the CDDL, the GPL Version 2 or
- * to extend the choice of license to its licensees as provided above.
- * However, if you add GPL Version 2 code and therefore, elected the GPL
- * Version 2 license, then the option applies only if the new code is
- * made subject to such option by the copyright holder.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 
 package org.netbeans.core.windows.options;
@@ -75,7 +50,7 @@ import org.openide.util.NbBundle;
 import org.openide.util.NbPreferences;
 
 @OptionsPanelController.Keywords(keywords={"#KW_LafOptions"}, location="Appearance", tabTitle="#Laf_DisplayName")
-public class LafPanel extends javax.swing.JPanel {
+public class LafPanel extends JPanel {
 
     protected final LafOptionsPanelController controller;
     
@@ -131,21 +106,21 @@ public class LafPanel extends javax.swing.JPanel {
         java.awt.GridBagConstraints gridBagConstraints;
 
         buttonGroup1 = new javax.swing.ButtonGroup();
-        panelLaF = new javax.swing.JPanel();
-        checkMaximizeNativeLaF = new javax.swing.JCheckBox();
-        panelLaFCombo = new javax.swing.JPanel();
+        panelLaF = new JPanel();
+        checkMaximizeNativeLaF = new JCheckBox();
+        panelLaFCombo = new JPanel();
         comboLaf = new javax.swing.JComboBox();
-        lblLaf = new javax.swing.JLabel();
-        lblRestart = new javax.swing.JLabel();
+        lblLaf = new JLabel();
+        lblRestart = new JLabel();
 
         setBorder(javax.swing.BorderFactory.createEmptyBorder(10, 10, 10, 10));
         setLayout(new java.awt.GridBagLayout());
 
-        panelLaF.setLayout(new java.awt.BorderLayout());
+        panelLaF.setLayout(new BorderLayout());
 
-        org.openide.awt.Mnemonics.setLocalizedText(checkMaximizeNativeLaF, org.openide.util.NbBundle.getMessage(LafPanel.class, "LafPanel.checkMaximizeNativeLaF.text")); // NOI18N
-        checkMaximizeNativeLaF.setToolTipText(org.openide.util.NbBundle.getMessage(LafPanel.class, "LafPanel.checkMaximizeNativeLaF.toolTipText")); // NOI18N
-        panelLaF.add(checkMaximizeNativeLaF, java.awt.BorderLayout.WEST);
+        org.openide.awt.Mnemonics.setLocalizedText(checkMaximizeNativeLaF, NbBundle.getMessage(LafPanel.class, "LafPanel.checkMaximizeNativeLaF.text")); // NOI18N
+        checkMaximizeNativeLaF.setToolTipText(NbBundle.getMessage(LafPanel.class, "LafPanel.checkMaximizeNativeLaF.toolTipText")); // NOI18N
+        panelLaF.add(checkMaximizeNativeLaF, BorderLayout.WEST);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
@@ -156,15 +131,15 @@ public class LafPanel extends javax.swing.JPanel {
         gridBagConstraints.insets = new java.awt.Insets(5, 0, 0, 0);
         add(panelLaF, gridBagConstraints);
 
-        panelLaFCombo.setLayout(new java.awt.BorderLayout(3, 0));
-        panelLaFCombo.add(comboLaf, java.awt.BorderLayout.CENTER);
+        panelLaFCombo.setLayout(new BorderLayout(3, 0));
+        panelLaFCombo.add(comboLaf, BorderLayout.CENTER);
 
         lblLaf.setLabelFor(comboLaf);
         org.openide.awt.Mnemonics.setLocalizedText(lblLaf, NbBundle.getMessage(LafPanel.class, "LafPanel.lblLaf.text")); // NOI18N
-        panelLaFCombo.add(lblLaf, java.awt.BorderLayout.WEST);
+        panelLaFCombo.add(lblLaf, BorderLayout.WEST);
 
         org.openide.awt.Mnemonics.setLocalizedText(lblRestart, NbBundle.getMessage(LafPanel.class, "LafPanel.lblRestart.text")); // NOI18N
-        panelLaFCombo.add(lblRestart, java.awt.BorderLayout.LINE_END);
+        panelLaFCombo.add(lblRestart, BorderLayout.LINE_END);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
@@ -203,12 +178,12 @@ public class LafPanel extends javax.swing.JPanel {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.ButtonGroup buttonGroup1;
-    private javax.swing.JCheckBox checkMaximizeNativeLaF;
+    private JCheckBox checkMaximizeNativeLaF;
     private javax.swing.JComboBox comboLaf;
-    private javax.swing.JLabel lblLaf;
-    private javax.swing.JLabel lblRestart;
-    private javax.swing.JPanel panelLaF;
-    private javax.swing.JPanel panelLaFCombo;
+    private JLabel lblLaf;
+    private JLabel lblRestart;
+    private JPanel panelLaF;
+    private JPanel panelLaFCombo;
     // End of variables declaration//GEN-END:variables
 
 
@@ -229,7 +204,7 @@ public class LafPanel extends javax.swing.JPanel {
         boolean isAqua = "Aqua".equals(UIManager.getLookAndFeel().getID()); //NOI18N
         for( LookAndFeelInfo li : lafs ) {
             if( currentLAFClassName.equals( li.getClassName() ) 
-                    || (isAqua && li.getClassName().contains("apple.laf.AquaLookAndFeel")) ) { //NOI18N
+                    || (isAqua && li.getClassName().contains("com.apple.laf.AquaLookAndFeel")) ) { //NOI18N
                 currentLaf = li;
                 break;
             }
@@ -245,7 +220,7 @@ public class LafPanel extends javax.swing.JPanel {
         boolean isAqua = "Aqua".equals(UIManager.getLookAndFeel().getID()); //NOI18N
         for( LookAndFeelInfo li : lafs ) {
             if( lafClassName.equals( li.getClassName() )
-                    || (isAqua && li.getClassName().contains("apple.laf.AquaLookAndFeel")) ) { //NOI18N
+                    || (isAqua && li.getClassName().contains("com.apple.laf.AquaLookAndFeel")) ) { //NOI18N
                 currentLaf = li;
                 break;
             }

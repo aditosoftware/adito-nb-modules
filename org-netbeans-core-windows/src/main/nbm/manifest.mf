@@ -1,19 +1,10 @@
 Manifest-Version: 1.0
-OpenIDE-Module-Friends: org.netbeans.core.multitabs, org.netbeans.core
- .nativeaccess
-OpenIDE-Module-Java-Dependencies: Java > 1.7
-OpenIDE-Module-Implementation-Version: 201609300101
-AutoUpdate-Show-In-Client: false
 OpenIDE-Module: org.netbeans.core.windows/2
-OpenIDE-Module-Localizing-Bundle: org/netbeans/core/windows/resources/
- Bundle.properties
+OpenIDE-Module-Localizing-Bundle: org/netbeans/core/windows/resources/Bundle.properties
 OpenIDE-Module-Layer: org/netbeans/core/windows/resources/layer.xml
-OpenIDE-Module-Provides: org.netbeans.core.WindowSystem, org.openide.w
- indows.WindowManager, org.openide.windows.TopComponent$Registry, org.
- openide.DialogDisplayer, org.openide.nodes.NodeOperation
-OpenIDE-Module-Recommends: org.netbeans.core.windows.nativeaccess.Nati
- veWindowSystem
+OpenIDE-Module-Provides: org.netbeans.core.WindowSystem, org.openide.windows.WindowManager, org.openide.windows.TopComponent$Registry, org.openide.DialogDisplayer, org.openide.nodes.NodeOperation
+OpenIDE-Module-Recommends: org.netbeans.core.windows.nativeaccess.NativeWindowSystem
+AutoUpdate-Show-In-Client: false
 AutoUpdate-Essential-Module: true
-OpenIDE-Module-Specification-Version: 2.81.1
-OpenIDE-Module-Requires: org.openide.modules.ModuleFormat1
-
+OpenIDE-Module-Specification-Version: 2.84.1
+OpenIDE-Module-Friends: org.netbeans.core.multitabs, org.netbeans.core.nativeaccess

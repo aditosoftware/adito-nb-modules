@@ -1,43 +1,20 @@
 /*
- * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
- * Copyright 2013 Oracle and/or its affiliates. All rights reserved.
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * Oracle and Java are registered trademarks of Oracle and/or its affiliates.
- * Other names may be trademarks of their respective owners.
- *
- * The contents of this file are subject to the terms of either the GNU
- * General Public License Version 2 only ("GPL") or the Common
- * Development and Distribution License("CDDL") (collectively, the
- * "License"). You may not use this file except in compliance with the
- * License. You can obtain a copy of the License at
- * http://www.netbeans.org/cddl-gplv2.html
- * or nbbuild/licenses/CDDL-GPL-2-CP. See the License for the
- * specific language governing permissions and limitations under the
- * License.  When distributing the software, include this License Header
- * Notice in each file and include the License file at
- * nbbuild/licenses/CDDL-GPL-2-CP.  Oracle designates this
- * particular file as subject to the "Classpath" exception as provided
- * by Oracle in the GPL Version 2 section of the License file that
- * accompanied this code. If applicable, add the following below the
- * License Header, with the fields enclosed by brackets [] replaced by
- * your own identifying information:
- * "Portions Copyrighted [year] [name of copyright owner]"
- *
- * If you wish your version of this file to be governed by only the CDDL
- * or only the GPL Version 2, indicate your decision by adding
- * "[Contributor] elects to include this software in this distribution
- * under the [CDDL or GPL Version 2] license." If you do not indicate a
- * single choice of license, a recipient has the option to distribute
- * your version of this file under either the CDDL, the GPL Version 2 or
- * to extend the choice of license to its licensees as provided above.
- * However, if you add GPL Version 2 code and therefore, elected the GPL
- * Version 2 license, then the option applies only if the new code is
- * made subject to such option by the copyright holder.
- *
- * Contributor(s):
- *
- * Portions Copyrighted 2013 Sun Microsystems, Inc.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 
 package org.netbeans.core.windows.documentgroup;
@@ -119,24 +96,24 @@ class ManageGroupsPanel extends javax.swing.JPanel {
 
         scrollGroups = new javax.swing.JScrollPane();
         listGroups = new javax.swing.JList();
-        btnRemove = new javax.swing.JButton();
-        btnRemoveAll = new javax.swing.JButton();
+        btnRemove = new JButton();
+        btnRemoveAll = new JButton();
 
         setBorder(javax.swing.BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
         listGroups.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
         scrollGroups.setViewportView(listGroups);
 
-        org.openide.awt.Mnemonics.setLocalizedText(btnRemove, org.openide.util.NbBundle.getMessage(ManageGroupsPanel.class, "ManageGroupsPanel.btnRemove.text")); // NOI18N
-        btnRemove.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
+        org.openide.awt.Mnemonics.setLocalizedText(btnRemove, NbBundle.getMessage(ManageGroupsPanel.class, "ManageGroupsPanel.btnRemove.text")); // NOI18N
+        btnRemove.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent evt) {
                 btnRemoveActionPerformed(evt);
             }
         });
 
-        org.openide.awt.Mnemonics.setLocalizedText(btnRemoveAll, org.openide.util.NbBundle.getMessage(ManageGroupsPanel.class, "ManageGroupsPanel.btnRemoveAll.text")); // NOI18N
-        btnRemoveAll.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
+        org.openide.awt.Mnemonics.setLocalizedText(btnRemoveAll, NbBundle.getMessage(ManageGroupsPanel.class, "ManageGroupsPanel.btnRemoveAll.text")); // NOI18N
+        btnRemoveAll.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent evt) {
                 btnRemoveAllActionPerformed(evt);
             }
         });
@@ -162,13 +139,13 @@ class ManageGroupsPanel extends javax.swing.JPanel {
         );
     }// </editor-fold>//GEN-END:initComponents
 
-    private void btnRemoveAllActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRemoveAllActionPerformed
+    private void btnRemoveAllActionPerformed(ActionEvent evt) {//GEN-FIRST:event_btnRemoveAllActionPerformed
         GroupsManager.getDefault().removeAllGroups();
         fillGroups();
         enableButtons();
     }//GEN-LAST:event_btnRemoveAllActionPerformed
 
-    private void btnRemoveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRemoveActionPerformed
+    private void btnRemoveActionPerformed(ActionEvent evt) {//GEN-FIRST:event_btnRemoveActionPerformed
         DocumentGroupImpl group = (DocumentGroupImpl) listGroups.getSelectedValue();
         if( null != group ) {
             GroupsManager.getDefault().removeGroup( group );
@@ -179,8 +156,8 @@ class ManageGroupsPanel extends javax.swing.JPanel {
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton btnRemove;
-    private javax.swing.JButton btnRemoveAll;
+    private JButton btnRemove;
+    private JButton btnRemoveAll;
     private javax.swing.JList listGroups;
     private javax.swing.JScrollPane scrollGroups;
     // End of variables declaration//GEN-END:variables

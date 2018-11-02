@@ -1,45 +1,20 @@
 /*
- * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
- * Copyright 1997-2010 Oracle and/or its affiliates. All rights reserved.
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * Oracle and Java are registered trademarks of Oracle and/or its affiliates.
- * Other names may be trademarks of their respective owners.
- *
- * The contents of this file are subject to the terms of either the GNU
- * General Public License Version 2 only ("GPL") or the Common
- * Development and Distribution License("CDDL") (collectively, the
- * "License"). You may not use this file except in compliance with the
- * License. You can obtain a copy of the License at
- * http://www.netbeans.org/cddl-gplv2.html
- * or nbbuild/licenses/CDDL-GPL-2-CP. See the License for the
- * specific language governing permissions and limitations under the
- * License.  When distributing the software, include this License Header
- * Notice in each file and include the License file at
- * nbbuild/licenses/CDDL-GPL-2-CP.  Oracle designates this
- * particular file as subject to the "Classpath" exception as provided
- * by Oracle in the GPL Version 2 section of the License file that
- * accompanied this code. If applicable, add the following below the
- * License Header, with the fields enclosed by brackets [] replaced by
- * your own identifying information:
- * "Portions Copyrighted [year] [name of copyright owner]"
- *
- * Contributor(s):
- *
- * The Original Software is NetBeans. The Initial Developer of the Original
- * Software is Sun Microsystems, Inc. Portions Copyright 1997-2006 Sun
- * Microsystems, Inc. All Rights Reserved.
- *
- * If you wish your version of this file to be governed by only the CDDL
- * or only the GPL Version 2, indicate your decision by adding
- * "[Contributor] elects to include this software in this distribution
- * under the [CDDL or GPL Version 2] license." If you do not indicate a
- * single choice of license, a recipient has the option to distribute
- * your version of this file under either the CDDL, the GPL Version 2 or
- * to extend the choice of license to its licensees as provided above.
- * However, if you add GPL Version 2 code and therefore, elected the GPL
- * Version 2 license, then the option applies only if the new code is
- * made subject to such option by the copyright holder.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 
 package org.netbeans.core.windows.view.ui.toolbars;
@@ -85,7 +60,7 @@ import org.openide.util.datatransfer.ExTransferable;
  *
  * @author  Stanislav Aubrecht
  */
-public class ConfigureToolbarPanel extends javax.swing.JPanel implements Runnable, ExplorerManager.Provider {
+public class ConfigureToolbarPanel extends JPanel implements Runnable, ExplorerManager.Provider {
 
     private static final Logger LOG = Logger.getLogger(ConfigureToolbarPanel.class.getName());
     private static WeakReference<Dialog> dialogRef; // is weak reference necessary?
@@ -137,13 +112,13 @@ public class ConfigureToolbarPanel extends javax.swing.JPanel implements Runnabl
     }
     
     public static void showConfigureDialog() {
-        java.awt.Dialog dialog = null;
+        Dialog dialog = null;
         if (dialogRef != null)
             dialog = dialogRef.get();
         if (dialog == null) {
             JButton closeButton = new JButton();
             closeButton.getAccessibleContext().setAccessibleDescription( getBundleString("ACSD_Close") );
-            org.openide.awt.Mnemonics.setLocalizedText(
+            Mnemonics.setLocalizedText(
                 closeButton, getBundleString("CTL_Close")); 
             DialogDescriptor dd = new DialogDescriptor(
                 new ConfigureToolbarPanel(),
@@ -205,27 +180,27 @@ public class ConfigureToolbarPanel extends javax.swing.JPanel implements Runnabl
     private void initComponents() {
         java.awt.GridBagConstraints gridBagConstraints;
 
-        lblHint = new javax.swing.JLabel();
-        palettePanel = new javax.swing.JPanel();
-        checkSmallIcons = new javax.swing.JCheckBox();
-        btnNewToolbar = new javax.swing.JButton();
-        btnReset = new javax.swing.JButton();
+        lblHint = new JLabel();
+        palettePanel = new JPanel();
+        checkSmallIcons = new JCheckBox();
+        btnNewToolbar = new JButton();
+        btnReset = new JButton();
 
         FormListener formListener = new FormListener();
 
         setLayout(new java.awt.GridBagLayout());
 
-        setMinimumSize(new java.awt.Dimension(453, 68));
-        org.openide.awt.Mnemonics.setLocalizedText(lblHint, getBundleString("CTL_TreeLabel")); // NOI18N
+        setMinimumSize(new Dimension(453, 68));
+        Mnemonics.setLocalizedText(lblHint, getBundleString("CTL_TreeLabel")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridwidth = 2;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
         gridBagConstraints.insets = new java.awt.Insets(10, 10, 1, 10);
         add(lblHint, gridBagConstraints);
 
-        palettePanel.setLayout(new java.awt.BorderLayout());
+        palettePanel.setLayout(new BorderLayout());
 
-        palettePanel.setBorder(javax.swing.BorderFactory.createEtchedBorder());
+        palettePanel.setBorder(BorderFactory.createEtchedBorder());
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 1;
@@ -236,8 +211,8 @@ public class ConfigureToolbarPanel extends javax.swing.JPanel implements Runnabl
         gridBagConstraints.insets = new java.awt.Insets(1, 10, 5, 10);
         add(palettePanel, gridBagConstraints);
 
-        org.openide.awt.Mnemonics.setLocalizedText(checkSmallIcons, getBundleString("CTL_SmallIcons")); // NOI18N
-        checkSmallIcons.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 0, 0, 0));
+        Mnemonics.setLocalizedText(checkSmallIcons, getBundleString("CTL_SmallIcons")); // NOI18N
+        checkSmallIcons.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
         checkSmallIcons.setMargin(new java.awt.Insets(0, 0, 0, 0));
         checkSmallIcons.setSelected( ToolbarPool.getDefault().getPreferredIconSize() == 16 );
         checkSmallIcons.addActionListener(formListener);
@@ -250,7 +225,7 @@ public class ConfigureToolbarPanel extends javax.swing.JPanel implements Runnabl
         add(checkSmallIcons, gridBagConstraints);
         checkSmallIcons.getAccessibleContext().setAccessibleDescription(getBundleString("ACSD_SmallIcons")); // NOI18N
 
-        org.openide.awt.Mnemonics.setLocalizedText(btnNewToolbar, getBundleString("CTL_NewToolbar")); // NOI18N
+        Mnemonics.setLocalizedText(btnNewToolbar, getBundleString("CTL_NewToolbar")); // NOI18N
         btnNewToolbar.addActionListener(formListener);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -261,7 +236,7 @@ public class ConfigureToolbarPanel extends javax.swing.JPanel implements Runnabl
         add(btnNewToolbar, gridBagConstraints);
         btnNewToolbar.getAccessibleContext().setAccessibleDescription(getBundleString("ACSD_NewToolbar")); // NOI18N
 
-        org.openide.awt.Mnemonics.setLocalizedText(btnReset, getBundleString("CTL_ResetToolbarsButton")); // NOI18N
+        Mnemonics.setLocalizedText(btnReset, getBundleString("CTL_ResetToolbarsButton")); // NOI18N
         btnReset.addActionListener(formListener);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -306,7 +281,7 @@ public class ConfigureToolbarPanel extends javax.swing.JPanel implements Runnabl
         DialogDescriptor dd = new DialogDescriptor( panel, NbBundle.getMessage(ConfigureToolbarPanel.class, "PROP_newToolbarDialog"), 
                 true, DialogDescriptor.OK_CANCEL_OPTION, null, DialogDescriptor.DEFAULT_ALIGN, new HelpCtx( ConfigureToolbarPanel.class), null );
 
-        Dialog dlg = org.openide.DialogDisplayer.getDefault ().createDialog( dd );
+        Dialog dlg = DialogDisplayer.getDefault ().createDialog( dd );
         dlg.setVisible( true );
         if (dd.getValue() != NotifyDescriptor.OK_OPTION)
             return;
@@ -332,7 +307,7 @@ public class ConfigureToolbarPanel extends javax.swing.JPanel implements Runnabl
             } else {
                 NotifyDescriptor.Message msg = new NotifyDescriptor.Message(
                         NbBundle.getMessage(ConfigureToolbarPanel.class, "MSG_ToolbarExists", s ) ); // NOI18N
-                org.openide.DialogDisplayer.getDefault().notify( msg );
+                DialogDisplayer.getDefault().notify( msg );
             }
         } catch (IOException e) {
             Exceptions.printStackTrace(e);
@@ -357,11 +332,11 @@ public class ConfigureToolbarPanel extends javax.swing.JPanel implements Runnabl
     
     
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton btnNewToolbar;
-    private javax.swing.JButton btnReset;
-    private javax.swing.JCheckBox checkSmallIcons;
-    private javax.swing.JLabel lblHint;
-    private javax.swing.JPanel palettePanel;
+    private JButton btnNewToolbar;
+    private JButton btnReset;
+    private JCheckBox checkSmallIcons;
+    private JLabel lblHint;
+    private JPanel palettePanel;
     // End of variables declaration//GEN-END:variables
 
     @Override
@@ -448,7 +423,7 @@ public class ConfigureToolbarPanel extends javax.swing.JPanel implements Runnabl
             return new Action[0];
         }
 
-        private static class MyChildren extends FilterNode.Children {
+        private static class MyChildren extends Children {
 
             public MyChildren(Node original) {
                 super(original);

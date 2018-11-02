@@ -1,45 +1,20 @@
 /*
- * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
- * Copyright 1997-2010 Oracle and/or its affiliates. All rights reserved.
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * Oracle and Java are registered trademarks of Oracle and/or its affiliates.
- * Other names may be trademarks of their respective owners.
- *
- * The contents of this file are subject to the terms of either the GNU
- * General Public License Version 2 only ("GPL") or the Common
- * Development and Distribution License("CDDL") (collectively, the
- * "License"). You may not use this file except in compliance with the
- * License. You can obtain a copy of the License at
- * http://www.netbeans.org/cddl-gplv2.html
- * or nbbuild/licenses/CDDL-GPL-2-CP. See the License for the
- * specific language governing permissions and limitations under the
- * License.  When distributing the software, include this License Header
- * Notice in each file and include the License file at
- * nbbuild/licenses/CDDL-GPL-2-CP.  Oracle designates this
- * particular file as subject to the "Classpath" exception as provided
- * by Oracle in the GPL Version 2 section of the License file that
- * accompanied this code. If applicable, add the following below the
- * License Header, with the fields enclosed by brackets [] replaced by
- * your own identifying information:
- * "Portions Copyrighted [year] [name of copyright owner]"
- *
- * Contributor(s):
- *
- * The Original Software is NetBeans. The Initial Developer of the Original
- * Software is Sun Microsystems, Inc. Portions Copyright 1997-2006 Sun
- * Microsystems, Inc. All Rights Reserved.
- *
- * If you wish your version of this file to be governed by only the CDDL
- * or only the GPL Version 2, indicate your decision by adding
- * "[Contributor] elects to include this software in this distribution
- * under the [CDDL or GPL Version 2] license." If you do not indicate a
- * single choice of license, a recipient has the option to distribute
- * your version of this file under either the CDDL, the GPL Version 2 or
- * to extend the choice of license to its licensees as provided above.
- * However, if you add GPL Version 2 code and therefore, elected the GPL
- * Version 2 license, then the option applies only if the new code is
- * made subject to such option by the copyright holder.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 
 package org.netbeans.core.windows.options;
@@ -55,7 +30,7 @@ import org.openide.util.NbPreferences;
 import org.openide.util.Utilities;
 
 @OptionsPanelController.Keywords(keywords={"#KW_WindowOptions"}, location="Appearance", tabTitle="#AdvancedOption_DisplayName_WinSys")
-public class WinSysPanel extends javax.swing.JPanel {
+public class WinSysPanel extends JPanel {
 
     protected final WinSysOptionsPanelController controller;
     
@@ -88,8 +63,8 @@ public class WinSysPanel extends javax.swing.JPanel {
         setBorder(javax.swing.BorderFactory.createEmptyBorder(10, 10, 10, 10));
         setLayout(new java.awt.GridBagLayout());
 
-        org.openide.awt.Mnemonics.setLocalizedText(isDragImage, org.openide.util.NbBundle.getMessage(WinSysPanel.class, "LBL_DragWindowImage")); // NOI18N
-        isDragImage.setToolTipText(org.openide.util.NbBundle.getMessage(WinSysPanel.class, "IsDragWindowTooltip")); // NOI18N
+        org.openide.awt.Mnemonics.setLocalizedText(isDragImage, NbBundle.getMessage(WinSysPanel.class, "LBL_DragWindowImage")); // NOI18N
+        isDragImage.setToolTipText(NbBundle.getMessage(WinSysPanel.class, "IsDragWindowTooltip")); // NOI18N
         isDragImage.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 isDragImageActionPerformed(evt);
@@ -99,8 +74,8 @@ public class WinSysPanel extends javax.swing.JPanel {
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
         add(isDragImage, gridBagConstraints);
 
-        org.openide.awt.Mnemonics.setLocalizedText(isAlphaFloating, org.openide.util.NbBundle.getMessage(WinSysPanel.class, "LBL_TransparentFloatingWindows")); // NOI18N
-        isAlphaFloating.setToolTipText(org.openide.util.NbBundle.getMessage(WinSysPanel.class, "IsAlphaFloatingTooltip")); // NOI18N
+        org.openide.awt.Mnemonics.setLocalizedText(isAlphaFloating, NbBundle.getMessage(WinSysPanel.class, "LBL_TransparentFloatingWindows")); // NOI18N
+        isAlphaFloating.setToolTipText(NbBundle.getMessage(WinSysPanel.class, "IsAlphaFloatingTooltip")); // NOI18N
         isAlphaFloating.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 isAlphaFloatingActionPerformed(evt);
@@ -114,8 +89,8 @@ public class WinSysPanel extends javax.swing.JPanel {
         gridBagConstraints.insets = new java.awt.Insets(20, 0, 0, 0);
         add(isAlphaFloating, gridBagConstraints);
 
-        org.openide.awt.Mnemonics.setLocalizedText(isSnapping, org.openide.util.NbBundle.getMessage(WinSysPanel.class, "LBL_SnapFloatingWindows")); // NOI18N
-        isSnapping.setToolTipText(org.openide.util.NbBundle.getMessage(WinSysPanel.class, "IsSnappingTooltip")); // NOI18N
+        org.openide.awt.Mnemonics.setLocalizedText(isSnapping, NbBundle.getMessage(WinSysPanel.class, "LBL_SnapFloatingWindows")); // NOI18N
+        isSnapping.setToolTipText(NbBundle.getMessage(WinSysPanel.class, "IsSnappingTooltip")); // NOI18N
         isSnapping.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 isSnappingActionPerformed(evt);
@@ -127,8 +102,8 @@ public class WinSysPanel extends javax.swing.JPanel {
         gridBagConstraints.insets = new java.awt.Insets(0, 25, 0, 0);
         add(isSnapping, gridBagConstraints);
 
-        org.openide.awt.Mnemonics.setLocalizedText(isDragImageAlpha, org.openide.util.NbBundle.getMessage(WinSysPanel.class, "LBL_TransparentDragWindow")); // NOI18N
-        isDragImageAlpha.setToolTipText(org.openide.util.NbBundle.getMessage(WinSysPanel.class, "IsAlphaDragTooltip")); // NOI18N
+        org.openide.awt.Mnemonics.setLocalizedText(isDragImageAlpha, NbBundle.getMessage(WinSysPanel.class, "LBL_TransparentDragWindow")); // NOI18N
+        isDragImageAlpha.setToolTipText(NbBundle.getMessage(WinSysPanel.class, "IsAlphaDragTooltip")); // NOI18N
         isDragImageAlpha.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 isDragImageAlphaActionPerformed(evt);
@@ -140,8 +115,8 @@ public class WinSysPanel extends javax.swing.JPanel {
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
         add(isDragImageAlpha, gridBagConstraints);
 
-        org.openide.awt.Mnemonics.setLocalizedText(isSnapScreenEdges, org.openide.util.NbBundle.getMessage(WinSysPanel.class, "LBL_SnapToScreenEdges")); // NOI18N
-        isSnapScreenEdges.setToolTipText(org.openide.util.NbBundle.getMessage(WinSysPanel.class, "IsSnapScreenEdgesTooltip")); // NOI18N
+        org.openide.awt.Mnemonics.setLocalizedText(isSnapScreenEdges, NbBundle.getMessage(WinSysPanel.class, "LBL_SnapToScreenEdges")); // NOI18N
+        isSnapScreenEdges.setToolTipText(NbBundle.getMessage(WinSysPanel.class, "IsSnapScreenEdgesTooltip")); // NOI18N
         isSnapScreenEdges.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 isSnapScreenEdgesActionPerformed(evt);

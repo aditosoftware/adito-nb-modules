@@ -1,45 +1,20 @@
 /*
- * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
- * Copyright 1997-2010 Oracle and/or its affiliates. All rights reserved.
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * Oracle and Java are registered trademarks of Oracle and/or its affiliates.
- * Other names may be trademarks of their respective owners.
- *
- * The contents of this file are subject to the terms of either the GNU
- * General Public License Version 2 only ("GPL") or the Common
- * Development and Distribution License("CDDL") (collectively, the
- * "License"). You may not use this file except in compliance with the
- * License. You can obtain a copy of the License at
- * http://www.netbeans.org/cddl-gplv2.html
- * or nbbuild/licenses/CDDL-GPL-2-CP. See the License for the
- * specific language governing permissions and limitations under the
- * License.  When distributing the software, include this License Header
- * Notice in each file and include the License file at
- * nbbuild/licenses/CDDL-GPL-2-CP.  Oracle designates this
- * particular file as subject to the "Classpath" exception as provided
- * by Oracle in the GPL Version 2 section of the License file that
- * accompanied this code. If applicable, add the following below the
- * License Header, with the fields enclosed by brackets [] replaced by
- * your own identifying information:
- * "Portions Copyrighted [year] [name of copyright owner]"
- *
- * Contributor(s):
- *
- * The Original Software is NetBeans. The Initial Developer of the Original
- * Software is Sun Microsystems, Inc. Portions Copyright 1997-2006 Sun
- * Microsystems, Inc. All Rights Reserved.
- *
- * If you wish your version of this file to be governed by only the CDDL
- * or only the GPL Version 2, indicate your decision by adding
- * "[Contributor] elects to include this software in this distribution
- * under the [CDDL or GPL Version 2] license." If you do not indicate a
- * single choice of license, a recipient has the option to distribute
- * your version of this file under either the CDDL, the GPL Version 2 or
- * to extend the choice of license to its licensees as provided above.
- * However, if you add GPL Version 2 code and therefore, elected the GPL
- * Version 2 license, then the option applies only if the new code is
- * made subject to such option by the copyright holder.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 
 package org.netbeans.core.windows.model;
@@ -117,7 +92,7 @@ public interface Model {
     /** Removes top component group. */
     public void removeTopComponentGroup(TopComponentGroupImpl tcGroup);
     /** Adds sliding mode into specific side */ 
-    public void addSlidingMode(ModeImpl mode, String side, Map<String,Integer> slideInSizes);
+    public void addSlidingMode(ModeImpl mode, String side, Map<String, Integer> slideInSizes);
     /** Resets the model to an initial state. */
     public void reset();
     /** Set the size (width or height of the given TopComponent when it is slided in */
@@ -125,7 +100,7 @@ public interface Model {
     /**
      * Set whether the given TopComponent is maximized when it is slided-in.
      */
-    public void setTopComponentMaximizedWhenSlidedIn( String tcid, boolean maximized );
+    public void setTopComponentMaximizedWhenSlidedIn(String tcid, boolean maximized);
     
     // Mutators (global level) <<
     /////////////////////////////
@@ -196,11 +171,11 @@ public interface Model {
      * @param mode Mode
      * @return The slide side for TopComponents from the given mode.
      */
-    public String getSlideSideForMode( ModeImpl mode );
+    public String getSlideSideForMode(ModeImpl mode);
     /**
      * @return True if the given TopComponent is maximized when it is slided-in.
      */
-    public boolean isTopComponentMaximizedWhenSlidedIn( String tcid );
+    public boolean isTopComponentMaximizedWhenSlidedIn(String tcid);
 
     // Accessors (global level) >>
     //////////////////////////////   
@@ -273,7 +248,7 @@ public interface Model {
     /** Make mode permanent
      * @since 2.30
      */
-    public void makeModePermanent( ModeImpl target );
+    public void makeModePermanent(ModeImpl target);
     /** */
     public boolean isModeEmpty(ModeImpl mode);
     /** Indicates whether the mode contains the TopComponent. */
@@ -300,7 +275,7 @@ public interface Model {
     /** @since 2.30 */
     public void addModeOtherName(ModeImpl mode, String otherModeName);
     /** @since 2.31 */
-    public void dockMode( ModeImpl prevMode, ModeImpl floatingMode );
+    public void dockMode(ModeImpl prevMode, ModeImpl floatingMode);
     
     // Info about previous top component context, used by sliding kind of modes
     
@@ -325,9 +300,9 @@ public interface Model {
     /** Gets programatic name of goup. */
     public String getGroupName(TopComponentGroupImpl tcGroup);
 
-    public void openGroup(TopComponentGroupImpl tcGroup, 
-            Collection<TopComponent> openedTopComponents, 
-            Collection<TopComponent> openedBeforeTopComponenets);
+    public void openGroup(TopComponentGroupImpl tcGroup,
+                          Collection<TopComponent> openedTopComponents,
+                          Collection<TopComponent> openedBeforeTopComponenets);
     public void closeGroup(TopComponentGroupImpl tcGroup);
     public boolean isGroupOpened(TopComponentGroupImpl tcGroup);
     
@@ -382,7 +357,7 @@ public interface Model {
     public void setEditorAreaBoundsUserHelp(Rectangle bounds);
     public void setModeBoundsSeparatedHelp(ModeImpl mode, Rectangle bounds);
     
-    public void setSplitWeights( ModelElement[] snapshots, double[] splitWeights );
+    public void setSplitWeights(ModelElement[] snapshots, double[] splitWeights);
     // controller updates <<
     ////////////////////////
 

@@ -1,45 +1,20 @@
 /*
- * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
- * Copyright 1997-2010 Oracle and/or its affiliates. All rights reserved.
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * Oracle and Java are registered trademarks of Oracle and/or its affiliates.
- * Other names may be trademarks of their respective owners.
- *
- * The contents of this file are subject to the terms of either the GNU
- * General Public License Version 2 only ("GPL") or the Common
- * Development and Distribution License("CDDL") (collectively, the
- * "License"). You may not use this file except in compliance with the
- * License. You can obtain a copy of the License at
- * http://www.netbeans.org/cddl-gplv2.html
- * or nbbuild/licenses/CDDL-GPL-2-CP. See the License for the
- * specific language governing permissions and limitations under the
- * License.  When distributing the software, include this License Header
- * Notice in each file and include the License file at
- * nbbuild/licenses/CDDL-GPL-2-CP.  Oracle designates this
- * particular file as subject to the "Classpath" exception as provided
- * by Oracle in the GPL Version 2 section of the License file that
- * accompanied this code. If applicable, add the following below the
- * License Header, with the fields enclosed by brackets [] replaced by
- * your own identifying information:
- * "Portions Copyrighted [year] [name of copyright owner]"
- *
- * Contributor(s):
- *
- * The Original Software is NetBeans. The Initial Developer of the Original
- * Software is Sun Microsystems, Inc. Portions Copyright 1997-2008 Sun
- * Microsystems, Inc. All Rights Reserved.
- *
- * If you wish your version of this file to be governed by only the CDDL
- * or only the GPL Version 2, indicate your decision by adding
- * "[Contributor] elects to include this software in this distribution
- * under the [CDDL or GPL Version 2] license." If you do not indicate a
- * single choice of license, a recipient has the option to distribute
- * your version of this file under either the CDDL, the GPL Version 2 or
- * to extend the choice of license to its licensees as provided above.
- * However, if you add GPL Version 2 code and therefore, elected the GPL
- * Version 2 license, then the option applies only if the new code is
- * made subject to such option by the copyright holder.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 
 package org.netbeans.core.windows.services;
@@ -53,7 +28,6 @@ import java.awt.Dialog;
 import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.FlowLayout;
-import java.awt.FocusTraversalPolicy;
 import java.awt.Frame;
 import java.awt.GraphicsDevice;
 import java.awt.GridBagConstraints;
@@ -105,7 +79,6 @@ import javax.swing.MenuSelectionManager;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.WindowConstants;
-import javax.swing.border.EmptyBorder;
 import javax.swing.event.ChangeListener;
 import javax.swing.plaf.basic.BasicLookAndFeel;
 import javax.swing.plaf.metal.MetalLookAndFeel;
@@ -809,7 +782,6 @@ implements PropertyChangeListener, WindowListener, Mutex.Action<Void>, Comparato
 
             if (currentPrimaryButtons != null) {
                 panelForPrimary = new JPanel();
-                panelForPrimary.setBorder(new EmptyBorder(0,0,9,9));
 
                 if (currentAlign == -1) {
                     panelForPrimary.setLayout(new org.openide.awt.EqualFlowLayout());
@@ -824,7 +796,6 @@ implements PropertyChangeListener, WindowListener, Mutex.Action<Void>, Comparato
             
             if (currentSecondaryButtons != null) {
                 panelForSecondary = new JPanel();
-                panelForSecondary.setBorder(new EmptyBorder(0,9,9,0));
                 panelForSecondary.setLayout(new org.openide.awt.EqualFlowLayout(FlowLayout.LEFT));
                 for (int i = 0; i < currentSecondaryButtons.length; i++) {
                     modifyListener(currentSecondaryButtons[i], buttonListener, true); // add button listener
@@ -847,7 +818,7 @@ implements PropertyChangeListener, WindowListener, Mutex.Action<Void>, Comparato
             // add final button panel to the dialog
             if ((currentButtonsPanel != null)&&(currentButtonsPanel.getComponentCount() != 0)) {
                 if (currentButtonsPanel.getBorder() == null) {
-                    currentButtonsPanel.setBorder(new javax.swing.border.EmptyBorder(new java.awt.Insets(11, 6, 5, 5)));
+                    currentButtonsPanel.setBorder(new javax.swing.border.EmptyBorder(new Insets(11, 6, 5, 5)));
                 }
                 getContentPane().add(currentButtonsPanel, BorderLayout.SOUTH);
             }
@@ -886,7 +857,7 @@ implements PropertyChangeListener, WindowListener, Mutex.Action<Void>, Comparato
             // add final button panel to the dialog
             if (currentButtonsPanel != null) {
                 if (currentButtonsPanel.getBorder() == null) {
-                    currentButtonsPanel.setBorder(new javax.swing.border.EmptyBorder(new java.awt.Insets(6, 7, 5, 5)));
+                    currentButtonsPanel.setBorder(new javax.swing.border.EmptyBorder(new Insets(6, 7, 5, 5)));
                 }
                 getContentPane().add(currentButtonsPanel, BorderLayout.EAST);
             }
@@ -1059,7 +1030,7 @@ implements PropertyChangeListener, WindowListener, Mutex.Action<Void>, Comparato
         } else {
             // we will have to use dynamic method invocation to add the action listener
             // to generic component (and we succeed only if it has the addActionListener method)
-            java.lang.reflect.Method m = null;
+            Method m = null;
             try {
                 m = comp.getClass().getMethod(add ? "addActionListener" : "removeActionListener", new Class[] { ActionListener.class });// NOI18N
                 try {
@@ -1283,6 +1254,7 @@ implements PropertyChangeListener, WindowListener, Mutex.Action<Void>, Comparato
         // #81938: special handling WizardDescriptor to avoid close wizard during instantiate
         if (!descriptor.isNoDefaultClose() ) {
             descriptor.setValue(NotifyDescriptor.CLOSED_OPTION);
+            buttonListener.actionPerformed(new ActionEvent(NotifyDescriptor.CLOSED_OPTION, -1, ""));
         }
     }
     public void windowActivated(final java.awt.event.WindowEvent p1) {
@@ -1411,7 +1383,7 @@ implements PropertyChangeListener, WindowListener, Mutex.Action<Void>, Comparato
                 // all options should close
                 dispose();
             } else {
-                java.util.List l = java.util.Arrays.asList(arr);
+                List l = Arrays.asList(arr);
                 
                 if (l.contains(pressedOption)) {
                     dispose();
@@ -1504,7 +1476,7 @@ implements PropertyChangeListener, WindowListener, Mutex.Action<Void>, Comparato
             try {
                 markers = DefaultKeyboardFocusManager.class.getDeclaredField("typeAheadMarkers"); // NOI18N
                 markers.setAccessible(true);
-                dequeue = DefaultKeyboardFocusManager.class.getDeclaredMethod("dequeueKeyEvents", new Class[] { Long.TYPE, java.awt.Component.class });
+                dequeue = DefaultKeyboardFocusManager.class.getDeclaredMethod("dequeueKeyEvents", new Class[] { Long.TYPE, Component.class });
                 dequeue.setAccessible(true);
             } catch (Throwable ex) {
                 LOG.log(Level.WARNING, "Not activating workaround for #50423", ex); // NOI18N

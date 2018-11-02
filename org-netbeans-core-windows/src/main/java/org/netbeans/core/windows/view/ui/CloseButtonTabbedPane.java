@@ -1,45 +1,20 @@
 /*
- * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
- * Copyright 1997-2010 Oracle and/or its affiliates. All rights reserved.
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * Oracle and Java are registered trademarks of Oracle and/or its affiliates.
- * Other names may be trademarks of their respective owners.
- *
- * The contents of this file are subject to the terms of either the GNU
- * General Public License Version 2 only ("GPL") or the Common
- * Development and Distribution License("CDDL") (collectively, the
- * "License"). You may not use this file except in compliance with the
- * License. You can obtain a copy of the License at
- * http://www.netbeans.org/cddl-gplv2.html
- * or nbbuild/licenses/CDDL-GPL-2-CP. See the License for the
- * specific language governing permissions and limitations under the
- * License.  When distributing the software, include this License Header
- * Notice in each file and include the License file at
- * nbbuild/licenses/CDDL-GPL-2-CP.  Oracle designates this
- * particular file as subject to the "Classpath" exception as provided
- * by Oracle in the GPL Version 2 section of the License file that
- * accompanied this code. If applicable, add the following below the
- * License Header, with the fields enclosed by brackets [] replaced by
- * your own identifying information:
- * "Portions Copyrighted [year] [name of copyright owner]"
- *
- * Contributor(s):
- *
- * The Original Software is NetBeans. The Initial Developer of the Original
- * Software is Sun Microsystems, Inc. Portions Copyright 1997-2006 Sun
- * Microsystems, Inc. All Rights Reserved.
- *
- * If you wish your version of this file to be governed by only the CDDL
- * or only the GPL Version 2, indicate your decision by adding
- * "[Contributor] elects to include this software in this distribution
- * under the [CDDL or GPL Version 2] license." If you do not indicate a
- * single choice of license, a recipient has the option to distribute
- * your version of this file under either the CDDL, the GPL Version 2 or
- * to extend the choice of license to its licensees as provided above.
- * However, if you add GPL Version 2 code and therefore, elected the GPL
- * Version 2 license, then the option applies only if the new code is
- * made subject to such option by the copyright holder.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 
 package org.netbeans.core.windows.view.ui;
@@ -58,14 +33,11 @@ import java.util.logging.Logger;
 import java.util.regex.Pattern;
 import javax.swing.*;
 import javax.swing.plaf.UIResource;
-import javax.swing.plaf.basic.BasicLabelUI;
-
-import de.adito.aditoweb.nbm.nbide.nbaditointerface.INetbeansAditoInterface;
-import de.adito.aditoweb.nbm.nbide.nbaditointerface.common.IAditoColorProvider;
 import org.netbeans.core.windows.actions.MaximizeWindowAction;
 import org.openide.awt.CloseButtonFactory;
 import org.openide.awt.TabbedPaneFactory;
-import org.openide.util.*;
+import org.openide.util.Exceptions;
+import org.openide.util.Utilities;
 import org.openide.windows.TopComponent;
 
 /**
@@ -87,12 +59,18 @@ final class CloseButtonTabbedPane extends JTabbedPane implements PropertyChangeL
     CloseButtonTabbedPane() {
             // close tab via middle button
             addMouseListener(new MouseAdapter() {
-                int lastIdx = -1;
+                // Tab index at the time of the previous two mouse presses.
+                private int lastTwoIdx[] = new int[] {-1, -1};
+                // Tab index of an ongoing middle mouse button press.
+                private int ongoingMiddleIdx = -1;
 
                 @Override
                 public void mousePressed(MouseEvent e) {
+                    int idx =
+                        getUI().tabForCoordinate(CloseButtonTabbedPane.this, e.getX(), e.getY());
+                    lastTwoIdx = new int[] { idx, lastTwoIdx[0] };
                     if (SwingUtilities.isMiddleMouseButton(e)) {
-                        lastIdx = getUI().tabForCoordinate(CloseButtonTabbedPane.this, e.getX(), e.getY());
+                        ongoingMiddleIdx = idx;
                     }
                 }
 
@@ -102,17 +80,26 @@ final class CloseButtonTabbedPane extends JTabbedPane implements PropertyChangeL
                         int idx = getUI().tabForCoordinate(CloseButtonTabbedPane.this, e.getX(), e.getY());
                         if (idx >= 0) {
                             Component comp = getComponentAt(idx);
-                            if (idx == lastIdx && comp != null && !hideCloseButton(comp)) {
+                            if (idx == ongoingMiddleIdx && comp != null && !hideCloseButton(comp)) {
                                 fireCloseRequest(comp);
                             }
                         }
-                        lastIdx = -1;
+                        ongoingMiddleIdx = -1;
                     }
                 }
 
             @Override
             public void mouseClicked( MouseEvent e ) {
                 if( e.getClickCount() == 2 && SwingUtilities.isLeftMouseButton( e ) ) {
+                    /* Fix for bug #268681. Avoid maximizing if the user is simply clicking the
+                    "left" or "right" tab-switching buttons quickly. By the time the double click
+                    event is delivered, the initial press or click of the left or right buttons may
+                    already have changed which tab button is currently under the mouse cursor, so
+                    instead of trying to detect whether the button pressed is a left/right button,
+                    perform the maximization action only if the same tab button was showing under
+                    the mouse cursor for both of the button presses involved in the double click. */
+                    if (!(lastTwoIdx[0] >= 0 && lastTwoIdx[0] == lastTwoIdx[1]))
+                      return;
                     //toggle maximize
                     TopComponent tc = ( TopComponent ) SwingUtilities.getAncestorOfClass( TopComponent.class, CloseButtonTabbedPane.this );
                     if( null != tc ) {
@@ -580,11 +567,13 @@ final class CloseButtonTabbedPane extends JTabbedPane implements PropertyChangeL
                     return icon;
                 }
             };
-
-            label.setUI(new _LabelUI());
-
             add(label);
             JButton tabCloseButton = CloseButtonFactory.createCloseButton();
+            if (IS_AQUA_LAF) {
+              // NETBEANS-172: Improve positioning of label and close button within the tab button.
+              setBorder(BorderFactory.createEmptyBorder(1, 0, 0, 0));
+              tabCloseButton.setBorder(BorderFactory.createEmptyBorder(2, 2, 0, 0));
+            }
             tabCloseButton.addActionListener(new ActionListener() {
 
                 @Override
@@ -617,28 +606,4 @@ final class CloseButtonTabbedPane extends JTabbedPane implements PropertyChangeL
             return getTabCount() > 1;
         }
     }
-
-  // changed by ADITO
-  private class _LabelUI extends BasicLabelUI
-  {
-    @Override
-    public void paint(Graphics g, JComponent c)
-    {
-      JLabel label = (JLabel) c;
-      INetbeansAditoInterface nbAditoInterface = Lookup.getDefault().lookup(INetbeansAditoInterface.class);
-      if (nbAditoInterface != null)
-      {
-        IAditoColorProvider colorProvider = nbAditoInterface.lookup(IAditoColorProvider.class);
-        if (colorProvider != null)
-        {
-          // der aktive Tab ist dunkel und bekommt eine helle Schriftfarbe. Bei den inaktiven Tabs ist es umgekehrt
-          if (indexOfTabComponent(c.getParent()) == getSelectedIndex())
-            label.setForeground(colorProvider.getWhite());
-          else
-            label.setForeground(colorProvider.getDesignerTabColor());
-        }
-      }
-      super.paint(g, c);
-    }
-  }
 }

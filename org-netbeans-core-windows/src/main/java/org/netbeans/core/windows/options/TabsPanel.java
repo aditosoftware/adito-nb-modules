@@ -1,45 +1,20 @@
 /*
- * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
- * Copyright 1997-2010 Oracle and/or its affiliates. All rights reserved.
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * Oracle and Java are registered trademarks of Oracle and/or its affiliates.
- * Other names may be trademarks of their respective owners.
- *
- * The contents of this file are subject to the terms of either the GNU
- * General Public License Version 2 only ("GPL") or the Common
- * Development and Distribution License("CDDL") (collectively, the
- * "License"). You may not use this file except in compliance with the
- * License. You can obtain a copy of the License at
- * http://www.netbeans.org/cddl-gplv2.html
- * or nbbuild/licenses/CDDL-GPL-2-CP. See the License for the
- * specific language governing permissions and limitations under the
- * License.  When distributing the software, include this License Header
- * Notice in each file and include the License file at
- * nbbuild/licenses/CDDL-GPL-2-CP.  Oracle designates this
- * particular file as subject to the "Classpath" exception as provided
- * by Oracle in the GPL Version 2 section of the License file that
- * accompanied this code. If applicable, add the following below the
- * License Header, with the fields enclosed by brackets [] replaced by
- * your own identifying information:
- * "Portions Copyrighted [year] [name of copyright owner]"
- *
- * Contributor(s):
- *
- * The Original Software is NetBeans. The Initial Developer of the Original
- * Software is Sun Microsystems, Inc. Portions Copyright 1997-2006 Sun
- * Microsystems, Inc. All Rights Reserved.
- *
- * If you wish your version of this file to be governed by only the CDDL
- * or only the GPL Version 2, indicate your decision by adding
- * "[Contributor] elects to include this software in this distribution
- * under the [CDDL or GPL Version 2] license." If you do not indicate a
- * single choice of license, a recipient has the option to distribute
- * your version of this file under either the CDDL, the GPL Version 2 or
- * to extend the choice of license to its licensees as provided above.
- * However, if you add GPL Version 2 code and therefore, elected the GPL
- * Version 2 license, then the option applies only if the new code is
- * made subject to such option by the copyright holder.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 
 package org.netbeans.core.windows.options;
@@ -53,7 +28,7 @@ import org.openide.util.NbBundle;
 import org.openide.util.NbPreferences;
 
 @OptionsPanelController.Keywords(keywords={"#KW_TabsOptions"}, location="Appearance", tabTitle="#Tabs_DisplayName")
-public class TabsPanel extends javax.swing.JPanel {
+public class TabsPanel extends JPanel {
 
     protected final TabsOptionsPanelController controller;
     
@@ -80,10 +55,10 @@ public class TabsPanel extends javax.swing.JPanel {
         java.awt.GridBagConstraints gridBagConstraints;
 
         buttonGroup1 = new javax.swing.ButtonGroup();
-        panelDocTabs = new javax.swing.JPanel();
+        panelDocTabs = new JPanel();
         isCloseActivatesMostRecentDocument = new javax.swing.JCheckBox();
         isNewDocumentOpensNextToActiveTab = new javax.swing.JCheckBox();
-        panelTabs = new javax.swing.JPanel();
+        panelTabs = new JPanel();
         jLabel1 = new javax.swing.JLabel();
         radioTop = new javax.swing.JRadioButton();
         radioBottom = new javax.swing.JRadioButton();
@@ -97,8 +72,8 @@ public class TabsPanel extends javax.swing.JPanel {
 
         panelDocTabs.setLayout(new java.awt.GridBagLayout());
 
-        org.openide.awt.Mnemonics.setLocalizedText(isCloseActivatesMostRecentDocument, org.openide.util.NbBundle.getMessage(TabsPanel.class, "LBL_CloseActivatesRecentDocument")); // NOI18N
-        isCloseActivatesMostRecentDocument.setToolTipText(org.openide.util.NbBundle.getMessage(TabsPanel.class, "TIP_CloseActivatesMostRecentDocument")); // NOI18N
+        org.openide.awt.Mnemonics.setLocalizedText(isCloseActivatesMostRecentDocument, NbBundle.getMessage(TabsPanel.class, "LBL_CloseActivatesRecentDocument")); // NOI18N
+        isCloseActivatesMostRecentDocument.setToolTipText(NbBundle.getMessage(TabsPanel.class, "TIP_CloseActivatesMostRecentDocument")); // NOI18N
         isCloseActivatesMostRecentDocument.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 isCloseActivatesMostRecentDocumentActionPerformed(evt);
@@ -112,7 +87,7 @@ public class TabsPanel extends javax.swing.JPanel {
         gridBagConstraints.weighty = 1.0;
         gridBagConstraints.insets = new java.awt.Insets(0, 0, 6, 0);
         panelDocTabs.add(isCloseActivatesMostRecentDocument, gridBagConstraints);
-        isCloseActivatesMostRecentDocument.getAccessibleContext().setAccessibleDescription(org.openide.util.NbBundle.getMessage(TabsPanel.class, "TabsPanel.isCloseActivatesMostRecentDocument.AccessibleContext.accessibleDescription")); // NOI18N
+        isCloseActivatesMostRecentDocument.getAccessibleContext().setAccessibleDescription(NbBundle.getMessage(TabsPanel.class, "TabsPanel.isCloseActivatesMostRecentDocument.AccessibleContext.accessibleDescription")); // NOI18N
 
         org.openide.awt.Mnemonics.setLocalizedText(isNewDocumentOpensNextToActiveTab, NbBundle.getMessage(TabsPanel.class, "TabsPanel.isNewDocumentOpensNextToActiveTab.text")); // NOI18N
         isNewDocumentOpensNextToActiveTab.addActionListener(new java.awt.event.ActionListener() {
@@ -290,8 +265,8 @@ public class TabsPanel extends javax.swing.JPanel {
     private javax.swing.JCheckBox isCloseActivatesMostRecentDocument;
     private javax.swing.JCheckBox isNewDocumentOpensNextToActiveTab;
     private javax.swing.JLabel jLabel1;
-    private javax.swing.JPanel panelDocTabs;
-    private javax.swing.JPanel panelTabs;
+    private JPanel panelDocTabs;
+    private JPanel panelTabs;
     private javax.swing.JRadioButton radioBottom;
     private javax.swing.JRadioButton radioLeft;
     private javax.swing.JRadioButton radioRight;

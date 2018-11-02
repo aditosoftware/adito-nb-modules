@@ -1,45 +1,20 @@
 /*
- * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
- * Copyright 1997-2010 Oracle and/or its affiliates. All rights reserved.
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * Oracle and Java are registered trademarks of Oracle and/or its affiliates.
- * Other names may be trademarks of their respective owners.
- *
- * The contents of this file are subject to the terms of either the GNU
- * General Public License Version 2 only ("GPL") or the Common
- * Development and Distribution License("CDDL") (collectively, the
- * "License"). You may not use this file except in compliance with the
- * License. You can obtain a copy of the License at
- * http://www.netbeans.org/cddl-gplv2.html
- * or nbbuild/licenses/CDDL-GPL-2-CP. See the License for the
- * specific language governing permissions and limitations under the
- * License.  When distributing the software, include this License Header
- * Notice in each file and include the License file at
- * nbbuild/licenses/CDDL-GPL-2-CP.  Oracle designates this
- * particular file as subject to the "Classpath" exception as provided
- * by Oracle in the GPL Version 2 section of the License file that
- * accompanied this code. If applicable, add the following below the
- * License Header, with the fields enclosed by brackets [] replaced by
- * your own identifying information:
- * "Portions Copyrighted [year] [name of copyright owner]"
- *
- * Contributor(s):
- *
- * The Original Software is NetBeans. The Initial Developer of the Original
- * Software is Sun Microsystems, Inc. Portions Copyright 1997-2006 Sun
- * Microsystems, Inc. All Rights Reserved.
- *
- * If you wish your version of this file to be governed by only the CDDL
- * or only the GPL Version 2, indicate your decision by adding
- * "[Contributor] elects to include this software in this distribution
- * under the [CDDL or GPL Version 2] license." If you do not indicate a
- * single choice of license, a recipient has the option to distribute
- * your version of this file under either the CDDL, the GPL Version 2 or
- * to extend the choice of license to its licensees as provided above.
- * However, if you add GPL Version 2 code and therefore, elected the GPL
- * Version 2 license, then the option applies only if the new code is
- * made subject to such option by the copyright holder.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 
 package org.netbeans.core.windows.view.ui;
@@ -204,7 +179,7 @@ public class DocumentsDlg extends JPanel implements PropertyChangeListener, Expl
         gridBagConstraints.insets = new java.awt.Insets(0, 0, 11, 11);
         add(explorerPanel, gridBagConstraints);
 
-        jScrollPane1.setPreferredSize(new java.awt.Dimension(3, 60));
+        jScrollPane1.setPreferredSize(new Dimension(3, 60));
 
         descriptionArea.setEditable(false);
         jScrollPane1.setViewportView(descriptionArea);
@@ -255,7 +230,7 @@ public class DocumentsDlg extends JPanel implements PropertyChangeListener, Expl
         gridBagConstraints.insets = new java.awt.Insets(0, 0, 11, 0);
         add(closeButton, gridBagConstraints);
 
-        org.openide.awt.Mnemonics.setLocalizedText(lblOrderBy, NbBundle.getMessage(DocumentsDlg.class, "Lbl_OrderBy")); // NOI18N
+        Mnemonics.setLocalizedText(lblOrderBy, NbBundle.getMessage(DocumentsDlg.class, "Lbl_OrderBy")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 4;
@@ -264,7 +239,7 @@ public class DocumentsDlg extends JPanel implements PropertyChangeListener, Expl
 
         buttonGroup1.add(radioOrderByName);
         radioOrderByName.setSelected(true);
-        org.openide.awt.Mnemonics.setLocalizedText(radioOrderByName, NbBundle.getMessage(DocumentsDlg.class, "Lbl_OrderByName")); // NOI18N
+        Mnemonics.setLocalizedText(radioOrderByName, NbBundle.getMessage(DocumentsDlg.class, "Lbl_OrderByName")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 5;
@@ -273,7 +248,7 @@ public class DocumentsDlg extends JPanel implements PropertyChangeListener, Expl
         add(radioOrderByName, gridBagConstraints);
 
         buttonGroup1.add(radioOrderByUsage);
-        org.openide.awt.Mnemonics.setLocalizedText(radioOrderByUsage, NbBundle.getMessage(DocumentsDlg.class, "Lbl_OrderByUsage")); // NOI18N
+        Mnemonics.setLocalizedText(radioOrderByUsage, NbBundle.getMessage(DocumentsDlg.class, "Lbl_OrderByUsage")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 6;
@@ -286,7 +261,7 @@ public class DocumentsDlg extends JPanel implements PropertyChangeListener, Expl
 
     private class FormListener implements java.awt.event.ActionListener {
         FormListener() {}
-        public void actionPerformed(java.awt.event.ActionEvent evt) {
+        public void actionPerformed(ActionEvent evt) {
             if (evt.getSource() == jButtonActivate) {
                 DocumentsDlg.this.activate(evt);
             }
@@ -302,11 +277,11 @@ public class DocumentsDlg extends JPanel implements PropertyChangeListener, Expl
         }
     }// </editor-fold>//GEN-END:initComponents
 
-    private void closeButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_closeButtonActionPerformed
+    private void closeButtonActionPerformed(ActionEvent evt) {//GEN-FIRST:event_closeButtonActionPerformed
         closeDialog();
     }//GEN-LAST:event_closeButtonActionPerformed
 
-    private void saveDocuments(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_saveDocuments
+    private void saveDocuments(ActionEvent evt) {//GEN-FIRST:event_saveDocuments
         // Add your handling code here:
         Node[] selNodes = explorer.getSelectedNodes();
         if (selNodes.length == 0) {
@@ -334,7 +309,7 @@ public class DocumentsDlg extends JPanel implements PropertyChangeListener, Expl
         jButtonSave.setEnabled(false);
     }//GEN-LAST:event_saveDocuments
 
-    private void closeDocuments(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_closeDocuments
+    private void closeDocuments(ActionEvent evt) {//GEN-FIRST:event_closeDocuments
         // Add your handling code here:
         Node[] selNodes = explorer.getSelectedNodes();
         if (selNodes.length == 0) {
@@ -385,7 +360,7 @@ public class DocumentsDlg extends JPanel implements PropertyChangeListener, Expl
         }
     }//GEN-LAST:event_closeDocuments
 
-    private void activate(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_activate
+    private void activate(ActionEvent evt) {//GEN-FIRST:event_activate
         // Add your handling code here:
         Node[] selNodes = explorer.getSelectedNodes();
         if (selNodes.length == 0) {
@@ -611,7 +586,7 @@ public class DocumentsDlg extends JPanel implements PropertyChangeListener, Expl
     private javax.swing.JTextArea descriptionArea;
     private javax.swing.JLabel descriptionLabel;
     private javax.swing.JLabel explorerLabel;
-    private javax.swing.JPanel explorerPanel;
+    private JPanel explorerPanel;
     private javax.swing.JButton jButtonActivate;
     private javax.swing.JButton jButtonClose;
     private javax.swing.JButton jButtonSave;
