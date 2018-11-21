@@ -1427,6 +1427,70 @@
       };
     };
 
+  //  ********************************************************************************
+  //
+  //  Firebird 2.5 (for Firebird 3.0.5 Driver)
+  //
+  //  ********************************************************************************/
+
+    "Firebird 2.5" = {
+      DatabaseProductName = "Firebird 2.5";
+      TypeMap = {
+        java.sql.Types.BLOB = BLOB;  //JDBC 2.0 A type representing an SQL Binary Large Object
+        java.sql.Types.CHAR = CHAR;
+        java.sql.Types.DATE = DATE;
+        java.sql.Types.DECIMAL = DECIMAL;
+        java.sql.Types.DOUBLE = "DOUBLE PRECISION";
+        java.sql.Types.FLOAT = FLOAT;
+        java.sql.Types.INTEGER = INTEGER;
+        java.sql.Types.NUMERIC = NUMERIC;
+        java.sql.Types.SMALLINT = SMALLINT;
+        java.sql.Types.TIMESTAMP = TIMESTAMP;
+        java.sql.Types.VARCHAR = VARCHAR;
+        java.sql.Types.BINARY = BLOB;
+        java.sql.Types.NVARCHAR = VARCHAR;
+        java.sql.Types.TINYINT = SMALLINT;
+        java.sql.Types.CLOB = "BLOB SUB_TYPE TEXT";
+        java.sql.Types.NCLOB = "BLOB SUB_TYPE TEXT";
+        java.sql.Types.LONGVARCHAR = "BLOB SUB_TYPE TEXT";
+        java.sql.Types.LONGNVARCHAR = "BLOB SUB_TYPE TEXT";
+        java.sql.Types.TIME = TIME;
+        java.sql.Types.TIME_WITH_TIMEZONE = TIME;
+        java.sql.Types.BIT = "CHAR(1)";
+        java.sql.Types.BOOLEAN = "CHAR(1)";
+        java.sql.Types.SQLXML = "BLOB SUB_TYPE TEXT";
+        java.sql.Types.REAL = "DOUBLE PRECISION";
+        java.sql.Types.TIMESTAMP_WITH_TIMEZONE = TIMESTAMP;
+        java.sql.Types.VARBINARY = BLOB;
+        java.sql.Types.LONGVARBINARY = BLOB;
+      };
+      SizelessTypes = (BLOB,DATE,"DOUBLE PRECISION",INTEGER,SMALLINT,TIMESTAMP,"BLOB SUB_TYPE TEXT",BIGINT,TIME,"CHAR(1)");
+      DecimalTypes = (DECIMAL,NUMERIC);
+      CharacterTypes = (CHAR,VARCHAR);
+      NoPrimaryKeyTypes = (BLOB,"BLOB SUB_TYPE TEXT");
+      NoIndexTypes = (BLOB,"BLOB SUB_TYPE TEXT");
+      Case=Upper;
+
+  //////////////////////
+  // Commands definition
+  //////////////////////
+
+      CreateTableCommand = {
+        Class = org.netbeans.lib.ddl.impl.CreateTable;
+        Format = "create table {object.name}\n(\n\t{columns}\n)";
+        Binding = {
+          COLUMN = Column;
+          UNIQUE = UniqueColumn;
+          PRIMARY_KEY = PrimaryKeyColumn;
+          CHECK = CheckColumn;
+          UNIQUE_CONSTRAINT = UniqueConstraint;
+          PRIMARY_KEY_CONSTRAINT = PrimaryKeyConstraint;
+          CHECK_CONSTRAINT = CheckConstraint;
+        };
+      };
+    };
+
+
 //  ********************************************************************************
 //
 //  MySQL
