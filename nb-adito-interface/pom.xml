@@ -6,12 +6,12 @@
   <parent>
     <groupId>de.adito</groupId>
     <artifactId>nb-modules</artifactId>
-    <version>1.0.7</version>
+    <version>1.1.1</version>
   </parent>
 
   <groupId>de.adito.nb-modules</groupId>
   <artifactId>nb-adito-interface</artifactId>
-  <version>1.0.8</version>
+  <version>1.0.9</version>
   <packaging>nbm</packaging>
   <name>Netbeans IDE module interface: nb-adito-interface</name>
 
