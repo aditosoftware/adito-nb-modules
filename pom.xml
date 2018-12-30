@@ -53,6 +53,7 @@
   </repositories>
 
   <modules>
+    <module>de-adito-runconfig-api</module>
     <module>nb-adito-interface</module>
     <module>org-netbeans-core-output2</module>
     <module>org-netbeans-core-windows</module>
