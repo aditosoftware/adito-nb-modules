@@ -6,13 +6,13 @@
   <parent>
     <groupId>de.adito</groupId>
     <artifactId>nb-modules</artifactId>
-    <version>1.1.2</version>
+    <version>1.1.3</version>
   </parent>
 
   <groupId>org.netbeans.modules</groupId>
   <artifactId>org-netbeans-modules-tasklist-projectint</artifactId>
   <packaging>nbm</packaging>
-  <version>RELEASE90a-1.0.11</version> <!-- HINT: Change Version in Root-Pom -> DependencyManagement! -->
+  <version>RELEASE90a-1.0.12</version> <!-- HINT: Change Version in Root-Pom -> DependencyManagement! -->
   <name>Netbeans IDE module: org-netbeans-modules-tasklist-projectint</name>
 
   <properties>
