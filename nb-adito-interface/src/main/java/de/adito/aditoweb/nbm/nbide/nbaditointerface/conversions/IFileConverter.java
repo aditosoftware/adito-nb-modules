@@ -4,6 +4,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
+import java.util.Map;
 
 /**
  * Interface for service providers that can convert one file type to another
@@ -18,9 +19,10 @@ public interface IFileConverter
    *
    * @param pSourceType File type of the file to convert
    * @param pTargetType File type of the final file
+   * @param pParams     Parameters for the conversion
    * @return true if the serviceProvider can accomplish the specified conversion, false otherwise
    */
-  boolean canConvert(@NotNull String pSourceType, @NotNull String pTargetType, @Nullable Object... pParams);
+  boolean canConvert(@NotNull String pSourceType, @NotNull String pTargetType, @NotNull Map<Object, Object> pParams);
 
   /**
    * Converts the source file to the specified type at the target location
@@ -34,6 +36,6 @@ public interface IFileConverter
    */
   @Nullable
   Object convert(@NotNull File pSourceLocation, @NotNull File pTargetLocation, @NotNull String pSourceType, @NotNull String pTargetType,
-                 @Nullable Object... pParams);
+                 @NotNull Map<Object, Object> pParams);
 
 }
