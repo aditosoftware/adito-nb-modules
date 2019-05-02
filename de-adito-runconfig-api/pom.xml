@@ -6,13 +6,13 @@
   <parent>
     <groupId>de.adito</groupId>
     <artifactId>nb-modules</artifactId>
-    <version>1.1.4</version>
+    <version>1.1.5</version>
   </parent>
 
   <groupId>de.adito.nbm</groupId>
   <artifactId>de-adito-runconfig-api</artifactId>
   <packaging>nbm</packaging>
-  <version>RELEASE90a-1.0.13</version>
+  <version>RELEASE90a-1.0.14</version>
   <name>ADITO Netbeans Module: de-adito-runconfig-api</name>
 
   <properties>
