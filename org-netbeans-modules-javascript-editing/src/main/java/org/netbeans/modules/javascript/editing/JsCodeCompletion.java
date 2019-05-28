@@ -573,6 +573,9 @@ public class JsCodeCompletion implements CodeCompletionHandler {
 
       pTs.move(offset);
 
+      if(pTs.token() == null)
+        pTs.moveNext();
+
       return result;
     }
 
