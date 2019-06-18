@@ -34,8 +34,11 @@ public interface IFileConverter
    * @return conversion result, or null
    */
   @Nullable
-  Object convert(@NotNull File pSourceLocation, @NotNull File pTargetLocation, @NotNull String pSourceType, @NotNull String pTargetType,
-                 @NotNull Map<Object, Object> pParams) throws IOException;
+  default Object convert(@NotNull File pSourceLocation, @NotNull File pTargetLocation, @NotNull String pSourceType, @NotNull String pTargetType,
+                         @NotNull Map<Object, Object> pParams) throws IOException
+  {
+    return convert(new FileReader(pSourceLocation), new FileWriter(pTargetLocation), pSourceType, pTargetType, pParams);
+  }
 
   /**
    * Converts the source file to the specified type at the target location
