@@ -35,7 +35,7 @@ public interface IFileConverter
    */
   @Nullable
   Object convert(@NotNull File pSourceLocation, @NotNull File pTargetLocation, @NotNull String pSourceType, @NotNull String pTargetType,
-                 @NotNull Map<Object, Object> pParams);
+                 @NotNull Map<Object, Object> pParams) throws IOException;
 
   /**
    * Converts the source file to the specified type at the target location
@@ -49,6 +49,6 @@ public interface IFileConverter
    */
   @Nullable
   Object convert(@NotNull Reader pSource, @NotNull Writer pTarget, @NotNull String pSourceType, @NotNull String pTargetType,
-                 @NotNull Map<Object, Object> pParams);
+                 @NotNull Map<Object, Object> pParams) throws IOException;
 
 }
