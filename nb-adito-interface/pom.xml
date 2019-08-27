@@ -11,7 +11,7 @@
 
   <groupId>de.adito.nb-modules</groupId>
   <artifactId>nb-adito-interface</artifactId>
-  <version>1.0.16</version>
+  <version>1.0.17</version>
   <packaging>nbm</packaging>
   <name>Netbeans IDE module interface: nb-adito-interface</name>
 
