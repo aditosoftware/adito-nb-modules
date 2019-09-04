@@ -37,7 +37,7 @@ import org.openide.util.NbBundle;
  *
  * @author Jiri Rechtacek
  */
-@org.openide.util.lookup.ServiceProvider(service = ExtendedDelete.class)
+@org.openide.util.lookup.ServiceProvider(service = org.openide.explorer.ExtendedDelete.class)
 public class DbExtendedDelete implements ExtendedDelete {
     private static final Class[] GUARDED_OBJECTS = new Class[] {DriverNode.class, TableNode.class, ViewNode.class, ColumnNode.class, ProcedureNode.class};
 
@@ -73,14 +73,11 @@ public class DbExtendedDelete implements ExtendedDelete {
             boolean preventDelete = preventDelete(tables,
                     NbBundle.getMessage(DbExtendedDelete.class, "DbExtendedDelete_ConfirmationMessage_Tables", tables.size()), // NOI18N
                     NbBundle.getMessage(DbExtendedDelete.class, "DbExtendedDelete_ConfirmationTitle_Tables", tables.size())); // NOI18N
-            // ADITO
-            // Neue Variante: aktualisiert die GUI nicht - ist von hier aus auch nicht machbar...=> rueckbau zur alten Variante
-            /*if (!preventDelete) {
+            if (!preventDelete) {
                 TableExtendedDelete.delete(nodes);
             }
             // return true to indicate, that deletion is always handled here
-            return true;*/
-            return preventDelete;
+            return true;
         } else if (!columns.isEmpty()) {
             return preventDelete(columns,
                     NbBundle.getMessage(DbExtendedDelete.class, "DbExtendedDelete_ConfirmationMessage_Columns", columns.size()), // NOI18N

@@ -113,7 +113,7 @@ public class CreateTableDialog {
     // ADITO
     public CreateTableDialog(final Specification spe, final String schema, List<ColumnItem> pItems, String pTableName) {
         spec = spe;
-
+        
         try {
             JLabel label;
             JPanel pane = new JPanel();
@@ -132,7 +132,7 @@ public class CreateTableDialog {
             constr.weightx = 0.0;
             constr.weighty = 0.0;
             constr.fill = GridBagConstraints.NONE;
-            constr.insets = new Insets (2, 2, 2, 2);
+            constr.insets = new java.awt.Insets (2, 2, 2, 2);
             constr.gridx = 0;
             constr.gridy = 0;
             layout.setConstraints(label, constr);
@@ -143,7 +143,7 @@ public class CreateTableDialog {
             constr.weighty = 0.0;
             constr.gridx = 1;
             constr.gridy = 0;
-            constr.insets = new Insets (2, 2, 2, 2);
+            constr.insets = new java.awt.Insets (2, 2, 2, 2);
             // ADITO
             //dbnamefield = new JTextField(getTableUntitledName(), 10);
             dbnamefield = new JTextField(NbBundle.getMessage (CreateTableDialog.class, "CreateTableUntitledName"), 10); // NOI18N
@@ -179,7 +179,7 @@ public class CreateTableDialog {
             constr.gridy = 1;
             constr.gridwidth = 4;
             constr.gridheight = 3;
-            constr.insets = new Insets (2, 2, 2, 2);
+            constr.insets = new java.awt.Insets (2, 2, 2, 2);
             table = new DataTable(new DataModel());
             table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
             table.setToolTipText(NbBundle.getMessage (CreateTableDialog.class, "ACS_CreateTableColumnTableA11yDesc"));
@@ -223,7 +223,7 @@ public class CreateTableDialog {
             constr.weighty = 0.0;
             constr.gridx = 4;
             constr.gridy = 1;
-            constr.insets = new Insets (2, 8, 2, 2);
+            constr.insets = new java.awt.Insets (2, 8, 2, 2);
             JPanel btnpane = new JPanel();
             GridLayout btnlay = new GridLayout(5,1,0,5);
             btnpane.setLayout(btnlay);
@@ -415,7 +415,7 @@ public class CreateTableDialog {
         }
         return false;
     }
-
+    
     // ADITO
     public static DialogDescriptor createDialog(final Specification spec, final String schema, List<ColumnItem> pItems, String pTableName)
     {

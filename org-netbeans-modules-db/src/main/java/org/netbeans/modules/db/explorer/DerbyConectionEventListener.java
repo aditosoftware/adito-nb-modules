@@ -77,7 +77,7 @@ public class DerbyConectionEventListener {
      * Called after a database connection was disconnected. 
      *
      * @param dbconn the database connection.
-     * @param conn the closed {@link Connection}. This parameter is needed since dbconn.getJDBCConnection()
+     * @param conn the closed {@link java.sql.Connection}. This parameter is needed since dbconn.getJDBCConnection()
         returns null at the moment when afterDisconnect is called.
      */
     public void afterDisconnect(DatabaseConnection dbconn, Connection conn) {

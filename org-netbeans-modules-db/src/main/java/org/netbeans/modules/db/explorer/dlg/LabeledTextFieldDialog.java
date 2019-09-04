@@ -161,12 +161,12 @@ public class LabeledTextFieldDialog extends javax.swing.JPanel {
         errorTextPane = new javax.swing.JTextPane();
 
         titleLabel.setLabelFor(textField);
-        titleLabel.setText(NbBundle.getMessage(LabeledTextFieldDialog.class, "LabeledTextFieldDialog.titleLabel.text")); // NOI18N
+        titleLabel.setText(org.openide.util.NbBundle.getMessage(LabeledTextFieldDialog.class, "LabeledTextFieldDialog.titleLabel.text")); // NOI18N
 
-        textField.setText(NbBundle.getMessage(LabeledTextFieldDialog.class, "LabeledTextFieldDialog.textField.text")); // NOI18N
+        textField.setText(org.openide.util.NbBundle.getMessage(LabeledTextFieldDialog.class, "LabeledTextFieldDialog.textField.text")); // NOI18N
 
         descLabel.setLabelFor(notesArea);
-        descLabel.setText(NbBundle.getMessage(LabeledTextFieldDialog.class, "LabeledTextFieldDialog.descLabel.text")); // NOI18N
+        descLabel.setText(org.openide.util.NbBundle.getMessage(LabeledTextFieldDialog.class, "LabeledTextFieldDialog.descLabel.text")); // NOI18N
 
         notesArea.setEditable(false);
         notesArea.setColumns(20);
@@ -175,12 +175,12 @@ public class LabeledTextFieldDialog extends javax.swing.JPanel {
         notesArea.setWrapStyleWord(true);
         notesArea.setEnabled(false);
         notesAreaScrollPane.setViewportView(notesArea);
-        notesArea.getAccessibleContext().setAccessibleName(NbBundle.getMessage(LabeledTextFieldDialog.class, "ACS_RecreateTableTableScriptTextAreaA11yName")); // NOI18N
-        notesArea.getAccessibleContext().setAccessibleDescription(NbBundle.getMessage(LabeledTextFieldDialog.class, "ACS_RecreateTableTableScriptTextAreaA11yDesc")); // NOI18N
+        notesArea.getAccessibleContext().setAccessibleName(org.openide.util.NbBundle.getMessage(LabeledTextFieldDialog.class, "ACS_RecreateTableTableScriptTextAreaA11yName")); // NOI18N
+        notesArea.getAccessibleContext().setAccessibleDescription(org.openide.util.NbBundle.getMessage(LabeledTextFieldDialog.class, "ACS_RecreateTableTableScriptTextAreaA11yDesc")); // NOI18N
 
-        editButton.setText(NbBundle.getMessage(LabeledTextFieldDialog.class, "LabeledTextFieldDialog.editButton.text")); // NOI18N
-        editButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent evt) {
+        editButton.setText(org.openide.util.NbBundle.getMessage(LabeledTextFieldDialog.class, "LabeledTextFieldDialog.editButton.text")); // NOI18N
+        editButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
                 editButtonActionPerformed(evt);
             }
         });
@@ -226,11 +226,11 @@ public class LabeledTextFieldDialog extends javax.swing.JPanel {
                 .addContainerGap())
         );
 
-        textField.getAccessibleContext().setAccessibleName(NbBundle.getMessage(LabeledTextFieldDialog.class, "ACS_RecreateTableNewNameTextFieldA11yName")); // NOI18N
-        textField.getAccessibleContext().setAccessibleDescription(NbBundle.getMessage(LabeledTextFieldDialog.class, "ACS_RecreateTableNewNameTextFieldA11yDesc")); // NOI18N
+        textField.getAccessibleContext().setAccessibleName(org.openide.util.NbBundle.getMessage(LabeledTextFieldDialog.class, "ACS_RecreateTableNewNameTextFieldA11yName")); // NOI18N
+        textField.getAccessibleContext().setAccessibleDescription(org.openide.util.NbBundle.getMessage(LabeledTextFieldDialog.class, "ACS_RecreateTableNewNameTextFieldA11yDesc")); // NOI18N
     }// </editor-fold>//GEN-END:initComponents
 
-    private void editButtonActionPerformed(ActionEvent evt) {
+    private void editButtonActionPerformed(java.awt.event.ActionEvent evt) {                                           
         updateState();
 }                                          
     

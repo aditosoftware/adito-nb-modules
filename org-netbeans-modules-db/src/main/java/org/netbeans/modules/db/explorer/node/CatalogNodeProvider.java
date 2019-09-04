@@ -104,7 +104,7 @@ public class CatalogNodeProvider extends NodeProvider implements PropertyChangeL
                         nodes.addAll(otherList);
 
                         if (!otherList.isEmpty()) {
-                            newList.add(new OtherCatalogsNode(
+                            newList.add(new CatalogNodeProvider.OtherCatalogsNode(
                                     otherList));
                         }
 

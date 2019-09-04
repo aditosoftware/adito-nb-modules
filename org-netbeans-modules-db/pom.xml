@@ -6,13 +6,13 @@
   <parent>
     <groupId>de.adito</groupId>
     <artifactId>nb-modules</artifactId>
-    <version>1.2.0</version>
+    <version>1.3.0</version>
   </parent>
 
   <groupId>org.netbeans.api</groupId>
   <artifactId>org-netbeans-modules-db</artifactId>
   <packaging>nbm</packaging>
-  <version>RELEASE90a-1.1.0</version>
+  <version>RELEASE111-1.2.0</version>
   <name>Netbeans IDE module: org-netbeans-modules-db</name>
 
   <properties>
@@ -119,6 +119,11 @@
     <dependency>
       <groupId>org.netbeans.api</groupId>
       <artifactId>org-openide-windows</artifactId>
+      <version>${netbeans.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.netbeans.external</groupId>
+      <artifactId>ddl</artifactId>
       <version>${netbeans.version}</version>
     </dependency>
 

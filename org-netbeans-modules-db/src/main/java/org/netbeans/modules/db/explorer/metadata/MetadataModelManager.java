@@ -72,7 +72,7 @@ public class MetadataModelManager {
         Connection conn = dbconn.getJDBCConnection();
 
         if (conn == null) {
-            conn = Mutex.EVENT.readAccess(new Mutex.Action<Connection>() {
+            conn = Mutex.EVENT.readAccess(new org.openide.util.Mutex.Action<Connection>() {
                 public Connection run() {
                     ConnectionManager.getDefault().showConnectionDialog(dbconn);
                     return dbconn.getJDBCConnection();

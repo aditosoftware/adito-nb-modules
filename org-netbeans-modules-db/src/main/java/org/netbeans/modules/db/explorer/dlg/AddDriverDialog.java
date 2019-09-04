@@ -61,7 +61,7 @@ import org.openide.util.HelpCtx;
 import org.openide.util.NbBundle;
 import org.openide.util.RequestProcessor;
 
-public final class AddDriverDialog extends JPanel {
+public final class AddDriverDialog extends javax.swing.JPanel {
     private static HelpCtx ADD_DRIVER_DIALOG_HELPCTX = new HelpCtx(AddDriverDialog.class);
 
     public static HelpCtx getHelpCtx() {
@@ -230,105 +230,105 @@ public final class AddDriverDialog extends JPanel {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        drvListLabel = new JLabel();
-        drvListScrollPane = new JScrollPane();
-        drvList = new JList();
-        browseButton = new JButton();
-        removeButton = new JButton();
-        drvClassLabel = new JLabel();
-        drvClassComboBox = new JComboBox();
-        findButton = new JButton();
-        nameLabel = new JLabel();
-        nameTextField = new JTextField();
-        progressMessageLabel = new JLabel();
-        progressContainerPanel = new JPanel();
+        drvListLabel = new javax.swing.JLabel();
+        drvListScrollPane = new javax.swing.JScrollPane();
+        drvList = new javax.swing.JList();
+        browseButton = new javax.swing.JButton();
+        removeButton = new javax.swing.JButton();
+        drvClassLabel = new javax.swing.JLabel();
+        drvClassComboBox = new javax.swing.JComboBox();
+        findButton = new javax.swing.JButton();
+        nameLabel = new javax.swing.JLabel();
+        nameTextField = new javax.swing.JTextField();
+        progressMessageLabel = new javax.swing.JLabel();
+        progressContainerPanel = new javax.swing.JPanel();
 
         FormListener formListener = new FormListener();
 
         drvListLabel.setLabelFor(drvList);
-        org.openide.awt.Mnemonics.setLocalizedText(drvListLabel, NbBundle.getMessage(AddDriverDialog.class, "AddDriverDriverFile")); // NOI18N
+        org.openide.awt.Mnemonics.setLocalizedText(drvListLabel, org.openide.util.NbBundle.getMessage(AddDriverDialog.class, "AddDriverDriverFile")); // NOI18N
 
         drvList.setModel(new DefaultListModel());
         drvList.addListSelectionListener(formListener);
         drvListScrollPane.setViewportView(drvList);
 
-        org.openide.awt.Mnemonics.setLocalizedText(browseButton, NbBundle.getMessage(AddDriverDialog.class, "AddDriverDriverAdd")); // NOI18N
+        org.openide.awt.Mnemonics.setLocalizedText(browseButton, org.openide.util.NbBundle.getMessage(AddDriverDialog.class, "AddDriverDriverAdd")); // NOI18N
         browseButton.addActionListener(formListener);
 
-        org.openide.awt.Mnemonics.setLocalizedText(removeButton, NbBundle.getMessage(AddDriverDialog.class, "AddDriverDriverRemove")); // NOI18N
+        org.openide.awt.Mnemonics.setLocalizedText(removeButton, org.openide.util.NbBundle.getMessage(AddDriverDialog.class, "AddDriverDriverRemove")); // NOI18N
         removeButton.addActionListener(formListener);
 
         drvClassLabel.setLabelFor(drvClassComboBox);
-        org.openide.awt.Mnemonics.setLocalizedText(drvClassLabel, NbBundle.getMessage(AddDriverDialog.class, "AddDriverDriverClass")); // NOI18N
+        org.openide.awt.Mnemonics.setLocalizedText(drvClassLabel, org.openide.util.NbBundle.getMessage(AddDriverDialog.class, "AddDriverDriverClass")); // NOI18N
 
         drvClassComboBox.setEditable(true);
         drvClassComboBox.addActionListener(formListener);
 
-        org.openide.awt.Mnemonics.setLocalizedText(findButton, NbBundle.getMessage(AddDriverDialog.class, "AddDriverDriverFind")); // NOI18N
+        org.openide.awt.Mnemonics.setLocalizedText(findButton, org.openide.util.NbBundle.getMessage(AddDriverDialog.class, "AddDriverDriverFind")); // NOI18N
         findButton.addActionListener(formListener);
 
         nameLabel.setLabelFor(nameTextField);
-        org.openide.awt.Mnemonics.setLocalizedText(nameLabel, NbBundle.getMessage(AddDriverDialog.class, "AddDriverDriverName")); // NOI18N
+        org.openide.awt.Mnemonics.setLocalizedText(nameLabel, org.openide.util.NbBundle.getMessage(AddDriverDialog.class, "AddDriverDriverName")); // NOI18N
 
         org.openide.awt.Mnemonics.setLocalizedText(progressMessageLabel, " ");
 
         progressContainerPanel.setMinimumSize(new java.awt.Dimension(20, 20));
         progressContainerPanel.setPreferredSize(new java.awt.Dimension(20, 20));
-        progressContainerPanel.setLayout(new BorderLayout());
+        progressContainerPanel.setLayout(new java.awt.BorderLayout());
 
-        GroupLayout layout = new GroupLayout(this);
+        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
-            layout.createParallelGroup(GroupLayout.Alignment.LEADING)
+            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                    .addGroup(GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(drvListLabel)
                             .addComponent(drvClassLabel)
                             .addComponent(nameLabel))
-                        .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                            .addComponent(nameTextField, GroupLayout.DEFAULT_SIZE, 258, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(nameTextField, javax.swing.GroupLayout.DEFAULT_SIZE, 258, Short.MAX_VALUE)
                             .addComponent(drvClassComboBox, 0, 258, Short.MAX_VALUE)
                             .addComponent(drvListScrollPane))
-                        .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(removeButton)
                             .addComponent(browseButton)
                             .addComponent(findButton)))
-                    .addComponent(progressMessageLabel, GroupLayout.DEFAULT_SIZE, 424, Short.MAX_VALUE)
-                    .addComponent(progressContainerPanel, GroupLayout.DEFAULT_SIZE, 424, Short.MAX_VALUE))
+                    .addComponent(progressMessageLabel, javax.swing.GroupLayout.DEFAULT_SIZE, 424, Short.MAX_VALUE)
+                    .addComponent(progressContainerPanel, javax.swing.GroupLayout.DEFAULT_SIZE, 424, Short.MAX_VALUE))
                 .addContainerGap())
         );
 
-        layout.linkSize(SwingConstants.HORIZONTAL, new Component[] {browseButton, findButton, removeButton});
+        layout.linkSize(javax.swing.SwingConstants.HORIZONTAL, new java.awt.Component[] {browseButton, findButton, removeButton});
 
         layout.setVerticalGroup(
-            layout.createParallelGroup(GroupLayout.Alignment.LEADING)
+            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                    .addComponent(drvListScrollPane, GroupLayout.DEFAULT_SIZE, 64, Short.MAX_VALUE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(drvListScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 64, Short.MAX_VALUE)
                     .addComponent(drvListLabel)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(browseButton)
-                        .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(removeButton)))
                 .addGap(24, 24, 24)
-                .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                    .addComponent(drvClassComboBox, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(drvClassComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(drvClassLabel)
                     .addComponent(findButton))
-                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                    .addComponent(nameTextField, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(nameTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(nameLabel))
-                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(progressMessageLabel)
-                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(progressContainerPanel, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(progressContainerPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
         );
     }
@@ -478,18 +478,18 @@ public final class AddDriverDialog extends JPanel {
             
     
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private JButton browseButton;
-    private JComboBox drvClassComboBox;
-    private JLabel drvClassLabel;
-    private JList drvList;
-    private JLabel drvListLabel;
-    private JScrollPane drvListScrollPane;
-    private JButton findButton;
-    private JLabel nameLabel;
-    private JTextField nameTextField;
-    private JPanel progressContainerPanel;
-    private JLabel progressMessageLabel;
-    private JButton removeButton;
+    private javax.swing.JButton browseButton;
+    private javax.swing.JComboBox drvClassComboBox;
+    private javax.swing.JLabel drvClassLabel;
+    private javax.swing.JList drvList;
+    private javax.swing.JLabel drvListLabel;
+    private javax.swing.JScrollPane drvListScrollPane;
+    private javax.swing.JButton findButton;
+    private javax.swing.JLabel nameLabel;
+    private javax.swing.JTextField nameTextField;
+    private javax.swing.JPanel progressContainerPanel;
+    private javax.swing.JLabel progressMessageLabel;
+    private javax.swing.JButton removeButton;
     // End of variables declaration//GEN-END:variables
     
     private boolean isDriverClass(URLClassLoader jarloader, String className) {

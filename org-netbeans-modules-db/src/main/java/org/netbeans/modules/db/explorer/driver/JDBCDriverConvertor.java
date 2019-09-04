@@ -317,7 +317,7 @@ public class JDBCDriverConvertor implements Environment.Provider, InstanceCookie
         }
 
         @Override
-        public void run() throws IOException {
+        public void run() throws java.io.IOException {
             FileLock lck;
             FileObject data;
 

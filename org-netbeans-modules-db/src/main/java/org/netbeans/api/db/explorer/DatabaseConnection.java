@@ -36,7 +36,7 @@ import org.netbeans.modules.db.explorer.DatabaseConnectionAccessor;
  * added to the Database Explorer using the 
  * {@link ConnectionManager#addConnection} method.</p>
  * 
- * <p>It is also possible to retrieve the JDBC {@link Connection}
+ * <p>It is also possible to retrieve the JDBC {@link java.sql.Connection}
  * using the {@link #getJDBCConnection} method (the connection can be connected
  * or disconnected using the {@link ConnectionManager#showConnectionDialog} 
  * and {@link ConnectionManager#disconnect} methods.</p>
@@ -288,16 +288,16 @@ public final class DatabaseConnection {
     }
 
     /**
-     * Returns the {@link Connection} instance which encapsulates
+     * Returns the {@link java.sql.Connection} instance which encapsulates 
      * the physical connection to the database if this database connection
      * is connected. Note that "connected" here means "connected using the
-     * Database Explorer". There is no check if {@link Connection#close}
+     * Database Explorer". There is no check if {@link java.sql.Connection#close}
      * has been called on the returned connection. However,
      * clients should not call <code>Connection.close()</code> on the returned
      * connection, therefore this method should always return a non-closed 
      * connection or <code>null</code>.
      *
-     * <p><strong>Calling {@link Connection#close} on the connection
+     * <p><strong>Calling {@link java.sql.Connection#close} on the connection
      * returned by this method is illegal. Use 
      * {@link ConnectionManager#disconnect} 
      * to close the connection.</strong></p>
@@ -316,17 +316,17 @@ public final class DatabaseConnection {
     }
     
     /**
-     * Returns the {@link Connection} instance which encapsulates
+     * Returns the {@link java.sql.Connection} instance which encapsulates 
      * the physical connection to the database if this database connection
      * is connected. Note that "connected" here means "connected using the
      * Database Explorer". Unless <code>test</code is set to <code>true</code>,
-     * there is no check if {@link Connection#close}
+     * there is no check if {@link java.sql.Connection#close}
      * has been called on the returned connection. However,
      * clients should not call <code>Connection.close()</code> on the returned
      * connection, therefore this method should always return a non-closed 
      * connection or <code>null</code>.
      *
-     * <p><strong>Calling {@link Connection#close} on the connection
+     * <p><strong>Calling {@link java.sql.Connection#close} on the connection
      * returned by this method is illegal. Use 
      * {@link ConnectionManager#disconnect} 
      * to close the connection.</strong></p>

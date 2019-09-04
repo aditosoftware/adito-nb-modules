@@ -41,7 +41,7 @@ public class BaseFilterNode extends FilterNode {
      * refresh its parent (ancestor at distance 1) or some other ancestor after
      * it is destroyed, it has to set attribute with this key to distance of
      * ancestor to refresh. (1 for parent, 2 for grandparent, ...). See
-     * {@link Node#setValue(String, Object)}.
+     * {@link Node#setValue(java.lang.String, java.lang.Object)}.
      */
     public static final String REFRESH_ANCESTOR_DISTANCE =
             "BaseFilterNode.refreshAncestorDistance";                   //NOI18N

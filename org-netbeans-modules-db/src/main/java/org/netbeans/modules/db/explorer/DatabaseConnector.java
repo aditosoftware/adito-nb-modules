@@ -125,7 +125,7 @@ public class DatabaseConnector {
      * method gets called by the DatabaseConnection itself, and should not be called
      * directly by any other object.
      *
-     * @throws DatabaseException
+     * @throws org.netbeans.api.db.explorer.DatabaseException
      */
     public void performDisconnect() throws DatabaseException {
                 driverSpecCache.clear();

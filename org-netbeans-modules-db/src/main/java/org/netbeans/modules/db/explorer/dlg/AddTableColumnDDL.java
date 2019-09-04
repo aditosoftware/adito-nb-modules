@@ -55,7 +55,7 @@ public class AddTableColumnDDL {
 
         AddColumn cmd = spec.createCommandAddColumn(tablename);
         cmd.setObjectOwner(schema);
-        TableColumn col = null;
+        org.netbeans.lib.ddl.impl.TableColumn col = null;
         if (citem.isPrimaryKey()) {
           col = cmd.createPrimaryKeyColumn(colname);
           // ADITO
