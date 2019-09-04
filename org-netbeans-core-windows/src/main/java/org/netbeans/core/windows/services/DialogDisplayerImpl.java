@@ -253,13 +253,13 @@ public class DialogDisplayerImpl extends DialogDisplayer {
         
         AWTQuery query = new AWTQuery ();
         
-        if (SwingUtilities.isEventDispatchThread ()) {
+        if (javax.swing.SwingUtilities.isEventDispatchThread ()) {
             query.showDialog ();
             return descriptor.getValue ();
         }
         
         synchronized (query) {
-            SwingUtilities.invokeLater (query);
+            javax.swing.SwingUtilities.invokeLater (query);
             try {
                 query.wait (10000);
             } catch (InterruptedException ex) {

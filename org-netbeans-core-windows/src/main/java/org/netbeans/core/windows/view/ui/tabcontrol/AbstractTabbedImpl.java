@@ -34,6 +34,7 @@ import org.netbeans.swing.tabcontrol.TabDataModel;
 import org.netbeans.swing.tabcontrol.customtabs.Tabbed;
 import org.netbeans.swing.tabcontrol.plaf.EqualPolygon;
 import org.openide.util.ChangeSupport;
+import org.openide.util.ImageUtilities;
 import org.openide.util.WeakListeners;
 import org.openide.windows.TopComponent;
 
@@ -53,7 +54,7 @@ public abstract class AbstractTabbedImpl extends Tabbed {
     private static final boolean DEBUG = Debug.isLoggable(TabbedAdapter.class);
 
     @Override
-    public final void addTopComponent( String name, Icon icon, TopComponent tc, String toolTip ) {
+    public final void addTopComponent( String name, javax.swing.Icon icon, TopComponent tc, String toolTip ) {
         insertComponent( name, icon, tc, toolTip, getTabCount() );
     }
 
@@ -118,7 +119,7 @@ public abstract class AbstractTabbedImpl extends Tabbed {
     protected abstract void setAttentionHighlight( int tabIndex, boolean highlight );
 
     @Override
-    public final void insertComponent( String name, Icon icon, Component comp, String toolTip, int position ) {
+    public final void insertComponent( String name, javax.swing.Icon icon, Component comp, String toolTip, int position ) {
         TabData td = new TabData( comp, icon, name, toolTip );
 
         if( DEBUG ) {
@@ -184,7 +185,7 @@ public abstract class AbstractTabbedImpl extends Tabbed {
             String displayName = WindowManagerImpl.getInstance().getTopComponentDisplayName( tc );
             data[i] = new TabData(
                     tc,
-                    icon == null ? null : new ImageIcon( icon ),
+                    icon == null ? null : ImageUtilities.image2Icon( icon ),
                     displayName == null ? "" : displayName, // NOI18N
                     tc.getToolTipText() );
             if( selected == tcs[i] ) {

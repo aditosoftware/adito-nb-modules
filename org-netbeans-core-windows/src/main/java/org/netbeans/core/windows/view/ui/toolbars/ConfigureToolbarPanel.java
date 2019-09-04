@@ -60,7 +60,7 @@ import org.openide.util.datatransfer.ExTransferable;
  *
  * @author  Stanislav Aubrecht
  */
-public class ConfigureToolbarPanel extends JPanel implements Runnable, ExplorerManager.Provider {
+public class ConfigureToolbarPanel extends javax.swing.JPanel implements Runnable, ExplorerManager.Provider {
 
     private static final Logger LOG = Logger.getLogger(ConfigureToolbarPanel.class.getName());
     private static WeakReference<Dialog> dialogRef; // is weak reference necessary?
@@ -112,13 +112,13 @@ public class ConfigureToolbarPanel extends JPanel implements Runnable, ExplorerM
     }
     
     public static void showConfigureDialog() {
-        Dialog dialog = null;
+        java.awt.Dialog dialog = null;
         if (dialogRef != null)
             dialog = dialogRef.get();
         if (dialog == null) {
             JButton closeButton = new JButton();
             closeButton.getAccessibleContext().setAccessibleDescription( getBundleString("ACSD_Close") );
-            Mnemonics.setLocalizedText(
+            org.openide.awt.Mnemonics.setLocalizedText(
                 closeButton, getBundleString("CTL_Close")); 
             DialogDescriptor dd = new DialogDescriptor(
                 new ConfigureToolbarPanel(),
@@ -180,27 +180,27 @@ public class ConfigureToolbarPanel extends JPanel implements Runnable, ExplorerM
     private void initComponents() {
         java.awt.GridBagConstraints gridBagConstraints;
 
-        lblHint = new JLabel();
-        palettePanel = new JPanel();
-        checkSmallIcons = new JCheckBox();
-        btnNewToolbar = new JButton();
-        btnReset = new JButton();
+        lblHint = new javax.swing.JLabel();
+        palettePanel = new javax.swing.JPanel();
+        checkSmallIcons = new javax.swing.JCheckBox();
+        btnNewToolbar = new javax.swing.JButton();
+        btnReset = new javax.swing.JButton();
 
         FormListener formListener = new FormListener();
 
         setLayout(new java.awt.GridBagLayout());
 
-        setMinimumSize(new Dimension(453, 68));
-        Mnemonics.setLocalizedText(lblHint, getBundleString("CTL_TreeLabel")); // NOI18N
+        setMinimumSize(new java.awt.Dimension(453, 68));
+        org.openide.awt.Mnemonics.setLocalizedText(lblHint, getBundleString("CTL_TreeLabel")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridwidth = 2;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
         gridBagConstraints.insets = new java.awt.Insets(10, 10, 1, 10);
         add(lblHint, gridBagConstraints);
 
-        palettePanel.setLayout(new BorderLayout());
+        palettePanel.setLayout(new java.awt.BorderLayout());
 
-        palettePanel.setBorder(BorderFactory.createEtchedBorder());
+        palettePanel.setBorder(javax.swing.BorderFactory.createEtchedBorder());
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 1;
@@ -211,8 +211,8 @@ public class ConfigureToolbarPanel extends JPanel implements Runnable, ExplorerM
         gridBagConstraints.insets = new java.awt.Insets(1, 10, 5, 10);
         add(palettePanel, gridBagConstraints);
 
-        Mnemonics.setLocalizedText(checkSmallIcons, getBundleString("CTL_SmallIcons")); // NOI18N
-        checkSmallIcons.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
+        org.openide.awt.Mnemonics.setLocalizedText(checkSmallIcons, getBundleString("CTL_SmallIcons")); // NOI18N
+        checkSmallIcons.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 0, 0, 0));
         checkSmallIcons.setMargin(new java.awt.Insets(0, 0, 0, 0));
         checkSmallIcons.setSelected( ToolbarPool.getDefault().getPreferredIconSize() == 16 );
         checkSmallIcons.addActionListener(formListener);
@@ -225,7 +225,7 @@ public class ConfigureToolbarPanel extends JPanel implements Runnable, ExplorerM
         add(checkSmallIcons, gridBagConstraints);
         checkSmallIcons.getAccessibleContext().setAccessibleDescription(getBundleString("ACSD_SmallIcons")); // NOI18N
 
-        Mnemonics.setLocalizedText(btnNewToolbar, getBundleString("CTL_NewToolbar")); // NOI18N
+        org.openide.awt.Mnemonics.setLocalizedText(btnNewToolbar, getBundleString("CTL_NewToolbar")); // NOI18N
         btnNewToolbar.addActionListener(formListener);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -236,7 +236,7 @@ public class ConfigureToolbarPanel extends JPanel implements Runnable, ExplorerM
         add(btnNewToolbar, gridBagConstraints);
         btnNewToolbar.getAccessibleContext().setAccessibleDescription(getBundleString("ACSD_NewToolbar")); // NOI18N
 
-        Mnemonics.setLocalizedText(btnReset, getBundleString("CTL_ResetToolbarsButton")); // NOI18N
+        org.openide.awt.Mnemonics.setLocalizedText(btnReset, getBundleString("CTL_ResetToolbarsButton")); // NOI18N
         btnReset.addActionListener(formListener);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -281,7 +281,7 @@ public class ConfigureToolbarPanel extends JPanel implements Runnable, ExplorerM
         DialogDescriptor dd = new DialogDescriptor( panel, NbBundle.getMessage(ConfigureToolbarPanel.class, "PROP_newToolbarDialog"), 
                 true, DialogDescriptor.OK_CANCEL_OPTION, null, DialogDescriptor.DEFAULT_ALIGN, new HelpCtx( ConfigureToolbarPanel.class), null );
 
-        Dialog dlg = DialogDisplayer.getDefault ().createDialog( dd );
+        Dialog dlg = org.openide.DialogDisplayer.getDefault ().createDialog( dd );
         dlg.setVisible( true );
         if (dd.getValue() != NotifyDescriptor.OK_OPTION)
             return;
@@ -307,7 +307,7 @@ public class ConfigureToolbarPanel extends JPanel implements Runnable, ExplorerM
             } else {
                 NotifyDescriptor.Message msg = new NotifyDescriptor.Message(
                         NbBundle.getMessage(ConfigureToolbarPanel.class, "MSG_ToolbarExists", s ) ); // NOI18N
-                DialogDisplayer.getDefault().notify( msg );
+                org.openide.DialogDisplayer.getDefault().notify( msg );
             }
         } catch (IOException e) {
             Exceptions.printStackTrace(e);
@@ -332,11 +332,11 @@ public class ConfigureToolbarPanel extends JPanel implements Runnable, ExplorerM
     
     
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private JButton btnNewToolbar;
-    private JButton btnReset;
-    private JCheckBox checkSmallIcons;
-    private JLabel lblHint;
-    private JPanel palettePanel;
+    private javax.swing.JButton btnNewToolbar;
+    private javax.swing.JButton btnReset;
+    private javax.swing.JCheckBox checkSmallIcons;
+    private javax.swing.JLabel lblHint;
+    private javax.swing.JPanel palettePanel;
     // End of variables declaration//GEN-END:variables
 
     @Override
@@ -423,7 +423,7 @@ public class ConfigureToolbarPanel extends JPanel implements Runnable, ExplorerM
             return new Action[0];
         }
 
-        private static class MyChildren extends Children {
+        private static class MyChildren extends FilterNode.Children {
 
             public MyChildren(Node original) {
                 super(original);

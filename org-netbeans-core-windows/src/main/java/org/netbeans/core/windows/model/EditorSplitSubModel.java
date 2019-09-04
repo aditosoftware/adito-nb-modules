@@ -85,7 +85,7 @@ final class EditorSplitSubModel extends SplitSubModel {
     
     
     /** Class which represents editor area position in EditorSplitSubModel. */
-    static class EditorNode extends Node {
+    static class EditorNode extends SplitSubModel.Node {
         /** Ref to editor area. */
         private final SplitSubModel editorArea;
         

@@ -165,7 +165,7 @@ public final class NodeOperationImpl extends NodeOperation {
                          NbBundle.getMessage(NodeOperationImpl.class, "CTL_Customizer_dialog_title"));
                     dd.setOptions(new Object[] { DialogDescriptor.CLOSED_OPTION });
 
-                    Dialog dialog = DialogDisplayer.getDefault ().createDialog(dd);
+                    Dialog dialog = org.openide.DialogDisplayer.getDefault ().createDialog(dd);
                     dialog.pack();
                     dialog.setVisible(true);
                     return Boolean.TRUE;
@@ -357,7 +357,7 @@ public final class NodeOperationImpl extends NodeOperation {
                         modal = true;
                     }
                     
-                    Dialog dlg = DialogDisplayer.getDefault().createDialog(new DialogDescriptor (
+                    Dialog dlg = org.openide.DialogDisplayer.getDefault().createDialog(new DialogDescriptor (
                         sheet,
                         sheet.getName(),
                         modal,

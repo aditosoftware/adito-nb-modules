@@ -34,7 +34,7 @@ import java.util.*;
 
 /**
  * PasteType for Action instances. PasteType impl. that uses {@link org.openide.loaders.DataShadow}  for copying and 
- * {@link DataObject#move(DataFolder)} .
+ * {@link DataObject#move(org.openide.loaders.DataFolder)} .
  *  
  * @author Radek Matous
  */ 

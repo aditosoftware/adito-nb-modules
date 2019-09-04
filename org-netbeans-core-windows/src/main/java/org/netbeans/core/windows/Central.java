@@ -2042,7 +2042,7 @@ final class Central implements ControllerHandler {
             SwingUtilities.invokeLater( new Runnable() {
                 @Override
                 public void run() {
-                    Frame f = getMainWindow();
+                    java.awt.Frame f = getMainWindow();
                     if( null != f && f.isVisible() ) {
                         f.invalidate();
                         f.repaint();

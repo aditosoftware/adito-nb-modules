@@ -120,14 +120,14 @@ interface ModeModel {
     public SplitConstraint[] getTopComponentPreviousConstraints(String tcID);
     
     /** Gets position of opened top component in this mode */
-    public int getOpenedTopComponentTabPosition(TopComponent tc);
+    public int getOpenedTopComponentTabPosition (TopComponent tc);
     /** @since 2.30 */
     public boolean isMinimized();
     /** @since 2.30 */
-    public void setMinimized(boolean minimized);
+    public void setMinimized( boolean minimized );
     /** @since 2.30 */
     public Collection<String> getOtherNames();
     /** @since 2.30 */
-    public void addOtherName(String otherModeName);
+    public void addOtherName( String otherModeName );
 }
 

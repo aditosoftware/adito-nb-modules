@@ -431,10 +431,6 @@ public final class NbSheet extends TopComponent {
             if (listen) {
                 TopComponent.getRegistry().addPropertyChangeListener(
                     listener);
-                // ADITO:
-                // Fehler #14649 Focus auf Entity bei öffnen setzen
-                // Sorgt dafür dass das Sheet auch angezeigt wird.
-                listener.activate();
             } else {
                 TopComponent.getRegistry().removePropertyChangeListener (listener);
             }
@@ -466,7 +462,7 @@ public final class NbSheet extends TopComponent {
     private class Listener extends Object implements Runnable, PropertyChangeListener {
         Listener() {}
         public void propertyChange (PropertyChangeEvent ev) {
-            if (Registry.PROP_ACTIVATED_NODES.equals(ev.getPropertyName() )) {
+            if (TopComponent.Registry.PROP_ACTIVATED_NODES.equals( ev.getPropertyName() )) {
                 activate();
             }
             /*
@@ -549,7 +545,7 @@ public final class NbSheet extends TopComponent {
             // start to listen to all given nodes and map nodes to
             // their listeners
             for (Node n : nodes) {
-                curListener = NodeOp.weakNodeListener(this, n);
+                curListener = org.openide.nodes.NodeOp.weakNodeListener(this, n);
                 pListener = org.openide.util.WeakListeners.propertyChange(this, n);
                 listenerMap.put(n, curListener);
                 pListenerMap.put(n, pListener);

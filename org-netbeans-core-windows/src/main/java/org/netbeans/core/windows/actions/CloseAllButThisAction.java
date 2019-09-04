@@ -85,7 +85,7 @@ implements PropertyChangeListener, Runnable {
 
     /** Perform the action. Sets/unsets maximzed mode. */
     @Override
-    public void actionPerformed(ActionEvent ev) {
+    public void actionPerformed(java.awt.event.ActionEvent ev) {
         TopComponent topC = obtainTC();
         if(topC != null) {
             ActionUtils.closeAllExcept(topC, isContext);

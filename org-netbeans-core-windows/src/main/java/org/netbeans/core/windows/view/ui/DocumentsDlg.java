@@ -179,7 +179,7 @@ public class DocumentsDlg extends JPanel implements PropertyChangeListener, Expl
         gridBagConstraints.insets = new java.awt.Insets(0, 0, 11, 11);
         add(explorerPanel, gridBagConstraints);
 
-        jScrollPane1.setPreferredSize(new Dimension(3, 60));
+        jScrollPane1.setPreferredSize(new java.awt.Dimension(3, 60));
 
         descriptionArea.setEditable(false);
         jScrollPane1.setViewportView(descriptionArea);
@@ -230,7 +230,7 @@ public class DocumentsDlg extends JPanel implements PropertyChangeListener, Expl
         gridBagConstraints.insets = new java.awt.Insets(0, 0, 11, 0);
         add(closeButton, gridBagConstraints);
 
-        Mnemonics.setLocalizedText(lblOrderBy, NbBundle.getMessage(DocumentsDlg.class, "Lbl_OrderBy")); // NOI18N
+        org.openide.awt.Mnemonics.setLocalizedText(lblOrderBy, NbBundle.getMessage(DocumentsDlg.class, "Lbl_OrderBy")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 4;
@@ -239,7 +239,7 @@ public class DocumentsDlg extends JPanel implements PropertyChangeListener, Expl
 
         buttonGroup1.add(radioOrderByName);
         radioOrderByName.setSelected(true);
-        Mnemonics.setLocalizedText(radioOrderByName, NbBundle.getMessage(DocumentsDlg.class, "Lbl_OrderByName")); // NOI18N
+        org.openide.awt.Mnemonics.setLocalizedText(radioOrderByName, NbBundle.getMessage(DocumentsDlg.class, "Lbl_OrderByName")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 5;
@@ -248,7 +248,7 @@ public class DocumentsDlg extends JPanel implements PropertyChangeListener, Expl
         add(radioOrderByName, gridBagConstraints);
 
         buttonGroup1.add(radioOrderByUsage);
-        Mnemonics.setLocalizedText(radioOrderByUsage, NbBundle.getMessage(DocumentsDlg.class, "Lbl_OrderByUsage")); // NOI18N
+        org.openide.awt.Mnemonics.setLocalizedText(radioOrderByUsage, NbBundle.getMessage(DocumentsDlg.class, "Lbl_OrderByUsage")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 6;
@@ -261,7 +261,7 @@ public class DocumentsDlg extends JPanel implements PropertyChangeListener, Expl
 
     private class FormListener implements java.awt.event.ActionListener {
         FormListener() {}
-        public void actionPerformed(ActionEvent evt) {
+        public void actionPerformed(java.awt.event.ActionEvent evt) {
             if (evt.getSource() == jButtonActivate) {
                 DocumentsDlg.this.activate(evt);
             }
@@ -277,11 +277,11 @@ public class DocumentsDlg extends JPanel implements PropertyChangeListener, Expl
         }
     }// </editor-fold>//GEN-END:initComponents
 
-    private void closeButtonActionPerformed(ActionEvent evt) {//GEN-FIRST:event_closeButtonActionPerformed
+    private void closeButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_closeButtonActionPerformed
         closeDialog();
     }//GEN-LAST:event_closeButtonActionPerformed
 
-    private void saveDocuments(ActionEvent evt) {//GEN-FIRST:event_saveDocuments
+    private void saveDocuments(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_saveDocuments
         // Add your handling code here:
         Node[] selNodes = explorer.getSelectedNodes();
         if (selNodes.length == 0) {
@@ -309,7 +309,7 @@ public class DocumentsDlg extends JPanel implements PropertyChangeListener, Expl
         jButtonSave.setEnabled(false);
     }//GEN-LAST:event_saveDocuments
 
-    private void closeDocuments(ActionEvent evt) {//GEN-FIRST:event_closeDocuments
+    private void closeDocuments(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_closeDocuments
         // Add your handling code here:
         Node[] selNodes = explorer.getSelectedNodes();
         if (selNodes.length == 0) {
@@ -360,7 +360,7 @@ public class DocumentsDlg extends JPanel implements PropertyChangeListener, Expl
         }
     }//GEN-LAST:event_closeDocuments
 
-    private void activate(ActionEvent evt) {//GEN-FIRST:event_activate
+    private void activate(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_activate
         // Add your handling code here:
         Node[] selNodes = explorer.getSelectedNodes();
         if (selNodes.length == 0) {
@@ -586,7 +586,7 @@ public class DocumentsDlg extends JPanel implements PropertyChangeListener, Expl
     private javax.swing.JTextArea descriptionArea;
     private javax.swing.JLabel descriptionLabel;
     private javax.swing.JLabel explorerLabel;
-    private JPanel explorerPanel;
+    private javax.swing.JPanel explorerPanel;
     private javax.swing.JButton jButtonActivate;
     private javax.swing.JButton jButtonClose;
     private javax.swing.JButton jButtonSave;

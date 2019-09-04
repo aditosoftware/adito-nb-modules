@@ -67,7 +67,7 @@ public class EditorView extends ViewElement {
         Component comp = getEditorAreaComponent();
         Rectangle bounds = comp.getBounds();
         Point location = new Point(0, 0);
-        SwingUtilities.convertPointToScreen(location, comp);
+        javax.swing.SwingUtilities.convertPointToScreen(location, comp);
         bounds.setLocation(location);
         return bounds;
     }
@@ -202,12 +202,12 @@ public class EditorView extends ViewElement {
             if(imageSource != null) {
                 Image image = ImageUtilities.loadImage(imageSource);
                 if(image != null) {
-                    JLabel label = new JLabel(new ImageIcon(image));
+                    JLabel label = new JLabel(ImageUtilities.image2Icon(image));
                     label.setMinimumSize(new Dimension(0, 0)); // XXX To be able shrink the area.
                     add(label, BorderLayout.CENTER);
                 } else {
                     Logger.getLogger(EditorView.class.getName()).log(Level.WARNING, null,
-                                      new NullPointerException("Image not found at " +
+                                      new java.lang.NullPointerException("Image not found at " +
                                                                          imageSource)); // NOI18N
                 }
             }

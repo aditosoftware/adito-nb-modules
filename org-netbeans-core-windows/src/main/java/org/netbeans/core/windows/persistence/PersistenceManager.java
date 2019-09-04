@@ -59,7 +59,6 @@ import org.openide.util.Exceptions;
 import org.openide.util.Lookup;
 import org.openide.util.NbBundle;
 import org.openide.util.Utilities;
-import org.openide.util.io.SafeException;
 import org.openide.windows.TopComponent;
 import org.openide.xml.XMLUtil;
 import org.xml.sax.EntityResolver;
@@ -99,6 +98,8 @@ public final class PersistenceManager implements PropertyChangeListener {
     /** default base name for noname top components */
     private static final String DEFAULT_TC_NAME = "untitled_tc"; // NOI18N
     
+    private static final String UNNAMED_MODE_PARSER = "unnamed_mp"; // NOI18N
+            
     private static final boolean DEBUG = Debug.isLoggable(PersistenceManager.class);
     
     /** Root folder for win sys module */
@@ -968,7 +969,7 @@ public final class PersistenceManager implements PropertyChangeListener {
             }
 
             topComponent2IDMap.put(tc, srcName);
-            id2TopComponentMap.put(srcName, new TopComponentReference(tc,srcName));
+            id2TopComponentMap.put(srcName, new PersistenceManager.TopComponentReference(tc,srcName));
             globalIDSet.add(srcName.toUpperCase(Locale.ENGLISH));
             if (persistenceType(tc) == TopComponent.PERSISTENCE_ONLY_OPENED) {
                 topComponentPersistentOnlyOpenedID.add(srcName);
@@ -1363,6 +1364,16 @@ public final class PersistenceManager implements PropertyChangeListener {
             tcName = tcName.replaceAll("'", "&apos;");
         }
         return tcName;
+    }
+
+    public ModeConfig createModeFromXml(String xml) throws IOException {
+        ModeParser modeParser = ModeParser.parseFromString(UNNAMED_MODE_PARSER, new HashSet());
+        return modeParser.load(xml);
+    }
+    
+    public String createXmlFromMode(ModeConfig modeConfig) throws IOException {
+        ModeParser modeParser = ModeParser.parseFromString(UNNAMED_MODE_PARSER, new HashSet());
+        return modeParser.modeConfigXml(modeConfig);
     }
     
     /**

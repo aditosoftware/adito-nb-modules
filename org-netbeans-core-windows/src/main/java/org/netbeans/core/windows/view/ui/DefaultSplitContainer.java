@@ -132,7 +132,7 @@ public final class DefaultSplitContainer extends AbstractModeContainer {
             super(new BorderLayout());
             this.abstractModeContainer = abstractModeContainer;
             // To be able to activate on mouse click.
-            enableEvents(AWTEvent.MOUSE_EVENT_MASK);
+            enableEvents(java.awt.AWTEvent.MOUSE_EVENT_MASK);
 //            Color fillC = (Color)UIManager.get("nb_workplace_fill"); //NOI18N
 //            if (fillC != null) setBackground (fillC);
             if( UIManager.getBoolean( "NbMainWindow.showCustomBackground" ) ) //NOI18N

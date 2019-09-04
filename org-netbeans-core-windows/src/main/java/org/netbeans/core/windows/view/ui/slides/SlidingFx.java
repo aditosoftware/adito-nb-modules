@@ -31,7 +31,7 @@ import javax.swing.event.ChangeListener;
  */
 public interface SlidingFx {
 
-    public void prepareEffect(SlideOperation operation);
+    public void prepareEffect (SlideOperation operation);
 
     public void showEffect(JLayeredPane pane, Integer layer, SlideOperation operation);
 

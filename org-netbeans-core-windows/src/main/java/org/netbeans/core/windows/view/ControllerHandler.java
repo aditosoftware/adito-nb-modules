@@ -56,7 +56,7 @@ public interface ControllerHandler {
     
     public void userChangedFrameStateMode(ModeImpl mode, int frameState);
     
-    public void userChangedSplit(ModelElement[] snapshots, double[] splitWeights);
+    public void userChangedSplit( ModelElement[] snapshots, double[] splitWeights );
     
     public void userClosedTopComponent(ModeImpl mode, TopComponent tc);
     

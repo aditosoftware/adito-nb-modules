@@ -92,7 +92,7 @@ public interface Model {
     /** Removes top component group. */
     public void removeTopComponentGroup(TopComponentGroupImpl tcGroup);
     /** Adds sliding mode into specific side */ 
-    public void addSlidingMode(ModeImpl mode, String side, Map<String, Integer> slideInSizes);
+    public void addSlidingMode(ModeImpl mode, String side, Map<String,Integer> slideInSizes);
     /** Resets the model to an initial state. */
     public void reset();
     /** Set the size (width or height of the given TopComponent when it is slided in */
@@ -100,7 +100,7 @@ public interface Model {
     /**
      * Set whether the given TopComponent is maximized when it is slided-in.
      */
-    public void setTopComponentMaximizedWhenSlidedIn(String tcid, boolean maximized);
+    public void setTopComponentMaximizedWhenSlidedIn( String tcid, boolean maximized );
     
     // Mutators (global level) <<
     /////////////////////////////
@@ -171,11 +171,11 @@ public interface Model {
      * @param mode Mode
      * @return The slide side for TopComponents from the given mode.
      */
-    public String getSlideSideForMode(ModeImpl mode);
+    public String getSlideSideForMode( ModeImpl mode );
     /**
      * @return True if the given TopComponent is maximized when it is slided-in.
      */
-    public boolean isTopComponentMaximizedWhenSlidedIn(String tcid);
+    public boolean isTopComponentMaximizedWhenSlidedIn( String tcid );
 
     // Accessors (global level) >>
     //////////////////////////////   
@@ -248,7 +248,7 @@ public interface Model {
     /** Make mode permanent
      * @since 2.30
      */
-    public void makeModePermanent(ModeImpl target);
+    public void makeModePermanent( ModeImpl target );
     /** */
     public boolean isModeEmpty(ModeImpl mode);
     /** Indicates whether the mode contains the TopComponent. */
@@ -275,7 +275,7 @@ public interface Model {
     /** @since 2.30 */
     public void addModeOtherName(ModeImpl mode, String otherModeName);
     /** @since 2.31 */
-    public void dockMode(ModeImpl prevMode, ModeImpl floatingMode);
+    public void dockMode( ModeImpl prevMode, ModeImpl floatingMode );
     
     // Info about previous top component context, used by sliding kind of modes
     
@@ -300,9 +300,9 @@ public interface Model {
     /** Gets programatic name of goup. */
     public String getGroupName(TopComponentGroupImpl tcGroup);
 
-    public void openGroup(TopComponentGroupImpl tcGroup,
-                          Collection<TopComponent> openedTopComponents,
-                          Collection<TopComponent> openedBeforeTopComponenets);
+    public void openGroup(TopComponentGroupImpl tcGroup, 
+            Collection<TopComponent> openedTopComponents, 
+            Collection<TopComponent> openedBeforeTopComponenets);
     public void closeGroup(TopComponentGroupImpl tcGroup);
     public boolean isGroupOpened(TopComponentGroupImpl tcGroup);
     
@@ -357,7 +357,7 @@ public interface Model {
     public void setEditorAreaBoundsUserHelp(Rectangle bounds);
     public void setModeBoundsSeparatedHelp(ModeImpl mode, Rectangle bounds);
     
-    public void setSplitWeights(ModelElement[] snapshots, double[] splitWeights);
+    public void setSplitWeights( ModelElement[] snapshots, double[] splitWeights );
     // controller updates <<
     ////////////////////////
 

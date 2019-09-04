@@ -454,7 +454,7 @@ implements AWTEventListener, DragSourceListener, DragSourceMotionListener {
         // Just refresh the weak ref to the context if necessary.
         // The expected code here is done by ragExitHack method called from DropTarget's.
         if(dragContextWRef.get() == null) {
-            dragContextWRef = new WeakReference<DragSourceContext>(evt.getDragSourceContext());
+            dragContextWRef = new java.lang.ref.WeakReference<DragSourceContext>(evt.getDragSourceContext());
         }
     }
 

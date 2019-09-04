@@ -30,7 +30,7 @@ import org.openide.util.NbPreferences;
 import org.openide.util.Utilities;
 
 @OptionsPanelController.Keywords(keywords={"#KW_WindowOptions"}, location="Appearance", tabTitle="#AdvancedOption_DisplayName_WinSys")
-public class WinSysPanel extends JPanel {
+public class WinSysPanel extends javax.swing.JPanel {
 
     protected final WinSysOptionsPanelController controller;
     
@@ -63,8 +63,8 @@ public class WinSysPanel extends JPanel {
         setBorder(javax.swing.BorderFactory.createEmptyBorder(10, 10, 10, 10));
         setLayout(new java.awt.GridBagLayout());
 
-        org.openide.awt.Mnemonics.setLocalizedText(isDragImage, NbBundle.getMessage(WinSysPanel.class, "LBL_DragWindowImage")); // NOI18N
-        isDragImage.setToolTipText(NbBundle.getMessage(WinSysPanel.class, "IsDragWindowTooltip")); // NOI18N
+        org.openide.awt.Mnemonics.setLocalizedText(isDragImage, org.openide.util.NbBundle.getMessage(WinSysPanel.class, "LBL_DragWindowImage")); // NOI18N
+        isDragImage.setToolTipText(org.openide.util.NbBundle.getMessage(WinSysPanel.class, "IsDragWindowTooltip")); // NOI18N
         isDragImage.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 isDragImageActionPerformed(evt);
@@ -74,8 +74,8 @@ public class WinSysPanel extends JPanel {
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
         add(isDragImage, gridBagConstraints);
 
-        org.openide.awt.Mnemonics.setLocalizedText(isAlphaFloating, NbBundle.getMessage(WinSysPanel.class, "LBL_TransparentFloatingWindows")); // NOI18N
-        isAlphaFloating.setToolTipText(NbBundle.getMessage(WinSysPanel.class, "IsAlphaFloatingTooltip")); // NOI18N
+        org.openide.awt.Mnemonics.setLocalizedText(isAlphaFloating, org.openide.util.NbBundle.getMessage(WinSysPanel.class, "LBL_TransparentFloatingWindows")); // NOI18N
+        isAlphaFloating.setToolTipText(org.openide.util.NbBundle.getMessage(WinSysPanel.class, "IsAlphaFloatingTooltip")); // NOI18N
         isAlphaFloating.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 isAlphaFloatingActionPerformed(evt);
@@ -89,8 +89,8 @@ public class WinSysPanel extends JPanel {
         gridBagConstraints.insets = new java.awt.Insets(20, 0, 0, 0);
         add(isAlphaFloating, gridBagConstraints);
 
-        org.openide.awt.Mnemonics.setLocalizedText(isSnapping, NbBundle.getMessage(WinSysPanel.class, "LBL_SnapFloatingWindows")); // NOI18N
-        isSnapping.setToolTipText(NbBundle.getMessage(WinSysPanel.class, "IsSnappingTooltip")); // NOI18N
+        org.openide.awt.Mnemonics.setLocalizedText(isSnapping, org.openide.util.NbBundle.getMessage(WinSysPanel.class, "LBL_SnapFloatingWindows")); // NOI18N
+        isSnapping.setToolTipText(org.openide.util.NbBundle.getMessage(WinSysPanel.class, "IsSnappingTooltip")); // NOI18N
         isSnapping.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 isSnappingActionPerformed(evt);
@@ -102,8 +102,8 @@ public class WinSysPanel extends JPanel {
         gridBagConstraints.insets = new java.awt.Insets(0, 25, 0, 0);
         add(isSnapping, gridBagConstraints);
 
-        org.openide.awt.Mnemonics.setLocalizedText(isDragImageAlpha, NbBundle.getMessage(WinSysPanel.class, "LBL_TransparentDragWindow")); // NOI18N
-        isDragImageAlpha.setToolTipText(NbBundle.getMessage(WinSysPanel.class, "IsAlphaDragTooltip")); // NOI18N
+        org.openide.awt.Mnemonics.setLocalizedText(isDragImageAlpha, org.openide.util.NbBundle.getMessage(WinSysPanel.class, "LBL_TransparentDragWindow")); // NOI18N
+        isDragImageAlpha.setToolTipText(org.openide.util.NbBundle.getMessage(WinSysPanel.class, "IsAlphaDragTooltip")); // NOI18N
         isDragImageAlpha.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 isDragImageAlphaActionPerformed(evt);
@@ -115,8 +115,8 @@ public class WinSysPanel extends JPanel {
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
         add(isDragImageAlpha, gridBagConstraints);
 
-        org.openide.awt.Mnemonics.setLocalizedText(isSnapScreenEdges, NbBundle.getMessage(WinSysPanel.class, "LBL_SnapToScreenEdges")); // NOI18N
-        isSnapScreenEdges.setToolTipText(NbBundle.getMessage(WinSysPanel.class, "IsSnapScreenEdgesTooltip")); // NOI18N
+        org.openide.awt.Mnemonics.setLocalizedText(isSnapScreenEdges, org.openide.util.NbBundle.getMessage(WinSysPanel.class, "LBL_SnapToScreenEdges")); // NOI18N
+        isSnapScreenEdges.setToolTipText(org.openide.util.NbBundle.getMessage(WinSysPanel.class, "IsSnapScreenEdgesTooltip")); // NOI18N
         isSnapScreenEdges.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 isSnapScreenEdgesActionPerformed(evt);
