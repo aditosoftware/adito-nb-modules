@@ -64,7 +64,6 @@ import javax.swing.text.JTextComponent;
 import org.netbeans.api.options.OptionsDisplayer;
 import org.netbeans.core.options.keymap.api.KeyStrokeUtils;
 import org.netbeans.core.output2.Controller.ControllerOutputEvent;
-import org.netbeans.core.output2.adito.IOutputTabFilterDescription;
 import org.netbeans.core.output2.ui.AbstractOutputPane;
 import org.netbeans.core.output2.ui.AbstractOutputTab;
 import org.openide.DialogDisplayer;
@@ -173,7 +172,7 @@ final class OutputTab extends AbstractOutputTab implements IOContainer.CallBacks
 
     public void reset() {
         if (origPane != null) {
-            setFilter(null);
+            setFilter(null, false, false);
         }
         // get new OutWriter
         outWriter = io.out();
@@ -721,8 +720,8 @@ final class OutputTab extends AbstractOutputTab implements IOContainer.CallBacks
     FilteredOutput filtOut;
     AbstractOutputPane origPane;
 
-    private void setFilter(IOutputTabFilterDescription pFilterDescription) {
-        if (pFilterDescription == null) {
+    private void setFilter(String pattern, boolean regExp, boolean matchCase) {
+        if (pattern == null) {
             assert origPane != null;
             setOutputPane(origPane);
             origPane = null;
@@ -731,7 +730,7 @@ final class OutputTab extends AbstractOutputTab implements IOContainer.CallBacks
         } else {
             assert origPane == null;
             origPane = getOutputPane();
-            filtOut = new FilteredOutput(pFilterDescription);
+            filtOut = new FilteredOutput(pattern, regExp, matchCase);
             setOutputPane(filtOut.getPane());
             try {
                 waitCursor(true);
@@ -1185,45 +1184,12 @@ final class OutputTab extends AbstractOutputTab implements IOContainer.CallBacks
                     break;
                 case FILTER:
                     if (origPane != null) {
-                        setFilter(null);
+                        setFilter(null, false, false);
                     } else {
-                        IOutputTabFilterDescription filterOutputDescription = io.getFilterOutputDescription();
-                        if (filterOutputDescription != null)
-                            setFilter(filterOutputDescription);
-                        else
-                        {
-                          final String pattern = getFindDlgResult(getOutputPane().getSelectedText(),
+                        String pattern = getFindDlgResult(getOutputPane().getSelectedText(),
                                 "LBL_Filter_Title", "LBL_Filter_What", "BTN_Filter"); //NOI18N
                         if (pattern != null) {
-                            final boolean regExp = FindDialogPanel.regExp();
-                            final boolean matchCase = FindDialogPanel.matchCase();
-                            final String finalPattern = (regExp || matchCase) ? pattern : pattern.toLowerCase();
-                            IOutputTabFilterDescription filterDescription = new IOutputTabFilterDescription()
-                            {
-                              private Pattern compPattern;
-
-                              @Override
-                              public void setup() { }
-
-                              @Override
-                              public boolean accepts(String pStr)
-                              {
-                                if (regExp)
-                                {
-                                  if (compPattern == null)
-                                  {
-                                    compPattern = matchCase ? Pattern.compile(finalPattern) : Pattern.compile(finalPattern, Pattern.CASE_INSENSITIVE);
-                                  }
-                                  return compPattern.matcher(pStr).find();
-                                }
-                                else
-                                {
-                                  return matchCase ? pStr.contains(finalPattern) : pStr.toLowerCase().contains(finalPattern);
-                                }
-                              }
-                            };
-                            setFilter(filterDescription);
-                          }
+                            setFilter(pattern, FindDialogPanel.regExp(), FindDialogPanel.matchCase());
                         }
                     }
                     break;
@@ -1364,14 +1330,19 @@ final class OutputTab extends AbstractOutputTab implements IOContainer.CallBacks
     }
 
     private class FilteredOutput {
+        String pattern;
         OutWriter out;
         OutputPane pane;
         OutputDocument doc;
         int readCount;
-        IOutputTabFilterDescription filterDescription;
+        Pattern compPattern;
+        boolean regExp;
+        boolean matchCase;
 
-        public FilteredOutput(IOutputTabFilterDescription pFilterDescription) {
-            filterDescription = pFilterDescription;
+        public FilteredOutput(String pattern, boolean regExp, boolean matchCase) {
+            this.pattern = (regExp || matchCase) ? pattern : pattern.toLowerCase();
+            this.regExp = regExp;
+            this.matchCase = matchCase;
             out = new OutWriter();
             pane = new OutputPane(OutputTab.this);
             doc = new OutputDocument(out);
@@ -1379,7 +1350,14 @@ final class OutputTab extends AbstractOutputTab implements IOContainer.CallBacks
         }
 
         boolean passFilter(String str) {
-           return filterDescription.accepts(str);
+            if (regExp) {
+                if (compPattern == null) {
+                    compPattern = matchCase ? Pattern.compile(pattern) : Pattern.compile(pattern, Pattern.CASE_INSENSITIVE);
+                }
+                return compPattern.matcher(str).find();
+            } else {
+                return matchCase ? str.contains(pattern) : str.toLowerCase().contains(pattern);
+            }
         }
 
         OutputPane getPane() {

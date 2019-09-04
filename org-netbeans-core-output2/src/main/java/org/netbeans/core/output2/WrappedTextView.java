@@ -532,7 +532,7 @@ public class WrappedTextView extends View implements TabExpander {
         return arrowColor;
     }
 
-    public Shape modelToView(int pos, Shape a, Bias b) throws BadLocationException {
+    public Shape modelToView(int pos, Shape a, Position.Bias b) throws BadLocationException {
         Rectangle result = new Rectangle();
         result.setBounds (0, 0, charWidth, charHeight);
         OutputDocument od = odoc();
@@ -568,7 +568,7 @@ public class WrappedTextView extends View implements TabExpander {
         return result;
     }
 
-    public int viewToModel(float x, float y, Shape a, Bias[] biasReturn) {
+    public int viewToModel(float x, float y, Shape a, Position.Bias[] biasReturn) {
         OutputDocument od = odoc();
         if (od != null) {
             int ix = Math.max((int) x - margin(), 0);

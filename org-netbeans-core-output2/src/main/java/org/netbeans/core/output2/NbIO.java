@@ -625,7 +625,7 @@ class NbIO implements InputOutputExt, IInputOutputFilter, InputOutput, Lookup.Pr
         /**
          * FoldHandleDefinition used when the output is already closed.
          */
-        class DummyFoldHandleDefinition extends FoldHandleDefinition {
+        class DummyFoldHandleDefinition extends IOFolding.FoldHandleDefinition {
 
             @Override
             public void finish() {
@@ -641,7 +641,7 @@ class NbIO implements InputOutputExt, IInputOutputFilter, InputOutput, Lookup.Pr
             }
         }
 
-        class NbIoFoldHandleDefinition extends FoldHandleDefinition {
+        class NbIoFoldHandleDefinition extends IOFolding.FoldHandleDefinition {
 
             private final NbIoFoldHandleDefinition parent;
             private final int start;

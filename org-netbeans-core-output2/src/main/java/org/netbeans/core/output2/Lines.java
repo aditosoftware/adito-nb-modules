@@ -44,9 +44,9 @@ public interface Lines {
      * @param idx the line number
      * @return the length
      */
-    int length(int idx);
+    int length (int idx);
 
-    int lengthWithTabs(int idx);
+    int lengthWithTabs (int idx);
 
     /**
      * Get the character position corresponding to the start of a line
@@ -54,7 +54,7 @@ public interface Lines {
      * @param line A line number
      * @return The character in the total text at which this line starts
      */
-    int getLineStart(int line);
+    int getLineStart (int line);
 
     /**
      * Get the line index of the nearest line start to this character position in the
@@ -62,7 +62,7 @@ public interface Lines {
      * @param position
      * @return The line on which this character position occurs
      */
-    int getLineAt(int position);
+    int getLineAt (int position);
 
     /**
      * Get the number of lines in the stored text
@@ -102,7 +102,7 @@ public interface Lines {
      * Get the index of the first line which has a listener
      * @return A line number, or -1 if there are no listeners
      */
-    int firstListenerLine();
+    int firstListenerLine ();
     
     /**
      * Get the index of the first line which has an important listener
@@ -141,7 +141,7 @@ public interface Lines {
      * @param charCount The number of characters at which line wrapping happens
      * @return The number of  logical lines above this one.
      */
-    int getLogicalLineCountAbove(int logicalLine, int charCount);
+    int getLogicalLineCountAbove (int logicalLine, int charCount);
 
     /**
      * Get the total number of logical lines required to display the stored text if wrapped at the specified
@@ -149,7 +149,7 @@ public interface Lines {
      * @param charCount The number of characters at which line wrapping happens
      * @return The number of logical lines needed to fit all of the text
      */
-    int getLogicalLineCountIfWrappedAt(int charCount);
+    int getLogicalLineCountIfWrappedAt (int charCount);
 
     /**
      * Get number of physical characters for the given logical (expanded TABs) length.
@@ -168,7 +168,7 @@ public interface Lines {
      * @param chpos A character index in the stored text
      * @return Whether or not it's the first character of a line
      */
-    boolean isLineStart(int chpos);
+    boolean isLineStart (int chpos);
 
     /**
      * Get a line of text
@@ -177,7 +177,7 @@ public interface Lines {
      * @return The text
      * @throws IOException If an error occurs and the text cannot be read
      */
-    String getLine(int idx) throws IOException;
+    String getLine (int idx) throws IOException;
 
     /**
      * Determine if there are any lines with associated output listeners
@@ -215,7 +215,7 @@ public interface Lines {
      * @param end A character position > start
      * @return A String representation of the text between these points, including newlines
      */
-    String getText(int start, int end);
+    String getText (int start, int end);
 
     /**
      * Fetch a getText of the entire text into a character array
@@ -224,7 +224,7 @@ public interface Lines {
      * @param chars A character array at least as large as end-start, or null
      * @return A character array containing the range of text specified
      */
-    char[] getText(int start, int end, char[] chars);
+    char[] getText (int start, int end, char[] chars);
 
     /**
       * Get a physical (real) line index for logical (wrapped) line index.
@@ -243,7 +243,7 @@ public interface Lines {
       *         <li>[2] The total number of line wraps for the physical line</li>
       *         </ul>
       */
-    void toPhysicalLineIndex(int[] info, int charsPerLine);
+    void toPhysicalLineIndex (int[] info, int charsPerLine);
 
     /**
      * Save the contents of the buffer to a file, in platform default encoding.
@@ -290,14 +290,14 @@ public interface Lines {
      *
      * @param cl A change listener
      */
-    void addChangeListener(ChangeListener cl);
+    void addChangeListener (ChangeListener cl);
 
     /**
      * Remove a change listener.
      *
      * @param cl
      */
-    void removeChangeListener(ChangeListener cl);
+    void removeChangeListener (ChangeListener cl);
 
     /**
      * Allows clients that wish to poll to see if there is new output to do

@@ -734,7 +734,7 @@ public class OutputDocument implements Document, Element, ChangeListener {
             return "Event: first=" + first + " linecount=" + lineCount + " offset=" + offset + " length=" + length + " consumed=" + wasConsumed;
         }
         
-        public ElementChange getChange(Element element) {
+        public DocumentEvent.ElementChange getChange(Element element) {
             if (element == OutputDocument.this) {
                 return this;
             } else {
@@ -756,9 +756,9 @@ public class OutputDocument implements Document, Element, ChangeListener {
             return offset;
         }
         
-        public EventType getType() {
-            return first == 0 ? EventType.CHANGE :
-                EventType.INSERT;
+        public DocumentEvent.EventType getType() {
+            return first == 0 ? DocumentEvent.EventType.CHANGE : 
+                DocumentEvent.EventType.INSERT;
         }
         
         public Element[] getChildrenAdded() {
