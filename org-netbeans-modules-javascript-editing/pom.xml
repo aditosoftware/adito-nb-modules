@@ -7,14 +7,14 @@
   <parent>
     <groupId>de.adito</groupId>
     <artifactId>nb-modules</artifactId>
-    <version>1.2.0</version>
+    <version>1.3.0</version>
   </parent>
 
 
   <groupId>org.netbeans.modules</groupId>
   <artifactId>org-netbeans-modules-javascript-editing</artifactId>
   <packaging>nbm</packaging>
-  <version>RELEASE90a-1.1.0</version>
+  <version>RELEASE111-1.2.0</version>
   <name>Netbeans IDE module: org-netbeans-modules-javascript-editing</name>
 
   <properties>
@@ -241,6 +241,11 @@
               <id>org.netbeans.modules:org-netbeans-modules-html-editor-lib</id>
               <type>impl</type>
               <explicitValue>org.netbeans.modules.html.editor.lib/3 = 20181030-19e5871a24d5</explicitValue>
+            </dependency>
+            <dependency>
+              <id>org.netbeans.api:org-netbeans-libs-xerces</id>
+              <type>impl</type>
+              <explicitValue>org.netbeans.libs.xerces/1 = netbeans-release-428-on-20190716</explicitValue>
             </dependency>
           </moduleDependencies>
 
