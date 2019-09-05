@@ -147,6 +147,13 @@
         </configuration>
       </plugin>
 
+      <!-- Plugin: Dependency Plugin -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <version>3.1.1</version>
+      </plugin>
+
       <!--Plugin: Jar-Plugin to exclude maven descriptors and add manifest entries -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
