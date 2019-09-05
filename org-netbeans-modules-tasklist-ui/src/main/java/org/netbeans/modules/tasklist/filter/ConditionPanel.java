@@ -74,7 +74,7 @@ final class ConditionPanel extends JPanel implements ActionListener, PropertyCha
         propertyCombo.setModel(m);
         propertyCombo.addActionListener(this);
         propertyCombo.setSelectedIndex(selectedIndex);
-	propertyCombo.setRenderer(new PropertyCellRenderer());
+	propertyCombo.setRenderer(new ConditionPanel.PropertyCellRenderer());
 
 
 	// construct the rest of items for the current condition 
@@ -90,7 +90,7 @@ final class ConditionPanel extends JPanel implements ActionListener, PropertyCha
         relationCombo.setModel(m);
         relationCombo.addActionListener(this);
         relationCombo.setSelectedItem(cond);
-        relationCombo.setRenderer(new ConditionCellRenderer());
+        relationCombo.setRenderer(new ConditionPanel.ConditionCellRenderer());
         
         setValueComponent(cond.getCondition().createConstantComponent());
     }
@@ -182,10 +182,10 @@ final class ConditionPanel extends JPanel implements ActionListener, PropertyCha
         }
         
         GridBagConstraints gridBagConstraints = 
-            new GridBagConstraints();
+            new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 2;
         gridBagConstraints.gridy = 0;
-        gridBagConstraints.fill = GridBagConstraints.BOTH;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.weightx = 1.0;
         gridBagConstraints.insets = new java.awt.Insets(0, 0, 0, 11);
         add(valueField, gridBagConstraints); 
@@ -255,30 +255,30 @@ final class ConditionPanel extends JPanel implements ActionListener, PropertyCha
      */
     // <editor-fold defaultstate="collapsed" desc=" Generated Code ">//GEN-BEGIN:initComponents
     private void initComponents() {
-        GridBagConstraints gridBagConstraints;
+        java.awt.GridBagConstraints gridBagConstraints;
 
         setLayout(new java.awt.GridBagLayout());
 
         setFocusable(false);
-        gridBagConstraints = new GridBagConstraints();
+        gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 0;
-        gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
         gridBagConstraints.insets = new java.awt.Insets(0, 12, 0, 0);
         add(propertyCombo, gridBagConstraints);
 
-        gridBagConstraints = new GridBagConstraints();
+        gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 0;
-        gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
         gridBagConstraints.insets = new java.awt.Insets(0, 12, 0, 12);
         add(relationCombo, gridBagConstraints);
 
         emptyPanel.setOpaque(false);
-        gridBagConstraints = new GridBagConstraints();
-        gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.weightx = 1.0;
         gridBagConstraints.insets = new java.awt.Insets(0, 0, 0, 12);
         add(emptyPanel, gridBagConstraints);
@@ -286,8 +286,8 @@ final class ConditionPanel extends JPanel implements ActionListener, PropertyCha
     }// </editor-fold>//GEN-END:initComponents
     
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    final JPanel emptyPanel = new JPanel();
-    final JComboBox propertyCombo = new JComboBox();
-    final JComboBox relationCombo = new JComboBox();
+    final javax.swing.JPanel emptyPanel = new javax.swing.JPanel();
+    final javax.swing.JComboBox propertyCombo = new javax.swing.JComboBox();
+    final javax.swing.JComboBox relationCombo = new javax.swing.JComboBox();
     // End of variables declaration//GEN-END:variables
 }

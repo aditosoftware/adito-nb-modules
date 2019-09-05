@@ -118,12 +118,12 @@ final class TaskListTopComponent extends TopComponent {
     private void initComponents() {
         java.awt.GridBagConstraints gridBagConstraints;
 
-        toolbar = new JToolBar();
-        tableHolderPanel = new JPanel();
+        toolbar = new javax.swing.JToolBar();
+        tableHolderPanel = new javax.swing.JPanel();
         tableScroll = new javax.swing.JScrollPane();
         toolbarSeparator = new javax.swing.JSeparator();
         statusSeparator = new javax.swing.JSeparator();
-        statusBarPanel = new JPanel();
+        statusBarPanel = new javax.swing.JPanel();
 
         setLayout(new java.awt.GridBagLayout());
 
@@ -178,7 +178,7 @@ final class TaskListTopComponent extends TopComponent {
         gridBagConstraints.weightx = 1.0;
         add(statusSeparator, gridBagConstraints);
 
-        statusBarPanel.setLayout(new BorderLayout());
+        statusBarPanel.setLayout(new java.awt.BorderLayout());
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 2;
         gridBagConstraints.gridy = 2;
@@ -190,11 +190,11 @@ final class TaskListTopComponent extends TopComponent {
     
     
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private JPanel statusBarPanel;
+    private javax.swing.JPanel statusBarPanel;
     private javax.swing.JSeparator statusSeparator;
-    private JPanel tableHolderPanel;
+    private javax.swing.JPanel tableHolderPanel;
     private javax.swing.JScrollPane tableScroll;
-    private JToolBar toolbar;
+    private javax.swing.JToolBar toolbar;
     private javax.swing.JSeparator toolbarSeparator;
     // End of variables declaration//GEN-END:variables
     

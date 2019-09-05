@@ -251,35 +251,35 @@ public class FilterEditor extends JPanel implements PropertyChangeListener {
         lblFilters = new javax.swing.JLabel();
         scrollFilters = new javax.swing.JScrollPane();
         lstFilters = new javax.swing.JList();
-        btnNewFilter = new JButton();
-        btnRemoveFilter = new JButton();
+        btnNewFilter = new javax.swing.JButton();
+        btnRemoveFilter = new javax.swing.JButton();
         tabs = new javax.swing.JTabbedPane();
-        panelTypes = new JPanel();
-        panelKeywords = new JPanel();
+        panelTypes = new javax.swing.JPanel();
+        panelKeywords = new javax.swing.JPanel();
         lblFilterName = new javax.swing.JLabel();
         txtFilterName = new javax.swing.JTextField();
 
         lblFilters.setLabelFor(lstFilters);
-        org.openide.awt.Mnemonics.setLocalizedText(lblFilters, NbBundle.getMessage(FilterEditor.class, "FilterEditor.lblFilters.text")); // NOI18N
+        org.openide.awt.Mnemonics.setLocalizedText(lblFilters, org.openide.util.NbBundle.getMessage(FilterEditor.class, "FilterEditor.lblFilters.text")); // NOI18N
 
-        lstFilters.setModel(new AbstractListModel() {
+        lstFilters.setModel(new javax.swing.AbstractListModel() {
             String[] strings = { "Item 1", "Item 2", "Item 3", "Item 4", "Item 5" };
             public int getSize() { return strings.length; }
             public Object getElementAt(int i) { return strings[i]; }
         });
-        lstFilters.setToolTipText(NbBundle.getMessage(FilterEditor.class, "FilterEditor.lstFilters.toolTipText")); // NOI18N
+        lstFilters.setToolTipText(org.openide.util.NbBundle.getMessage(FilterEditor.class, "FilterEditor.lstFilters.toolTipText")); // NOI18N
         scrollFilters.setViewportView(lstFilters);
 
-        org.openide.awt.Mnemonics.setLocalizedText(btnNewFilter, NbBundle.getMessage(FilterEditor.class, "FilterEditor.btnNewFilter.text")); // NOI18N
-        btnNewFilter.setToolTipText(NbBundle.getMessage(FilterEditor.class, "FilterEditor.btnNewFilter.toolTipText")); // NOI18N
+        org.openide.awt.Mnemonics.setLocalizedText(btnNewFilter, org.openide.util.NbBundle.getMessage(FilterEditor.class, "FilterEditor.btnNewFilter.text")); // NOI18N
+        btnNewFilter.setToolTipText(org.openide.util.NbBundle.getMessage(FilterEditor.class, "FilterEditor.btnNewFilter.toolTipText")); // NOI18N
         btnNewFilter.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 onNewFilter(evt);
             }
         });
 
-        org.openide.awt.Mnemonics.setLocalizedText(btnRemoveFilter, NbBundle.getMessage(FilterEditor.class, "FilterEditor.btnRemoveFilter.text")); // NOI18N
-        btnRemoveFilter.setToolTipText(NbBundle.getMessage(FilterEditor.class, "FilterEditor.btnRemoveFilter.toolTipText")); // NOI18N
+        org.openide.awt.Mnemonics.setLocalizedText(btnRemoveFilter, org.openide.util.NbBundle.getMessage(FilterEditor.class, "FilterEditor.btnRemoveFilter.text")); // NOI18N
+        btnRemoveFilter.setToolTipText(org.openide.util.NbBundle.getMessage(FilterEditor.class, "FilterEditor.btnRemoveFilter.toolTipText")); // NOI18N
         btnRemoveFilter.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 onRemoveFilter(evt);
@@ -287,17 +287,17 @@ public class FilterEditor extends JPanel implements PropertyChangeListener {
         });
 
         panelTypes.setOpaque(false);
-        panelTypes.setLayout(new BorderLayout());
-        tabs.addTab(NbBundle.getMessage(FilterEditor.class, "FilterEditor.panelTypes.TabConstraints.tabTitle"), panelTypes); // NOI18N
+        panelTypes.setLayout(new java.awt.BorderLayout());
+        tabs.addTab(org.openide.util.NbBundle.getMessage(FilterEditor.class, "FilterEditor.panelTypes.TabConstraints.tabTitle"), panelTypes); // NOI18N
 
         panelKeywords.setOpaque(false);
-        panelKeywords.setLayout(new BorderLayout());
-        tabs.addTab(NbBundle.getMessage(FilterEditor.class, "FilterEditor.panelKeywords.TabConstraints.tabTitle"), panelKeywords); // NOI18N
+        panelKeywords.setLayout(new java.awt.BorderLayout());
+        tabs.addTab(org.openide.util.NbBundle.getMessage(FilterEditor.class, "FilterEditor.panelKeywords.TabConstraints.tabTitle"), panelKeywords); // NOI18N
 
         lblFilterName.setLabelFor(txtFilterName);
-        org.openide.awt.Mnemonics.setLocalizedText(lblFilterName, NbBundle.getMessage(FilterEditor.class, "FilterEditor.lblFilterName.text")); // NOI18N
+        org.openide.awt.Mnemonics.setLocalizedText(lblFilterName, org.openide.util.NbBundle.getMessage(FilterEditor.class, "FilterEditor.lblFilterName.text")); // NOI18N
 
-        txtFilterName.setToolTipText(NbBundle.getMessage(FilterEditor.class, "FilterEditor.txtFilterName.toolTipText")); // NOI18N
+        txtFilterName.setToolTipText(org.openide.util.NbBundle.getMessage(FilterEditor.class, "FilterEditor.txtFilterName.toolTipText")); // NOI18N
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
@@ -364,13 +364,13 @@ private void onNewFilter(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_onNe
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private JButton btnNewFilter;
-    private JButton btnRemoveFilter;
+    private javax.swing.JButton btnNewFilter;
+    private javax.swing.JButton btnRemoveFilter;
     private javax.swing.JLabel lblFilterName;
     private javax.swing.JLabel lblFilters;
     private javax.swing.JList lstFilters;
-    private JPanel panelKeywords;
-    private JPanel panelTypes;
+    private javax.swing.JPanel panelKeywords;
+    private javax.swing.JPanel panelTypes;
     private javax.swing.JScrollPane scrollFilters;
     private javax.swing.JTabbedPane tabs;
     private javax.swing.JTextField txtFilterName;

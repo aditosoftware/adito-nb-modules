@@ -209,7 +209,7 @@ public final class FilterRepository {
         if( shouldSave )
             save();
     }
-
+    
     private boolean _isAditoFilterInstalled_3(Preferences pFilters)
     {
         return pFilters.getBoolean(aditoFilterInstalled_3, false);

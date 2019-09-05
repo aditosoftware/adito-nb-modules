@@ -407,9 +407,9 @@ public class TaskList {
     }
     
     private void fireTasksAdded( List<Task> tasks ) {
-        Listener[] tmp;
+        TaskList.Listener[] tmp; 
         synchronized( listeners ) {
-            tmp = listeners.toArray(new Listener[listeners.size()]);
+            tmp = listeners.toArray(new TaskList.Listener[listeners.size()]);
         }
         for ( Listener l : tmp ) {
             l.tasksAdded( tasks );
@@ -417,9 +417,9 @@ public class TaskList {
     }
     
     private void fireTasksRemoved( List<Task> tasks ) {
-        Listener[] tmp;
+        TaskList.Listener[] tmp; 
         synchronized( listeners ) {
-            tmp = listeners.toArray(new Listener[listeners.size()]);
+            tmp = listeners.toArray(new TaskList.Listener[listeners.size()]);
         }
         for ( Listener l : tmp ) {
             l.tasksRemoved( tasks );
@@ -427,9 +427,9 @@ public class TaskList {
     }
     
     private void fireCleared() {
-        Listener[] tmp;
+        TaskList.Listener[] tmp; 
         synchronized( listeners ) {
-            tmp = listeners.toArray(new Listener[listeners.size()]);
+            tmp = listeners.toArray(new TaskList.Listener[listeners.size()]);
         }
         for( Listener l : tmp) {
             l.cleared();
@@ -454,8 +454,8 @@ public class TaskList {
     }    
     
     public static interface Listener {
-        void tasksAdded(List<? extends Task> tasks);
-        void tasksRemoved(List<? extends Task> tasks);
+        void tasksAdded( List<? extends Task> tasks );
+        void tasksRemoved( List<? extends Task> tasks );
         void cleared();
     }
 }

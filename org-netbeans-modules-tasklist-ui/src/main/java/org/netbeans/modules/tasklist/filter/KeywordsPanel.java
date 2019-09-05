@@ -147,13 +147,13 @@ final class KeywordsPanel extends JPanel implements ActionListener, PropertyChan
 
         matchGroup.add(matchAllRadio);
         org.openide.awt.Mnemonics.setLocalizedText(matchAllRadio, NbBundle.getMessage(KeywordsPanel.class, "MatchAll")); // NOI18N(); // NOI18N
-        matchAllRadio.setToolTipText(NbBundle.getMessage(KeywordsPanel.class, "HINT_MatchAll")); // NOI18N
+        matchAllRadio.setToolTipText(org.openide.util.NbBundle.getMessage(KeywordsPanel.class, "HINT_MatchAll")); // NOI18N
         matchAllRadio.setOpaque(false);
 
         matchGroup.add(matchAnyRadio);
         matchAnyRadio.setSelected(true);
         org.openide.awt.Mnemonics.setLocalizedText(matchAnyRadio, NbBundle.getMessage(KeywordsPanel.class, "MatchAny")); // NOI18N(); // NOI18N
-        matchAnyRadio.setToolTipText(NbBundle.getMessage(KeywordsPanel.class, "HINT_MatchAny")); // NOI18N
+        matchAnyRadio.setToolTipText(org.openide.util.NbBundle.getMessage(KeywordsPanel.class, "HINT_MatchAny")); // NOI18N
         matchAnyRadio.setOpaque(false);
 
         conditionsScrollPane.setVerticalScrollBarPolicy(javax.swing.ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
@@ -165,10 +165,10 @@ final class KeywordsPanel extends JPanel implements ActionListener, PropertyChan
         conditionsScrollPane.setViewportView(conditionsPanel);
 
         org.openide.awt.Mnemonics.setLocalizedText(fewerButton, NbBundle.getMessage(KeywordsPanel.class, "Fewer")); // NOI18N(); // NOI18N
-        fewerButton.setToolTipText(NbBundle.getMessage(KeywordsPanel.class, "HINT_Fewer")); // NOI18N
+        fewerButton.setToolTipText(org.openide.util.NbBundle.getMessage(KeywordsPanel.class, "HINT_Fewer")); // NOI18N
 
         org.openide.awt.Mnemonics.setLocalizedText(moreButton, NbBundle.getMessage(KeywordsPanel.class, "More")); // NOI18N(); // NOI18N
-        moreButton.setToolTipText(NbBundle.getMessage(KeywordsPanel.class, "HINT_More")); // NOI18N
+        moreButton.setToolTipText(org.openide.util.NbBundle.getMessage(KeywordsPanel.class, "HINT_More")); // NOI18N
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
@@ -205,8 +205,8 @@ final class KeywordsPanel extends JPanel implements ActionListener, PropertyChan
                 .addContainerGap())
         );
 
-        conditionsScrollPane.getAccessibleContext().setAccessibleName(NbBundle.getBundle(KeywordsPanel.class).getString("LBL_Conditions")); // NOI18N
-        conditionsScrollPane.getAccessibleContext().setAccessibleDescription(NbBundle.getBundle(KeywordsPanel.class).getString("HNT_Conditions")); // NOI18N
+        conditionsScrollPane.getAccessibleContext().setAccessibleName(org.openide.util.NbBundle.getBundle(KeywordsPanel.class).getString("LBL_Conditions")); // NOI18N
+        conditionsScrollPane.getAccessibleContext().setAccessibleDescription(org.openide.util.NbBundle.getBundle(KeywordsPanel.class).getString("HNT_Conditions")); // NOI18N
     }// </editor-fold>//GEN-END:initComponents
 
     private void initA11y() {
@@ -322,7 +322,7 @@ final class KeywordsPanel extends JPanel implements ActionListener, PropertyChan
     }
     
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    final JPanel conditionsPanel = new JPanel();
+    final javax.swing.JPanel conditionsPanel = new javax.swing.JPanel();
     final javax.swing.JScrollPane conditionsScrollPane = new javax.swing.JScrollPane();
     final javax.swing.JButton fewerButton = new javax.swing.JButton();
     final javax.swing.JRadioButton matchAllRadio = new javax.swing.JRadioButton();

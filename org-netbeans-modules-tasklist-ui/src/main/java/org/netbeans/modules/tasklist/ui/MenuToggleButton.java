@@ -118,7 +118,7 @@ class MenuToggleButton extends JToggleButton {
         }
     }
     
-    private class Model extends ToggleButtonModel {
+    private class Model extends JToggleButton.ToggleButtonModel {
         public void setPressed(boolean b) {
             if( mouseInArrowArea )
                 return;
