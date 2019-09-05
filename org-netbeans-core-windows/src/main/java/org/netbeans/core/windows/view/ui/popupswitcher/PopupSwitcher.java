@@ -161,7 +161,8 @@ class PopupSwitcher extends JPanel {
         lblDescription.setText( truncateText( statusText, lblDescription.getWidth() ) );
     }
 
-    static final char DOTS = '…';
+    // A
+    static final char DOTS = '\u00a6';
 
     static String truncateText( String s, int availPixels ) {
         if( null == s )
