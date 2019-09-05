@@ -160,7 +160,7 @@ public class ClobFieldTableCellEditor extends AbstractCellEditor
     
     @Override
     public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row, int column) {
-        currentValue = (Clob) value;
+        currentValue = (java.sql.Clob) value;
         this.currentColumn = column;
         this.currentRow = row;
         this.table = table;

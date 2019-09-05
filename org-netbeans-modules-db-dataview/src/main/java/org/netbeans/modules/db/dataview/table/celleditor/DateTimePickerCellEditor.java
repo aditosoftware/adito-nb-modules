@@ -79,8 +79,8 @@ public class DateTimePickerCellEditor extends ResultSetTableCellEditor {
             return new Timestamp(System.currentTimeMillis());
         } else if (value instanceof Timestamp) {
             return (Timestamp) value;
-        } else if (value instanceof Date) {
-            return new Timestamp(((Date) value).getTime());
+        } else if (value instanceof java.util.Date) {
+            return new Timestamp(((java.util.Date) value).getTime());
         } else if (value instanceof java.util.Calendar) {
             return new Timestamp(((java.util.Calendar) value).getTime().getTime());
         } else if (value instanceof Long) {

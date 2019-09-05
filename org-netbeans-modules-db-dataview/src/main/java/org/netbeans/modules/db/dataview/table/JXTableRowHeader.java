@@ -319,7 +319,7 @@ public final class JXTableRowHeader extends JComponent {
         ctm = new CountingTableModel(backingTable);
 
         headerTable = new JXTableDecorator(ctm,
-                new InternalTableColumnModel());
+                new JXTableRowHeader.InternalTableColumnModel());
 
         backingTable.addPropertyChangeListener(backingTableListener);
         headerTable.setRowHeight(backingTable.getRowHeight());
@@ -371,7 +371,7 @@ public final class JXTableRowHeader extends JComponent {
     protected TableCellRenderer createDefaultRenderer() {
         // TODO get a rollover enabled renderer
         //return new ColumnHeaderRenderer();
-        return new RowHeaderColumnRenderer();
+        return new JXTableRowHeader.RowHeaderColumnRenderer();
     }
 
     @Override

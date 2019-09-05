@@ -91,7 +91,7 @@ class ShowSQLDialog extends javax.swing.JDialog {
         jButton1.setMnemonic('O');
         org.openide.awt.Mnemonics.setLocalizedText(jButton1, org.openide.util.NbBundle.getMessage(ShowSQLDialog.class, "ShowSQLDialog.jButton1.text")); // NOI18N
         jButton1.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(ActionEvent evt) {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButton1ActionPerformed(evt);
             }
         });
@@ -125,7 +125,7 @@ class ShowSQLDialog extends javax.swing.JDialog {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void jButton1ActionPerformed(ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
         dispose();                                        
     }//GEN-LAST:event_jButton1ActionPerformed
                                         

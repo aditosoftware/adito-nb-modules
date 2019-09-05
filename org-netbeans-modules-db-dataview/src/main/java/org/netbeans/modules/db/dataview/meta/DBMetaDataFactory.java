@@ -46,7 +46,7 @@ public final class DBMetaDataFactory {
     public static final int SQLSERVER = 2;
     public static final int JDBC = 3;
     public static final int PostgreSQL = 4;
-    public static final int MYSQL = 5; // ADITO: MySQL and MariaDB
+    public static final int MYSQL = 5;
     public static final int DERBY = 6;
     public static final int SYBASE = 7;
     public static final int AXION = 8;

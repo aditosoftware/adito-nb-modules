@@ -37,7 +37,7 @@ public class MultiColPatternFilter extends SuperPatternFilter {
     }
 
     @Override
-    public boolean include(Entry<? extends TableModel,? extends Integer> entry)  {
+    public boolean include(RowFilter.Entry<? extends TableModel,? extends Integer> entry)  {
         for (int colIdx : cols) {
             Object val = entry.getValue(colIdx);
             if (testValue(val)) {

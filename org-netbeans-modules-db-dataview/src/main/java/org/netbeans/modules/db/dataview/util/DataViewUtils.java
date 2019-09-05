@@ -95,8 +95,8 @@ public class DataViewUtils {
 
     public static boolean isScaleRequired(int type) {
         switch (type) {
-            case Types.DECIMAL:
-            case Types.NUMERIC:
+            case java.sql.Types.DECIMAL:
+            case java.sql.Types.NUMERIC:
                 return true;
             default:
                 return false;
