@@ -158,12 +158,12 @@
             <dependency>
               <id>org.netbeans.modules:org-netbeans-modules-db-metadata-model</id>
               <type>impl</type>
-              <explicitValue>org.netbeans.modules.db.metadata.model/1 = 20181030-19e5871a24d5</explicitValue>
+              <explicitValue>org.netbeans.modules.db.metadata.model/1 = netbeans-release-428-on-20190716</explicitValue>
             </dependency>
             <dependency>
               <id>org.netbeans.api:org-netbeans-core-ide</id>
               <type>impl</type>
-              <explicitValue>org.netbeans.core.ide/1 = 20181030-19e5871a24d5</explicitValue>
+              <explicitValue>org.netbeans.core.ide/1 = netbeans-release-428-on-20190716</explicitValue>
             </dependency>
           </moduleDependencies>
 
