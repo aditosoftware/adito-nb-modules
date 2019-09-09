@@ -86,7 +86,9 @@ public class CommandBuffer
         Enumeration cmd_e = commands.elements();
         while (cmd_e.hasMoreElements()) {
             DDLCommand e_cmd = (DDLCommand)cmd_e.nextElement();
-            cmds = cmds + e_cmd.getCommand() + "\n";
+            // ADITO
+            cmds = cmds + e_cmd.getCommand() + ";\n";
+            //cmds = cmds + e_cmd.getCommand() + "\n";
         }
 
         return cmds;

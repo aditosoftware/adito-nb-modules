@@ -4036,11 +4036,11 @@ public class DefaultAdaptor implements DatabaseMetaDataAdaptor, Serializable {
         return false;
     }
 
-    public Object unwrap(java.lang.Class iface) throws java.sql.SQLException {
+    public Object unwrap(Class iface) throws SQLException {
         return null;
     }
     
-    public java.sql.RowIdLifetime getRowIdLifetime() throws SQLException {
+    public RowIdLifetime getRowIdLifetime() throws SQLException {
         return null;
     }
 

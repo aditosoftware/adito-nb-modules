@@ -119,7 +119,7 @@
 
     ColumnName = {
       Class = org.netbeans.lib.ddl.impl.TableColumn;
-      Format = "{column.name}[ {direction}]";
+      Format = "{column.name}";
     };
 
 //    ProcedureArgument = {
@@ -261,6 +261,7 @@
     SizelessTypes = (BIGINT,BINARY,BIT,IMAGE,DATE,INT,"LONG VARCHAR","LONG BINARY",REAL,SMALLINT,TIME,TIMESTAMP,TINYINT,VARBINARY);
     DecimalTypes = (DECIMAL,FLOAT,NUMERIC);
     CharacterTypes = (CHAR,VARCHAR);
+    Case=Upper;
 
 //
 // Definice sloupcu
@@ -415,6 +416,7 @@
     SizelessTypes = (BIGINT,BINARY,BIT,IMAGE,DATE,INT,"LONG VARCHAR","LONG BINARY",REAL,SMALLINT,TIME,TIMESTAMP,TINYINT,VARBINARY);
     DecimalTypes = (DECIMAL,FLOAT,NUMERIC);
     CharacterTypes = (CHAR,VARCHAR);
+    Case=Upper;
 
 //
 // Definice sloupcu
@@ -574,18 +576,35 @@
     DatabaseProductVersion = 8;
     TriggerEventListDelimiter = " OR ";
     TypeMap = {
-      java.sql.Types.BIGINT = BIGINT;
+      java.sql.Types.BIGINT = "NUMBER(19)";
       java.sql.Types.BLOB = BLOB;  //JDBC 2.0 A type representing an SQL Binary Large Object
+	    java.sql.Types.CLOB = CLOB;
       java.sql.Types.CHAR = CHAR;
+      java.sql.Types.NCHAR = NCHAR;
       java.sql.Types.DECIMAL = DECIMAL;
       java.sql.Types.DATE = DATE;
       java.sql.Types.FLOAT = FLOAT;
       java.sql.Types.INTEGER = INT;
-      java.sql.Types.BIGINT = INTEGER;
       java.sql.Types.NUMERIC = NUMERIC;
       java.sql.Types.REAL = REAL;
       java.sql.Types.SMALLINT = SMALLINT;
+      // ADITO: #13290
+      java.sql.Types.TIMESTAMP = TIMESTAMP;
       java.sql.Types.VARCHAR = VARCHAR2;
+      java.sql.Types.NVARCHAR = NVARCHAR2;
+      java.sql.Types.BINARY = RAW;
+      java.sql.Types.DOUBLE = NUMBER;
+      java.sql.Types.TINYINT = NUMBER;
+      java.sql.Types.LONGVARCHAR = CLOB;
+      java.sql.Types.LONGNVARCHAR = CLOB;
+      java.sql.Types.TIME = DATE;
+      java.sql.Types.TIME_WITH_TIMEZONE = DATE;
+      java.sql.Types.BIT = "NUMBER(3)";
+      java.sql.Types.BOOLEAN = NUMBER;
+      java.sql.Types.SQLXML = CLOB;
+      java.sql.Types.TIMESTAMP_WITH_TIMEZONE = TIMESTAMP;
+      java.sql.Types.VARBINARY = BLOB;
+      java.sql.Types.LONGVARBINARY = BLOB;
     };
     ProcedureArgumentMap = {
       IN = IN;
@@ -597,9 +616,23 @@
       UPDATE = UPDATE;
       DELETE = DELETE;
     };
-    SizelessTypes = (BIGINT,BLOB,DATE,INT,INTEGER,REAL,SMALLINT);
-    DecimalTypes = (DECIMAL,FLOAT,NUMERIC);
-    CharacterTypes = (CHAR,VARCHAR2);
+    SizelessTypes = (BIGINT,BLOB,CLOB,DATE,INT,INTEGER,REAL,SMALLINT,TIMESTAMP,NCLOB,"NUMBER(19)","NUMBER(3)");
+    DecimalTypes = (DECIMAL,NUMERIC);
+    CharacterTypes = (CHAR,VARCHAR2,NVARCHAR2);
+    NoPrimaryKeyTypes = (BLOB,CLOB,NCLOB);
+    NoIndexTypes = (BLOB,CLOB,NCLOB);
+    NoUniqueTypes = (BLOB,CLOB,NCLOB);
+    Case=Upper;
+    MaxObjectNameLength=30;
+
+//
+// Define ADITO
+//
+    SetDefaultSchemaCommand = {
+      Class = org.netbeans.lib.ddl.impl.SetDefaultSchema;
+      Format = "ALTER SESSION SET CURRENT_SCHEMA = {schemaName}";
+      Supported = true;
+    };
 
 //
 // Definice sloupcu
@@ -823,18 +856,24 @@
       java.sql.Types.DATE = DATE;
       java.sql.Types.DECIMAL = DECIMAL;
       java.sql.Types.DOUBLE = DOUBLE;
-//      java.sql.Types.DOUBLE = "DOUBLE PRECISION";
-//      java.sql.Types.DOUBLE = FLOAT;
       java.sql.Types.INTEGER = INTEGER;
       java.sql.Types.LONGVARCHAR = "LONG VARCHAR";
-//      java.sql.Types.VARBINARY = "LONG VARCHAR FOR BIT DATA";
       java.sql.Types.NUMERIC = NUMERIC;
       java.sql.Types.REAL = REAL;
       java.sql.Types.SMALLINT = SMALLINT;
-      java.sql.Types.TIME = TIME;
       java.sql.Types.TIMESTAMP = TIMESTAMP;
       java.sql.Types.VARCHAR = VARCHAR;
       java.sql.Types.VARBINARY = "VARCHAR FOR BIT DATA";
+      java.sql.Types.NCHAR = CHAR;
+      java.sql.Types.NVARCHAR = VARCHAR;
+      java.sql.Types.TINYINT = SMALLINT;
+      java.sql.Types.NCLOB = CLOB;
+      java.sql.Types.LONGNVARCHAR = "LONG VARCHAR";
+      java.sql.Types.TIME = TIME;
+      java.sql.Types.BIT = SMALLINT;
+      java.sql.Types.SQLXML = CLOB;
+      java.sql.Types.TIMESTAMP_WITH_TIMEZONE = TIMESTAMP;
+      java.sql.Types.LONGVARBINARY = "VARCHAR FOR BIT DATA";
     };
 //    ProcedureArgumentMap = {
 //      IN = IN;
@@ -846,9 +885,12 @@
 //      UPDATE = UPDATE;
 //      DELETE = DELETE;
 //    };
-    SizelessTypes = (BIGINT,BOOLEAN, CLOB,DATE,DOUBLE,INTEGER,"LONG VARCHAR",REAL,SMALLINT,TIME,TIMESTAMP);
+    SizelessTypes = (BIGINT,BOOLEAN, CLOB,DATE,DOUBLE,INTEGER,"LONG VARCHAR",REAL,SMALLINT,TIMESTAMP,TIME,TIME_WITH_TIMEZONE);
     DecimalTypes = (DECIMAL,NUMERIC);
     CharacterTypes = (CHAR,VARCHAR);
+    NoPrimaryKeyTypes = ("LONG VARCHAR", BLOB, CLOB);
+    NoIndexTypes = ("LONG VARCHAR", BLOB, CLOB);
+    Case=Upper;
 
     TypePrefixSuffixMap = {
       "CHAR FOR BIT DATA" = {
@@ -912,7 +954,9 @@
       java.sql.Types.BIT = BIT;
       java.sql.Types.BLOB = IMAGE;
       java.sql.Types.CHAR = CHAR;
-      java.sql.Types.DATE = DATETIME;
+      java.sql.Types.NCHAR = NCHAR;
+	    java.sql.Types.CLOB = TEXT;
+      java.sql.Types.DATE = DATE;
       java.sql.Types.DECIMAL = DECIMAL;
       java.sql.Types.DOUBLE = "DOUBLE PRECISION";
       java.sql.Types.FLOAT = FLOAT;
@@ -920,14 +964,26 @@
       java.sql.Types.NUMERIC = NUMERIC;
       java.sql.Types.REAL = REAL;
       java.sql.Types.SMALLINT = SMALLINT;
-      java.sql.Types.TIMESTAMP = TIMESTAMP;
+      java.sql.Types.TIMESTAMP = DATETIME;
       java.sql.Types.TINYINT = TINYINT;
       java.sql.Types.VARBINARY = VARBINARY;
       java.sql.Types.VARCHAR = VARCHAR;
+      java.sql.Types.NVARCHAR = NVARCHAR;
+      java.sql.Types.NCLOB = TEXT;
+      java.sql.Types.LONGVARCHAR = TEXT;
+      java.sql.Types.LONGNVARCHAR = TEXT;
+      java.sql.Types.TIME = TIME;
+      java.sql.Types.TIMESTAMP_WITH_TIMEZONE = TIMESTAMP;
+      java.sql.Types.BOOLEAN = BIT;
+      java.sql.Types.SQLXML = XML;
+      java.sql.Types.LONGVARBINARY = IMAGE;
     };
-    SizelessTypes = (BINARY,BIT,IMAGE,DATETIME,"DOUBLE PRECISION",INT,REAL,SMALLINT,TIMESTAMP,TINYINT,VARBINARY);
-    DecimalTypes = (DECIMAL,FLOAT,NUMERIC);
-    CharacterTypes = (CHAR,VARCHAR);
+    SizelessTypes = (BIT,IMAGE,DATETIME,"DOUBLE PRECISION",INT,REAL,SMALLINT,TEXT,TINYINT,BIGINT,DATE,XML,TIMESTAMP);
+    DecimalTypes = (DECIMAL,NUMERIC);
+    CharacterTypes = (CHAR,VARCHAR,NVARCHAR,NCHAR,XML);
+    NoIndexTypes = (BLOB,IMAGE,TEXT,XML);
+    NoPrimaryKeyTypes = (BLOB,IMAGE,TEXT,XML);
+    Case=Upper;
 
 //////////////////////
 // Commands definition
@@ -950,6 +1006,12 @@
       Class = org.netbeans.lib.ddl.impl.AbstractCommand;
       Format = "drop procedure [{object.owner}.]{object.name}";
     };
+
+    PrimaryKeyColumn = {
+      Class = org.netbeans.lib.ddl.impl.TableColumn;
+      Format = "{column.name} {column.type}[({column.size}[,{column.decsize}])][ default {default.value}][ {column.notnull}not null][ check ({check.condition})] primary key NONCLUSTERED";
+    };
+
 
   };
 
@@ -985,6 +1047,7 @@
     SizelessTypes = (BIGINT,DATE,DOUBLE,INTEGER,"LONG VARCHAR",REAL,SMALLINT,TIME,TIMESTAMP);
     DecimalTypes = (DECIMAL,FLOAT,NUMERIC);
     CharacterTypes = (BLOB,CLOB,CHAR,VARCHAR);
+    Case=Upper;
 
     RemoveColumnCommand = {
       Supported = false;
@@ -1025,6 +1088,7 @@
     SizelessTypes = (BIGINT,BINARY,BIT,DATE,DOUBLE,INTEGER,LONGVARBINARY,LONGVARCHAR,REAL,SMALLINT,TIME,TIMESTAMP,TINYINT);
     DecimalTypes = (DECIMAL,NUMERIC);
     CharacterTypes = (CHAR,VARCHAR);
+    Case=Upper;
 
     CreateTableCommand = {
       Class = org.netbeans.lib.ddl.impl.CreateTable;
@@ -1042,7 +1106,7 @@
 
     PrimaryKeyColumn = {
       Class = org.netbeans.lib.ddl.impl.TableColumn;
-      Format = "{column.name} {column.type}[({column.size}[,{column.decsize}])][ default {default.value}][ {column.notnull}not null][ check ({check.condition})] primary key";
+      Format = "{column.name} {column.type}[({column.size}[,{column.decsize}])][ default {default.value}][ {column.notnull}not null][ check ({check.condition})] primary key NONCLUSTERED";
     };
   };
 
@@ -1073,6 +1137,7 @@
     SizelessTypes = ("BIG INTEGER",BINARY,BOOLEAN,DATE,DOUBLE,INTEGER,TIME,"TIME STAMP",VARBINARY);
     DecimalTypes = (DECIMAL,FLOAT,NUMERIC);
     CharacterTypes = (CHAR);
+    Case=Upper;
 
   };
 
@@ -1142,6 +1207,7 @@
     SizelessTypes = (BLOB,DATE,"DOUBLE PRECISION",INT,REAL,SMALLINT);
     DecimalTypes = (DECIMAL,FLOAT,NUMERIC);
     CharacterTypes = (CHAR,VARCHAR);
+    Case=Upper;
   };
 
 //  ********************************************************************************
@@ -1171,6 +1237,7 @@
     SizelessTypes = (BOOLEAN,BLOB,DATE,"DOUBLE PRECISION",INT,REAL,SMALLINT);
     DecimalTypes = (DECIMAL,FLOAT,NUMERIC);
     CharacterTypes = (CHAR,VARCHAR);
+    Case=Upper;
   };
 
 //  ********************************************************************************
@@ -1229,6 +1296,7 @@
     SizelessTypes = (BINARY,IMAGE,DATE,DOUBLE,INT,LONGVARBINARY,SMALLINT,TINYINT,VARBINARY);
     DecimalTypes = (DECIMAL,FLOAT,NUMERIC);
     CharacterTypes = (CHAR,VARCHAR);
+    Case=Upper;
 
 //////////////////////
 // Commands definition
@@ -1275,6 +1343,7 @@
     SizelessTypes = (BLOB,DATE,"DOUBLE PRECISION",INTEGER,SMALLINT);
     DecimalTypes = (DECIMAL,FLOAT,NUMERIC);
     CharacterTypes = (CHAR,VARCHAR);
+    Case=Upper;
 
 //////////////////////
 // Commands definition
@@ -1295,6 +1364,133 @@
     };
   };
 
+  //  ********************************************************************************
+  //
+  //  Firebird 2.53LI
+  //
+  //  ********************************************************************************/
+
+    "Firebird 2.53LI" = {
+      DatabaseProductName = "Firebird 2.53LI";
+      TypeMap = {
+        java.sql.Types.BLOB = BLOB;  //JDBC 2.0 A type representing an SQL Binary Large Object
+        java.sql.Types.CHAR = CHAR;
+        java.sql.Types.DATE = DATE;
+        java.sql.Types.DECIMAL = DECIMAL;
+        java.sql.Types.DOUBLE = "DOUBLE PRECISION";
+        java.sql.Types.FLOAT = FLOAT;
+        java.sql.Types.INTEGER = INTEGER;
+        java.sql.Types.NUMERIC = NUMERIC;
+        java.sql.Types.SMALLINT = SMALLINT;
+        java.sql.Types.TIMESTAMP = TIMESTAMP;
+        java.sql.Types.VARCHAR = VARCHAR;
+        java.sql.Types.BINARY = BLOB;
+        java.sql.Types.NVARCHAR = VARCHAR;
+        java.sql.Types.TINYINT = SMALLINT;
+        java.sql.Types.CLOB = "BLOB SUB_TYPE TEXT";
+        java.sql.Types.NCLOB = "BLOB SUB_TYPE TEXT";
+        java.sql.Types.LONGVARCHAR = "BLOB SUB_TYPE TEXT";
+        java.sql.Types.LONGNVARCHAR = "BLOB SUB_TYPE TEXT";
+        java.sql.Types.TIME = TIME;
+        java.sql.Types.TIME_WITH_TIMEZONE = TIME;
+        java.sql.Types.BIT = "CHAR(1)";
+        java.sql.Types.BOOLEAN = "CHAR(1)";
+        java.sql.Types.SQLXML = "BLOB SUB_TYPE TEXT";
+        java.sql.Types.REAL = "DOUBLE PRECISION";
+        java.sql.Types.TIMESTAMP_WITH_TIMEZONE = TIMESTAMP;
+        java.sql.Types.VARBINARY = BLOB;
+        java.sql.Types.LONGVARBINARY = BLOB;
+      };
+      SizelessTypes = (BLOB,DATE,"DOUBLE PRECISION",INTEGER,SMALLINT,TIMESTAMP,"BLOB SUB_TYPE TEXT",BIGINT,TIME,"CHAR(1)");
+      DecimalTypes = (DECIMAL,NUMERIC);
+      CharacterTypes = (CHAR,VARCHAR);
+      NoPrimaryKeyTypes = (BLOB,"BLOB SUB_TYPE TEXT");
+      NoIndexTypes = (BLOB,"BLOB SUB_TYPE TEXT");
+      Case=Upper;
+
+  //////////////////////
+  // Commands definition
+  //////////////////////
+
+      CreateTableCommand = {
+        Class = org.netbeans.lib.ddl.impl.CreateTable;
+        Format = "create table {object.name}\n(\n\t{columns}\n)";
+        Binding = {
+          COLUMN = Column;
+          UNIQUE = UniqueColumn;
+          PRIMARY_KEY = PrimaryKeyColumn;
+          CHECK = CheckColumn;
+          UNIQUE_CONSTRAINT = UniqueConstraint;
+          PRIMARY_KEY_CONSTRAINT = PrimaryKeyConstraint;
+          CHECK_CONSTRAINT = CheckConstraint;
+        };
+      };
+    };
+
+  //  ********************************************************************************
+  //
+  //  Firebird 2.5 (for Firebird 3.0.5 Driver)
+  //
+  //  ********************************************************************************/
+
+    "Firebird 2.5" = {
+      DatabaseProductName = "Firebird 2.5";
+      TypeMap = {
+        java.sql.Types.BLOB = BLOB;  //JDBC 2.0 A type representing an SQL Binary Large Object
+        java.sql.Types.CHAR = CHAR;
+        java.sql.Types.DATE = DATE;
+        java.sql.Types.DECIMAL = DECIMAL;
+        java.sql.Types.DOUBLE = "DOUBLE PRECISION";
+        java.sql.Types.FLOAT = FLOAT;
+        java.sql.Types.INTEGER = INTEGER;
+        java.sql.Types.NUMERIC = NUMERIC;
+        java.sql.Types.SMALLINT = SMALLINT;
+        java.sql.Types.TIMESTAMP = TIMESTAMP;
+        java.sql.Types.VARCHAR = VARCHAR;
+        java.sql.Types.BINARY = BLOB;
+        java.sql.Types.NVARCHAR = VARCHAR;
+        java.sql.Types.TINYINT = SMALLINT;
+        java.sql.Types.CLOB = "BLOB SUB_TYPE TEXT";
+        java.sql.Types.NCLOB = "BLOB SUB_TYPE TEXT";
+        java.sql.Types.LONGVARCHAR = "BLOB SUB_TYPE TEXT";
+        java.sql.Types.LONGNVARCHAR = "BLOB SUB_TYPE TEXT";
+        java.sql.Types.TIME = TIME;
+        java.sql.Types.TIME_WITH_TIMEZONE = TIME;
+        java.sql.Types.BIT = "CHAR(1)";
+        java.sql.Types.BOOLEAN = "CHAR(1)";
+        java.sql.Types.SQLXML = "BLOB SUB_TYPE TEXT";
+        java.sql.Types.REAL = "DOUBLE PRECISION";
+        java.sql.Types.TIMESTAMP_WITH_TIMEZONE = TIMESTAMP;
+        java.sql.Types.VARBINARY = BLOB;
+        java.sql.Types.LONGVARBINARY = BLOB;
+      };
+      SizelessTypes = (BLOB,DATE,"DOUBLE PRECISION",INTEGER,SMALLINT,TIMESTAMP,"BLOB SUB_TYPE TEXT",BIGINT,TIME,"CHAR(1)");
+      DecimalTypes = (DECIMAL,NUMERIC);
+      CharacterTypes = (CHAR,VARCHAR);
+      NoPrimaryKeyTypes = (BLOB,"BLOB SUB_TYPE TEXT");
+      NoIndexTypes = (BLOB,"BLOB SUB_TYPE TEXT");
+      Case=Upper;
+
+  //////////////////////
+  // Commands definition
+  //////////////////////
+
+      CreateTableCommand = {
+        Class = org.netbeans.lib.ddl.impl.CreateTable;
+        Format = "create table {object.name}\n(\n\t{columns}\n)";
+        Binding = {
+          COLUMN = Column;
+          UNIQUE = UniqueColumn;
+          PRIMARY_KEY = PrimaryKeyColumn;
+          CHECK = CheckColumn;
+          UNIQUE_CONSTRAINT = UniqueConstraint;
+          PRIMARY_KEY_CONSTRAINT = PrimaryKeyConstraint;
+          CHECK_CONSTRAINT = CheckConstraint;
+        };
+      };
+    };
+
+
 //  ********************************************************************************
 //
 //  MySQL
@@ -1306,7 +1502,8 @@
     TypeMap = {
       java.sql.Types.BIGINT = BIGINT;
       java.sql.Types.OTHER = BIT; // not true for MySQL prior to 5.0
-      java.sql.Types.BLOB = BLOB;  //JDBC 2.0 A type representing an SQL Binary Large Object
+      java.sql.Types.BLOB = LONGBLOB;  //JDBC 2.0 A type representing an SQL Binary Large Object
+      java.sql.Types.LONGVARBINARY = LONGBLOB;
       java.sql.Types.CHAR = CHAR;
       java.sql.Types.LONGVARCHAR = TEXT;
       java.sql.Types.DATE = DATE;
@@ -1318,13 +1515,23 @@
       java.sql.Types.REAL = REAL;
       java.sql.Types.SMALLINT = SMALLINT;
       java.sql.Types.TIME = TIME;
-      java.sql.Types.TIMESTAMP = TIMESTAMP;
+      java.sql.Types.TIMESTAMP = DATETIME;
       java.sql.Types.TINYINT = TINYINT;
       java.sql.Types.VARCHAR = VARCHAR;
+      java.sql.Types.NCLOB = TEXT;
+      java.sql.Types.TIME_WITH_TIMEZONE = TIME;
+      java.sql.Types.TIMESTAMP_WITH_TIMEZONE = DATETIME;
+      java.sql.Types.SQLXML = TEXT;
+      java.sql.Types.CLOB = LONGTEXT;
+      java.sql.Types.LONGNVARCHAR = TEXT;
+      java.sql.Types.BOOLEAN = TINYINT;
     };
-    SizelessTypes = (BIGINT,BLOB,DATE,"DOUBLE PRECISION",FLOAT,INT,REAL,SMALLINT,TIME,TIMESTAMP,TINYINT,TEXT);
+    SizelessTypes = (BIGINT,LONGBLOB,DATE,"DOUBLE PRECISION",FLOAT,INT,REAL,SMALLINT,TIME,TIMESTAMP,DATETIME,TINYINT,TEXT,LONGTEXT);
 //    DecimalTypes = (DECIMAL,NUMERIC);
     CharacterTypes = (CHAR,VARCHAR,TEXT);
+      NoPrimaryKeyTypes = (LONGTEXT, LONGBLOB,TEXT);
+      NoIndexTypes = (LONGTEXT, LONGBLOB,TEXT);
+      Case=Upper;
 
     DropIndexCommand = {
       Class = org.netbeans.lib.ddl.impl.DropIndex;
@@ -1343,6 +1550,65 @@
     };
   };
 
+  //  ********************************************************************************
+  //
+  //  MariaDB
+  //
+  //  ********************************************************************************/
+
+    "MariaDB" = {
+      DatabaseProductName = "MariaDB";
+      TypeMap = {
+        java.sql.Types.BIGINT = BIGINT;
+        java.sql.Types.OTHER = BIT; // not true for MySQL prior to 5.0
+        java.sql.Types.BLOB = LONGBLOB;  //JDBC 2.0 A type representing an SQL Binary Large Object
+        java.sql.Types.CHAR = CHAR;
+        java.sql.Types.LONGVARCHAR = LONGTEXT;
+        java.sql.Types.CLOB = LONGTEXT;
+        java.sql.Types.DATE = DATE;
+        java.sql.Types.DECIMAL = DECIMAL;
+        java.sql.Types.DOUBLE = "DOUBLE PRECISION";
+        java.sql.Types.FLOAT = FLOAT;
+        java.sql.Types.INTEGER = INT;
+        java.sql.Types.NUMERIC = NUMERIC;
+        java.sql.Types.REAL = REAL;
+        java.sql.Types.SMALLINT = SMALLINT;
+        java.sql.Types.TIME = TIME;
+        java.sql.Types.TIMESTAMP = DATETIME;
+        java.sql.Types.TINYINT = TINYINT;
+        java.sql.Types.VARCHAR = VARCHAR;
+        java.sql.Types.BOOLEAN = BOOLEAN;
+        java.sql.Types.NCLOB = LONGTEXT;
+        java.sql.Types.LONGNVARCHAR = LONGTEXT;
+        java.sql.Types.TIME_WITH_TIMEZONE = TIME;
+        java.sql.Types.TIMESTAMP_WITH_TIMEZONE = DATETIME;
+        java.sql.Types.SQLXML = LONGTEXT;
+        java.sql.Types.LONGVARBINARY = LONGBLOB;
+      };
+      SizelessTypes = (BIGINT,LONGBLOB,LONGTEXT,DATE,"DOUBLE PRECISION",FLOAT,INT,REAL,SMALLINT,TIME,DATETIME,TIMESTAMP,TINYINT,BOOLEAN);
+      DecimalTypes = (DECIMAL,NUMERIC);
+      CharacterTypes = (CHAR,VARCHAR);
+      NoPrimaryKeyTypes = (LONGTEXT, LONGBLOB);
+      NoIndexTypes = (LONGTEXT, LONGBLOB);
+      Case=Upper;
+
+      DropIndexCommand = {
+        Class = org.netbeans.lib.ddl.impl.DropIndex;
+        Format = "drop index {object.name} on {object.owner}.{table.name}";
+      };
+
+      DropProcedureCommand = {
+        Class = org.netbeans.lib.ddl.impl.AbstractCommand;
+        Format = "drop procedure [{object.owner}.]{object.name}";
+      };
+
+      SetDefaultDatabaseCommand = {
+        Class = org.netbeans.lib.ddl.impl.SetDefaultDatabase;
+        Format = "use {database}";
+        Supported = true;
+      };
+    };
+
 //  ********************************************************************************
 //
 //  Oracle8 (ODBC - Oracle)
@@ -1357,6 +1623,7 @@
       java.sql.Types.BIGINT = BIGINT;
       java.sql.Types.BLOB = BLOB;  //JDBC 2.0 A type representing an SQL Binary Large Object
       java.sql.Types.CHAR = CHAR;
+	    java.sql.Types.CLOB = CLOB;
       java.sql.Types.DECIMAL = DECIMAL;
       java.sql.Types.DATE = DATE;
       java.sql.Types.FLOAT = FLOAT;
@@ -1365,6 +1632,8 @@
       java.sql.Types.NUMERIC = NUMERIC;
       java.sql.Types.REAL = REAL;
       java.sql.Types.SMALLINT = SMALLINT;
+      // ADITO: #13290
+      java.sql.Types.TIMESTAMP = TIMESTAMP;
       java.sql.Types.VARCHAR = VARCHAR2;
     };
     ProcedureArgumentMap = {
@@ -1377,9 +1646,18 @@
       UPDATE = UPDATE;
       DELETE = DELETE;
     };
-    SizelessTypes = (BIGINT,BLOB,DATE,INT,INTEGER,REAL,SMALLINT);
+    SizelessTypes = (BIGINT,BLOB,CLOB,DATE,INT,INTEGER,REAL,SMALLINT);
     DecimalTypes = (DECIMAL,FLOAT,NUMERIC);
     CharacterTypes = (CHAR,VARCHAR2);
+
+//
+// Define ADITO
+//
+    SetDefaultSchemaCommand = {
+      Class = org.netbeans.lib.ddl.impl.SetDefaultSchema;
+      Format = "ALTER SESSION SET CURRENT_SCHEMA = {schemaName}";
+      Supported = true;
+    };
 
 //
 // Definice sloupcu
@@ -1550,6 +1828,7 @@
     TypeMap = {
       java.sql.Types.BIGINT = BIGINT;
       java.sql.Types.BLOB = BLOB;  //JDBC 2.0 A type representing an SQL Binary Large Object
+	    java.sql.Types.CLOB = CLOB;
       java.sql.Types.CHAR = CHAR;
       java.sql.Types.DECIMAL = DECIMAL;
       java.sql.Types.DATE = DATE;
@@ -1559,6 +1838,8 @@
       java.sql.Types.NUMERIC = NUMERIC;
       java.sql.Types.REAL = REAL;
       java.sql.Types.SMALLINT = SMALLINT;
+      // ADITO: #13290
+      java.sql.Types.TIMESTAMP = TIMESTAMP;
       java.sql.Types.VARCHAR = VARCHAR2;
     };
     ProcedureArgumentMap = {
@@ -1571,9 +1852,18 @@
       UPDATE = UPDATE;
       DELETE = DELETE;
     };
-    SizelessTypes = (BIGINT,BLOB,DATE,INT,INTEGER,REAL,SMALLINT);
+    SizelessTypes = (BIGINT,BLOB,CLOB,DATE,INT,INTEGER,REAL,SMALLINT);
     DecimalTypes = (DECIMAL,FLOAT,NUMERIC);
     CharacterTypes = (CHAR,VARCHAR2);
+
+//
+// Define ADITO
+//
+    SetDefaultSchemaCommand = {
+      Class = org.netbeans.lib.ddl.impl.SetDefaultSchema;
+      Format = "ALTER SESSION SET CURRENT_SCHEMA = {schemaName}";
+      Supported = true;
+    };
 
 //
 // Definice sloupcu
@@ -1742,6 +2032,8 @@
     TypeMap = {
       java.sql.Types.BIT = BOOL;
       java.sql.Types.CHAR = CHAR;
+	    java.sql.Types.BLOB = BYTEA;
+	    java.sql.Types.CLOB = TEXT;
       java.sql.Types.DATE = DATE;
       java.sql.Types.DECIMAL = DECIMAL;
       java.sql.Types.DOUBLE = FLOAT8;
@@ -1752,10 +2044,25 @@
       java.sql.Types.TIME = TIME;
       java.sql.Types.TIMESTAMP = TIMESTAMP;
       java.sql.Types.VARCHAR = VARCHAR;
+      java.sql.Types.BINARY = BYTEA;
+      java.sql.Types.NVARCHAR = VARCHAR;
+      java.sql.Types.TINYINT = SMALLINT;
+      java.sql.Types.NCLOB = TEXT;
+      java.sql.Types.LONGVARCHAR = TEXT;
+      java.sql.Types.LONGNVARCHAR = TEXT;
+      java.sql.Types.BIGINT = BIGINT;
+      java.sql.Types.TIME_WITH_TIMEZONE = TIME;
+      java.sql.Types.TIMESTAMP_WITH_TIMEZONE = TIMESTAMP;
+      java.sql.Types.BOOLEAN = BOOL;
+      java.sql.Types.SQLXML = TEXT;
+      java.sql.Types.REAL = REAL;
+      java.sql.Types.VARBINARY = BYTEA;
+      java.sql.Types.LONGVARBINARY = BYTEA;
     };
-    SizelessTypes = (BOOL,DATE,FLOAT8,FLOAT4,INT4,INT2,TIME,TIMESTAMP);
+    SizelessTypes = (BOOL,BYTEA,DATE,FLOAT8,FLOAT4,INT4,INT2,TEXT,TIME,TIMESTAMP,SMALLINT,BIGINT,TIME,REAL);
     DecimalTypes = (DECIMAL,NUMERIC);
     CharacterTypes = (CHAR,VARCHAR);
+    Case=Lower;
 
 //////////////////////
 // Commands definition
@@ -1796,6 +2103,15 @@
     DropIndexCommand = {
       Class = org.netbeans.lib.ddl.impl.DropIndex;
       Format = "drop index {object.name}";
+    };
+
+//
+// Define ADITO
+//
+    SetDefaultSchemaCommand = {
+      Class = org.netbeans.lib.ddl.impl.SetDefaultSchema;
+      Format = "SET search_path TO {schemaName}";
+      Supported = true;
     };
 
   };
@@ -2102,11 +2418,12 @@
 //
 //  ********************************************************************************/
 
-  "Firebird something == notyet impelemented" = {
-    DatabaseProductName = "Firebird something == notyet impelemented";
+  "Firebird 2.51WI" = {
+    DatabaseProductName = "Firebird 2.51WI";
     TypeMap = {
-      java.sql.Types.BLOB = BLOB;  //JDBC 2.0 A type representing an SQL Binary Large Object
+      java.sql.Types.BLOB = "BLOB SUB_TYPE 0";  //JDBC 2.0 A type representing an SQL Binary Large Object
       java.sql.Types.CHAR = CHAR;
+	    java.sql.Types.CLOB = "BLOB SUB_TYPE 1";
       java.sql.Types.DATE = DATE;
       java.sql.Types.DECIMAL = DECIMAL;
       java.sql.Types.DOUBLE = "DOUBLE PRECISION";
@@ -2118,9 +2435,10 @@
       java.sql.Types.TIMESTAMP = TIMESTAMP;
       java.sql.Types.VARCHAR = VARCHAR;
     };
-    SizelessTypes = (BLOB,DATE,"DOUBLE PRECISION",INTEGER,SMALLINT);
+    SizelessTypes = ("BLOB SUB_TYPE 0","BLOB SUB_TYPE 1",DATE,"DOUBLE PRECISION",INTEGER,SMALLINT);
     DecimalTypes = (DECIMAL,FLOAT,NUMERIC);
     CharacterTypes = (CHAR,VARCHAR);
+    Case=Upper;
   };
 
 //  ********************************************************************************
@@ -2184,6 +2502,7 @@
     SizelessTypes = (BIGINT,BINARY,BIT,DATE,DOUBLE,INTEGER,LONGVARBINARY,REAL,SMALLINT,TIME,TIMESTAMP,TINYINT,VARBINARY);
     DecimalTypes = (DECIMAL,FLOAT,NUMERIC);
     CharacterTypes = (CHAR,LONGVARCHAR,VARCHAR);
+    Case=Upper;
   };
 
 //  ********************************************************************************
@@ -2219,6 +2538,7 @@
     SizelessTypes = (BIGINT,BINARY,BIT,DATE,DOUBLE,INTEGER,LONGVARBINARY,OTHER,REAL,SMALLINT,TIME,TIMESTAMP,TINYINT,VARBINARY);
     DecimalTypes = (DECIMAL,FLOAT,NUMERIC);
     CharacterTypes = (CHAR,LONGVARCHAR,VARCHAR);
+    Case=Upper;
   };
 
 //  ********************************************************************************

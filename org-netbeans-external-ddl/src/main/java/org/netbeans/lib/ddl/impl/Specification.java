@@ -20,12 +20,10 @@
 package org.netbeans.lib.ddl.impl;
 
 import java.beans.Beans;
-import java.sql.Connection;
-import java.sql.DatabaseMetaData;
-import java.sql.SQLException;
+import java.lang.reflect.Field;
+import java.sql.*;
 import java.text.MessageFormat;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -473,6 +471,36 @@ public class Specification implements DatabaseSpecification {
         return (Map)desc.get("TypeMap"); // NOI18N
     }
 
+    /**
+     * ADITO
+     * Liefert eine Liste der Typen, allerdings jeden Value nur einmal.
+     * Spezialversion für den Designer, damit jeder Value in der ComboBox nur einmal angezeigt wird.
+     *
+     * @return Liste ohne redundante Values
+     */
+    public Map getNonRedundantTypeMap()
+    {
+        Map<String, String> reducedTypeMap = new LinkedHashMap<>();
+        ((Map<String, String>) getTypeMap()).entrySet().stream()
+            .sorted(Comparator.comparing(pEntry -> pEntry.getValue() + "-" + pEntry.getKey()))
+            .forEachOrdered(pEntry -> {
+                if(!reducedTypeMap.containsValue(pEntry.getValue()))
+                    reducedTypeMap.put(pEntry.getKey(), pEntry.getValue());
+            });
+        return reducedTypeMap;
+    }
+
+    ///**
+    // * @return Liefert den Eintrag, der auch in der nonRedundantTypeMap drin ist
+    // */
+    //public TypeElement getNonRedundantTypeMapEntry(TypeElement pElement)
+    //{
+    //    return ((Map<String,String>) getNonRedundantTypeMap()).entrySet().stream()
+    //        .filter(pEntry -> pElement.getName().equals(pEntry.getValue()))
+    //        .map(pEntry -> new TypeElement(pEntry.getKey(), pEntry.getValue()))
+    //        .findFirst().orElse(null);
+    //}
+
     /** Returns DBType where maps specified java type */
     @Override
     public String getType(int type)
@@ -513,6 +541,8 @@ public class Specification implements DatabaseSpecification {
         case java.sql.Types.SQLXML: typestr = "SQLXML"; break; // NOI18N
         case java.sql.Types.TIME: typestr = "TIME"; break; // NOI18N
         case java.sql.Types.TIMESTAMP: typestr = "TIMESTAMP"; break; // NOI18N
+        case Types.TIME_WITH_TIMEZONE: typestr = "TIME_WITH_TIMEZONE"; break; // ADITO
+        case Types.TIMESTAMP_WITH_TIMEZONE: typestr = "TIMESTAMP_WITH_TIMEZONE"; break; // ADITO
         case java.sql.Types.TINYINT: typestr = "TINYINT"; break; // NOI18N
         case java.sql.Types.VARBINARY: typestr = "VARBINARY"; break; // NOI18N
         case java.sql.Types.VARCHAR: typestr = "VARCHAR"; break; // NOI18N
@@ -562,11 +592,47 @@ public class Specification implements DatabaseSpecification {
         if (type.equals("java.sql.Types.SQLXML")) return java.sql.Types.SQLXML; // NOI18N
         if (type.equals("java.sql.Types.TIME")) return java.sql.Types.TIME; // NOI18N
         if (type.equals("java.sql.Types.TIMESTAMP")) return java.sql.Types.TIMESTAMP; // NOI18N
+        if (type.equals("java.sql.Types.TIME_WITH_TIMEZONE")) return Types.TIME_WITH_TIMEZONE; // ADITO
         if (type.equals("java.sql.Types.TINYINT")) return java.sql.Types.TINYINT; // NOI18N
         if (type.equals("java.sql.Types.VARBINARY")) return java.sql.Types.VARBINARY; // NOI18N
         if (type.equals("java.sql.Types.VARCHAR")) return java.sql.Types.VARCHAR; // NOI18N
+        if (type.equals("java.sql.Types.TIMESTAMP_WITH_TIMEZONE")) return java.sql.Types.TIMESTAMP_WITH_TIMEZONE; // ADITO
         Logger.getLogger(Specification.class.getName()).log(Level.INFO, "Unknown type name {0}, so return -1", type);
         assert false : "Unknown type name " + type;
         return -1;
+    }
+
+    // ADITO
+    public static Map<String, Integer> getSqlTypeList()
+    {
+        Class<?> c = java.sql.Types.class;
+        Map<String, Integer> typeList = new HashMap<>();
+        Field[] types = Types.class.getFields();
+        for (Field type : types)
+        {
+            try
+            {
+                Field field = c.getField(type.getName());
+                typeList.put(type.getName(), field.getInt(c));
+            }
+            catch (IllegalAccessException | NoSuchFieldException e)
+            {
+                // kann ned passieren
+            }
+
+            // java.sql.Types die nicht benutzt werden (k�nnen):
+            typeList.remove("NULL");
+            typeList.remove("REF_CURSOR");
+            typeList.remove("ARRAY");
+            typeList.remove("JAVA_OBJECT");
+            typeList.remove("DISTINCT");
+            typeList.remove("OTHER");
+            typeList.remove("REF");
+            typeList.remove("REF_CURSOR");
+            typeList.remove("DATALINK");
+            typeList.remove("ROWID");
+            typeList.remove("STRUCT");
+        }
+        return typeList;
     }
 }
