@@ -66,6 +66,7 @@
     <module>org-netbeans-modules-javascript-refactoring</module>
     <module>org-netbeans-modules-tasklist-projectint</module>
     <module>org-netbeans-modules-tasklist-ui</module>
+    <module>org-openide-util-ui</module>
   </modules>
 
   <dependencyManagement>

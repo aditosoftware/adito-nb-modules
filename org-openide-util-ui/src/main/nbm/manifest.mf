@@ -1,0 +1,9 @@
+Manifest-Version: 1.0
+Ant-Version: Apache Ant 1.10.5
+Created-By: 1.8.0_201-b09 (Oracle Corporation)
+OpenIDE-Module-Implementation-Version: netbeans-release-428-on-2019071
+ 6
+AutoUpdate-Show-In-Client: false
+OpenIDE-Module: org.openide.util.ui
+OpenIDE-Module-Localizing-Bundle: org/openide/util/Bundle.properties
+OpenIDE-Module-Specification-Version: 9.13
