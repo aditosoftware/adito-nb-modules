@@ -394,6 +394,16 @@ public class JsCodeCompletion implements CodeCompletionHandler {
                     completionResult.setFilterable(false);
                     return completionResult;
                 }
+                // ADITO
+                else if(id == JsTokenId.EOL)
+                {
+                  _completeAdito(proposals, request);
+                  if(!proposals.isEmpty())
+                  {
+                    completionResult.setFilterable(false);
+                    return completionResult;
+                  }
+                }
             }
 
             // If we're in a call, add in some info and help for the code completion call
@@ -561,7 +571,7 @@ public class JsCodeCompletion implements CodeCompletionHandler {
 
       boolean result = true;
 
-      if (pTs.token().id().equals(JsTokenId.STRING_LITERAL))
+      if (pTs.token().id().equals(JsTokenId.STRING_LITERAL) || pTs.token().id().equals(JsTokenId.ERROR)) // ignore errors, just try
       {
         if (!pTs.movePrevious())
           result = false;

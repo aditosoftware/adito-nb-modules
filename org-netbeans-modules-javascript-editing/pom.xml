@@ -14,7 +14,7 @@
   <groupId>org.netbeans.modules</groupId>
   <artifactId>org-netbeans-modules-javascript-editing</artifactId>
   <packaging>nbm</packaging>
-  <version>RELEASE111-1.2.0</version>
+  <version>RELEASE111-1.2.0-2</version>
   <name>Netbeans IDE module: org-netbeans-modules-javascript-editing</name>
 
   <properties>
