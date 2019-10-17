@@ -38,6 +38,7 @@
                 <configuration>
                     <codeNameBase>org.openide.util.ui</codeNameBase>
                     <publicPackages>
+                        <publicPackage>org.netbeans.modules.openide.util</publicPackage>
                         <publicPackage>org.openide</publicPackage>
                         <publicPackage>org.openide.util</publicPackage>
                         <publicPackage>org.openide.util.actions</publicPackage>

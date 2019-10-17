@@ -73,7 +73,8 @@ import javax.swing.UIManager;
  * @since 7.15
  */
 public final class ImageUtilities {
-    private static final RGBImageFilter ADITO_DISABLED_ICON_FILTER = new GrayFilter(true, 0);
+    private static final RGBImageFilter ADITO_DARK_DISABLED_ICON_FILTER = new GrayFilter(true, 0);
+    private static final RGBImageFilter ADITO_BRIGHT_DISABLED_ICON_FILTER = new GrayFilter(true, 70);
     private static final Logger LOGGER = Logger.getLogger(ImageUtilities.class.getName());
 
     /** separator for individual parts of tool tip text */
@@ -412,11 +413,14 @@ public final class ImageUtilities {
         Parameters.notNull("icon", icon);
         // true, if the current LookAndFeel inherits from AditoBaseLookAndFeel
         boolean isAditoTheme = UIManager.getBoolean("adito.theme");
+        boolean isDarkTheme = UIManager.getBoolean("nb.dark.theme");
         /* FilteredIcon's Javadoc mentions a caveat about the Component parameter that is passed to
         Icon.paintIcon. It's not really a problem; previous implementations had the same
         behavior. */
         // if current LaF inherits from AditoBaseLaF use Grayfilter instead of RBGFilter
-        return FilteredIcon.create(isAditoTheme ? ADITO_DISABLED_ICON_FILTER : DisabledButtonFilter.INSTANCE, icon);
+        return FilteredIcon.create(isAditoTheme ? ( isDarkTheme ? ADITO_DARK_DISABLED_ICON_FILTER
+                                                                : ADITO_BRIGHT_DISABLED_ICON_FILTER)
+                                                : DisabledButtonFilter.INSTANCE, icon);
     }
 
     /**
