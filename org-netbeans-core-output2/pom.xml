@@ -12,7 +12,7 @@
   <groupId>org.netbeans.modules</groupId>
   <artifactId>org-netbeans-core-output2</artifactId>
   <packaging>nbm</packaging>
-  <version>RELEASE111-1.2.0</version>
+  <version>RELEASE111-1.2.0-2</version>
   <name>Netbeans IDE module: org-netbeans-core-output2</name>
 
   <properties>
@@ -94,7 +94,7 @@
         <groupId>org.apache.netbeans.utilities</groupId>
         <artifactId>nbm-maven-plugin</artifactId>
         <configuration>
-          <cluster>ide</cluster>
+          <cluster>platform</cluster>
           <codeNameBase>org.netbeans.core.output2</codeNameBase>
           <publicPackages>
             <publicPackage>org.netbeans.api.db.explorer.*</publicPackage>
