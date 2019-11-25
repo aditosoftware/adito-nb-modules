@@ -19,15 +19,13 @@
 
 package org.netbeans.modules.db.explorer.action;
 
-import org.netbeans.adito.db.ColumnItemCreator;
+import org.netbeans.adito.db.*;
 import org.netbeans.api.db.explorer.node.BaseNode;
 import org.netbeans.lib.ddl.impl.Specification;
 import org.netbeans.modules.db.explorer.DatabaseConnection;
 import org.netbeans.modules.db.explorer.dlg.*;
 import org.openide.nodes.Node;
-import org.openide.util.HelpCtx;
-import org.openide.util.NbBundle;
-import org.openide.util.RequestProcessor;
+import org.openide.util.*;
 import org.openide.util.actions.SystemAction;
 
 import java.util.List;
@@ -80,7 +78,7 @@ public class CreateTableAction extends BaseAction {
         DatabaseConnection connection = node.getLookup().lookup(DatabaseConnection.class);
         Specification spec = connection.getConnector().getDatabaseSpecification();
 
-        List<ColumnItem> items = ColumnItemCreator.getDefaultSystemColumnItems(connection.getDriver(), spec);
+        List<ColumnItem> items = Lookup.getDefault().lookup(IDefaultSystemStructureProvider.class).getDefaultColumnItems(spec);
         boolean tableCreated = CreateTableDialog.showDialogAndCreate(connection.getConnector().getDatabaseSpecification(),
                                                                      schema, items, null);
         if (tableCreated) {

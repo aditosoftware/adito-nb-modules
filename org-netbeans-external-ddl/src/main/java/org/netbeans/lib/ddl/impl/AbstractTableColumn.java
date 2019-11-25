@@ -23,8 +23,7 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
-import de.adito.aditoweb.nbm.nbide.nbaditointerface.database.specifier.ITableColumnSpecifierFactory;
-import org.openide.util.*;
+import org.openide.util.NbBundle;
 
 import org.netbeans.lib.ddl.DDLException;
 import org.netbeans.lib.ddl.util.CommandFormatter;
@@ -203,10 +202,7 @@ public class AbstractTableColumn implements Serializable {
         Map cprops;
         if (format == null) throw new DDLException(NbBundle.getBundle("org.netbeans.lib.ddl.resources.Bundle").getString("EXC_NoFormatSpec")); //NOI18N
         try {
-            // Edit ADITO
             cprops = getColumnProperties(cmd);
-            String databaseProductName = cmd.getSpecification().getProperties().get("DatabaseProductName").toString();
-            cprops = Lookup.getDefault().lookup(ITableColumnSpecifierFactory.class).getTableColumnSpecifier(databaseProductName).optimizeColumnProps(cprops);
             return CommandFormatter.format(format, cprops);
         } catch (Exception e) {
             throw new DDLException(e.getMessage());

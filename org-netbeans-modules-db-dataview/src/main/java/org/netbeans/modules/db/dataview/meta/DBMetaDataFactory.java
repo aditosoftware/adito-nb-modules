@@ -27,11 +27,9 @@ import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import de.adito.aditoweb.nbm.nbide.nbaditointerface.database.specifier.*;
 import org.netbeans.api.db.sql.support.SQLIdentifiers;
 import org.netbeans.api.db.sql.support.SQLIdentifiers.Quoter;
 import org.netbeans.modules.db.dataview.util.DataViewUtils;
-import org.openide.util.Lookup;
 
 /**
  * Extracts database metadata information (table names and constraints, their
@@ -61,14 +59,14 @@ public final class DBMetaDataFactory {
     public DBMetaDataFactory(Connection dbconn) throws SQLException {
         assert dbconn != null;
         dbmeta = dbconn.getMetaData();
-        
+
         // get the database type based on the product name converted to lowercase
         if (dbmeta.getURL() != null) {
             dbType = getDBTypeFromURL(dbmeta.getURL());
         } else {
             dbType = JDBC;
         }
-        
+
         sqlquoter = SQLIdentifiers.createQuoter(dbmeta);
         String buildIdentifierQuoteString = "\""; // NOI18N
         try {
@@ -163,7 +161,7 @@ public final class DBMetaDataFactory {
         // get table column information
         ResultSetMetaData rsMeta = rs.getMetaData();
         for (int i = 1; i <= rsMeta.getColumnCount(); i++) {
-            // #153219 - workaround 
+            // #153219 - workaround
             String tableName = rsMeta.getTableName(i);
             if (tableName == null) {
                 tableName = noTableName;
@@ -259,14 +257,6 @@ public final class DBMetaDataFactory {
                 }
             }
 
-            // ADITO
-            ITableColumnSpecifier speci = Lookup.getDefault().lookup(ITableColumnSpecifierFactory.class).getTableColumnSpecifier(dbmeta.getDatabaseProductName());
-
-            displaySize = speci.getDisplySize(sqlTypeCode, displaySize, precision);
-            precision = speci.getPrecision(sqlTypeCode, displaySize, precision);
-            sqlTypeCode = speci.getTypeCode(sqlTypeCode, sqlTypeStr);
-            sqlTypeStr = speci.getTypeString(sqlTypeCode, sqlTypeStr);
-
             // The SQL Server timestamp type is a JDBC BINARY type with the fixed length of 8 bytes.
             // A Transact-SQL timestamp != an ANSI SQL-92 timestamp.
             // If its a SQL style timestamp you are after use a datetime data type.
@@ -322,12 +312,12 @@ public final class DBMetaDataFactory {
     /**
      * Do post processing of the resultset metadata and add data provided by
      * database metadata.
-     * 
+     *
      * This was decoupled from generateDBTables because accessing the database
      * metadata before the resultset is fully read risks either a corrupted resultset
      * (oracle, pointbase) or out of memory errors on large resultsets (mssql)
-     * 
-     * @param tables 
+     *
+     * @param tables
      */
     public void postprocessTables(Collection<DBTable> tables) {
         DBModel dbModel = new DBModel();
