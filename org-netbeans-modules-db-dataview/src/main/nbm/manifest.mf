@@ -3,7 +3,6 @@ OpenIDE-Module: org.netbeans.modules.db.dataview
 OpenIDE-Module-Localizing-Bundle: org/netbeans/modules/db/dataview/Bundle.properties
 OpenIDE-Module-Specification-Version: 1.35.1
 AutoUpdate-Show-In-Client: false
-OpenIDE-Module-Recommends: de.adito.aditoweb.nbm.nbide.nbaditointerface.database.specifier.ITableColumnSpecifierFactory
 OpenIDE-Module-Friends: org.netbeans.modules.etl.editor, org.netbeans.
  modules.db.core, org.netbeans.modules.dm.virtual.db, org.netbeans.mod
  ules.edm.editor

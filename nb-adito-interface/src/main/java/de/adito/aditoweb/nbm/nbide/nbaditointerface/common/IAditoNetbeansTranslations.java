@@ -9,8 +9,6 @@ public interface IAditoNetbeansTranslations
 
   String getRenameAction();
 
-  String getCreateSystemTablesAction();
-
   String create();
 
   String config();
@@ -19,5 +17,4 @@ public interface IAditoNetbeansTranslations
 
   String cancel();
 
-  String tooltipTableWereCreated();
 }

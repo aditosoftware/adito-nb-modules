@@ -1,12 +1,15 @@
 package org.netbeans.adito.db;
 
-import org.jetbrains.annotations.*;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.netbeans.lib.ddl.impl.Specification;
-import org.netbeans.modules.db.explorer.dlg.*;
+import org.netbeans.modules.db.explorer.dlg.ColumnItem;
+import org.netbeans.modules.db.explorer.dlg.TypeElement;
 
 import java.lang.reflect.Field;
 import java.sql.Types;
-import java.util.*;
+import java.util.Map;
+import java.util.Vector;
 
 /**
  * Liefert ColumnItems.
@@ -14,6 +17,7 @@ import java.util.*;
  *
  * @author J. Boesl, 14.01.13
  */
+@SuppressWarnings("unused")
 public class ColumnItemFactory
 {
 

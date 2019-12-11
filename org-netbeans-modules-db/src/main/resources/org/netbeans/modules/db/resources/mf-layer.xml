@@ -191,11 +191,6 @@
                         <attr name="position" intvalue="150"/>
                     </file>
 
-                    <!-- org.netbeans.adito.db.CreateSystemTablesAction -->
-                    <file name="org-netbeans-adito-db-CreateSystemTablesAction.instance">
-                      <attr name="position" intvalue="160"/>
-                    </file>
-
                     <file name="Separator1.instance">
                         <attr name="instanceClass" stringvalue="javax.swing.JSeparator"/>
                         <attr name="position" intvalue="200"/>
