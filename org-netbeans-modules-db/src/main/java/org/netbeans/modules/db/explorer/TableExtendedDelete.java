@@ -18,36 +18,28 @@
  */
 package org.netbeans.modules.db.explorer;
 
-import java.awt.Dimension;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
 import org.netbeans.api.db.explorer.ConnectionManager;
 import org.netbeans.lib.ddl.CommandNotSupportedException;
 import org.netbeans.lib.ddl.DDLException;
 import org.netbeans.lib.ddl.impl.AbstractCommand;
 import org.netbeans.lib.ddl.impl.Specification;
+import org.netbeans.modules.db.explorer.action.RefreshAction;
 import org.netbeans.modules.db.explorer.node.TableNode;
 import org.netbeans.modules.db.metadata.model.api.Action;
-import org.netbeans.modules.db.metadata.model.api.ForeignKey;
-import org.netbeans.modules.db.metadata.model.api.ForeignKeyColumn;
-import org.netbeans.modules.db.metadata.model.api.Metadata;
-import org.netbeans.modules.db.metadata.model.api.MetadataElementHandle;
-import org.netbeans.modules.db.metadata.model.api.MetadataModelException;
-import org.netbeans.modules.db.metadata.model.api.Table;
+import org.netbeans.modules.db.metadata.model.api.*;
 import org.openide.DialogDisplayer;
 import org.openide.NotifyDescriptor;
 import org.openide.nodes.Node;
 import org.openide.util.NbBundle;
+import org.openide.util.actions.SystemAction;
+
+import javax.swing.*;
+import java.awt.*;
+import java.util.List;
+import java.util.*;
+import java.util.Map.Entry;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Extendend Delete for Tabels.
@@ -191,6 +183,13 @@ public class TableExtendedDelete {
                 }
             }
             ConnectionManager.getDefault().refreshConnectionInExplorer(e.getKey().getDatabaseConnection());
+
+            // ADITO
+            SystemAction.get(RefreshAction.class).performAction(Arrays.stream(inputNodes)
+                    .map(Node::getParentNode)
+                    .filter(Objects::nonNull)
+                    .distinct()
+                    .toArray(Node[]::new));
         }
 
         // If errors happend => report them and if cycle is detected, inform user
