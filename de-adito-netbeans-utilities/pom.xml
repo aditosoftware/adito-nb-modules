@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <parent>
+    <artifactId>nb-modules</artifactId>
+    <groupId>de.adito</groupId>
+    <version>1.3.0</version>
+  </parent>
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>de.adito.nb-modules</groupId>
+  <artifactId>de-adito-netbeans-utilities</artifactId>
+  <version>1.0</version>
+
+  <dependencies>
+    <dependency>
+      <groupId>info.clearthought</groupId>
+      <artifactId>table-layout</artifactId>
+      <version>4.2.1</version>
+    </dependency>
+  </dependencies>
+
+</project>
