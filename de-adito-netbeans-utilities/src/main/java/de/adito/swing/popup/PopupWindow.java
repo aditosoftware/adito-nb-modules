@@ -1,5 +1,8 @@
 package de.adito.swing.popup;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
@@ -14,7 +17,13 @@ public class PopupWindow extends JWindow
 {
   private _WindowDisposer windowDisposer;
 
-  public PopupWindow(Window parent, String pTitle, JComponent pComponent)
+  /**
+   *
+   * @param parent Window that should be registered as the parent
+   * @param pTitle Title the popup should have, pass an empty string for no header/title
+   * @param pComponent Content that is displayed in the popup
+   */
+  public PopupWindow(@Nullable Window parent, @NotNull String pTitle, @NotNull JComponent pComponent)
   {
     super(parent);
     windowDisposer = new _WindowDisposer();

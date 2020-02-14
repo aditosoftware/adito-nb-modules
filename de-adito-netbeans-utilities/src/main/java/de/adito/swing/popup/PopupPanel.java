@@ -2,6 +2,7 @@ package de.adito.swing.popup;
 
 import de.adito.swing.TableLayoutUtil;
 import info.clearthought.layout.TableLayout;
+import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
 import javax.swing.border.LineBorder;
@@ -20,7 +21,7 @@ class PopupPanel extends JPanel
   protected static final int DRAG_BORDER_WIDTH = 5;
   private static final String SECONDARY_BACKGROUND_COLOR_KEY = "adito.secondary.background.color";
 
-  PopupPanel(JComponent pComponent, String pTitle, PopupWindow pWindow)
+  PopupPanel(@NotNull JComponent pComponent, @NotNull String pTitle, @NotNull PopupWindow pWindow)
   {
     setBorder(new LineBorder(Color.gray));
     final int gap = 5;
