@@ -82,7 +82,8 @@ public final class DatabaseConnection {
     /**
      * Returns the org.netbeans.modules.db.explorer.DatabaseConnection which this instance delegates to.
      */
-    org.netbeans.modules.db.explorer.DatabaseConnection getDelegate() {
+    // ADITO
+    public org.netbeans.modules.db.explorer.DatabaseConnection getDelegate() {
         return delegate;
     }
     
