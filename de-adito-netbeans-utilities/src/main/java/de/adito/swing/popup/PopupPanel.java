@@ -6,9 +6,7 @@ import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
 import javax.swing.border.LineBorder;
-import java.awt.Color;
-import java.awt.Cursor;
-import java.awt.Graphics;
+import java.awt.*;
 
 /**
  * A Panel for all mouse handlers.
@@ -20,6 +18,7 @@ class PopupPanel extends JPanel
 {
   protected static final int DRAG_BORDER_WIDTH = 5;
   private static final String SECONDARY_BACKGROUND_COLOR_KEY = "adito.secondary.background.color";
+  private JComponent searchAttachComponent;
 
   PopupPanel(@NotNull JComponent pComponent, @NotNull String pTitle, @NotNull PopupWindow pWindow)
   {
@@ -51,13 +50,20 @@ class PopupPanel extends JPanel
 
   private JComponent _createContentPanel(JComponent pComponent)
   {
+    searchAttachComponent = new JPanel(new BorderLayout());
     JScrollPane contentScrollPane = new JScrollPane(pComponent);
     contentScrollPane.getVerticalScrollBar().setUnitIncrement(16);
 
     contentScrollPane.setViewportBorder(null);
     contentScrollPane.getViewport().setBorder(null);
     contentScrollPane.setBorder(null);
-    return contentScrollPane;
+    searchAttachComponent.add(contentScrollPane, BorderLayout.CENTER);
+    return searchAttachComponent;
+  }
+
+  JComponent getSearchAttachComponent()
+  {
+    return searchAttachComponent;
   }
 
   /**

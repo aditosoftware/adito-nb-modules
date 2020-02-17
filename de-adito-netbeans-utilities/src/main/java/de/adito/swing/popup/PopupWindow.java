@@ -1,7 +1,9 @@
 package de.adito.swing.popup;
 
+import de.adito.swing.quicksearch.IExtendedQuickSearchCallback;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.openide.awt.QuickSearch;
 
 import javax.swing.*;
 import java.awt.*;
@@ -15,19 +17,35 @@ import java.awt.event.*;
 
 public class PopupWindow extends JWindow
 {
+  @Nullable
+  private final IExtendedQuickSearchCallback quickSearchCallback;
   private _WindowDisposer windowDisposer;
+  private QuickSearch quickSearch = null;
+  private PopupPanel popupPanel;
 
   /**
-   *
-   * @param parent Window that should be registered as the parent
-   * @param pTitle Title the popup should have, pass an empty string for no header/title
+   * @param parent     Window that should be registered as the parent
+   * @param pTitle     Title the popup should have, pass an empty string for no header/title
    * @param pComponent Content that is displayed in the popup
    */
   public PopupWindow(@Nullable Window parent, @NotNull String pTitle, @NotNull JComponent pComponent)
   {
+    this(parent, pTitle, pComponent, null);
+  }
+
+  /**
+   * @param parent               Window that should be registered as the parent
+   * @param pTitle               Title the popup should have, pass an empty string for no header/title
+   * @param pComponent           Content that is displayed in the popup
+   * @param pQuickSearchCallback Callback for the Quicksearch that should be attached to the Popup. Null if no popup is wanted
+   */
+  public PopupWindow(@Nullable Window parent, @NotNull String pTitle, @NotNull JComponent pComponent, @Nullable IExtendedQuickSearchCallback pQuickSearchCallback)
+  {
     super(parent);
+    quickSearchCallback = pQuickSearchCallback;
     windowDisposer = new _WindowDisposer();
-    add(new PopupPanel(pComponent, pTitle, this));
+    popupPanel = new PopupPanel(pComponent, pTitle, this);
+    add(popupPanel);
     setType(Type.POPUP);
     try
     {
@@ -42,14 +60,24 @@ public class PopupWindow extends JWindow
   @Override
   public void setVisible(boolean b)
   {
+    if(quickSearchCallback != null)
+      quickSearch = QuickSearch.attach(getSearchAttachComponent(), BorderLayout.SOUTH, quickSearchCallback);
     pack();
     super.setVisible(b);
     SwingUtilities.invokeLater(() -> Toolkit.getDefaultToolkit().addAWTEventListener(windowDisposer, AWTEvent.WINDOW_EVENT_MASK | AWTEvent.KEY_EVENT_MASK));
   }
 
-  public void disposeWindow() {
+  public void disposeWindow()
+  {
     Toolkit.getDefaultToolkit().removeAWTEventListener(windowDisposer);
+    if(quickSearch != null) {
+      quickSearch.detach();
+    }
     dispose();
+  }
+
+  public JComponent getSearchAttachComponent() {
+    return popupPanel.getSearchAttachComponent();
   }
 
   /**
@@ -79,17 +107,13 @@ public class PopupWindow extends JWindow
       }
       else if (pEvent instanceof KeyEvent && ((KeyEvent) pEvent).getKeyCode() == KeyEvent.VK_ESCAPE)
       {
-        disposeWindow();
+        if(quickSearchCallback != null && quickSearchCallback.isSearchActive()) {
+          quickSearchCallback.quickSearchCanceled();
+        } else
+        {
+          disposeWindow();
+        }
       }
-    }
-
-    /**
-     * removes the AWTEventListener and disposes of the ChunkPopupWindow
-     */
-    void disposeWindow()
-    {
-      Toolkit.getDefaultToolkit().removeAWTEventListener(this);
-      dispose();
     }
 
     /**
