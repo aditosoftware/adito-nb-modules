@@ -33,7 +33,7 @@ public class PopupMouseAdapter extends MouseAdapter
     popupWindow.setPreferredSize(new Dimension(popupContent.getPreferredSize().width + WIDTH_BUFFER, Math.min(popupContent.getPreferredSize().height + ADD_HEIGHT, MAX_HEIGHT)));
     Point labelStart = originComponent.getLocationOnScreen();
     int x = Math.min(labelStart.x, labelStart.x + originComponent.getWidth() - (int) popupWindow.getPreferredSize().getWidth());
-    int y = labelStart.y + originComponent.getHeight() - (int) popupWindow.getPreferredSize().getHeight();
+    int y = labelStart.y - (int) popupWindow.getPreferredSize().getHeight();
     popupWindow.setVisible(true);
     popupWindow.setLocation(x, y);
   }
