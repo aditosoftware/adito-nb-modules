@@ -2,6 +2,8 @@ package de.adito.aditoweb.nbm.nbide.nbaditointerface.metrics;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.util.concurrent.Callable;
+
 /**
  * This MetricsFacade takes different types of metric objects.
  * They will be presented in different ways - maybe via JMX in JVisualVM / JProfiler or via Console
@@ -30,6 +32,15 @@ public interface IMetricsFacade
   IMeter meter(@NotNull String pName);
 
   /**
+   * Returns a (new) timer object
+   *
+   * @param pName name of the timer
+   * @return the timer instance
+   */
+  @NotNull
+  ITimer timer(@NotNull String pName);
+
+  /**
    * A counter is just a gauge for an AtomicLong instance.
    * You can increment or decrement its value.
    * For example, we may want a more efficient way of measuring the pending job in a queue
@@ -54,6 +65,21 @@ public interface IMetricsFacade
      * Marks, that an event has occured
      */
     void mark();
+  }
+
+  /**
+   * A timer measures both the rate that a particular piece of code
+   * is called and the distribution of its duration.
+   */
+  interface ITimer
+  {
+    /**
+     * Times and records the duration of event.
+     *
+     * @param pAction Action to track
+     * @return the return value of pAction
+     */
+    <T> T time(@NotNull Callable<T> pAction);
   }
 
 }
