@@ -42,23 +42,10 @@ class PopupPanel extends JPanel
     tlu.add(1, 1, titlePanel);
     tlu.add(2, 1, 2, 3, new EastWestColoredMouseDragHandler(pWindow, titlePanel, Cursor.E_RESIZE_CURSOR));
     tlu.add(1, 2, new MouseSensor(new HandlerMovement(pWindow)));
-    tlu.add(1, 3, _createContentPanel(pComponent));
+    tlu.add(1, 3, pComponent);
     tlu.add(0, 4, new MouseSensor(new MouseDragHandler(pWindow, Cursor.SW_RESIZE_CURSOR)));
     tlu.add(1, 4, new MouseSensor(new MouseDragHandler(pWindow, Cursor.S_RESIZE_CURSOR)));
     tlu.add(2, 4, new MouseSensor(new MouseDragHandler(pWindow, Cursor.SE_RESIZE_CURSOR)));
-  }
-
-  private JComponent _createContentPanel(JComponent pComponent)
-  {
-    searchAttachComponent = new JPanel(new BorderLayout());
-    JScrollPane contentScrollPane = new JScrollPane(pComponent);
-    contentScrollPane.getVerticalScrollBar().setUnitIncrement(16);
-
-    contentScrollPane.setViewportBorder(null);
-    contentScrollPane.getViewport().setBorder(null);
-    contentScrollPane.setBorder(null);
-    searchAttachComponent.add(contentScrollPane, BorderLayout.CENTER);
-    return searchAttachComponent;
   }
 
   JComponent getSearchAttachComponent()
