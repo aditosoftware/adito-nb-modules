@@ -3,6 +3,7 @@
 
 *.iml
 /.idea/*
+!/.idea/codeStyles
 !/.idea/vcs.xml
 
 target/
