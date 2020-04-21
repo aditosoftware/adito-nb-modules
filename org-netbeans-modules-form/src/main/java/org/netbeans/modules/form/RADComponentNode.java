@@ -127,7 +127,7 @@ public class RADComponentNode extends FormNode
           updateName();
           updateDisplayName();
         }
-        else if(Node.PROP_PROPERTY_SETS.equals(evt.getPropertyName()))
+        else if (Node.PROP_PROPERTY_SETS.equals(evt.getPropertyName()))
           firePropertySetsChange(null, null);
       }
     };
@@ -282,31 +282,39 @@ public class RADComponentNode extends FormNode
     return null;
   }
 
+  /**
+   * Returns all actions from the super-class, our own node and the default actions.
+   * If an action from our own node has the same name as some other action (ignoring whitespaces and case),
+   * the other action is replaced by the action from our own Node.
+   *
+   * @param context whether to find actions for the context or  the node itself
+   * @return the actions, ordered by position
+   */
   @Override
   public Action[] getActions(boolean context)
   {
-
     RADComponent topComp = component.getFormModel().getTopRADComponent();
 
     // Liefert Actions der Oberklasse
     super.getActions(context);
     for (Object a : super.getSortedActionList().toArray())
-      if(a != null)
+      if (a != null)
         actions.add((AditoActionObject) a);
 
+    List<AditoActionObject> ownActions = new ArrayList<>();
     // all actions from our own node.
     for (Action action : AditoNodeConnect.getActions(component, true))
     {
-      if(action != null)
+      if (action != null)
       {
         Object position = action.getValue("position");
         if (position instanceof Integer)
         {
-          actions.add(new AditoActionObject(action, (Integer) position));
-          actions.add(new AditoActionObject(null, (Integer) position + 1));
+          ownActions.add(new AditoActionObject(action, (Integer) position));
+          ownActions.add(new AditoActionObject(null, (Integer) position + 1));
         }
         else
-          actions.add(new AditoActionObject(action, Integer.MAX_VALUE));
+          ownActions.add(new AditoActionObject(action, Integer.MAX_VALUE));
       }
     }
     actions.add(new AditoActionObject(null, 100));
@@ -347,6 +355,28 @@ public class RADComponentNode extends FormNode
     }
     actions.add(new AditoActionObject(null, 1200));
 
+    // Replaces other Actions with the own Actions, if they have the same name (white-spaces are ignored)
+    for (int indexOwnAct = 0; indexOwnAct < ownActions.size(); indexOwnAct++)
+    {
+      AditoActionObject aaoOwn = ownActions.get(indexOwnAct);
+      if (aaoOwn.getAction() != null)
+      {
+        String nameAaoOwn = aaoOwn.getName().replace(" ", "");
+        for (int indexSystemAct = 0; indexSystemAct < actions.size(); indexSystemAct++)
+        {
+          AditoActionObject aaoSystem = actions.get(indexSystemAct);
+          if (aaoSystem.getAction() != null
+              && aaoSystem.getName().replace(" ", "").equals(nameAaoOwn))
+          {
+            aaoSystem.setAction(aaoOwn.getAction());
+            ownActions.remove(indexOwnAct);
+            indexOwnAct--;
+          }
+        }
+      }
+    }
+
+    actions.addAll(ownActions);
     return actions.toActionArray();
   }
 
@@ -595,7 +625,7 @@ public class RADComponentNode extends FormNode
    * implementation obtains write access to
    * the {@link Children#MUTEX children's lock}, and removes
    * the node from its parent(if any). Also fires a property change.
-   * <P>
+   * <p>
    * This may be overridden by subclasses to do any additional
    * cleanup.
    *
