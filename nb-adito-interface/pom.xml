@@ -67,6 +67,10 @@
       <groupId>de.adito.propertly</groupId>
       <artifactId>propertly.core</artifactId>
     </dependency>
+    <dependency>
+      <groupId>io.reactivex.rxjava2</groupId>
+      <artifactId>rxjava</artifactId>
+    </dependency>
 
   </dependencies>
 
@@ -79,6 +83,7 @@
         <configuration>
           <publicPackages>
             <publicPackage>de.adito.aditoweb.nbm.nbide.nbaditointerface.*</publicPackage>
+            <publicPackage>de.adito.aditoweb.nbm.nbide.nbaditointerface.actionitems.*</publicPackage>
             <publicPackage>de.adito.aditoweb.nbm.nbide.nbaditointerface.common.*</publicPackage>
             <publicPackage>de.adito.aditoweb.nbm.nbide.nbaditointerface.database.*</publicPackage>
             <publicPackage>de.adito.aditoweb.nbm.nbide.nbaditointerface.database.specifier.*</publicPackage>
