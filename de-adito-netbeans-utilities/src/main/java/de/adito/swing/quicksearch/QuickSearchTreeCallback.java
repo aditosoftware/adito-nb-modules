@@ -22,6 +22,11 @@ public abstract class QuickSearchTreeCallback implements QuickSearch.Callback
   private int searchResultIndex = 0;
   private TreePath lastFoundBuffer = null;
 
+  protected QuickSearchTreeCallback()
+  {
+    this(false);
+  }
+
   protected QuickSearchTreeCallback(boolean pExpandOnResultFound)
   {
     tree = null;

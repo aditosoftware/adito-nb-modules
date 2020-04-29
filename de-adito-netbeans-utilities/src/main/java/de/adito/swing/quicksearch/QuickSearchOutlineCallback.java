@@ -16,6 +16,12 @@ public abstract class QuickSearchOutlineCallback extends QuickSearchTreeCallback
 
   private final Outline treeTable;
 
+  public QuickSearchOutlineCallback(@NotNull Outline pTreeTable)
+  {
+    super();
+    treeTable = pTreeTable;
+  }
+
   public QuickSearchOutlineCallback(@NotNull Outline pTreeTable, boolean pExpandOnResultFound)
   {
     super(pExpandOnResultFound);
