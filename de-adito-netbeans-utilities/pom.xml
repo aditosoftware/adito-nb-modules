@@ -12,7 +12,8 @@
 
   <groupId>de.adito.nb-modules</groupId>
   <artifactId>de-adito-netbeans-utilities</artifactId>
-  <version>1.1.0</version>
+  <version>1.1.1</version>
+  <name>ADITO Netbeans Module: de-adito-netbeans-utilities</name>
 
   <dependencies>
     <dependency>
@@ -24,6 +25,11 @@
     <dependency>
       <groupId>org.netbeans.api</groupId>
       <artifactId>org-openide-awt</artifactId>
+      <version>${netbeans.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.netbeans.api</groupId>
+      <artifactId>org-netbeans-swing-outline</artifactId>
       <version>${netbeans.version}</version>
     </dependency>
   </dependencies>
