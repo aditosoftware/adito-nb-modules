@@ -57,4 +57,10 @@ public abstract class QuickSearchOutlineCallback extends QuickSearchTreeCallback
     }
   }
 
+  @Override
+  protected boolean isVisible(@NotNull TreePath pPath)
+  {
+    return treeTable.isVisible(pPath);
+  }
+
 }
