@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>de.adito</groupId>
+    <artifactId>nb-modules</artifactId>
+    <version>1.3.1</version>
+  </parent>
+
+  <groupId>org.netbeans.modules</groupId>
+  <artifactId>org-netbeans-bootstrap</artifactId>
+  <packaging>nbm</packaging>
+  <version>RELEASE111-1.3.1</version>
+  <name>Netbeans IDE module: org-netbeans-bootstrap</name>
+
+  <properties>
+    <sonar.skip>true</sonar.skip>
+  </properties>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.netbeans.api</groupId>
+      <artifactId>org-openide-util</artifactId>
+      <version>${netbeans.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.netbeans.api</groupId>
+      <artifactId>org-openide-util-ui</artifactId>
+      <version>RELEASE111-1.3.1</version>
+    </dependency>
+    <dependency>
+      <groupId>org.netbeans.api</groupId>
+      <artifactId>org-openide-modules</artifactId>
+      <version>${netbeans.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.netbeans.api</groupId>
+      <artifactId>org-openide-util-lookup</artifactId>
+      <version>${netbeans.version}</version>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.netbeans.utilities</groupId>
+        <artifactId>nbm-maven-plugin</artifactId>
+        <configuration>
+          <cluster>ide</cluster>
+          <codeNameBase>org.netbeans.bootstrap</codeNameBase>
+          <publicPackages>
+            <publicPackage>org.netbeans.*</publicPackage>
+          </publicPackages>
+        </configuration>
+      </plugin>
+
+      <!--
+        Workflow:
+        1. unzip the nbm-file
+        2. create tar-gz of the jar-file
+        3. rename tar-gz to boot.jar.pack.gz
+        4. create zip-file of main/build/*, boot.jar.pack.gz and info.xml
+        5. change line-ending of the zip to nbm
+      -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-assembly-plugin</artifactId>
+        <executions>
+          <!-- 2. create tar-gz of the jar-file-->
+          <execution>
+            <id>tarGz</id>
+            <phase>package</phase>
+            <goals>
+              <goal>single</goal>
+            </goals>
+            <configuration>
+              <attach>false</attach>
+              <outputDirectory>${project.build.directory}/zip</outputDirectory>
+              <appendAssemblyId>false</appendAssemblyId>
+              <descriptors>
+                <descriptor>src/main/assembly/assemblyTarGz.xml</descriptor>
+              </descriptors>
+            </configuration>
+          </execution>
+
+          <!-- 4. create zip-file of main/build, boot.jar.pack.gz and info.xml-->
+          <execution>
+            <id>zip</id>
+            <phase>verify</phase>
+            <goals>
+              <goal>single</goal>
+            </goals>
+            <configuration>
+              <attach>false</attach>
+              <outputDirectory>${project.build.directory}/zip</outputDirectory>
+              <appendAssemblyId>false</appendAssemblyId>
+              <descriptors>
+                <descriptor>src/main/assembly/assemblyZip.xml</descriptor>
+              </descriptors>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-antrun-plugin</artifactId>
+        <version>1.7</version>
+        <executions>
+          <!--1. unzip the nbm-file-->
+          <execution>
+            <phase>package</phase>
+            <goals>
+              <goal>run</goal>
+            </goals>
+            <configuration>
+              <target>
+                <unzip src="${project.build.directory}/${project.artifactId}-${project.version}.nbm" dest="${project.build.directory}/${project.artifactId}-${project.version}"/>
+              </target>
+            </configuration>
+          </execution>
+
+          <!-- 3. rename tar-gz to boot.jar.pack.gz-->
+          <execution>
+            <id>move2</id>
+            <phase>package</phase>
+            <goals>
+              <goal>run</goal>
+            </goals>
+            <configuration>
+              <target>
+                <move file="${project.build.directory}/zip/${project.artifactId}-${project.version}.tar.gz" tofile="${project.build.directory}/boot.jar.pack.gz"/>
+              </target>
+            </configuration>
+          </execution>
+
+          <!--5. change line-ending of the zip to nbm-->
+          <execution>
+            <id>move1</id>
+            <phase>verify</phase>
+            <goals>
+              <goal>run</goal>
+            </goals>
+            <configuration>
+              <target>
+                <move file="${project.build.directory}/zip/${project.artifactId}-${project.version}.zip" tofile="${project.build.directory}/${project.artifactId}-${project.version}.nbm"/>
+              </target>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+</project>

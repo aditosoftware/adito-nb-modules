@@ -1,0 +1,14 @@
+OpenIDE-Module-Friends: org.netbeans.core, org.netbeans.core.execution
+ , org.netbeans.core.netigso, org.netbeans.core.startup, org.netbeans.
+ modules.autoupdate.services, org.netbeans.modules.ide.ergonomics, org
+ .netbeans.modules.modulemanager, org.netbeans.modules.sendopts, org.n
+ etbeans.modules.settings, com.oracle.jdeveloper.extcache
+OpenIDE-Module-Java-Dependencies: Java > 1.7
+OpenIDE-Module-Implementation-Version: netbeans-release-428-on-2019071
+ 6
+AutoUpdate-Show-In-Client: false
+OpenIDE-Module: org.netbeans.bootstrap/1
+OpenIDE-Module-Specification-Version: 2.83
+OpenIDE-Module-Localizing-Bundle: org/netbeans/Bundle.properties
+OpenIDE-Module-Recommends: org.netbeans.NetigsoFramework
+OpenIDE-Module-Requires: -
