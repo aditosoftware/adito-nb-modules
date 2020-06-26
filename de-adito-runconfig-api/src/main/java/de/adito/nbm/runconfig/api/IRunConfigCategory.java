@@ -1,8 +1,7 @@
 package de.adito.nbm.runconfig.api;
 
-import io.reactivex.Observable;
+import io.reactivex.rxjava3.core.Observable;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.awt.*;
 import java.util.Optional;

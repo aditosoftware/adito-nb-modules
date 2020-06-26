@@ -1,6 +1,6 @@
 package de.adito.aditoweb.nbm.nbide.nbaditointerface.actionitems;
 
-import io.reactivex.Flowable;
+import io.reactivex.rxjava3.core.Flowable;
 import org.jetbrains.annotations.NotNull;
 import org.openide.filesystems.FileObject;
 
