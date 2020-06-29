@@ -29,7 +29,7 @@
       <outputDirectory>/netbeans/lib/</outputDirectory>
     </file>
     <file>
-      <source>${project.build.directory}/boot.jar.pack.gz</source>
+      <source>${project.build.directory}/boot.jar</source>
       <outputDirectory>/netbeans/lib/</outputDirectory>
     </file>
     <file>

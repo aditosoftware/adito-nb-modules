@@ -12,7 +12,7 @@
   <groupId>org.netbeans.modules</groupId>
   <artifactId>org-netbeans-bootstrap</artifactId>
   <packaging>nbm</packaging>
-  <version>RELEASE111-1.4.0</version>
+  <version>RELEASE111-1.4.0-2</version>
   <name>Netbeans IDE module: org-netbeans-bootstrap</name>
 
   <properties>
@@ -59,33 +59,15 @@
       <!--
         Workflow:
         1. unzip the nbm-file
-        2. create tar-gz of the jar-file
-        3. rename tar-gz to boot.jar.pack.gz
-        4. create zip-file of main/build/*, boot.jar.pack.gz and info.xml
-        5. change line-ending of the zip to nbm
+        2. rename jar to boot.jar
+        3. create zip-file of main/build/*, boot.jar.pack.gz and info.xml
+        4. change line-ending of the zip to nbm
       -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-assembly-plugin</artifactId>
         <executions>
-          <!-- 2. create tar-gz of the jar-file-->
-          <execution>
-            <id>tarGz</id>
-            <phase>package</phase>
-            <goals>
-              <goal>single</goal>
-            </goals>
-            <configuration>
-              <attach>false</attach>
-              <outputDirectory>${project.build.directory}/zip</outputDirectory>
-              <appendAssemblyId>false</appendAssemblyId>
-              <descriptors>
-                <descriptor>src/main/assembly/assemblyTarGz.xml</descriptor>
-              </descriptors>
-            </configuration>
-          </execution>
-
-          <!-- 4. create zip-file of main/build, boot.jar.pack.gz and info.xml-->
+          <!-- 3. create zip-file of main/build, boot.jar.pack.gz and info.xml-->
           <execution>
             <id>zip</id>
             <phase>verify</phase>
@@ -109,7 +91,7 @@
         <artifactId>maven-antrun-plugin</artifactId>
         <version>1.7</version>
         <executions>
-          <!--1. unzip the nbm-file-->
+          <!-- 1. unzip the nbm-file-->
           <execution>
             <phase>package</phase>
             <goals>
@@ -122,23 +104,23 @@
             </configuration>
           </execution>
 
-          <!-- 3. rename tar-gz to boot.jar.pack.gz-->
+          <!-- 2. rename jar to boot.jar-->
           <execution>
-            <id>move2</id>
+            <id>move_jarToBootJar</id>
             <phase>package</phase>
             <goals>
               <goal>run</goal>
             </goals>
             <configuration>
               <target>
-                <move file="${project.build.directory}/zip/${project.artifactId}-${project.version}.tar.gz" tofile="${project.build.directory}/boot.jar.pack.gz"/>
+                <copy file="${project.build.directory}/${project.artifactId}-${project.version}.jar" tofile="${project.build.directory}/boot.jar"/>
               </target>
             </configuration>
           </execution>
 
-          <!--5. change line-ending of the zip to nbm-->
+          <!-- 4. change line-ending of the zip to nbm-->
           <execution>
-            <id>move1</id>
+            <id>move_ZipToNbm</id>
             <phase>verify</phase>
             <goals>
               <goal>run</goal>
