@@ -48,7 +48,7 @@
         <groupId>org.apache.netbeans.utilities</groupId>
         <artifactId>nbm-maven-plugin</artifactId>
         <configuration>
-          <cluster>ide</cluster>
+          <cluster>platform</cluster>
           <codeNameBase>org.netbeans.bootstrap</codeNameBase>
           <publicPackages>
             <publicPackage>org.netbeans.*</publicPackage>
