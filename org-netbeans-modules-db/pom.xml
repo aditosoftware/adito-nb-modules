@@ -12,7 +12,7 @@
   <groupId>org.netbeans.api</groupId>
   <artifactId>org-netbeans-modules-db</artifactId>
   <packaging>nbm</packaging>
-  <version>RELEASE111-1.4.0</version>
+  <version>RELEASE111-1.4.0-2</version>
   <name>Netbeans IDE module: org-netbeans-modules-db</name>
 
   <properties>

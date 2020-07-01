@@ -31,14 +31,11 @@ import java.awt.event.ItemListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
@@ -139,6 +136,12 @@ public class AddTableColumnDialog extends JPanel {
         for (String key : tmap.keySet()) {
             ttab.add(new TypeElement(key, tmap.get(key)));
         }
+        // ADITO
+        // Remove duplicated type-names and sort the list
+        ttab = new ArrayList<>(ttab.stream()
+                                   .filter(pTypeElement -> pTypeElement.getName() != null)
+                                   .collect(Collectors.toMap(TypeElement::getName, p -> p, (p, q) -> p)).values());
+        ttab.sort((tE1, tE2) -> String.CASE_INSENSITIVE_ORDER.compare(tE1.getName(), tE2.getName()));
 
         ColumnItem item = new ColumnItem();
         item.setProperty(ColumnItem.TYPE, ttab.get(0));
