@@ -12,7 +12,7 @@
   <groupId>de.adito.nbm</groupId>
   <artifactId>de-adito-runconfig-api</artifactId>
   <packaging>nbm</packaging>
-  <version>RELEASE111-1.4.0</version>
+  <version>RELEASE111-1.4.0-2</version>
   <name>ADITO Netbeans Module: de-adito-runconfig-api</name>
 
   <properties>
@@ -31,6 +31,12 @@
       <groupId>org.netbeans.api</groupId>
       <artifactId>org-netbeans-api-progress</artifactId>
       <version>${netbeans.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.netbeans.api</groupId>
+      <artifactId>org-netbeans-modules-projectapi</artifactId>
+      <version>${netbeans.version}</version>
+      <scope>compile</scope>
     </dependency>
   </dependencies>
 
