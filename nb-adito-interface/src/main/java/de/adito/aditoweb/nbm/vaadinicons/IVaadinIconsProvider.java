@@ -13,6 +13,7 @@ import java.util.Set;
  *
  * @author m.kaspera, 16.07.2020
  */
+@SuppressWarnings("unused")
 public interface IVaadinIconsProvider
 {
 
