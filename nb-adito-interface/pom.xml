@@ -11,7 +11,7 @@
 
   <groupId>de.adito.nb-modules</groupId>
   <artifactId>nb-adito-interface</artifactId>
-  <version>1.4.0</version>
+  <version>1.4.0-2</version>
   <packaging>nbm</packaging>
   <name>Netbeans IDE module interface: nb-adito-interface</name>
 
@@ -72,6 +72,13 @@
       <artifactId>rxjava</artifactId>
     </dependency>
 
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>4.12</version>
+      <scope>test</scope>
+    </dependency>
+
   </dependencies>
 
 
@@ -91,6 +98,8 @@
             <publicPackage>de.adito.aditoweb.nbm.nbide.nbaditointerface.form.*</publicPackage>
             <publicPackage>de.adito.aditoweb.nbm.nbide.nbaditointerface.git.*</publicPackage>
             <publicPackage>de.adito.aditoweb.nbm.nbide.nbaditointerface.windowsystem.*</publicPackage>
+            <publicPackage>de.adito.swing.icon</publicPackage>
+            <publicPackage>de.adito.aditoweb.nbm.vaadinicons</publicPackage>
           </publicPackages>
           <codeNameBase>de.adito.aditoweb.modules.nbide.nbaditointerface</codeNameBase>
         </configuration>
