@@ -12,7 +12,7 @@
   <groupId>de.adito.nbm</groupId>
   <artifactId>de-adito-runconfig-api</artifactId>
   <packaging>nbm</packaging>
-  <version>RELEASE111-1.4.0-2</version>
+  <version>RELEASE111-1.4.0-3</version>
   <name>ADITO Netbeans Module: de-adito-runconfig-api</name>
 
   <properties>
@@ -24,6 +24,10 @@
     <dependency>
       <groupId>io.reactivex.rxjava3</groupId>
       <artifactId>rxjava</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>de.adito.nb-modules</groupId>
+      <artifactId>nb-adito-interface</artifactId>
     </dependency>
 
     <!-- NetBeans -->

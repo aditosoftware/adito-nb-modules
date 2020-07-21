@@ -1,5 +1,6 @@
 package de.adito.nbm.runconfig.api;
 
+import de.adito.aditoweb.nbm.nbide.nbaditointerface.tunnel.ITunnelConfigProvider;
 import io.reactivex.rxjava3.core.Observable;
 
 import java.util.Map;
@@ -9,15 +10,8 @@ import java.util.Map;
  *
  * @author m.kaspera, 10.07.2020
  */
-public interface ISystemInfo
+public interface ISystemInfo extends ITunnelConfigProvider
 {
-
-  /**
-   * Name of the system
-   *
-   * @return name of the system
-   */
-  String getSystemName();
 
   /**
    *
