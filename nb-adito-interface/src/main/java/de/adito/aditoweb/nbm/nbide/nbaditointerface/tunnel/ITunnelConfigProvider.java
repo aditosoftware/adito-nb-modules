@@ -1,6 +1,7 @@
 package de.adito.aditoweb.nbm.nbide.nbaditointerface.tunnel;
 
 import io.reactivex.rxjava3.core.Observable;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.util.*;
@@ -18,13 +19,15 @@ public interface ITunnelConfigProvider
    *
    * @return name of the system
    */
-  String getSystemName();
+  @NotNull
+  Observable<String> getSystemName();
 
   /**
    * Observes the list of tunnelConfigs defined for this provider
    *
    * @return Observable with the list of tunnelConfigs defined for this provider
    */
+  @NotNull
   Observable<List<ITunnelConfig>> observeTunnelConfigs();
 
   /**
@@ -34,6 +37,7 @@ public interface ITunnelConfigProvider
    * @return Observable Optional of the config file that defines the tunnels for this provider
    */
   @Deprecated
+  @NotNull
   Observable<Optional<File>> observeTunnelConfigFile();
 
 }
