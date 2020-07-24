@@ -40,7 +40,11 @@
       <groupId>org.netbeans.api</groupId>
       <artifactId>org-netbeans-modules-projectapi</artifactId>
       <version>${netbeans.version}</version>
-      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.netbeans.api</groupId>
+      <artifactId>org-openide-util</artifactId>
+      <version>${netbeans.version}</version>
     </dependency>
   </dependencies>
 
@@ -51,7 +55,9 @@
         <artifactId>nbm-maven-plugin</artifactId>
         <configuration>
           <publicPackages>
-            <publicPackage>de.adito.nbm.runconfig.api.*</publicPackage>
+            <publicPackage>de.adito.nbm.runconfig.api</publicPackage>
+            <publicPackage>de.adito.nbm.runconfig.spi</publicPackage>
+            <publicPackage>de.adito.nbm.runconfig.category</publicPackage>
           </publicPackages>
         </configuration>
       </plugin>
