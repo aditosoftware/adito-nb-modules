@@ -1,4 +1,4 @@
-package de.adito.nbm.designer.observables;
+package de.adito.observables.netbeans;
 
 import de.adito.util.reactive.*;
 import io.reactivex.rxjava3.core.Observable;

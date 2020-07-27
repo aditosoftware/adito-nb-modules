@@ -1,4 +1,4 @@
-package de.adito.nbm.designer.observables;
+package de.adito.observables.netbeans;
 
 import com.google.common.collect.ImmutableList;
 import de.adito.util.reactive.AbstractListenerObservable;
