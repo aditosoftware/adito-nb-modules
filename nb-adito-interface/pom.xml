@@ -58,6 +58,11 @@
       <artifactId>org-netbeans-modules-parsing-api</artifactId>
       <version>${netbeans.version}</version>
     </dependency>
+    <dependency>
+      <groupId>org.netbeans.api</groupId>
+      <artifactId>org-openide-io</artifactId>
+      <version>${netbeans.version}</version>
+    </dependency>
 
     <dependency>
       <groupId>com.google.guava</groupId>
@@ -100,6 +105,7 @@
             <publicPackage>de.adito.aditoweb.nbm.nbide.nbaditointerface.windowsystem.*</publicPackage>
             <publicPackage>de.adito.swing.icon</publicPackage>
             <publicPackage>de.adito.aditoweb.nbm.vaadinicons</publicPackage>
+            <publicPackage>de.adito.aditoweb.logging.colorsupport</publicPackage>
           </publicPackages>
           <codeNameBase>de.adito.aditoweb.modules.nbide.nbaditointerface</codeNameBase>
         </configuration>
