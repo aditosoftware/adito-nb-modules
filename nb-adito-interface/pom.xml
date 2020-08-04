@@ -11,7 +11,7 @@
 
   <groupId>de.adito.nb-modules</groupId>
   <artifactId>nb-adito-interface</artifactId>
-  <version>1.4.0-3</version>
+  <version>1.4.0-4</version>
   <packaging>nbm</packaging>
   <name>Netbeans IDE module interface: nb-adito-interface</name>
 
@@ -56,6 +56,11 @@
     <dependency>
       <groupId>org.netbeans.api</groupId>
       <artifactId>org-netbeans-modules-parsing-api</artifactId>
+      <version>${netbeans.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.netbeans.api</groupId>
+      <artifactId>org-netbeans-modules-projectapi</artifactId>
       <version>${netbeans.version}</version>
     </dependency>
     <dependency>

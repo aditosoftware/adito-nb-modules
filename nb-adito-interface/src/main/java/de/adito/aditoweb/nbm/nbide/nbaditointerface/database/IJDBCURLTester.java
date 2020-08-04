@@ -1,4 +1,4 @@
-package de.adito.aditoweb.nbm.nbide.nbaditointerface.liquibase;
+package de.adito.aditoweb.nbm.nbide.nbaditointerface.database;
 
 /**
  * Determines the location of a database using its JDBC URL.
