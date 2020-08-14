@@ -1,9 +1,11 @@
 package de.adito.aditoweb.nbm.nbide.nbaditointerface.database;
 
 import org.jetbrains.annotations.*;
-import org.netbeans.api.db.explorer.DatabaseConnection;
 
+import java.io.IOException;
+import java.sql.Connection;
 import java.util.Collection;
+import java.util.function.Function;
 
 /**
  * @author w.glanzer, 13.08.2020
@@ -38,10 +40,25 @@ public interface IPossibleConnectionProvider
     String getSourceName();
 
     /**
-     * @return opens the connection to this possible connection. May fail if something is wrong with it.
+     * Opens the connection and executes something on it
+     *
+     * @param pFunction Function that consumes the connection and executes something on it
+     * @return the result of the function
      */
-    @NotNull
-    DatabaseConnection openConnection() throws Exception;
+    <T, Ex extends Throwable> T withJDBCConnection(@NotNull IConnectionFunction<T, Ex> pFunction) throws IOException, Ex;
 
+    /**
+     * Function for the connection - exception aware
+     */
+    interface IConnectionFunction<T, Ex extends Throwable>
+    {
+      /**
+       * Consumes the given connection and executes something on it
+       *
+       * @param pConnection Connection
+       * @throws Ex Exception, if any
+       */
+      T apply(@NotNull Connection pConnection) throws Ex;
+    }
   }
 }
