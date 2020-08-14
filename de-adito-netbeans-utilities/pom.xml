@@ -12,7 +12,7 @@
 
   <groupId>de.adito.nb-modules</groupId>
   <artifactId>de-adito-netbeans-utilities</artifactId>
-  <version>RELEASE111-1.4.0-4</version>
+  <version>RELEASE111-1.4.0-5</version>
   <name>ADITO Netbeans Module: de-adito-netbeans-utilities</name>
 
   <dependencies>
