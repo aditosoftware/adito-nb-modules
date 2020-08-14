@@ -113,7 +113,6 @@
             <publicPackage>de.adito.aditoweb.nbm.nbide.nbaditointerface.actionitems.*</publicPackage>
             <publicPackage>de.adito.aditoweb.nbm.nbide.nbaditointerface.common.*</publicPackage>
             <publicPackage>de.adito.aditoweb.nbm.nbide.nbaditointerface.database.*</publicPackage>
-            <publicPackage>de.adito.aditoweb.nbm.nbide.nbaditointerface.database.specifier.*</publicPackage>
             <publicPackage>de.adito.aditoweb.nbm.nbide.nbaditointerface.javascript.*</publicPackage>
             <publicPackage>de.adito.aditoweb.nbm.nbide.nbaditointerface.form.*</publicPackage>
             <publicPackage>de.adito.aditoweb.nbm.nbide.nbaditointerface.git.*</publicPackage>
