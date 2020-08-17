@@ -2,7 +2,7 @@ package de.adito.aditoweb.nbm.nbide.nbaditointerface.common;
 
 import org.jetbrains.annotations.*;
 import org.netbeans.api.project.Project;
-import org.openide.util.Lookup;
+import org.openide.util.*;
 
 import java.util.*;
 
@@ -22,6 +22,17 @@ public interface IProjectQuery
   static IProjectQuery getInstance()
   {
     return Lookup.getDefault().lookup(IProjectQuery.class);
+  }
+
+  /**
+   * Returns all projects that exist in current context
+   *
+   * @return all (currently selected) projects
+   */
+  @NotNull
+  default Set<Project> findProjectsInCurrentContext()
+  {
+    return findProjects(Utilities.actionsGlobalContext());
   }
 
   /**
