@@ -4,6 +4,8 @@ import org.jetbrains.annotations.*;
 import org.netbeans.api.project.Project;
 import org.openide.util.Lookup;
 
+import java.util.*;
+
 /**
  * A service, accessible via default Lookup, that gives information about
  * the project, that a lookup / lookup-provider contains.
@@ -23,27 +25,27 @@ public interface IProjectQuery
   }
 
   /**
-   * Returns the project that the given lookup contains
+   * Returns all projects that the given lookup contains
    *
    * @param pLookup Lookup as search base
-   * @return the project or null, if no project was found
+   * @return all found projects
    */
-  @Nullable
-  default Project findProject(@NotNull Lookup.Provider pLookup)
+  @NotNull
+  default Set<Project> findProjects(@NotNull Lookup.Provider pLookup)
   {
     Lookup lookup = pLookup.getLookup();
     if(lookup == null)
-      return null;
-    return findProject(lookup);
+      return new HashSet<>();
+    return findProjects(lookup);
   }
 
   /**
-   * Returns the project that the given lookup contains
+   * Returns all projects that the given lookup contains
    *
    * @param pLookup Lookup as search base
-   * @return the project or null, if no project was found
+   * @return all found projects
    */
-  @Nullable
-  Project findProject(@NotNull Lookup pLookup);
+  @NotNull
+  Set<Project> findProjects(@NotNull Lookup pLookup);
 
 }
