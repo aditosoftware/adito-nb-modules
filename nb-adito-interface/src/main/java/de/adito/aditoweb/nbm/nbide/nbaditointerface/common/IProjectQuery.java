@@ -5,6 +5,7 @@ import org.netbeans.api.project.Project;
 import org.openide.util.*;
 
 import java.util.*;
+import java.util.function.Function;
 
 /**
  * A service, accessible via default Lookup, that gives information about
@@ -29,10 +30,10 @@ public interface IProjectQuery
    *
    * @return all (currently selected) projects
    */
-  @NotNull
-  default Set<Project> findProjectsInCurrentContext()
+  @Nullable
+  default <T> T findProjectsInCurrentContext(@NotNull ReturnType<T> pType)
   {
-    return findProjects(Utilities.actionsGlobalContext());
+    return findProjects(Utilities.actionsGlobalContext(), pType);
   }
 
   /**
@@ -41,13 +42,13 @@ public interface IProjectQuery
    * @param pLookup Lookup as search base
    * @return all found projects
    */
-  @NotNull
-  default Set<Project> findProjects(@NotNull Lookup.Provider pLookup)
+  @Nullable
+  default <T> T findProjects(@NotNull Lookup.Provider pLookup, @NotNull ReturnType<T> pType)
   {
     Lookup lookup = pLookup.getLookup();
     if(lookup == null)
-      return new HashSet<>();
-    return findProjects(lookup);
+      return null;
+    return findProjects(lookup, pType);
   }
 
   /**
@@ -56,7 +57,53 @@ public interface IProjectQuery
    * @param pLookup Lookup as search base
    * @return all found projects
    */
-  @NotNull
-  Set<Project> findProjects(@NotNull Lookup pLookup);
+  @Nullable
+  <T> T findProjects(@NotNull Lookup pLookup, @NotNull ReturnType<T> pType);
+
+  /**
+   * Defines, what findProjects() should return
+   */
+  class ReturnType<T>
+  {
+    /**
+     * Transforms all currently available projects into a single set. NULL if no project was found.
+     */
+    public static final ReturnType<Set<Project>> MULTIPLE_TO_SET = new ReturnType<>(pProj -> pProj.isEmpty() ? null : pProj);
+
+    /**
+     * If only one project is found, then it will be returned. NULL if none or mulitple found.
+     */
+    public static final ReturnType<Project> MULTIPLE_TO_NULL = new ReturnType<>(pProj -> {
+      if(pProj.size() == 1)
+        return pProj.iterator().next();
+      return null;
+    });
+
+    /**
+     * Finds any project in the current lookup. NULL if nothing was found.
+     */
+    public static final ReturnType<Project> FIND_FIRST = new ReturnType<>(pProj -> pProj.stream()
+        .findFirst()
+        .orElse(null));
+
+    private final Function<Set<Project>, T> returnValueFn;
+
+    public ReturnType(@NotNull Function<Set<Project>, T> pReturnValueFn)
+    {
+      returnValueFn = pReturnValueFn;
+    }
+
+    /**
+     * Converts the given set of projects to the correct return value
+     *
+     * @param pProjects Projects
+     * @return return value
+     */
+    @Nullable
+    public T toReturnValue(@NotNull Set<Project> pProjects)
+    {
+      return returnValueFn.apply(pProjects);
+    }
+  }
 
 }
