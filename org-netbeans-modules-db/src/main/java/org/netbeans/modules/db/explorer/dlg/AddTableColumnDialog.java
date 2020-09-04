@@ -576,7 +576,19 @@ public class AddTableColumnDialog extends JPanel {
     /** Sets UI controls according to given ColumnItem. */
     private void setValues(ColumnItem columnItem) {
         colnamefield.setText(columnItem.getName());
-        coltypecombo.setSelectedItem(columnItem.getType());
+
+        //ADITO
+        for(int i = 0; i < coltypecombo.getItemCount(); i++) {
+            Object item = coltypecombo.getItemAt(i);
+            if(item instanceof TypeElement) {
+                TypeElement typeElement = (TypeElement) item;
+                if(typeElement.getName().equals(columnItem.getType().getName())) {
+                    coltypecombo.setSelectedIndex(i);
+                    break;
+                }
+            }
+        }
+
         if (!sizelesstypes.contains(columnItem.getType().toString())) {
             colsizefield.setText(String.valueOf(columnItem.getSize()));
             colscalefield.setText(String.valueOf(columnItem.getScale()));
