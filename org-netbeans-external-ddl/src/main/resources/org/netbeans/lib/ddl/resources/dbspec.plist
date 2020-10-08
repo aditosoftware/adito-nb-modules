@@ -1574,18 +1574,21 @@
         java.sql.Types.REAL = REAL;
         java.sql.Types.SMALLINT = SMALLINT;
         java.sql.Types.TIME = TIME;
-        java.sql.Types.TIMESTAMP = DATETIME;
+        // #1056358 MariaDb verwendet nur sekundengenaue DATETIME. Schreibweise mit "" kann eventuell Probleme verursachen wenn size gesetzt wird, aber ohne failed der Parser
+        java.sql.Types.TIMESTAMP = "DATETIME(3)";
         java.sql.Types.TINYINT = TINYINT;
         java.sql.Types.VARCHAR = VARCHAR;
         java.sql.Types.BOOLEAN = BOOLEAN;
         java.sql.Types.NCLOB = LONGTEXT;
         java.sql.Types.LONGNVARCHAR = LONGTEXT;
         java.sql.Types.TIME_WITH_TIMEZONE = TIME;
-        java.sql.Types.TIMESTAMP_WITH_TIMEZONE = DATETIME;
+        // #1056358 MariaDb verwendet nur sekundengenaue DATETIME. Schreibweise mit "" kann eventuell Probleme verursachen wenn size gesetzt wird, aber ohne failed der Parser
+        java.sql.Types.TIMESTAMP_WITH_TIMEZONE = "DATETIME(3)";
         java.sql.Types.SQLXML = LONGTEXT;
         java.sql.Types.LONGVARBINARY = LONGBLOB;
       };
-      SizelessTypes = (BIGINT,LONGBLOB,LONGTEXT,DATE,"DOUBLE PRECISION",FLOAT,INT,REAL,SMALLINT,TIME,DATETIME,TIMESTAMP,TINYINT,BOOLEAN);
+      // #1056358 MariaDb verwendet nur sekundengenaue DATETIME. DATETIME(3) zu sizeless types hinzufügen -> Bei "add column" kann keine Größe eingestellt werden
+      SizelessTypes = (BIGINT,LONGBLOB,LONGTEXT,DATE,"DOUBLE PRECISION",FLOAT,INT,REAL,SMALLINT,TIME,DATETIME,TIMESTAMP,"DATETIME(3)",TINYINT,BOOLEAN);
       DecimalTypes = (DECIMAL,NUMERIC);
       CharacterTypes = (CHAR,VARCHAR);
       NoPrimaryKeyTypes = (LONGTEXT, LONGBLOB);

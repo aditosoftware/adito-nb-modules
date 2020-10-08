@@ -12,7 +12,7 @@
   <groupId>org.netbeans.api</groupId>
   <artifactId>org-netbeans-modules-db</artifactId>
   <packaging>nbm</packaging>
-  <version>RELEASE111-1.4.0-4</version>
+  <version>RELEASE111-1.4.0-5</version>
   <name>Netbeans IDE module: org-netbeans-modules-db</name>
 
   <properties>
@@ -124,7 +124,7 @@
     <dependency>
       <groupId>org.netbeans.external</groupId>
       <artifactId>ddl</artifactId>
-      <version>${netbeans.version}-1.4.0</version>
+      <version>${netbeans.version}-1.4.0-1</version>
     </dependency>
   </dependencies>
 
