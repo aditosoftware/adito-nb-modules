@@ -18,11 +18,12 @@ class PopupPanel extends JPanel
 {
   protected static final int DRAG_BORDER_WIDTH = 5;
   private static final String SECONDARY_BACKGROUND_COLOR_KEY = "adito.secondary.background.color";
-  private JComponent searchAttachComponent;
+  private final JComponent searchAttachComponent = new JPanel(new BorderLayout());
 
   PopupPanel(@NotNull JComponent pComponent, @NotNull String pTitle, @NotNull PopupWindow pWindow)
   {
     setBorder(new LineBorder(Color.gray));
+    searchAttachComponent.add(pComponent, BorderLayout.CENTER);
     final int gap = 5;
     double fill = TableLayout.FILL;
     double[] cols = {DRAG_BORDER_WIDTH, fill, DRAG_BORDER_WIDTH};
@@ -42,7 +43,7 @@ class PopupPanel extends JPanel
     tlu.add(1, 1, titlePanel);
     tlu.add(2, 1, 2, 3, new EastWestColoredMouseDragHandler(pWindow, titlePanel, Cursor.E_RESIZE_CURSOR));
     tlu.add(1, 2, new MouseSensor(new HandlerMovement(pWindow)));
-    tlu.add(1, 3, pComponent);
+    tlu.add(1, 3, searchAttachComponent);
     tlu.add(0, 4, new MouseSensor(new MouseDragHandler(pWindow, Cursor.SW_RESIZE_CURSOR)));
     tlu.add(1, 4, new MouseSensor(new MouseDragHandler(pWindow, Cursor.S_RESIZE_CURSOR)));
     tlu.add(2, 4, new MouseSensor(new MouseDragHandler(pWindow, Cursor.SE_RESIZE_CURSOR)));
