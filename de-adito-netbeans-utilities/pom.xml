@@ -12,10 +12,14 @@
 
   <groupId>de.adito.nb-modules</groupId>
   <artifactId>de-adito-netbeans-utilities</artifactId>
-  <version>RELEASE111-1.4.0-6</version>
+  <version>RELEASE111-1.4.0-7</version>
   <name>ADITO Netbeans Module: de-adito-netbeans-utilities</name>
 
   <dependencies>
+    <dependency>
+      <groupId>de.adito.nb-modules</groupId>
+      <artifactId>nb-adito-interface</artifactId>
+    </dependency>
     <dependency>
       <groupId>info.clearthought</groupId>
       <artifactId>table-layout</artifactId>
