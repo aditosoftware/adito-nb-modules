@@ -31,7 +31,7 @@ public interface ISystemInfo extends ITunnelConfigProvider
    *
    * @return Observable
    */
-  Observable<Boolean> isCloud();
+  Observable<String> getCloudId();
 
   /**
    * Get a map with parameter settings
