@@ -6,13 +6,13 @@
   <parent>
     <groupId>de.adito</groupId>
     <artifactId>nb-modules</artifactId>
-    <version>1.4.0</version>
+    <version>1.5.0</version>
   </parent>
 
   <groupId>de.adito.nbm</groupId>
   <artifactId>de-adito-blueprint-api</artifactId>
   <packaging>nbm</packaging>
-  <version>RELEASE111-1.4.0</version>
+  <version>RELEASE111-1.5.0</version>
   <name>ADITO Netbeans Module: de-adito-blueprint-api</name>
 
   <properties>

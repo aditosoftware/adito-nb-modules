@@ -6,7 +6,7 @@
 
   <groupId>de.adito</groupId>
   <artifactId>nb-modules</artifactId>
-  <version>1.4.0</version>
+  <version>1.5.0</version>
   <packaging>pom</packaging>
   <name>Custom Netbeans Modules</name>
 
@@ -91,13 +91,6 @@
         <groupId>de.adito.propertly</groupId>
         <artifactId>propertly.core</artifactId>
         <version>1.0.2</version>
-      </dependency>
-
-      <!-- NB-Adito-Interface for providing ADITO-Specific stuff -->
-      <dependency>
-        <groupId>de.adito.nb-modules</groupId>
-        <artifactId>nb-adito-interface</artifactId>
-        <version>1.4.0-12</version>
       </dependency>
 
       <dependency>
