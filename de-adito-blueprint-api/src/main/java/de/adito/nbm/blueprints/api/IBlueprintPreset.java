@@ -47,6 +47,9 @@ public interface IBlueprintPreset
    */
   void store(@NotNull FileObject pParent, @NotNull IBlueprint pBlueprint, @NotNull InputStream pCompiledData, @NotNull String pName) throws Exception;
 
+  @Nullable
+  String validate(@NotNull String pNameToValidate, @Nullable FileObject pParent);
+
   /**
    * @return the type of the IBlueprintPreset
    */
