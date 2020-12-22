@@ -47,6 +47,13 @@ public interface IBlueprintPreset
    */
   void store(@NotNull FileObject pParent, @NotNull IBlueprint pBlueprint, @NotNull InputStream pCompiledData, @NotNull String pName) throws Exception;
 
+  /**
+   * Validates the name of the file which is created by this preset
+   *
+   * @param pNameToValidate name to validate
+   * @param pParent         the parent of the new file, must be a directory. Is only used, if the path {@link #setPath(String)} is null.
+   * @return null, if everything is ok or a string for the user
+   */
   @Nullable
   String validate(@NotNull String pNameToValidate, @Nullable FileObject pParent);
 
