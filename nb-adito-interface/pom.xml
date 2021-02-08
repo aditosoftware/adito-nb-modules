@@ -6,12 +6,12 @@
   <parent>
     <groupId>de.adito</groupId>
     <artifactId>nb-modules</artifactId>
-    <version>1.5.0</version>
+    <version>1.6.0</version>
   </parent>
 
   <groupId>de.adito.nb-modules</groupId>
   <artifactId>nb-adito-interface</artifactId>
-  <version>1.5.2</version>
+  <version>1.6.0</version>
   <packaging>nbm</packaging>
   <name>Netbeans IDE module interface: nb-adito-interface</name>
 
@@ -118,14 +118,25 @@
             <publicPackage>de.adito.aditoweb.nbm.nbide.nbaditointerface.actionitems.*</publicPackage>
             <publicPackage>de.adito.aditoweb.nbm.nbide.nbaditointerface.common.*</publicPackage>
             <publicPackage>de.adito.aditoweb.nbm.nbide.nbaditointerface.database.*</publicPackage>
-            <publicPackage>de.adito.aditoweb.nbm.nbide.nbaditointerface.javascript.*</publicPackage>
             <publicPackage>de.adito.aditoweb.nbm.nbide.nbaditointerface.form.*</publicPackage>
+            <publicPackage>de.adito.aditoweb.nbm.nbide.nbaditointerface.form.component.*</publicPackage>
+            <publicPackage>de.adito.aditoweb.nbm.nbide.nbaditointerface.form.dataobject.*</publicPackage>
+            <publicPackage>de.adito.aditoweb.nbm.nbide.nbaditointerface.form.layout.*</publicPackage>
+            <publicPackage>de.adito.aditoweb.nbm.nbide.nbaditointerface.form.layout.anchor.*</publicPackage>
+            <publicPackage>de.adito.aditoweb.nbm.nbide.nbaditointerface.form.layout.common.*</publicPackage>
+            <publicPackage>de.adito.aditoweb.nbm.nbide.nbaditointerface.form.layout.neon.*</publicPackage>
+            <publicPackage>de.adito.aditoweb.nbm.nbide.nbaditointerface.form.layout.register.*</publicPackage>
+            <publicPackage>de.adito.aditoweb.nbm.nbide.nbaditointerface.form.model.*</publicPackage>
+            <publicPackage>de.adito.aditoweb.nbm.nbide.nbaditointerface.form.sync.*</publicPackage>
             <publicPackage>de.adito.aditoweb.nbm.nbide.nbaditointerface.git.*</publicPackage>
-            <publicPackage>de.adito.aditoweb.nbm.nbide.nbaditointerface.windowsystem.*</publicPackage>
-            <publicPackage>de.adito.swing</publicPackage>
-            <publicPackage>de.adito.swing.icon</publicPackage>
-            <publicPackage>de.adito.aditoweb.nbm.vaadinicons</publicPackage>
-            <publicPackage>de.adito.aditoweb.logging.colorsupport</publicPackage>
+            <publicPackage>de.adito.aditoweb.nbm.nbide.nbaditointerface.javascript.*</publicPackage>
+            <publicPackage>de.adito.aditoweb.nbm.nbide.nbaditointerface.metrics.*</publicPackage>
+            <publicPackage>de.adito.aditoweb.nbm.nbide.nbaditointerface.nodes.*</publicPackage>
+            <publicPackage>de.adito.aditoweb.nbm.nbide.nbaditointerface.tunnel.*</publicPackage>
+            <publicPackage>de.adito.swing.*</publicPackage>
+            <publicPackage>de.adito.swing.icon.*</publicPackage>
+            <publicPackage>de.adito.aditoweb.nbm.vaadinicons.*</publicPackage>
+            <publicPackage>de.adito.aditoweb.logging.colorsupport.*</publicPackage>
           </publicPackages>
           <codeNameBase>de.adito.aditoweb.modules.nbide.nbaditointerface</codeNameBase>
         </configuration>

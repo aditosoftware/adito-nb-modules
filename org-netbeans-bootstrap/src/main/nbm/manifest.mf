@@ -1,14 +1,16 @@
+Manifest-Version: 1.0
+Ant-Version: Apache Ant 1.10.5
+Created-By: 1.8.0_252-b09 (Oracle Corporation)
 OpenIDE-Module-Friends: org.netbeans.core, org.netbeans.core.execution
  , org.netbeans.core.netigso, org.netbeans.core.startup, org.netbeans.
  modules.autoupdate.services, org.netbeans.modules.ide.ergonomics, org
  .netbeans.modules.modulemanager, org.netbeans.modules.sendopts, org.n
  etbeans.modules.settings, com.oracle.jdeveloper.extcache
-OpenIDE-Module-Java-Dependencies: Java > 1.7
-OpenIDE-Module-Implementation-Version: netbeans-release-428-on-2019071
- 6
+OpenIDE-Module-Java-Dependencies: Java > 1.8
+OpenIDE-Module-Implementation-Version: 12.2-d73d3dd898acc440c460924dab
+ f8ad5feb90369f
 AutoUpdate-Show-In-Client: false
 OpenIDE-Module: org.netbeans.bootstrap/1
-OpenIDE-Module-Specification-Version: 2.83
+OpenIDE-Module-Specification-Version: 2.88
 OpenIDE-Module-Localizing-Bundle: org/netbeans/Bundle.properties
 OpenIDE-Module-Recommends: org.netbeans.NetigsoFramework
-OpenIDE-Module-Requires: -

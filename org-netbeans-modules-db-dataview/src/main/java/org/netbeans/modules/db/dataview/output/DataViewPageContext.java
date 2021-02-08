@@ -55,8 +55,7 @@ class DataViewPageContext {
     }
 
     void resetEditableState() {
-        // ADITO
-        model.setEditable(tableMetaData != null && tableMetaData.hasOneRealTable());
+        model.setEditable(tableMetaData == null ? false : tableMetaData.hasOneTable());
     }
 
     int getPageSize() {

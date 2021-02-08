@@ -1,8 +1,15 @@
 Manifest-Version: 1.0
-OpenIDE-Module: org.netbeans.modules.db/1
-OpenIDE-Module-Install: org/netbeans/modules/db/DatabaseModule.class
 OpenIDE-Module-Implementation-Version: 30
-OpenIDE-Module-Layer: org/netbeans/modules/db/resources/mf-layer.xml
-OpenIDE-Module-Localizing-Bundle: org/netbeans/modules/db/resources/Bundle.properties
+OpenIDE-Module-Build-Version: 12.2-d73d3dd898acc440c460924dabf8ad5feb9
+ 0369f
+OpenIDE-Module-Java-Dependencies: Java > 1.8
+OpenIDE-Module-Localizing-Bundle: org/netbeans/modules/db/resources/Bu
+ ndle.properties
+OpenIDE-Module-Install: org/netbeans/modules/db/DatabaseModule.class
 AutoUpdate-Show-In-Client: false
-OpenIDE-Module-Specification-Version: 1.71.0.30
+OpenIDE-Module-Layer: org/netbeans/modules/db/resources/mf-layer.xml
+Ant-Version: Apache Ant 1.10.5
+OpenIDE-Module-Requires: org.openide.modules.ModuleFormat1
+OpenIDE-Module: org.netbeans.modules.db/1
+Created-By: 1.8.0_252-b09 (Oracle Corporation)
+OpenIDE-Module-Specification-Version: 1.76.0.30

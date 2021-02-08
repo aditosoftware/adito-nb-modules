@@ -190,7 +190,6 @@
                     <file name="org-netbeans-modules-db-explorer-action-RecreateTableAction.instance">
                         <attr name="position" intvalue="150"/>
                     </file>
-
                     <file name="Separator1.instance">
                         <attr name="instanceClass" stringvalue="javax.swing.JSeparator"/>
                         <attr name="position" intvalue="200"/>

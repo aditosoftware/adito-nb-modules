@@ -1,7 +1,16 @@
 Manifest-Version: 1.0
+Ant-Version: Apache Ant 1.10.5
+Created-By: 1.8.0_252-b09 (Oracle Corporation)
+OpenIDE-Module-Java-Dependencies: Java > 1.8
+OpenIDE-Module-Implementation-Version: 12.2-d73d3dd898acc440c460924dab
+ f8ad5feb90369f
+AutoUpdate-Show-In-Client: false
 OpenIDE-Module: org.netbeans.core.output2/1
 OpenIDE-Module-Layer: org/netbeans/core/output2/layer.xml
-OpenIDE-Module-Localizing-Bundle: org/netbeans/core/output2/Bundle.properties
-OpenIDE-Module-Provides: org.openide.windows.IOProvider, org.netbeans.spi.io.InputOutputProvider
+OpenIDE-Module-Localizing-Bundle: org/netbeans/core/output2/Bundle.pro
+ perties
+OpenIDE-Module-Provides: org.openide.windows.IOProvider org.netbeans.s
+ pi.io.InputOutputProvider
 AutoUpdate-Essential-Module: true
-OpenIDE-Module-Specification-Version: 1.44.1
+OpenIDE-Module-Specification-Version: 1.52
+OpenIDE-Module-Requires: org.openide.modules.ModuleFormat1

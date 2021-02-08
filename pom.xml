@@ -6,7 +6,7 @@
 
   <groupId>de.adito</groupId>
   <artifactId>nb-modules</artifactId>
-  <version>1.5.0</version>
+  <version>1.6.0</version>
   <packaging>pom</packaging>
   <name>Custom Netbeans Modules</name>
 
@@ -25,7 +25,7 @@
 
   <properties>
     <!-- Netbeans-Versionen -->
-    <netbeans.version>RELEASE111</netbeans.version>
+    <netbeans.version>RELEASE122</netbeans.version>
     <!-- gibt das Encoding das wir im SourceCode verwenden vor -->
     <project.build.sourceEncoding>Cp1252</project.build.sourceEncoding>
   </properties>
@@ -122,6 +122,7 @@
           <version>4.3-SNAPSHOT</version>
           <extensions>true</extensions>
           <configuration>
+            <sourceManifestFile>${project.build.sourceDirectory}/../nbm/manifest.mf</sourceManifestFile>
             <useOSGiDependencies>true</useOSGiDependencies>
             <cluster>platform</cluster>
           </configuration>

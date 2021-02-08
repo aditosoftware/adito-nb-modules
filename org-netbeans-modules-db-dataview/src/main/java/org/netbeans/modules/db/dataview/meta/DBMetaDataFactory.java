@@ -26,7 +26,6 @@ import java.sql.SQLException;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
 import org.netbeans.api.db.sql.support.SQLIdentifiers;
 import org.netbeans.api.db.sql.support.SQLIdentifiers.Quoter;
 import org.netbeans.modules.db.dataview.util.DataViewUtils;
@@ -49,8 +48,6 @@ public final class DBMetaDataFactory {
     public static final int SYBASE = 7;
     public static final int AXION = 8;
     public static final int POINTBASE = 9;
-    // ADITO
-    public static final int FIREBIRD = 10;
     private final int dbType;
     private final DatabaseMetaData dbmeta;
     private final Quoter sqlquoter;
@@ -59,14 +56,14 @@ public final class DBMetaDataFactory {
     public DBMetaDataFactory(Connection dbconn) throws SQLException {
         assert dbconn != null;
         dbmeta = dbconn.getMetaData();
-
+        
         // get the database type based on the product name converted to lowercase
         if (dbmeta.getURL() != null) {
             dbType = getDBTypeFromURL(dbmeta.getURL());
         } else {
             dbType = JDBC;
         }
-
+        
         sqlquoter = SQLIdentifiers.createQuoter(dbmeta);
         String buildIdentifierQuoteString = "\""; // NOI18N
         try {
@@ -114,9 +111,6 @@ public final class DBMetaDataFactory {
             dbtype = MYSQL;
         } else if (url.contains("pointbase")) { // NOI18N
             dbtype = POINTBASE;
-        // ADITO
-        } else if (url.contains("firebird")) { // NOI18N
-            dbtype = FIREBIRD;
         } else {
             dbtype = JDBC;
         }
@@ -161,7 +155,7 @@ public final class DBMetaDataFactory {
         // get table column information
         ResultSetMetaData rsMeta = rs.getMetaData();
         for (int i = 1; i <= rsMeta.getColumnCount(); i++) {
-            // #153219 - workaround
+            // #153219 - workaround 
             String tableName = rsMeta.getTableName(i);
             if (tableName == null) {
                 tableName = noTableName;
@@ -312,12 +306,12 @@ public final class DBMetaDataFactory {
     /**
      * Do post processing of the resultset metadata and add data provided by
      * database metadata.
-     *
+     * 
      * This was decoupled from generateDBTables because accessing the database
      * metadata before the resultset is fully read risks either a corrupted resultset
      * (oracle, pointbase) or out of memory errors on large resultsets (mssql)
-     *
-     * @param tables
+     * 
+     * @param tables 
      */
     public void postprocessTables(Collection<DBTable> tables) {
         DBModel dbModel = new DBModel();

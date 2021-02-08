@@ -6,13 +6,13 @@
   <parent>
     <groupId>de.adito</groupId>
     <artifactId>nb-modules</artifactId>
-    <version>1.5.0</version>
+    <version>1.6.0</version>
   </parent>
 
   <groupId>org.netbeans.modules</groupId>
   <artifactId>org-netbeans-modules-form</artifactId>
   <packaging>nbm</packaging>
-  <version>RELEASE111-1.5.0</version>
+  <version>RELEASE122-1.6.0</version>
   <name>Netbeans IDE module: org-netbeans-modules-form</name>
 
   <properties>
@@ -26,7 +26,7 @@
     <dependency>
       <groupId>de.adito.nb-modules</groupId>
       <artifactId>nb-adito-interface</artifactId>
-      <version>1.5.0</version>
+      <version>1.6.0</version>
     </dependency>
 
     <dependency>
@@ -215,6 +215,9 @@
         <groupId>org.apache.netbeans.utilities</groupId>
         <artifactId>nbm-maven-plugin</artifactId>
         <configuration>
+          <publicPackages>
+            <publicPackage>org.netbeans.api.editor.guards.*</publicPackage>
+          </publicPackages>
           <codeNameBase>org.netbeans.modules.form</codeNameBase>
         </configuration>
       </plugin>

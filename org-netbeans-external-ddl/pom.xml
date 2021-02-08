@@ -6,13 +6,13 @@
   <parent>
     <groupId>de.adito</groupId>
     <artifactId>nb-modules</artifactId>
-    <version>1.5.0</version>
+    <version>1.6.0</version>
   </parent>
 
   <groupId>org.netbeans.external</groupId>
   <artifactId>ddl</artifactId>
   <packaging>jar</packaging>
-  <version>RELEASE111-1.5.0</version>
+  <version>RELEASE122-1.6.0</version>
   <name>Netbeans IDE module: org-netbeans-external-ddl</name>
 
   <properties>
@@ -23,7 +23,7 @@
     <dependency>
       <groupId>de.adito.nb-modules</groupId>
       <artifactId>nb-adito-interface</artifactId>
-      <version>1.5.0</version>
+      <version>1.6.0</version>
     </dependency>
 
     <dependency>

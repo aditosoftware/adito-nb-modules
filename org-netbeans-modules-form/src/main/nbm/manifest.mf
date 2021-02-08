@@ -1,15 +1,18 @@
 Manifest-Version: 1.0
-OpenIDE-Module-Java-Dependencies: Java > 1.6
-OpenIDE-Module-Specification-Version: 1.39.1.4
-AutoUpdate-Show-In-Client: false
-OpenIDE-Module: org.netbeans.modules.form/2
+OpenIDE-Module-Implementation-Version: 4
+OpenIDE-Module-Build-Version: 12.2-d73d3dd898acc440c460924dabf8ad5feb9
+ 0369f
+OpenIDE-Module-Java-Dependencies: Java > 1.7
 OpenIDE-Module-Localizing-Bundle: org/netbeans/modules/form/Bundle2.pr
  operties
-OpenIDE-Module-Implementation-Version: 4
 OpenIDE-Module-Install: org/netbeans/modules/form/FormEditorModule.cla
  ss
-OpenIDE-Module-Needs: javax.script.ScriptEngine.freemarker,
- de.adito.aditoweb.nbm.nbide.nbaditointerface.INetbeansAditoInterface
+AutoUpdate-Show-In-Client: false
 OpenIDE-Module-Layer: org/netbeans/modules/form/resources/layer.xml
-OpenIDE-Module-Provides: de.adito.aditoweb.nbm.nbide.nbaditointerface.form.dataobject.IAditoFormDataObjectDataProvider
-OpenIDE-Module-Requires: org.openide.modules.InstalledFileLocator, org.openide.modules.ModuleFormat1
+Ant-Version: Apache Ant 1.10.5
+OpenIDE-Module-Requires:  org.openide.modules.InstalledFileLocator, or
+ g.openide.modules.ModuleFormat1
+OpenIDE-Module: org.netbeans.modules.form/2
+OpenIDE-Module-Needs: javax.script.ScriptEngine.freemarker
+Created-By: 1.8.0_252-b09 (Oracle Corporation)
+OpenIDE-Module-Specification-Version: 1.67.0.4

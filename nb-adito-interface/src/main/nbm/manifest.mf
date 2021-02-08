@@ -1,1 +1,3 @@
 Manifest-Version: 1.0
+OpenIDE-Module-Provides: de.adito.aditoweb.nbm.nbide.nbaditointerface.
+ form.dataobject.IAditoFormDataObjectDataProvider

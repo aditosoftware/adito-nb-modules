@@ -1,4 +1,3 @@
-OpenIDE-Module-Public-Packages: -
 OpenIDE-Module-Module-Dependencies: org.mozilla.rhino.patched/1 > 1.10
  2, org.netbeans.api.annotations.common/1 > 1.0, org.netbeans.api.java
  .classpath/1 > 1.19, org.netbeans.modules.csl.api/2 > 2.26, org.netbe

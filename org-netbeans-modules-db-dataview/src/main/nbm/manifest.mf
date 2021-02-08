@@ -1,8 +1,15 @@
 Manifest-Version: 1.0
-OpenIDE-Module: org.netbeans.modules.db.dataview
-OpenIDE-Module-Localizing-Bundle: org/netbeans/modules/db/dataview/Bundle.properties
-OpenIDE-Module-Specification-Version: 1.35.1
+OpenIDE-Module-Implementation-Version: 12.2-d73d3dd898acc440c460924dab
+ f8ad5feb90369f
+OpenIDE-Module-Java-Dependencies: Java > 1.8
+OpenIDE-Module-Localizing-Bundle: org/netbeans/modules/db/dataview/Bun
+ dle.properties
 AutoUpdate-Show-In-Client: false
-OpenIDE-Module-Friends: org.netbeans.modules.etl.editor, org.netbeans.
- modules.db.core, org.netbeans.modules.dm.virtual.db, org.netbeans.mod
- ules.edm.editor
+Ant-Version: Apache Ant 1.10.5
+OpenIDE-Module-Requires: org.openide.modules.ModuleFormat1
+OpenIDE-Module: org.netbeans.modules.db.dataview
+OpenIDE-Module-Friends: org.netbeans.modules.db.core, org.netbeans.mod
+ ules.dm.virtual.db, org.netbeans.modules.edm.editor, org.netbeans.mod
+ ules.etl.editor
+Created-By: 1.8.0_252-b09 (Oracle Corporation)
+OpenIDE-Module-Specification-Version: 1.43
