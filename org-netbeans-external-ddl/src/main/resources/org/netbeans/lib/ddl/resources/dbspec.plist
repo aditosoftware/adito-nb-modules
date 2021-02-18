@@ -182,6 +182,17 @@
       Supported = true;
     };
 
+//
+// Define ADITO
+//
+    ModifyColumnCommand = {
+      Class = org.netbeans.lib.ddl.impl.ModifyColumn;
+      Format = "alter table [{object.owner}.]{object.name} {column}";
+      Binding = {
+        COLUMN = ModificationColumn;
+      };
+    };
+
     CreateViewCommand = {
       Class = org.netbeans.lib.ddl.impl.CreateView;
       Format = "create view [{object.owner}.]{object.name} as {query}";
@@ -684,6 +695,14 @@
     };
 
 //
+// Define ADITO
+//
+    ModificationColumn = {
+      Class = org.netbeans.lib.ddl.impl.TableColumn;
+      Format = "modify {column.name} {column.type}[({column.size}[,{column.decsize}])][ default {default.value}][ {column.notnull}not null][ check ({check.condition})]";
+    };
+
+//
 // Definice prikazu
 //
 
@@ -912,6 +931,14 @@
       Format = "{column.name} {column.type}[({column.size}[,{column.decsize}])][ {column.type.suffix}][ default {default.value}][ {column.notnull}not null][ check ({check.condition})]";
     };
 
+//
+// Define ADITO
+//
+    ModificationColumn = {
+      Class = org.netbeans.lib.ddl.impl.TableColumn;
+      Format = "alter column {column.name} set data type {column.type}[({column.size}[,{column.decsize}])][ {column.type.suffix}][ default {default.value}][ {column.notnull}not null][ check ({check.condition})]";
+    };
+
     UniqueColumn = {
       Class = org.netbeans.lib.ddl.impl.TableColumn;
       Format = "{column.name} {column.type}[({column.size}[,{column.decsize}])][ {column.type.suffix}][ default {default.value}][ {column.notnull}not null][ check ({check.condition})] unique";
@@ -1012,7 +1039,13 @@
       Format = "{column.name} {column.type}[({column.size}[,{column.decsize}])][ default {default.value}][ {column.notnull}not null][ check ({check.condition})] primary key NONCLUSTERED";
     };
 
-
+//
+// Define ADITO
+//
+    ModificationColumn = {
+      Class = org.netbeans.lib.ddl.impl.TableColumn;
+      Format = "alter column {column.name} {column.type}[({column.size}[,{column.decsize}])][ default {default.value}][ {column.notnull}not null][ check ({check.condition})]";
+    };
   };
 
 //  ********************************************************************************
@@ -1053,6 +1086,13 @@
       Supported = false;
     };
 
+//
+// Define ADITO
+//
+    ModificationColumn = {
+      Class = org.netbeans.lib.ddl.impl.TableColumn;
+      Format = "alter column {column.name} set data type {column.type}[({column.size}[,{column.decsize}])][ {column.type.suffix}][ default {default.value}][ {column.notnull}not null][ check ({check.condition})]";
+    };
   };
 
 //  ********************************************************************************
@@ -1548,6 +1588,14 @@
       Format = "use {database}";
       Supported = true;
     };
+
+//
+// Define ADITO
+//
+    ModificationColumn = {
+      Class = org.netbeans.lib.ddl.impl.TableColumn;
+      Format = "modify column {column.name} {column.type}[({column.size}[,{column.decsize}])][ default {default.value}][ {column.notnull}not null][ check ({check.condition})]";
+    };
   };
 
   //  ********************************************************************************
@@ -1594,6 +1642,14 @@
       NoPrimaryKeyTypes = (LONGTEXT, LONGBLOB);
       NoIndexTypes = (LONGTEXT, LONGBLOB);
       Case=Upper;
+
+//
+// Define ADITO
+//
+    ModificationColumn = {
+      Class = org.netbeans.lib.ddl.impl.TableColumn;
+      Format = "modify {column.name} {column.type}[({column.size}[,{column.decsize}])][ default {default.value}][ {column.notnull}not null][ check ({check.condition})]";
+    };
 
       DropIndexCommand = {
         Class = org.netbeans.lib.ddl.impl.DropIndex;
@@ -1709,6 +1765,14 @@
     CheckConstraint = {
       Class = org.netbeans.lib.ddl.impl.TableColumn;
       Format = "constraint {object.name} check ({check.condition})";
+    };
+
+//
+// Define ADITO
+//
+    ModificationColumn = {
+      Class = org.netbeans.lib.ddl.impl.TableColumn;
+      Format = "modify {column.name} {column.type}[({column.size}[,{column.decsize}])][ default {default.value}][ {column.notnull}not null][ check ({check.condition})]";
     };
 
 //
@@ -1918,6 +1982,14 @@
     };
 
 //
+// Define ADITO
+//
+    ModificationColumn = {
+      Class = org.netbeans.lib.ddl.impl.TableColumn;
+      Format = "modify {column.name} {column.type}[({column.size}[,{column.decsize}])][ default {default.value}][ {column.notnull}not null][ check ({check.condition})]";
+    };
+
+//
 // Definice prikazu
 //
 
@@ -2083,6 +2155,14 @@
         PRIMARY_KEY_CONSTRAINT = PrimaryKeyConstraint;
         CHECK_CONSTRAINT = CheckConstraint;
       };
+    };
+
+//
+// Define ADITO
+//
+    ModificationColumn = {
+      Class = org.netbeans.lib.ddl.impl.TableColumn;
+      Format = "alter {column.name} TYPE {column.type}[({column.size}[,{column.decsize}])][ {column.type.suffix}][ default {default.value}][ {column.notnull}not null][ check ({check.condition})]";
     };
 
     CreateViewCommand = {
