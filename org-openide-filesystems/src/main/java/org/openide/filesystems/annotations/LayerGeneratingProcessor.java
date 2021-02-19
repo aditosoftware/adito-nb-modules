@@ -178,9 +178,9 @@ public abstract class LayerGeneratingProcessor extends AbstractProcessor {
                     }
                     */
                 } catch (IOException x) {
-                    messager.printMessage(Kind.ERROR, "Failed to write generated-layer.xml: " + x.toString());
+                    messager.printMessage(Kind.WARNING, "Failed to write generated-layer.xml: " + x.toString());
                 } catch (SAXException x) {
-                    messager.printMessage(Kind.ERROR, "Refused to write invalid generated-layer.xml: " + x.toString());
+                    messager.printMessage(Kind.WARNING, "Refused to write invalid generated-layer.xml: " + x.toString());
                 }
             }
             for (LayerBuilder b : createdBuilders) {
