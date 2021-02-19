@@ -19,11 +19,7 @@
 
 package org.netbeans.modules.openide.util;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.PrintWriter;
-import java.io.Writer;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -285,8 +281,11 @@ public class NbBundleProcessor extends AbstractProcessor {
                 } finally {
                     w.close();
                 }
-            } catch (IOException x) {
-                processingEnv.getMessager().printMessage(Kind.ERROR, "Could not generate files: " + x, elements[0]);
+                //ADITO
+            } catch (Throwable x) {
+                StringWriter strig = new StringWriter();
+                x.printStackTrace(new PrintWriter(strig));
+                processingEnv.getMessager().printMessage(Kind.WARNING, "Could not generate files: \n" + strig.toString(), elements[0]);
             }
         }
         return true;

@@ -139,6 +139,19 @@ public abstract class LayerGeneratingProcessor extends AbstractProcessor {
                     }
                     ser.write(doc, output);
                     byte[] data = baos.toByteArray();
+
+                    // ADITO
+                    try
+                    {
+                        FileObject res = filer.getResource(StandardLocation.CLASS_OUTPUT, "", GENERATED_LAYER);
+                        messager.printMessage(Kind.WARNING, "Deleting previous " + GENERATED_LAYER);
+                        res.delete();
+                    }
+                    catch(Throwable e)
+                    {
+                        // ignore
+                    }
+
                     XMLUtil.parse(new InputSource(new ByteArrayInputStream(data)), true, true, ERROR_HANDLER, ENTITY_RESOLVER);
                     FileObject layer = filer.createResource(StandardLocation.CLASS_OUTPUT, "", GENERATED_LAYER, originatingElementsA);
                     OutputStream os = layer.openOutputStream();
