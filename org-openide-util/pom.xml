@@ -11,7 +11,7 @@
   <artifactId>org-openide-util</artifactId>
   <version>RELEASE122-1.6.0</version>
   <packaging>nbm</packaging>
-  <name>OpenIDE module: org-openide-utilbase</name>
+  <name>OpenIDE module: org-openide-util</name>
 
   <properties>
     <sonar.skip>true</sonar.skip>
