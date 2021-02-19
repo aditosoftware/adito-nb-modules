@@ -67,6 +67,7 @@
     <module>org-netbeans-modules-javascript-hints</module>
     <module>org-netbeans-modules-javascript-refactoring</module>
     <module>de-adito-netbeans-utilities</module>
+    <module>org-openide-util</module>
     <module>org-openide-util-ui</module>
   </modules>
 
