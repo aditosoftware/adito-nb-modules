@@ -130,6 +130,7 @@
             <publicPackage>de.adito.aditoweb.nbm.nbide.nbaditointerface.form.sync.*</publicPackage>
             <publicPackage>de.adito.aditoweb.nbm.nbide.nbaditointerface.git.*</publicPackage>
             <publicPackage>de.adito.aditoweb.nbm.nbide.nbaditointerface.javascript.*</publicPackage>
+            <publicPackage>de.adito.aditoweb.nbm.nbide.nbaditointerface.javascript.node.*</publicPackage>
             <publicPackage>de.adito.aditoweb.nbm.nbide.nbaditointerface.metrics.*</publicPackage>
             <publicPackage>de.adito.aditoweb.nbm.nbide.nbaditointerface.nodes.*</publicPackage>
             <publicPackage>de.adito.aditoweb.nbm.nbide.nbaditointerface.tunnel.*</publicPackage>
