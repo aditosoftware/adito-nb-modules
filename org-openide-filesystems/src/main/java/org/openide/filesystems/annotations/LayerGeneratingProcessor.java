@@ -19,12 +19,8 @@
 
 package org.openide.filesystems.annotations;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
+import java.lang.reflect.*;
 import java.nio.file.NoSuchFileException;
 import java.util.Arrays;
 import java.util.Collection;
@@ -33,11 +29,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.WeakHashMap;
-import javax.annotation.processing.AbstractProcessor;
-import javax.annotation.processing.Filer;
-import javax.annotation.processing.Messager;
-import javax.annotation.processing.RoundEnvironment;
-import javax.annotation.processing.SupportedSourceVersion;
+import javax.annotation.processing.*;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
@@ -143,13 +135,35 @@ public abstract class LayerGeneratingProcessor extends AbstractProcessor {
                     // ADITO
                     try
                     {
-                        FileObject res = filer.getResource(StandardLocation.CLASS_OUTPUT, "", GENERATED_LAYER);
-                        messager.printMessage(Kind.WARNING, "Deleting previous " + GENERATED_LAYER);
-                        res.delete();
+                        filer.getResource(StandardLocation.CLASS_OUTPUT, "", GENERATED_LAYER);
+                        filer.getResource(StandardLocation.CLASS_OUTPUT, "", GENERATED_LAYER);
                     }
-                    catch(Throwable e)
+                    catch(FilerException e)
                     {
-                        // ignore
+                        try
+                        {
+                            Method myDelegate = filer.getClass().getDeclaredMethod("getWrapperDelegate");
+                            myDelegate.setAccessible(true);
+                            Object javacFiler = myDelegate.invoke(filer);
+
+                            String search = "Attempt to reopen a file for path ";
+                            String path = e.getMessage().substring(search.length());
+                            if (new File(path).delete())
+                            {
+                                messager.printMessage(Kind.WARNING, "Deleted previous layer file " + path);
+                                Field fileObjectHistory = Class.forName("com.sun.tools.javac.processing.JavacFiler").getDeclaredField("fileObjectHistory");
+                                fileObjectHistory.setAccessible(true);
+                                Set<FileObject> history = (Set<FileObject>) fileObjectHistory.get(javacFiler);
+                                history.removeIf(pFo -> pFo.getName().equals(path));
+                            }
+                        }
+                        catch (Throwable ex)
+                        {
+                            // ignore
+                            StringWriter writer = new StringWriter();
+                            ex.printStackTrace(new PrintWriter(writer));
+                            messager.printMessage(Kind.WARNING, writer.toString());
+                        }
                     }
 
                     XMLUtil.parse(new InputSource(new ByteArrayInputStream(data)), true, true, ERROR_HANDLER, ENTITY_RESOLVER);
