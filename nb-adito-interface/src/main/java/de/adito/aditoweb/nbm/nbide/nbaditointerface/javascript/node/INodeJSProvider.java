@@ -27,11 +27,11 @@ public interface INodeJSProvider
   }
 
   /**
-   * Observes the current nodejs version of the project
+   * Observes the current nodejs environment of the project
    *
-   * @return observable with the current nodejs version
+   * @return observable with the current environment
    */
   @NotNull
-  Observable<Optional<INodeJSVersion>> current();
+  Observable<Optional<INodeJSEnvironment>> current();
 
 }

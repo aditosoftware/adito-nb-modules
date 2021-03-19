@@ -5,11 +5,11 @@ import org.jetbrains.annotations.NotNull;
 import java.io.File;
 
 /**
- * Describes a single version (installation) of nodejs
+ * Describes a single version (installation) of nodejs and its environment
  *
  * @author w.glanzer, 05.03.2021
  */
-public interface INodeJSVersion
+public interface INodeJSEnvironment
 {
 
   /**

@@ -25,9 +25,9 @@ public interface INodeJSExecutor
   }
 
   /**
-   * Executes the given command on the nodejs version and waits until it finished
+   * Executes the given command on the nodejs environment and waits until it finished
    *
-   * @param pVersion Version to execute on. Has to be valid.
+   * @param pEnv     Environment to execute on. Has to be valid.
    * @param pCommand Command to execute, without "nodejs" prefix
    * @param pTimeout Timeout in ms, -1 if no timeout
    * @return the output of the executed nodejs command
@@ -35,6 +35,6 @@ public interface INodeJSExecutor
    * @throws InterruptedException if the timeout killed the process
    */
   @NotNull
-  String executeSync(@NotNull INodeJSVersion pVersion, @NotNull String pCommand, long pTimeout) throws IOException, InterruptedException;
+  String executeSync(@NotNull INodeJSEnvironment pEnv, @NotNull String pCommand, long pTimeout) throws IOException, InterruptedException;
 
 }
