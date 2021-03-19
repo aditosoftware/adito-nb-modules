@@ -1,9 +1,11 @@
 package de.adito.aditoweb.nbm.nbide.nbaditointerface.javascript.node;
 
 import org.jetbrains.annotations.NotNull;
+import org.netbeans.api.project.Project;
 import org.openide.util.Lookup;
 
 import java.io.IOException;
+import java.util.Optional;
 
 /**
  * Executor to execute commands on nodejs packages
@@ -19,9 +21,9 @@ public interface INodeJSExecutor
    * @return the instance
    */
   @NotNull
-  static INodeJSExecutor getInstance()
+  static Optional<INodeJSExecutor> findInstance(@NotNull Project pProject)
   {
-    return Lookup.getDefault().lookup(INodeJSExecutor.class);
+    return Optional.ofNullable(pProject.getLookup().lookup(INodeJSExecutor.class));
   }
 
   /**
