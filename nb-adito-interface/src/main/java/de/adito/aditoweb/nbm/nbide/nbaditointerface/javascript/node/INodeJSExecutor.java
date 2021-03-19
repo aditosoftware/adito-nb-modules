@@ -28,13 +28,15 @@ public interface INodeJSExecutor
    * Executes the given command on the nodejs environment and waits until it finished
    *
    * @param pEnv     Environment to execute on. Has to be valid.
-   * @param pCommand Command to execute, without "nodejs" prefix
+   * @param pBase    Base to execute commands on
+   * @param pCommand Command to execute, without the base prefix
    * @param pTimeout Timeout in ms, -1 if no timeout
    * @return the output of the executed nodejs command
    * @throws IOException if an error occured
    * @throws InterruptedException if the timeout killed the process
    */
   @NotNull
-  String executeSync(@NotNull INodeJSEnvironment pEnv, @NotNull String pCommand, long pTimeout) throws IOException, InterruptedException;
+  String executeSync(@NotNull INodeJSEnvironment pEnv, @NotNull INodeJSExecBase pBase, @NotNull String pCommand, long pTimeout)
+      throws IOException, InterruptedException;
 
 }

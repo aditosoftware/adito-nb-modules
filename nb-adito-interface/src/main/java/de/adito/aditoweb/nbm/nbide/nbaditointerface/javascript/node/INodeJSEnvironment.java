@@ -19,6 +19,15 @@ public interface INodeJSEnvironment
   File getPath();
 
   /**
+   * Resolves the execbase to determine, on which executable a command should be run exactly
+   *
+   * @param pBase the base
+   * @return the file
+   */
+  @NotNull
+  File resolveExecBase(@NotNull INodeJSExecBase pBase);
+
+  /**
    * @return Version of nodejs
    */
   @NotNull
