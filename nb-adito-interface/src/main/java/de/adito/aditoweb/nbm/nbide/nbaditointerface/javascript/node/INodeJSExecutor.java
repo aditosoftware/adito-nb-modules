@@ -3,7 +3,7 @@ package de.adito.aditoweb.nbm.nbide.nbaditointerface.javascript.node;
 import org.jetbrains.annotations.NotNull;
 import org.openide.util.Lookup;
 
-import java.io.*;
+import java.io.IOException;
 
 /**
  * Executor to execute commands on nodejs packages
@@ -29,14 +29,14 @@ public interface INodeJSExecutor
    *
    * @param pEnv     Environment to execute on. Has to be valid.
    * @param pBase    Base to execute commands on
-   * @param pCommand Command to execute, without the base prefix
+   * @param pParams  Command to execute, without the base prefix
    * @param pTimeout Timeout in ms, -1 if no timeout
    * @return the output of the executed nodejs command
-   * @throws IOException if an error occured
+   * @throws IOException          if an error occured
    * @throws InterruptedException if the timeout killed the process
    */
   @NotNull
-  String executeSync(@NotNull INodeJSEnvironment pEnv, @NotNull INodeJSExecBase pBase, @NotNull String pCommand, long pTimeout)
+  String executeSync(@NotNull INodeJSEnvironment pEnv, @NotNull INodeJSExecBase pBase, long pTimeout, @NotNull String... pParams)
       throws IOException, InterruptedException;
 
 }
