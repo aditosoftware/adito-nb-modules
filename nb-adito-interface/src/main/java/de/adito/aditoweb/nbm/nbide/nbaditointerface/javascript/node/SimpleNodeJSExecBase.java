@@ -25,7 +25,7 @@ class SimpleNodeJSExecBase implements INodeJSExecBase
   }
 
   @Override
-  public boolean isRelativeToProject()
+  public boolean isRelativeToWorkingDir()
   {
     return realtiveToProject;
   }

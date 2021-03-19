@@ -19,7 +19,7 @@ public interface INodeJSExecBase
   @NotNull
   static INodeJSExecBase binary(@NotNull String pBinaryName)
   {
-    return new SimpleNodeJSExecBase("./node_modules/.bin/" + pBinaryName, true);
+    return new SimpleNodeJSExecBase("node_modules/.bin/" + pBinaryName, true);
   }
 
   /**
@@ -51,8 +51,8 @@ public interface INodeJSExecBase
   String getBasePath();
 
   /**
-   * @return true, if the command is project realtive
+   * @return true, if the command is realtive to working directory (mainly the project)
    */
-  boolean isRelativeToProject();
+  boolean isRelativeToWorkingDir();
 
 }
