@@ -23,6 +23,19 @@ public interface INodeJSExecBase
   }
 
   /**
+   * Use this base, if you want to execute something on a module
+   *
+   * @param pModuleName Name of the module to execute something on
+   * @param pInnerPath  Path to the executable inside the module
+   * @return the base
+   */
+  @NotNull
+  static INodeJSExecBase module(@NotNull String pModuleName, @Nullable String pInnerPath)
+  {
+    return new SimpleNodeJSExecBase("node_modules/" + pModuleName + (pInnerPath != null ? "/" + pInnerPath : ""), true);
+  }
+
+  /**
    * Use this base, if you want to execute something on the current package manager (like npm, yarn, ...)
    *
    * @return the base
