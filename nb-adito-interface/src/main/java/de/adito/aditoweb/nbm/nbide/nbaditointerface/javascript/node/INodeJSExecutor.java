@@ -47,11 +47,10 @@ public interface INodeJSExecutor
    * @param pEnv     Environment to execute on. Has to be valid.
    * @param pBase    Base to execute commands on
    * @param pParams  Command to execute, without the base prefix
-   * @param pTimeout Timeout in ms, -1 if no timeout
    * @return the process handle
    * @throws IOException if an error occured
    */
   @NotNull
-  Process execute(@NotNull INodeJSEnvironment pEnv, @NotNull INodeJSExecBase pBase, long pTimeout, @NotNull String... pParams) throws IOException;
+  Process execute(@NotNull INodeJSEnvironment pEnv, @NotNull INodeJSExecBase pBase, @NotNull String... pParams) throws IOException;
 
 }
