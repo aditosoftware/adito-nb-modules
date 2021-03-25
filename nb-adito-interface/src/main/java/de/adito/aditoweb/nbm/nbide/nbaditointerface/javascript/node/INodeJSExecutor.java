@@ -2,7 +2,6 @@ package de.adito.aditoweb.nbm.nbide.nbaditointerface.javascript.node;
 
 import org.jetbrains.annotations.NotNull;
 import org.netbeans.api.project.Project;
-import org.openide.util.Lookup;
 
 import java.io.IOException;
 import java.util.Optional;
@@ -40,5 +39,19 @@ public interface INodeJSExecutor
   @NotNull
   String executeSync(@NotNull INodeJSEnvironment pEnv, @NotNull INodeJSExecBase pBase, long pTimeout, @NotNull String... pParams)
       throws IOException, InterruptedException;
+
+  /**
+   * Executes the given command on the nodejs environment and returns the process after it was started.
+   * Does wait until completion.
+   *
+   * @param pEnv     Environment to execute on. Has to be valid.
+   * @param pBase    Base to execute commands on
+   * @param pParams  Command to execute, without the base prefix
+   * @param pTimeout Timeout in ms, -1 if no timeout
+   * @return the process handle
+   * @throws IOException if an error occured
+   */
+  @NotNull
+  Process execute(@NotNull INodeJSEnvironment pEnv, @NotNull INodeJSExecBase pBase, long pTimeout, @NotNull String... pParams) throws IOException;
 
 }
