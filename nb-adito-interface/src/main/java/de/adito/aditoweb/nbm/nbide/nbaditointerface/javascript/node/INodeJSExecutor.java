@@ -1,10 +1,11 @@
 package de.adito.aditoweb.nbm.nbide.nbaditointerface.javascript.node;
 
-import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.*;
 import org.netbeans.api.project.Project;
 
-import java.io.IOException;
+import java.io.*;
 import java.util.Optional;
+import java.util.concurrent.*;
 
 /**
  * Executor to execute commands on nodejs packages
@@ -35,22 +36,39 @@ public interface INodeJSExecutor
    * @return the output of the executed nodejs command
    * @throws IOException          if an error occured
    * @throws InterruptedException if the timeout killed the process
+   * @throws TimeoutException     if the timeout killed the process
    */
   @NotNull
   String executeSync(@NotNull INodeJSEnvironment pEnv, @NotNull INodeJSExecBase pBase, long pTimeout, @NotNull String... pParams)
-      throws IOException, InterruptedException;
+      throws IOException, InterruptedException, TimeoutException;
 
   /**
    * Executes the given command on the nodejs environment and returns the process after it was started.
-   * Does wait until completion.
    *
-   * @param pEnv     Environment to execute on. Has to be valid.
-   * @param pBase    Base to execute commands on
-   * @param pParams  Command to execute, without the base prefix
+   * @param pEnv    Environment to execute on. Has to be valid.
+   * @param pBase   Base to execute commands on
+   * @param pParams Command to execute, without the base prefix
    * @return the process handle
    * @throws IOException if an error occured
    */
   @NotNull
   Process execute(@NotNull INodeJSEnvironment pEnv, @NotNull INodeJSExecBase pBase, @NotNull String... pParams) throws IOException;
+
+  /**
+   * Executes the given command on the nodejs environment and returns a future containing the exitcode after it was started.
+   *
+   * @param pEnv        Environment to execute on. Has to be valid.
+   * @param pBase       Base to execute commands on
+   * @param pDefaultOut Default-Output
+   * @param pErrorOut   Error-Output, NULL will use the given Default-Output
+   * @param pDefaultIn  Default-Input, NULL ignores the input and does not delegate something to the spawned process
+   * @param pParams     Command to execute, without the base prefix
+   * @return the future containing the exitcode
+   * @throws IOException if an error occured
+   */
+  @NotNull
+  CompletableFuture<Integer> executeAsync(@NotNull INodeJSEnvironment pEnv, @NotNull INodeJSExecBase pBase,
+                                          @NotNull OutputStream pDefaultOut, @Nullable OutputStream pErrorOut, @Nullable InputStream pDefaultIn,
+                                          @NotNull String... pParams) throws IOException;
 
 }
