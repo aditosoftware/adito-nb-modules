@@ -43,7 +43,7 @@ public interface INodeJSExecBase
   @NotNull
   static INodeJSExecBase packageManager()
   {
-    return new SimpleNodeJSExecBase("npm", false);
+    return new SimpleNodeJSExecBase("npm", false, "cmd", null, null);
   }
 
   /**
@@ -54,7 +54,7 @@ public interface INodeJSExecBase
   @NotNull
   static INodeJSExecBase node()
   {
-    return new SimpleNodeJSExecBase("node", false);
+    return new SimpleNodeJSExecBase("node", false, "exe", null, null);
   }
 
   /**
@@ -67,5 +67,23 @@ public interface INodeJSExecBase
    * @return true, if the command is realtive to working directory (mainly the project)
    */
   boolean isRelativeToWorkingDir();
+
+  /**
+   * @return the extension of the executable to use on windows
+   */
+  @Nullable
+  String getWindowsExt();
+
+  /**
+   * @return the extension of the executable to use on mac
+   */
+  @Nullable
+  String getMacExt();
+
+  /**
+   * @return the extension of the executable to use on linux
+   */
+  @Nullable
+  String getLinuxExt();
 
 }
