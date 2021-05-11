@@ -28,6 +28,11 @@
     </dependency>
 
     <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-api</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
       <groupId>io.reactivex.rxjava3</groupId>
       <artifactId>rxjava</artifactId>
     </dependency>
@@ -61,6 +66,13 @@
       <groupId>org.netbeans.api</groupId>
       <artifactId>org-netbeans-modules-projectuiapi-base</artifactId>
       <version>${netbeans.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.netbeans.modules</groupId>
+      <artifactId>org-netbeans-modules-projectui</artifactId>
+      <version>${netbeans.version}</version>
+      <!-- Only for UnitTest -->
+      <scope>test</scope>
     </dependency>
   </dependencies>
 
