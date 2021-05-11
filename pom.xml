@@ -101,6 +101,14 @@
         <version>1.6.2-2</version>
         <scope>provided</scope>
       </dependency>
+
+      <!-- JUnit for UnitTests -->
+      <dependency>
+        <groupId>org.junit.jupiter</groupId>
+        <artifactId>junit-jupiter-api</artifactId>
+        <version>5.7.1</version>
+        <scope>test</scope>
+      </dependency>
     </dependencies>
   </dependencyManagement>
 
@@ -151,6 +159,12 @@
           <source>1.8</source>
           <target>1.8</target>
         </configuration>
+      </plugin>
+
+      <!-- Plugin: Tests -->
+      <plugin>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>3.0.0-M5</version>
       </plugin>
 
       <!-- Plugin: Dependency Plugin -->
