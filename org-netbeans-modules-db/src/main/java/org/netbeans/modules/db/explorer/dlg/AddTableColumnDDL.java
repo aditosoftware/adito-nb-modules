@@ -91,20 +91,4 @@ public class AddTableColumnDDL {
 
         return cbuff.wasException();
     }
-
-    // ADITO
-    public AddColumn getDDL(String pColumnName, int pType, int pSize, int pDecSize) throws Exception
-    {
-        AddColumn column = spec.createCommandAddColumn(tablename);
-
-        column.setObjectOwner(schema);
-        column.setNewObject(true);
-        TableColumn tableColumn = (TableColumn) column.specifyColumn("COLUMN", pColumnName);
-        tableColumn.setColumnType(pType);
-        tableColumn.setColumnSize(pSize);
-        tableColumn.setDecimalSize(pDecSize);
-        tableColumn.setColumnName(pColumnName);
-
-        return column;
-    }
 }

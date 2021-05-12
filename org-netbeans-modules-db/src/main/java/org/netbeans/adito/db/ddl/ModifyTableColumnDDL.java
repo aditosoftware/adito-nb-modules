@@ -1,23 +1,19 @@
-package org.netbeans.modules.db.explorer.dlg;
+package org.netbeans.adito.db.ddl;
 
 import org.netbeans.lib.ddl.impl.*;
 
 /**
- * This ADITO-class factors out the logic of actually modifying a column to
- * the database. It is responsible for interacting with the DDL package.
+ * Creates a DDL-String for modifying an existing column of a table
  *
  * @author s.seemann, 16.02.2021
  */
-public class ModifyTableColumnDDL
+class ModifyTableColumnDDL
 {
-
   /**
-   * // ADITO
-   *
    * @return the Command for the DDL to modify an existing column
    */
-  public ModifyColumn getDDL(Specification pSpec, String pSchema, String pTableName, String pColumnName, int pType, int pSize, int pDecSize,
-                             String pDefaultValue, boolean pNullAllowed) throws Exception
+  public String getDDL(Specification pSpec, String pSchema, String pTableName, String pColumnName, int pType, int pSize, int pDecSize,
+                       String pDefaultValue, boolean pNullAllowed) throws Exception
   {
     ModifyColumn modifyColumn = pSpec.createCommandModifyColumn(pTableName);
     modifyColumn.setObjectOwner(pSchema);
@@ -34,6 +30,6 @@ public class ModifyTableColumnDDL
     column.setDefaultValue(pDefaultValue);
     column.setNullAllowed(pNullAllowed);
 
-    return modifyColumn;
+    return modifyColumn.getCommand();
   }
 }
