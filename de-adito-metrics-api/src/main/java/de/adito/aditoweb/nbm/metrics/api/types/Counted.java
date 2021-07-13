@@ -9,4 +9,10 @@ import java.lang.annotation.*;
 @Target(ElementType.METHOD)
 public @interface Counted
 {
+
+  /**
+   * @return unique name of this metric. Must not be empty and has to be unique!
+   */
+  String name();
+
 }
