@@ -48,6 +48,7 @@
           <publicPackages>
             <publicPackage>de.adito.aditoweb.nbm.metrics.api</publicPackage>
             <publicPackage>de.adito.aditoweb.nbm.metrics.api.types</publicPackage>
+            <publicPackage>de.adito.aditoweb.nbm.metrics.api.collectors</publicPackage>
           </publicPackages>
         </configuration>
       </plugin>
