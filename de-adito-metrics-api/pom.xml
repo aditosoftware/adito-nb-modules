@@ -21,6 +21,13 @@
 
   <dependencies>
     <dependency>
+      <groupId>de.adito.picoservice</groupId>
+      <artifactId>picoservice</artifactId>
+      <version>1.1.6</version>
+    </dependency>
+
+    <!-- NetBeans -->
+    <dependency>
       <groupId>org.netbeans.api</groupId>
       <artifactId>org-openide-util</artifactId>
       <version>${netbeans.version}</version>
