@@ -2,7 +2,9 @@ package de.adito.aditoweb.nbm.nbide.nbaditointerface.metainfo.deploy;
 
 import de.adito.aditoweb.nbm.nbide.nbaditointerface.metainfo.*;
 import org.jetbrains.annotations.*;
+import org.netbeans.api.project.Project;
 
+import java.io.File;
 import java.util.List;
 
 /**
@@ -16,7 +18,7 @@ public interface IDeployMetaInfoFacade
    * @return all available sources
    */
   @NotNull
-  List<IMetaInfoSource> getSources();
+  List<IMetaInfoSource> getSources(@NotNull Project pProject);
 
   /**
    * Returns the corresponding source of a server config
@@ -25,7 +27,7 @@ public interface IDeployMetaInfoFacade
    * @return the source or null, if it cannot be found
    */
   @Nullable
-  IMetaInfoSource getSource(@NotNull String pPathServerConfig);
+  IMetaInfoSource getSource(@NotNull Project pProject, @NotNull String pPathServerConfig);
 
   /**
    * Returns the meta information of a source
@@ -35,4 +37,13 @@ public interface IDeployMetaInfoFacade
    */
   @Nullable
   IMetaInfo getInfos(@NotNull IMetaInfoSource pSource);
+
+  /**
+   * Returns the meta information of a source
+   *
+   * @param pServerConfigFile server config file
+   * @return the meta information or null, if the source is not valid
+   */
+  @Nullable
+  IMetaInfo getInfos(@NotNull File pServerConfigFile);
 }
