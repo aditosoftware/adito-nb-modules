@@ -24,9 +24,11 @@ import java.beans.BeanInfo;
 import java.util.*;
 import javax.swing.Icon;
 import org.netbeans.api.annotations.common.StaticResource;
+import org.netbeans.api.search.SearchRoot;
 import org.netbeans.api.search.provider.SearchInfo;
 import org.netbeans.api.search.provider.SearchInfoUtils;
 import org.netbeans.spi.search.SearchScopeDefinition;
+import org.openide.filesystems.FileObject;
 import org.openide.loaders.*;
 import org.openide.nodes.Node;
 import org.openide.util.ImageUtilities;
@@ -153,6 +155,12 @@ final class SearchScopeNodeSelection extends SearchScopeDefinition
 
     private Node[] getFileObjectChildNodes(Node[] pNodes)
     {
+        Set<FileObject> coveredFOs = new HashSet<>();
+        SearchInfo searchInfo = getSearchInfo(pNodes);
+        for (SearchRoot searchRoot : searchInfo.getSearchRoots())
+        {
+            coveredFOs.add(searchRoot.getFileObject());
+        }
         Node[] childNodes = Arrays.stream(pNodes)
             .flatMap(pNode -> new ArrayList<>(pNode.getLookup().lookupAll(DataFolder.class))
                 .stream()
@@ -160,8 +168,8 @@ final class SearchScopeNodeSelection extends SearchScopeDefinition
                 .flatMap(pDataFolder -> Collections.list(pDataFolder.children(true))
                     .stream()
                     .filter(pDataObject -> !(pDataObject instanceof DataFolder))
-                    .map(DataObject::getNodeDelegate)
-                    .filter(pNodeDelegate -> !(pNodeDelegate.getClass().getName().equals("de.adito.aditoweb.designer.dataobjects.filetype.DataModelDataNode")))))
+                    .filter(pDataObject -> !coveredFOs.contains(pDataObject.getPrimaryFile()))
+                    .map(DataObject::getNodeDelegate)))
             .toArray(Node[]::new);
         List<Node> nodes = Arrays.asList(pNodes);
         Set<Node> nodeSet = new HashSet<>(nodes);
