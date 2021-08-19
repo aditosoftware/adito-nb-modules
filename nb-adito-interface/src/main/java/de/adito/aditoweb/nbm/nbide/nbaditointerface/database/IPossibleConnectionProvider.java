@@ -4,8 +4,7 @@ import org.jetbrains.annotations.*;
 
 import java.io.IOException;
 import java.sql.Connection;
-import java.util.Collection;
-import java.util.function.Function;
+import java.util.*;
 
 /**
  * @author w.glanzer, 13.08.2020
@@ -40,6 +39,12 @@ public interface IPossibleConnectionProvider
     String getSourceName();
 
     /**
+     * @return meta information about all tables
+     */
+    @NotNull
+    List<ITableMetaInfo> getTableMetaInfos();
+
+    /**
      * Opens the connection and executes something on it
      *
      * @param pFunction Function that consumes the connection and executes something on it
@@ -59,6 +64,28 @@ public interface IPossibleConnectionProvider
        * @throws Ex Exception, if any
        */
       T apply(@NotNull Connection pConnection) throws Ex;
+    }
+
+    /**
+     * Meta information about a table
+     */
+    interface ITableMetaInfo
+    {
+      /**
+       * @return the name of the table
+       */
+      @NotNull
+      String getTableName();
+
+      /**
+       * @return true, if audit is active
+       */
+      boolean isAuditActive();
+
+      /**
+       * @return true, if offline sync is active
+       */
+      boolean isOfflineActive();
     }
   }
 }
