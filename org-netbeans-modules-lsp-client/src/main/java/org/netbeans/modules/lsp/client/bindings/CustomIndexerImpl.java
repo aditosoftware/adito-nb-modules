@@ -30,12 +30,14 @@ import org.netbeans.api.editor.mimelookup.MimeRegistration;
 import org.netbeans.api.project.FileOwnerQuery;
 import org.netbeans.api.project.Project;
 import org.netbeans.modules.lsp.client.LSPBindings;
+import org.netbeans.modules.lsp.client.LSPBindingFactory;
 import org.netbeans.modules.parsing.spi.indexing.Context;
 import org.netbeans.modules.parsing.spi.indexing.CustomIndexer;
 import org.netbeans.modules.parsing.spi.indexing.CustomIndexerFactory;
 import org.netbeans.modules.parsing.spi.indexing.Indexable;
 import org.openide.filesystems.FileObject;
 import org.openide.filesystems.FileUtil;
+import org.openide.util.EditableProperties;
 import org.openide.util.Exceptions;
 import org.openide.util.RequestProcessor;
 
@@ -58,14 +60,13 @@ public class CustomIndexerImpl extends CustomIndexer {
                 }
             }
 
-            @SuppressWarnings("unchecked")
-            Set<String> mimeTypes = new HashSet<>((Collection) props.values());
+            Set<String> mimeTypes = new HashSet<>(props.values());
             Project prj = FileOwnerQuery.getOwner(root);
 
             if (prj != null) {
                 WORKER.post(() -> {
                     for (String mimeType : mimeTypes) {
-                        LSPBindings.ensureServerRunning(prj, mimeType);
+                        LSPBindingFactory.ensureServerRunning(prj, mimeType);
                     }
                 });
             }
@@ -74,8 +75,8 @@ public class CustomIndexerImpl extends CustomIndexer {
 
     private static final String INDEX_FILE_NAME = "index.properties";
 
-    private static void handleStoredFiles(Context context, Consumer<Properties> handleProperties) {
-        Properties props = new Properties();
+    private static void handleStoredFiles(Context context, Consumer<EditableProperties> handleProperties) {
+        EditableProperties props = new EditableProperties(true);
         FileObject index = context.getIndexFolder().getFileObject(INDEX_FILE_NAME);
 
         if (index != null) {
@@ -86,7 +87,7 @@ public class CustomIndexerImpl extends CustomIndexer {
             }
         }
 
-        Properties old = (Properties) props.clone();
+        EditableProperties old = props.cloneProperties();
 
         handleProperties.accept(props);
 
@@ -96,7 +97,7 @@ public class CustomIndexerImpl extends CustomIndexer {
                     index = context.getIndexFolder().createData(INDEX_FILE_NAME);
                 }
                 try (OutputStream out = index.getOutputStream()) {
-                    props.store(out, "");
+                    props.store(out);
                 }
             } catch (IOException ex) {
                 Exceptions.printStackTrace(ex);

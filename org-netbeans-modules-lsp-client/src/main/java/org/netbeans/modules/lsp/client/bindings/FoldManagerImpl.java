@@ -37,8 +37,9 @@ import org.netbeans.api.editor.fold.FoldType;
 import org.netbeans.api.editor.mimelookup.MimeRegistration;
 import org.netbeans.modules.editor.NbEditorUtilities;
 import org.netbeans.modules.lsp.client.LSPBindings;
-import org.netbeans.modules.lsp.client.LSPBindings.BackgroundTask;
 import org.netbeans.modules.lsp.client.Utils;
+import org.netbeans.modules.lsp.client.LSPWorkingPool;
+import org.netbeans.modules.lsp.client.LSPWorkingPool.BackgroundTask;
 import org.netbeans.spi.editor.fold.FoldHierarchyTransaction;
 import org.netbeans.spi.editor.fold.FoldInfo;
 import org.netbeans.spi.editor.fold.FoldManager;
@@ -70,7 +71,7 @@ public class FoldManagerImpl implements FoldManager, BackgroundTask {
             return ;
         }
 
-        LSPBindings.addBackgroundTask(file, this);
+        LSPWorkingPool.addBackgroundTask(file, this);
     }
 
     @Override
@@ -100,7 +101,7 @@ public class FoldManagerImpl implements FoldManager, BackgroundTask {
     @Override
     public void release() {
         if (file != null) {
-            LSPBindings.removeBackgroundTask(file, this);
+            LSPWorkingPool.removeBackgroundTask(file, this);
             file = null;
         }
     }
@@ -142,7 +143,7 @@ public class FoldManagerImpl implements FoldManager, BackgroundTask {
     static List<FoldingRange> computeRanges(LSPBindings bindings, FileObject file) {
         if (bindings.getInitResult() != null &&
             bindings.getInitResult().getCapabilities() != null &&
-            bindings.getInitResult().getCapabilities().getFoldingRangeProvider() != null) { //XXX
+            bindings.getInitResult().getCapabilities().hasFoldingRangeSupport()) { //XXX
             try {
                 return bindings.getTextDocumentService().foldingRange(new FoldingRangeRequestParams(new TextDocumentIdentifier(Utils.toURI(file)))).get();
             } catch (InterruptedException | ExecutionException ex) {

@@ -41,10 +41,9 @@ import org.eclipse.lsp4j.CompletionItemKind;
 import org.eclipse.lsp4j.CompletionList;
 import org.eclipse.lsp4j.CompletionOptions;
 import org.eclipse.lsp4j.CompletionParams;
-import org.eclipse.lsp4j.InitializeResult;
+import org.eclipse.lsp4j.InsertReplaceEdit;
 import org.eclipse.lsp4j.MarkupContent;
 import org.eclipse.lsp4j.ParameterInformation;
-import org.eclipse.lsp4j.ServerCapabilities;
 import org.eclipse.lsp4j.SignatureHelp;
 import org.eclipse.lsp4j.SignatureHelpParams;
 import org.eclipse.lsp4j.SignatureInformation;
@@ -56,8 +55,11 @@ import org.netbeans.api.editor.mimelookup.MimeRegistration;
 import org.netbeans.editor.BaseDocument;
 import org.netbeans.editor.Utilities;
 import org.netbeans.modules.editor.NbEditorUtilities;
+import org.netbeans.modules.lsp.client.LSPBindingFactory;
 import org.netbeans.modules.lsp.client.LSPBindings;
 import org.netbeans.modules.lsp.client.Utils;
+import org.netbeans.modules.lsp.client.model.LSPInitializeResult;
+import org.netbeans.modules.lsp.client.model.LSPServerCapabilities;
 import org.netbeans.spi.editor.completion.CompletionDocumentation;
 import org.netbeans.spi.editor.completion.CompletionProvider;
 import org.netbeans.spi.editor.completion.CompletionResultSet;
@@ -90,7 +92,7 @@ public class CompletionProviderImpl implements CompletionProvider {
                             //TODO: beep
                             return ;
                         }
-                        LSPBindings server = LSPBindings.getBindings(file);
+                        LSPBindings server = LSPBindingFactory.getBindingForFile(file);
                         if (server == null) {
                             return ;
                         }
@@ -147,7 +149,7 @@ public class CompletionProviderImpl implements CompletionProvider {
                         //TODO: beep
                         return ;
                     }
-                    LSPBindings server = LSPBindings.getBindings(file);
+                    LSPBindings server = LSPBindingFactory.getBindingForFile(file);
                     if (server == null) {
                         return ;
                     }
@@ -162,6 +164,7 @@ public class CompletionProviderImpl implements CompletionProvider {
                         return ; //no results
                     }
                     List<CompletionItem> items;
+                    System.out.println("COMPLETION :\n" +completionResult);
                     boolean incomplete;
                     if (completionResult.isLeft()) {
                         items = completionResult.getLeft();
@@ -170,17 +173,17 @@ public class CompletionProviderImpl implements CompletionProvider {
                         items = completionResult.getRight().getItems();
                         incomplete = completionResult.getRight().isIncomplete();
                     }
-                    for (CompletionItem i : items) {
-                        String insert = i.getInsertText() != null ? i.getInsertText() : i.getLabel();
-                        String leftLabel = encode(i.getLabel());
+                    for (CompletionItem completionItem : items) {
+                        String insert = completionItem.getInsertText() != null ? completionItem.getInsertText() : completionItem.getLabel();
+                        String leftLabel = encode(completionItem.getLabel());
                         String rightLabel;
-                        if (i.getDetail() != null) {
-                            rightLabel = encode(i.getDetail());
+                        if (completionItem.getDetail() != null) {
+                            rightLabel = encode(completionItem.getDetail());
                         } else {
                             rightLabel = null;
                         }
-                        String sortText = i.getSortText() != null ? i.getSortText() : i.getLabel();
-                        CompletionItemKind kind = i.getKind();
+                        String sortText = completionItem.getSortText() != null ? completionItem.getSortText() : completionItem.getLabel();
+                        CompletionItemKind kind = completionItem.getKind();
                         Icon ic = Icons.getCompletionIcon(kind);
                         ImageIcon icon = new ImageIcon(ImageUtilities.icon2Image(ic));
                         resultSet.addItem(new org.netbeans.spi.editor.completion.CompletionItem() {
@@ -189,7 +192,8 @@ public class CompletionProviderImpl implements CompletionProvider {
                                 commit("");
                             }
                             private void commit(String appendText) {
-                                TextEdit te = i.getTextEdit();
+                                Either<TextEdit, InsertReplaceEdit> x = completionItem.getTextEdit();
+                                TextEdit te = (x!=null)?x.getLeft():null;
                                 NbDocument.runAtomic((StyledDocument) doc, () -> {
                                     try {
                                         int endPos;
@@ -200,9 +204,9 @@ public class CompletionProviderImpl implements CompletionProvider {
                                             doc.insertString(start, te.getNewText(), null);
                                             endPos = start + te.getNewText().length();
                                         } else {
-                                            String toAdd = i.getInsertText();
+                                            String toAdd = completionItem.getInsertText();
                                             if (toAdd == null) {
-                                                toAdd = i.getLabel();
+                                                toAdd = completionItem.getLabel();
                                             }
                                             int[] identSpan = Utilities.getIdentifierBlock((BaseDocument) doc, caretOffset);
                                             String printSuffix = toAdd.substring(identSpan != null ? caretOffset - identSpan[0] : 0);
@@ -222,7 +226,7 @@ public class CompletionProviderImpl implements CompletionProvider {
                             public void processKeyEvent(KeyEvent ke) {
                                 if (ke.getID() == KeyEvent.KEY_TYPED) {
                                     String commitText = String.valueOf(ke.getKeyChar());
-                                    List<String> commitCharacters = i.getCommitCharacters();
+                                    List<String> commitCharacters = completionItem.getCommitCharacters();
 
                                     if (commitCharacters != null && commitCharacters.contains(commitText)) {
                                         commit(commitText);
@@ -250,17 +254,17 @@ public class CompletionProviderImpl implements CompletionProvider {
                                     @Override
                                     protected void query(CompletionResultSet resultSet, Document doc, int caretOffset) {
                                         CompletionItem resolved;
-                                        if ((i.getDetail() == null || i.getDocumentation() == null) && hasCompletionResolve(server)) {
+                                        if ((completionItem.getDetail() == null || completionItem.getDocumentation() == null) && hasCompletionResolve(server)) {
                                             CompletionItem temp;
                                             try {
-                                                temp = server.getTextDocumentService().resolveCompletionItem(i).get();
+                                                temp = server.getTextDocumentService().resolveCompletionItem(completionItem).get();
                                             } catch (InterruptedException | ExecutionException ex) {
                                                 Exceptions.printStackTrace(ex);
-                                                temp = i;
+                                                temp = completionItem;
                                             }
                                             resolved = temp;
                                         } else {
-                                            resolved = i;
+                                            resolved = completionItem;
                                         }
                                         if (resolved.getDocumentation() != null || resolved.getDetail() != null) {
                                             resultSet.setDocumentation(new CompletionDocumentation() {
@@ -346,10 +350,14 @@ public class CompletionProviderImpl implements CompletionProvider {
     }
     
     private boolean hasCompletionResolve(LSPBindings server) {
-        ServerCapabilities capabilities = server.getInitResult().getCapabilities();
-        if (capabilities == null) return false;
+        LSPServerCapabilities capabilities = server.getInitResult().getCapabilities();
+        if (capabilities == null) {
+            return false;
+        }
         CompletionOptions completionProvider = capabilities.getCompletionProvider();
-        if (completionProvider == null) return false;
+        if (completionProvider == null) { 
+            return false;
+        }
         Boolean resolveProvider = completionProvider.getResolveProvider();
         return resolveProvider != null && resolveProvider;
     }
@@ -374,7 +382,7 @@ public class CompletionProviderImpl implements CompletionProvider {
         if (file == null) {
             return 0;
         }
-        LSPBindings server = LSPBindings.getBindings(file);
+        LSPBindings server = LSPBindingFactory.getBindingForFile(file);
         if (server == null) {
             return 0;
         }
@@ -382,14 +390,22 @@ public class CompletionProviderImpl implements CompletionProvider {
     }
     
     private boolean isTriggerCharacter(LSPBindings server, String text) {
-        InitializeResult init = server.getInitResult();
-        if (init == null) return false;
-        ServerCapabilities capabilities = init.getCapabilities();
-        if (capabilities == null) return false;
+        LSPInitializeResult init = server.getInitResult();
+        if (init == null) { 
+            return false;
+        }
+        LSPServerCapabilities capabilities = init.getCapabilities();
+        if (capabilities == null) { 
+            return false;
+        }
         CompletionOptions completionOptions = capabilities.getCompletionProvider();
-        if (completionOptions == null) return false;
+        if (completionOptions == null) {
+            return false;
+        }
         List<String> triggerCharacters = completionOptions.getTriggerCharacters();
-        if (triggerCharacters == null) return false;
+        if (triggerCharacters == null) {
+            return false;
+        }
         return triggerCharacters.stream().anyMatch(trigger -> text.endsWith(trigger));
     }
 }
