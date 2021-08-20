@@ -67,6 +67,7 @@
     <module>org-netbeans-modules-javascript-editing</module>
     <module>org-netbeans-modules-javascript-hints</module>
     <module>org-netbeans-modules-javascript-refactoring</module>
+    <module>org-netbeans-modules-lsp-client</module>
     <module>org-netbeans-modules-utilities-project</module>
     <module>de-adito-netbeans-utilities</module>
     <module>org-openide-filesystems</module>
