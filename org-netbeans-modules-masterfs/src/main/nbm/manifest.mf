@@ -1,0 +1,17 @@
+Manifest-Version: 1.0
+Ant-Version: Apache Ant 1.10.5
+Created-By: 1.8.0_291-b10 (Oracle Corporation)
+OpenIDE-Module-Java-Dependencies: Java > 1.8
+OpenIDE-Module-Build-Version: 12.5-fd523ddc12d6156412d7b81f0c8663d8913
+ d1021
+OpenIDE-Module-Specification-Version: 2.68.0.2
+AutoUpdate-Show-In-Client: false
+OpenIDE-Module: org.netbeans.modules.masterfs/2
+OpenIDE-Module-Localizing-Bundle: org/netbeans/modules/masterfs/resour
+ ces/Bundle.properties
+OpenIDE-Module-Recommends: org.netbeans.modules.masterfs.providers.Not
+ ifier
+OpenIDE-Module-Provides: org.openide.filesystems.FileUtil.toFileObject
+AutoUpdate-Essential-Module: true
+OpenIDE-Module-Implementation-Version: 2
+OpenIDE-Module-Requires: org.openide.modules.ModuleFormat1
