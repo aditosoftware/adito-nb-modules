@@ -2,6 +2,7 @@ package de.adito.observables.netbeans;
 
 import de.adito.util.reactive.AbstractListenerObservable;
 import io.reactivex.rxjava3.core.Observable;
+import io.reactivex.rxjava3.schedulers.Schedulers;
 import org.jetbrains.annotations.NotNull;
 import org.openide.nodes.*;
 
@@ -21,7 +22,9 @@ public class NodeObservable extends AbstractListenerObservable<NodeListener, Nod
   public static Observable<Node> create(@NotNull Node pNode, @NotNull String... pProps)
   {
     return Observable.create(new NodeObservable(pNode, pProps))
-        .startWithItem(pNode);
+        .startWithItem(pNode)
+        .observeOn(Schedulers.computation())
+        .subscribeOn(Schedulers.computation());
   }
 
   private NodeObservable(@NotNull Node pListenableValue, @NotNull String... pProperties)

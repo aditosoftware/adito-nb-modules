@@ -2,6 +2,7 @@ package de.adito.observables.netbeans;
 
 import de.adito.util.reactive.*;
 import io.reactivex.rxjava3.core.Observable;
+import io.reactivex.rxjava3.schedulers.Schedulers;
 import org.jetbrains.annotations.NotNull;
 import org.openide.filesystems.*;
 
@@ -29,7 +30,9 @@ public class FileObservable extends AbstractListenerObservable<FileChangeListene
   @NotNull
   public static Observable<Optional<File>> create(@NotNull File pFile)
   {
-    return Observables.create(new FileObservable(pFile), () -> _getValue(pFile));
+    return Observables.create(new FileObservable(pFile), () -> _getValue(pFile))
+        .observeOn(Schedulers.io())
+        .subscribeOn(Schedulers.io());
   }
 
   @NotNull

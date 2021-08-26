@@ -2,6 +2,7 @@ package de.adito.observables.netbeans;
 
 import de.adito.util.reactive.*;
 import io.reactivex.rxjava3.core.Observable;
+import io.reactivex.rxjava3.schedulers.Schedulers;
 import org.jetbrains.annotations.NotNull;
 import org.netbeans.api.project.*;
 
@@ -29,7 +30,9 @@ public class ProjectObservable extends AbstractListenerObservable<PropertyChange
           if(pInfos.isEmpty())
             return Observable.empty();
           return Observables.create(new ProjectObservable(pInfos.get(0)), () -> pInfos.get(0));
-        });
+        })
+        .observeOn(Schedulers.computation())
+        .subscribeOn(Schedulers.computation());
   }
 
   private ProjectObservable(@NotNull ProjectInformation pProjectInformation)

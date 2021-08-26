@@ -2,6 +2,7 @@ package de.adito.observables.netbeans;
 
 import de.adito.util.reactive.AbstractListenerObservable;
 import io.reactivex.rxjava3.core.Observable;
+import io.reactivex.rxjava3.schedulers.Schedulers;
 import org.jetbrains.annotations.NotNull;
 import org.openide.filesystems.*;
 
@@ -22,7 +23,9 @@ public class FileFullObservable extends AbstractListenerObservable<FileChangeLis
   @NotNull
   public static Observable<Optional<File>> create(@NotNull File pFile)
   {
-    return Observable.create(new FileFullObservable(pFile)).startWithItem(Optional.of(pFile));
+    return Observable.create(new FileFullObservable(pFile)).startWithItem(Optional.of(pFile))
+        .observeOn(Schedulers.io())
+        .subscribeOn(Schedulers.io());
   }
 
   @NotNull

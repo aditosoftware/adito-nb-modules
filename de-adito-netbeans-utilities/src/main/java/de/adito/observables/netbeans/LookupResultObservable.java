@@ -3,6 +3,7 @@ package de.adito.observables.netbeans;
 import com.google.common.collect.ImmutableList;
 import de.adito.util.reactive.AbstractListenerObservable;
 import io.reactivex.rxjava3.core.Observable;
+import io.reactivex.rxjava3.schedulers.Schedulers;
 import org.jetbrains.annotations.NotNull;
 import org.openide.util.*;
 
@@ -30,6 +31,8 @@ public class LookupResultObservable<T> extends AbstractListenerObservable<Lookup
     Lookup.Result<T> result = pLookup.lookupResult(pLookupClass);
     return Observable.create(new LookupResultObservable<>(result))
         .startWithItem(_getValuesUnmodifiable(result))
+        .observeOn(Schedulers.computation())
+        .subscribeOn(Schedulers.computation())
         .distinctUntilChanged();
   }
 

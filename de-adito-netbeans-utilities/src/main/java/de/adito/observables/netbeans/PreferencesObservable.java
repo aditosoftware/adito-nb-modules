@@ -2,6 +2,7 @@ package de.adito.observables.netbeans;
 
 import de.adito.util.reactive.AbstractListenerObservable;
 import io.reactivex.rxjava3.core.Observable;
+import io.reactivex.rxjava3.schedulers.Schedulers;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.prefs.*;
@@ -19,7 +20,9 @@ public class PreferencesObservable extends AbstractListenerObservable<Preference
   public static Observable<Preferences> create(@NotNull Preferences pPreferences)
   {
     return Observable.create(new PreferencesObservable(pPreferences))
-        .startWithItem(pPreferences);
+        .startWithItem(pPreferences)
+        .observeOn(Schedulers.computation())
+        .subscribeOn(Schedulers.computation());
   }
 
   private PreferencesObservable(@NotNull Preferences pBase)
