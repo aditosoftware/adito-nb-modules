@@ -324,12 +324,34 @@ public class JsWhereUsedQueryPlugin extends JsRefactoringPlugin {
     
     private class FindTask extends TransformTask {
 
+        private final List<WhereUsedElement> usedElements = new ArrayList<>(); // ADITO
         private RefactoringElementsBag elements;
 
         public FindTask(RefactoringElementsBag elements) {
             super();
             this.elements = elements;
         }
+
+        private void _addElement(WhereUsedElement pElement) { // Begin ADITO
+          boolean alreadyExists = usedElements.stream().anyMatch(pEle -> {
+              try
+              {
+                  return pEle.getParentFile().equals(pElement.getParentFile())
+                      && pEle.getPosition().getBegin().getPosition().equals(pElement.getPosition().getBegin().getPosition())
+                      && pEle.getPosition().getEnd().getPosition().equals(pElement.getPosition().getEnd().getPosition());
+              }
+              catch(Exception e) // If something is null or something goes wrong: add it
+              {
+                  return false;
+              }
+          });
+
+          if(!alreadyExists)
+          {
+            usedElements.add(pElement);
+            elements.add(refactoring, pElement);
+          }
+        } // End ADITO
 
         protected Collection<ModificationResult> process(JsParseResult jspr) {
             if (isCancelled()) {
@@ -381,7 +403,7 @@ public class JsWhereUsedQueryPlugin extends JsRefactoringPlugin {
                     Icon icon = UiUtils.getElementIcon(ElementKind.ERROR, modifiers);
                     OffsetRange range = new OffsetRange(start, end);
                     WhereUsedElement element = WhereUsedElement.create(jspr, targetName, desc, range, icon);
-                    elements.add(refactoring, element);
+                    _addElement(element); // ADITO
                 }
             }
 
@@ -511,8 +533,8 @@ public class JsWhereUsedQueryPlugin extends JsRefactoringPlugin {
                                 }
                                 Icon icon = UiUtils.getElementIcon(searchHandle.getKind(), modifiers);
                                 OffsetRange range = new OffsetRange(start, end);
-                                WhereUsedElement element = WhereUsedElement.create(info, targetName, range, icon); 
-                                elements.add(refactoring, element);
+                                WhereUsedElement element = WhereUsedElement.create(info, targetName, range, icon);
+                                _addElement(element); // ADITO
                             }
                         }
                     } else {
@@ -539,7 +561,7 @@ public class JsWhereUsedQueryPlugin extends JsRefactoringPlugin {
                     // TODO - implement skip semantics here, as is done for functions!
                     // AstUtilities.getLabelledFunction(node);
                     JsElementCtx matchCtx = new JsElementCtx(fileCtx, node);
-                    elements.add(refactoring, WhereUsedElement.create(matchCtx));
+                    _addElement(WhereUsedElement.create(matchCtx)); // ADITO
                 }
                 
                 // No children to consider
@@ -584,7 +606,7 @@ public class JsWhereUsedQueryPlugin extends JsRefactoringPlugin {
                             // Found a method match
                             // TODO - check arity - see OccurrencesFinder
                             JsElementCtx matchCtx = new JsElementCtx(fileCtx, node);
-                            elements.add(refactoring, WhereUsedElement.create(matchCtx));
+                            _addElement(WhereUsedElement.create(matchCtx)); // ADITO
                         }
                     }
                     break;
@@ -600,7 +622,7 @@ public class JsWhereUsedQueryPlugin extends JsRefactoringPlugin {
                     // TODO - make a node on the same line
                     // TODO - check arity - see OccurrencesFinder
                     JsElementCtx matchCtx = new JsElementCtx(fileCtx, node);
-                    elements.add(refactoring, WhereUsedElement.create(matchCtx));
+                    _addElement(WhereUsedElement.create(matchCtx)); // ADITO
                  }
                  break;
             }
@@ -624,7 +646,7 @@ public class JsWhereUsedQueryPlugin extends JsRefactoringPlugin {
                 // Global vars
                 if (node.getString().equals(name)) {
                     JsElementCtx matchCtx = new JsElementCtx(fileCtx, node);
-                    elements.add(refactoring, WhereUsedElement.create(matchCtx));
+                    _addElement(WhereUsedElement.create(matchCtx)); // ADITO
                 }
                 break;
             }
@@ -656,7 +678,7 @@ public class JsWhereUsedQueryPlugin extends JsRefactoringPlugin {
                 // Global vars
                 if (node.getString().equals(name)) {
                     JsElementCtx matchCtx = new JsElementCtx(fileCtx, node);
-                    elements.add(refactoring, WhereUsedElement.create(matchCtx));
+                    _addElement(WhereUsedElement.create(matchCtx)); // ADITO
                 }
                 break;
             }
