@@ -24,6 +24,7 @@ import java.beans.BeanInfo;
 import java.util.*;
 import javax.swing.Icon;
 import org.netbeans.api.annotations.common.StaticResource;
+import org.netbeans.api.project.FileOwnerQuery;
 import org.netbeans.api.search.SearchRoot;
 import org.netbeans.api.search.provider.SearchInfo;
 import org.netbeans.api.search.provider.SearchInfoUtils;
@@ -162,6 +163,8 @@ final class SearchScopeNodeSelection extends SearchScopeDefinition
             coveredFOs.add(searchRoot.getFileObject());
         }
         Node[] childNodes = Arrays.stream(pNodes)
+            .filter(pNode -> FileOwnerQuery.getOwner(pNode.getLookup().lookup(DataObject.class).getPrimaryFile()).getProjectDirectory()
+                .equals(pNode.getLookup().lookup(DataObject.class).getPrimaryFile().getParent().getParent()))
             .flatMap(pNode -> new ArrayList<>(pNode.getLookup().lookupAll(DataFolder.class))
                 .stream()
                 .map(DataFolder.class::cast)
