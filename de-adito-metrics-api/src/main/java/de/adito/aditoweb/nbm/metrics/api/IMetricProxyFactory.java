@@ -3,6 +3,8 @@ package de.adito.aditoweb.nbm.metrics.api;
 import org.jetbrains.annotations.*;
 import org.openide.util.Lookup;
 
+import java.util.logging.Logger;
+
 /**
  * This proxy factory creates a "shallow" wrapper objects around a given object, so that
  * all metric annotations can be evaluated correctly.
@@ -31,7 +33,8 @@ public interface IMetricProxyFactory
         return proxy.createProxy(pObject);
     }
 
-    throw new IllegalArgumentException("Failed to find appropriate proxy for object " + pObject + " " + pObject.getClass());
+    // no plugin installed - just return object and do not proxy metrics
+    return pObject;
   }
 
   /**
