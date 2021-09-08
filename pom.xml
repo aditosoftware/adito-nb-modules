@@ -56,6 +56,7 @@
     <module>de-adito-blueprint-api</module>
     <module>de-adito-metrics-api</module>
     <module>de-adito-runconfig-api</module>
+    <module>de-adito-translation-api</module>
     <module>nb-adito-interface</module>
     <module>org-netbeans-bootstrap</module>
     <module>org-netbeans-core-output2</module>
