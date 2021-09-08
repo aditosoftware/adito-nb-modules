@@ -1,11 +1,13 @@
 package de.adito.nbm.translation.gui;
 
 import de.adito.nbm.translation.api.*;
+import de.adito.nbm.translation.spi.ITranslatorAuthKeyProvider;
+import de.adito.notification.INotificationFacade;
 import org.jetbrains.annotations.*;
 import org.openide.*;
-import org.openide.util.NbBundle;
+import org.openide.util.*;
 
-import java.util.Locale;
+import java.util.*;
 
 /**
  * @author w.glanzer, 08.09.2021
@@ -16,12 +18,39 @@ public class TranslationDialog
   /**
    * Shows the dialog for translation and returns the result of it
    *
+   * @param pDefaultLocale default target locale
+   * @return the result
+   */
+  @Nullable
+  public TranslationResult show(@Nullable Locale pDefaultLocale)
+  {
+    Set<ETranslatorType> availableTypes = new HashSet<>();
+    for (ITranslatorAuthKeyProvider keyProvider : Lookup.getDefault().lookupAll(ITranslatorAuthKeyProvider.class))
+      for (ETranslatorType type : ETranslatorType.values())
+      {
+        String providedKey = keyProvider.getAuthKey(type);
+        if (providedKey != null && !providedKey.trim().isEmpty())
+          availableTypes.add(type);
+      }
+
+    if (availableTypes.isEmpty())
+    {
+      INotificationFacade.INSTANCE.notify("Translation", "No API key found", true, null);
+      return null;
+    }
+
+    return show(availableTypes.toArray(new ETranslatorType[0]), pDefaultLocale);
+  }
+
+  /**
+   * Shows the dialog for translation and returns the result of it
+   *
    * @param pAvailableTypes available translator types
    * @param pDefaultLocale  default target locale
    * @return the result
    */
   @Nullable
-  public TranslationResult show(@Nullable ETranslatorType[] pAvailableTypes, Locale pDefaultLocale)
+  public TranslationResult show(@Nullable ETranslatorType[] pAvailableTypes, @Nullable Locale pDefaultLocale)
   {
     TranslationPanel panel = createContent(pAvailableTypes, pDefaultLocale);
     DialogDescriptor dialogDescriptor = new DialogDescriptor(panel, NbBundle.getMessage(TranslationDialog.class, "TITLE_DLG_TRANSLATION"), true,

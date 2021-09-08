@@ -136,6 +136,7 @@
           <publicPackages>
             <publicPackage>de.adito.nbm.translation.api</publicPackage>
             <publicPackage>de.adito.nbm.translation.gui</publicPackage>
+            <publicPackage>de.adito.nbm.translation.spi</publicPackage>
           </publicPackages>
         </configuration>
       </plugin>
