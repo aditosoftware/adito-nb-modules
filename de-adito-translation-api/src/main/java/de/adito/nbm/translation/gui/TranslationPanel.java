@@ -4,12 +4,13 @@ import de.adito.nbm.translation.api.*;
 import de.adito.swing.TableLayoutUtil;
 import info.clearthought.layout.TableLayout;
 import org.jetbrains.annotations.*;
-import org.openide.util.NbBundle;
+import org.openide.util.*;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.util.*;
+import java.util.prefs.Preferences;
 import java.util.stream.Collectors;
 
 /**
@@ -27,7 +28,7 @@ public class TranslationPanel extends JPanel
   private final JComboBox<ELineBreakMethod> linebreakCombo;
   private final JComboBox<ETranslatorType> translatorCombo;
 
-  protected TranslationPanel(@Nullable ETranslatorType[] pTypes, @Nullable Locale pTargetLocaleDefaultValue)
+  protected TranslationPanel(@Nullable ETranslatorType[] pTypes, @Nullable Locale pTargetLocaleDefaultValue, boolean pUsePreviousSettings)
   {
     double pref = TableLayout.PREFERRED;
     double gap = 3;
@@ -49,6 +50,9 @@ public class TranslationPanel extends JPanel
     TableLayoutUtil tlu = new TableLayoutUtil(this);
     tlu.add(1, 1, new JLabel(_TRANSLATORTYPE + ":"));
     translatorCombo = new JComboBox<>(pTypes == null ? ETranslatorType.values() : pTypes);
+    readSetting("translation.tType", null)
+        .map(ETranslatorType::valueOf)
+        .ifPresent(translatorCombo::setSelectedItem);
     tlu.add(3, 1, translatorCombo);
 
     ListCellRenderer<Object> comboRenderer = new DefaultListCellRenderer()
@@ -66,20 +70,26 @@ public class TranslationPanel extends JPanel
     tlu.add(1, 3, new JLabel(_SOURCE_LANG + ":"));
     fromLangCombo = new JComboBox<>(_getLocales(false));
     fromLangCombo.setRenderer(comboRenderer);
+    readSetting("translation.from", null)
+        .map(Locale::forLanguageTag)
+        .ifPresent(fromLangCombo::setSelectedItem);
     tlu.add(3, 3, fromLangCombo);
 
     tlu.add(1, 5, new JLabel(_TARGET_LANG + ":"));
     toLangCombo = new JComboBox<>(_getLocales(true));
     toLangCombo.setRenderer(comboRenderer);
-    if (pTargetLocaleDefaultValue != null)
-      toLangCombo.setSelectedItem(pTargetLocaleDefaultValue);
-    else
-      toLangCombo.setSelectedItem(Locale.ENGLISH);
+    readSetting("translation.to", null)
+        .map(Locale::forLanguageTag)
+        .ifPresentOrElse(toLangCombo::setSelectedItem, () -> {
+          if (pTargetLocaleDefaultValue != null)
+            toLangCombo.setSelectedItem(pTargetLocaleDefaultValue);
+          else
+            toLangCombo.setSelectedItem(Locale.ENGLISH);
+        });
     tlu.add(3, 5, toLangCombo);
 
     tlu.add(1, 7, new JLabel(_LINEBREAK + ":"));
     linebreakCombo = new JComboBox<>(ELineBreakMethod.values());
-    linebreakCombo.setSelectedItem(ELineBreakMethod.LINEBREAK_TO_SINGLE_REQUEST); //default
     linebreakCombo.setRenderer(new DefaultListCellRenderer()
     {
       @Override
@@ -90,9 +100,12 @@ public class TranslationPanel extends JPanel
         return this;
       }
     });
+    readSetting("translation.lbMethod", null)
+        .map(ELineBreakMethod::valueOf)
+        .ifPresentOrElse(linebreakCombo::setSelectedItem, () -> linebreakCombo.setSelectedItem(ELineBreakMethod.LINEBREAK_TO_SINGLE_REQUEST));
     tlu.add(3, 7, linebreakCombo);
 
-    JComponent additionalComponents = createAdditional();
+    JComponent additionalComponents = createAdditional(pUsePreviousSettings);
     JPanel additionalComponentContainer = new JPanel(new BorderLayout());
     additionalComponentContainer.setBorder(new EmptyBorder(4, 4, 4, 4));
     if (additionalComponents != null)
@@ -113,18 +126,42 @@ public class TranslationPanel extends JPanel
     Locale toLang = (Locale) toLangCombo.getSelectedItem();
     ELineBreakMethod lbMethod = (ELineBreakMethod) linebreakCombo.getSelectedItem();
     ETranslatorType tType = (ETranslatorType) translatorCombo.getSelectedItem();
+
+    // store
+    storeSetting("translation.from", fromLang == null ? null : fromLang.toLanguageTag());
+    storeSetting("translation.to", toLang == null ? null : toLang.toLanguageTag());
+    storeSetting("translation.lbMethod", lbMethod == null ? null : lbMethod.name());
+    storeSetting("translation.tType", tType == null ? null : tType.name());
+
     return new TranslationDialog.TranslationResult(fromLang, toLang, lbMethod, tType);
   }
 
   /**
    * Can be overridden, if components should be added to the panel
    *
+   * @param pUsePreviousSettings true, if the latest used settings should be set by default
    * @return the component (panel for more) that should be added
    */
   @Nullable
-  protected JComponent createAdditional()
+  protected JComponent createAdditional(boolean pUsePreviousSettings)
   {
     return null;
+  }
+
+
+  protected void storeSetting(@NotNull String pKey, @Nullable String pValue)
+  {
+    Preferences pref = NbPreferences.forModule(TranslationPanel.class);
+    if (pValue != null)
+      pref.put(pKey, pValue);
+    else
+      pref.remove(pKey);
+  }
+
+  @NotNull
+  protected Optional<String> readSetting(@NotNull String pKey, @Nullable String pDefault)
+  {
+    return Optional.ofNullable(NbPreferences.forModule(TranslationPanel.class).get(pKey, pDefault));
   }
 
   /**
