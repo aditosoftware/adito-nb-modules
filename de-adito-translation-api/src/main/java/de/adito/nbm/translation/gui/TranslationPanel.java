@@ -51,6 +51,7 @@ public class TranslationPanel extends JPanel
     tlu.add(1, 1, new JLabel(_TRANSLATORTYPE + ":"));
     translatorCombo = new JComboBox<>(pTypes == null ? ETranslatorType.values() : pTypes);
     readSetting("translation.tType", null)
+        .filter(pType -> pUsePreviousSettings)
         .map(ETranslatorType::valueOf)
         .ifPresent(translatorCombo::setSelectedItem);
     tlu.add(3, 1, translatorCombo);
@@ -71,6 +72,7 @@ public class TranslationPanel extends JPanel
     fromLangCombo = new JComboBox<>(_getLocales(false));
     fromLangCombo.setRenderer(comboRenderer);
     readSetting("translation.from", null)
+        .filter(pType -> pUsePreviousSettings)
         .map(Locale::forLanguageTag)
         .ifPresent(fromLangCombo::setSelectedItem);
     tlu.add(3, 3, fromLangCombo);
@@ -79,6 +81,7 @@ public class TranslationPanel extends JPanel
     toLangCombo = new JComboBox<>(_getLocales(true));
     toLangCombo.setRenderer(comboRenderer);
     readSetting("translation.to", null)
+        .filter(pType -> pUsePreviousSettings)
         .map(Locale::forLanguageTag)
         .ifPresentOrElse(toLangCombo::setSelectedItem, () -> {
           if (pTargetLocaleDefaultValue != null)
@@ -101,6 +104,7 @@ public class TranslationPanel extends JPanel
       }
     });
     readSetting("translation.lbMethod", null)
+        .filter(pType -> pUsePreviousSettings)
         .map(ELineBreakMethod::valueOf)
         .ifPresentOrElse(linebreakCombo::setSelectedItem, () -> linebreakCombo.setSelectedItem(ELineBreakMethod.LINEBREAK_TO_SINGLE_REQUEST));
     tlu.add(3, 7, linebreakCombo);
