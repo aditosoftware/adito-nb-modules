@@ -2,7 +2,6 @@ package de.adito.observables.netbeans;
 
 import de.adito.util.reactive.*;
 import io.reactivex.rxjava3.core.Observable;
-import io.reactivex.rxjava3.schedulers.Schedulers;
 import org.jetbrains.annotations.NotNull;
 import org.netbeans.api.project.*;
 
@@ -25,14 +24,29 @@ public class ProjectObservable extends AbstractListenerObservable<PropertyChange
   @NotNull
   public static Observable<ProjectInformation> createInfos(@NotNull Project pProject)
   {
+    return createInfos(pProject, true);
+  }
+
+  /**
+   * Erstellt ein Observable, welches auf ein spezifisches Projekt und seinen PropertyChangeListener hört
+   *
+   * @param pProject             Projekt
+   * @param pUsePossibleDelegate true, wenn das Delegate des Projektes, wenn möglich (wenn implementiert), verwendet werden soll.
+   *                             Regulär ist der Parameter IMMER TRUE, außer man implementiert das Delegate.
+   * @return das Observable mit dem Projekt
+   */
+  @NotNull
+  public static Observable<ProjectInformation> createInfos(@NotNull Project pProject, boolean pUsePossibleDelegate)
+  {
+    if (pUsePossibleDelegate && pProject instanceof IProvider)
+      return ((IProvider) pProject).create();
+
     return LookupResultObservable.create(pProject.getLookup(), ProjectInformation.class)
         .switchMap(pInfos -> {
-          if(pInfos.isEmpty())
+          if (pInfos.isEmpty())
             return Observable.empty();
           return Observables.create(new ProjectObservable(pInfos.get(0)), () -> pInfos.get(0));
-        })
-        .observeOn(Schedulers.computation())
-        .subscribeOn(Schedulers.computation());
+        });
   }
 
   private ProjectObservable(@NotNull ProjectInformation pProjectInformation)
@@ -53,5 +67,11 @@ public class ProjectObservable extends AbstractListenerObservable<PropertyChange
   protected void removeListener(@NotNull ProjectInformation pProjectInformation, @NotNull PropertyChangeListener pPropertyChangeListener)
   {
     pProjectInformation.removePropertyChangeListener(pPropertyChangeListener);
+  }
+
+  public interface IProvider
+  {
+    @NotNull
+    Observable<ProjectInformation> create();
   }
 }
