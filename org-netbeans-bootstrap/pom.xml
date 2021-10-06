@@ -6,13 +6,13 @@
   <parent>
     <groupId>de.adito</groupId>
     <artifactId>nb-modules</artifactId>
-    <version>1.6.0</version>
+    <version>1.8.0</version>
   </parent>
 
   <groupId>org.netbeans.modules</groupId>
   <artifactId>org-netbeans-bootstrap</artifactId>
   <packaging>nbm</packaging>
-  <version>RELEASE122-1.6.0</version>
+  <version>RELEASE122-1.8.0</version>
   <name>Netbeans IDE module: org-netbeans-bootstrap</name>
 
   <properties>
@@ -28,7 +28,7 @@
     <dependency>
       <groupId>org.netbeans.api</groupId>
       <artifactId>org-openide-util-ui</artifactId>
-      <version>${netbeans.version}-1.6.0</version>
+      <version>${netbeans.version}-1.8.0</version>
     </dependency>
     <dependency>
       <groupId>org.netbeans.api</groupId>

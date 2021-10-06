@@ -6,7 +6,7 @@
 
   <groupId>de.adito</groupId>
   <artifactId>nb-modules</artifactId>
-  <version>1.6.0</version>
+  <version>1.8.0</version>
   <packaging>pom</packaging>
   <name>Custom Netbeans Modules</name>
 
@@ -64,7 +64,6 @@
     <module>org-netbeans-external-ddl</module>
     <module>org-netbeans-modules-db</module>
     <module>org-netbeans-modules-db-dataview</module>
-    <module>org-netbeans-modules-form</module>
     <module>org-netbeans-modules-javascript-editing</module>
     <module>org-netbeans-modules-javascript-hints</module>
     <module>org-netbeans-modules-javascript-refactoring</module>
