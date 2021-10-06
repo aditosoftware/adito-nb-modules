@@ -45,6 +45,16 @@
   <build>
     <plugins>
       <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.6.2</version>
+        <configuration>
+          <!-- We have to compile it with 1.8, because of Jigsaw not letting us override java.lang.Module -->
+          <source>8</source>
+        </configuration>
+      </plugin>
+
+      <plugin>
         <groupId>org.apache.netbeans.utilities</groupId>
         <artifactId>nbm-maven-plugin</artifactId>
         <configuration>

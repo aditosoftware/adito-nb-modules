@@ -18,16 +18,9 @@
  */
 package org.netbeans.core.windows.view.ui;
 
-import java.awt.AWTException;
-import java.awt.GraphicsConfiguration;
-import java.awt.GraphicsDevice;
-import java.awt.MouseInfo;
-import java.awt.Point;
-import java.awt.PointerInfo;
-import java.awt.Rectangle;
-import java.awt.Robot;
 import org.netbeans.core.windows.options.WinSysPrefs;
-import sun.font.GraphicComponent;
+
+import java.awt.*;
 
 /**
  *
