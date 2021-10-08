@@ -4,12 +4,12 @@
   <parent>
     <groupId>de.adito</groupId>
     <artifactId>nb-modules</artifactId>
-    <version>1.8.0</version>
+    <version>1.9.0</version>
   </parent>
 
   <groupId>org.netbeans.api</groupId>
   <artifactId>org-netbeans-modules-lsp-client</artifactId>
-  <version>RELEASE122-1.8.0</version>
+  <version>RELEASE125-1.9.0</version>
   <packaging>nbm</packaging>
   <name>NetbeansIDE module: org-netbeans-modules-lsp-client</name>
 
@@ -195,12 +195,25 @@
       <artifactId>org-openide-windows</artifactId>
       <version>${netbeans.version}</version>
     </dependency>
-
     <dependency>
-      <groupId>org.netbeans.external</groupId>
-      <artifactId>org.eclipse.tm4e.core_0.2.0.201809031154</artifactId>
+      <groupId>org.netbeans.api</groupId>
+      <artifactId>org-netbeans-modules-jumpto</artifactId>
       <version>${netbeans.version}</version>
-      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.netbeans.api</groupId>
+      <artifactId>org-netbeans-modules-queries</artifactId>
+      <version>${netbeans.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.netbeans.api</groupId>
+      <artifactId>org-netbeans-modules-parsing-indexing</artifactId>
+      <version>${netbeans.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.netbeans.api</groupId>
+      <artifactId>org-netbeans-modules-editor-fold</artifactId>
+      <version>${netbeans.version}</version>
     </dependency>
 
     <dependency>
@@ -252,7 +265,7 @@
             <moduleDependency>
               <id>org.netbeans.api:org-netbeans-spi-navigator</id>
               <type>impl</type>
-              <explicitValue>org.netbeans.spi.navigator/1 = 12.2-d73d3dd898acc440c460924dabf8ad5feb90369f</explicitValue>
+              <explicitValue>org.netbeans.spi.navigator/1 = 12.5-fd523ddc12d6156412d7b81f0c8663d8913d1021</explicitValue>
             </moduleDependency>
             <moduleDependency>
               <id>org.netbeans.api:org-netbeans-modules-textmate-lexer</id>

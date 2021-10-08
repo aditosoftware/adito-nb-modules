@@ -490,17 +490,6 @@ public class Specification implements DatabaseSpecification {
         return reducedTypeMap;
     }
 
-    ///**
-    // * @return Liefert den Eintrag, der auch in der nonRedundantTypeMap drin ist
-    // */
-    //public TypeElement getNonRedundantTypeMapEntry(TypeElement pElement)
-    //{
-    //    return ((Map<String,String>) getNonRedundantTypeMap()).entrySet().stream()
-    //        .filter(pEntry -> pElement.getName().equals(pEntry.getValue()))
-    //        .map(pEntry -> new TypeElement(pEntry.getKey(), pEntry.getValue()))
-    //        .findFirst().orElse(null);
-    //}
-
     /** Returns DBType where maps specified java type */
     @Override
     public String getType(int type)

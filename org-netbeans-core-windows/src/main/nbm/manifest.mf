@@ -1,11 +1,11 @@
 Manifest-Version: 1.0
 Ant-Version: Apache Ant 1.10.5
-Created-By: 1.8.0_252-b09 (Oracle Corporation)
+Created-By: 1.8.0_291-b10 (Oracle Corporation)
 OpenIDE-Module-Friends: org.netbeans.core.multitabs, org.netbeans.core
  .nativeaccess
 OpenIDE-Module-Java-Dependencies: Java > 1.8
-OpenIDE-Module-Implementation-Version: 12.2-d73d3dd898acc440c460924dab
- f8ad5feb90369f
+OpenIDE-Module-Implementation-Version: 12.5-fd523ddc12d6156412d7b81f0c
+ 8663d8913d1021
 AutoUpdate-Show-In-Client: false
 OpenIDE-Module: org.netbeans.core.windows/2
 OpenIDE-Module-Localizing-Bundle: org/netbeans/core/windows/resources/
@@ -19,5 +19,5 @@ OpenIDE-Module-Recommends: org.netbeans.core.windows.nativeaccess.Nati
 OpenIDE-Module-Needs: org.netbeans.swing.tabcontrol.customtabs.TabbedC
  omponentFactory
 AutoUpdate-Essential-Module: true
-OpenIDE-Module-Specification-Version: 2.95
+OpenIDE-Module-Specification-Version: 2.98
 OpenIDE-Module-Requires: org.openide.modules.ModuleFormat1

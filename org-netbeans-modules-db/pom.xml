@@ -6,13 +6,13 @@
   <parent>
     <groupId>de.adito</groupId>
     <artifactId>nb-modules</artifactId>
-    <version>1.8.0</version>
+    <version>1.9.0</version>
   </parent>
 
   <groupId>org.netbeans.api</groupId>
   <artifactId>org-netbeans-modules-db</artifactId>
   <packaging>nbm</packaging>
-  <version>RELEASE122-1.8.0</version>
+  <version>RELEASE125-1.9.0</version>
   <name>Netbeans IDE module: org-netbeans-modules-db</name>
 
   <properties>
@@ -124,7 +124,7 @@
     <dependency>
       <groupId>org.netbeans.external</groupId>
       <artifactId>ddl</artifactId>
-      <version>${netbeans.version}-1.8.0</version>
+      <version>${netbeans.version}-1.9.0</version>
     </dependency>
   </dependencies>
 
@@ -153,12 +153,12 @@
             <dependency>
               <id>org.netbeans.modules:org-netbeans-modules-db-metadata-model</id>
               <type>impl</type>
-              <explicitValue>org.netbeans.modules.db.metadata.model/1 = 12.2-d73d3dd898acc440c460924dabf8ad5feb90369f</explicitValue>
+              <explicitValue>org.netbeans.modules.db.metadata.model/1 = 12.5-fd523ddc12d6156412d7b81f0c8663d8913d1021</explicitValue>
             </dependency>
             <dependency>
               <id>org.netbeans.api:org-netbeans-core-ide</id>
               <type>impl</type>
-              <explicitValue>org.netbeans.core.ide/1 = 12.2-d73d3dd898acc440c460924dabf8ad5feb90369f</explicitValue>
+              <explicitValue>org.netbeans.core.ide/1 = 12.5-fd523ddc12d6156412d7b81f0c8663d8913d1021</explicitValue>
             </dependency>
           </moduleDependencies>
 

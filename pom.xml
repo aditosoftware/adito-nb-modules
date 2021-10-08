@@ -6,7 +6,7 @@
 
   <groupId>de.adito</groupId>
   <artifactId>nb-modules</artifactId>
-  <version>1.8.0</version>
+  <version>1.9.0</version>
   <packaging>pom</packaging>
   <name>Custom Netbeans Modules</name>
 
@@ -25,7 +25,7 @@
 
   <properties>
     <!-- Netbeans-Versionen -->
-    <netbeans.version>RELEASE122</netbeans.version>
+    <netbeans.version>RELEASE125</netbeans.version>
     <!-- gibt das Encoding das wir im SourceCode verwenden vor -->
     <project.build.sourceEncoding>Cp1252</project.build.sourceEncoding>
   </properties>

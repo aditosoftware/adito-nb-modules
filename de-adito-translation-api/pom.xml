@@ -6,13 +6,13 @@
   <parent>
     <groupId>de.adito</groupId>
     <artifactId>nb-modules</artifactId>
-    <version>1.8.0</version>
+    <version>1.9.0</version>
   </parent>
 
   <groupId>de.adito.nbm</groupId>
   <artifactId>de-adito-translation-api</artifactId>
   <packaging>nbm</packaging>
-  <version>RELEASE122-1.8.0</version>
+  <version>RELEASE125-1.9.0</version>
   <name>ADITO Netbeans Module: de-adito-translation-api</name>
 
   <properties>
@@ -23,12 +23,12 @@
     <dependency>
       <groupId>de.adito.nb-modules</groupId>
       <artifactId>de-adito-netbeans-utilities</artifactId>
-      <version>${netbeans.version}-1.6.2-1</version>
+      <version>${netbeans.version}-1.9.0</version>
     </dependency>
     <dependency>
       <groupId>de.adito.nb-modules</groupId>
       <artifactId>nb-adito-interface</artifactId>
-      <version>1.8.0</version>
+      <version>1.9.0</version>
     </dependency>
 
     <!-- PicoService -->

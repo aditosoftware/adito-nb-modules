@@ -1,6 +1,6 @@
 Manifest-Version: 1.0
-OpenIDE-Module-Implementation-Version: 12.2-d73d3dd898acc440c460924dab
- f8ad5feb90369f
+OpenIDE-Module-Implementation-Version: 12.5-fd523ddc12d6156412d7b81f0c
+ 8663d8913d1021
 OpenIDE-Module-Java-Dependencies: Java > 1.8
 OpenIDE-Module-Localizing-Bundle: org/netbeans/modules/db/dataview/Bun
  dle.properties
@@ -11,5 +11,5 @@ OpenIDE-Module: org.netbeans.modules.db.dataview
 OpenIDE-Module-Friends: org.netbeans.modules.db.core, org.netbeans.mod
  ules.dm.virtual.db, org.netbeans.modules.edm.editor, org.netbeans.mod
  ules.etl.editor
-Created-By: 1.8.0_252-b09 (Oracle Corporation)
-OpenIDE-Module-Specification-Version: 1.43
+Created-By: 1.8.0_291-b10 (Oracle Corporation)
+OpenIDE-Module-Specification-Version: 1.46

@@ -4,12 +4,12 @@
   <parent>
     <groupId>de.adito</groupId>
     <artifactId>nb-modules</artifactId>
-    <version>1.8.0</version>
+    <version>1.9.0</version>
   </parent>
 
   <groupId>org.netbeans.api</groupId>
   <artifactId>org-openide-util</artifactId>
-  <version>RELEASE122-1.8.0</version>
+  <version>RELEASE125-1.9.0</version>
   <packaging>nbm</packaging>
   <name>OpenIDE module: org-openide-util</name>
 

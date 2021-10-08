@@ -1,7 +1,7 @@
 Manifest-Version: 1.0
 OpenIDE-Module-Implementation-Version: 30
-OpenIDE-Module-Build-Version: 12.2-d73d3dd898acc440c460924dabf8ad5feb9
- 0369f
+OpenIDE-Module-Build-Version: 12.5-fd523ddc12d6156412d7b81f0c8663d8913
+ d1021
 OpenIDE-Module-Java-Dependencies: Java > 1.8
 OpenIDE-Module-Localizing-Bundle: org/netbeans/modules/db/resources/Bu
  ndle.properties
@@ -11,5 +11,5 @@ OpenIDE-Module-Layer: org/netbeans/modules/db/resources/mf-layer.xml
 Ant-Version: Apache Ant 1.10.5
 OpenIDE-Module-Requires: org.openide.modules.ModuleFormat1
 OpenIDE-Module: org.netbeans.modules.db/1
-Created-By: 1.8.0_252-b09 (Oracle Corporation)
-OpenIDE-Module-Specification-Version: 1.76.0.30
+Created-By: 1.8.0_291-b10 (Oracle Corporation)
+OpenIDE-Module-Specification-Version: 1.79.0.30
