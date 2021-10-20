@@ -25,6 +25,11 @@ public @interface Sampled
   String name();
 
   /**
+   * @return factory that extends the given name dynamically based on the called method arguments
+   */
+  Class<? extends MetricType.IMetricNameFactory> nameFactory() default MetricType.DefaultMetricNameFactory.class;
+
+  /**
    * @return this converter describes, how the argument values of the called method should be converted
    * to a sendable and human readable string
    */
