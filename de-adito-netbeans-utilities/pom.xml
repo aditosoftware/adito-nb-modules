@@ -12,7 +12,7 @@
 
   <groupId>de.adito.nb-modules</groupId>
   <artifactId>de-adito-netbeans-utilities</artifactId>
-  <version>RELEASE122-1.6.2-3</version>
+  <version>RELEASE122-1.6.2-4</version>
   <name>ADITO Netbeans Module: de-adito-netbeans-utilities</name>
 
   <dependencies>
@@ -21,6 +21,12 @@
       <artifactId>nb-adito-interface</artifactId>
       <version>1.6.0</version>
     </dependency>
+    <dependency>
+      <groupId>de.adito.nbm</groupId>
+      <artifactId>de-adito-metrics-api</artifactId>
+      <version>${netbeans.version}-1.6.0-2</version>
+    </dependency>
+
     <dependency>
       <groupId>info.clearthought</groupId>
       <artifactId>table-layout</artifactId>

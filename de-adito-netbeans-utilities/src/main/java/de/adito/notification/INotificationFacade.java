@@ -1,5 +1,6 @@
 package de.adito.notification;
 
+import de.adito.aditoweb.nbm.metrics.api.IMetricProxyFactory;
 import org.jetbrains.annotations.*;
 
 import java.awt.event.ActionListener;
@@ -11,7 +12,7 @@ import java.awt.event.ActionListener;
  */
 public interface INotificationFacade
 {
-  INotificationFacade INSTANCE = new NotificationFacadeImpl();
+  INotificationFacade INSTANCE = IMetricProxyFactory.proxy(new NotificationFacadeImpl());
 
   /**
    * Shows a simple balloon to display a pMessage to the user.
