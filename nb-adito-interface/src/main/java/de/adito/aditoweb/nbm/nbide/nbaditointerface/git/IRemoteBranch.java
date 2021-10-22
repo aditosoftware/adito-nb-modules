@@ -1,0 +1,23 @@
+package de.adito.aditoweb.nbm.nbide.nbaditointerface.git;
+
+/**
+ * Represents a Branch in some remote repository
+ *
+ * @author m.kaspera, 19.10.2021
+ */
+public interface IRemoteBranch
+{
+
+  /**
+   *
+   * @return the name of the branch
+   */
+  String getName();
+
+  /**
+   *
+   * @return the commit this branch is pointing at
+   */
+  String getId();
+
+}

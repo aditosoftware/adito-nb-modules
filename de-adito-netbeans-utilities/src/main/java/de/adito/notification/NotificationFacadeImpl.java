@@ -1,6 +1,7 @@
 package de.adito.notification;
 
 import com.google.common.base.Strings;
+import de.adito.aditoweb.nbm.metrics.api.types.Sampled;
 import org.jetbrains.annotations.*;
 import org.openide.awt.*;
 import org.openide.modules.Modules;
@@ -57,6 +58,7 @@ class NotificationFacadeImpl implements INotificationFacade
   }
 
   @Override
+  @Sampled(name = "logging.external.error")
   public void error(@NotNull Throwable pThrowable)
   {
     _notify(pThrowable.getClass().getSimpleName(), _getRootMessage(pThrowable), false, NotificationDisplayer.Priority.HIGH, null);
