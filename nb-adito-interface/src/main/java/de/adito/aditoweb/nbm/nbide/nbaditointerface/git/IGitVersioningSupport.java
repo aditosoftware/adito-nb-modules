@@ -30,8 +30,19 @@ public interface IGitVersioningSupport
    *
    * @param pRemoteUrl The URL of the remote repository, from which to fetch the list of available branches
    * @return a list of the available branches
+   * @throws AditoVersioningException if authentication fails or no connection to the repository could be established
    */
   @NotNull
   List<IRemoteBranch> getBranchesInRepository(@NotNull String pRemoteUrl) throws AditoVersioningException;
+
+  /**
+   * Fetches the list of all available tags of the given repository
+   *
+   * @param pRemoteUrl The URL of the remote repository, from which to fetch the list of tags
+   * @return a list of the available branches
+   * @throws AditoVersioningException if authentication fails or no connection to the repository could be established
+   */
+  @NotNull
+  List<ITag> getTagsInRepository(@NotNull String pRemoteUrl) throws AditoVersioningException;
 
 }
