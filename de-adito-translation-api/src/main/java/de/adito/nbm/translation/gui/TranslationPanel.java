@@ -10,8 +10,11 @@ import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.util.*;
+import java.util.List;
 import java.util.prefs.Preferences;
 import java.util.stream.Collectors;
+
+import static info.clearthought.layout.TableLayoutConstants.PREFERRED;
 
 /**
  * @author w.glanzer, 08.09.2021
@@ -30,7 +33,13 @@ public class TranslationPanel extends JPanel
 
   protected TranslationPanel(@Nullable ETranslatorType[] pTypes, @Nullable Locale pTargetLocaleDefaultValue, boolean pUsePreviousSettings)
   {
-    double pref = TableLayout.PREFERRED;
+    this(pTypes, pTargetLocaleDefaultValue, null, pUsePreviousSettings);
+  }
+
+  protected TranslationPanel(@Nullable ETranslatorType[] pTypes, @Nullable Locale pTargetLocaleDefaultValue,
+                             @Nullable Locale pSourceLocaleDefaultValue, boolean pUsePreviousSettings)
+  {
+    double pref = PREFERRED;
     double gap = 3;
 
     double[] cols = {gap, pref, gap, pref, gap};
@@ -47,6 +56,7 @@ public class TranslationPanel extends JPanel
     };
 
     setLayout(new TableLayout(cols, rows));
+    setBorder(new EmptyBorder(6, 6, 6, 6));
     TableLayoutUtil tlu = new TableLayoutUtil(this);
     tlu.add(1, 1, new JLabel(_TRANSLATORTYPE + ":"));
     translatorCombo = new JComboBox<>(pTypes == null ? ETranslatorType.values() : pTypes);
@@ -71,24 +81,25 @@ public class TranslationPanel extends JPanel
     tlu.add(1, 3, new JLabel(_SOURCE_LANG + ":"));
     fromLangCombo = new JComboBox<>(_getLocales(false));
     fromLangCombo.setRenderer(comboRenderer);
-    readSetting("translation.from", null)
-        .filter(pType -> pUsePreviousSettings)
-        .map(Locale::forLanguageTag)
-        .ifPresent(fromLangCombo::setSelectedItem);
+    if (pSourceLocaleDefaultValue != null)
+      _selectLocaleInCombobox(fromLangCombo, pSourceLocaleDefaultValue);
+    else
+      readSetting("translation.from", null)
+          .filter(pType -> pUsePreviousSettings)
+          .map(Locale::forLanguageTag)
+          .ifPresent(pLocale -> _selectLocaleInCombobox(fromLangCombo, pLocale));
     tlu.add(3, 3, fromLangCombo);
 
     tlu.add(1, 5, new JLabel(_TARGET_LANG + ":"));
     toLangCombo = new JComboBox<>(_getLocales(true));
     toLangCombo.setRenderer(comboRenderer);
-    readSetting("translation.to", null)
-        .filter(pType -> pUsePreviousSettings)
-        .map(Locale::forLanguageTag)
-        .ifPresentOrElse(toLangCombo::setSelectedItem, () -> {
-          if (pTargetLocaleDefaultValue != null)
-            toLangCombo.setSelectedItem(pTargetLocaleDefaultValue);
-          else
-            toLangCombo.setSelectedItem(Locale.ENGLISH);
-        });
+    if (pTargetLocaleDefaultValue != null)
+      _selectLocaleInCombobox(toLangCombo, pTargetLocaleDefaultValue);
+    else
+      readSetting("translation.to", null)
+          .filter(pType -> pUsePreviousSettings)
+          .map(Locale::forLanguageTag)
+          .ifPresentOrElse(pLocale -> _selectLocaleInCombobox(toLangCombo, pLocale), () -> _selectLocaleInCombobox(toLangCombo, Locale.ENGLISH));
     tlu.add(3, 5, toLangCombo);
 
     tlu.add(1, 7, new JLabel(_LINEBREAK + ":"));
@@ -111,7 +122,6 @@ public class TranslationPanel extends JPanel
 
     JComponent additionalComponents = createAdditional(pUsePreviousSettings);
     JPanel additionalComponentContainer = new JPanel(new BorderLayout());
-    additionalComponentContainer.setBorder(new EmptyBorder(4, 4, 4, 4));
     if (additionalComponents != null)
       additionalComponentContainer.add(additionalComponents, BorderLayout.CENTER);
     tlu.add(1, 9, 3, 9, additionalComponentContainer);
@@ -185,4 +195,24 @@ public class TranslationPanel extends JPanel
         .toArray(Locale[]::new);
   }
 
+  /**
+   * Selects the locale in the combobox. Only the values of {@link Locale#getLanguage()} are compared, because in the combobox can be any Locale
+   * with {@link Locale#getLanguage()} of {@code pLocaleToSelect}. Example: ComboBox en_EN, {@code pLocaleToSelect} en_US: Then should be en_EN be selected.
+   *
+   * @param pCombo          combobox
+   * @param pLocaleToSelect the locale to select
+   * @see #_getLocales(boolean)
+   */
+  private void _selectLocaleInCombobox(@NotNull JComboBox<Locale> pCombo, @NotNull Locale pLocaleToSelect)
+  {
+    ComboBoxModel<Locale> model = pCombo.getModel();
+    List<Locale> localesInModel = new ArrayList<>();
+
+    for (int i = 0; i < model.getSize(); i++)
+      localesInModel.add(model.getElementAt(i));
+
+    localesInModel.stream()
+        .filter(pLocale -> pLocale.getLanguage().equals(pLocaleToSelect.getLanguage()))
+        .findFirst().ifPresent(model::setSelectedItem);
+  }
 }

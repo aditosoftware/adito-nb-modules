@@ -12,7 +12,7 @@
   <groupId>de.adito.nbm</groupId>
   <artifactId>de-adito-translation-api</artifactId>
   <packaging>nbm</packaging>
-  <version>RELEASE122-1.6.0-2</version>
+  <version>RELEASE122-1.6.0-3</version>
   <name>ADITO Netbeans Module: de-adito-translation-api</name>
 
   <properties>

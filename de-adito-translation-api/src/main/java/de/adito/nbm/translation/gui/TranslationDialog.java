@@ -7,7 +7,11 @@ import org.jetbrains.annotations.*;
 import org.openide.*;
 import org.openide.util.*;
 
+import javax.swing.*;
+import java.awt.*;
 import java.util.*;
+
+import static org.openide.NotifyDescriptor.*;
 
 /**
  * @author w.glanzer, 08.09.2021
@@ -18,12 +22,26 @@ public class TranslationDialog
   /**
    * Shows the dialog for translation and returns the result of it
    *
-   * @param pDefaultLocale       default target locale
+   * @param pDefaultTargetLocale default target locale
    * @param pUsePreviousSettings true, if the latest used settings should be set by default
    * @return the result
    */
   @Nullable
-  public TranslationResult show(@Nullable Locale pDefaultLocale, boolean pUsePreviousSettings)
+  public TranslationResult show(@Nullable Locale pDefaultTargetLocale, boolean pUsePreviousSettings)
+  {
+    return show(pDefaultTargetLocale, null, pUsePreviousSettings);
+  }
+
+  /**
+   * Shows the dialog for translation and returns the result of it
+   *
+   * @param pDefaultTargetLocale default target locale
+   * @param pDefaultSourceLocale default source locale
+   * @param pUsePreviousSettings true, if the latest used settings should be set by default
+   * @return the result
+   */
+  @Nullable
+  public TranslationResult show(@Nullable Locale pDefaultTargetLocale, @Nullable Locale pDefaultSourceLocale, boolean pUsePreviousSettings)
   {
     Set<ETranslatorType> availableTypes = new HashSet<>();
     for (ITranslatorAuthKeyProvider keyProvider : Lookup.getDefault().lookupAll(ITranslatorAuthKeyProvider.class))
@@ -40,26 +58,47 @@ public class TranslationDialog
       return null;
     }
 
-    return show(availableTypes.toArray(new ETranslatorType[0]), pDefaultLocale, pUsePreviousSettings);
+    return show(availableTypes.toArray(new ETranslatorType[0]), pDefaultTargetLocale, pDefaultSourceLocale, pUsePreviousSettings);
   }
 
   /**
    * Shows the dialog for translation and returns the result of it
    *
    * @param pAvailableTypes      available translator types
-   * @param pDefaultLocale       default target locale
+   * @param pDefaultTargetLocale default target locale
    * @param pUsePreviousSettings true, if the latest used settings should be set by default
    * @return the result
    */
   @Nullable
-  public TranslationResult show(@Nullable ETranslatorType[] pAvailableTypes, @Nullable Locale pDefaultLocale, boolean pUsePreviousSettings)
+  public TranslationResult show(@Nullable ETranslatorType[] pAvailableTypes, @Nullable Locale pDefaultTargetLocale, boolean pUsePreviousSettings)
   {
-    TranslationPanel panel = createContent(pAvailableTypes, pDefaultLocale, pUsePreviousSettings);
+    return show(pAvailableTypes, pDefaultTargetLocale, null, pUsePreviousSettings);
+  }
+
+  /**
+   * Shows the dialog for translation and returns the result of it
+   *
+   * @param pAvailableTypes      available translator types
+   * @param pDefaultTargetLocale default target locale
+   * @param pDefaultSourceLocale default source locale
+   * @param pUsePreviousSettings true, if the latest used settings should be set by default
+   * @return the result
+   */
+  @Nullable
+  public TranslationResult show(@Nullable ETranslatorType[] pAvailableTypes, @Nullable Locale pDefaultTargetLocale, @Nullable Locale pDefaultSourceLocale,
+                                boolean pUsePreviousSettings)
+  {
+    TranslationPanel panel = createContent(pAvailableTypes, pDefaultTargetLocale, pDefaultSourceLocale, pUsePreviousSettings);
     DialogDescriptor dialogDescriptor = new DialogDescriptor(panel, NbBundle.getMessage(TranslationDialog.class, "TITLE_DLG_TRANSLATION"), true,
-                                                             new Object[]{DialogDescriptor.OK_OPTION, DialogDescriptor.CANCEL_OPTION},
-                                                             DialogDescriptor.OK_OPTION, DialogDescriptor.BOTTOM_ALIGN, null, null);
+                                                             new Object[]{OK_OPTION, CANCEL_OPTION},
+                                                             OK_OPTION, DialogDescriptor.BOTTOM_ALIGN, null, null);
+    SwingUtilities.invokeLater(() -> {
+      Window rootPane = SwingUtilities.getWindowAncestor(panel);
+      if (rootPane instanceof JDialog)
+        ((JDialog) rootPane).setResizable(false);
+    });
     Object result = DialogDisplayer.getDefault().notify(dialogDescriptor);
-    if (result == DialogDescriptor.OK_OPTION)
+    if (result == OK_OPTION)
       return panel.getResult();
     return null;
   }
@@ -75,7 +114,22 @@ public class TranslationDialog
   @NotNull
   protected TranslationPanel createContent(@Nullable ETranslatorType[] pTypes, @Nullable Locale pDefaultTarget, boolean pUsePreviousSettings)
   {
-    return new TranslationPanel(pTypes, pDefaultTarget, pUsePreviousSettings);
+    return createContent(pTypes, pDefaultTarget, null, pUsePreviousSettings);
+  }
+
+  /**
+   * Creates the content of the dialog
+   *
+   * @param pTypes               available translator types
+   * @param pDefaultTarget       default target locale
+   * @param pDefaultSource       default source locale
+   * @param pUsePreviousSettings true, if the latest used settings should be set by default
+   * @return the content
+   */
+  @NotNull
+  protected TranslationPanel createContent(@Nullable ETranslatorType[] pTypes, @Nullable Locale pDefaultTarget, @Nullable Locale pDefaultSource, boolean pUsePreviousSettings)
+  {
+    return new TranslationPanel(pTypes, pDefaultTarget, pDefaultSource, pUsePreviousSettings);
   }
 
   /**
