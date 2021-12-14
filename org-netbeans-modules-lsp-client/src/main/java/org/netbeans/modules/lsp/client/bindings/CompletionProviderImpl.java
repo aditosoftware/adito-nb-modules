@@ -119,7 +119,7 @@ public class CompletionProviderImpl implements CompletionProvider {
                                     signatures.append("<b>");
                                 }
                                 signatures.append(sigSep);
-                                signatures.append(pi.getLabel());
+                                signatures.append(pi.getLabel().getLeft());
                                 if (idx == help.getActiveParameter()) {
                                     signatures.append("</b>");
                                 }
