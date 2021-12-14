@@ -111,7 +111,8 @@ public class LanguageClientImpl implements LanguageClient {
      */
     @Override
     public CompletableFuture<ApplyWorkspaceEditResponse> applyEdit(ApplyWorkspaceEditParams params) {
-        Utils.applyWorkspaceEdit(params.getEdit());
+        if(params.getEdit() != null)
+            Utils.applyWorkspaceEdit(params.getEdit());
         return CompletableFuture.completedFuture(new ApplyWorkspaceEditResponse(true));
     }
 

@@ -185,7 +185,8 @@ public class Utils {
             if (cmd.isLeft()) {
                 command = cmd.getLeft();
             } else {
-                Utils.applyWorkspaceEdit(cmd.getRight().getEdit());
+                if(cmd.getRight().getEdit() != null)
+                    Utils.applyWorkspaceEdit(cmd.getRight().getEdit());
                 command = cmd.getRight().getCommand();
             }
             if (command != null) {
