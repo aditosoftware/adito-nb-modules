@@ -48,7 +48,6 @@ import org.eclipse.lsp4j.services.LanguageClient;
 import org.netbeans.modules.lsp.client.LSPBindings;
 import org.netbeans.modules.lsp.client.Utils;
 import org.netbeans.modules.lsp.client.bindings.hints.HintsAndErrorsProvider;
-import org.netbeans.modules.lsp.client.log.LogStorage;
 import org.netbeans.spi.editor.hints.ErrorDescription;
 import org.netbeans.spi.editor.hints.HintsController;
 import org.openide.cookies.EditorCookie;
@@ -143,15 +142,7 @@ public class LanguageClientImpl implements LanguageClient {
      */
     @Override
     public void logMessage(MessageParams message) {
-        switch(message.getType()) {
-            case Error: LogStorage.ALL.error(message.getMessage());
-                        break;
-            case Warning: LogStorage.ALL.warning(message.getMessage());
-                        break;
-            default: LogStorage.ALL.info(message.getMessage());
-                        break;
-        }
-//        System.err.println("logMessage: " + arg0);
+        Logger.getLogger(LanguageClientImpl.class.getName()).log(Level.INFO, message::getMessage);
     }
     
     
