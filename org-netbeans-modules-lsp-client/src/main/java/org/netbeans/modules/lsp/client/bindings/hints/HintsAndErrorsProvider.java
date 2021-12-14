@@ -108,7 +108,7 @@ public class HintsAndErrorsProvider {
             // sometimes version 0 contains broken infos, for that reason we use only the last version 0
             listMerger = new ListMerger(diagnosticVersion);
             cachedLists.put(diagnostics.getUri(), listMerger);
-        } else if (listMerger.version < diagnosticVersion) {
+        } else if (listMerger.version <= diagnosticVersion) {
             // incoming data for a newer version, throw the old stuff away
             listMerger = new ListMerger(diagnosticVersion);
             cachedLists.put(diagnostics.getUri(), listMerger);
