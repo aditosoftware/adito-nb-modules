@@ -53,7 +53,6 @@ import org.netbeans.api.project.FileOwnerQuery;
 import org.netbeans.api.project.Project;
 import org.netbeans.modules.lsp.client.bindings.LanguageClientImpl;
 import org.netbeans.modules.lsp.client.bindings.TextDocumentSyncServerCapabilityHandler;
-import org.netbeans.modules.lsp.client.options.MimeTypeInfo;
 import org.netbeans.modules.lsp.client.spi.LSPClientInfo;
 import org.netbeans.modules.lsp.client.spi.LanguageServerProvider;
 import org.netbeans.modules.lsp.client.spi.ServerRestarter;
@@ -257,7 +256,6 @@ public class LSPBindingFactory {
     
     @SuppressWarnings({"AccessingNonPublicFieldOfAnotherObject", "ResultOfObjectAllocationIgnored"})
     private static LSPBindings buildBindings(Project project, String mt, FileObject dir, URI baseUri) {
-        MimeTypeInfo mimeTypeInfo = new MimeTypeInfo(mt);
         ServerRestarter restarter = () -> {
             synchronized (LSPBindings.class) {
                 WeakReference<LSPBindings> bRef = project2MimeType2Server.getOrDefault(baseUri, Collections.emptyMap()).remove(mt);
@@ -271,7 +269,7 @@ public class LSPBindingFactory {
         };
         
         for (LanguageServerProvider provider : MimeLookup.getLookup(mt).lookupAll(LanguageServerProvider.class)) {
-            final Lookup lkp = project != null ? Lookups.fixed(project, mimeTypeInfo, restarter) : Lookups.fixed(mimeTypeInfo, restarter);
+            final Lookup lkp = project != null ? Lookups.fixed(project, restarter) : Lookups.fixed(restarter);
             LanguageServerProvider.LanguageServerDescription desc = provider.startServer(lkp);
 
             if (desc != null) {

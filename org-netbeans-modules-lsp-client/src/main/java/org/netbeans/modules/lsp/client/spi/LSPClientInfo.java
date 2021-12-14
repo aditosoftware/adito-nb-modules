@@ -1,7 +1,7 @@
 package org.netbeans.modules.lsp.client.spi;
 
 import org.eclipse.lsp4j.ClientInfo;
-import org.netbeans.modules.lsp.client.ConnectToLanguageServerParameters;
+import org.netbeans.modules.lsp.client.LSPBindings;
 
 /**
  * Handling of LSP client informations.
@@ -13,7 +13,7 @@ public class LSPClientInfo {
     private final String clientName;
 
     public LSPClientInfo() {
-        this.clientName = org.openide.util.NbBundle.getMessage(ConnectToLanguageServerParameters.class, "OpenIDE-Module-Name");
+        this.clientName = org.openide.util.NbBundle.getMessage(LSPBindings.class, "OpenIDE-Module-Name");
     }
 
     public String getClientName() {
