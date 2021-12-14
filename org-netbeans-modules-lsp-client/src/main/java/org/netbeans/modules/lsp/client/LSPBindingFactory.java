@@ -41,22 +41,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.swing.event.ChangeListener;
-import org.eclipse.lsp4j.ClientCapabilities;
-import org.eclipse.lsp4j.CompletionCapabilities;
-import org.eclipse.lsp4j.DocumentHighlightCapabilities;
-import org.eclipse.lsp4j.DocumentSymbolCapabilities;
-import org.eclipse.lsp4j.InitializeParams;
-import org.eclipse.lsp4j.InitializeResult;
-import org.eclipse.lsp4j.InitializedParams;
-import org.eclipse.lsp4j.ResourceOperationKind;
-import org.eclipse.lsp4j.ServerCapabilities;
-import org.eclipse.lsp4j.SymbolCapabilities;
-import org.eclipse.lsp4j.SymbolKind;
-import org.eclipse.lsp4j.SymbolKindCapabilities;
-import org.eclipse.lsp4j.TextDocumentClientCapabilities;
-import org.eclipse.lsp4j.WorkspaceClientCapabilities;
-import org.eclipse.lsp4j.WorkspaceEditCapabilities;
-import org.eclipse.lsp4j.WorkspaceFolder;
+
+import org.eclipse.lsp4j.*;
 import org.eclipse.lsp4j.jsonrpc.Launcher;
 import org.eclipse.lsp4j.launch.LSPLauncher;
 import org.eclipse.lsp4j.services.LanguageServer;
@@ -347,6 +333,14 @@ public class LSPBindingFactory {
        symbolCapabilities.setDynamicRegistration(Boolean.TRUE);
        
        TextDocumentClientCapabilities tdcc = new TextDocumentClientCapabilities();
+       PublishDiagnosticsCapabilities pdc = new PublishDiagnosticsCapabilities();
+       pdc.setTagSupport(true);
+       pdc.setCodeDescriptionSupport(true);
+       pdc.setDataSupport(true);
+       pdc.setRelatedInformation(true);
+       pdc.setVersionSupport(true);
+       tdcc.setPublishDiagnostics(pdc);
+
        DocumentSymbolCapabilities dsc = new DocumentSymbolCapabilities();
        dsc.setDynamicRegistration(Boolean.TRUE); //?
        dsc.setSymbolKind( symbolCapabilities.getSymbolKind());
