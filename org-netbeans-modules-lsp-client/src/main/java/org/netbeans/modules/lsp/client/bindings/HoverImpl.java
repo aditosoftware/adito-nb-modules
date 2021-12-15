@@ -70,7 +70,6 @@ public class HoverImpl implements LSPWorkingPool.BackgroundTask, CaretListener, 
             Optional<Hover> hoverResult = call(bindings, file, document, latestCaretPos);
 
             if (hoverResult.isPresent()) {
-                System.out.println("hover\n" +hoverResult);
             }
         }
          catch (InterruptedException | TimeoutException ex) {

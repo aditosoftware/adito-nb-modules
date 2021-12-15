@@ -160,7 +160,6 @@ public class LanguageClientImpl implements LanguageClient {
         WORKER.post(() -> {
             List<Object> outcome = new ArrayList<>();
             for (ConfigurationItem ci : configurationParams.getItems()) {
-                System.out.println("server ask for config " +ci);
                 outcome.add(null);
             }
             result.complete(outcome);
@@ -268,7 +267,7 @@ public class LanguageClientImpl implements LanguageClient {
     @Override
     public void logTrace(LogTraceParams params) {
         // @todo
-        System.out.println("logTrace: " +params);
+        Logger.getLogger(LanguageClientImpl.class.getName()).log(Level.INFO, params.getMessage());
     }
 
     /**

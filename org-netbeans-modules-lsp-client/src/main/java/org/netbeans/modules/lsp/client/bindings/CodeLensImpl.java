@@ -56,13 +56,10 @@ public class CodeLensImpl implements LSPWorkingPool.BackgroundTask {
             clp.setTextDocument(new TextDocumentIdentifier(uri));
             
             List<? extends CodeLens> codeLens = docService.codeLens(clp).get();
-            
-            System.out.println(codeLens);
-            
+
+
             for(CodeLens cl : codeLens) {
                 CodeLens resolved = docService.resolveCodeLens(cl).get();
-                System.out.println( resolved);
-                
             }
 
         } catch (ExecutionException ex) {
