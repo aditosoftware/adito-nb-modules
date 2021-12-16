@@ -336,18 +336,25 @@ public final class Watcher extends BaseAnnotationProvider {
                         // don't ask for nonexistent FOs
                         File file = new File(path);
                         final FileObjectFactory factory = FileObjectFactory.getInstance(file);
-                        FileObject fo = factory.getCachedOnly(file);
-                        if (fo == null || fo.isData()) {
-                            fo = factory.getCachedOnly(file.getParentFile());
+
+                        //START ADITO
+                        synchronized (LOCK)
+                        {
+                            enqueueAll(ADITOWatcherSymlinkExt.getAllReferences(file, factory, getReferences(), impl));
                         }
-                        if (fo != null) {
-                            synchronized (LOCK) {
-                                NotifierKeyRef<KEY> kr = new NotifierKeyRef<KEY>(fo, null, null, impl);
-                                if (getReferences().contains(kr)) {
-                                    enqueue(fo);
-                                }
-                            }
-                        }
+                        //FileObject fo = factory.getCachedOnly(file);
+                        //if (fo == null || fo.isData()) {
+                        //    fo = factory.getCachedOnly(file.getParentFile());
+                        //}
+                        //if (fo != null) {
+                        //    synchronized (LOCK) {
+                        //        NotifierKeyRef<KEY> kr = new NotifierKeyRef<KEY>(fo, null, null, impl);
+                        //        if (getReferences().contains(kr)) {
+                        //            enqueue(fo);
+                        //        }
+                        //    }
+                        //}
+                        //END ADITO
                     }
                 } catch (ThreadDeath td) {
                     throw td;
