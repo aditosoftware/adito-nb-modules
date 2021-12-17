@@ -30,7 +30,7 @@ class ADITOWatcherSymlinkExt
    */
   @NotNull
   public static <KEY> Set<FileObject> getAllReferences(@NotNull File pChangedFile, @NotNull FileObjectFactory pFileObjectFactory,
-                                                       @NotNull Set<NotifierKeyRef> pWatchedRefs, @NotNull Notifier<KEY> pNotifier)
+                                                       @NotNull Set<NotifierKeyRef> pWatchedRefs, @Nullable Notifier<KEY> pNotifier)
   {
     // NetBeans Original
     Set<FileObject> toRefresh = new HashSet<>();
