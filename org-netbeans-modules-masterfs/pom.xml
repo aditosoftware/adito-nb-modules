@@ -9,7 +9,7 @@
 
   <groupId>org.netbeans.modules</groupId>
   <artifactId>org-netbeans-modules-masterfs</artifactId>
-  <version>RELEASE125-1.9.0-1</version>
+  <version>RELEASE125-1.9.0-2</version>
   <packaging>nbm</packaging>
   <name>NetbeansIDE module: org-netbeans-modules-masterfs</name>
 
