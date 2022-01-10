@@ -20,17 +20,13 @@ package org.netbeans.modules.lsp.client.bindings.hints;
 
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
-import java.util.Collections;
-import java.util.EnumMap;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.swing.text.Document;
+
+import de.adito.aditoweb.nbm.nbide.nbaditointerface.lsp.*;
 import org.eclipse.lsp4j.CodeAction;
 import org.eclipse.lsp4j.CodeActionContext;
 import org.eclipse.lsp4j.CodeActionParams;
@@ -48,57 +44,61 @@ import org.netbeans.spi.editor.hints.ErrorDescription;
 import org.netbeans.spi.editor.hints.ErrorDescriptionFactory;
 import org.netbeans.spi.editor.hints.Fix;
 import org.netbeans.spi.editor.hints.LazyFixList;
-import static org.netbeans.spi.editor.hints.LazyFixList.PROP_COMPUTED;
-import static org.netbeans.spi.editor.hints.LazyFixList.PROP_FIXES;
 import org.netbeans.spi.editor.hints.Severity;
 import org.openide.filesystems.FileObject;
+import org.openide.util.Lookup;
 
 /**
  *
  * @author ranSprd
  */
 public class HintsAndErrorsProvider {
-    
+
     private static final Map<DiagnosticSeverity, Severity> severityMap = new EnumMap<>(DiagnosticSeverity.class);
-    
+    private static final Collection<? extends ILSPHintsFilter> _HINTS_FILTERS = Lookup.getDefault().lookupAll(ILSPHintsFilter.class);
+    private static final Collection<? extends ILSPFixesFilter> _FIXES_FILTERS = Lookup.getDefault().lookupAll(ILSPFixesFilter.class);
+
     static {
         severityMap.put(DiagnosticSeverity.Error, Severity.ERROR);
         severityMap.put(DiagnosticSeverity.Hint, Severity.HINT);
         severityMap.put(DiagnosticSeverity.Information, Severity.HINT);
         severityMap.put(DiagnosticSeverity.Warning, Severity.WARNING);
     }
-    
+
     private final LSPBindings bindings;
     private final Map<String, ListMerger> cachedLists = new HashMap<>();
 
     public HintsAndErrorsProvider(LSPBindings bindings) {
         this.bindings = bindings;
     }
-    
+
     /**
      * Build a list of ErrorDescription from given LSP struct.
-     * 
-     * @param diagnostics data from LSP 
+     *
+     * @param diagnostics data from LSP
      * @param file
      * @param doc
-     * @return 
+     * @return
      */
     public List<ErrorDescription> transform(PublishDiagnosticsParams diagnostics, FileObject file, Document doc) {
         List<ErrorDescription> errorDescriptions = get(diagnostics).combinedStream(diagnostics.getDiagnostics())
 //        List<ErrorDescription> errorDescriptions = diagnostics.getDiagnostics().stream()
                 .map(d -> createHintsAndErrors(doc, file, diagnostics.getUri(), d))
+            .filter(pDesc -> _HINTS_FILTERS.stream()
+                .filter(pFilter -> pFilter.canFilter(file))
+                .allMatch(pFilter -> pFilter.filter(file, pDesc.getId(), pDesc.getDescription(), pDesc.getSeverity().name(), pDesc.getRange())))
                 .collect(Collectors.toList());
         return errorDescriptions;
     }
 
     private ErrorDescription createHintsAndErrors(Document doc, FileObject file, String uri, org.eclipse.lsp4j.Diagnostic d) {
-        LazyFixList fixList = new DiagnosticFixList(uri, d);
+        LazyFixList fixList = new DiagnosticFixList(uri, d, file);
         return ErrorDescriptionFactory.createErrorDescription(severityMap.get(d.getSeverity()), d.getMessage(), fixList, file, Utils.getOffset(doc, d.getRange().getStart()), Utils.getOffset(doc, d.getRange().getEnd()));
     }
-    
-    /** 
+
+    /**
      *  Server can send several lists (with different content) for the same file version, for that reason
-     *  previous send lists are cached and combined with later arrived lists. 
+     *  previous send lists are cached and combined with later arrived lists.
      */
     private ListMerger get(PublishDiagnosticsParams diagnostics) {
         int diagnosticVersion = (diagnostics.getVersion() == null)?-1:diagnostics.getVersion();
@@ -115,10 +115,10 @@ public class HintsAndErrorsProvider {
         } else if (listMerger.version > diagnosticVersion) {
             // uuupppps, that is crazy
         }
-        
+
         return listMerger;
     }
-    
+
     /** merge list of the same version */
     private class ListMerger {
 
@@ -132,26 +132,28 @@ public class HintsAndErrorsProvider {
         public int getVersion() {
             return version;
         }
-        
+
         public Stream<Diagnostic> combinedStream(List<Diagnostic> list) {
             allDiagnosticItems.addAll(list);
             return allDiagnosticItems.stream();
         }
 
     }
-    
+
     private final class DiagnosticFixList implements LazyFixList {
 
         private final PropertyChangeSupport pcs = new PropertyChangeSupport(this);
         private final String fileUri;
+        private final FileObject fileObject;
         private final Diagnostic diagnostic;
         private List<Fix> fixes;
         private boolean computing;
         private boolean computed;
 
-        public DiagnosticFixList(String fileUri, Diagnostic diagnostic) {
+        public DiagnosticFixList(String fileUri, Diagnostic diagnostic, FileObject fileObject) {
             this.fileUri = fileUri;
             this.diagnostic = diagnostic;
+            this.fileObject = fileObject;
         }
 
         @Override
@@ -181,7 +183,10 @@ public class HintsAndErrorsProvider {
                                         new CodeActionContext(Collections.singletonList(diagnostic)))).get();
                         List<Fix> newFixes = commands.stream()
                                                   .map(cmd -> new CommandBasedFix(cmd))
-                                                  .collect(Collectors.toList());
+                            .filter(pFix -> _FIXES_FILTERS.stream()
+                                .filter(pFilter -> pFilter.canFilter(fileObject))
+                                .allMatch(pFilter -> pFilter.filter(fileObject, pFix.getText())))
+                            .collect(Collectors.toList());
                         synchronized (this) {
                             this.fixes = Collections.unmodifiableList(newFixes);
                             this.computed = true;
@@ -221,7 +226,7 @@ public class HintsAndErrorsProvider {
                 return null;
             }
         }
-        
+
     }
-    
+
 }
