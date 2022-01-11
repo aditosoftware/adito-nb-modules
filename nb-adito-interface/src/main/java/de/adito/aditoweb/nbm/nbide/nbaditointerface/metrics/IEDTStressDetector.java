@@ -5,7 +5,7 @@ package de.adito.aditoweb.nbm.nbide.nbaditointerface.metrics;
  *
  * @author m.kaspera, 20.12.2021
  */
-public interface IEDTStressDetector
+public interface IEDTStressDetector extends IRunnableDetector
 {
 
   /**

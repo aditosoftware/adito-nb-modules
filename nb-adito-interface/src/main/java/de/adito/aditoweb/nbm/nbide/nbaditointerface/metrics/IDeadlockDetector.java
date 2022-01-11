@@ -6,7 +6,7 @@ package de.adito.aditoweb.nbm.nbide.nbaditointerface.metrics;
  *
  * @author m.kaspera, 15.12.2021
  */
-public interface IDeadlockDetector
+public interface IDeadlockDetector extends IRunnableDetector
 {
 
   /**
