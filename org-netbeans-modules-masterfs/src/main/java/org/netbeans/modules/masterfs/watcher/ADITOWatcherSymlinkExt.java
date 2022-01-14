@@ -8,6 +8,7 @@ import org.openide.util.BaseUtilities;
 
 import java.io.File;
 import java.util.*;
+import java.util.function.*;
 
 /**
  * Implementes specialhandling for NTFS junction files
@@ -22,26 +23,30 @@ class ADITOWatcherSymlinkExt
    * Returns all references that have to be refreshed, after pChangedFile changed.
    * This method tries to handle symbolic links too.
    *
-   * @param pChangedFile       File that changed
-   * @param pFileObjectFactory Factory to retrieve FileObjects
-   * @param pWatchedRefs       All Refs, that are currently watched
-   * @param pNotifier          Notifier
+   * @param pChangedFile         File that changed
+   * @param pFileObjectFactory   Factory to retrieve FileObjects
+   * @param pWatchedRefs         All Refs, that are currently watched
+   * @param pNotifier            Notifier
+   * @param pExecuteSynchronized Wraps the passed runnable in a synchronized block
    * @return a set of FileObjects that have to be recalculcated / refreshed, because they somehow belong to pChangedFile
    */
   @NotNull
   public static <KEY> Set<FileObject> getAllReferences(@NotNull File pChangedFile, @NotNull FileObjectFactory pFileObjectFactory,
-                                                       @NotNull Set<NotifierKeyRef> pWatchedRefs, @Nullable Notifier<KEY> pNotifier)
+                                                       @NotNull Supplier<Set<NotifierKeyRef>> pWatchedRefs, @Nullable Notifier<KEY> pNotifier,
+                                                       @NotNull Consumer<Runnable> pExecuteSynchronized)
   {
     // NetBeans Original
     Set<FileObject> toRefresh = new HashSet<>();
     FileObject fo = pFileObjectFactory.getCachedOnly(pChangedFile);
+    Set<NotifierKeyRef> watchedRefs = new HashSet<>();
+    pExecuteSynchronized.accept(() -> watchedRefs.addAll(pWatchedRefs.get()));
     if (fo == null || fo.isData())
       fo = pFileObjectFactory.getCachedOnly(pChangedFile.getParentFile());
 
     if (fo != null)
     {
       NotifierKeyRef<?> kr = new NotifierKeyRef<>(fo, null, null, pNotifier);
-      if (pWatchedRefs.contains(kr))
+      if (watchedRefs.contains(kr))
         toRefresh.add(fo);
     }
 
@@ -49,7 +54,7 @@ class ADITOWatcherSymlinkExt
     try
     {
       String pathToFire = fo == null ? pChangedFile.getAbsolutePath() : fo.getPath();
-      for (NotifierKeyRef<?> watchedRef : pWatchedRefs)
+      for (NotifierKeyRef<?> watchedRef : watchedRefs)
       {
         FileObject refFo = watchedRef.get();
         if (refFo != null && _isSymbolicLinkRecursive(refFo))

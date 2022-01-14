@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.WeakHashMap;
+import java.util.function.BiFunction;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.netbeans.modules.masterfs.filebasedfs.fileobjects.FileObjectFactory;
@@ -338,7 +339,12 @@ public final class Watcher extends BaseAnnotationProvider {
                         final FileObjectFactory factory = FileObjectFactory.getInstance(file);
 
                         //START ADITO
-                        enqueueAll(ADITOWatcherSymlinkExt.getAllReferences(file, factory, new HashSet<>(getReferences()), impl));
+                        enqueueAll(ADITOWatcherSymlinkExt.getAllReferences(file, factory, () -> new HashSet<>(getReferences()), impl, (pRun) -> {
+                            synchronized (LOCK)
+                            {
+                                pRun.run();
+                            }
+                        }));
                         //FileObject fo = factory.getCachedOnly(file);
                         //if (fo == null || fo.isData()) {
                         //    fo = factory.getCachedOnly(file.getParentFile());
