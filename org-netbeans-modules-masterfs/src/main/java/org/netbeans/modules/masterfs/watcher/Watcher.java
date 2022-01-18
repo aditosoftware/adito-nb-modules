@@ -339,12 +339,18 @@ public final class Watcher extends BaseAnnotationProvider {
                         final FileObjectFactory factory = FileObjectFactory.getInstance(file);
 
                         //START ADITO
-                        enqueueAll(ADITOWatcherSymlinkExt.getAllReferences(file, factory, () -> new HashSet<>(getReferences()), impl, (pRun) -> {
+                        Set<FileObject> referencesToRefresh = ADITOWatcherSymlinkExt.getAllReferences(file,
+                                                                                                      factory,
+                                                                                                      () -> new HashSet<>(getReferences()),
+                                                                                                      impl,
+                                                                                                      pRun -> {
                             synchronized (LOCK)
                             {
                                 pRun.run();
                             }
-                        }));
+                        });
+                        if(!referencesToRefresh.isEmpty())
+                            enqueueAll(referencesToRefresh);
                         //FileObject fo = factory.getCachedOnly(file);
                         //if (fo == null || fo.isData()) {
                         //    fo = factory.getCachedOnly(file.getParentFile());
