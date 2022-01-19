@@ -36,8 +36,10 @@ import org.netbeans.modules.editor.indent.api.IndentUtils;
 import org.netbeans.modules.editor.indent.spi.Context;
 import org.netbeans.modules.editor.indent.spi.ExtraLock;
 import org.netbeans.modules.editor.indent.spi.ReformatTask;
+import org.netbeans.modules.lsp.client.LSPBindingFactory;
 import org.netbeans.modules.lsp.client.LSPBindings;
 import org.netbeans.modules.lsp.client.Utils;
+import org.netbeans.modules.lsp.client.model.LSPServerCapabilities;
 import org.openide.filesystems.FileObject;
 import org.openide.text.NbDocument;
 
@@ -51,7 +53,7 @@ public class Formatter implements ReformatTask {
         public ReformatTask createTask(Context context) {
             FileObject file = NbEditorUtilities.getFileObject(context.document());
             if (file != null) {
-                LSPBindings bindings = LSPBindings.getBindings(file);
+                LSPBindings bindings = LSPBindingFactory.getBindingForFile(file);
                 if (bindings != null) {
                     return new Formatter(context);
                 }
@@ -71,13 +73,12 @@ public class Formatter implements ReformatTask {
     public void reformat() throws BadLocationException {
         FileObject file = NbEditorUtilities.getFileObject(ctx.document());
         if (file != null) {
-            LSPBindings bindings = LSPBindings.getBindings(file);
+            LSPBindings bindings = LSPBindingFactory.getBindingForFile(file);
             if (bindings != null) {
-                Boolean documentFormatting = bindings.getInitResult().getCapabilities().getDocumentFormattingProvider();
-                Boolean rangeFormatting = bindings.getInitResult().getCapabilities().getDocumentRangeFormattingProvider();
-                if (rangeFormatting != null && rangeFormatting) {
+                LSPServerCapabilities capabilities = bindings.getInitResult().getCapabilities();
+                if (capabilities.hasDocumentRangeFormattingSupport()) {
                     rangeFormat(file, bindings);
-                } else if (documentFormatting != null && documentFormatting) {
+                } else if (capabilities.hasDocumentFormattingSupport()) {
                     documentFormat(file, bindings);
                 }
             }

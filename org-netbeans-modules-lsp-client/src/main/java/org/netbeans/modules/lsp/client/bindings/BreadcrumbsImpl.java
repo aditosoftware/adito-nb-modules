@@ -48,8 +48,9 @@ import org.netbeans.editor.SideBarFactory;
 import org.netbeans.modules.editor.NbEditorUtilities;
 import org.netbeans.modules.editor.breadcrumbs.spi.BreadcrumbsController;
 import org.netbeans.modules.editor.breadcrumbs.spi.BreadcrumbsElement;
+import org.netbeans.modules.lsp.client.LSPBindingFactory;
 import org.netbeans.modules.lsp.client.LSPBindings;
-import org.netbeans.modules.lsp.client.LSPBindings.BackgroundTask;
+import org.netbeans.modules.lsp.client.LSPWorkingPool.BackgroundTask;
 import org.netbeans.modules.lsp.client.Utils;
 import org.openide.filesystems.FileObject;
 import org.openide.loaders.DataObject;
@@ -90,7 +91,7 @@ public class BreadcrumbsImpl implements BackgroundTask {
 
             SwingUtilities.invokeLater(() -> update());
         } catch (InterruptedException | ExecutionException ex) {
-            Exceptions.printStackTrace(ex);
+//            Exceptions.printStackTrace(ex);
         }
     }
 
@@ -327,17 +328,17 @@ public class BreadcrumbsImpl implements BackgroundTask {
             setLayout(new BorderLayout());
             add(sidebar, BorderLayout.CENTER);
             sidebar.addPropertyChangeListener(this);
-            LSPBindings.addChangeListener(this);
+            LSPBindingFactory.addChangeListener(this);
             update();
         }
 
         private void update() {
             WORKER.post(() -> {
                 FileObject file = NbEditorUtilities.getFileObject(component.getDocument());
-                LSPBindings bindings = file != null ? LSPBindings.getBindings(file) : null;
+                LSPBindings bindings = file != null ? LSPBindingFactory.getBindingForFile(file) : null;
                 Runnable r;
 
-                if (bindings != null && Utils.isTrue(bindings.getInitResult().getCapabilities().getDocumentSymbolProvider())) {
+                if (bindings != null && bindings.getInitResult().getCapabilities().hasDocumentSymbolSupport()) {
                     r = () -> {
                         setPreferredSize(sidebar.getPreferredSize());
                         setMaximumSize(sidebar.getMaximumSize());

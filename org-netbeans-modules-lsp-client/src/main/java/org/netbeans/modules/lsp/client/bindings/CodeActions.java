@@ -28,17 +28,16 @@ import org.eclipse.lsp4j.CodeAction;
 import org.eclipse.lsp4j.CodeActionContext;
 import org.eclipse.lsp4j.CodeActionParams;
 import org.eclipse.lsp4j.Command;
-import org.eclipse.lsp4j.ExecuteCommandParams;
 import org.eclipse.lsp4j.Range;
 import org.eclipse.lsp4j.TextDocumentIdentifier;
 import org.eclipse.lsp4j.jsonrpc.messages.Either;
 import org.netbeans.api.editor.mimelookup.MimeRegistration;
 import org.netbeans.modules.editor.NbEditorUtilities;
+import org.netbeans.modules.lsp.client.LSPBindingFactory;
 import org.netbeans.modules.lsp.client.LSPBindings;
 import org.netbeans.modules.lsp.client.Utils;
 import org.netbeans.spi.editor.codegen.CodeGenerator;
 import org.openide.filesystems.FileObject;
-import org.openide.util.Exceptions;
 import org.openide.util.Lookup;
 
 /**
@@ -58,7 +57,7 @@ public class CodeActions implements CodeGenerator.Factory {
         if (file == null) {
             return Collections.emptyList();
         }
-        LSPBindings server = LSPBindings.getBindings(file);
+        LSPBindings server = LSPBindingFactory.getBindingForFile(file);
         if (server == null) {
             return Collections.emptyList();
         }
@@ -81,7 +80,7 @@ public class CodeActions implements CodeGenerator.Factory {
                 }
             }).collect(Collectors.toList());
         } catch (BadLocationException | InterruptedException | ExecutionException ex) {
-            Exceptions.printStackTrace(ex);
+//            Exceptions.printStackTrace(ex);
             return Collections.emptyList();
         }
     }

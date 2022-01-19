@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import javax.swing.text.AbstractDocument;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 import org.eclipse.lsp4j.DefinitionParams;
@@ -39,6 +40,7 @@ import org.netbeans.editor.Utilities;
 import org.netbeans.lib.editor.hyperlink.spi.HyperlinkProviderExt;
 import org.netbeans.lib.editor.hyperlink.spi.HyperlinkType;
 import org.netbeans.modules.editor.NbEditorUtilities;
+import org.netbeans.modules.lsp.client.LSPBindingFactory;
 import org.netbeans.modules.lsp.client.LSPBindings;
 import org.netbeans.modules.lsp.client.Utils;
 import org.netbeans.modules.textmate.lexer.TextmateTokenId;
@@ -69,6 +71,11 @@ public class HyperlinkProviderImpl implements HyperlinkProviderExt {
             return null;
         }
 
+        AbstractDocument lockableDocument = null;
+        if (doc instanceof AbstractDocument) {
+            lockableDocument = (AbstractDocument) doc;
+            lockableDocument.readLock();
+        }
         try {
             //XXX: not really using the server, are we?
             int[] ident = Utilities.getIdentifierBlock((BaseDocument) doc, offset);
@@ -76,6 +83,7 @@ public class HyperlinkProviderImpl implements HyperlinkProviderExt {
                 return null;
             }
             TokenSequence<?> ts = TokenHierarchy.get(doc).tokenSequence();
+            
             if (ts == null) {
                 return ident;
             }
@@ -84,8 +92,12 @@ public class HyperlinkProviderImpl implements HyperlinkProviderExt {
                 return new int[]{ts.offset(), ts.offset() + ts.token().length()};
             }
             return ident;
-        } catch (BadLocationException ex) {
+        } catch (Exception ex) {
             return null;
+        } finally {
+            if (lockableDocument != null) {
+                lockableDocument.readUnlock();
+            }
         }
     }
 
@@ -96,7 +108,7 @@ public class HyperlinkProviderImpl implements HyperlinkProviderExt {
             //TODO: beep
             return ;
         }
-        LSPBindings server = LSPBindings.getBindings(file);
+        LSPBindings server = LSPBindingFactory.getBindingForFile(file);
         if (server == null) {
             return ;
         }
@@ -138,7 +150,24 @@ public class HyperlinkProviderImpl implements HyperlinkProviderExt {
     }
 
     @Override
-    public String getTooltipText(Document doc, int offset, HyperlinkType type) {
+    public String getTooltipText(Document document, int offset, HyperlinkType type) {
+        
+        FileObject file = NbEditorUtilities.getFileObject(document);
+        if (file == null) {
+            return null;
+        }
+        LSPBindings server = LSPBindingFactory.getBindingForFile(file);
+        if (server == null) {
+            return null;
+        }
+        try {
+            return HoverImpl.call(server, file, document, offset)
+                            .map(lspResponse -> HoverImpl.getSimpleHoverContent(lspResponse))
+                            .orElse(null);
+        } catch (Exception e) {
+        }
+        
+        
         return null;
     }
 

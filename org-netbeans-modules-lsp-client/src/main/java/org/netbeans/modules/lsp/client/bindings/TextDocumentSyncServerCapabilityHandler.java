@@ -50,8 +50,11 @@ import org.netbeans.api.editor.EditorRegistry;
 import org.netbeans.editor.BaseDocumentEvent;
 import org.netbeans.lib.editor.util.swing.DocumentUtilities;
 import org.netbeans.modules.editor.*;
+import org.netbeans.modules.lsp.client.LSPBindingFactory;
 import org.netbeans.modules.lsp.client.LSPBindings;
+import org.netbeans.modules.lsp.client.LSPWorkingPool;
 import org.netbeans.modules.lsp.client.Utils;
+import org.netbeans.modules.lsp.client.bindings.symbols.DocumentStructureProvider;
 import org.openide.filesystems.FileObject;
 import org.openide.filesystems.FileUtil;
 import org.openide.modules.OnStart;
@@ -127,8 +130,9 @@ public class TextDocumentSyncServerCapabilityHandler {
     private void documentOpened(Document doc) {
         FileObject file = NbEditorUtilities.getFileObject(doc);
 
-        if (file == null)
+        if (file == null) {
             return; //ignore
+        }
 
         openDocument2PanesCount.computeIfAbsent(doc, d -> {
             doc.putProperty(TextDocumentSyncServerCapabilityHandler.class, true);
@@ -161,7 +165,7 @@ public class TextDocumentSyncServerCapabilityHandler {
                         long documentVersion = DocumentUtilities.getDocumentVersion(doc);
 
                         WORKER.post(() -> {
-                            LSPBindings server = LSPBindings.getBindings(file);
+                            LSPBindings server = LSPBindingFactory.getBindingForFile(file);
 
                             if (server == null)
                                 return ; //ignore
@@ -195,8 +199,7 @@ public class TextDocumentSyncServerCapabilityHandler {
                                     break;
                             }
 
-                            VersionedTextDocumentIdentifier di = new VersionedTextDocumentIdentifier(++version);
-                            di.setUri(org.netbeans.modules.lsp.client.Utils.toURI(file));
+                            VersionedTextDocumentIdentifier di = new VersionedTextDocumentIdentifier(org.netbeans.modules.lsp.client.Utils.toURI(file), ++version);
                             DidChangeTextDocumentParams params = new DidChangeTextDocumentParams(di, Arrays.asList(event));
 
                             server.getTextDocumentService().didChange(params);
@@ -216,7 +219,7 @@ public class TextDocumentSyncServerCapabilityHandler {
                                     });
                                 }
                             }
-                            LSPBindings.scheduleBackgroundTasks(file);
+                            LSPWorkingPool.scheduleBackgroundTasks(file);
                         });
                     } catch (BadLocationException ex) {
                         Exceptions.printStackTrace(ex);
@@ -237,6 +240,7 @@ public class TextDocumentSyncServerCapabilityHandler {
             return; //ignore
 
         documentOpened(doc);
+        DocumentStructureProvider.INSTANCE.register(doc, file);
         registerBackgroundTasks(c);
         openDocument2PanesCount.compute(doc, (d, count) -> count + 1);
     }
@@ -255,10 +259,12 @@ public class TextDocumentSyncServerCapabilityHandler {
                 if (file == null)
                     return; //ignore
 
-                LSPBindings server = LSPBindings.getBindings(file);
+                LSPBindings server = LSPBindingFactory.getBindingForFile(file);
 
                 if (server == null)
                     return ; //ignore
+
+                DocumentStructureProvider.INSTANCE.unregister(file);
 
                 TextDocumentIdentifier di = new TextDocumentIdentifier();
                 di.setUri(Utils.toURI(file));
@@ -278,7 +284,7 @@ public class TextDocumentSyncServerCapabilityHandler {
             if (file == null)
                 return; //ignore
 
-            LSPBindings server = LSPBindings.getBindings(file);
+            LSPBindings server = LSPBindingFactory.getBindingForFile(file);
 
             if (server == null)
                 return ; //ignore
@@ -302,40 +308,53 @@ public class TextDocumentSyncServerCapabilityHandler {
                 }
             });
 
+            // languageId sollte csharp sein
             TextDocumentItem textDocumentItem = new TextDocumentItem(uri,
                                                                      FileUtil.getMIMEType(file),
                                                                      0,
                                                                      text[0]);
 
             server.getTextDocumentService().didOpen(new DidOpenTextDocumentParams(textDocumentItem));
-            LSPBindings.scheduleBackgroundTasks(file);
+            LSPWorkingPool.scheduleBackgroundTasks(file);
         });
     }
 
-    private void registerBackgroundTasks(JTextComponent c) {
-        Document doc = c.getDocument();
+    private void registerBackgroundTasks(JTextComponent textComponent) {
+        Document doc = textComponent.getDocument();
         WORKER.post(() -> {
             FileObject file = NbEditorUtilities.getFileObject(doc);
 
             if (file == null)
                 return; //ignore
 
-            LSPBindings server = LSPBindings.getBindings(file);
+            LSPBindings server = LSPBindingFactory.getBindingForFile(file);
 
             if (server == null)
                 return ; //ignore
 
             SwingUtilities.invokeLater(() -> {
-                if (c.getClientProperty(MarkOccurrences.class) == null) {
-                    MarkOccurrences mo = new MarkOccurrences(c);
-                    LSPBindings.addBackgroundTask(file, mo);
-                    c.putClientProperty(MarkOccurrences.class, mo);
+                if (textComponent.getClientProperty(MarkOccurrences.class) == null) {
+                    MarkOccurrences mo = new MarkOccurrences(textComponent);
+                    LSPWorkingPool.addBackgroundTask(file, mo);
+                    textComponent.putClientProperty(MarkOccurrences.class, mo);
                 }
-                if (c.getClientProperty(BreadcrumbsImpl.class) == null) {
-                    BreadcrumbsImpl bi = new BreadcrumbsImpl(c);
-                    LSPBindings.addBackgroundTask(file, bi);
-                    c.putClientProperty(BreadcrumbsImpl.class, bi);
+                if (textComponent.getClientProperty(BreadcrumbsImpl.class) == null) {
+                    BreadcrumbsImpl bi = new BreadcrumbsImpl(textComponent);
+                    LSPWorkingPool.addBackgroundTask(file, bi);
+                    textComponent.putClientProperty(BreadcrumbsImpl.class, bi);
                 }
+//                if (textComponent.getClientProperty(HoverImpl.class) == null) {
+//                    HoverImpl hover = new HoverImpl(textComponent);
+//                    LSPWorkingPool.addBackgroundTask(file, hover);
+//                    textComponent.putClientProperty(HoverImpl.class, hover);
+//                }
+//                if (textComponent.getClientProperty(SignatureHelpImpl.class) == null) {
+//                    SignatureHelpImpl signatureHelper = new SignatureHelpImpl(textComponent);
+//                    LSPWorkingPool.addBackgroundTask(file, signatureHelper);
+//                    textComponent.putClientProperty(SignatureHelpImpl.class, signatureHelper);
+//                }
+//                CodeLensImpl cl = new CodeLensImpl();
+//                LSPWorkingPool.addBackgroundTask(file, cl);
             });
         });
     }
