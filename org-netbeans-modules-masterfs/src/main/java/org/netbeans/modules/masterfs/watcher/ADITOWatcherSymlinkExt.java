@@ -46,8 +46,9 @@ class ADITOWatcherSymlinkExt
 
     if (fo[0] != null)
     {
+      FileObject realFileObject = getRealFileObject(fo[0]);
       pExecuteSynchronized.accept(() -> {
-        NotifierKeyRef<?> kr = new NotifierKeyRef<>(fo[0], null, null, pNotifier);
+        NotifierKeyRef<?> kr = new NotifierKeyRef<>(fo[0], realFileObject, null, null, pNotifier);
         // ADITO: Retrieve all symlinked files
         Optional.ofNullable(watchedRefs.get(kr.get()))
             .ifPresent(pSet -> pSet
@@ -60,6 +61,24 @@ class ADITOWatcherSymlinkExt
     }
 
     return toRefresh;
+  }
+
+  /**
+   * Get the real location of the file. If the passed FileObject does not contain a symlink, returns the given FileObject
+   *
+   * @param pFileObject FileObject to check
+   * @return the fileObject itself if there is no symlink in the path, or the "real" FileObject if the path to pFileObject contains a symlink
+   */
+  @NotNull
+  static FileObject getRealFileObject(@NotNull FileObject pFileObject) {
+    try
+    {
+      return readSymbolicLinkRecursive(pFileObject);
+    }
+    catch (Exception pE)
+    {
+      return pFileObject;
+    }
   }
 
   /**

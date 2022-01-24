@@ -195,8 +195,9 @@ public final class Watcher extends BaseAnnotationProvider {
             } catch (IOException ex) {
                 LOG.log(Level.INFO, "Exception while clearing the queue", ex);
             }
+            FileObject realFileObject = ADITOWatcherSymlinkExt.getRealFileObject(fo);
             synchronized (LOCK) {
-                NotifierKeyRef<KEY> kr = new NotifierKeyRef<KEY>(fo, null, null, impl);
+                NotifierKeyRef<KEY> kr = new NotifierKeyRef<KEY>(fo, realFileObject, null, null, impl);
                 /* ADITO CHANGE */
                 return getReferences().containsKey(kr.getSymlinkRealTargetLink());
                 /* END ADITO CHANGE */
@@ -226,8 +227,9 @@ public final class Watcher extends BaseAnnotationProvider {
          * (FileChangedManager's "lock" must be taken always first.)
          */
         private void registerSynchronized(FileObject fo) {
+            FileObject realFileObject = ADITOWatcherSymlinkExt.getRealFileObject(fo);
             synchronized (LOCK) {
-                NotifierKeyRef<KEY> kr = new NotifierKeyRef<KEY>(fo, null, null, impl);
+                NotifierKeyRef<KEY> kr = new NotifierKeyRef<KEY>(fo, realFileObject, null, null, impl);
                 /* ADITO CHANGE */
                 if (getReferences().containsKey(kr.getSymlinkRealTargetLink())) {
                 /* END ADITO CHANGE */
@@ -236,7 +238,8 @@ public final class Watcher extends BaseAnnotationProvider {
 
                 try {
                     /* ADITO CHANGE */
-                    NotifierKeyRef<KEY> keyNotifierKeyRef = new NotifierKeyRef<>(fo, NotifierAccessor.getDefault().addWatch(impl, kr.getSymlinkRealTargetLink().getPath()), REF, impl);
+                    NotifierKeyRef<KEY> keyNotifierKeyRef = new NotifierKeyRef<>(fo, realFileObject, NotifierAccessor.getDefault()
+                        .addWatch(impl, kr.getSymlinkRealTargetLink().getPath()), REF, impl);
                     Map<FileObject, Set<NotifierKeyRef>> references = getReferences();
                     Set<NotifierKeyRef> keyRefs = references.get(keyNotifierKeyRef.getSymlinkRealTargetLink());
                     if(keyRefs != null)
@@ -283,9 +286,10 @@ public final class Watcher extends BaseAnnotationProvider {
 
         final void unregister(FileObject fo) {
             assert !fo.isValid() || fo.isFolder() : "If valid, it should be a folder: " + fo + " clazz: " + fo.getClass();
+            FileObject realFileObject = ADITOWatcherSymlinkExt.getRealFileObject(fo);
             synchronized (LOCK) {
                 final NotifierKeyRef[] equalOne = new NotifierKeyRef[1];
-                NotifierKeyRef<KEY> kr = new NotifierKeyRef<KEY>(fo, null, null, impl) {
+                NotifierKeyRef<KEY> kr = new NotifierKeyRef<KEY>(fo, realFileObject, null, null, impl) {
                     @Override
                     public boolean equals(Object obj) {
                         if (super.equals(obj)) {

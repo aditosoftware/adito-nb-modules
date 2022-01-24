@@ -18,6 +18,7 @@
  */
 package org.netbeans.modules.masterfs.watcher;
 
+import org.jetbrains.annotations.Nullable;
 import org.netbeans.modules.masterfs.providers.Notifier;
 import java.io.IOException;
 import java.lang.ref.ReferenceQueue;
@@ -37,7 +38,7 @@ class NotifierKeyRef<KEY> extends WeakReference<FileObject> {
     /*  END ADITO CHANGE */
     private final Notifier<KEY> outer;
 
-    public NotifierKeyRef(FileObject fo, KEY key, ReferenceQueue<FileObject> queue, final Notifier<KEY> outer) {
+    public NotifierKeyRef(FileObject fo, @Nullable FileObject realTarget, KEY key, ReferenceQueue<FileObject> queue, final Notifier<KEY> outer) {
         super(fo, queue);
         this.outer = outer;
         this.key = key;
@@ -46,20 +47,7 @@ class NotifierKeyRef<KEY> extends WeakReference<FileObject> {
             Watcher.LOG.log(Level.FINE, "Adding watch for {0}", key);
         }
     /* ADITO CHANGE */
-        try
-        {
-            if(ADITOWatcherSymlinkExt.isSymbolicLinkRecursive(fo))
-            {
-                this.symlinkRealTargetLink = new WeakReference<>(ADITOWatcherSymlinkExt.readSymbolicLinkRecursive(fo));
-            } else
-            {
-                this.symlinkRealTargetLink = new WeakReference<>(null);
-            }
-        }
-        catch (Exception pE)
-        {
-            this.symlinkRealTargetLink = new WeakReference<>(null);
-        }
+        this.symlinkRealTargetLink = new WeakReference<>(realTarget);
         /* END ADITO CHANGE */
     }
 
