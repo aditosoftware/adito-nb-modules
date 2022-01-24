@@ -40,7 +40,14 @@ public class FileFullObservable extends AbstractListenerObservable<FileChangeLis
   @Override
   protected void removeListener(@NotNull File pFile, @NotNull FileChangeListener pFileChangeListener)
   {
-    FileUtil.removeRecursiveListener(pFileChangeListener, pFile);
+    try
+    {
+      FileUtil.removeRecursiveListener(pFileChangeListener, pFile);
+    }
+    catch(IllegalArgumentException iae)
+    {
+      // ignore
+    }
   }
 
   private static class _FileCreatedListener extends FileChangeAdapter
