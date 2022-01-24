@@ -32,6 +32,9 @@ import org.openide.filesystems.FileObject;
 class NotifierKeyRef<KEY> extends WeakReference<FileObject> {
     private final KEY key;
     private final int hash;
+    /* ADITO CHANGE */
+    private WeakReference<FileObject> symlinkRealTargetLink;
+    /*  END ADITO CHANGE */
     private final Notifier<KEY> outer;
 
     public NotifierKeyRef(FileObject fo, KEY key, ReferenceQueue<FileObject> queue, final Notifier<KEY> outer) {
@@ -42,6 +45,22 @@ class NotifierKeyRef<KEY> extends WeakReference<FileObject> {
         if (key != null) {
             Watcher.LOG.log(Level.FINE, "Adding watch for {0}", key);
         }
+    /* ADITO CHANGE */
+        try
+        {
+            if(ADITOWatcherSymlinkExt.isSymbolicLinkRecursive(fo))
+            {
+                this.symlinkRealTargetLink = new WeakReference<>(ADITOWatcherSymlinkExt.readSymbolicLinkRecursive(fo));
+            } else
+            {
+                this.symlinkRealTargetLink = new WeakReference<>(null);
+            }
+        }
+        catch (Exception pE)
+        {
+            this.symlinkRealTargetLink = new WeakReference<>(null);
+        }
+        /* END ADITO CHANGE */
     }
 
     @Override
@@ -77,5 +96,12 @@ class NotifierKeyRef<KEY> extends WeakReference<FileObject> {
     public int hashCode() {
         return hash;
     }
-    
+
+    /* ADITO CHANGE */
+    public FileObject getSymlinkRealTargetLink()
+    {
+        FileObject symlinkRealTarget = symlinkRealTargetLink.get();
+        return  symlinkRealTarget == null ? super.get() : symlinkRealTarget;
+    }
+    /* END ADITO CHANGE */
 }

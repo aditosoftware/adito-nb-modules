@@ -32,42 +32,31 @@ class ADITOWatcherSymlinkExt
    */
   @NotNull
   public static <KEY> Set<FileObject> getAllReferences(@NotNull File pChangedFile, @NotNull FileObjectFactory pFileObjectFactory,
-                                                       @NotNull Supplier<Set<NotifierKeyRef>> pWatchedRefs, @Nullable Notifier<KEY> pNotifier,
+                                                       @NotNull Supplier<Map<FileObject, Set<NotifierKeyRef>>> pWatchedRefs, @Nullable Notifier<KEY> pNotifier,
                                                        @NotNull Consumer<Runnable> pExecuteSynchronized)
   {
     // NetBeans Original
     Set<FileObject> toRefresh = new HashSet<>();
-    FileObject fo = pFileObjectFactory.getCachedOnly(pChangedFile);
-    Set<NotifierKeyRef> watchedRefs = new HashSet<>();
-    pExecuteSynchronized.accept(() -> watchedRefs.addAll(pWatchedRefs.get()));
-    if (fo == null || fo.isData())
-      fo = pFileObjectFactory.getCachedOnly(pChangedFile.getParentFile());
+    Map<FileObject, Set<NotifierKeyRef>> watchedRefs = new HashMap<>();
+    final FileObject[] fo = new FileObject[1];
+    fo[0] = pFileObjectFactory.getCachedOnly(pChangedFile);
+    pExecuteSynchronized.accept(() -> watchedRefs.putAll(pWatchedRefs.get()));
+    if (fo[0] == null || fo[0].isData())
+      fo[0] = pFileObjectFactory.getCachedOnly(pChangedFile.getParentFile());
 
-    if (fo != null)
+    if (fo[0] != null)
     {
-      NotifierKeyRef<?> kr = new NotifierKeyRef<>(fo, null, null, pNotifier);
-      if (watchedRefs.contains(kr))
-        toRefresh.add(fo);
-    }
-
-    // ADITO: Retrieve all symlinked files
-    try
-    {
-      String pathToFire = fo == null ? pChangedFile.getAbsolutePath() : fo.getPath();
-      for (NotifierKeyRef<?> watchedRef : watchedRefs)
-      {
-        FileObject refFo = watchedRef.get();
-        if (refFo != null && _isSymbolicLinkRecursive(refFo))
-        {
-          FileObject symlinkTarget = _readSymbolicLinkRecursive(refFo);
-          if (Objects.equals(pathToFire, symlinkTarget.getPath()))
-            toRefresh.add(refFo);
-        }
-      }
-    }
-    catch (Exception e)
-    {
-      // ignore
+      pExecuteSynchronized.accept(() -> {
+        NotifierKeyRef<?> kr = new NotifierKeyRef<>(fo[0], null, null, pNotifier);
+        // ADITO: Retrieve all symlinked files
+        Optional.ofNullable(watchedRefs.get(kr.get()))
+            .ifPresent(pSet -> pSet
+                .forEach(pNotifierKeyRef -> {
+                  toRefresh.add(pNotifierKeyRef.getSymlinkRealTargetLink());
+                  if (Optional.ofNullable(pNotifierKeyRef.get()).map(pFo -> !pFo.equals(pNotifierKeyRef.getSymlinkRealTargetLink())).orElse(false))
+                    toRefresh.add(pNotifierKeyRef.get());
+                }));
+      });
     }
 
     return toRefresh;
@@ -80,7 +69,7 @@ class ADITOWatcherSymlinkExt
    * @param pFo FileObject to check
    * @return true if pFo or any of its parents are symlinks
    */
-  private static boolean _isSymbolicLinkRecursive(@Nullable FileObject pFo) throws Exception
+  static boolean isSymbolicLinkRecursive(@Nullable FileObject pFo) throws Exception
   {
     FileObject fo = pFo;
     while (fo != null)
@@ -101,7 +90,7 @@ class ADITOWatcherSymlinkExt
    * @return the target
    */
   @NotNull
-  private static FileObject _readSymbolicLinkRecursive(@NotNull FileObject pFo) throws Exception
+  static FileObject readSymbolicLinkRecursive(@NotNull FileObject pFo) throws Exception
   {
     FileObject fo = pFo;
     while (fo != null)
