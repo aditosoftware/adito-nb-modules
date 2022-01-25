@@ -8,7 +8,6 @@ import org.openide.util.BaseUtilities;
 
 import java.io.File;
 import java.util.*;
-import java.util.function.*;
 
 /**
  * Implementes specialhandling for NTFS junction files
@@ -23,62 +22,50 @@ class ADITOWatcherSymlinkExt
    * Returns all references that have to be refreshed, after pChangedFile changed.
    * This method tries to handle symbolic links too.
    *
-   * @param pChangedFile         File that changed
-   * @param pFileObjectFactory   Factory to retrieve FileObjects
-   * @param pWatchedRefs         All Refs, that are currently watched
-   * @param pNotifier            Notifier
-   * @param pExecuteSynchronized Wraps the passed runnable in a synchronized block
+   * @param pChangedFile       File that changed
+   * @param pFileObjectFactory Factory to retrieve FileObjects
+   * @param pWatchedRefs       All Refs, that are currently watched
+   * @param pNotifier          Notifier
    * @return a set of FileObjects that have to be recalculcated / refreshed, because they somehow belong to pChangedFile
    */
   @NotNull
   public static <KEY> Set<FileObject> getAllReferences(@NotNull File pChangedFile, @NotNull FileObjectFactory pFileObjectFactory,
-                                                       @NotNull Supplier<Map<FileObject, Set<NotifierKeyRef>>> pWatchedRefs, @Nullable Notifier<KEY> pNotifier,
-                                                       @NotNull Consumer<Runnable> pExecuteSynchronized)
+                                                       @NotNull Set<NotifierKeyRef> pWatchedRefs, @Nullable Notifier<KEY> pNotifier)
   {
     // NetBeans Original
     Set<FileObject> toRefresh = new HashSet<>();
-    Map<FileObject, Set<NotifierKeyRef>> watchedRefs = new HashMap<>();
-    final FileObject[] fo = new FileObject[1];
-    fo[0] = pFileObjectFactory.getCachedOnly(pChangedFile);
-    pExecuteSynchronized.accept(() -> watchedRefs.putAll(pWatchedRefs.get()));
-    if (fo[0] == null || fo[0].isData())
-      fo[0] = pFileObjectFactory.getCachedOnly(pChangedFile.getParentFile());
+    FileObject fo = pFileObjectFactory.getCachedOnly(pChangedFile);
+    if (fo == null || fo.isData())
+      fo = pFileObjectFactory.getCachedOnly(pChangedFile.getParentFile());
 
-    if (fo[0] != null)
+    if (fo != null)
     {
-      FileObject realFileObject = getRealFileObject(fo[0]);
-      pExecuteSynchronized.accept(() -> {
-        NotifierKeyRef<?> kr = new NotifierKeyRef<>(fo[0], realFileObject, null, null, pNotifier);
-        // ADITO: Retrieve all symlinked files
-        Optional.ofNullable(watchedRefs.get(kr.get()))
-            .ifPresent(pSet -> pSet
-                .forEach(pNotifierKeyRef -> {
-                  toRefresh.add(pNotifierKeyRef.getSymlinkRealTargetLink());
-                  if (Optional.ofNullable(pNotifierKeyRef.get()).map(pFo -> !pFo.equals(pNotifierKeyRef.getSymlinkRealTargetLink())).orElse(false))
-                    toRefresh.add(pNotifierKeyRef.get());
-                }));
-      });
+      NotifierKeyRef<?> kr = new NotifierKeyRef<>(fo, null, null, pNotifier);
+      if (pWatchedRefs.contains(kr))
+        toRefresh.add(fo);
+    }
+
+    // ADITO: Retrieve all symlinked files
+    try
+    {
+      String pathToFire = fo == null ? pChangedFile.getAbsolutePath() : fo.getPath();
+      for (NotifierKeyRef<?> watchedRef : pWatchedRefs)
+      {
+        FileObject refFo = watchedRef.get();
+        if (refFo != null && _isSymbolicLinkRecursive(refFo))
+        {
+          FileObject symlinkTarget = _readSymbolicLinkRecursive(refFo);
+          if (Objects.equals(pathToFire, symlinkTarget.getPath()))
+            toRefresh.add(refFo);
+        }
+      }
+    }
+    catch (Exception e)
+    {
+      // ignore
     }
 
     return toRefresh;
-  }
-
-  /**
-   * Get the real location of the file. If the passed FileObject does not contain a symlink, returns the given FileObject
-   *
-   * @param pFileObject FileObject to check
-   * @return the fileObject itself if there is no symlink in the path, or the "real" FileObject if the path to pFileObject contains a symlink
-   */
-  @NotNull
-  static FileObject getRealFileObject(@NotNull FileObject pFileObject) {
-    try
-    {
-      return readSymbolicLinkRecursive(pFileObject);
-    }
-    catch (Exception pE)
-    {
-      return pFileObject;
-    }
   }
 
   /**
@@ -88,7 +75,7 @@ class ADITOWatcherSymlinkExt
    * @param pFo FileObject to check
    * @return true if pFo or any of its parents are symlinks
    */
-  static boolean isSymbolicLinkRecursive(@Nullable FileObject pFo) throws Exception
+  private static boolean _isSymbolicLinkRecursive(@Nullable FileObject pFo) throws Exception
   {
     FileObject fo = pFo;
     while (fo != null)
@@ -109,7 +96,7 @@ class ADITOWatcherSymlinkExt
    * @return the target
    */
   @NotNull
-  static FileObject readSymbolicLinkRecursive(@NotNull FileObject pFo) throws Exception
+  private static FileObject _readSymbolicLinkRecursive(@NotNull FileObject pFo) throws Exception
   {
     FileObject fo = pFo;
     while (fo != null)

@@ -20,10 +20,15 @@
 package org.netbeans.modules.masterfs.watcher;
 
 import org.netbeans.modules.masterfs.providers.Notifier;
+import java.awt.Image;
 import java.io.File;
 import java.io.IOException;
-import java.lang.ref.*;
-import java.util.*;
+import java.lang.ref.ReferenceQueue;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.WeakHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.netbeans.modules.masterfs.filebasedfs.fileobjects.FileObjectFactory;
@@ -154,9 +159,7 @@ public final class Watcher extends BaseAnnotationProvider {
         private final ReferenceQueue<FileObject> REF = new ReferenceQueue<FileObject>();
         private final Notifier<KEY> impl;
         private final Object LOCK = new Object();
-        /* ADITO CHANGE */
-        private final Map<FileObject, Set<NotifierKeyRef>> references = new HashMap<>();
-        /* END ADITO CHANGE */
+        private final Set<NotifierKeyRef> references = new HashSet<NotifierKeyRef>();
         private final Thread watcher;
         private volatile boolean shutdown;
         private int loggedRegisterExceptions = 0;
@@ -195,12 +198,9 @@ public final class Watcher extends BaseAnnotationProvider {
             } catch (IOException ex) {
                 LOG.log(Level.INFO, "Exception while clearing the queue", ex);
             }
-            FileObject realFileObject = ADITOWatcherSymlinkExt.getRealFileObject(fo);
             synchronized (LOCK) {
-                NotifierKeyRef<KEY> kr = new NotifierKeyRef<KEY>(fo, realFileObject, null, null, impl);
-                /* ADITO CHANGE */
-                return getReferences().containsKey(kr.getSymlinkRealTargetLink());
-                /* END ADITO CHANGE */
+                NotifierKeyRef<KEY> kr = new NotifierKeyRef<KEY>(fo, null, null, impl);
+                return getReferences().contains(kr);
             }
         }
         
@@ -227,30 +227,14 @@ public final class Watcher extends BaseAnnotationProvider {
          * (FileChangedManager's "lock" must be taken always first.)
          */
         private void registerSynchronized(FileObject fo) {
-            FileObject realFileObject = ADITOWatcherSymlinkExt.getRealFileObject(fo);
             synchronized (LOCK) {
-                NotifierKeyRef<KEY> kr = new NotifierKeyRef<KEY>(fo, realFileObject, null, null, impl);
-                /* ADITO CHANGE */
-                if (getReferences().containsKey(kr.getSymlinkRealTargetLink())) {
-                /* END ADITO CHANGE */
+                NotifierKeyRef<KEY> kr = new NotifierKeyRef<KEY>(fo, null, null, impl);
+                if (getReferences().contains(kr)) {
                     return;
                 }
 
                 try {
-                    /* ADITO CHANGE */
-                    NotifierKeyRef<KEY> keyNotifierKeyRef = new NotifierKeyRef<>(fo, realFileObject, NotifierAccessor.getDefault()
-                        .addWatch(impl, kr.getSymlinkRealTargetLink().getPath()), REF, impl);
-                    Map<FileObject, Set<NotifierKeyRef>> references = getReferences();
-                    Set<NotifierKeyRef> keyRefs = references.get(keyNotifierKeyRef.getSymlinkRealTargetLink());
-                    if(keyRefs != null)
-                        keyRefs.add(keyNotifierKeyRef);
-                    else
-                    {
-                        HashSet<NotifierKeyRef> map = new HashSet<>();
-                        map.add(keyNotifierKeyRef);
-                        references.put(keyNotifierKeyRef.getSymlinkRealTargetLink(), map);
-                    }
-                    /* END ADITO CHANGE */
+                    getReferences().add(new NotifierKeyRef<KEY>(fo, NotifierAccessor.getDefault().addWatch(impl, fo.getPath()), REF, impl));
                 } catch (IOException ex) {
                     Level l = getLogLevelForRegisterException(fo);
                     // XXX: handle resource overflow gracefully
@@ -286,10 +270,9 @@ public final class Watcher extends BaseAnnotationProvider {
 
         final void unregister(FileObject fo) {
             assert !fo.isValid() || fo.isFolder() : "If valid, it should be a folder: " + fo + " clazz: " + fo.getClass();
-            FileObject realFileObject = ADITOWatcherSymlinkExt.getRealFileObject(fo);
             synchronized (LOCK) {
                 final NotifierKeyRef[] equalOne = new NotifierKeyRef[1];
-                NotifierKeyRef<KEY> kr = new NotifierKeyRef<KEY>(fo, realFileObject, null, null, impl) {
+                NotifierKeyRef<KEY> kr = new NotifierKeyRef<KEY>(fo, null, null, impl) {
                     @Override
                     public boolean equals(Object obj) {
                         if (super.equals(obj)) {
@@ -305,23 +288,11 @@ public final class Watcher extends BaseAnnotationProvider {
                         return super.hashCode();
                     }
                 };
-                /* ADITO CHANGE */
-                if (!references.containsKey(kr.getSymlinkRealTargetLink())) {
-                /* END ADITO CHANGE */
+                if (!references.contains(kr)) {
                     return;
                 }
-                /* ADITO CHANGE */
-                Set<NotifierKeyRef> keyRefs = references.get(kr.getSymlinkRealTargetLink());
-                if(keyRefs == null || !keyRefs.contains(kr))
-                    return;
-                /* END ADITO CHANGE */
-
                 assert equalOne[0] != null;
-                /* ADITO CHANGE */
-                keyRefs.remove(equalOne[0]);
-                if(keyRefs.isEmpty())
-                    references.remove(kr.getSymlinkRealTargetLink());
-                /* END ADITO CHANGE */
+                getReferences().remove(equalOne[0]);
                 try {
                     equalOne[0].removeWatch();
                 } catch (IOException ex) {
@@ -353,16 +324,10 @@ public final class Watcher extends BaseAnnotationProvider {
                     if (path == null) { // all dirty
                         Set<FileObject> set = new HashSet<FileObject>();
                         synchronized (LOCK) {
-                            /* ADITO CHANGE */
-                            for (Set<NotifierKeyRef> krSet : getReferences().values()) {
-                                for(NotifierKeyRef kr : krSet)
-                                {
-                                    final FileObject ref = kr.get();
-                                    if (ref != null)
-                                    {
-                                        set.add(ref);
-                                    }
-                            /* END ADITO CHANGE */
+                            for (NotifierKeyRef kr : getReferences()) {
+                                final FileObject ref = kr.get();
+                                if (ref != null) {
+                                    set.add(ref);
                                 }
                             }
                         }
@@ -373,18 +338,7 @@ public final class Watcher extends BaseAnnotationProvider {
                         final FileObjectFactory factory = FileObjectFactory.getInstance(file);
 
                         //START ADITO
-                        Set<FileObject> referencesToRefresh = ADITOWatcherSymlinkExt.getAllReferences(file,
-                                                                                                      factory,
-                                                                                                      () -> new HashMap<>(getReferences()),
-                                                                                                      impl,
-                                                                                                      pRun -> {
-                            synchronized (LOCK)
-                            {
-                                pRun.run();
-                            }
-                        });
-                        if(!referencesToRefresh.isEmpty())
-                            enqueueAll(referencesToRefresh);
+                        enqueueAll(ADITOWatcherSymlinkExt.getAllReferences(file, factory, new HashSet<>(getReferences()), impl));
                         //FileObject fo = factory.getCachedOnly(file);
                         //if (fo == null || fo.isData()) {
                         //    fo = factory.getCachedOnly(file.getParentFile());
@@ -418,9 +372,7 @@ public final class Watcher extends BaseAnnotationProvider {
             watcher.join(1000);
         }
 
-        /* ADITO CHANGE */
-        private Map<FileObject, Set<NotifierKeyRef>> getReferences() {
-        /* END ADITO CHANGE */
+        private Set<NotifierKeyRef> getReferences() {
             assert Thread.holdsLock(LOCK);
             return references;
         }
