@@ -20,7 +20,8 @@ import java.util.logging.Level;
 class ADITOWatcherSymlinkExt
 {
 
-  private static final ISymlinkCache _SYMLINK_CACHE = new _GlobalSymlinkCache();
+  private static final ISymlinkCache _SYMLINK_CACHE = new _SymlinkCache();
+  private static final ILastModifiedCache _LASTMODIFIED_CACHE = new _LastModifiedCache();
   private static final ExecutorService _SYMLINK_CALCULATION_POOL = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors(), r -> {
     Thread t = Executors.defaultThreadFactory().newThread(r);
     t.setName("tSymlinkCalculationThread");
@@ -38,11 +39,13 @@ class ADITOWatcherSymlinkExt
   @NotNull
   public static Set<FileObject> getAllReferences(@NotNull FileObject pFileObject, @NotNull Consumer<Consumer<Set<NotifierKeyRef>>> pKeyRefProvider)
   {
-    Set<FileObject> toRefresh = new HashSet<>();
-    ILastModifiedCache lastModifiedCache = new _LastModifiedCache();
+    // Invalidate the lastModified of the given fileobject, because we knew, pFileObject was changed now
+    _LASTMODIFIED_CACHE.invalidate(pFileObject);
 
     try
     {
+      // Check symlinks
+      Set<FileObject> toRefresh = new HashSet<>();
       String pathToFire = pFileObject.getPath();
       AtomicReference<Set<NotifierKeyRef>> savedRefs = new AtomicReference<>();
       pKeyRefProvider.accept(pRefs -> savedRefs.set(new HashSet<>(pRefs)));
@@ -51,23 +54,20 @@ class ADITOWatcherSymlinkExt
                                     FileObject refFo = pRef.get();
                                     if (refFo != null)
                                     {
-                                      FileObject symlinkTarget = _SYMLINK_CACHE.readSymbolicLink(lastModifiedCache, refFo);
+                                      FileObject symlinkTarget = _SYMLINK_CACHE.readSymbolicLink(_LASTMODIFIED_CACHE, refFo);
                                       if (symlinkTarget != null && Objects.equals(pathToFire, symlinkTarget.getPath()))
                                         toRefresh.add(refFo);
                                     }
                                   }, _SYMLINK_CALCULATION_POOL))
                                   .toArray(CompletableFuture[]::new)).get();
+      return toRefresh;
     }
     catch (Throwable e)
     {
       Watcher.LOG.log(Level.WARNING, "", e);
     }
-    finally
-    {
-      lastModifiedCache.invalidate();
-    }
 
-    return toRefresh;
+    return Set.of();
   }
 
   /**
@@ -100,28 +100,31 @@ class ADITOWatcherSymlinkExt
      */
     @Nullable
     FileObject readSymbolicLink(@NotNull ILastModifiedCache pLastModifiedCache, @NotNull FileObject pFo);
-
-    /**
-     * Invalidates the cache and all of its entries
-     */
-    void invalidate();
   }
 
   interface ILastModifiedCache
   {
+    /**
+     * Determines the date, when pFo was last modified
+     *
+     * @param pFo FileObject to check
+     * @return the lastModified timestamp
+     */
     @NotNull
     Date lastModified(@NotNull FileObject pFo);
 
     /**
-     * Invalidates the cache and all of its entries
+     * Invalidates the lastModified entry of the given FileObject
+     *
+     * @param pFo FileObject to invalidate
      */
-    void invalidate();
+    void invalidate(@NotNull FileObject pFo);
   }
 
   /**
    * ISymlinkCache-Impl
    */
-  private static class _GlobalSymlinkCache implements ISymlinkCache
+  private static class _SymlinkCache implements ISymlinkCache
   {
     // key: symlink; value: Pair (symlink-target, lastmodified symlink)
     private final Map<FileObject, Pair<Optional<FileObject>, Date>> internalCache = new ConcurrentHashMap<>(20000);
@@ -178,17 +181,14 @@ class ADITOWatcherSymlinkExt
         return null;
       }
     }
-
-    @Override
-    public void invalidate()
-    {
-      internalCache.clear();
-    }
   }
 
+  /**
+   * ILastModifiedCache-Impl
+   */
   private static class _LastModifiedCache implements ILastModifiedCache
   {
-    private final Map<FileObject, Date> internalCache = new ConcurrentHashMap<>(10000);
+    private final Map<FileObject, Date> internalCache = new ConcurrentHashMap<>(20000);
 
     @NotNull
     @Override
@@ -198,9 +198,9 @@ class ADITOWatcherSymlinkExt
     }
 
     @Override
-    public void invalidate()
+    public void invalidate(@NotNull FileObject pFo)
     {
-      internalCache.clear();
+      internalCache.remove(pFo);
     }
   }
 
