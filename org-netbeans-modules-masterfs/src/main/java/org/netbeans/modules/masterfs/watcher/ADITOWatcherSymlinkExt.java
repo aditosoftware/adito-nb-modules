@@ -8,7 +8,7 @@ import org.openide.util.*;
 
 import java.io.File;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.logging.Level;
@@ -21,6 +21,13 @@ import java.util.logging.Level;
  */
 class ADITOWatcherSymlinkExt
 {
+
+  private static final ISymlinkCache _SYMLINK_CACHE = new _GlobalSymlinkCache();
+  private static final ExecutorService _SYMLINK_CALCULATION_POOL = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors(), r -> {
+    Thread t = Executors.defaultThreadFactory().newThread(r);
+    t.setName("tSymlinkCalculationThread");
+    return t;
+  });
 
   /**
    * Returns all references that have to be refreshed, after pChangedFile changed.
@@ -52,23 +59,24 @@ class ADITOWatcherSymlinkExt
       });
 
     // ADITO: Retrieve all symlinked files
-    _SymlinkCache cache = new _SymlinkCache();
+    ILastModifiedCache lastModifiedCache = new _LastModifiedCache();
 
     try
     {
       String pathToFire = fo == null ? pChangedFile.getAbsolutePath() : fo.getPath();
       AtomicReference<Set<NotifierKeyRef>> savedRefs = new AtomicReference<>();
       pKeyRefProvider.accept(pRefs -> savedRefs.set(new HashSet<>(pRefs)));
-      for (NotifierKeyRef<?> watchedRef : savedRefs.get())
-      {
-        FileObject refFo = watchedRef.get();
-        if (refFo != null)
-        {
-          FileObject symlinkTarget = _readSymbolicLinkTraverseParents(refFo, cache);
-          if (symlinkTarget != null && Objects.equals(pathToFire, symlinkTarget.getPath()))
-            toRefresh.add(refFo);
-        }
-      }
+      CompletableFuture.allOf(savedRefs.get().stream()
+                                  .map(pRef -> CompletableFuture.runAsync(() -> {
+                                    FileObject refFo = pRef.get();
+                                    if (refFo != null)
+                                    {
+                                      FileObject symlinkTarget = _SYMLINK_CACHE.readSymbolicLink(lastModifiedCache, refFo);
+                                      if (symlinkTarget != null && Objects.equals(pathToFire, symlinkTarget.getPath()))
+                                        toRefresh.add(refFo);
+                                    }
+                                  }, _SYMLINK_CALCULATION_POOL))
+                                  .toArray(CompletableFuture[]::new)).get();
     }
     catch (Throwable e)
     {
@@ -76,35 +84,10 @@ class ADITOWatcherSymlinkExt
     }
     finally
     {
-      cache.invalidate();
+      lastModifiedCache.invalidate();
     }
 
     return toRefresh;
-  }
-
-  /**
-   * Reads the target of the symlink which pFo references.
-   * This method tries to resolve the whole symlink path of pFo, so
-   * if a parent of pFo is a symlink, it gets resolved too.
-   *
-   * @param pFo FileObject to check
-   * @return the target
-   */
-  @Nullable
-  private static FileObject _readSymbolicLinkTraverseParents(@NotNull FileObject pFo, @NotNull ISymlinkCache pCache)
-  {
-    FileObject fo = pFo;
-    while (fo != null)
-    {
-      String relativeInLink = FileUtil.getRelativePath(fo, pFo);
-      FileObject realFo = pCache.readSymbolicLink(fo);
-      if(realFo != null)
-        return realFo.getFileObject(relativeInLink);
-
-      fo = fo.getParent();
-    }
-
-    return null;
   }
 
   interface ISymlinkCache
@@ -120,7 +103,18 @@ class ADITOWatcherSymlinkExt
      * @return the target
      */
     @Nullable
-    FileObject readSymbolicLink(@NotNull FileObject pFo);
+    FileObject readSymbolicLink(@NotNull ILastModifiedCache pLastModifiedCache, @NotNull FileObject pFo);
+
+    /**
+     * Invalidates the cache and all of its entries
+     */
+    void invalidate();
+  }
+
+  interface ILastModifiedCache
+  {
+    @NotNull
+    Date lastModified(@NotNull FileObject pFo);
 
     /**
      * Invalidates the cache and all of its entries
@@ -131,36 +125,78 @@ class ADITOWatcherSymlinkExt
   /**
    * ISymlinkCache-Impl
    */
-  private static class _SymlinkCache implements ISymlinkCache
+  private static class _GlobalSymlinkCache implements ISymlinkCache
   {
-    private final Map<FileObject, Optional<FileObject>> internalCache = new ConcurrentHashMap<>(10000);
+    private final Map<Pair<FileObject, Date>, Optional<FileObject>> internalCache = new ConcurrentHashMap<>(10000);
 
     @Nullable
     @Override
-    public FileObject readSymbolicLink(@NotNull FileObject pFo)
+    public FileObject readSymbolicLink(@NotNull ILastModifiedCache pLastModifiedCache, @NotNull FileObject pFo)
     {
-      return internalCache.computeIfAbsent(pFo, pPair -> {
-        try
-        {
-          // Specialhandling: NTFS - only on Windows
-          if (BaseUtilities.isWindows())
-            return Optional.ofNullable(FileUtil.toFileObject(new File(ADITOLinkWindowsNatives.readJunctionLink(pFo.getPath()))));
-        }
-        catch (Throwable e)
-        {
-          // fallback - catch everything because the native code can throw "errors" too.
-        }
+      FileObject fo = pFo;
+      while (fo != null)
+      {
+        Pair<FileObject, Date> current = Pair.of(fo, pLastModifiedCache.lastModified(fo));
 
-        try
-        {
-          return Optional.ofNullable(pFo.readSymbolicLink());
-        }
-        catch (Throwable e)
-        {
-          // no symbolic link detected
-          return Optional.empty();
-        }
-      }).orElse(null);
+        // was calculated before
+        if(internalCache.containsKey(current))
+          return internalCache.get(current).orElse(null);
+
+        String relativeInLink = FileUtil.getRelativePath(fo, pFo);
+        FileObject realFo = _readSymbolicLink(fo);
+
+        // put back in cache
+        internalCache.put(current, Optional.ofNullable(realFo));
+        if (realFo != null)
+          return realFo.getFileObject(relativeInLink);
+
+        fo = fo.getParent();
+      }
+
+      return null;
+    }
+
+    @Nullable
+    private FileObject _readSymbolicLink(@NotNull FileObject pFo)
+    {
+      try
+      {
+        // Specialhandling: NTFS - only on Windows
+        if (BaseUtilities.isWindows())
+          return FileUtil.toFileObject(new File(ADITOLinkWindowsNatives.readJunctionLink(pFo.getPath())));
+      }
+      catch (Throwable e)
+      {
+        // fallback - catch everything because the native code can throw "errors" too.
+      }
+
+      try
+      {
+        return pFo.readSymbolicLink();
+      }
+      catch (Throwable e)
+      {
+        // no symbolic link detected
+        return null;
+      }
+    }
+
+    @Override
+    public void invalidate()
+    {
+      internalCache.clear();
+    }
+  }
+
+  private static class _LastModifiedCache implements ILastModifiedCache
+  {
+    private final Map<FileObject, Date> internalCache = new ConcurrentHashMap<>(10000);
+
+    @NotNull
+    @Override
+    public Date lastModified(@NotNull FileObject pFo)
+    {
+      return internalCache.computeIfAbsent(pFo, FileObject::lastModified);
     }
 
     @Override
