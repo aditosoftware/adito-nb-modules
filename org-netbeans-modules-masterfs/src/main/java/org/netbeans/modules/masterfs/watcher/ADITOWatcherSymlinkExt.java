@@ -8,6 +8,9 @@ import org.openide.util.BaseUtilities;
 
 import java.io.File;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
+import java.util.logging.Level;
 
 /**
  * Implementes specialhandling for NTFS junction files
@@ -24,32 +27,36 @@ class ADITOWatcherSymlinkExt
    *
    * @param pChangedFile       File that changed
    * @param pFileObjectFactory Factory to retrieve FileObjects
-   * @param pWatchedRefs       All Refs, that are currently watched
+   * @param pKeyRefProvider       All Refs, that are currently watched
    * @param pNotifier          Notifier
    * @return a set of FileObjects that have to be recalculcated / refreshed, because they somehow belong to pChangedFile
    */
   @NotNull
   public static <KEY> Set<FileObject> getAllReferences(@NotNull File pChangedFile, @NotNull FileObjectFactory pFileObjectFactory,
-                                                       @NotNull Set<NotifierKeyRef> pWatchedRefs, @Nullable Notifier<KEY> pNotifier)
+                                                       @NotNull Consumer<Consumer<Set<NotifierKeyRef>>> pKeyRefProvider,
+                                                       @Nullable Notifier<KEY> pNotifier)
   {
     // NetBeans Original
     Set<FileObject> toRefresh = new HashSet<>();
     FileObject fo = pFileObjectFactory.getCachedOnly(pChangedFile);
     if (fo == null || fo.isData())
       fo = pFileObjectFactory.getCachedOnly(pChangedFile.getParentFile());
+    final FileObject finalFo = fo;
 
     if (fo != null)
-    {
-      NotifierKeyRef<?> kr = new NotifierKeyRef<>(fo, null, null, pNotifier);
-      if (pWatchedRefs.contains(kr))
-        toRefresh.add(fo);
-    }
+      pKeyRefProvider.accept(pRefs -> {
+        NotifierKeyRef<?> kr = new NotifierKeyRef<>(finalFo, null, null, pNotifier);
+        if (pRefs.contains(kr))
+          toRefresh.add(finalFo);
+      });
 
     // ADITO: Retrieve all symlinked files
     try
     {
       String pathToFire = fo == null ? pChangedFile.getAbsolutePath() : fo.getPath();
-      for (NotifierKeyRef<?> watchedRef : pWatchedRefs)
+      AtomicReference<Set<NotifierKeyRef>> savedRefs = new AtomicReference<>();
+      pKeyRefProvider.accept(pRefs -> savedRefs.set(new HashSet<>(pRefs)));
+      for (NotifierKeyRef<?> watchedRef : savedRefs.get())
       {
         FileObject refFo = watchedRef.get();
         if (refFo != null && _isSymbolicLinkRecursive(refFo))
