@@ -24,11 +24,7 @@ import java.awt.Image;
 import java.io.File;
 import java.io.IOException;
 import java.lang.ref.ReferenceQueue;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.WeakHashMap;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.netbeans.modules.masterfs.filebasedfs.fileobjects.FileObjectFactory;
@@ -242,6 +238,24 @@ public final class Watcher extends BaseAnnotationProvider {
                     LOG.log(Level.FINE, null, ex);
                 }
             }
+
+            // START ADITO
+            // Register all symlinks too
+            FileObject realTargetIfSymlink = ADITOWatcherSymlinkExt.readSymbolicLink(fo);
+            if(realTargetIfSymlink != null && !Objects.equals(fo, realTargetIfSymlink))
+            {
+                boolean registerRealTarget = false;
+                synchronized (LOCK)
+                {
+                    NotifierKeyRef<KEY> kr = new NotifierKeyRef<KEY>(realTargetIfSymlink, null, null, impl);
+                    if (!getReferences().contains(kr))
+                        registerRealTarget = true;
+                }
+
+                if(registerRealTarget)
+                    registerSynchronized(realTargetIfSymlink);
+            }
+            // END ADITO
         }
         
         /**
@@ -336,28 +350,30 @@ public final class Watcher extends BaseAnnotationProvider {
                         // don't ask for nonexistent FOs
                         File file = new File(path);
                         final FileObjectFactory factory = FileObjectFactory.getInstance(file);
-
-                        //START ADITO
-                        enqueueAll(ADITOWatcherSymlinkExt.getAllReferences(file, factory, pConsumer -> {
-                            synchronized (LOCK)
-                            {
-                                pConsumer.accept(getReferences());
+                        FileObject fo = factory.getCachedOnly(file);
+                        if (fo == null || fo.isData()) {
+                            fo = factory.getCachedOnly(file.getParentFile());
+                        }
+                        if (fo != null) {
+                            boolean shouldHandleFileChange = false; //ADITO
+                            synchronized (LOCK) {
+                                NotifierKeyRef<KEY> kr = new NotifierKeyRef<KEY>(fo, null, null, impl);
+                                if (getReferences().contains(kr)) {
+                                    enqueue(fo);
+                                    shouldHandleFileChange = true; // ADITO
+                                }
                             }
-                        }, impl));
 
-                        //FileObject fo = factory.getCachedOnly(file);
-                        //if (fo == null || fo.isData()) {
-                        //    fo = factory.getCachedOnly(file.getParentFile());
-                        //}
-                        //if (fo != null) {
-                        //    synchronized (LOCK) {
-                        //        NotifierKeyRef<KEY> kr = new NotifierKeyRef<KEY>(fo, null, null, impl);
-                        //        if (getReferences().contains(kr)) {
-                        //            enqueue(fo);
-                        //        }
-                        //    }
-                        //}
-                        //END ADITO
+                            // START ADITO
+                            if(shouldHandleFileChange)
+                                enqueueAll(ADITOWatcherSymlinkExt.getAllReferences(fo, pConsumer -> {
+                                    synchronized (LOCK)
+                                    {
+                                        pConsumer.accept(getReferences());
+                                    }
+                                }));
+                            // END ADITO
+                        }
                     }
                 } catch (ThreadDeath td) {
                     throw td;

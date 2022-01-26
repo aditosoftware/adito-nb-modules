@@ -1,8 +1,6 @@
 package org.netbeans.modules.masterfs.watcher;
 
 import org.jetbrains.annotations.*;
-import org.netbeans.modules.masterfs.filebasedfs.fileobjects.FileObjectFactory;
-import org.netbeans.modules.masterfs.providers.Notifier;
 import org.openide.filesystems.*;
 import org.openide.util.*;
 
@@ -33,37 +31,19 @@ class ADITOWatcherSymlinkExt
    * Returns all references that have to be refreshed, after pChangedFile changed.
    * This method tries to handle symbolic links too.
    *
-   * @param pChangedFile       File that changed
-   * @param pFileObjectFactory Factory to retrieve FileObjects
+   * @param pFileObject        File that changed
    * @param pKeyRefProvider    All Refs, that are currently watched
-   * @param pNotifier          Notifier
    * @return a set of FileObjects that have to be recalculcated / refreshed, because they somehow belong to pChangedFile
    */
   @NotNull
-  public static <KEY> Set<FileObject> getAllReferences(@NotNull File pChangedFile, @NotNull FileObjectFactory pFileObjectFactory,
-                                                       @NotNull Consumer<Consumer<Set<NotifierKeyRef>>> pKeyRefProvider,
-                                                       @Nullable Notifier<KEY> pNotifier)
+  public static Set<FileObject> getAllReferences(@NotNull FileObject pFileObject, @NotNull Consumer<Consumer<Set<NotifierKeyRef>>> pKeyRefProvider)
   {
-    // NetBeans Original
     Set<FileObject> toRefresh = new HashSet<>();
-    FileObject fo = pFileObjectFactory.getCachedOnly(pChangedFile);
-    if (fo == null || fo.isData())
-      fo = pFileObjectFactory.getCachedOnly(pChangedFile.getParentFile());
-    final FileObject finalFo = fo;
-
-    if (fo != null)
-      pKeyRefProvider.accept(pRefs -> {
-        NotifierKeyRef<?> kr = new NotifierKeyRef<>(finalFo, null, null, pNotifier);
-        if (pRefs.contains(kr))
-          toRefresh.add(finalFo);
-      });
-
-    // ADITO: Retrieve all symlinked files
     ILastModifiedCache lastModifiedCache = new _LastModifiedCache();
 
     try
     {
-      String pathToFire = fo == null ? pChangedFile.getAbsolutePath() : fo.getPath();
+      String pathToFire = pFileObject.getPath();
       AtomicReference<Set<NotifierKeyRef>> savedRefs = new AtomicReference<>();
       pKeyRefProvider.accept(pRefs -> savedRefs.set(new HashSet<>(pRefs)));
       CompletableFuture.allOf(savedRefs.get().stream()
@@ -88,6 +68,22 @@ class ADITOWatcherSymlinkExt
     }
 
     return toRefresh;
+  }
+
+  /**
+   * Reads the target of the symlink which pFo references.
+   * This has to be done a little weird, because of NTFS "Junction" links.
+   * Those are symlinks too, but {@link FileObject#isSymbolicLink()} returns false, because
+   * symlinks are handled different in NTFS. So {@link FileObject#readSymbolicLink()} will throw an exception,
+   * because NetBeans thinks, that they are no symbolic links...
+   *
+   * @param pFileObject FileObject to check
+   * @return the target
+   */
+  @Nullable
+  public static FileObject readSymbolicLink(@NotNull FileObject pFileObject)
+  {
+    return _SYMLINK_CACHE.readSymbolicLink(new _LastModifiedCache(), pFileObject);
   }
 
   interface ISymlinkCache
@@ -127,7 +123,8 @@ class ADITOWatcherSymlinkExt
    */
   private static class _GlobalSymlinkCache implements ISymlinkCache
   {
-    private final Map<Pair<FileObject, Date>, Optional<FileObject>> internalCache = new ConcurrentHashMap<>(10000);
+    // key: symlink; value: Pair (symlink-target, lastmodified symlink)
+    private final Map<FileObject, Pair<Optional<FileObject>, Date>> internalCache = new ConcurrentHashMap<>(20000);
 
     @Nullable
     @Override
@@ -136,17 +133,18 @@ class ADITOWatcherSymlinkExt
       FileObject fo = pFo;
       while (fo != null)
       {
-        Pair<FileObject, Date> current = Pair.of(fo, pLastModifiedCache.lastModified(fo));
+        Date foLastModified = pLastModifiedCache.lastModified(fo);
+        Pair<Optional<FileObject>, Date> cachedData = internalCache.get(fo);
 
-        // was calculated before
-        if(internalCache.containsKey(current))
-          return internalCache.get(current).orElse(null);
+        // was calculated before and nothing has changed since calculation
+        if (cachedData != null && Objects.equals(cachedData.second(), foLastModified))
+          return cachedData.first().orElse(null); //todo refresh if null? refresh to check if null now?
 
         String relativeInLink = FileUtil.getRelativePath(fo, pFo);
         FileObject realFo = _readSymbolicLink(fo);
 
         // put back in cache
-        internalCache.put(current, Optional.ofNullable(realFo));
+        internalCache.put(fo, Pair.of(Optional.ofNullable(realFo), foLastModified));
         if (realFo != null)
           return realFo.getFileObject(relativeInLink);
 
