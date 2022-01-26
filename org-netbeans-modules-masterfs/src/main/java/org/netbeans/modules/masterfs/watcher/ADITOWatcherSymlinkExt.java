@@ -4,10 +4,11 @@ import org.jetbrains.annotations.*;
 import org.netbeans.modules.masterfs.filebasedfs.fileobjects.FileObjectFactory;
 import org.netbeans.modules.masterfs.providers.Notifier;
 import org.openide.filesystems.*;
-import org.openide.util.BaseUtilities;
+import org.openide.util.*;
 
 import java.io.File;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.logging.Level;
@@ -27,7 +28,7 @@ class ADITOWatcherSymlinkExt
    *
    * @param pChangedFile       File that changed
    * @param pFileObjectFactory Factory to retrieve FileObjects
-   * @param pKeyRefProvider       All Refs, that are currently watched
+   * @param pKeyRefProvider    All Refs, that are currently watched
    * @param pNotifier          Notifier
    * @return a set of FileObjects that have to be recalculcated / refreshed, because they somehow belong to pChangedFile
    */
@@ -51,6 +52,8 @@ class ADITOWatcherSymlinkExt
       });
 
     // ADITO: Retrieve all symlinked files
+    _SymlinkCache cache = new _SymlinkCache();
+
     try
     {
       String pathToFire = fo == null ? pChangedFile.getAbsolutePath() : fo.getPath();
@@ -61,7 +64,7 @@ class ADITOWatcherSymlinkExt
         FileObject refFo = watchedRef.get();
         if (refFo != null)
         {
-          FileObject symlinkTarget = _readSymbolicLinkTraverseParents(refFo);
+          FileObject symlinkTarget = _readSymbolicLinkTraverseParents(refFo, cache);
           if (symlinkTarget != null && Objects.equals(pathToFire, symlinkTarget.getPath()))
             toRefresh.add(refFo);
         }
@@ -70,6 +73,10 @@ class ADITOWatcherSymlinkExt
     catch (Throwable e)
     {
       Watcher.LOG.log(Level.WARNING, "", e);
+    }
+    finally
+    {
+      cache.invalidate();
     }
 
     return toRefresh;
@@ -84,13 +91,13 @@ class ADITOWatcherSymlinkExt
    * @return the target
    */
   @Nullable
-  private static FileObject _readSymbolicLinkTraverseParents(@NotNull FileObject pFo)
+  private static FileObject _readSymbolicLinkTraverseParents(@NotNull FileObject pFo, @NotNull ISymlinkCache pCache)
   {
     FileObject fo = pFo;
     while (fo != null)
     {
       String relativeInLink = FileUtil.getRelativePath(fo, pFo);
-      FileObject realFo = _readSymbolicLink(fo);
+      FileObject realFo = pCache.readSymbolicLink(fo);
       if(realFo != null)
         return realFo.getFileObject(relativeInLink);
 
@@ -100,38 +107,66 @@ class ADITOWatcherSymlinkExt
     return null;
   }
 
-  /**
-   * Reads the target of the symlink which pFo references.
-   * This has to be done a little weird, because of NTFS "Junction" links.
-   * Those are symlinks too, but {@link FileObject#isSymbolicLink()} returns false, because
-   * symlinks are handled different in NTFS. So {@link FileObject#readSymbolicLink()} will throw an exception,
-   * because NetBeans thinks, that they are no symbolic links...
-   *
-   * @param pFo FileObject to check
-   * @return the target
-   */
-  @Nullable
-  private static FileObject _readSymbolicLink(@NotNull FileObject pFo)
+  interface ISymlinkCache
   {
-    try
+    /**
+     * Reads the target of the symlink which pFo references.
+     * This has to be done a little weird, because of NTFS "Junction" links.
+     * Those are symlinks too, but {@link FileObject#isSymbolicLink()} returns false, because
+     * symlinks are handled different in NTFS. So {@link FileObject#readSymbolicLink()} will throw an exception,
+     * because NetBeans thinks, that they are no symbolic links...
+     *
+     * @param pFo FileObject to check
+     * @return the target
+     */
+    @Nullable
+    FileObject readSymbolicLink(@NotNull FileObject pFo);
+
+    /**
+     * Invalidates the cache and all of its entries
+     */
+    void invalidate();
+  }
+
+  /**
+   * ISymlinkCache-Impl
+   */
+  private static class _SymlinkCache implements ISymlinkCache
+  {
+    private final Map<FileObject, Optional<FileObject>> internalCache = new ConcurrentHashMap<>(10000);
+
+    @Nullable
+    @Override
+    public FileObject readSymbolicLink(@NotNull FileObject pFo)
     {
-      // Specialhandling: NTFS - only on Windows
-      if (BaseUtilities.isWindows())
-        return FileUtil.toFileObject(new File(ADITOLinkWindowsNatives.readJunctionLink(pFo.getPath())));
-    }
-    catch (Throwable e)
-    {
-      // fallback - catch everything because the native code can throw "errors" too.
+      return internalCache.computeIfAbsent(pFo, pPair -> {
+        try
+        {
+          // Specialhandling: NTFS - only on Windows
+          if (BaseUtilities.isWindows())
+            return Optional.ofNullable(FileUtil.toFileObject(new File(ADITOLinkWindowsNatives.readJunctionLink(pFo.getPath()))));
+        }
+        catch (Throwable e)
+        {
+          // fallback - catch everything because the native code can throw "errors" too.
+        }
+
+        try
+        {
+          return Optional.ofNullable(pFo.readSymbolicLink());
+        }
+        catch (Throwable e)
+        {
+          // no symbolic link detected
+          return Optional.empty();
+        }
+      }).orElse(null);
     }
 
-    try
+    @Override
+    public void invalidate()
     {
-      return pFo.readSymbolicLink();
-    }
-    catch (Throwable e)
-    {
-      // no symbolic link detected
-      return null;
+      internalCache.clear();
     }
   }
 
