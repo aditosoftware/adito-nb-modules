@@ -67,9 +67,9 @@ class ADITOWatcherSymlinkExt
         }
       }
     }
-    catch (Exception e)
+    catch (Throwable e)
     {
-      // ignore
+      Watcher.LOG.log(Level.WARNING, "", e);
     }
 
     return toRefresh;
