@@ -59,10 +59,10 @@ class ADITOWatcherSymlinkExt
       for (NotifierKeyRef<?> watchedRef : savedRefs.get())
       {
         FileObject refFo = watchedRef.get();
-        if (refFo != null && _isSymbolicLinkRecursive(refFo))
+        if (refFo != null)
         {
-          FileObject symlinkTarget = _readSymbolicLinkRecursive(refFo);
-          if (Objects.equals(pathToFire, symlinkTarget.getPath()))
+          FileObject symlinkTarget = _readSymbolicLinkTraverseParents(refFo);
+          if (symlinkTarget != null && Objects.equals(pathToFire, symlinkTarget.getPath()))
             toRefresh.add(refFo);
         }
       }
@@ -76,102 +76,63 @@ class ADITOWatcherSymlinkExt
   }
 
   /**
-   * Determines, if pFo is a symbolic link.
-   * This method returns true, even if a parent is a symbolic link.
-   *
-   * @param pFo FileObject to check
-   * @return true if pFo or any of its parents are symlinks
-   */
-  private static boolean _isSymbolicLinkRecursive(@Nullable FileObject pFo) throws Exception
-  {
-    FileObject fo = pFo;
-    while (fo != null)
-    {
-      if (_isSymbolicLink(fo))
-        return true;
-      fo = fo.getParent();
-    }
-    return false;
-  }
-
-  /**
    * Reads the target of the symlink which pFo references.
    * This method tries to resolve the whole symlink path of pFo, so
-   * if some parents of pFo are symlinks, they get resolved too.
+   * if a parent of pFo is a symlink, it gets resolved too.
    *
    * @param pFo FileObject to check
    * @return the target
    */
-  @NotNull
-  private static FileObject _readSymbolicLinkRecursive(@NotNull FileObject pFo) throws Exception
+  @Nullable
+  private static FileObject _readSymbolicLinkTraverseParents(@NotNull FileObject pFo)
   {
     FileObject fo = pFo;
     while (fo != null)
     {
-      if (_isSymbolicLink(fo))
-      {
-        String relativeInLink = FileUtil.getRelativePath(fo, pFo);
-        FileObject realFo = _readSymbolicLink(fo);
+      String relativeInLink = FileUtil.getRelativePath(fo, pFo);
+      FileObject realFo = _readSymbolicLink(fo);
+      if(realFo != null)
         return realFo.getFileObject(relativeInLink);
-      }
 
       fo = fo.getParent();
     }
 
-    throw new NullPointerException(pFo.toString());
-  }
-
-  /**
-   * Determines, if pFo (and only pFo, no parent check!) is a symlink.
-   * This has to be done a little weird, because of NTFS "Junction" links.
-   * Those are symlinks too, but {@link FileObject#isSymbolicLink()} returns false, because
-   * symlinks are handeld different in NTFS.
-   *
-   * @param pFo FileObject to check
-   * @return true, if pFo (and only pFo!) is a kind of symlink
-   */
-  private static boolean _isSymbolicLink(@NotNull FileObject pFo) throws Exception
-  {
-    try
-    {
-      // Specialhandling: NTFS - only on Windows
-      if (BaseUtilities.isWindows())
-        if (ADITOLinkWindowsNatives.isJunctionLink(pFo.getPath()))
-          return true;
-    }
-    catch (Exception e)
-    {
-      // fallback
-    }
-
-    return pFo.isSymbolicLink();
+    return null;
   }
 
   /**
    * Reads the target of the symlink which pFo references.
    * This has to be done a little weird, because of NTFS "Junction" links.
    * Those are symlinks too, but {@link FileObject#isSymbolicLink()} returns false, because
-   * symlinks are handeld different in NTFS. So {@link FileObject#readSymbolicLink()} will throw an exception,
+   * symlinks are handled different in NTFS. So {@link FileObject#readSymbolicLink()} will throw an exception,
    * because NetBeans thinks, that they are no symbolic links...
    *
    * @param pFo FileObject to check
    * @return the target
    */
-  private static FileObject _readSymbolicLink(@NotNull FileObject pFo) throws Exception
+  @Nullable
+  private static FileObject _readSymbolicLink(@NotNull FileObject pFo)
   {
     try
     {
       // Specialhandling: NTFS - only on Windows
       if (BaseUtilities.isWindows())
-        if (ADITOLinkWindowsNatives.isJunctionLink(pFo.getPath()))
-          return FileUtil.toFileObject(new File(ADITOLinkWindowsNatives.readJunctionLink(pFo.getPath())));
+        return FileUtil.toFileObject(new File(ADITOLinkWindowsNatives.readJunctionLink(pFo.getPath())));
     }
-    catch (Exception e)
+    catch (Throwable e)
     {
-      // fallback
+      // fallback - catch everything because the native code can throw "errors" too.
     }
 
-    return pFo.readSymbolicLink();
+    try
+    {
+      return pFo.readSymbolicLink();
+    }
+    catch (Throwable e)
+    {
+      // no symbolic link detected
+      return null;
+    }
   }
 
 

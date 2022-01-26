@@ -65,18 +65,6 @@ class ADITOLinkWindowsNatives
   }
 
   /**
-   * Determines, if the given path is a junction link
-   *
-   * @param pPath path to determine
-   * @return true, if it is a junction link
-   */
-  public static boolean isJunctionLink(@NotNull String pPath) throws Exception
-  {
-    BasicFileAttributes attributes = Files.readAttributes(new File(pPath).toPath(), BasicFileAttributes.class, LinkOption.NOFOLLOW_LINKS);
-    return (boolean) _IS_REPARSE_POINT.invoke(attributes);
-  }
-
-  /**
    * Reads the target of the given junction link
    *
    * @param pPath Path to read its target from
