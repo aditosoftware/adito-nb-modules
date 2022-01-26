@@ -33,7 +33,7 @@ public class FileFullObservable extends AbstractListenerObservable<FileChangeLis
   protected FileChangeListener registerListener(@NotNull File pFile, @NotNull IFireable<Optional<File>> pFireable)
   {
     FileChangeListener fcl = new _FileCreatedListener(pFireable);
-    FileUtil.addRecursiveListener(fcl, pFile);
+    FileUtil.addRecursiveListener(fcl, FileUtil.normalizeFile(pFile));
     return fcl;
   }
 
@@ -42,7 +42,7 @@ public class FileFullObservable extends AbstractListenerObservable<FileChangeLis
   {
     try
     {
-      FileUtil.removeRecursiveListener(pFileChangeListener, pFile);
+      FileUtil.removeRecursiveListener(pFileChangeListener, FileUtil.normalizeFile(pFile));
     }
     catch(IllegalArgumentException iae)
     {
