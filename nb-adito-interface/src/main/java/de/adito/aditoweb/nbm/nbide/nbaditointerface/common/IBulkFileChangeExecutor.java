@@ -7,7 +7,7 @@ import org.jetbrains.annotations.NotNull;
  *
  * @author s.seemann, 31.01.2022
  */
-public interface IBulkFileChangeExecutor<Ex extends Throwable>
+public interface IBulkFileChangeExecutor
 {
 
   /**
@@ -15,7 +15,7 @@ public interface IBulkFileChangeExecutor<Ex extends Throwable>
    *
    * @param pRunnable runnable, which should be executed
    */
-  void execute(@NotNull IBulkFileChangeRunnable<Ex> pRunnable) throws Ex;
+  <Ex extends Throwable> void execute(@NotNull IBulkFileChangeRunnable<Ex> pRunnable) throws Ex;
 
 
   /**
