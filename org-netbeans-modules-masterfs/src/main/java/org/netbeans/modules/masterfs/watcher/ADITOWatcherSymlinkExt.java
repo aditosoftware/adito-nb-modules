@@ -1,6 +1,7 @@
 package org.netbeans.modules.masterfs.watcher;
 
 import org.jetbrains.annotations.*;
+import org.netbeans.api.queries.VisibilityQuery;
 import org.openide.filesystems.*;
 import org.openide.util.*;
 
@@ -39,6 +40,13 @@ class ADITOWatcherSymlinkExt
   @NotNull
   public static Set<FileObject> getAllReferences(@NotNull FileObject pFileObject, @NotNull Consumer<Consumer<Set<NotifierKeyRef>>> pKeyRefProvider)
   {
+    // a bit hacky, but should work in our current situation
+    // we just want to exclude our "dist" directory from this calculation,
+    // because we knew that there is nothing referenced.
+    // If there is any problem with this, it can be removed - but think of our "dist" directory!
+    if(!VisibilityQuery.getDefault().isVisible(pFileObject))
+      return Set.of();
+
     // Invalidate the lastModified of the given fileobject, because we knew, pFileObject was changed now
     _LASTMODIFIED_CACHE.invalidate(pFileObject);
 
