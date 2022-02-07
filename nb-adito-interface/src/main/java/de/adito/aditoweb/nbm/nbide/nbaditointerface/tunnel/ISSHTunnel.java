@@ -4,6 +4,7 @@ import org.jetbrains.annotations.*;
 import org.openide.nodes.Node;
 
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BiConsumer;
 
 /**
@@ -79,6 +80,16 @@ public interface ISSHTunnel extends AutoCloseable
    */
   @NotNull
   CompletableFuture<String> connect();
+
+  /**
+   * Establishes the tunnel connection
+   *
+   * @param pAbortFlag AtomicBoolean that can be used to abort the connection if the user presses cancel on a bunch of tunnels started at the same
+   *                   time. The AtomicBoolean has to be the same for all tunnels in the bunch
+   * @return CompletableFuture with the local target adress
+   */
+  @NotNull
+  CompletableFuture<String> connect(@NotNull AtomicBoolean pAbortFlag);
 
   void removeConnectionListener(ISSHTunnelConnectionListener pListener);
 
