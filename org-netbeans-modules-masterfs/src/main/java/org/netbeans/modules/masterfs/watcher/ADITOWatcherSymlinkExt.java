@@ -202,7 +202,14 @@ class ADITOWatcherSymlinkExt
     @Override
     public Date lastModified(@NotNull FileObject pFo)
     {
-      return internalCache.computeIfAbsent(pFo, FileObject::lastModified);
+      Date lastModified = internalCache.get(pFo);
+      if(lastModified == null)
+      {
+        lastModified = pFo.lastModified();
+        internalCache.put(pFo, lastModified);
+      }
+
+      return lastModified;
     }
 
     @Override
