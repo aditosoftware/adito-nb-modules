@@ -8,7 +8,7 @@ import org.openide.util.*;
 import java.io.File;
 import java.util.*;
 import java.util.concurrent.*;
-import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.atomic.*;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 
@@ -29,9 +29,14 @@ class ADITOWatcherSymlinkExt
     return t;
   });
 
+  private static final int CALLING_THRESHOLD_MS = 200;
+  private static final AtomicLong lastRefCallTime = new AtomicLong();
+  private static final AtomicReference<FileObject> lastRefCallFo = new AtomicReference<>();
+
   /**
    * Returns all references that have to be refreshed, after pChangedFile changed.
    * This method tries to handle symbolic links too.
+   * It returns an empty set, if it gets called too often with the same fileobject
    *
    * @param pFileObject        File that changed
    * @param pKeyRefProvider    All Refs, that are currently watched
@@ -40,6 +45,14 @@ class ADITOWatcherSymlinkExt
   @NotNull
   public static Set<FileObject> getAllReferences(@NotNull FileObject pFileObject, @NotNull Consumer<Consumer<Set<NotifierKeyRef>>> pKeyRefProvider)
   {
+    // Ignore duplicate method calls, if they occur too often.
+    // This has to be done because of windows firing too many events too often
+    long currentRefCallTime = System.currentTimeMillis();
+    long oldRefCallTime = lastRefCallTime.getAndSet(currentRefCallTime);
+    FileObject oldRef = lastRefCallFo.getAndSet(pFileObject);
+    if(Objects.equals(oldRef, pFileObject) && (currentRefCallTime - oldRefCallTime >= CALLING_THRESHOLD_MS))
+      return Set.of();
+
     // a bit hacky, but should work in our current situation
     // we just want to exclude our "dist" directory from this calculation,
     // because we knew that there is nothing referenced.
