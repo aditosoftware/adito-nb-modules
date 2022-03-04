@@ -32,6 +32,8 @@ class ADITOWatcherSymlinkExt
   private static final int CALLING_THRESHOLD_MS = 200;
   private static final AtomicLong lastRefCallTime = new AtomicLong();
   private static final AtomicReference<FileObject> lastRefCallFo = new AtomicReference<>();
+  private static final AtomicInteger shortLivingRefCacheHash = new AtomicInteger();
+  private static final Map<String, Set<FileObject>> shortLivingRefCache = new ConcurrentHashMap<>();
 
   /**
    * Returns all references that have to be refreshed, after pChangedFile changed.
@@ -66,23 +68,36 @@ class ADITOWatcherSymlinkExt
 
     try
     {
-      // Check symlinks
-      Set<FileObject> toRefresh = new HashSet<>();
-      String pathToFire = pFileObject.getPath();
+      // Retrieve watched refs
       AtomicReference<Set<NotifierKeyRef>> savedRefs = new AtomicReference<>();
-      pKeyRefProvider.accept(pRefs -> savedRefs.set(new HashSet<>(pRefs)));
-      CompletableFuture.allOf(savedRefs.get().stream()
-                                  .map(pRef -> CompletableFuture.runAsync(() -> {
-                                    FileObject refFo = pRef.get();
-                                    if (refFo != null)
-                                    {
-                                      FileObject symlinkTarget = _SYMLINK_CACHE.readSymbolicLink(_LASTMODIFIED_CACHE, refFo);
-                                      if (symlinkTarget != null && Objects.equals(pathToFire, symlinkTarget.getPath()))
-                                        toRefresh.add(refFo);
-                                    }
-                                  }, _SYMLINK_CALCULATION_POOL))
-                                  .toArray(CompletableFuture[]::new)).get();
-      return toRefresh;
+      pKeyRefProvider.accept(pRefs -> {
+        int newSavedRefsHash = pRefs.hashCode();
+        int oldSavedRefsHash = shortLivingRefCacheHash.getAndSet(newSavedRefsHash);
+        if(!Objects.equals(newSavedRefsHash, oldSavedRefsHash))
+          savedRefs.set(new HashSet<>(pRefs));
+      });
+
+      // Recreate Cache if necessary and possible
+      if(savedRefs.get() != null)
+      {
+        // invalidate cache
+        shortLivingRefCache.clear();
+
+        // Check symlinks
+        CompletableFuture.allOf(savedRefs.get().stream()
+                                    .map(pRef -> CompletableFuture.runAsync(() -> {
+                                      FileObject refFo = pRef.get();
+                                      if (refFo != null)
+                                      {
+                                        FileObject symlinkTarget = _SYMLINK_CACHE.readSymbolicLink(_LASTMODIFIED_CACHE, refFo);
+                                        if (symlinkTarget != null)
+                                          shortLivingRefCache.computeIfAbsent(symlinkTarget.getPath(), pF -> new HashSet<>()).add(refFo);
+                                      }
+                                    }, _SYMLINK_CALCULATION_POOL))
+                                    .toArray(CompletableFuture[]::new)).get();
+      }
+
+      return shortLivingRefCache.getOrDefault(pFileObject.getPath(), Set.of());
     }
     catch (Throwable e)
     {
