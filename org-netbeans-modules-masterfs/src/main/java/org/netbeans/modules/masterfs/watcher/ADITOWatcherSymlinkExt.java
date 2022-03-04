@@ -50,7 +50,8 @@ class ADITOWatcherSymlinkExt
     long currentRefCallTime = System.currentTimeMillis();
     long oldRefCallTime = lastRefCallTime.getAndSet(currentRefCallTime);
     FileObject oldRef = lastRefCallFo.getAndSet(pFileObject);
-    if(Objects.equals(oldRef, pFileObject) && (currentRefCallTime - oldRefCallTime >= CALLING_THRESHOLD_MS))
+    boolean timeBetweenCallsNotExceedThreshold = currentRefCallTime - oldRefCallTime < CALLING_THRESHOLD_MS;
+    if(Objects.equals(oldRef, pFileObject) && timeBetweenCallsNotExceedThreshold)
       return Set.of();
 
     // a bit hacky, but should work in our current situation
