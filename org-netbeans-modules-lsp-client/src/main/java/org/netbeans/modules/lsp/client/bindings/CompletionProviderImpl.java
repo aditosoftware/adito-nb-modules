@@ -25,7 +25,7 @@ import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.event.KeyEvent;
 import java.net.URL;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import javax.swing.Action;
@@ -172,6 +172,11 @@ public class CompletionProviderImpl implements CompletionProvider {
                         items = completionResult.getRight().getItems();
                         incomplete = completionResult.getRight().isIncomplete();
                     }
+
+                    // ADITO
+                    items = new ArrayList<>(items);
+                    boolean aditoCustom = CompletionAditoUtils.addAditoCompletionItems(doc, caretOffset, file, items);
+
                     for (CompletionItem completionItem : items) {
                         String insert = completionItem.getInsertText() != null ? completionItem.getInsertText() : completionItem.getLabel();
                         String leftLabel = encode(completionItem.getLabel());
@@ -209,6 +214,11 @@ public class CompletionProviderImpl implements CompletionProvider {
                                             }
                                             int[] identSpan = Utilities.getIdentifierBlock((BaseDocument) doc, caretOffset);
                                             String printSuffix = toAdd.substring(identSpan != null ? caretOffset - identSpan[0] : 0);
+
+                                            // ADITO
+                                            if(aditoCustom && identSpan != null)
+                                                printSuffix = CompletionAditoUtils.getPrintSuffix(identSpan[0], toAdd, caretOffset);
+
                                             doc.insertString(caretOffset, printSuffix, null);
                                             endPos = caretOffset + printSuffix.length();
                                         }
@@ -347,14 +357,14 @@ public class CompletionProviderImpl implements CompletionProvider {
             }
         }, component);
     }
-    
+
     private boolean hasCompletionResolve(LSPBindings server) {
         LSPServerCapabilities capabilities = server.getInitResult().getCapabilities();
         if (capabilities == null) {
             return false;
         }
         CompletionOptions completionProvider = capabilities.getCompletionProvider();
-        if (completionProvider == null) { 
+        if (completionProvider == null) {
             return false;
         }
         Boolean resolveProvider = completionProvider.getResolveProvider();
@@ -394,7 +404,7 @@ public class CompletionProviderImpl implements CompletionProvider {
             return false;
         }
         LSPServerCapabilities capabilities = init.getCapabilities();
-        if (capabilities == null) { 
+        if (capabilities == null) {
             return false;
         }
         CompletionOptions completionOptions = capabilities.getCompletionProvider();
