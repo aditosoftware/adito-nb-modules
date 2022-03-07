@@ -20,6 +20,7 @@ public interface ISystemInfo extends ITunnelConfigProvider
   String TELNET_HOST_EXTERNAL_ADRESS_KEY = "loggingTelnetExternalAddress";
   String TELNET_PORT_KEY = "loggingTelnetPort";
   String CLOUD_ID_PREF_KEY_PEFIX = "ssp.cloudSystemId.";
+  String SYSTEM_ADDRESS = "system.host.adress";
 
   /**
    * @return true if the system is declared as productive system

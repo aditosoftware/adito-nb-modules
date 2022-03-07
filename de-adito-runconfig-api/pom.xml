@@ -12,7 +12,7 @@
   <groupId>de.adito.nbm</groupId>
   <artifactId>de-adito-runconfig-api</artifactId>
   <packaging>nbm</packaging>
-  <version>RELEASE125-1.9.0</version>
+  <version>RELEASE125-1.9.1</version>
   <name>ADITO Netbeans Module: de-adito-runconfig-api</name>
 
   <properties>
