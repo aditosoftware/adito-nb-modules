@@ -54,6 +54,18 @@ public class FileObjectObservable extends AbstractListenerObservable<FileChangeL
     }
 
     @Override
+    public void fileFolderCreated(FileEvent fe)
+    {
+      fireable.fireValueChanged(fileObject);
+    }
+
+    @Override
+    public void fileDataCreated(FileEvent fe)
+    {
+      fireable.fireValueChanged(fileObject);
+    }
+
+    @Override
     public void fileChanged(FileEvent fe)
     {
       fireable.fireValueChanged(fileObject);
