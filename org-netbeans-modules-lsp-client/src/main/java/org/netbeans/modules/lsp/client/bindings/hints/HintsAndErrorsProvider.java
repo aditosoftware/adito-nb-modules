@@ -93,7 +93,9 @@ public class HintsAndErrorsProvider {
 
     private ErrorDescription createHintsAndErrors(Document doc, FileObject file, String uri, org.eclipse.lsp4j.Diagnostic d) {
         LazyFixList fixList = new DiagnosticFixList(uri, d, file);
-        return ErrorDescriptionFactory.createErrorDescription(severityMap.get(d.getSeverity()), d.getMessage(), fixList, file, Utils.getOffset(doc, d.getRange().getStart()), Utils.getOffset(doc, d.getRange().getEnd()));
+        Either<String, Integer> code = d.getCode();
+        String id = code.isLeft() ? code.getLeft() : code.getRight().toString();
+        return ErrorDescriptionFactory.createErrorDescription(id, severityMap.get(d.getSeverity()), d.getMessage(), null, fixList, file, Utils.getOffset(doc, d.getRange().getStart()), Utils.getOffset(doc, d.getRange().getEnd()));
     }
 
     /**
