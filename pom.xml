@@ -58,6 +58,8 @@
     <module>de-adito-netbeans-utilities</module>
     <module>de-adito-runconfig-api</module>
     <module>de-adito-translation-api</module>
+    <module>de-adito-utilities</module>
+    <module>de-adito-vaadin-icons</module>
     <module>nb-adito-interface</module>
     <module>org-netbeans-bootstrap</module>
     <module>org-netbeans-core-output2</module>
