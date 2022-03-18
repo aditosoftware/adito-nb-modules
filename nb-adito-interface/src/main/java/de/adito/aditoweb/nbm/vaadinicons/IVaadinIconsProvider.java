@@ -21,7 +21,7 @@ public interface IVaadinIconsProvider
    * @return Delivers all available icons
    */
   @NotNull
-  Map<String, Integer> getAllIcons();
+  Map<String, String> getAllIcons();
 
   /**
    * Creates an image based on a name, or <tt>null</tt> if not found
