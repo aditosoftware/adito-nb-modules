@@ -55,6 +55,7 @@
   <modules>
     <module>de-adito-blueprint-api</module>
     <module>de-adito-metrics-api</module>
+    <module>de-adito-netbeans-utilities</module>
     <module>de-adito-runconfig-api</module>
     <module>de-adito-translation-api</module>
     <module>nb-adito-interface</module>
@@ -70,7 +71,6 @@
     <module>org-netbeans-modules-lsp-client</module>
     <module>org-netbeans-modules-masterfs</module>
     <module>org-netbeans-modules-utilities-project</module>
-    <module>de-adito-netbeans-utilities</module>
     <module>org-openide-filesystems</module>
     <module>org-openide-util</module>
     <module>org-openide-util-ui</module>
