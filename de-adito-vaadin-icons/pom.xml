@@ -12,8 +12,13 @@
   <groupId>de.adito.nbm</groupId>
   <artifactId>de-adito-vaadin-icons</artifactId>
   <packaging>nbm</packaging>
-  <version>RELEASE125-22.0.1</version>
+  <version>RELEASE125-23.0.1</version>
   <name>ADITO Netbeans Module: de-adito-vaadin-icons</name>
+
+  <properties>
+    <vaadin-icons.version>23.0.1</vaadin-icons.version>
+    <vaadin-server.version>23.0.1</vaadin-server.version>
+  </properties>
 
   <dependencies>
     <dependency>
@@ -58,13 +63,13 @@
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin-icons-flow</artifactId>
-      <version>22.0.1</version>
+      <version>${vaadin-icons.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>flow-server</artifactId>
-      <version>9.0.1</version>
+      <version>${vaadin-server.version}</version>
       <scope>test</scope>
     </dependency>
 
@@ -96,12 +101,12 @@
           <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-icons-flow</artifactId>
-            <version>22.0.1</version>
+            <version>${vaadin-icons.version}</version>
           </dependency>
           <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>flow-server</artifactId>
-            <version>9.0.1</version>
+            <version>${vaadin-server.version}</version>
           </dependency>
         </dependencies>
         <executions>
