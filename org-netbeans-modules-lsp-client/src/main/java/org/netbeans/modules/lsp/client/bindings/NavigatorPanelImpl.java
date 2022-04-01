@@ -222,7 +222,9 @@ public class NavigatorPanelImpl extends Children.Keys<Either<SymbolInformation, 
                 this.open = createOpenAction(symbolInfo.getLocation().getUri(), symbolInfo.getLocation().getRange());
             } else {
                 DocumentSymbol docSymbol = symbol.getRight();
-                setDisplayName(docSymbol.getDetail());
+                // Changed by ADITO
+                setDisplayName(docSymbol.getDetail().isEmpty() ? docSymbol.getName() : docSymbol.getDetail());
+                // End ADITO change
                 setIconBaseWithExtension(Icons.getSymbolIconBase(docSymbol.getKind()));
                 this.open = createOpenAction(currentFileUri, docSymbol.getRange());
             }
