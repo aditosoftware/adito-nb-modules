@@ -12,7 +12,7 @@
   <groupId>de.adito.nbm</groupId>
   <artifactId>de-adito-metrics-api</artifactId>
   <packaging>nbm</packaging>
-  <version>RELEASE125-1.9.1-SNAPSHOT</version>
+  <version>RELEASE125-1.9.1</version>
   <name>ADITO Netbeans Module: de-adito-metrics-api</name>
 
   <properties>

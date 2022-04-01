@@ -12,7 +12,7 @@
 
   <groupId>de.adito.nb-modules</groupId>
   <artifactId>de-adito-netbeans-utilities</artifactId>
-  <version>RELEASE125-1.9.1-SNAPSHOT</version>
+  <version>RELEASE125-1.9.1</version>
   <name>ADITO Netbeans Module: de-adito-netbeans-utilities</name>
 
   <dependencies>
@@ -24,7 +24,7 @@
     <dependency>
       <groupId>de.adito.nbm</groupId>
       <artifactId>de-adito-metrics-api</artifactId>
-      <version>${netbeans.version}-1.9.1-SNAPSHOT</version>
+      <version>${netbeans.version}-1.9.1</version>
     </dependency>
 
     <dependency>
