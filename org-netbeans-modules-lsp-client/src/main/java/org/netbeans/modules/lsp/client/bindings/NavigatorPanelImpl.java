@@ -105,7 +105,10 @@ public class NavigatorPanelImpl extends Children.Keys<Either<SymbolInformation, 
 
     @Override
     public void panelDeactivated() {
-        result.removeLookupListener(this);
+        // Changed by ADITO
+        if(result != null)
+          result.removeLookupListener(this);
+        // End ADITO change
         result = null;
         updateFile();
     }
