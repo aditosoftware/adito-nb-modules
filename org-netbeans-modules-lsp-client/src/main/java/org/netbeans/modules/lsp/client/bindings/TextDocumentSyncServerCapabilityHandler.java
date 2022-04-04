@@ -343,6 +343,11 @@ public class TextDocumentSyncServerCapabilityHandler {
                     LSPWorkingPool.addBackgroundTask(file, bi);
                     textComponent.putClientProperty(BreadcrumbsImpl.class, bi);
                 }
+                if (textComponent.getClientProperty(ProgressHandleTask.class) == null) {
+                    ProgressHandleTask handle = new ProgressHandleTask();
+                    LSPWorkingPool.addBackgroundTask(file, handle);
+                    textComponent.putClientProperty(ProgressHandleTask.class, handle);
+                }
 //                if (textComponent.getClientProperty(HoverImpl.class) == null) {
 //                    HoverImpl hover = new HoverImpl(textComponent);
 //                    LSPWorkingPool.addBackgroundTask(file, hover);
