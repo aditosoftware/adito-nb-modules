@@ -12,6 +12,7 @@ import java.util.Optional;
 /**
  * @author m.kaspera, 15.01.2020
  */
+@Deprecated(forRemoval = true)
 public class FileFullObservable extends AbstractListenerObservable<FileChangeListener, File, Optional<File>>
 {
 
