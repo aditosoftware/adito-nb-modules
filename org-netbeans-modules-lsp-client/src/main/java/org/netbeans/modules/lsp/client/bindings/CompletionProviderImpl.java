@@ -399,6 +399,12 @@ public class CompletionProviderImpl implements CompletionProvider {
     }
     
     private boolean isTriggerCharacter(LSPBindings server, String text) {
+        // BEGIN ADITO
+        if(text.endsWith("\""))
+            return false;
+        if(text.endsWith("$"))
+            return true;
+        // END ADITO
         LSPInitializeResult init = server.getInitResult();
         if (init == null) { 
             return false;
