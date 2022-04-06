@@ -86,7 +86,7 @@ class CompletionAditoUtils
               CompletionItem item = new CompletionItem(pSuggestion);
               item.setKind(CompletionItemKind.Constant);
               item.setInsertTextFormat(InsertTextFormat.PlainText);
-              item.setCommitCharacters(List.of("\""));
+              item.setCommitCharacters(List.of("."));
 
               // LSP server needs this information
               JsonObject obj = new JsonObject();
