@@ -18,8 +18,7 @@ public class FileObjectObservable extends AbstractListenerObservable<FileChangeL
   public static Observable<FileObject> create(@NotNull FileObject pFileObject)
   {
     return Observables.create(new FileObjectObservable(pFileObject), () -> pFileObject)
-        .observeOn(Schedulers.io())
-        .subscribeOn(Schedulers.io());
+        .observeOn(Schedulers.io());
   }  
   
   private FileObjectObservable(@NotNull FileObject pListenableValue)

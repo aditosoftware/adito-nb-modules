@@ -23,8 +23,7 @@ public class NodeObservable extends AbstractListenerObservable<NodeListener, Nod
   {
     return Observable.create(new NodeObservable(pNode, pProps))
         .startWithItem(pNode)
-        .observeOn(Schedulers.computation())
-        .subscribeOn(Schedulers.computation());
+        .observeOn(Schedulers.computation());
   }
 
   private NodeObservable(@NotNull Node pListenableValue, @NotNull String... pProperties)

@@ -25,8 +25,7 @@ public class FileFullObservable extends AbstractListenerObservable<FileChangeLis
   public static Observable<Optional<File>> create(@NotNull File pFile)
   {
     return Observable.create(new FileFullObservable(pFile)).startWithItem(Optional.of(pFile))
-        .observeOn(Schedulers.io())
-        .subscribeOn(Schedulers.io());
+        .observeOn(Schedulers.io());
   }
 
   @NotNull

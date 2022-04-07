@@ -45,8 +45,7 @@ public class FileObservable extends AbstractListenerObservable<FileChangeListene
   public static Observable<Optional<File>> createForDirectory(@NotNull File pFile)
   {
     return Observables.create(new FileObservable(pFile), () -> _getValue(pFile))
-        .observeOn(Schedulers.io())
-        .subscribeOn(Schedulers.io());
+        .observeOn(Schedulers.io());
   }
 
   /**
