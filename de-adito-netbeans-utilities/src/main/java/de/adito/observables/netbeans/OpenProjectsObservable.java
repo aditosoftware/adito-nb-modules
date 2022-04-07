@@ -34,6 +34,7 @@ public class OpenProjectsObservable extends AbstractListenerObservable<PropertyC
       _INSTANCE = Observable.create(new OpenProjectsObservable())
           .startWithItem(ImmutableList.copyOf(OpenProjects.getDefault().getOpenProjects()))
           .observeOn(Schedulers.computation())
+          .subscribeOn(Schedulers.computation())
           .replay(1)
           .autoConnect();
     return _INSTANCE;

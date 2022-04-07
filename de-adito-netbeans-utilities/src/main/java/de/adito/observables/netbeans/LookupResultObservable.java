@@ -32,6 +32,7 @@ public class LookupResultObservable<T> extends AbstractListenerObservable<Lookup
     return Observable.create(new LookupResultObservable<>(result))
         .startWithItem(_getValuesUnmodifiable(result))
         .observeOn(Schedulers.computation())
+        .subscribeOn(Schedulers.computation())
         .distinctUntilChanged();
   }
 

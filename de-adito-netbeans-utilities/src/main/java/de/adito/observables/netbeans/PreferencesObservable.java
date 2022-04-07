@@ -21,7 +21,8 @@ public class PreferencesObservable extends AbstractListenerObservable<Preference
   {
     return Observable.create(new PreferencesObservable(pPreferences))
         .startWithItem(pPreferences)
-        .observeOn(Schedulers.computation());
+        .observeOn(Schedulers.computation())
+        .subscribeOn(Schedulers.computation());
   }
 
   private PreferencesObservable(@NotNull Preferences pBase)
