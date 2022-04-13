@@ -15,9 +15,12 @@ import java.util.Optional;
 public class FileObservable extends AbstractListenerObservable<FileChangeListener, File, Optional<File>>
 {
 
-  private FileObservable(@NotNull File pListenableValue)
+  private final boolean recurseInto;
+
+  private FileObservable(@NotNull File pListenableValue, boolean pRecurseInto)
   {
     super(pListenableValue);
+    recurseInto = pRecurseInto;
   }
 
   /**
@@ -44,7 +47,22 @@ public class FileObservable extends AbstractListenerObservable<FileChangeListene
   @NotNull
   public static Observable<Optional<File>> createForDirectory(@NotNull File pFile)
   {
-    return Observables.create(new FileObservable(pFile), () -> _getValue(pFile))
+    return createForDirectory(pFile, true);
+  }
+
+  /**
+   * Creates a new observable that contains the file object, if the given folder exists.
+   * Returns an empty optional, if it does not.
+   * If pFile represents a directory and pRecursiveInto is true, all recursive files events will be fired
+   *
+   * @param pFile          File to check
+   * @param pRecursiveInto true if the observable should trigger if ANY file inside pFile will trigger this observable
+   * @return Observable
+   */
+  @NotNull
+  public static Observable<Optional<File>> createForDirectory(@NotNull File pFile, boolean pRecursiveInto)
+  {
+    return Observables.create(new FileObservable(pFile, pRecursiveInto), () -> _getValue(pFile))
         .observeOn(Schedulers.io())
         .subscribeOn(Schedulers.io());
   }
@@ -59,7 +77,7 @@ public class FileObservable extends AbstractListenerObservable<FileChangeListene
   @NotNull
   public static Observable<Optional<File>> createForPlainFile(@NotNull File pFile)
   {
-    return createForDirectory(pFile.getParentFile())
+    return createForDirectory(pFile.getParentFile(), false)
 
         // determine, if File is available in parent and distinct it afterwards, so we will only be triggered initially and on file creation / deletion
         .map(pParent -> _getValue(pFile))
@@ -83,7 +101,11 @@ public class FileObservable extends AbstractListenerObservable<FileChangeListene
   protected FileChangeListener registerListener(@NotNull File pFile, @NotNull IFireable<Optional<File>> pFireable)
   {
     FileChangeListener fcl = new _FileListenerImpl(pFireable, pFile);
-    FileUtil.addRecursiveListener(fcl, FileUtil.normalizeFile(pFile));
+    pFile = FileUtil.normalizeFile(pFile);
+    if (recurseInto)
+      FileUtil.addRecursiveListener(fcl, pFile);
+    else
+      FileUtil.addFileChangeListener(fcl, pFile);
     return fcl;
   }
 
@@ -94,7 +116,7 @@ public class FileObservable extends AbstractListenerObservable<FileChangeListene
     {
       FileUtil.removeRecursiveListener(pFileChangeListener, FileUtil.normalizeFile(pFile));
     }
-    catch(IllegalArgumentException iae)
+    catch (IllegalArgumentException iae)
     {
       // ignore
     }
@@ -103,7 +125,7 @@ public class FileObservable extends AbstractListenerObservable<FileChangeListene
   @NotNull
   private static Optional<File> _getValue(@NotNull File pFile)
   {
-    if(pFile.exists())
+    if (pFile.exists())
       return Optional.of(pFile);
     return Optional.empty();
   }
@@ -134,7 +156,7 @@ public class FileObservable extends AbstractListenerObservable<FileChangeListene
       {
         FileUtil.removeFileChangeListener(pFileChangeListener, FileUtil.normalizeFile(pFile));
       }
-      catch(IllegalArgumentException iae)
+      catch (IllegalArgumentException iae)
       {
         // ignore
       }
