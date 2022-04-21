@@ -77,12 +77,18 @@ public class FileObservable extends AbstractListenerObservable<FileChangeListene
   @NotNull
   public static Observable<Optional<File>> createForPlainFile(@NotNull File pFile)
   {
-    return createForDirectory(pFile.getParentFile(), false)
+    File parentFile = pFile.getParentFile();
+    Observable<Optional<File>> parentObservable;
+    if(parentFile != null)
+      // determine, if File is available in parent and distinct it afterwards, so we will only be triggered initially and on file creation / deletion
+      parentObservable = createForDirectory(parentFile, false)
+          .map(pParent -> _getValue(pFile))
+          .distinctUntilChanged();
+    else
+      // we do not own a parent -> just fire our value
+      parentObservable = Observable.just(_getValue(pFile));
 
-        // determine, if File is available in parent and distinct it afterwards, so we will only be triggered initially and on file creation / deletion
-        .map(pParent -> _getValue(pFile))
-        .distinctUntilChanged()
-
+    return parentObservable
         // handle file changes, if pMyFileOpt is available in parent
         .switchMap(pMyFileOpt -> pMyFileOpt
             .map(pMyFile -> Observables.create(new _NonRecursiveFileObservable(pMyFile), () -> _getValue(pMyFile)))
