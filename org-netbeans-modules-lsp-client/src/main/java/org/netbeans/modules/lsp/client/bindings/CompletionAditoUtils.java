@@ -5,7 +5,7 @@ import de.adito.aditoweb.nbm.nbide.nbaditointerface.NbAditoInterface;
 import de.adito.aditoweb.nbm.nbide.nbaditointerface.javascript.IJsDataSupply;
 import org.eclipse.lsp4j.*;
 import org.eclipse.lsp4j.Position;
-import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.*;
 import org.netbeans.api.editor.document.*;
 import org.netbeans.modules.lsp.client.Utils;
 import org.openide.filesystems.FileObject;
@@ -42,8 +42,9 @@ class CompletionAditoUtils
     Position position = Utils.createPosition(pDoc, pCaretOffset);
     try
     {
-      int lineStartFromIndex = LineDocumentUtils.getLineStartFromIndex((LineDocument) pDoc, position.getLine());
-      String line = pDoc.getText(lineStartFromIndex, pCaretOffset - lineStartFromIndex);
+      String line = getLine(pDoc, pCaretOffset, position);
+      if (line == null)
+        return false;
       int idx = line.lastIndexOf('"');
       if (idx >= 0)
         prefix = line.substring(idx + 1);
@@ -111,22 +112,51 @@ class CompletionAditoUtils
   }
 
   /**
-   * @param pBeginIdx    the begin index of the insert
-   * @param pToAdd       string which should be added
-   * @param pCaretOffset the caret offset
-   * @return the print suffix
+   * Removes dollar characters if there is one before the offset
+   *
+   * @param pDoc    the document
+   * @param pOffset current offset in the document
+   * @return the new offset
    */
-  public static String getPrintSuffix(int pBeginIdx, @NotNull String pToAdd, int pCaretOffset)
+  public static int removeCharacters(@NotNull Document pDoc, int pOffset) throws BadLocationException
   {
-    String toInsert = pToAdd.substring(0, pCaretOffset - pBeginIdx);
-    Optional<Integer> opt = new StringBuilder(toInsert).reverse().toString().chars()
-        .filter(pInt -> !Character.isLetterOrDigit(pInt))
-        .boxed()
-        .findFirst();
+    Position position = Utils.createPosition(pDoc, pOffset);
+    String line = getLine(pDoc, pOffset, position);
+    if (line == null)
+      return pOffset;
 
-    if (opt.isPresent())
-      pBeginIdx -= (toInsert.lastIndexOf(opt.get())) + 1;
+    // remove all $
+    int toRemove = 0;
+    int currentChar = position.getCharacter() - 1;
+    while (true)
+    {
+      if (currentChar > 0 && line.charAt(currentChar) == '$')
+      {
+        toRemove += 1;
+        currentChar -= 1;
+      }
+      else
+        break;
+    }
 
-    return pToAdd.substring(pCaretOffset - pBeginIdx);
+    pDoc.remove(pOffset - toRemove, toRemove);
+
+    // return the new offset
+    return pOffset - toRemove;
+  }
+
+  @Nullable
+  private static String getLine(@NotNull Document pDoc, int pCaretOffset, @NotNull Position pPosition)
+  {
+    try
+    {
+      int lineStartFromIndex = LineDocumentUtils.getLineStartFromIndex((LineDocument) pDoc, pPosition.getLine());
+      return pDoc.getText(lineStartFromIndex, pCaretOffset - lineStartFromIndex);
+    }
+    catch (Exception pE)
+    {
+      Logger.getLogger(CompletionAditoUtils.class.getName()).log(Level.WARNING, "", pE);
+      return null;
+    }
   }
 }

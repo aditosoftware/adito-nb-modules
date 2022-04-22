@@ -213,14 +213,22 @@ public class CompletionProviderImpl implements CompletionProvider {
                                                 toAdd = completionItem.getLabel();
                                             }
                                             int[] identSpan = Utilities.getIdentifierBlock((BaseDocument) doc, caretOffset);
-                                            String printSuffix = toAdd.substring(identSpan != null ? caretOffset - identSpan[0] : 0);
 
-                                            // ADITO
+                                            // BEGIN ADITO
+                                            // Fallback to caret offset, if there is no ident span
+                                            int[] identSpanCopy = new int[]{caretOffset, 0};
+                                            if(identSpan != null)
+                                                identSpanCopy = new int[]{identSpan[0], identSpan[1]};
+
+                                            // remove old text
+                                            doc.remove(identSpanCopy[0], caretOffset - identSpanCopy[0]);
+
                                             if(aditoCustom && identSpan != null)
-                                                printSuffix = CompletionAditoUtils.getPrintSuffix(identSpan[0], toAdd, caretOffset);
+                                                identSpanCopy[0] = CompletionAditoUtils.removeCharacters(doc, identSpanCopy[0]);
 
-                                            doc.insertString(caretOffset, printSuffix, null);
-                                            endPos = caretOffset + printSuffix.length();
+                                            doc.insertString(identSpanCopy[0], toAdd, null);
+                                            endPos = caretOffset + toAdd.length();
+                                            // END ADITO
                                         }
                                         doc.insertString(endPos, appendText, null);
                                     } catch (BadLocationException ex) {
