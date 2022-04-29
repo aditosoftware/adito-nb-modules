@@ -21,6 +21,8 @@ import java.util.logging.*;
  */
 class CompletionAditoUtils
 {
+  private static final List<Character> EXCLUSION_CHARACTERS = List.of('$', '#');
+
   private CompletionAditoUtils()
   {
     // Only static
@@ -112,25 +114,24 @@ class CompletionAditoUtils
   }
 
   /**
-   * Removes dollar characters if there is one before the offset
+   * Removes specific characters if there is one before the offset
    *
    * @param pDoc    the document
    * @param pOffset current offset in the document
    * @return the new offset
    */
-  public static int removeCharacters(@NotNull Document pDoc, int pOffset) throws BadLocationException
+  public static int removeSpecialCharacters(@NotNull Document pDoc, int pOffset) throws BadLocationException
   {
     Position position = Utils.createPosition(pDoc, pOffset);
     String line = getLine(pDoc, pOffset, position);
     if (line == null)
       return pOffset;
 
-    // remove all $
     int toRemove = 0;
     int currentChar = position.getCharacter() - 1;
     while (true)
     {
-      if (currentChar > 0 && line.charAt(currentChar) == '$')
+      if (currentChar > 0 && EXCLUSION_CHARACTERS.contains(line.charAt(currentChar)))
       {
         toRemove += 1;
         currentChar -= 1;

@@ -223,8 +223,8 @@ public class CompletionProviderImpl implements CompletionProvider {
                                             // remove old text
                                             doc.remove(identSpanCopy[0], caretOffset - identSpanCopy[0]);
 
-                                            if(aditoCustom && identSpan != null)
-                                                identSpanCopy[0] = CompletionAditoUtils.removeCharacters(doc, identSpanCopy[0]);
+                                            if(aditoCustom)
+                                                identSpanCopy[0] = CompletionAditoUtils.removeSpecialCharacters(doc, identSpanCopy[0]);
 
                                             doc.insertString(identSpanCopy[0], toAdd, null);
                                             endPos = caretOffset + toAdd.length();
