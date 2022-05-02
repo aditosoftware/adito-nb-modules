@@ -176,17 +176,22 @@ class ADITOWatcherSymlinkExt
         Date foLastModified = pLastModifiedCache.lastModified(fo);
         Pair<Optional<FileObject>, Date> cachedData = internalCache.get(fo);
 
+        FileObject realFo;
+
         // was calculated before and nothing has changed since calculation
         if (cachedData != null && Objects.equals(cachedData.second(), foLastModified))
-          return cachedData.first().orElse(null); //todo refresh if null? refresh to check if null now?
+          realFo = cachedData.first().orElse(null); //todo refresh if null? refresh to check if null now?
+        else
+        {
+          realFo = _readSymbolicLink(fo);
 
-        String relativeInLink = FileUtil.getRelativePath(fo, pFo);
-        FileObject realFo = _readSymbolicLink(fo);
+          // put back in cache
+          internalCache.put(fo, Pair.of(Optional.ofNullable(realFo), foLastModified));
+        }
 
-        // put back in cache
-        internalCache.put(fo, Pair.of(Optional.ofNullable(realFo), foLastModified));
+        // something resolved -> resolve me in parent and return
         if (realFo != null)
-          return realFo.getFileObject(relativeInLink);
+          return realFo.getFileObject(FileUtil.getRelativePath(fo, pFo));
 
         fo = fo.getParent();
       }
