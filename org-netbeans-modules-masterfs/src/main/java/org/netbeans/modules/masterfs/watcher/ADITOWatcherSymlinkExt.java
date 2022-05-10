@@ -12,6 +12,8 @@ import java.util.concurrent.atomic.*;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 
+import static java.lang.Boolean.FALSE;
+
 /**
  * Implementes specialhandling for NTFS junction files
  * and "regular" symlink files under linux
@@ -21,6 +23,7 @@ import java.util.logging.Level;
 class ADITOWatcherSymlinkExt
 {
 
+  static final String IS_INCLUDE_SYMLINKS_PROPERTY = "adito.fs.watcher.symlink.handling.enabled";
   private static final ISymlinkCache _SYMLINK_CACHE = new _SymlinkCache();
   private static final ILastModifiedCache _LASTMODIFIED_CACHE = new _LastModifiedCache();
   private static final ExecutorService _SYMLINK_CALCULATION_POOL = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors(), r -> {
@@ -34,6 +37,7 @@ class ADITOWatcherSymlinkExt
   private static final AtomicReference<FileObject> lastRefCallFo = new AtomicReference<>();
   private static final AtomicInteger shortLivingRefCacheHash = new AtomicInteger();
   private static final Map<String, Set<FileObject>> shortLivingRefCache = new ConcurrentHashMap<>();
+  private static final boolean IS_INCLUDE_SYMLINKS = isIsIncludeSymlinks();
 
   /**
    * Returns all references that have to be refreshed, after pChangedFile changed.
@@ -47,61 +51,64 @@ class ADITOWatcherSymlinkExt
   @NotNull
   public static Set<FileObject> getAllReferences(@NotNull FileObject pFileObject, @NotNull Consumer<Consumer<Set<NotifierKeyRef>>> pKeyRefProvider)
   {
-    // Ignore duplicate method calls, if they occur too often.
-    // This has to be done because of windows firing too many events too often
-    long currentRefCallTime = System.currentTimeMillis();
-    long oldRefCallTime = lastRefCallTime.getAndSet(currentRefCallTime);
-    FileObject oldRef = lastRefCallFo.getAndSet(pFileObject);
-    boolean timeBetweenCallsNotExceedThreshold = currentRefCallTime - oldRefCallTime < CALLING_THRESHOLD_MS;
-    if(Objects.equals(oldRef, pFileObject) && timeBetweenCallsNotExceedThreshold)
-      return Set.of();
-
-    // a bit hacky, but should work in our current situation
-    // we just want to exclude our "dist" directory from this calculation,
-    // because we knew that there is nothing referenced.
-    // If there is any problem with this, it can be removed - but think of our "dist" directory!
-    if(!VisibilityQuery.getDefault().isVisible(pFileObject))
-      return Set.of();
-
-    // Invalidate the lastModified of the given fileobject, because we knew, pFileObject was changed now
-    _LASTMODIFIED_CACHE.invalidate(pFileObject);
-
-    try
+    if (IS_INCLUDE_SYMLINKS)
     {
-      // Retrieve watched refs
-      AtomicReference<Set<NotifierKeyRef>> savedRefs = new AtomicReference<>();
-      pKeyRefProvider.accept(pRefs -> {
-        int newSavedRefsHash = pRefs.hashCode();
-        int oldSavedRefsHash = shortLivingRefCacheHash.getAndSet(newSavedRefsHash);
-        if(!Objects.equals(newSavedRefsHash, oldSavedRefsHash))
-          savedRefs.set(new HashSet<>(pRefs));
-      });
+      // Ignore duplicate method calls, if they occur too often.
+      // This has to be done because of windows firing too many events too often
+      long currentRefCallTime = System.currentTimeMillis();
+      long oldRefCallTime = lastRefCallTime.getAndSet(currentRefCallTime);
+      FileObject oldRef = lastRefCallFo.getAndSet(pFileObject);
+      boolean timeBetweenCallsNotExceedThreshold = currentRefCallTime - oldRefCallTime < CALLING_THRESHOLD_MS;
+      if (Objects.equals(oldRef, pFileObject) && timeBetweenCallsNotExceedThreshold)
+        return Set.of();
 
-      // Recreate Cache if necessary and possible
-      if(savedRefs.get() != null)
+      // a bit hacky, but should work in our current situation
+      // we just want to exclude our "dist" directory from this calculation,
+      // because we knew that there is nothing referenced.
+      // If there is any problem with this, it can be removed - but think of our "dist" directory!
+      if (!VisibilityQuery.getDefault().isVisible(pFileObject))
+        return Set.of();
+
+      // Invalidate the lastModified of the given fileobject, because we knew, pFileObject was changed now
+      _LASTMODIFIED_CACHE.invalidate(pFileObject);
+
+      try
       {
-        // invalidate cache
-        shortLivingRefCache.clear();
+        // Retrieve watched refs
+        AtomicReference<Set<NotifierKeyRef>> savedRefs = new AtomicReference<>();
+        pKeyRefProvider.accept(pRefs -> {
+          int newSavedRefsHash = pRefs.hashCode();
+          int oldSavedRefsHash = shortLivingRefCacheHash.getAndSet(newSavedRefsHash);
+          if (!Objects.equals(newSavedRefsHash, oldSavedRefsHash))
+            savedRefs.set(new HashSet<>(pRefs));
+        });
 
-        // Check symlinks
-        CompletableFuture.allOf(savedRefs.get().stream()
-                                    .map(pRef -> CompletableFuture.runAsync(() -> {
-                                      FileObject refFo = pRef.get();
-                                      if (refFo != null)
-                                      {
-                                        FileObject symlinkTarget = _SYMLINK_CACHE.readSymbolicLink(_LASTMODIFIED_CACHE, refFo);
-                                        if (symlinkTarget != null)
-                                          shortLivingRefCache.computeIfAbsent(symlinkTarget.getPath(), pF -> new HashSet<>()).add(refFo);
-                                      }
-                                    }, _SYMLINK_CALCULATION_POOL))
-                                    .toArray(CompletableFuture[]::new)).get();
+        // Recreate Cache if necessary and possible
+        if (savedRefs.get() != null)
+        {
+          // invalidate cache
+          shortLivingRefCache.clear();
+
+          // Check symlinks
+          CompletableFuture.allOf(savedRefs.get().stream()
+                                      .map(pRef -> CompletableFuture.runAsync(() -> {
+                                        FileObject refFo = pRef.get();
+                                        if (refFo != null)
+                                        {
+                                          FileObject symlinkTarget = _SYMLINK_CACHE.readSymbolicLink(_LASTMODIFIED_CACHE, refFo);
+                                          if (symlinkTarget != null)
+                                            shortLivingRefCache.computeIfAbsent(symlinkTarget.getPath(), pF -> new HashSet<>()).add(refFo);
+                                        }
+                                      }, _SYMLINK_CALCULATION_POOL))
+                                      .toArray(CompletableFuture[]::new)).get();
+        }
+
+        return shortLivingRefCache.getOrDefault(pFileObject.getPath(), Set.of());
       }
-
-      return shortLivingRefCache.getOrDefault(pFileObject.getPath(), Set.of());
-    }
-    catch (Throwable e)
-    {
-      Watcher.LOG.log(Level.WARNING, "", e);
+      catch (Throwable e)
+      {
+        Watcher.LOG.log(Level.WARNING, "", e);
+      }
     }
 
     return Set.of();
@@ -120,7 +127,9 @@ class ADITOWatcherSymlinkExt
   @Nullable
   public static FileObject readSymbolicLink(@NotNull FileObject pFileObject)
   {
-    return _SYMLINK_CACHE.readSymbolicLink(new _LastModifiedCache(), pFileObject);
+    if (IS_INCLUDE_SYMLINKS)
+      return _SYMLINK_CACHE.readSymbolicLink(new _LastModifiedCache(), pFileObject);
+    return null;
   }
 
   interface ISymlinkCache
@@ -253,5 +262,13 @@ class ADITOWatcherSymlinkExt
     }
   }
 
+  /**
+   *
+   * @return true if symlinks and junction links should be resolved, false otherwise
+   */
+  static boolean isIsIncludeSymlinks()
+  {
+    return !FALSE.toString().equalsIgnoreCase(System.getProperty(IS_INCLUDE_SYMLINKS_PROPERTY, "false"));
+  }
 
 }
