@@ -18,19 +18,14 @@
  */
 package org.netbeans.modules.lsp.client.bindings;
 
-import java.util.EnumSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import javax.swing.text.AbstractDocument;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
-import org.eclipse.lsp4j.DefinitionParams;
-import org.eclipse.lsp4j.Location;
-import org.eclipse.lsp4j.LocationLink;
-import org.eclipse.lsp4j.Range;
-import org.eclipse.lsp4j.TextDocumentIdentifier;
+
+import org.eclipse.lsp4j.*;
 import org.eclipse.lsp4j.jsonrpc.messages.Either;
 import org.netbeans.api.editor.mimelookup.MimeRegistration;
 import org.netbeans.api.lexer.TokenHierarchy;
@@ -43,9 +38,11 @@ import org.netbeans.modules.editor.NbEditorUtilities;
 import org.netbeans.modules.lsp.client.LSPBindingFactory;
 import org.netbeans.modules.lsp.client.LSPBindings;
 import org.netbeans.modules.lsp.client.Utils;
+import org.netbeans.modules.lsp.client.bindings.refactoring.WhereUsedAction;
 import org.netbeans.modules.textmate.lexer.TextmateTokenId;
 import org.openide.filesystems.FileObject;
-import org.openide.util.Exceptions;
+import org.openide.util.*;
+import org.openide.util.actions.SystemAction;
 
 /**
  *
@@ -115,8 +112,9 @@ public class HyperlinkProviderImpl implements HyperlinkProviderExt {
         String uri = Utils.toURI(file);
         try {
             DefinitionParams params;
-            params = new DefinitionParams(new TextDocumentIdentifier(uri),
-                                          Utils.createPosition(doc, offset));
+            Position offsetPosition = Utils.createPosition(doc, offset);
+            params = new DefinitionParams(new TextDocumentIdentifier(uri), offsetPosition);
+
             //TODO: Location or Location[]
             CompletableFuture<Either<List<? extends Location>, List<? extends LocationLink>>> def = server.getTextDocumentService().definition(params);
             def.handleAsync((locations, exception) -> {
@@ -138,6 +136,16 @@ public class HyperlinkProviderImpl implements HyperlinkProviderExt {
                     return null;
                 }
                 Utils.open(targetUri, targetRange);
+
+                // if the current location is the definition returned by the lsp server, find usages should be started
+                if(Objects.equals(targetUri, uri)
+                    && targetRange.getStart().getLine() == offsetPosition.getLine()
+                    &&targetRange.getEnd().getLine() == offsetPosition.getLine()
+                    && targetRange.getStart().getCharacter() <= offsetPosition.getCharacter()
+                    && targetRange.getEnd().getCharacter() >= offsetPosition.getCharacter())
+                {
+                    SystemAction.get(WhereUsedAction.class).performAction(file.getLookup());
+                }
                 return null;
             }).get();
         } catch (BadLocationException ex) {
