@@ -105,7 +105,8 @@ public class CustomIndexerImpl extends CustomIndexer {
         }
     }
 
-    @MimeRegistration(mimeType="", service=CustomIndexerFactory.class)
+    //ADITO: Indexer triggers OOM errors too often, because EditableProperties get too big
+    //@MimeRegistration(mimeType="", service=CustomIndexerFactory.class)
     public static final class FactoryImpl extends CustomIndexerFactory {
 
         @Override
