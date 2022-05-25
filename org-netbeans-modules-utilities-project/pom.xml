@@ -9,7 +9,7 @@
 
   <groupId>org.netbeans.modules</groupId>
   <artifactId>org-netbeans-modules-utilities-project</artifactId>
-  <version>RELEASE125-1.9.0</version>
+  <version>RELEASE125-1.9.1</version>
   <packaging>nbm</packaging>
   <name>OpenIDE module: org-netbeans-modules-utilities-project</name>
 
@@ -93,7 +93,7 @@
           <codeNameBase>org.netbeans.modules.utilities.project</codeNameBase>
           <publicPackages>
             <publicPackage>org.netbeans.modules.search.project.*</publicPackage>
-            <publicPackage>org.netbeans.modules.search.project.spi*</publicPackage>
+            <publicPackage>org.netbeans.modules.search.project.spi.*</publicPackage>
             <publicPackage>org.netbeans.modules.utilities.project.*</publicPackage>
           </publicPackages>
         </configuration>
