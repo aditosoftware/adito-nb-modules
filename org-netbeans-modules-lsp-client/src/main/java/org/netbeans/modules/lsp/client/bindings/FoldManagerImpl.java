@@ -124,7 +124,8 @@ public class FoldManagerImpl implements FoldManager, BackgroundTask {
                 } else {
                     end = Utils.getOffset(doc, new Position(r.getEndLine(), r.getEndCharacter()));
                 }
-                infos.add(FoldInfo.range(start, end, FoldType.CODE_BLOCK));
+                if(end >= start)
+                    infos.add(FoldInfo.range(start, end, FoldType.CODE_BLOCK));
             }
         }
         SwingUtilities.invokeLater(() -> {
