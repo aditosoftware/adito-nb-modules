@@ -1,6 +1,8 @@
 package de.adito.nbm.runconfig.api;
 
 import de.adito.aditoweb.nbm.nbide.nbaditointerface.tunnel.ITunnelConfigProvider;
+import de.adito.aditoweb.properties.PropertyAlias;
+import de.adito.nbm.runconfig.exception.PropertyNotFoundException;
 import io.reactivex.rxjava3.core.Observable;
 import org.jetbrains.annotations.NotNull;
 import org.netbeans.api.project.Project;
@@ -40,6 +42,21 @@ public interface ISystemInfo extends ITunnelConfigProvider
    * @param pCloudId the CloudId to be set
    */
   void setCloudId(@NotNull String pCloudId);
+
+  /**
+   * Sets the requested value for the given property. Some Property names are available in de.adito.properties.PropertyNames found in
+   * de-adito-netbeans-utilities
+   *
+   * @param pPropertyAlias name of the property to be set
+   * @param pPropertyValue value to be set
+   * @throws PropertyNotFoundException if no property for the given name could be found
+   */
+  void setProperty(@NotNull PropertyAlias pPropertyAlias, @NotNull String pPropertyValue) throws PropertyNotFoundException;
+
+  /**
+   * @return absolute Path that of the $ADITODATA path property
+   */
+  String getResolvedAditoDataPath();
 
   /**
    * Get a map with parameter settings

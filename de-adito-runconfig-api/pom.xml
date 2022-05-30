@@ -12,7 +12,7 @@
   <groupId>de.adito.nbm</groupId>
   <artifactId>de-adito-runconfig-api</artifactId>
   <packaging>nbm</packaging>
-  <version>RELEASE125-1.9.1</version>
+  <version>RELEASE125-1.9.2</version>
   <name>ADITO Netbeans Module: de-adito-runconfig-api</name>
 
   <properties>
@@ -28,7 +28,7 @@
     <dependency>
       <groupId>de.adito.nb-modules</groupId>
       <artifactId>nb-adito-interface</artifactId>
-      <version>1.9.0</version>
+      <version>1.9.4-SNAPSHOT</version>
     </dependency>
 
     <!-- NetBeans -->
@@ -64,6 +64,7 @@
             <publicPackage>de.adito.nbm.runconfig.api</publicPackage>
             <publicPackage>de.adito.nbm.runconfig.spi</publicPackage>
             <publicPackage>de.adito.nbm.runconfig.category</publicPackage>
+            <publicPackage>de.adito.nbm.runconfig.exception</publicPackage>
           </publicPackages>
         </configuration>
       </plugin>
