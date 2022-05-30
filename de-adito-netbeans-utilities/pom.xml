@@ -12,14 +12,14 @@
 
   <groupId>de.adito.nb-modules</groupId>
   <artifactId>de-adito-netbeans-utilities</artifactId>
-  <version>RELEASE125-1.9.2</version>
+  <version>RELEASE125-1.9.3</version>
   <name>ADITO Netbeans Module: de-adito-netbeans-utilities</name>
 
   <dependencies>
     <dependency>
       <groupId>de.adito.nb-modules</groupId>
       <artifactId>nb-adito-interface</artifactId>
-      <version>1.9.0</version>
+      <version>1.9.4-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>de.adito.nbm</groupId>
