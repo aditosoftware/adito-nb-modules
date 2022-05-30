@@ -129,6 +129,7 @@
             <publicPackage>de.adito.aditoweb.nbm.nbide.nbaditointerface.metrics.*</publicPackage>
             <publicPackage>de.adito.aditoweb.nbm.nbide.nbaditointerface.nodes.*</publicPackage>
             <publicPackage>de.adito.aditoweb.nbm.nbide.nbaditointerface.tunnel.*</publicPackage>
+            <publicPackage>de.adito.aditoweb.properties.*</publicPackage>
             <publicPackage>de.adito.swing.*</publicPackage>
             <publicPackage>de.adito.swing.icon.*</publicPackage>
             <publicPackage>de.adito.aditoweb.nbm.vaadinicons.*</publicPackage>
