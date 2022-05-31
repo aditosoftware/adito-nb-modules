@@ -86,6 +86,9 @@ public class LanguageClientImpl implements LanguageClient {
         if (allowCodeActions && hintsAndErrorsProvider != null) {
             try {
                 FileObject file = URLMapper.findFileObject(new URI(pdp.getUri()).toURL());
+                if(file == null) {
+                    return; // ignore
+                }
                 EditorCookie ec = file.getLookup().lookup(EditorCookie.class);
                 Document doc = ec != null ? ec.getDocument() : null;
                 if (doc == null) {
