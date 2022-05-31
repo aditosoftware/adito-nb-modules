@@ -24,10 +24,10 @@ public interface IJsParserUtility
   /**
    * Determines, if the given code snippet contains an import
    *
-   * @param pCode Code to check
+   * @param pLine Code to check
    * @return true, if the code snippet contains an import
    */
-  boolean containsImport(@NotNull String pCode);
+  boolean isImportLine(@NotNull String pLine);
 
   /**
    * Parses all imports from the given script
