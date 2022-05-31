@@ -24,7 +24,8 @@ OpenIDE-Module-Module-Dependencies: com.google.gson > 2.7, com.google.
  .modules.jumpto/1 > 1.65, org.netbeans.modules.settings/1 > 1.59, org
  .netbeans.modules.queries/1 > 1.53, org.netbeans.modules.parsing.inde
  xing > 9.19, org.netbeans.modules.editor.fold/1 > 1.55, de.adito.adit
- oweb.modules.nbide.nbaditointerface > 1.9.1
+ oweb.modules.nbide.nbaditointerface > 1.9.1, org.netbeans.modules.pro
+ jectuiapi.base/1 > 1.98.0.9
 OpenIDE-Module-Java-Dependencies: Java > 1.8
 OpenIDE-Module-Build-Version: 12.5-fd523ddc12d6156412d7b81f0c8663d8913
  d1021

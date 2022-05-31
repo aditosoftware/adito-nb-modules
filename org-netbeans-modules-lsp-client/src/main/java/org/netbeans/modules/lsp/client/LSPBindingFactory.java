@@ -26,13 +26,7 @@ import java.lang.ref.WeakReference;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.net.URI;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.IdentityHashMap;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -51,6 +45,7 @@ import org.netbeans.api.editor.mimelookup.MimeLookup;
 import org.netbeans.api.progress.BaseProgressUtils;
 import org.netbeans.api.project.FileOwnerQuery;
 import org.netbeans.api.project.Project;
+import org.netbeans.api.project.ui.OpenProjects;
 import org.netbeans.modules.lsp.client.bindings.LanguageClientImpl;
 import org.netbeans.modules.lsp.client.bindings.TextDocumentSyncServerCapabilityHandler;
 import org.netbeans.modules.lsp.client.spi.LSPClientInfo;
@@ -58,7 +53,7 @@ import org.netbeans.modules.lsp.client.spi.LanguageServerProvider;
 import org.netbeans.modules.lsp.client.spi.ServerRestarter;
 import org.openide.filesystems.FileObject;
 import org.openide.filesystems.FileUtil;
-import org.openide.modules.OnStop;
+import org.openide.modules.*;
 import org.openide.util.ChangeSupport;
 import org.openide.util.Exceptions;
 import org.openide.util.Lookup;
@@ -75,10 +70,10 @@ import org.openide.util.lookup.Lookups;
  */
 public class LSPBindingFactory {
     
-    private static final int LSP_KEEP_ALIVE_MINUTES = 10;
+    //private static final int LSP_KEEP_ALIVE_MINUTES = 10;
     private static final Logger LOG = Logger.getLogger(LSPBindingFactory.class.getName());
     
-    private static final Map<LSPBindings,Long> lspKeepAlive = new IdentityHashMap<>();
+    //private static final Map<LSPBindings,Long> lspKeepAlive = new IdentityHashMap<>();
     private static final Map<URI, Map<String, WeakReference<LSPBindings>>> project2MimeType2Server = new HashMap<>();
     private static final Map<FileObject, Map<String, LSPBindings>> workspace2Extension2Server = new HashMap<>();
     
@@ -95,27 +90,27 @@ public class LSPBindingFactory {
 
         // Remove LSP Servers from strong reference tracking, that have not
         // been accessed more than LSP_KEEP_ALIVE_MINUTES minutes
-        WORKER.scheduleAtFixedRate(
-            () -> {
-                synchronized (LSPBindings.class) {
-                    long tooOld = System.currentTimeMillis() - (LSP_KEEP_ALIVE_MINUTES * 60L * 1000L);
-                    Iterator<Map.Entry<LSPBindings, Long>> iterator = lspKeepAlive.entrySet().iterator();
-                    while (iterator.hasNext()) {
-                        Map.Entry<LSPBindings, Long> entry = iterator.next();
-                        if (entry.getValue() < tooOld) {
-                            //@todo close the server...
-                            try {
-                                entry.getKey().shutdown();
-                            } catch (Exception e) {
-                            }
-                            iterator.remove();
-                        }
-                    }
-                }
-            },
-            Math.max(LSP_KEEP_ALIVE_MINUTES / 2, 1),
-            Math.max(LSP_KEEP_ALIVE_MINUTES / 2, 1),
-            TimeUnit.MINUTES);
+        //WORKER.scheduleAtFixedRate(
+        //    () -> {
+        //        synchronized (LSPBindings.class) {
+        //            long tooOld = System.currentTimeMillis() - (LSP_KEEP_ALIVE_MINUTES * 60L * 1000L);
+        //            Iterator<Map.Entry<LSPBindings, Long>> iterator = lspKeepAlive.entrySet().iterator();
+        //            while (iterator.hasNext()) {
+        //                Map.Entry<LSPBindings, Long> entry = iterator.next();
+        //                if (entry.getValue() < tooOld) {
+        //                    //@todo close the server...
+        //                    try {
+        //                        entry.getKey().shutdown();
+        //                    } catch (Exception e) {
+        //                    }
+        //                    iterator.remove();
+        //                }
+        //            }
+        //        }
+        //    },
+        //    Math.max(LSP_KEEP_ALIVE_MINUTES / 2, 1),
+        //    Math.max(LSP_KEEP_ALIVE_MINUTES / 2, 1),
+        //    TimeUnit.MINUTES);
     }
     
     
@@ -190,9 +185,9 @@ public class LSPBindingFactory {
             }
         }
 
-        if(bindings != null) {
-            lspKeepAlive.put(bindings, System.currentTimeMillis());
-        }
+        //if(bindings != null) {
+        //    lspKeepAlive.put(bindings, System.currentTimeMillis());
+        //}
 
         return bindings != null ? bindings : null;
     }
@@ -262,7 +257,7 @@ public class LSPBindingFactory {
                 LSPBindings b = bRef != null ? bRef.get() : null;
 
                 if (b != null) {
-                    lspKeepAlive.remove(b);
+                    //lspKeepAlive.remove(b);
                     b.shutdownAndKill();
                 }
             }
@@ -381,7 +376,39 @@ public class LSPBindingFactory {
            }
        }
     }
-    
+
+    /**
+     * Runnable which is executed on module start. Registers listener
+     */
+    @OnStart
+    public static class Initialize implements Runnable
+    {
+
+        @Override
+        public void run()
+        {
+            OpenProjects.getDefault().addPropertyChangeListener(evt -> {
+                List<Project> newValue = new ArrayList<>(Arrays.asList(Objects.requireNonNullElse((Project[]) evt.getNewValue(), new Project[0])));
+                List<Project> oldValue = new ArrayList<>(Arrays.asList(Objects.requireNonNullElse((Project[]) evt.getOldValue(), new Project[0])));
+
+                // Stop LSP server of closed projects
+                List<Project> closedProjects = new ArrayList<>(oldValue);
+                closedProjects.removeAll(newValue);
+
+                closedProjects.forEach(pProject -> {
+                    Map<String, WeakReference<LSPBindings>> map = project2MimeType2Server.get(pProject.getProjectDirectory().toURI());
+                    if(map != null)
+                    {
+                        Collection<WeakReference<LSPBindings>> bindings = map.values();
+                        bindings.forEach(pRef -> {
+                            if(pRef != null && pRef.get() != null)
+                                Objects.requireNonNull(pRef.get()).shutdownAndKill();
+                        });
+                    }
+                });
+            });
+        }
+    }
     
     @OnStop
     public static class Cleanup implements Runnable {

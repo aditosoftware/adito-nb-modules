@@ -226,6 +226,11 @@
       <artifactId>org-netbeans-modules-editor-fold</artifactId>
       <version>${netbeans.version}</version>
     </dependency>
+    <dependency>
+      <groupId>org.netbeans.api</groupId>
+      <artifactId>org-netbeans-modules-projectuiapi-base</artifactId>
+      <version>${netbeans.version}</version>
+    </dependency>
 
 <!--    <dependency>-->
 <!--      <groupId>org.netbeans.external</groupId>-->
