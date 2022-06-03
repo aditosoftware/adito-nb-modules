@@ -27,23 +27,8 @@ import java.util.concurrent.CompletableFuture;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.text.Document;
-import org.eclipse.lsp4j.ApplyWorkspaceEditParams;
-import org.eclipse.lsp4j.ApplyWorkspaceEditResponse;
-import org.eclipse.lsp4j.ConfigurationItem;
-import org.eclipse.lsp4j.ConfigurationParams;
-import org.eclipse.lsp4j.LogTraceParams;
-import org.eclipse.lsp4j.MessageActionItem;
-import org.eclipse.lsp4j.MessageParams;
-import org.eclipse.lsp4j.ProgressParams;
-import org.eclipse.lsp4j.PublishDiagnosticsParams;
-import org.eclipse.lsp4j.RegistrationParams;
-import org.eclipse.lsp4j.SetTraceParams;
-import org.eclipse.lsp4j.ShowDocumentParams;
-import org.eclipse.lsp4j.ShowDocumentResult;
-import org.eclipse.lsp4j.ShowMessageRequestParams;
-import org.eclipse.lsp4j.UnregistrationParams;
-import org.eclipse.lsp4j.WorkDoneProgressCreateParams;
-import org.eclipse.lsp4j.WorkspaceFolder;
+
+import org.eclipse.lsp4j.*;
 import org.eclipse.lsp4j.services.LanguageClient;
 import org.netbeans.modules.lsp.client.LSPBindings;
 import org.netbeans.modules.lsp.client.Utils;
@@ -62,6 +47,7 @@ import org.openide.util.RequestProcessor;
 public class LanguageClientImpl implements LanguageClient {
 
     private static final Logger LOG = Logger.getLogger(LanguageClientImpl.class.getName());
+    private static final boolean LOGGING_ACTIVE = System.getProperty("adito.designer.lsp.client.logging") != null;
     private static final RequestProcessor WORKER = new RequestProcessor(LanguageClientImpl.class.getName(), 1, false, false);
     
     private boolean allowCodeActions;
@@ -145,7 +131,8 @@ public class LanguageClientImpl implements LanguageClient {
      */
     @Override
     public void logMessage(MessageParams message) {
-        Logger.getLogger(LanguageClientImpl.class.getName()).log(Level.INFO, message::getMessage);
+        if(LOGGING_ACTIVE)
+            Logger.getLogger(LanguageClientImpl.class.getName()).log(Level.INFO, message::getMessage);
     }
     
     
