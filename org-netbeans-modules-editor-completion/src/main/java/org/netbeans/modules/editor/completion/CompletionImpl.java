@@ -1182,6 +1182,8 @@ outer:      for (Iterator it = localCompletionResult.getResultSets().iterator();
         runInAWT(requestShowRunnable);
     }
 
+    private static final List<Character> SPECIAL_CHARACTER = List.of('$', '#');
+
     private int getCompletionPreSelectionIndex(List<CompletionItem> items) {
         String prefix = null;
         if(getActiveDocument() instanceof BaseDocument) {
@@ -1190,6 +1192,18 @@ outer:      for (Iterator it = localCompletionResult.getResultSets().iterator();
             try {
                 int[] block = Utilities.getIdentifierBlock(doc, caretOffset);
                 if (block != null) {
+                    try {
+                        while (true) {
+                            if (block[0] > 0 && SPECIAL_CHARACTER.contains(doc.getChars(block[0] - 1, 1)[0])) {
+                                block[0] -= 1;
+                            }
+                            else
+                                break;
+                        }
+                    }
+                    catch (Throwable t) {
+                        // ignore
+                    }
                     block[1] = caretOffset;
                     prefix = doc.getText(block);
                 }
