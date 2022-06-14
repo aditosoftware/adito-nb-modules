@@ -227,7 +227,7 @@ public class CompletionProviderImpl implements CompletionProvider {
                                                 identSpanCopy[0] = CompletionAditoUtils.removeSpecialCharacters(doc, identSpanCopy[0]);
 
                                             doc.insertString(identSpanCopy[0], toAdd, null);
-                                            endPos = caretOffset + toAdd.length();
+                                            endPos = identSpanCopy[0] + toAdd.length();
                                             // END ADITO
                                         }
                                         doc.insertString(endPos, appendText, null);
