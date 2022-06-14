@@ -67,6 +67,7 @@
     <module>org-netbeans-external-ddl</module>
     <module>org-netbeans-modules-db</module>
     <module>org-netbeans-modules-db-dataview</module>
+    <module>org-netbeans-modules-editor-completion</module>
     <module>org-netbeans-modules-javascript-editing</module>
     <module>org-netbeans-modules-javascript-hints</module>
     <module>org-netbeans-modules-javascript-refactoring</module>

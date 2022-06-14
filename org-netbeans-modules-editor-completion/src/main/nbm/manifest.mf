@@ -1,0 +1,15 @@
+Manifest-Version: 1.0
+OpenIDE-Module-Java-Dependencies: Java > 1.8
+OpenIDE-Module-Build-Version: 12.5-fd523ddc12d6156412d7b81f0c8663d8913
+ d1021
+OpenIDE-Module-Specification-Version: 1.57.0.2
+AutoUpdate-Show-In-Client: false
+OpenIDE-Module: org.netbeans.modules.editor.completion/1
+OpenIDE-Module-Localizing-Bundle: org/netbeans/modules/editor/completi
+ on/Bundle.properties
+OpenIDE-Module-Install: org/netbeans/modules/editor/completion/Complet
+ ionModule.class
+OpenIDE-Module-Layer: org/netbeans/modules/editor/completion/resources
+ /layer.xml
+OpenIDE-Module-Implementation-Version: 2
+OpenIDE-Module-Requires: org.openide.modules.ModuleFormat1
