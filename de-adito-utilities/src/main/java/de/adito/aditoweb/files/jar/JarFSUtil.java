@@ -2,7 +2,7 @@ package de.adito.aditoweb.files.jar;
 
 import com.google.common.base.Charsets;
 import com.google.common.io.Files;
-import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.*;
 
 import java.io.*;
 import java.net.*;
@@ -78,13 +78,28 @@ public class JarFSUtil
    * @return Map
    */
   @NotNull
-  public static Map<String, InputStream> loadBlueprintsFromInnerJar(@NotNull URL pJarFile) {
+  @Deprecated
+  public static Map<String, InputStream> loadBlueprintsFromInnerJar(@NotNull URL pJarFile)
+  {
+    return loadBlueprintsFromInnerJar(pJarFile, null);
+  }
+
+  /**
+   * Liefert alle Blueprints aus einer jar Datei
+   *
+   * @param pJarFile URL zur Jar
+   * @param pResolver Resolver für die Blueprint-Datei-Pfade
+   * @return Map
+   */
+  @NotNull
+  public static Map<String, InputStream> loadBlueprintsFromInnerJar(@NotNull URL pJarFile, @Nullable BlueprintResolver pResolver)
+  {
     // Daten können NICHT direkt aus dem Verzeichnis gelesen werden.
     // Beispielsweise wenn die XML-Dateien innerhalb einer JAR liegen
     String[] split = pJarFile.toExternalForm().split("!");
     if (split.length != 2)
       return loadBlueprintsFromNormalFolder(new File(pJarFile.getPath()));
-    return loadFromInnerJar(split, new FileStreamExtractor(), pathname -> true);
+    return loadFromInnerJar(split, new FileStreamExtractor(pResolver), pathname -> true);
   }
 
 
@@ -142,6 +157,12 @@ public class JarFSUtil
 
   private static class FileStreamExtractor implements ZipExtractor<Map<String, InputStream>>
   {
+    private final BlueprintResolver extractor;
+
+    public FileStreamExtractor(@Nullable BlueprintResolver pExtractor)
+    {
+      extractor = pExtractor;
+    }
 
     @Override
     public Map<String, InputStream> extractEntries(@NotNull ZipInputStream pZis, @NotNull String pPathInJar, @NotNull FileFilter pFileFilter) throws IOException
@@ -152,8 +173,16 @@ public class JarFSUtil
         {
           try
           {
-            //noinspection UnstableApiUsage
-            result.put(Files.getNameWithoutExtension(entry.getName()), getClass().getResourceAsStream("/" + entry.getName()));
+            if (extractor != null)
+            {
+              //noinspection UnstableApiUsage
+              result.put(Files.getNameWithoutExtension(entry.getName()), extractor.loadBlueprint(entry.getName()));
+            }
+            else
+            {
+              //noinspection UnstableApiUsage
+              result.put(Files.getNameWithoutExtension(entry.getName()), getClass().getResourceAsStream("/" + entry.getName()));
+            }
           }
           catch (Exception e)
           {
@@ -164,5 +193,15 @@ public class JarFSUtil
     }
   }
 
-
+  public interface BlueprintResolver
+  {
+    /**
+     * Loads a blueprint
+     *
+     * @param pPath path to the blueprint file
+     * @return the corresponding input stream
+     */
+    @Nullable
+    InputStream loadBlueprint(@NotNull String pPath);
+  }
 }
