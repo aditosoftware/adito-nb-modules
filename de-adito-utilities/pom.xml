@@ -15,7 +15,7 @@
   <groupId>de.adito.nbm</groupId>
   <artifactId>de-adito-utilities</artifactId>
   <packaging>nbm</packaging>
-  <version>RELEASE125-1.0.0</version>
+  <version>RELEASE125-1.0.1</version>
   <name>ADITO Netbeans Module: de-adito-utilities</name>
 
   <dependencies>
