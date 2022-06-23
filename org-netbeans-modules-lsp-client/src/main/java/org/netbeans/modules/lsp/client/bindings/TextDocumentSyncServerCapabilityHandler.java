@@ -344,7 +344,7 @@ public class TextDocumentSyncServerCapabilityHandler {
                     textComponent.putClientProperty(BreadcrumbsImpl.class, bi);
                 }
                 if (textComponent.getClientProperty(ProgressHandleTask.class) == null) {
-                    ProgressHandleTask handle = new ProgressHandleTask();
+                    ProgressHandleTask handle = new ProgressHandleTask(file);
                     LSPWorkingPool.addBackgroundTask(file, handle);
                     textComponent.putClientProperty(ProgressHandleTask.class, handle);
                 }

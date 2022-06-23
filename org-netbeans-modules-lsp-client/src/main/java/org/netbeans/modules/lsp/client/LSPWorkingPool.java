@@ -22,7 +22,8 @@ import java.util.IdentityHashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.WeakHashMap;
-import org.netbeans.modules.lsp.client.bindings.LanguageClientImpl;
+
+import org.netbeans.modules.lsp.client.bindings.*;
 import org.openide.filesystems.FileObject;
 import org.openide.util.RequestProcessor;
 
@@ -44,10 +45,24 @@ public class LSPWorkingPool {
     @SuppressWarnings("AccessingNonPublicFieldOfAnotherObject")
     public static synchronized void addBackgroundTask(FileObject file, BackgroundTask task) {
         RequestProcessor.Task req = WORKER.create(() -> {
-            LSPBindings bindings = LSPBindingFactory.getBindingForFile(file);
+            LSPBindings bindings;
+            try
+            {
+                bindings = LSPBindingFactory.getBindingForFile(file);
 
-            if (bindings == null)
-                return ;
+                if (bindings == null)
+                {
+                    // if bindings are not present, cancel progress handle
+                    ProgressHandleTask.cleanup(file);
+                    return;
+                }
+            }
+            catch (Throwable t)
+            {
+                // if an error occurs, cancel progress handle
+                ProgressHandleTask.cleanup(file);
+                throw t;
+            }
 
             task.run(bindings, file);
         });

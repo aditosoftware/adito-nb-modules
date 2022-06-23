@@ -1,8 +1,12 @@
 package org.netbeans.modules.lsp.client.bindings;
 
+import org.jetbrains.annotations.NotNull;
 import org.netbeans.api.progress.ProgressHandle;
 import org.netbeans.modules.lsp.client.*;
 import org.openide.filesystems.FileObject;
+
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Pseudo background task for progress handle
@@ -14,24 +18,37 @@ import org.openide.filesystems.FileObject;
  */
 public class ProgressHandleTask implements LSPWorkingPool.BackgroundTask
 {
-  private ProgressHandle handle;
+  private static final Map<String, ProgressHandle> handles = new ConcurrentHashMap<>();
 
-  public ProgressHandleTask()
+  public ProgressHandleTask(@NotNull FileObject file)
   {
-    handle = ProgressHandle.createSystemHandle("", null);
-    handle.start();
-    handle.switchToIndeterminate();
-    handle.setDisplayName("Initializing JS/TS features");
+    String ext = Objects.requireNonNullElse(file.getExt(), "").toLowerCase(Locale.ROOT);
+    ProgressHandle handle = handles.get(ext);
+    if(handle == null)
+    {
+      handle = ProgressHandle.createSystemHandle("", null);
+      handle.start();
+      handle.switchToIndeterminate();
+      handle.setDisplayName("Initializing " + ext.toUpperCase() + " features");
+      handles.put(ext, handle);
+    }
   }
 
   @Override
   public void run(LSPBindings bindings, FileObject file)
   {
+    cleanup(file);
+  }
+
+  public static void cleanup(FileObject file)
+  {
+    String ext = Objects.requireNonNullElse(file.getExt(), "").toLowerCase(Locale.ROOT);
+    ProgressHandle handle = handles.get(ext);
     if (handle != null)
     {
       handle.finish();
       handle.close();
+      handles.remove(ext);
     }
-    handle = null;
   }
 }
