@@ -9,7 +9,7 @@
 
   <groupId>org.netbeans.api</groupId>
   <artifactId>org-netbeans-modules-editor-completion</artifactId>
-  <version>RELEASE125-1.9.1-SNAPSHOT</version>
+  <version>RELEASE125-1.9.1</version>
   <packaging>nbm</packaging>
   <name>NetbeansIDE module: org-netbeans-modules-editor-completion</name>
 
