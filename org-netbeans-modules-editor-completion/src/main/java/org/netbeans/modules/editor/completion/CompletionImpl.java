@@ -1182,7 +1182,7 @@ outer:      for (Iterator it = localCompletionResult.getResultSets().iterator();
         runInAWT(requestShowRunnable);
     }
 
-    private static final List<Character> SPECIAL_CHARACTER = List.of('$', '#'); // ADITO
+    private static final List<Character> SPECIAL_CHARACTER = List.of('$', '#', '_'); // ADITO
 
     private int getCompletionPreSelectionIndex(List<CompletionItem> items) {
         String prefix = null;
@@ -1191,22 +1191,29 @@ outer:      for (Iterator it = localCompletionResult.getResultSets().iterator();
             int caretOffset = getActiveComponent().getSelectionStart();
             try {
                 int[] block = Utilities.getIdentifierBlock(doc, caretOffset);
-                if (block != null) { // BEGIN ADITO
-                    try {
-                        while (true) {
-                            if (block[0] > 0 && SPECIAL_CHARACTER.contains(doc.getChars(block[0] - 1, 1)[0])) {
-                                block[0] -= 1;
+                // BEGIN ADITO
+                if(block == null)
+                    block = new int[]{caretOffset, caretOffset};
+                try {
+                    while (true) {
+                        // if the character before the current offset is a special character, the offset must be corrected
+                        if (block[0] > 0 && SPECIAL_CHARACTER.contains(doc.getChars(block[0] - 1, 1)[0])) {
+                            block[0] -= 1;
+                            int[] tmp = Utilities.getIdentifierBlock(doc, block[0]);
+                            if(tmp != null) {
+                                block[0] = tmp[0];
                             }
-                            else
-                                break;
                         }
+                        else
+                            break;
                     }
-                    catch (Throwable t) {
-                        // ignore
-                    } // END ADITO
-                    block[1] = caretOffset;
-                    prefix = doc.getText(block);
                 }
+                catch (Throwable t) {
+                    // ignore
+                }
+                block[1] = caretOffset;
+                prefix = doc.getText(block);
+                // END ADITO
             } catch (BadLocationException ble) {
             }
         }
