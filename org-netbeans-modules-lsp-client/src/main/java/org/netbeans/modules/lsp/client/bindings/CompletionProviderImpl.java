@@ -212,22 +212,13 @@ public class CompletionProviderImpl implements CompletionProvider {
                                             if (toAdd == null) {
                                                 toAdd = completionItem.getLabel();
                                             }
-                                            int[] identSpan = Utilities.getIdentifierBlock((BaseDocument) doc, caretOffset);
 
                                             // BEGIN ADITO
-                                            // Fallback to caret offset, if there is no ident span
-                                            int[] identSpanCopy = new int[]{caretOffset, 0};
-                                            if(identSpan != null)
-                                                identSpanCopy = new int[]{identSpan[0], identSpan[1]};
-
                                             // remove old text
-                                            doc.remove(identSpanCopy[0], caretOffset - identSpanCopy[0]);
+                                            int offset = CompletionAditoUtils.removeSpecialCharacters(doc, caretOffset);
 
-                                            if(aditoCustom)
-                                                identSpanCopy[0] = CompletionAditoUtils.removeSpecialCharacters(doc, identSpanCopy[0]);
-
-                                            doc.insertString(identSpanCopy[0], toAdd, null);
-                                            endPos = identSpanCopy[0] + toAdd.length();
+                                            doc.insertString(offset, toAdd, null);
+                                            endPos = offset + toAdd.length();
                                             // END ADITO
                                         }
                                         doc.insertString(endPos, appendText, null);

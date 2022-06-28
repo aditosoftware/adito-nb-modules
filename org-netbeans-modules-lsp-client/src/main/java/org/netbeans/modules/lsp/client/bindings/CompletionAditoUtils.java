@@ -7,6 +7,8 @@ import org.eclipse.lsp4j.*;
 import org.eclipse.lsp4j.Position;
 import org.jetbrains.annotations.*;
 import org.netbeans.api.editor.document.*;
+import org.netbeans.editor.*;
+import org.netbeans.editor.Utilities;
 import org.netbeans.modules.lsp.client.Utils;
 import org.openide.filesystems.FileObject;
 
@@ -21,7 +23,7 @@ import java.util.logging.*;
  */
 class CompletionAditoUtils
 {
-  private static final List<Character> EXCLUSION_CHARACTERS = List.of('$', '#');
+  private static final List<Character> EXCLUSION_CHARACTERS = List.of('$', '#', '_');
 
   private CompletionAditoUtils()
   {
@@ -122,28 +124,39 @@ class CompletionAditoUtils
    */
   public static int removeSpecialCharacters(@NotNull Document pDoc, int pOffset) throws BadLocationException
   {
-    Position position = Utils.createPosition(pDoc, pOffset);
-    String line = getLine(pDoc, pOffset, position);
-    if (line == null)
+    if (!(pDoc instanceof BaseDocument))
       return pOffset;
 
-    int toRemove = 0;
-    int currentChar = position.getCharacter() - 1;
-    while (true)
-    {
-      if (currentChar > 0 && EXCLUSION_CHARACTERS.contains(line.charAt(currentChar)))
-      {
-        toRemove += 1;
-        currentChar -= 1;
-      }
-      else
-        break;
-    }
+    BaseDocument doc = (BaseDocument) pDoc;
 
-    pDoc.remove(pOffset - toRemove, toRemove);
+    int[] block = Utilities.getIdentifierBlock(doc, pOffset);
+    if (block == null)
+      block = new int[]{pOffset, pOffset};
+    try
+    {
+      while (true)
+      {
+        if (block[0] > 0 && EXCLUSION_CHARACTERS.contains(doc.getChars(block[0] - 1, 1)[0]))
+        {
+          block[0] -= 1;
+          int[] tmp = Utilities.getIdentifierBlock(doc, block[0]);
+          if (tmp != null)
+          {
+            block[0] = tmp[0];
+          }
+        }
+        else
+          break;
+      }
+    }
+    catch (Throwable t)
+    {
+      // ignore
+    }
+    pDoc.remove(block[0], pOffset - block[0]);
 
     // return the new offset
-    return pOffset - toRemove;
+    return block[0];
   }
 
   @Nullable
