@@ -68,6 +68,7 @@
           <cluster>platform</cluster>
           <publicPackages>
             <publicPackage>org.netbeans.modules.masterfs.providers.*</publicPackage>
+            <publicPackage>org.netbeans.modules.masterfs.watcher.*</publicPackage>
           </publicPackages>
         </configuration>
       </plugin>

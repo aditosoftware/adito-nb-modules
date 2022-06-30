@@ -230,7 +230,8 @@ public final class Watcher extends BaseAnnotationProvider {
                 }
 
                 try {
-                    getReferences().add(new NotifierKeyRef<KEY>(fo, NotifierAccessor.getDefault().addWatch(impl, fo.getPath()), REF, impl));
+                    if(Lookup.getDefault().lookupAll(ADITOFileEventProxy.class).stream().allMatch(pQuery -> pQuery.canRegisterForFileEvents(fo))) // A
+                      getReferences().add(new NotifierKeyRef<KEY>(fo, NotifierAccessor.getDefault().addWatch(impl, fo.getPath()), REF, impl));
                 } catch (IOException ex) {
                     Level l = getLogLevelForRegisterException(fo);
                     // XXX: handle resource overflow gracefully
