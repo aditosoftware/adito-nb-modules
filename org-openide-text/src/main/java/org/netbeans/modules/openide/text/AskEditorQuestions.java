@@ -21,6 +21,10 @@ package org.netbeans.modules.openide.text;
 import org.openide.DialogDisplayer;
 import org.openide.NotifyDescriptor;
 import org.openide.util.NbBundle;
+import org.openide.windows.WindowManager;
+
+import javax.swing.*;
+import java.awt.*;
 
 public final class AskEditorQuestions {
     private AskEditorQuestions() {
@@ -34,6 +38,21 @@ public final class AskEditorQuestions {
         if ("no".equals(ask)) { // NOI18N
             return false;
         }
+
+        // START ADITO
+        try
+        {
+            // Check if the UI is currently locked and not clickable by the user
+            Component gp = ((JFrame) WindowManager.getDefault().getMainWindow()).getGlassPane();
+            if (gp != null && gp.getClass().getName().equals("org.netbeans.modules.progress.ui.RunOffEDTImpl$TranslucentMask"))
+                return true;
+        }
+        catch(Throwable e)
+        {
+            // ignore
+        }
+        // END ADITO
+
         NotifyDescriptor nd = new NotifyDescriptor.Confirmation(localizedMessage, NotifyDescriptor.YES_NO_OPTION);
         Object res = DialogDisplayer.getDefault().notify(nd);
         if (NotifyDescriptor.OK_OPTION.equals(res)) {
