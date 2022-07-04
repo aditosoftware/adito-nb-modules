@@ -1,0 +1,10 @@
+Manifest-Version: 1.0
+AutoUpdate-Show-In-Client: false
+OpenIDE-Module-Java-Dependencies: Java > 1.8
+OpenIDE-Module-Implementation-Version: 12.5-fd523ddc12d6156412d7b81f0c
+ 8663d8913d1021
+OpenIDE-Module-Localizing-Bundle: org/openide/text/Bundle.properties
+AutoUpdate-Essential-Module: true
+OpenIDE-Module-Specification-Version: 6.81
+OpenIDE-Module-Requires: org.openide.modules.ModuleFormat1
+

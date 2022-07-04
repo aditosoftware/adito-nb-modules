@@ -75,6 +75,7 @@
     <module>org-netbeans-modules-masterfs</module>
     <module>org-netbeans-modules-utilities-project</module>
     <module>org-openide-filesystems</module>
+    <module>org-openide-text</module>
     <module>org-openide-util</module>
     <module>org-openide-util-ui</module>
   </modules>
