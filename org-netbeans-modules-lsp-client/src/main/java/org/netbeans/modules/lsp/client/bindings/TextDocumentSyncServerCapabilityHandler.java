@@ -407,11 +407,27 @@ public class TextDocumentSyncServerCapabilityHandler {
             if(!_MAPPING.containsKey(keyChar))
                 return;
 
+            //noinspection unchecked
+            List<javax.swing.text.Position> positions = (List<javax.swing.text.Position>) textComponent.getClientProperty("rectangular-selection-regions");
+            if(positions == null || positions.size() == 2)
+              doModification(textComponent, selectionStart, selectionEnd, keyChar, 1);
+            else
+            {
+              for (int i = 0; i < positions.size(); i = i + 2)
+              {
+                  doModification(textComponent, positions.get(i).getOffset(), positions.get(i + 1).getOffset(), keyChar, 1 + i);
+              }
+            }
+            e.consume();
+        }
+
+        private void doModification(JTextComponent pTextComponent, int pSelectionStart, int pSelectionEnd, char pChar, int pOffset)
+        {
             try
             {
-                Document document = textComponent.getDocument();
-                String text = document.getText(selectionStart, selectionEnd - selectionStart);
-                int caretPosition = textComponent.getCaretPosition();
+                Document document = pTextComponent.getDocument();
+                String text = document.getText(pSelectionStart, pSelectionEnd - pSelectionStart);
+                int caretPosition = pTextComponent.getCaretPosition();
 
                 SwingUtilities.invokeLater(() -> {
                     try
@@ -419,14 +435,14 @@ public class TextDocumentSyncServerCapabilityHandler {
                         // insert the text and the "closing" character
                         // the "opening" character is handled by the component. Unfortunately, the selected text gets overridden => selected text must
                         // be inserted again
-                        document.insertString(selectionStart + 1, text + _MAPPING.get(keyChar), null);
+                        document.insertString(pSelectionStart + pOffset, text + _MAPPING.get(pChar), null);
 
                         // set initial caret position again
-                        textComponent.setCaretPosition(caretPosition + 1);
+                        pTextComponent.setCaretPosition(caretPosition + pOffset);
 
-                        // set initial selection again (+1, because one character was before this offset inserted meanwhile)
-                        textComponent.setSelectionStart(selectionStart + 1);
-                        textComponent.setSelectionEnd(selectionEnd + 1);
+                        // set initial selection again
+                        pTextComponent.setSelectionStart(pSelectionStart + pOffset);
+                        pTextComponent.setSelectionEnd(pSelectionEnd + pOffset);
                     }
                     catch (Exception ex)
                     {
@@ -434,7 +450,6 @@ public class TextDocumentSyncServerCapabilityHandler {
                     }
 
                 });
-                e.consume();
             }
             catch (Exception ex)
             {
