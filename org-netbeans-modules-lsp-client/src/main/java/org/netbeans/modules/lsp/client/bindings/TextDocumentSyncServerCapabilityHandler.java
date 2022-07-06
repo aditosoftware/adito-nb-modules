@@ -18,6 +18,8 @@
  */
 package org.netbeans.modules.lsp.client.bindings;
 
+import java.awt.*;
+import java.awt.event.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -26,6 +28,7 @@ import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.*;
 import javax.swing.SwingUtilities;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
@@ -348,6 +351,12 @@ public class TextDocumentSyncServerCapabilityHandler {
                     LSPWorkingPool.addBackgroundTask(file, handle);
                     textComponent.putClientProperty(ProgressHandleTask.class, handle);
                 }
+
+                // Custom Property, avoids that the listener is added twice
+                if (textComponent.getClientProperty(_Object.class) == null) {
+                    textComponent.addKeyListener(new _KeyListener());
+                    textComponent.putClientProperty(_Object.class, new _Object());
+                }
 //                if (textComponent.getClientProperty(HoverImpl.class) == null) {
 //                    HoverImpl hover = new HoverImpl(textComponent);
 //                    LSPWorkingPool.addBackgroundTask(file, hover);
@@ -362,5 +371,79 @@ public class TextDocumentSyncServerCapabilityHandler {
 //                LSPWorkingPool.addBackgroundTask(file, cl);
             });
         });
+    }
+
+    /**
+     * KeyListener: If a text is selected and special character is typed, the corresponding "closing" character should be inserted around the
+     * selected text. Example: Opening and closing bracket around a selected text
+     */
+    private static class _KeyListener extends KeyAdapter
+    {
+        private static final Map<Character, Character> _MAPPING = new HashMap<>();
+
+        static {
+            _MAPPING.put('"', '"');
+            _MAPPING.put('(', ')');
+            _MAPPING.put('[', ']');
+            _MAPPING.put('{', '}');
+        }
+        @Override
+        public void keyPressed(KeyEvent e)
+        {
+            Component component = e.getComponent();
+            if(!(component instanceof JTextComponent))
+                return;
+
+            JTextComponent textComponent = (JTextComponent) component;
+            int selectionStart = textComponent.getSelectionStart();
+            int selectionEnd = textComponent.getSelectionEnd();
+
+            // if no selection, return
+            if(selectionEnd - selectionStart <= 0)
+                return;
+
+            // check, if one of the relevant characters was typed
+            char keyChar = e.getKeyChar();
+            if(!_MAPPING.containsKey(keyChar))
+                return;
+
+            try
+            {
+                Document document = textComponent.getDocument();
+                String text = document.getText(selectionStart, selectionEnd - selectionStart);
+                int caretPosition = textComponent.getCaretPosition();
+
+                SwingUtilities.invokeLater(() -> {
+                    try
+                    {
+                        // insert the text and the "closing" character
+                        // the "opening" character is handled by the component. Unfortunately, the selected text gets overridden => selected text must
+                        // be inserted again
+                        document.insertString(selectionStart + 1, text + _MAPPING.get(keyChar), null);
+
+                        // set initial caret position again
+                        textComponent.setCaretPosition(caretPosition + 1);
+
+                        // set initial selection again (+1, because one character was before this offset inserted meanwhile)
+                        textComponent.setSelectionStart(selectionStart + 1);
+                        textComponent.setSelectionEnd(selectionEnd + 1);
+                    }
+                    catch (Exception ex)
+                    {
+                        Logger.getLogger(TextDocumentSyncServerCapabilityHandler.class.getName()).log(Level.WARNING, "Could not insert into document.", ex);
+                    }
+
+                });
+                e.consume();
+            }
+            catch (Exception ex)
+            {
+                Logger.getLogger(TextDocumentSyncServerCapabilityHandler.class.getName()).log(Level.WARNING, "Could not insert into document.", ex);
+            }
+        }
+    }
+
+    private static class _Object
+    {
     }
 }
