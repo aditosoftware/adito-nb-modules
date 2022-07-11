@@ -3,16 +3,19 @@ package de.adito.http.proxy;
 import org.apache.http.HttpHost;
 import org.apache.http.auth.*;
 import org.apache.http.client.*;
+import org.apache.http.client.config.AuthSchemes;
+import org.apache.http.config.*;
 import org.apache.http.conn.ssl.*;
+import org.apache.http.impl.auth.BasicSchemeFactory;
 import org.apache.http.impl.client.*;
 import org.apache.http.ssl.SSLContexts;
-import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.*;
 import org.netbeans.api.keyring.Keyring;
 import org.openide.util.NbPreferences;
 
 import javax.net.ssl.SSLContext;
 import java.security.*;
-import java.util.prefs.Preferences;
+import java.util.prefs.*;
 
 /**
  * Utility class for allowing easy setting of proxy options
@@ -50,34 +53,18 @@ public class ProxyClientProvider
       httpClientBuilder.setSSLSocketFactory(sslsf);
     }
 
-    // load manually set proxy options
-    String proxyHttpHost = PREFERENCES_NODE.get("proxyHttpHost", null);
-    String proxyHttpPort = PREFERENCES_NODE.get("proxyHttpPort", null);
-    String proxyHttpsHost = PREFERENCES_NODE.get("proxyHttpsHost", null);
-    String proxyHttpsPort = PREFERENCES_NODE.get("proxyHttpsPort", null);
-    // load system proxy options
-    String systemProxyHttpHost = PREFERENCES_NODE.get("systemProxyHttpHost", null);
-    String systemProxyHttpPort = PREFERENCES_NODE.get("systemProxyHttpPort", null);
-    String systemProxyHttpsHost = PREFERENCES_NODE.get("systemProxyHttpsHost", null);
-    String systemProxyHttpsPort = PREFERENCES_NODE.get("systemProxyHttpsPort", null);
-    if (proxyHttpsHost != null && proxyHttpsPort != null)
+    int proxyType = PREFERENCES_NODE.getInt("proxyType", 1);
+    if (proxyType == 1)
     {
-      httpClientBuilder.setProxy(new HttpHost(proxyHttpsHost, Integer.parseInt(proxyHttpsPort)));
+      setSystemProxySettings(httpClientBuilder);
     }
-    else if (proxyHttpHost != null && proxyHttpPort != null)
+    else if (proxyType == 2)
     {
-      httpClientBuilder.setProxy(new HttpHost(proxyHttpHost, Integer.parseInt(proxyHttpPort)));
+      setManualProxySettings(httpClientBuilder);
     }
-    else if (systemProxyHttpHost != null && systemProxyHttpPort != null)
-    {
-      httpClientBuilder.setProxy(new HttpHost(systemProxyHttpHost, Integer.parseInt(systemProxyHttpPort)));
-    }
-    else if (systemProxyHttpsHost != null && systemProxyHttpsPort != null)
-    {
-      httpClientBuilder.setProxy(new HttpHost(systemProxyHttpsHost, Integer.parseInt(systemProxyHttpsPort)));
-    }
+    httpClientBuilder.useSystemProperties();
     // if the proxy requires authentication provide a credentialsProvider and pre-load it with the proxy authentication info stored in netbeans
-    boolean isUseProxyAuth = Boolean.parseBoolean(PREFERENCES_NODE.get("useProxyAuthentication", null));
+    boolean isUseProxyAuth = PREFERENCES_NODE.getBoolean("useProxyAuthentication", false);
     if (isUseProxyAuth)
     {
       CredentialsProvider credentialsProvider = new SystemDefaultCredentialsProvider();
@@ -87,9 +74,63 @@ public class ProxyClientProvider
       {
         credentialsProvider.setCredentials(AuthScope.ANY, new UsernamePasswordCredentials(authenticationUser, new String(authenticationPassword)));
       }
+      httpClientBuilder.setProxyAuthenticationStrategy(new ProxyAuthenticationStrategy());
+      Lookup<AuthSchemeProvider> authProviders = RegistryBuilder.<AuthSchemeProvider>create()
+          .register(AuthSchemes.BASIC, new BasicSchemeFactory())
+          .build();
+      httpClientBuilder.setDefaultAuthSchemeRegistry(authProviders);
       httpClientBuilder.setDefaultCredentialsProvider(credentialsProvider);
     }
     return httpClientBuilder.build();
+  }
+
+  private static void setSystemProxySettings(HttpClientBuilder httpClientBuilder)
+  {
+    // load system proxy options
+    String systemProxyHttpHost = PREFERENCES_NODE.get("systemProxyHttpHost", null);
+    String systemProxyHttpPort = PREFERENCES_NODE.get("systemProxyHttpPort", null);
+    String systemProxyHttpsHost = PREFERENCES_NODE.get("systemProxyHttpsHost", null);
+    String systemProxyHttpsPort = PREFERENCES_NODE.get("systemProxyHttpsPort", null);
+    if (isNonEmpty(systemProxyHttpHost) && isNonEmpty(systemProxyHttpPort))
+    {
+      httpClientBuilder.setProxy(new HttpHost(systemProxyHttpHost, Integer.parseInt(systemProxyHttpPort)));
+    }
+    else if (isNonEmpty(systemProxyHttpsHost) && isNonEmpty(systemProxyHttpsPort))
+    {
+      httpClientBuilder.setProxy(new HttpHost(systemProxyHttpsHost, Integer.parseInt(systemProxyHttpsPort)));
+    }
+  }
+
+  private static void setManualProxySettings(HttpClientBuilder httpClientBuilder)
+  {
+    // load manually set proxy options
+    String proxyHttpHost = PREFERENCES_NODE.get("proxyHttpHost", null);
+    String proxyHttpPort = PREFERENCES_NODE.get("proxyHttpPort", null);
+    String proxyHttpsHost = PREFERENCES_NODE.get("proxyHttpsHost", null);
+    String proxyHttpsPort = PREFERENCES_NODE.get("proxyHttpsPort", null);
+    if (isNonEmpty(proxyHttpsHost) && isNonEmpty(proxyHttpsPort))
+    {
+      httpClientBuilder.setProxy(new HttpHost(proxyHttpsHost, Integer.parseInt(proxyHttpsPort)));
+    }
+    else if (isNonEmpty(proxyHttpHost) && isNonEmpty(proxyHttpPort))
+    {
+      httpClientBuilder.setProxy(new HttpHost(proxyHttpHost, Integer.parseInt(proxyHttpPort)));
+    }
+  }
+
+  public static void addProxySettingsListener(@NotNull PreferenceChangeListener pPreferenceChangeListener)
+  {
+    PREFERENCES_NODE.addPreferenceChangeListener(pPreferenceChangeListener);
+  }
+
+  public static void removeProxySettingsListener(@NotNull PreferenceChangeListener pPreferenceChangeListener)
+  {
+    PREFERENCES_NODE.removePreferenceChangeListener(pPreferenceChangeListener);
+  }
+
+  private static boolean isNonEmpty(@Nullable String pToCheck)
+  {
+    return pToCheck != null && !pToCheck.isEmpty();
   }
 
 }
