@@ -30,12 +30,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.logging.*;
 import javax.swing.SwingUtilities;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
-import javax.swing.text.BadLocationException;
-import javax.swing.text.Document;
-import javax.swing.text.JTextComponent;
-import javax.swing.text.StyledDocument;
+import javax.swing.event.*;
+import javax.swing.text.*;
+import javax.swing.undo.UndoableEdit;
+
 import org.eclipse.lsp4j.DidChangeTextDocumentParams;
 import org.eclipse.lsp4j.DidCloseTextDocumentParams;
 import org.eclipse.lsp4j.DidOpenTextDocumentParams;
@@ -61,7 +59,7 @@ import org.netbeans.modules.lsp.client.bindings.symbols.DocumentStructureProvide
 import org.openide.filesystems.FileObject;
 import org.openide.filesystems.FileUtil;
 import org.openide.modules.OnStart;
-import org.openide.text.NbDocument;
+import org.openide.text.*;
 import org.openide.util.Exceptions;
 import org.openide.util.RequestProcessor;
 
@@ -383,6 +381,7 @@ public class TextDocumentSyncServerCapabilityHandler {
 
         static {
             _MAPPING.put('"', '"');
+            _MAPPING.put('\'', '\'');
             _MAPPING.put('(', ')');
             _MAPPING.put('[', ']');
             _MAPPING.put('{', '}');
@@ -407,16 +406,23 @@ public class TextDocumentSyncServerCapabilityHandler {
             if(!_MAPPING.containsKey(keyChar))
                 return;
 
-            //noinspection unchecked
-            List<javax.swing.text.Position> positions = (List<javax.swing.text.Position>) textComponent.getClientProperty("rectangular-selection-regions");
-            if(positions == null || positions.size() == 2)
-              doModification(textComponent, selectionStart, selectionEnd, keyChar, 1);
-            else
+            try
             {
-              for (int i = 0; i < positions.size(); i = i + 2)
-              {
-                  doModification(textComponent, positions.get(i).getOffset(), positions.get(i + 1).getOffset(), keyChar, 1 + i);
-              }
+                //noinspection unchecked
+                List<javax.swing.text.Position> positions = (List<javax.swing.text.Position>) textComponent.getClientProperty("rectangular-selection-regions");
+                if (positions == null || positions.size() == 2)
+                    doModification(textComponent, selectionStart, selectionEnd, keyChar, 1);
+                else
+                {
+                    for (int i = 0; i < positions.size(); i = i + 2)
+                    {
+                        doModification(textComponent, positions.get(i).getOffset(), positions.get(i + 1).getOffset(), keyChar, 1 + i);
+                    }
+                }
+            }
+            catch (Throwable t)
+            {
+                Logger.getLogger(TextDocumentSyncServerCapabilityHandler.class.getName()).log(Level.WARNING, "Could not insert into document.", t);
             }
             e.consume();
         }
@@ -428,6 +434,7 @@ public class TextDocumentSyncServerCapabilityHandler {
                 Document document = pTextComponent.getDocument();
                 String text = document.getText(pSelectionStart, pSelectionEnd - pSelectionStart);
                 int caretPosition = pTextComponent.getCaretPosition();
+                sendUndoableEdit(document, CloneableEditorSupport.BEGIN_COMMIT_GROUP);
 
                 SwingUtilities.invokeLater(() -> {
                     try
@@ -443,6 +450,7 @@ public class TextDocumentSyncServerCapabilityHandler {
                         // set initial selection again
                         pTextComponent.setSelectionStart(pSelectionStart + pOffset);
                         pTextComponent.setSelectionEnd(pSelectionEnd + pOffset);
+                        sendUndoableEdit(document, CloneableEditorSupport.END_COMMIT_GROUP);
                     }
                     catch (Exception ex)
                     {
@@ -454,6 +462,16 @@ public class TextDocumentSyncServerCapabilityHandler {
             catch (Exception ex)
             {
                 Logger.getLogger(TextDocumentSyncServerCapabilityHandler.class.getName()).log(Level.WARNING, "Could not insert into document.", ex);
+            }
+        }
+
+        static void sendUndoableEdit(Document d, UndoableEdit ue) {
+            if(d instanceof AbstractDocument) {
+                UndoableEditListener[] uels = ((AbstractDocument)d).getUndoableEditListeners();
+                UndoableEditEvent ev = new UndoableEditEvent(d, ue);
+                for(UndoableEditListener uel : uels) {
+                    uel.undoableEditHappened(ev);
+                }
             }
         }
     }
