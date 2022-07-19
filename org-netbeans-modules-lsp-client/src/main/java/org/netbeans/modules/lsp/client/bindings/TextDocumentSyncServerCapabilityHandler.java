@@ -260,6 +260,9 @@ public class TextDocumentSyncServerCapabilityHandler {
                 if (file == null)
                     return; //ignore
 
+                // File is closed => remove all corresponding background tasks
+                LSPWorkingPool.removeBackgroundTasks(file);
+
                 LSPBindings server = LSPBindingFactory.getBindingForFile(file);
 
                 if (server == null)

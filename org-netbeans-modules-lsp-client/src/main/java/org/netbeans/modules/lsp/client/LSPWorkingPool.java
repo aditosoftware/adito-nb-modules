@@ -18,10 +18,8 @@
  */
 package org.netbeans.modules.lsp.client;
 
-import java.util.IdentityHashMap;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.WeakHashMap;
+import java.util.*;
+import java.util.logging.*;
 
 import org.netbeans.modules.lsp.client.bindings.*;
 import org.openide.filesystems.FileObject;
@@ -79,7 +77,24 @@ public class LSPWorkingPool {
             req.cancel();
         }
     }
-    
+
+    /**
+     * Removes and cancels all existing background tasks
+     *
+     * @param pFile the file, which is closed and which tasks should be removed
+     */
+    public static synchronized void removeBackgroundTasks(FileObject pFile) {
+        try {
+            Map<BackgroundTask, RequestProcessor.Task> removed = backgroundTasks.remove(pFile);
+            if (removed != null)
+                removed.forEach((key, value) -> value.cancel());
+        }
+        catch (Throwable t) {
+            // failsafe, only log the error
+            Logger.getLogger(LSPWorkingPool.class.getName()).log(Level.WARNING, t, t::getMessage);
+        }
+    }
+
     public static void runOnBackground(Runnable r) {
         WORKER.post(r);
     }
