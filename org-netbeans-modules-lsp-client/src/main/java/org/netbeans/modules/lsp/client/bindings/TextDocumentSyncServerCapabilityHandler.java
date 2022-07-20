@@ -20,14 +20,8 @@ package org.netbeans.modules.lsp.client.bindings;
 
 import java.awt.*;
 import java.awt.event.*;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.IdentityHashMap;
+import java.util.*;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import java.util.logging.*;
 import javax.swing.SwingUtilities;
 import javax.swing.event.*;
@@ -48,6 +42,7 @@ import org.eclipse.lsp4j.TextEdit;
 import org.eclipse.lsp4j.VersionedTextDocumentIdentifier;
 import org.eclipse.lsp4j.jsonrpc.messages.Either;
 import org.netbeans.api.editor.EditorRegistry;
+import org.netbeans.api.editor.document.*;
 import org.netbeans.editor.BaseDocumentEvent;
 import org.netbeans.lib.editor.util.swing.DocumentUtilities;
 import org.netbeans.modules.editor.*;
@@ -355,7 +350,7 @@ public class TextDocumentSyncServerCapabilityHandler {
 
                 // Custom Property, avoids that the listener is added twice
                 if (textComponent.getClientProperty(_Object.class) == null) {
-                    textComponent.addKeyListener(new _KeyListener());
+                    textComponent.addKeyListener(new KeyListener());
                     textComponent.putClientProperty(_Object.class, new _Object());
                 }
 //                if (textComponent.getClientProperty(HoverImpl.class) == null) {
@@ -378,9 +373,10 @@ public class TextDocumentSyncServerCapabilityHandler {
      * KeyListener: If a text is selected and special character is typed, the corresponding "closing" character should be inserted around the
      * selected text. Example: Opening and closing bracket around a selected text
      */
-    private static class _KeyListener extends KeyAdapter
+    protected static class KeyListener extends KeyAdapter
     {
         private static final Map<Character, Character> _MAPPING = new HashMap<>();
+        private static final Set<Character> _IDENTICAL_CHARACTERS = new HashSet<>();
 
         static {
             _MAPPING.put('"', '"');
@@ -388,6 +384,9 @@ public class TextDocumentSyncServerCapabilityHandler {
             _MAPPING.put('(', ')');
             _MAPPING.put('[', ']');
             _MAPPING.put('{', '}');
+
+            _IDENTICAL_CHARACTERS.add('"');
+            _IDENTICAL_CHARACTERS.add('\'');
         }
         @Override
         public void keyPressed(KeyEvent e)
@@ -396,38 +395,67 @@ public class TextDocumentSyncServerCapabilityHandler {
             if(!(component instanceof JTextComponent))
                 return;
 
-            JTextComponent textComponent = (JTextComponent) component;
-            int selectionStart = textComponent.getSelectionStart();
-            int selectionEnd = textComponent.getSelectionEnd();
-
-            // if no selection, return
-            if(selectionEnd - selectionStart <= 0)
-                return;
-
             // check, if one of the relevant characters was typed
             char keyChar = e.getKeyChar();
             if(!_MAPPING.containsKey(keyChar))
                 return;
 
-            try
+            JTextComponent textComponent = (JTextComponent) component;
+            int selectionStart = textComponent.getSelectionStart();
+            int selectionEnd = textComponent.getSelectionEnd();
+
+            if(selectionEnd - selectionStart <= 0)
             {
-                //noinspection unchecked
-                List<javax.swing.text.Position> positions = (List<javax.swing.text.Position>) textComponent.getClientProperty("rectangular-selection-regions");
-                if (positions == null || positions.size() == 2)
-                    doModification(textComponent, selectionStart, selectionEnd, keyChar, 1);
-                else
-                {
-                    for (int i = 0; i < positions.size(); i = i + 2)
+                // if nothing got selected, then handle the insertion of the corresponding characters
+                SwingUtilities.invokeLater(() -> {
+                    try
                     {
-                        doModification(textComponent, positions.get(i).getOffset(), positions.get(i + 1).getOffset(), keyChar, 1 + i);
+                        String toInsert = Character.toString(_MAPPING.get(keyChar));
+                        int caretPosition = textComponent.getCaretPosition();
+                        Document document = textComponent.getDocument();
+
+                        if(document instanceof LineDocument && _IDENTICAL_CHARACTERS.contains(keyChar))
+                        {
+                            // check if already an even count of characters in this line is present
+                            // only if not, then insert the second one
+                            int lineStart = LineDocumentUtils.getLineStart((LineDocument) document, caretPosition);
+                            String line = document.getText(lineStart, caretPosition - lineStart);
+                            int count = line.length() - line.replace(Character.toString(keyChar), "").length();
+                            if(count % 2 == 0)
+                                toInsert = "";
+                        }
+                        document.insertString(caretPosition, toInsert, null);
+                        textComponent.setCaretPosition(caretPosition);
+                    }
+                    catch (Throwable t)
+                    {
+                        Logger.getLogger(TextDocumentSyncServerCapabilityHandler.class.getName()).log(Level.WARNING, "Could not insert into document.", t);
+                    }
+                });
+            }
+            else
+            {
+                // surround selection with the characters
+                try
+                {
+                    // check if multiselection
+                    //noinspection unchecked
+                    List<javax.swing.text.Position> positions = (List<javax.swing.text.Position>) textComponent.getClientProperty("rectangular-selection-regions");
+                    if (positions == null || positions.size() == 2)
+                        doModification(textComponent, selectionStart, selectionEnd, keyChar, 1);
+                    else
+                    {
+                        for (int i = 0; i < positions.size(); i = i + 2)
+                        {
+                            doModification(textComponent, positions.get(i).getOffset(), positions.get(i + 1).getOffset(), keyChar, 1 + i);
+                        }
                     }
                 }
+                catch (Throwable t)
+                {
+                    Logger.getLogger(TextDocumentSyncServerCapabilityHandler.class.getName()).log(Level.WARNING, "Could not insert into document.", t);
+                }
             }
-            catch (Throwable t)
-            {
-                Logger.getLogger(TextDocumentSyncServerCapabilityHandler.class.getName()).log(Level.WARNING, "Could not insert into document.", t);
-            }
-            e.consume();
         }
 
         private void doModification(JTextComponent pTextComponent, int pSelectionStart, int pSelectionEnd, char pChar, int pOffset)
