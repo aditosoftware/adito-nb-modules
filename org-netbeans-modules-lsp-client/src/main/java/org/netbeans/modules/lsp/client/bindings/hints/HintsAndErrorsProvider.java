@@ -27,14 +27,7 @@ import java.util.stream.Stream;
 import javax.swing.text.Document;
 
 import de.adito.aditoweb.nbm.nbide.nbaditointerface.lsp.*;
-import org.eclipse.lsp4j.CodeAction;
-import org.eclipse.lsp4j.CodeActionContext;
-import org.eclipse.lsp4j.CodeActionParams;
-import org.eclipse.lsp4j.Command;
-import org.eclipse.lsp4j.Diagnostic;
-import org.eclipse.lsp4j.DiagnosticSeverity;
-import org.eclipse.lsp4j.PublishDiagnosticsParams;
-import org.eclipse.lsp4j.TextDocumentIdentifier;
+import org.eclipse.lsp4j.*;
 import org.eclipse.lsp4j.jsonrpc.messages.Either;
 import org.netbeans.modules.lsp.client.LSPBindings;
 import org.netbeans.modules.lsp.client.LSPWorkingPool;
@@ -183,11 +176,12 @@ public class HintsAndErrorsProvider {
                                 bindings.getTextDocumentService().codeAction(new CodeActionParams(new TextDocumentIdentifier(fileUri),
                                         diagnostic.getRange(),
                                         new CodeActionContext(Collections.singletonList(diagnostic)))).get();
-                        List<Fix> newFixes = commands.stream()
-                                                  .map(cmd -> new CommandBasedFix(cmd))
-                            .filter(pFix -> _FIXES_FILTERS.stream()
-                                .filter(pFilter -> pFilter.canFilter(fileObject))
-                                .allMatch(pFilter -> pFilter.filter(fileObject, pFix.getText())))
+                        List<Fix> newFixes = Stream.concat(commands.stream()
+                                                               .map(cmd -> new CommandBasedFix(cmd))
+                                                               .filter(pFix -> _FIXES_FILTERS.stream()
+                                                                   .filter(pFilter -> pFilter.canFilter(fileObject))
+                                                                   .allMatch(pFilter -> pFilter.filter(fileObject, pFix.getText()))),
+                                                           getAdditionalFixes())
                             .collect(Collectors.toList());
                         synchronized (this) {
                             this.fixes = Collections.unmodifiableList(newFixes);
@@ -208,6 +202,59 @@ public class HintsAndErrorsProvider {
         public synchronized boolean isComputed() {
             return computed;
         }
+
+// additional ADITO Lines
+        private Stream<Fix> getAdditionalFixes() {
+            return Lookup.getDefault().lookupAll(ILSPFixProvider.class)
+                                    .stream()
+                .flatMap(pProvider -> pProvider.provideFixes(fileObject, diagnostic.getCode().getRight(), diagnostic.getMessage(),
+                                                             diagnostic.getSeverity().toString(), new RangeImpl(diagnostic.getRange())).stream());
+        }
+
+        /**
+         * Translate the Range given from the diagnostics to the Range needed for the interface. Interface has its own Range due to dependency  reasons
+         */
+        private class RangeImpl implements ILSPFixProvider.Range {
+
+            private final int startLine;
+            private final int startCharacter;
+            private final int endLine;
+            private final int endCharacter;
+
+            public RangeImpl(Range pRange)
+            {
+                startLine = pRange.getStart().getLine();
+                startCharacter = pRange.getStart().getCharacter();
+                endLine = pRange.getEnd().getLine();
+                endCharacter = pRange.getEnd().getCharacter();
+            }
+
+            @Override
+            public int getStartLine()
+            {
+                return startLine;
+            }
+
+            @Override
+            public int getStartCharacter()
+            {
+                return startCharacter;
+            }
+
+            @Override
+            public int getEndLine()
+            {
+                return endLine;
+            }
+
+            @Override
+            public int getEndCharacter()
+            {
+                return endCharacter;
+            }
+        }
+
+// END additional ADITO Lines
 
         private class CommandBasedFix implements Fix {
 
