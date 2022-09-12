@@ -23,6 +23,7 @@ class ADITOLinkWindowsNatives
   private static Method _GET_NATIVE_BUFFER_ADDRESS;
   private static Method _GET_NATIVE_BUFFER_RELEASE;
   private static Method _DEVICEIO_CONTROL_GET_REPARSE_POINT;
+  private static Method _CLOSE_HANDLE;
   private static Method _STRIP_PREFIX;
 
   static
@@ -52,6 +53,9 @@ class ADITOLinkWindowsNatives
       _DEVICEIO_CONTROL_GET_REPARSE_POINT = Class.forName("sun.nio.fs.WindowsNativeDispatcher")
           .getDeclaredMethod("DeviceIoControlGetReparsePoint", long.class, long.class, int.class);
       _DEVICEIO_CONTROL_GET_REPARSE_POINT.setAccessible(true);
+
+      _CLOSE_HANDLE = Class.forName("sun.nio.fs.WindowsNativeDispatcher").getDeclaredMethod("CloseHandle", long.class);
+      _CLOSE_HANDLE.setAccessible(true);
 
       _STRIP_PREFIX = Class.forName("sun.nio.fs.WindowsLinkSupport").getDeclaredMethod("stripPrefix", String.class);
       _STRIP_PREFIX.setAccessible(true);
@@ -96,6 +100,7 @@ class ADITOLinkWindowsNatives
       //             USHORT  SubstituteNameLength;
       //             USHORT  PrintNameOffset;
       //             USHORT  PrintNameLength;
+      //             ULONG  Flags;
       //             WCHAR  PathBuffer[1];
       //         } SymbolicLinkReparseBuffer;
       //         struct {
@@ -140,6 +145,7 @@ class ADITOLinkWindowsNatives
     finally
     {
       _GET_NATIVE_BUFFER_RELEASE.invoke(nativeBuffer);
+      _CLOSE_HANDLE.invoke(null, pathHandle);
     }
   }
 
