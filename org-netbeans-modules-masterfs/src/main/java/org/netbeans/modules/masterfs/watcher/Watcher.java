@@ -52,8 +52,11 @@ public final class Watcher extends BaseAnnotationProvider {
     static final Logger LOG = Logger.getLogger(Watcher.class.getName());
     private static final Map<FileObject,int[]> MODIFIED = new WeakHashMap<FileObject, int[]>();
     private final Ext<?> ext;
-    
+    private final ADITOWatcherState aditoWatcherState;
+
     public Watcher() {
+        aditoWatcherState = Lookup.getDefault().lookup(ADITOWatcherState.class);
+
         // Watcher disabled manually or for some tests
         if (Boolean.getBoolean("org.netbeans.modules.masterfs.watcher.disable")) {
             ext = null;
@@ -334,8 +337,20 @@ public final class Watcher extends BaseAnnotationProvider {
             while (!shutdown) {
                 try {
                     clearQueue();
+                    try {
+                        if (aditoWatcherState != null)
+                            aditoWatcherState.setWatcherState(false);
+                    } catch (Throwable ignored) {
+                        // ignore
+                    }
                     String path = NotifierAccessor.getDefault().nextEvent(impl);
-                    LOG.log(Level.FINEST, "nextEvent: {0}", path); 
+                    try {
+                        if (aditoWatcherState != null)
+                            aditoWatcherState.setWatcherState(true);
+                    } catch (Throwable ignored) {
+                        // ignore
+                    }
+                    LOG.log(Level.FINEST, "nextEvent: {0}", path);
                     if (path == null) { // all dirty
                         Set<FileObject> set = new HashSet<FileObject>();
                         synchronized (LOCK) {
@@ -385,6 +400,12 @@ public final class Watcher extends BaseAnnotationProvider {
                 } catch (Throwable t) {
                     LOG.log(Level.INFO, "Error dispatching FS changes", t);
                 }
+            }
+            try {
+                if (aditoWatcherState != null)
+                    aditoWatcherState.setWatcherState(false);
+            } catch (Throwable ignored) {
+                // ignore
             }
         }
 
