@@ -20,7 +20,6 @@ package org.netbeans.modules.lsp.client.bindings;
 
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 import javax.swing.text.AbstractDocument;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
@@ -147,12 +146,8 @@ public class HyperlinkProviderImpl implements HyperlinkProviderExt {
                     SystemAction.get(WhereUsedAction.class).performAction(file.getLookup());
                 }
                 return null;
-            }).get();
+            });
         } catch (BadLocationException ex) {
-            Exceptions.printStackTrace(ex);
-        } catch (InterruptedException ex) {
-            Exceptions.printStackTrace(ex);
-        } catch (ExecutionException ex) {
             Exceptions.printStackTrace(ex);
         }
     }
