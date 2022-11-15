@@ -23,7 +23,7 @@ import java.util.logging.*;
  */
 class CompletionAditoUtils
 {
-  private static final List<Character> EXCLUSION_CHARACTERS = List.of('$', '#', '_');
+  private static final List<Character> EXCLUSION_CHARACTERS = List.of('$', '#', '_', '@');
 
   private CompletionAditoUtils()
   {
