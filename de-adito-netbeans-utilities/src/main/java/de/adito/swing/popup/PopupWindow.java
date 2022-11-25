@@ -19,9 +19,9 @@ public class PopupWindow extends JWindow
 {
   @Nullable
   private final IExtendedQuickSearchCallback quickSearchCallback;
-  private _WindowDisposer windowDisposer;
+  private final _WindowDisposer windowDisposer;
   private QuickSearch quickSearch = null;
-  private PopupPanel popupPanel;
+  private final PopupPanel popupPanel;
 
   /**
    * @param parent     Window that should be registered as the parent
@@ -96,7 +96,7 @@ public class PopupWindow extends JWindow
           disposeWindow();
         }
         if (pEvent instanceof WindowEvent && pEvent.getID() != WindowEvent.WINDOW_OPENED
-            && !(pEvent.getID() == WindowEvent.WINDOW_CLOSED && pEvent.getSource() instanceof PopupWindow))
+            && !(pEvent.getID() == WindowEvent.WINDOW_CLOSED && ((WindowEvent) pEvent).getWindow().getType() == Type.POPUP))
         {
           disposeWindow();
         }

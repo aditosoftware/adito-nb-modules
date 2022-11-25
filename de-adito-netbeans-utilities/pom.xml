@@ -19,7 +19,7 @@
     <dependency>
       <groupId>de.adito.nb-modules</groupId>
       <artifactId>nb-adito-interface</artifactId>
-      <version>1.9.4-SNAPSHOT</version>
+      <version>1.9.6</version>
     </dependency>
     <dependency>
       <groupId>de.adito.nbm</groupId>
@@ -46,11 +46,6 @@
       <groupId>de.adito.util</groupId>
       <artifactId>reactive</artifactId>
       <version>1.1.0</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.httpcomponents</groupId>
-      <artifactId>httpcore</artifactId>
-      <version>4.4.4</version>
     </dependency>
     <dependency>
       <groupId>de.adito.nbm.wrappers</groupId>
