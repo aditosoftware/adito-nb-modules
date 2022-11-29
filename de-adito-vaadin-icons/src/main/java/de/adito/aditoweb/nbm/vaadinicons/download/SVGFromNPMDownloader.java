@@ -7,7 +7,8 @@ import org.jetbrains.annotations.*;
 import java.io.*;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
-import java.net.URL;
+import java.net.*;
+import java.nio.file.*;
 import java.util.*;
 import java.util.logging.*;
 import java.util.stream.Collectors;
@@ -47,7 +48,8 @@ public class SVGFromNPMDownloader
   private static final String SVG_PATHS_START_MARKER = "\">" + SVG_PATH_START_MARKER;
   private static final String SVG_PATHS_END_MARKER = "</g>";
 
-  private static final String SVG_DEST_FOLDER_PATH = "target/classes/de/adito/aditoweb/nbm/vaadinicons/" + SVG_DEST_FOLDER_NAME;
+  private static final Path SVG_DEST_FOLDER_PATH = getSvgDestFolderPath();
+  private static final String SVG_DEST_FOLDER_PATH_FALLBACK = "target/classes/de/adito/aditoweb/nbm/vaadinicons/";
 
   private static final String SVG_CONTENT_PREFIX = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n" +
       "<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\" \"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">\n" +
@@ -218,7 +220,7 @@ public class SVGFromNPMDownloader
   private static void writeSvgFile(@NotNull String pSvgLine)
   {
     String fileName = getSvgName(pSvgLine);
-    File folder = new File(SVG_DEST_FOLDER_PATH);
+    File folder = SVG_DEST_FOLDER_PATH.toFile();
     if (!folder.exists())
       folder.mkdirs();
     if (fileName != null)
@@ -233,6 +235,29 @@ public class SVGFromNPMDownloader
         LOGGER.log(Level.SEVERE, "Error while writing an SVG file to disk", pE);
       }
     }
+  }
+
+  /**
+   * get the path that should be used to store the svg icons. Retrieves the path irrespective of the execution location
+   *
+   * @return Path used as directory for the svg icons
+   */
+  private static Path getSvgDestFolderPath()
+  {
+    Path targetClassPath;
+    try
+    {
+      targetClassPath = Paths.get(SVGFromNPMDownloader.class.getProtectionDomain().getCodeSource().getLocation().toURI());
+    }
+    catch (URISyntaxException pE)
+    {
+      Logger.getLogger(SVGFromNPMDownloader.class.getName()).log(Level.INFO, pE, () -> "Failed to load CodeSource location, using fallback "
+          + SVG_DEST_FOLDER_PATH_FALLBACK);
+      // use fallback
+      targetClassPath = Paths.get(SVG_DEST_FOLDER_PATH_FALLBACK);
+    }
+    Path packageTargetPath = targetClassPath.resolve(SVGFromNPMDownloader.class.getPackageName().replace(".", "/").replace("download", ""));
+    return packageTargetPath.resolve(SVG_DEST_FOLDER_NAME);
   }
 
 }
