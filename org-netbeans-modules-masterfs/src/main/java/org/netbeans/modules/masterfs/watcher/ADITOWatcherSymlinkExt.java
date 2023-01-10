@@ -37,21 +37,20 @@ class ADITOWatcherSymlinkExt
   private static final AtomicReference<FileObject> lastRefCallFo = new AtomicReference<>();
   private static final AtomicInteger shortLivingRefCacheHash = new AtomicInteger();
   private static final Map<String, Set<FileObject>> shortLivingRefCache = new ConcurrentHashMap<>();
-  private static final boolean IS_INCLUDE_SYMLINKS = isIsIncludeSymlinks();
 
   /**
    * Returns all references that have to be refreshed, after pChangedFile changed.
    * This method tries to handle symbolic links too.
    * It returns an empty set, if it gets called too often with the same fileobject
    *
-   * @param pFileObject        File that changed
-   * @param pKeyRefProvider    All Refs, that are currently watched
+   * @param pFileObject     File that changed
+   * @param pKeyRefProvider All Refs, that are currently watched
    * @return a set of FileObjects that have to be recalculcated / refreshed, because they somehow belong to pChangedFile
    */
   @NotNull
   public static Set<FileObject> getAllReferences(@NotNull FileObject pFileObject, @NotNull Consumer<Consumer<Set<NotifierKeyRef>>> pKeyRefProvider)
   {
-    if (IS_INCLUDE_SYMLINKS)
+    if (isIsIncludeSymlinks(pFileObject))
     {
       // Ignore duplicate method calls, if they occur too often.
       // This has to be done because of windows firing too many events too often
@@ -127,7 +126,7 @@ class ADITOWatcherSymlinkExt
   @Nullable
   public static FileObject readSymbolicLink(@NotNull FileObject pFileObject)
   {
-    if (IS_INCLUDE_SYMLINKS)
+    if (isIsIncludeSymlinks(pFileObject))
       return _SYMLINK_CACHE.readSymbolicLink(new _LastModifiedCache(), pFileObject);
     return null;
   }
@@ -246,7 +245,7 @@ class ADITOWatcherSymlinkExt
     public Date lastModified(@NotNull FileObject pFo)
     {
       Date lastModified = internalCache.get(pFo);
-      if(lastModified == null)
+      if (lastModified == null)
       {
         lastModified = pFo.lastModified();
         internalCache.put(pFo, lastModified);
@@ -263,12 +262,27 @@ class ADITOWatcherSymlinkExt
   }
 
   /**
+   * Tests if symbolic links should be included.
+   * <p>
+   * First, it will check {@link IADITOWatcherSymlinkProvider#isIncludeSymlinks(FileObject)} with the given {@code pFileObject}.
+   * If this called method returns {@code true}, it will also return {@code true}.
+   * <p>
+   * Otherwise, it will check the system property {@link #IS_INCLUDE_SYMLINKS_PROPERTY} and returns this value.
    *
+   * @param pFileObject the file object for which the inclusion of symbolic links should be checked
    * @return true if symlinks and junction links should be resolved, false otherwise
    */
-  static boolean isIsIncludeSymlinks()
+  static boolean isIsIncludeSymlinks(@NotNull FileObject pFileObject)
   {
-    return !FALSE.toString().equalsIgnoreCase(System.getProperty(IS_INCLUDE_SYMLINKS_PROPERTY, "false"));
+    IADITOWatcherSymlinkProvider aditoWatcherSymlinkDetector = Lookup.getDefault().lookup(IADITOWatcherSymlinkProvider.class);
+    if (aditoWatcherSymlinkDetector != null && aditoWatcherSymlinkDetector.isIncludeSymlinks(pFileObject))
+    {
+      return true;
+    }
+    else
+    {
+      return !FALSE.toString().equalsIgnoreCase(System.getProperty(IS_INCLUDE_SYMLINKS_PROPERTY, "false"));
+    }
   }
 
 }
