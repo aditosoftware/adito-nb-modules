@@ -9,7 +9,7 @@
 
   <groupId>org.netbeans.modules</groupId>
   <artifactId>org-netbeans-modules-masterfs</artifactId>
-  <version>RELEASE125-1.9.0-9</version>
+  <version>RELEASE125-1.9.0-10</version>
   <packaging>nbm</packaging>
   <name>NetbeansIDE module: org-netbeans-modules-masterfs</name>
 
@@ -43,6 +43,11 @@
       <artifactId>org-openide-util-lookup</artifactId>
       <version>${netbeans.version}</version>
     </dependency>
+    <dependency>
+      <groupId>org.netbeans.api</groupId>
+      <artifactId>org-netbeans-modules-projectapi</artifactId>
+      <version>${netbeans.version}</version>
+    </dependency>
 
     <!-- JUnit -->
     <dependency>
@@ -55,6 +60,19 @@
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter-params</artifactId>
       <version>5.7.1</version>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-inline</artifactId>
+      <version>4.8.1</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-junit-jupiter</artifactId>
+      <version>4.8.1</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
