@@ -19,7 +19,19 @@ public interface IProjectCreationManager
    * @param pHandle            progress handle
    * @param pTargetProjectPath path, where the project should be stored
    * @param pProjectName       name of the project
-   * @param pProjectVersion    Version, mit der das Projekt angelegt werden soll. Für die aktuelle Designerversion einfach null übergeben
+   * @param pServerConfigPath  path to the server config
+   * @return the project root as file object
+   */
+  FileObject createProject(@NotNull ProgressHandle pHandle, @NotNull String pTargetProjectPath, @NotNull String pProjectName,
+                           @NotNull String pServerConfigPath) throws IOException;
+
+  /**
+   * Creates a new project from system db
+   *
+   * @param pHandle            progress handle
+   * @param pTargetProjectPath path, where the project should be stored
+   * @param pProjectName       name of the project
+   * @param pProjectVersion    Version, with which the project should be created. Pass null for the current designer project version
    * @param pServerConfigPath  path to the server config
    * @return the project root as file object
    */
