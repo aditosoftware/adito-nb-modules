@@ -264,25 +264,22 @@ class ADITOWatcherSymlinkExt
   /**
    * Tests if symbolic links should be included.
    * <p>
-   * First, it will check {@link IADITOWatcherSymlinkProvider#isIncludeSymlinks(FileObject)} with the given {@code pFileObject}.
+   * First, it will check if {@link #IS_INCLUDE_SYMLINKS_PROPERTY} is explicitly set to false.
+   * Otherwise, it will check {@link IADITOWatcherSymlinkProvider#isIncludeSymlinks(FileObject)} with the given {@code pFileObject}.
    * If this called method returns {@code true}, it will also return {@code true}.
+   * If the {@link IADITOWatcherSymlinkProvider} was not found or returns false symlinks will not be resolved.
    * <p>
-   * Otherwise, it will check the system property {@link #IS_INCLUDE_SYMLINKS_PROPERTY} and returns this value.
    *
    * @param pFileObject the file object for which the inclusion of symbolic links should be checked
    * @return true if symlinks and junction links should be resolved, false otherwise
    */
   static boolean isIsIncludeSymlinks(@NotNull FileObject pFileObject)
   {
+    if (FALSE.toString().equalsIgnoreCase(System.getProperty(IS_INCLUDE_SYMLINKS_PROPERTY, "true")))
+      return false;
+
     IADITOWatcherSymlinkProvider aditoWatcherSymlinkDetector = Lookup.getDefault().lookup(IADITOWatcherSymlinkProvider.class);
-    if (aditoWatcherSymlinkDetector != null && aditoWatcherSymlinkDetector.isIncludeSymlinks(pFileObject))
-    {
-      return true;
-    }
-    else
-    {
-      return !FALSE.toString().equalsIgnoreCase(System.getProperty(IS_INCLUDE_SYMLINKS_PROPERTY, "false"));
-    }
+    return aditoWatcherSymlinkDetector != null && aditoWatcherSymlinkDetector.isIncludeSymlinks(pFileObject);
   }
 
 }
