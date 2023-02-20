@@ -264,7 +264,8 @@ class ADITOWatcherSymlinkExt
   /**
    * Tests if symbolic links should be included.
    * <p>
-   * First, it will check if {@link #IS_INCLUDE_SYMLINKS_PROPERTY} is explicitly set to false.
+   * First, it will check if {@link #IS_INCLUDE_SYMLINKS_PROPERTY} is explicitly set to false, this will be the case if the nodejs version is >= 18.x.x,
+   * since those versions don't create symlinks anymore and thus the symlink watcher is not needed anymore.
    * Otherwise, it will check {@link IADITOWatcherSymlinkProvider#isIncludeSymlinks(FileObject)} with the given {@code pFileObject}.
    * If this called method returns {@code true}, it will also return {@code true}.
    * If the {@link IADITOWatcherSymlinkProvider} was not found or returns false symlinks will not be resolved.
