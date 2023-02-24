@@ -12,7 +12,7 @@
 
   <groupId>de.adito.nb-modules</groupId>
   <artifactId>de-adito-netbeans-utilities</artifactId>
-  <version>RELEASE125-1.9.5</version>
+  <version>RELEASE125-1.9.6</version>
   <name>ADITO Netbeans Module: de-adito-netbeans-utilities</name>
 
   <dependencies>
@@ -33,10 +33,34 @@
       <version>4.2.1</version>
     </dependency>
 
+    <!-- Lombok for additional annotations -->
+    <dependency>
+      <groupId>org.projectlombok</groupId>
+      <artifactId>lombok</artifactId>
+      <scope>provided</scope>
+    </dependency>
+
     <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter-api</artifactId>
       <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-params</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-inline</artifactId>
+      <!-- scope is provided and not test, because NotificationFacadeTestUtil exists and needs to have access to mockito. -->
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-junit-jupiter</artifactId>
+      <!-- scope is provided and not test, because NotificationFacadeTestUtil exists and needs to have access to mockito. -->
+      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>io.reactivex.rxjava3</groupId>
