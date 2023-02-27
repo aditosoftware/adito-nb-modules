@@ -68,16 +68,14 @@ class NotificationFacadeImpl implements INotificationFacade
   @Sampled(name = "logging.external.error")
   public void error(@NotNull Throwable pThrowable)
   {
-    _notify(pThrowable.getClass().getSimpleName(), getRootMessage(pThrowable), false, NotificationDisplayer.Priority.HIGH, null);
-    Exceptions.printStackTrace(pThrowable);
+    notifyError(pThrowable, pThrowable.getClass().getSimpleName(), getRootMessage(pThrowable));
   }
 
   @Override
   @Sampled(name = "logging.external.error")
   public void error(@NotNull Throwable pThrowable, @NotNull String pTitle)
   {
-    _notify(pTitle, getExceptionAndMessage(pThrowable), false, NotificationDisplayer.Priority.HIGH, null);
-    Exceptions.printStackTrace(pThrowable);
+    notifyError(pThrowable, pTitle, getExceptionAndMessage(pThrowable));
   }
 
   @Override
@@ -85,7 +83,20 @@ class NotificationFacadeImpl implements INotificationFacade
   public void error(@NotNull Throwable pThrowable, @NotNull String pTitle, @NotNull String pAdditionalInformation)
   {
     String exceptionMessage = getExceptionAndMessage(pThrowable);
-    _notify(pTitle, exceptionMessage + "\n " + pAdditionalInformation, false, NotificationDisplayer.Priority.HIGH, null);
+    notifyError(pThrowable, pTitle, exceptionMessage + "\n " + pAdditionalInformation);
+  }
+
+  /**
+   * Notify about an error. It also prints the stack trace.
+   *
+   * @param pThrowable the {@link Throwable} that should be notified about
+   * @param pTitle     the title of the message
+   * @param pMessage   the message
+   */
+  @VisibleForTesting
+  void notifyError(@NotNull Throwable pThrowable, @NotNull String pTitle, @NotNull String pMessage)
+  {
+    _notify(pTitle, pMessage, false, NotificationDisplayer.Priority.HIGH, null);
     Exceptions.printStackTrace(pThrowable);
   }
 

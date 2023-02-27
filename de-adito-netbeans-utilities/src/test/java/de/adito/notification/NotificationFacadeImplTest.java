@@ -95,6 +95,7 @@ class NotificationFacadeImplTest
         pNotificationFacade.error(exception);
 
         Mockito.verify(pNotificationFacade).error(any());
+        Mockito.verify(pNotificationFacade).notifyError(any(), any(), any());
         Mockito.verify(pNotificationFacade, Mockito.times(2)).getRootMessage(any());
       });
     }
@@ -109,6 +110,7 @@ class NotificationFacadeImplTest
         pNotificationFacade.error(exception, MY_TITLE);
 
         Mockito.verify(pNotificationFacade).error(any(), any());
+        Mockito.verify(pNotificationFacade).notifyError(any(), any(), any());
         Mockito.verify(pNotificationFacade).getExceptionAndMessage(any());
         Mockito.verify(pNotificationFacade, Mockito.times(2)).getRootMessage(any());
       });
@@ -125,8 +127,22 @@ class NotificationFacadeImplTest
         pNotificationFacade.error(exception, MY_TITLE, myAdditionalInformation);
 
         Mockito.verify(pNotificationFacade).error(any(), any(), any());
+        Mockito.verify(pNotificationFacade).notifyError(any(), any(), any());
         Mockito.verify(pNotificationFacade).getExceptionAndMessage(any());
         Mockito.verify(pNotificationFacade, Mockito.times(2)).getRootMessage(any());
+      });
+    }
+
+    /**
+     * Tests that the method {@link NotificationFacadeImpl#notifyError(Throwable, String, String)} is calling the notify method.
+     */
+    @Test
+    void shouldHandleNotifyError()
+    {
+      baseError(MY_TITLE, MY_JUNIT_MESSAGE, pNotificationFacade -> {
+        pNotificationFacade.notifyError(exception, MY_TITLE, MY_JUNIT_MESSAGE);
+
+        Mockito.verify(pNotificationFacade).notifyError(any(), any(), any());
       });
     }
 
