@@ -1,5 +1,6 @@
 package de.adito.notification;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import de.adito.aditoweb.nbm.metrics.api.types.Sampled;
 import org.jetbrains.annotations.*;
@@ -58,15 +59,51 @@ class NotificationFacadeImpl implements INotificationFacade
   }
 
   @Override
+  public void notify(@Nullable String pTitle, @Nullable String pMessage, boolean pAutoDispose)
+  {
+    notify(pTitle, pMessage, pAutoDispose, null);
+  }
+
+  @Override
   @Sampled(name = "logging.external.error")
   public void error(@NotNull Throwable pThrowable)
   {
-    _notify(pThrowable.getClass().getSimpleName(), _getRootMessage(pThrowable), false, NotificationDisplayer.Priority.HIGH, null);
+    notifyError(pThrowable, pThrowable.getClass().getSimpleName(), getRootMessage(pThrowable));
+  }
+
+  @Override
+  @Sampled(name = "logging.external.error")
+  public void error(@NotNull Throwable pThrowable, @NotNull String pTitle)
+  {
+    notifyError(pThrowable, pTitle, getExceptionAndMessage(pThrowable));
+  }
+
+  @Override
+  @Sampled(name = "logging.external.error")
+  public void error(@NotNull Throwable pThrowable, @NotNull String pTitle, @NotNull String pAdditionalInformation)
+  {
+    String exceptionMessage = getExceptionAndMessage(pThrowable);
+    notifyError(pThrowable, pTitle, exceptionMessage + "\n " + pAdditionalInformation);
+  }
+
+  /**
+   * Notify about an error. It also prints the stack trace.
+   *
+   * @param pThrowable the {@link Throwable} that should be notified about
+   * @param pTitle     the title of the message
+   * @param pMessage   the message
+   */
+  @VisibleForTesting
+  void notifyError(@NotNull Throwable pThrowable, @NotNull String pTitle, @NotNull String pMessage)
+  {
+    _notify(pTitle, pMessage, false, NotificationDisplayer.Priority.HIGH, null);
     Exceptions.printStackTrace(pThrowable);
   }
 
-  private void _notify(String pTitle, String pMessage, boolean pAutoDispose, @NotNull NotificationDisplayer.Priority pPriority,
-                       @Nullable ActionListener pActionListener)
+
+  @VisibleForTesting
+  void _notify(@Nullable String pTitle, @Nullable String pMessage, boolean pAutoDispose, @NotNull NotificationDisplayer.Priority pPriority,
+               @Nullable ActionListener pActionListener)
   {
     Icon icon = pPriority.getIcon();
     Notification n = NotificationDisplayer.getDefault().notify(Strings.nullToEmpty(pTitle), icon,
@@ -79,11 +116,34 @@ class NotificationFacadeImpl implements INotificationFacade
     }
   }
 
-  private String _getRootMessage(Throwable pThrowable)
+  /**
+   * Creates a message for notifying the user about the name and root message of an exception.
+   *
+   * @param pThrowable the throwable of which the message should be created
+   * @return the message containing class name of the throwable and root message
+   */
+  @NotNull
+  @VisibleForTesting
+  String getExceptionAndMessage(@NotNull Throwable pThrowable)
+  {
+    return pThrowable.getClass().getSimpleName() + ": " + getRootMessage(pThrowable);
+  }
+
+  /**
+   * Gets the root message of a throwable.
+   * <p>
+   * If the root message is {@code null}, the message of the throwable is returned, or {@code exception} if both are {@code null}.
+   *
+   * @param pThrowable the {@link Throwable} of which the root message should be extracted
+   * @return the root message
+   */
+  @NotNull
+  @VisibleForTesting
+  String getRootMessage(@NotNull Throwable pThrowable)
   {
     Throwable cause = pThrowable.getCause();
     if (cause != null)
-      return _getRootMessage(cause);
+      return getRootMessage(cause);
     String msg = pThrowable.getLocalizedMessage();
     if (msg == null)
       msg = pThrowable.getMessage();

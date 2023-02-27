@@ -19,9 +19,19 @@ public interface INotificationFacade
    *
    * @param pTitle       Title
    * @param pMessage     Message
-   * @param pAutoDispose <tt>true</tt> if the balloon should dispose automatically after a couple of seconds
+   * @param pAutoDispose {@code true} if the balloon should dispose automatically after a couple of seconds
+   * @param pListener    Action to invoke when user click details text or {@code null}
    */
   void notify(@Nullable String pTitle, @Nullable String pMessage, boolean pAutoDispose, @Nullable ActionListener pListener);
+
+  /**
+   * Shows a simple balloon to display a pMessage to the user. This balloon will have no listener.
+   *
+   * @param pTitle       Title
+   * @param pMessage     Message
+   * @param pAutoDispose {@code true} if the balloon should dispose automatically after a couple of seconds
+   */
+  void notify(@Nullable String pTitle, @Nullable String pMessage, boolean pAutoDispose);
 
   /**
    * Displays an error as a balloon
@@ -29,6 +39,23 @@ public interface INotificationFacade
    * @param pThrowable Exception
    */
   void error(@NotNull Throwable pThrowable);
+
+  /**
+   * Displays an error as a balloon
+   *
+   * @param pThrowable the Exception
+   * @param pTitle     the title of the box
+   */
+  void error(@NotNull Throwable pThrowable, @NotNull String pTitle);
+
+  /**
+   * Displays an error as a balloon
+   *
+   * @param pThrowable             the Exception
+   * @param pTitle                 the title of the box
+   * @param pAdditionalInformation additional information that should be displayed
+   */
+  void error(@NotNull Throwable pThrowable, @NotNull String pTitle, @NotNull String pAdditionalInformation);
 
   /**
    * Shows SQL in a Dialog
