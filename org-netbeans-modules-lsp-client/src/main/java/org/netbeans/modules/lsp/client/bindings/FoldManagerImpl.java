@@ -101,6 +101,7 @@ public class FoldManagerImpl implements FoldManager, BackgroundTask {
     @Override
     public void release() {
         if (file != null) {
+            LOG.info(() -> "[LSP]: release " + file);
             LSPWorkingPool.removeBackgroundTask(file, this);
             file = null;
         }

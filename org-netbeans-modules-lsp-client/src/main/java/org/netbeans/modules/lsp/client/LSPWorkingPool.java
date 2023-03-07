@@ -32,7 +32,7 @@ import org.openide.util.RequestProcessor;
  * 
  */
 public class LSPWorkingPool {
- 
+    private static final Logger LOG = Logger.getLogger(LSPWorkingPool.class.getName());
     private static final RequestProcessor WORKER = new RequestProcessor(LanguageClientImpl.class.getName(), 1, false, true);
     public static final RequestProcessor  ASYNC = new RequestProcessor(LanguageClientImpl.class.getName()+"-ASYNC", 1, false, false);
     
@@ -50,6 +50,7 @@ public class LSPWorkingPool {
 
                 if (bindings == null)
                 {
+                    LOG.info(() -> "[LSP]: binding not found for file " + file);
                     // if bindings are not present, cancel progress handle
                     ProgressHandleTask.cleanup(file);
                     return;

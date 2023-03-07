@@ -69,7 +69,8 @@ import org.openide.util.lookup.Lookups;
  * @author ran
  */
 public class LSPBindingFactory {
-    
+
+    private static final int LSP_CHECK_MINUTES = 10;
     //private static final int LSP_KEEP_ALIVE_MINUTES = 10;
     private static final Logger LOG = Logger.getLogger(LSPBindingFactory.class.getName());
     
@@ -87,6 +88,29 @@ public class LSPBindingFactory {
     static {
         //Don't perform null checks. The servers may not adhere to the specification, and send illegal nulls.
         Preconditions.enableNullChecks(false);
+
+      // Logs the status of the LSPs after a fixed time
+      WORKER.scheduleAtFixedRate(
+          () -> {
+            synchronized (LSPBindings.class)
+            {
+              LOG.info(() -> {
+                // building logging information about the lSP
+                StringBuilder sb = new StringBuilder("[LSP]: status check:");
+                project2MimeType2Server.forEach((pFile, pValue) -> pValue.forEach((type, pWeakReference) -> {
+                  sb.append("\n").append(pFile).append(" for mimeType ").append(type).append(" is alive? ");
+                  if (pWeakReference == null || pWeakReference.get() == null)
+                    sb.append("no weak reference");
+                  else
+                    sb.append(Objects.requireNonNull(pWeakReference.get()).isProcessAlive());
+                }));
+                return sb.toString();
+              });
+            }
+          },
+          Math.max(LSP_CHECK_MINUTES / 2, 1),
+          Math.max(LSP_CHECK_MINUTES / 2, 1),
+          TimeUnit.MINUTES);
 
         // Remove LSP Servers from strong reference tracking, that have not
         // been accessed more than LSP_KEEP_ALIVE_MINUTES minutes
@@ -177,6 +201,7 @@ public class LSPBindingFactory {
         }
 
         if (bindings == null) {
+            LOG.info(() -> "[LSP]: building new bindings for " + project + " and mimeType " + mimeType);
             bindings = buildBindings(project, mimeType, dir, uri);
             if (bindings != null) {
                 project2MimeType2Server.computeIfAbsent(uri, p -> new HashMap<>())
@@ -201,6 +226,7 @@ public class LSPBindingFactory {
     @NbBundle.Messages("LBL_Connecting=Connecting to language server")
     public static void addBindings(FileObject root, int port, String... extensions) {
         BaseProgressUtils.showProgressDialogAndRun(() -> {
+            LOG.info(() -> "[LSP]: trying to connect to language server port " + port + " binding");
             try {
                 Socket s = new Socket(InetAddress.getLocalHost(), port);
                 LanguageClientImpl lc = new LanguageClientImpl();
@@ -253,6 +279,7 @@ public class LSPBindingFactory {
     private static LSPBindings buildBindings(Project project, String mt, FileObject dir, URI baseUri) {
         ServerRestarter restarter = () -> {
             synchronized (LSPBindings.class) {
+              LOG.info(() -> "[LSP]: Restart triggered for " + baseUri + " and mimeType " + mt);
                 WeakReference<LSPBindings> bRef = project2MimeType2Server.getOrDefault(baseUri, Collections.emptyMap()).remove(mt);
                 LSPBindings b = bRef != null ? bRef.get() : null;
 
@@ -287,6 +314,7 @@ public class LSPBindingFactory {
                     lci.setBindings(b);
                     LanguageServerProviderAccessor.getINSTANCE().setBindings(desc, b);
                     TextDocumentSyncServerCapabilityHandler.refreshOpenedFilesInServers();
+                    LOG.info(() -> "[LSP]: started LSP process with process id " + p.pid());
                     return b;
                 } catch (InterruptedException | ExecutionException ex) {
                     LOG.log(Level.WARNING, null, ex);
@@ -298,6 +326,7 @@ public class LSPBindingFactory {
     
     @SuppressWarnings("deprecation")
     private static InitializeResult initServer(Process p, LanguageServer server, FileObject root) throws InterruptedException, ExecutionException {
+      LOG.info(() -> "[LSP]: init server for process " + p.pid() + " and file " + root);
        InitializeParams initParams = new InitializeParams();
        initParams.setRootUri(Utils.toURI(root));
        final File rootFile = FileUtil.toFile(root);
@@ -395,6 +424,8 @@ public class LSPBindingFactory {
                 List<Project> closedProjects = new ArrayList<>(oldValue);
                 closedProjects.removeAll(newValue);
 
+                LOG.info(() -> "[LSP]: shutdown servers for projects" + closedProjects);
+
                 closedProjects.forEach(pProject -> {
                     Map<String, WeakReference<LSPBindings>> map = project2MimeType2Server.get(pProject.getProjectDirectory().toURI());
                     if(map != null)
@@ -416,6 +447,8 @@ public class LSPBindingFactory {
         @Override
         @SuppressWarnings("AccessingNonPublicFieldOfAnotherObject")
         public void run() {
+            LOG.info("[LSP]: cleanup triggered");
+
             for (Map<String, WeakReference<LSPBindings>> mime2Bindings : project2MimeType2Server.values()) {
                 for (WeakReference<LSPBindings> bRef : mime2Bindings.values()) {
                     LSPBindings b = bRef != null ? bRef.get() : null;
