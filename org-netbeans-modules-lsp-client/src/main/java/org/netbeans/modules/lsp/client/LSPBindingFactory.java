@@ -70,7 +70,7 @@ import org.openide.util.lookup.Lookups;
  */
 public class LSPBindingFactory {
 
-    private static final int LSP_CHECK_MINUTES = 10;
+    private static final int LSP_CHECK_MINUTES = 5;
     //private static final int LSP_KEEP_ALIVE_MINUTES = 10;
     private static final Logger LOG = Logger.getLogger(LSPBindingFactory.class.getName());
     
@@ -108,8 +108,8 @@ public class LSPBindingFactory {
               });
             }
           },
-          Math.max(LSP_CHECK_MINUTES / 2, 1),
-          Math.max(LSP_CHECK_MINUTES / 2, 1),
+          LSP_CHECK_MINUTES,
+          LSP_CHECK_MINUTES,
           TimeUnit.MINUTES);
 
         // Remove LSP Servers from strong reference tracking, that have not
