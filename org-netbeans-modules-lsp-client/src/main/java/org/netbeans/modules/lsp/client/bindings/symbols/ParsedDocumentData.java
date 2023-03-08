@@ -25,12 +25,16 @@ import org.netbeans.modules.lsp.client.LSPBindingFactory;
 import org.netbeans.modules.lsp.client.LSPBindings;
 import org.openide.filesystems.FileObject;
 
+import java.util.logging.Logger;
+
 /**
  *
  * @author ranSprd
  */
 public class ParsedDocumentData {
-    
+
+    private static final Logger LOG = Logger.getLogger(ParsedDocumentData.class.getName());
+
     private final Document document;
     private final String fileUri;
 
@@ -49,6 +53,7 @@ public class ParsedDocumentData {
         if (file == null) {
             return this;
         }
+        LOG.info(() -> "[LSP]: refresh triggered for file " + file);
         LSPBindings server = LSPBindingFactory.getBindingForFile(file);
         if (server == null) {
             return this;

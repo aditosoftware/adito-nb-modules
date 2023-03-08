@@ -62,6 +62,7 @@ public class LSPBindings {
      */
     public void shutdown() {
         if (this.server != null) {
+            LOG.info(() -> "[LSP]: shutting down LSP server " + server);
             this.server.exit();
         }
     }
@@ -73,7 +74,7 @@ public class LSPBindings {
         if (this.server != null) {
 
             try {
-//            LOG.log(Level.WARNING, "shutting down LSP server");
+                LOG.info(() -> "[LSP]: shutting down and killing LSP server " + server);
                 this.server.shutdown().get();
             } catch (InterruptedException | ExecutionException ex) {
                 LOG.log(Level.FINE, null, ex);
@@ -84,6 +85,7 @@ public class LSPBindings {
 
     public void killRunningServerProcess() {
         if (this.process != null) {
+            LOG.info(() -> "[LSP]: kill running process " + process.pid());
             this.process.destroy();
         }
     }
@@ -131,6 +133,7 @@ public class LSPBindings {
             if(! process.isAlive()) {
                 return;
             }
+            LOG.info(() -> "[LSP]: starting the shutting down of process " + process.pid());
             CompletableFuture<Object> shutdownResult = server.shutdown();
             for (int i = 0; i < 300; i--) {
                 try {

@@ -20,6 +20,7 @@ package org.netbeans.modules.lsp.client.bindings.symbols;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Logger;
 import javax.swing.text.Document;
 import org.netbeans.modules.lsp.client.LSPWorkingPool;
 import org.netbeans.modules.lsp.client.Utils;
@@ -36,16 +37,21 @@ public enum DocumentStructureProvider {
     INSTANCE;
     
     private Map<String, ParsedDocumentData> documents = new HashMap<>();
-    
+
+    private static final Logger LOG = Logger.getLogger(DocumentStructureProvider.class.getName());
+
     public ParsedDocumentData register(Document document, FileObject file) { 
         if (document == null || file == null) {
             return null;
         }
-        
+
         String uri = Utils.toURI(file);
 
         synchronized(this) {
-            return documents.computeIfAbsent(uri, (x) -> createAndInitialize(document, uri));
+            return documents.computeIfAbsent(uri, x -> {
+                LOG.info(() -> "[LSP]: Register and initialize DocumentStructureProvider for " + uri + " and mimeType " + document.getProperty("mimeType"));
+               return createAndInitialize(document, uri);
+            });
         }
     }
     

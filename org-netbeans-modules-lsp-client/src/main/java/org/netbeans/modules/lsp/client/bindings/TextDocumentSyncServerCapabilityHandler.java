@@ -123,6 +123,8 @@ public class TextDocumentSyncServerCapabilityHandler {
 
     private final Map<Document, Integer> openDocument2PanesCount = new HashMap<>();
 
+    private final static Logger LOG = Logger.getLogger(TextDocumentSyncServerCapabilityHandler.class.getName());
+
     private void documentOpened(Document doc) {
         FileObject file = NbEditorUtilities.getFileObject(doc);
 
@@ -177,6 +179,7 @@ public class TextDocumentSyncServerCapabilityHandler {
                                         syncKind = change;
                                 }
                             }
+                            LOG.info(() -> "[LSP]: event in document " + doc + " with sync " + sync + " fired");
                             switch (syncKind) {
                                 case None:
                                     return ;

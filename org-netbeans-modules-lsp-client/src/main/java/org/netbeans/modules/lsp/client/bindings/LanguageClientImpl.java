@@ -64,7 +64,7 @@ public class LanguageClientImpl implements LanguageClient {
      */
     @Override
     public void telemetryEvent(Object arg0) {
-        System.err.println("telemetry: " + arg0);
+        LOG.warning(() -> "[LSP]: telemetry: " + arg0);
     }
 
     @Override
@@ -110,7 +110,7 @@ public class LanguageClientImpl implements LanguageClient {
      */
     @Override
     public void showMessage(MessageParams arg0) {
-        System.err.println("showMessage: " + arg0);
+        LOG.warning(() -> "[LSP]: showMessage: " + arg0);
     }
 
     /**
@@ -121,7 +121,7 @@ public class LanguageClientImpl implements LanguageClient {
      */
     @Override
     public CompletableFuture<MessageActionItem> showMessageRequest(ShowMessageRequestParams arg0) {
-        System.err.println("showMessageRequest: " +arg0);
+        LOG.warning(() -> "[LSP]: showMessageRequest: " + arg0);
         return null; //???
     }
 
@@ -187,7 +187,7 @@ public class LanguageClientImpl implements LanguageClient {
     public CompletableFuture<Void> registerCapability(RegistrationParams params) {
         CompletableFuture<Void> result = new CompletableFuture<>();
         // @todo
-        System.err.println("register Capabilities " +params);
+        LOG.warning(() -> "[LSP]: register Capabilities " + params);
         return result;
     }
 
@@ -213,6 +213,7 @@ public class LanguageClientImpl implements LanguageClient {
         WORKER.post(() -> {
             ShowDocumentResult outcome = new ShowDocumentResult();
             // @todo show and log success here
+            LOG.info(() -> "[LSP]: is outcome successful: " + outcome.isSuccess());
             outcome.setSuccess(true);
             
             result.complete(outcome);
