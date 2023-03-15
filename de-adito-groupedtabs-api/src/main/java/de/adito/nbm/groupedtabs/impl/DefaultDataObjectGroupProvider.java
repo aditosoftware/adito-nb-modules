@@ -36,8 +36,19 @@ public final class DefaultDataObjectGroupProvider implements IDataObjectGroupPro
             FileObject parent = curr.getParent();
             if (parent == null || pProjectDir.equals(parent.getPath()))
               return null;
-            if ("entity".equals(parent.getName()))
-              return curr.getName();
+            switch (parent.getName())
+            {
+              case "entity":
+                return curr.getName();
+              case "neonView":
+                return "#VIEW";
+              case "neonDashboard":
+                return "#DASHBOARD";
+              case "language":
+                return "#LANGUAGE";
+              case "process":
+                return "#PROCESS";
+            }
             curr = parent;
           }
         });
@@ -46,6 +57,14 @@ public final class DefaultDataObjectGroupProvider implements IDataObjectGroupPro
   @Override
   public int compare(DataObject pFirst, DataObject pSecond)
   {
+    final Optional<String> group = group(pFirst);
+    if (group.isPresent())
+    {
+      if (pFirst.getPrimaryFile().getName().equals(group.get()))
+        return -1;
+      if (pSecond.getPrimaryFile().getName().equals(group.get()))
+        return 1;
+    }
     return pFirst.getPrimaryFile().getPath()
         .compareToIgnoreCase(pSecond.getPrimaryFile().getPath());
   }
