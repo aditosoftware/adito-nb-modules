@@ -1,6 +1,7 @@
 package de.adito.nbm.blueprints.api;
 
-import org.jetbrains.annotations.*;
+import io.reactivex.rxjava3.annotations.Nullable;
+import lombok.NonNull;
 
 import java.util.List;
 
@@ -15,25 +16,25 @@ public interface IBlueprint
   /**
    * @return Returns all parameters for this blueprint
    */
-  @NotNull
+  @NonNull
   List<IBlueprintParameter> getParameters();
 
   /**
    * @return Returns all presets for this blueprint
    */
-  @NotNull
+  @NonNull
   List<IBlueprintPreset> getPresets();
 
   /**
    * @return a unique identifier
    */
-  @NotNull
+  @NonNull
   String getID();
 
   /**
    * @return the displayName on GUI / dialog
    */
-  @NotNull
+  @NonNull
   String getDisplayName();
 
   /**

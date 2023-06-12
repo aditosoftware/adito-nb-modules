@@ -1,6 +1,7 @@
 package de.adito.swing;
 
-import org.jetbrains.annotations.*;
+import lombok.NonNull;
+import org.jetbrains.annotations.Nullable;
 import org.openide.util.NbBundle;
 
 import javax.swing.*;
@@ -24,12 +25,12 @@ public class PathSelectionPanel extends JPanel
   private final FileFilter filter;
   private JComboBox<String> entries;
 
-  public PathSelectionPanel(@NotNull String pFileChooserTitle, int pFileChooserType, JButton... pAdditionalButtons)
+  public PathSelectionPanel(@NonNull String pFileChooserTitle, int pFileChooserType, JButton... pAdditionalButtons)
   {
     this(pFileChooserTitle, pFileChooserType, (FileFilter) null, pAdditionalButtons);
   }
 
-  public PathSelectionPanel(@NotNull String pFileChooserTitle, int pFileChooserType, @Nullable FileFilter pFilter, JButton... pAdditionalButtons)
+  public PathSelectionPanel(@NonNull String pFileChooserTitle, int pFileChooserType, @Nullable FileFilter pFilter, JButton... pAdditionalButtons)
   {
     super(new BorderLayout(5, 0));
     fileChooserTitle = pFileChooserTitle;
@@ -39,12 +40,12 @@ public class PathSelectionPanel extends JPanel
     _init(path, pAdditionalButtons);
   }
 
-  public PathSelectionPanel(@NotNull String pFileChooserTitle, int pFileChooserType, @NotNull List<String> pEntries, JButton... pAdditionalButtons)
+  public PathSelectionPanel(@NonNull String pFileChooserTitle, int pFileChooserType, @NonNull List<String> pEntries, JButton... pAdditionalButtons)
   {
     this(pFileChooserTitle, pFileChooserType, pEntries, null, pAdditionalButtons);
   }
 
-  public PathSelectionPanel(@NotNull String pFileChooserTitle, int pFileChooserType, @NotNull List<String> pEntries, @Nullable FileFilter pFilter,
+  public PathSelectionPanel(@NonNull String pFileChooserTitle, int pFileChooserType, @NonNull List<String> pEntries, @Nullable FileFilter pFilter,
                             JButton... pAdditionalButtons)
   {
     super(new BorderLayout(5, 0));
@@ -58,14 +59,14 @@ public class PathSelectionPanel extends JPanel
     setEntries(pEntries);
   }
 
-  public void setEntries(@NotNull List<String> pEntries)
+  public void setEntries(@NonNull List<String> pEntries)
   {
     if (entries == null)
       throw new IllegalArgumentException("You are setting entries, but this is not allowed in a non-combobox editor");
     entries.setModel(new DefaultComboBoxModel<>(pEntries.toArray(new String[0])));
   }
 
-  public void setValue(@NotNull String pValue)
+  public void setValue(@NonNull String pValue)
   {
     if (entries != null)
       entries.setSelectedItem(pValue);
@@ -73,7 +74,7 @@ public class PathSelectionPanel extends JPanel
       path.setText(pValue);
   }
 
-  @NotNull
+  @NonNull
   public String getValue()
   {
     if (entries != null && entries.getSelectedItem() != null)
@@ -81,7 +82,7 @@ public class PathSelectionPanel extends JPanel
     return path.getText();
   }
 
-  public void addDocumentListener(@NotNull DocumentListener pListener)
+  public void addDocumentListener(@NonNull DocumentListener pListener)
   {
     path.getDocument().addDocumentListener(pListener);
   }
@@ -102,8 +103,8 @@ public class PathSelectionPanel extends JPanel
   @NbBundle.Messages({
       "LBL_Browse=Browse...",
   })
-  @NotNull
-  private JButton _createBrowseButton(@NotNull JComponent pParent, @NotNull Supplier<String> pDefaultPath, @NotNull Consumer<String> pOnFileSelected)
+  @NonNull
+  private JButton _createBrowseButton(@NonNull JComponent pParent, @NonNull Supplier<String> pDefaultPath, @NonNull Consumer<String> pOnFileSelected)
   {
     JButton btn = new JButton(Bundle.LBL_Browse());
     btn.addActionListener(e -> {

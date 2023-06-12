@@ -4,7 +4,7 @@ import com.google.common.collect.ImmutableList;
 import de.adito.util.reactive.AbstractListenerObservable;
 import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.schedulers.Schedulers;
-import org.jetbrains.annotations.NotNull;
+import lombok.NonNull;
 import org.openide.util.*;
 
 import java.util.*;
@@ -25,7 +25,7 @@ public class LookupResultObservable<T> extends AbstractListenerObservable<Lookup
    * @param pLookupClass Klasse, die als LookupResult dient
    * @return ein Observable, das alle Instanzen als Liste enthält
    */
-  @NotNull
+  @NonNull
   public static <T> Observable<List<T>> create(Lookup pLookup, Class<T> pLookupClass)
   {
     Lookup.Result<T> result = pLookup.lookupResult(pLookupClass);
@@ -36,14 +36,14 @@ public class LookupResultObservable<T> extends AbstractListenerObservable<Lookup
         .distinctUntilChanged();
   }
 
-  private LookupResultObservable(@NotNull Lookup.Result<T> pResult)
+  private LookupResultObservable(@NonNull Lookup.Result<T> pResult)
   {
     super(pResult);
   }
 
-  @NotNull
+  @NonNull
   @Override
-  protected LookupListener registerListener(@NotNull Lookup.Result<T> pResult, @NotNull IFireable<List<T>> pFireable)
+  protected LookupListener registerListener(@NonNull Lookup.Result<T> pResult, @NonNull IFireable<List<T>> pFireable)
   {
     LookupListener ll = ev -> pFireable.fireValueChanged(_getValuesUnmodifiable(pResult));
     pResult.addLookupListener(ll);
@@ -51,13 +51,13 @@ public class LookupResultObservable<T> extends AbstractListenerObservable<Lookup
   }
 
   @Override
-  protected void removeListener(@NotNull Lookup.Result<T> pResult, @NotNull LookupListener pLookupListener)
+  protected void removeListener(@NonNull Lookup.Result<T> pResult, @NonNull LookupListener pLookupListener)
   {
     pResult.removeLookupListener(pLookupListener);
   }
 
-  @NotNull
-  private static <T> List<T> _getValuesUnmodifiable(@NotNull Lookup.Result<T> pResult)
+  @NonNull
+  private static <T> List<T> _getValuesUnmodifiable(@NonNull Lookup.Result<T> pResult)
   {
     return ImmutableList.copyOf(pResult.allInstances());
   }

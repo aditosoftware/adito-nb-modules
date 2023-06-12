@@ -1,6 +1,6 @@
 package de.adito.nbm.blueprints.api;
 
-import org.jetbrains.annotations.NotNull;
+import lombok.NonNull;
 
 import java.util.Set;
 
@@ -17,7 +17,7 @@ public interface IBlueprintProvider
    *
    * @return all names as a set
    */
-  @NotNull
+  @NonNull
   Set<String> getSourceNames();
 
   /**
@@ -27,7 +27,7 @@ public interface IBlueprintProvider
    * @return new instance
    * @throws BlueprintNotAvailableException this exception gets thrown, if a blueprint with pSourceName as name could not be found.
    */
-  @NotNull
-  IBlueprint read(@NotNull String pSourceName) throws BlueprintNotAvailableException;
+  @NonNull
+  IBlueprint read(@NonNull String pSourceName) throws BlueprintNotAvailableException;
 
 }

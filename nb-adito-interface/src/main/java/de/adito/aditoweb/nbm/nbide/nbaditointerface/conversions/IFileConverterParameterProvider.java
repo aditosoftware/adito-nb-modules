@@ -1,5 +1,6 @@
 package de.adito.aditoweb.nbm.nbide.nbaditointerface.conversions;
 
+import lombok.NonNull;
 import org.jetbrains.annotations.*;
 
 import java.io.File;
@@ -24,7 +25,7 @@ public interface IFileConverterParameterProvider
    *                        They have to be modified
    */
   void modifyParameters(@Nullable File pSourceLocation, @Nullable File pTargetLocation,
-                        @NotNull String pSourceType, @NotNull String pTargetType,
-                        @NotNull Map<String, Object> pParams);
+                        @NonNull String pSourceType, @NonNull String pTargetType,
+                        @NonNull Map<String, Object> pParams);
 
 }

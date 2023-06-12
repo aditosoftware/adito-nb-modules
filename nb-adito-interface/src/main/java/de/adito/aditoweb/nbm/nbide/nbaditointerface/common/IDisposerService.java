@@ -2,6 +2,7 @@ package de.adito.aditoweb.nbm.nbide.nbaditointerface.common;
 
 
 import io.reactivex.rxjava3.disposables.Disposable;
+import lombok.NonNull;
 import org.jetbrains.annotations.*;
 import org.netbeans.api.project.Project;
 
@@ -20,14 +21,14 @@ public interface IDisposerService
    *
    * @param pProject project whose dispose is to be waited for
    */
-  void awaitProjectDispose(@NotNull Project pProject);
+  void awaitProjectDispose(@NonNull Project pProject);
 
   /**
    * Disposes all disposables associated with the submitted project
    *
    * @param pProject the project which should be disposed
    */
-  void disposeProject(@NotNull Project pProject);
+  void disposeProject(@NonNull Project pProject);
 
   /**
    * Disposing an object asynchronously
@@ -50,19 +51,19 @@ public interface IDisposerService
    * @param pProject    the project
    * @param pDisposable the disposable
    */
-  void register(@NotNull Project pProject, @NotNull Disposable pDisposable);
+  void register(@NonNull Project pProject, @NonNull Disposable pDisposable);
 
   /**
    * Registers a consumer, which is called, when the project is disposed
    *
    * @param pHandler consumer who receives the project that is currently to be dispatched
    */
-  void doOnDispose(@NotNull Consumer<Project> pHandler);
+  void doOnDispose(@NonNull Consumer<Project> pHandler);
 
   /**
    * Removes a dispose consumer, which was added with {@link #doOnDispose(Consumer)}.
    *
    * @param pHandler the handler
    */
-  void deregisterOnDisposeHandler(@NotNull Consumer<Project> pHandler);
+  void deregisterOnDisposeHandler(@NonNull Consumer<Project> pHandler);
 }

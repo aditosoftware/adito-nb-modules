@@ -3,6 +3,7 @@ package de.adito.aditoweb.nbm.vaadinicons;
 import de.adito.aditoweb.files.jar.JarFSUtil;
 import de.adito.aditoweb.nbm.vaadinicons.download.*;
 import de.adito.swing.icon.IconAttributes;
+import lombok.NonNull;
 import org.jetbrains.annotations.*;
 
 import java.awt.image.BufferedImage;
@@ -26,7 +27,7 @@ public class VaadinIconLoader
    * @throws IOException if the file cannot be read
    */
   @Nullable
-  public static BufferedImage loadSvg(@NotNull String pIconName, @NotNull IconAttributes pIconAttributes) throws IOException
+  public static BufferedImage loadSvg(@NonNull String pIconName, @NonNull IconAttributes pIconAttributes) throws IOException
   {
     return SVGToIconConverter.loadSvg(SVGFromNPMDownloader.SVG_DEST_FOLDER_NAME + "/" + pIconName + ".svg", pIconAttributes);
   }
@@ -35,7 +36,7 @@ public class VaadinIconLoader
    *
    * @return List with the names of all possible icons this loader can load
    */
-  @NotNull
+  @NonNull
   public static List<String> getIconNames()
   {
     URL svgFolderUrl = VaadinIconLoader.class.getResource(SVGFromNPMDownloader.SVG_DEST_FOLDER_NAME);

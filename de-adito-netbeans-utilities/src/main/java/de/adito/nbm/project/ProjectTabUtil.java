@@ -1,7 +1,7 @@
 package de.adito.nbm.project;
 
 import de.adito.notification.INotificationFacade;
-import org.jetbrains.annotations.NotNull;
+import lombok.NonNull;
 import org.openide.windows.TopComponent;
 
 import java.lang.reflect.*;
@@ -26,7 +26,7 @@ public class ProjectTabUtil
    *
    * @return the expanded nodes or an empty list, if there is no project tab opened
    */
-  @NotNull
+  @NonNull
   public static List<String[]> getExpandedNodes()
   {
     Optional<TopComponent> tabOpt = _findProjectTab();
@@ -55,7 +55,7 @@ public class ProjectTabUtil
   /**
    * Sets the expanded nodes of the project tree in the project tab. If no project tab is opened, nothing happens.
    */
-  public static void setExpandedNodes(@NotNull List<String[]> pNodes)
+  public static void setExpandedNodes(@NonNull List<String[]> pNodes)
   {
     Optional<TopComponent> tabOpt = _findProjectTab();
     if (!tabOpt.isPresent())
@@ -83,7 +83,7 @@ public class ProjectTabUtil
    *
    * @return the project tab or an empty optional
    */
-  @NotNull
+  @NonNull
   private static Optional<TopComponent> _findProjectTab()
   {
     return TopComponent.getRegistry().getOpened().stream()

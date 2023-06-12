@@ -1,6 +1,6 @@
 package de.adito.nbm.groupedtabs.api;
 
-import org.jetbrains.annotations.*;
+import lombok.NonNull;
 import org.openide.loaders.DataObject;
 import org.openide.util.Lookup;
 
@@ -20,7 +20,7 @@ public interface IDataObjectGroupProvider extends Comparator<DataObject>
    *
    * @return an instance of {@link IDataObjectGroupProvider}
    */
-  @NotNull
+  @NonNull
   static IDataObjectGroupProvider getDefault()
   {
     return Objects.requireNonNull(Lookup.getDefault().lookup(IDataObjectGroupProvider.class));
@@ -33,6 +33,6 @@ public interface IDataObjectGroupProvider extends Comparator<DataObject>
    * @param pDataObject the DataObject
    * @return the group of the DataObject
    */
-  @NotNull
-  Optional<String> group(@NotNull DataObject pDataObject);
+  @NonNull
+  Optional<String> group(@NonNull DataObject pDataObject);
 }

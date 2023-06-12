@@ -1,5 +1,6 @@
 package de.adito.aditoweb.nbm.nbide.nbaditointerface.database;
 
+import lombok.NonNull;
 import org.jetbrains.annotations.*;
 
 import java.io.IOException;
@@ -17,7 +18,7 @@ public interface IPossibleConnectionProvider
    *
    * @return connections
    */
-  @NotNull
+  @NonNull
   Collection<IPossibleDBConnection> getPossibleConnections();
 
   /**
@@ -29,7 +30,7 @@ public interface IPossibleConnectionProvider
     /**
      * @return the URL where this connection points to
      */
-    @NotNull
+    @NonNull
     String getURL();
 
     /**
@@ -41,7 +42,7 @@ public interface IPossibleConnectionProvider
     /**
      * @return meta information about all tables
      */
-    @NotNull
+    @NonNull
     List<ITableMetaInfo> getTableMetaInfos();
 
     /**
@@ -50,7 +51,7 @@ public interface IPossibleConnectionProvider
      * @param pFunction Function that consumes the connection and executes something on it
      * @return the result of the function
      */
-    <T, Ex extends Throwable> T withJDBCConnection(@NotNull IConnectionFunction<T, Ex> pFunction) throws IOException, Ex;
+    <T, Ex extends Throwable> T withJDBCConnection(@NonNull IConnectionFunction<T, Ex> pFunction) throws IOException, Ex;
 
     /**
      * Function for the connection - exception aware
@@ -63,7 +64,7 @@ public interface IPossibleConnectionProvider
        * @param pConnection Connection
        * @throws Ex Exception, if any
        */
-      T apply(@NotNull Connection pConnection) throws Ex;
+      T apply(@NonNull Connection pConnection) throws Ex;
     }
 
     /**
@@ -74,7 +75,7 @@ public interface IPossibleConnectionProvider
       /**
        * @return the name of the table
        */
-      @NotNull
+      @NonNull
       String getTableName();
 
       /**

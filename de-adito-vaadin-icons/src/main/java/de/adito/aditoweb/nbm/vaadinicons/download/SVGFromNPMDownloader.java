@@ -1,5 +1,6 @@
 package de.adito.aditoweb.nbm.vaadinicons.download;
 
+import lombok.NonNull;
 import org.apache.commons.compress.archivers.tar.*;
 import org.apache.commons.io.IOUtils;
 import org.jetbrains.annotations.*;
@@ -74,7 +75,7 @@ public class SVGFromNPMDownloader
    *
    * @param downloadUrl URL used to download the NPM module
    */
-  private static void downloadSVGs(@NotNull String downloadUrl)
+  private static void downloadSVGs(@NonNull String downloadUrl)
   {
     try (TarArchiveInputStream in = new TarArchiveInputStream(new GZIPInputStream(new BufferedInputStream(new URL(downloadUrl).openStream()))))
     {
@@ -107,8 +108,8 @@ public class SVGFromNPMDownloader
    * @param version version of the npm artifact
    * @return String of the adress of the npm artifact that can be used to download the artifact
    */
-  @NotNull
-  private static String getNPMDownloadUrl(@NotNull String version)
+  @NonNull
+  private static String getNPMDownloadUrl(@NonNull String version)
   {
     return "https://registry.npmjs.org/" + GROUP_ID + "/" + ARTIFACT_ID + "/-/" + ARTIFACT_ID + "-" + version + ".tgz";
   }
@@ -156,7 +157,7 @@ public class SVGFromNPMDownloader
    * @return the name used for the SVG
    */
   @Nullable
-  static String getSvgName(@NotNull String pSvgLine)
+  static String getSvgName(@NonNull String pSvgLine)
   {
     int startIndex = Math.min(pSvgLine.length(), pSvgLine.indexOf(SVG_PRE_NAME_CONTENT) + SVG_PRE_NAME_CONTENT.length());
     int endIndex = Math.min(pSvgLine.length(), pSvgLine.indexOf("\">", startIndex));
@@ -175,8 +176,8 @@ public class SVGFromNPMDownloader
    * @param pSvgLine line describing a SVG
    * @return paths that describe the SVG
    */
-  @NotNull
-  private static String getSvgPaths(@NotNull String pSvgLine)
+  @NonNull
+  private static String getSvgPaths(@NonNull String pSvgLine)
   {
 
     int startIndex = Math.min(pSvgLine.length(), pSvgLine.indexOf(SVG_PATHS_START_MARKER) + "\">".length());
@@ -190,8 +191,8 @@ public class SVGFromNPMDownloader
    * @param pSvgPaths paths that describe the SVG
    * @return contents of a .svg file containing the path info given as string
    */
-  @NotNull
-  private static String getSvgFileContents(@NotNull String pSvgPaths)
+  @NonNull
+  private static String getSvgFileContents(@NonNull String pSvgPaths)
   {
     return SVG_CONTENT_PREFIX + pSvgPaths + SVG_CONTENT_SUFFIX;
   }
@@ -202,7 +203,7 @@ public class SVGFromNPMDownloader
    * @param pSvgPaths Paths that describe the look of the SVG
    * @return String that includes the paths and the placeholders
    */
-  static String addPlaceholders(@NotNull String pSvgPaths)
+  static String addPlaceholders(@NonNull String pSvgPaths)
   {
     if (!pSvgPaths.contains(SVG_PATH_START_MARKER))
       return pSvgPaths;
@@ -217,7 +218,7 @@ public class SVGFromNPMDownloader
    *
    * @param pSvgLine contents of the svg file that should be written to disk
    */
-  private static void writeSvgFile(@NotNull String pSvgLine)
+  private static void writeSvgFile(@NonNull String pSvgLine)
   {
     String fileName = getSvgName(pSvgLine);
     File folder = SVG_DEST_FOLDER_PATH.toFile();

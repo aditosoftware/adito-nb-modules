@@ -1,5 +1,6 @@
 package de.adito.swing.quicksearch;
 
+import lombok.NonNull;
 import org.jetbrains.annotations.*;
 import org.openide.awt.QuickSearch;
 
@@ -22,14 +23,14 @@ public abstract class QuickSearchTableCallback implements QuickSearch.Callback
   private String searchString = null;
   private int searchResultIndex = 0;
 
-  public QuickSearchTableCallback(@NotNull JTable pTable)
+  public QuickSearchTableCallback(@NonNull JTable pTable)
   {
     this(pTable, IntStream.range(0, pTable.getColumnCount())
         .boxed()
         .collect(Collectors.toList()));
   }
 
-  public QuickSearchTableCallback(@NotNull JTable pTable, @NotNull List<Integer> pColumnsToSearch)
+  public QuickSearchTableCallback(@NonNull JTable pTable, @NonNull List<Integer> pColumnsToSearch)
   {
     table = pTable;
 
@@ -85,7 +86,7 @@ public abstract class QuickSearchTableCallback implements QuickSearch.Callback
    * @return current string representation to search in or null if this element should be skipped
    */
   @Nullable
-  protected abstract String toString(@NotNull Object pCellValue);
+  protected abstract String toString(@NonNull Object pCellValue);
 
   /**
    * @param pSearchString the String to look for

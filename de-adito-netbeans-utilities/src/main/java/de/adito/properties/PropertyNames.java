@@ -1,7 +1,7 @@
 package de.adito.properties;
 
 import de.adito.aditoweb.properties.PropertyAlias;
-import org.jetbrains.annotations.NotNull;
+import lombok.NonNull;
 
 /**
  * Interface that contains the names/aliases for properties of data models. One data model is encapsulated by an enum, and the enum contains
@@ -43,7 +43,7 @@ public interface PropertyNames
       value = pValue;
     }
 
-    @NotNull
+    @NonNull
     public String getPropertyName()
     {
       return value;

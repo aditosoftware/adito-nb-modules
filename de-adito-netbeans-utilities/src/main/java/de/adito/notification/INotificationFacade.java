@@ -1,7 +1,8 @@
 package de.adito.notification;
 
 import de.adito.aditoweb.nbm.metrics.api.IMetricProxyFactory;
-import org.jetbrains.annotations.*;
+import lombok.NonNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.awt.event.ActionListener;
 
@@ -38,7 +39,7 @@ public interface INotificationFacade
    *
    * @param pThrowable Exception
    */
-  void error(@NotNull Throwable pThrowable);
+  void error(@NonNull Throwable pThrowable);
 
   /**
    * Displays an error as a balloon
@@ -46,7 +47,7 @@ public interface INotificationFacade
    * @param pThrowable the Exception
    * @param pTitle     the title of the box
    */
-  void error(@NotNull Throwable pThrowable, @NotNull String pTitle);
+  void error(@NonNull Throwable pThrowable, @NonNull String pTitle);
 
   /**
    * Displays an error as a balloon
@@ -55,12 +56,12 @@ public interface INotificationFacade
    * @param pTitle                 the title of the box
    * @param pAdditionalInformation additional information that should be displayed
    */
-  void error(@NotNull Throwable pThrowable, @NotNull String pTitle, @NotNull String pAdditionalInformation);
+  void error(@NonNull Throwable pThrowable, @NonNull String pTitle, @NonNull String pAdditionalInformation);
 
   /**
    * Shows SQL in a Dialog
    *
    * @param pSqlText the SQL-Text, which should be displayed
    */
-  void showSql(@NotNull String pSqlText);
+  void showSql(@NonNull String pSqlText);
 }

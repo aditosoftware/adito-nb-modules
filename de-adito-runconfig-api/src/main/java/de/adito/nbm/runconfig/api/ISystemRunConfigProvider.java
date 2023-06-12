@@ -1,7 +1,7 @@
 package de.adito.nbm.runconfig.api;
 
 import io.reactivex.rxjava3.core.Observable;
-import org.jetbrains.annotations.NotNull;
+import lombok.NonNull;
 import org.netbeans.api.project.Project;
 
 import java.util.List;
@@ -18,7 +18,7 @@ public interface ISystemRunConfigProvider
   /**
    * @return Returns an Observable for all available RunConfigurations.
    */
-  @NotNull
+  @NonNull
   Observable<List<IRunConfig>> runConfigurations(List<ISystemInfo> pSystemInfos);
 
   /**

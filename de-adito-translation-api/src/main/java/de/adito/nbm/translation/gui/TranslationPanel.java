@@ -3,7 +3,8 @@ package de.adito.nbm.translation.gui;
 import de.adito.nbm.translation.api.*;
 import de.adito.swing.TableLayoutUtil;
 import info.clearthought.layout.TableLayout;
-import org.jetbrains.annotations.*;
+import lombok.NonNull;
+import org.jetbrains.annotations.Nullable;
 import org.openide.util.*;
 
 import javax.swing.*;
@@ -130,7 +131,7 @@ public class TranslationPanel extends JPanel
   /**
    * @return the result containing all set "properties"
    */
-  @NotNull
+  @NonNull
   public TranslationDialog.TranslationResult getResult()
   {
     Locale fromLang = (Locale) fromLangCombo.getSelectedItem();
@@ -163,7 +164,7 @@ public class TranslationPanel extends JPanel
   }
 
 
-  protected void storeSetting(@NotNull String pKey, @Nullable String pValue)
+  protected void storeSetting(@NonNull String pKey, @Nullable String pValue)
   {
     Preferences pref = NbPreferences.forModule(TranslationPanel.class);
     if (pValue != null)
@@ -172,8 +173,8 @@ public class TranslationPanel extends JPanel
       pref.remove(pKey);
   }
 
-  @NotNull
-  protected Optional<String> readSetting(@NotNull String pKey, @Nullable String pDefault)
+  @NonNull
+  protected Optional<String> readSetting(@NonNull String pKey, @Nullable String pDefault)
   {
     return Optional.ofNullable(NbPreferences.forModule(TranslationPanel.class).get(pKey, pDefault));
   }
@@ -184,7 +185,7 @@ public class TranslationPanel extends JPanel
    * @param pExcludeEmpty true, if empty locales should be omitted
    * @return the locales
    */
-  @NotNull
+  @NonNull
   private Locale[] _getLocales(boolean pExcludeEmpty)
   {
     return Arrays.stream(Locale.getAvailableLocales())
@@ -203,7 +204,7 @@ public class TranslationPanel extends JPanel
    * @param pLocaleToSelect the locale to select
    * @see #_getLocales(boolean)
    */
-  private void _selectLocaleInCombobox(@NotNull JComboBox<Locale> pCombo, @NotNull Locale pLocaleToSelect)
+  private void _selectLocaleInCombobox(@NonNull JComboBox<Locale> pCombo, @NonNull Locale pLocaleToSelect)
   {
     ComboBoxModel<Locale> model = pCombo.getModel();
     List<Locale> localesInModel = new ArrayList<>();

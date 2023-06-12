@@ -1,6 +1,6 @@
 package de.adito.actions;
 
-import org.jetbrains.annotations.NotNull;
+import lombok.NonNull;
 import org.openide.nodes.Node;
 import org.openide.util.RequestProcessor;
 import org.openide.util.actions.NodeAction;
@@ -78,6 +78,6 @@ public abstract class AbstractAsyncNodeAction extends NodeAction
    * @see #asynchronous()
    * @return <tt>true</tt> wenn dies der Fall ist
    */
-  protected abstract boolean enable0(@NotNull Node[] activatedNodes);
+  protected abstract boolean enable0(@NonNull Node[] activatedNodes);
 
 }

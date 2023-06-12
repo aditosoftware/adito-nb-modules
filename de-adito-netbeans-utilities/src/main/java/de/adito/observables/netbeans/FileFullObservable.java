@@ -3,7 +3,7 @@ package de.adito.observables.netbeans;
 import de.adito.util.reactive.AbstractListenerObservable;
 import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.schedulers.Schedulers;
-import org.jetbrains.annotations.NotNull;
+import lombok.NonNull;
 import org.openide.filesystems.*;
 
 import java.io.File;
@@ -16,22 +16,22 @@ import java.util.Optional;
 public class FileFullObservable extends AbstractListenerObservable<FileChangeListener, File, Optional<File>>
 {
 
-  private FileFullObservable(@NotNull File pListenableValue)
+  private FileFullObservable(@NonNull File pListenableValue)
   {
     super(pListenableValue);
   }
 
-  @NotNull
-  public static Observable<Optional<File>> create(@NotNull File pFile)
+  @NonNull
+  public static Observable<Optional<File>> create(@NonNull File pFile)
   {
     return Observable.create(new FileFullObservable(pFile)).startWithItem(Optional.of(pFile))
         .observeOn(Schedulers.io())
         .subscribeOn(Schedulers.io());
   }
 
-  @NotNull
+  @NonNull
   @Override
-  protected FileChangeListener registerListener(@NotNull File pFile, @NotNull IFireable<Optional<File>> pFireable)
+  protected FileChangeListener registerListener(@NonNull File pFile, @NonNull IFireable<Optional<File>> pFireable)
   {
     FileChangeListener fcl = new _FileCreatedListener(pFireable);
     FileUtil.addRecursiveListener(fcl, FileUtil.normalizeFile(pFile));
@@ -39,7 +39,7 @@ public class FileFullObservable extends AbstractListenerObservable<FileChangeLis
   }
 
   @Override
-  protected void removeListener(@NotNull File pFile, @NotNull FileChangeListener pFileChangeListener)
+  protected void removeListener(@NonNull File pFile, @NonNull FileChangeListener pFileChangeListener)
   {
     try
     {

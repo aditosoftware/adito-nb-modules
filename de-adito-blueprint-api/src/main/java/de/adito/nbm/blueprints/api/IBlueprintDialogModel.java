@@ -1,7 +1,7 @@
 package de.adito.nbm.blueprints.api;
 
 import io.reactivex.rxjava3.core.Observable;
-import org.jetbrains.annotations.NotNull;
+import lombok.NonNull;
 import org.netbeans.api.project.Project;
 
 import java.util.Optional;
@@ -17,7 +17,7 @@ public interface IBlueprintDialogModel
    *
    * @return Observable with project
    */
-  @NotNull
+  @NonNull
   Observable<Optional<Project>> observeProject();
 
   /**
@@ -28,7 +28,7 @@ public interface IBlueprintDialogModel
    * @param pName Name of the attribute
    * @return Observable containing the string value
    */
-  @NotNull
-  Observable<Optional<String>> observeAttributeValue(@NotNull String pID, @NotNull String pName);
+  @NonNull
+  Observable<Optional<String>> observeAttributeValue(@NonNull String pID, @NonNull String pName);
 
 }

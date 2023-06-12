@@ -111,15 +111,6 @@
         <scope>provided</scope>
       </dependency>
 
-      <!-- Lombok for additional annotations -->
-      <dependency>
-        <groupId>org.projectlombok</groupId>
-        <artifactId>lombok</artifactId>
-        <version>1.18.22</version>
-        <scope>provided</scope>
-        <optional>true</optional>
-      </dependency>
-
       <!-- JUnit for UnitTests -->
       <dependency>
         <groupId>org.junit.jupiter</groupId>
@@ -159,11 +150,9 @@
   <dependencies>
     <!-- für @NotNull-Annotations -->
     <dependency>
-      <groupId>org.jetbrains</groupId>
-      <artifactId>annotations</artifactId>
-      <version>13.0</version>
-      <scope>provided</scope>
-      <optional>true</optional>
+      <groupId>de.adito.aditoweb</groupId>
+      <artifactId>adito-lombok-extended</artifactId>
+      <version>1.0.0</version>
     </dependency>
   </dependencies>
 
@@ -183,7 +172,6 @@
         </plugin>
       </plugins>
     </pluginManagement>
-
     <plugins>
       <!-- NetBeans-Plugin -->
       <plugin>

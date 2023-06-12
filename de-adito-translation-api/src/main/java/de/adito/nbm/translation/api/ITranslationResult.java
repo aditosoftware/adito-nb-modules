@@ -1,5 +1,6 @@
 package de.adito.nbm.translation.api;
 
+import lombok.NonNull;
 import org.jetbrains.annotations.*;
 
 import java.util.Locale;
@@ -17,7 +18,7 @@ public interface ITranslationResult
    *
    * @return Text as String
    */
-  @NotNull
+  @NonNull
   String[] getSourceTexts();
 
   /**
@@ -25,7 +26,7 @@ public interface ITranslationResult
    *
    * @return Text as String
    */
-  @NotNull
+  @NonNull
   String[] getTranslatedTexts();
 
   /**
@@ -41,7 +42,7 @@ public interface ITranslationResult
    *
    * @return the locale
    */
-  @NotNull
+  @NonNull
   Locale getTargetLocale();
 
 }

@@ -1,6 +1,7 @@
 package de.adito.nbm.blueprints.api;
 
 import de.adito.picoservice.IPicoRegistry;
+import lombok.NonNull;
 import org.jetbrains.annotations.*;
 import org.openide.filesystems.FileObject;
 
@@ -23,13 +24,13 @@ public interface IBlueprintPreset
   /**
    * @return the data
    */
-  @NotNull
+  @NonNull
   String getContent();
 
   /**
    * @param pContent the data
    */
-  void setContent(@NotNull String pContent);
+  void setContent(@NonNull String pContent);
 
   /**
    * @param pPath the path, where the file created by the blueprint should be stored
@@ -45,7 +46,7 @@ public interface IBlueprintPreset
    * @param pName         the name of the new file/model
    * @see #setPath(String)
    */
-  void store(@NotNull FileObject pParent, @NotNull IBlueprint pBlueprint, @NotNull InputStream pCompiledData, @NotNull String pName) throws Exception;
+  void store(@NonNull FileObject pParent, @NonNull IBlueprint pBlueprint, @NonNull InputStream pCompiledData, @NonNull String pName) throws Exception;
 
   /**
    * Validates the name of the file which is created by this preset
@@ -55,7 +56,7 @@ public interface IBlueprintPreset
    * @return null, if everything is ok or a string for the user
    */
   @Nullable
-  String validate(@NotNull String pNameToValidate, @Nullable FileObject pParent);
+  String validate(@NonNull String pNameToValidate, @Nullable FileObject pParent);
 
   /**
    * @return the type of the IBlueprintPreset
@@ -100,7 +101,7 @@ public interface IBlueprintPreset
    * @return a new instantiated preset
    */
   @Nullable
-  static IBlueprintPreset get(@NotNull EContentType pType)
+  static IBlueprintPreset get(@NonNull EContentType pType)
   {
     List<IBlueprintPreset> presets = INSTANCES.get(pType);
     if (presets != null && !presets.isEmpty())

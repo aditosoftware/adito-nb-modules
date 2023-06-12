@@ -1,5 +1,6 @@
 package de.adito.swing.quicksearch;
 
+import lombok.NonNull;
 import org.jetbrains.annotations.*;
 import org.openide.awt.QuickSearch;
 
@@ -33,12 +34,12 @@ public abstract class QuickSearchTreeCallback implements QuickSearch.Callback
     expandOnResultFound = pExpandOnResultFound;
   }
 
-  public QuickSearchTreeCallback(@NotNull JTree pTree)
+  public QuickSearchTreeCallback(@NonNull JTree pTree)
   {
     this(pTree, false);
   }
 
-  public QuickSearchTreeCallback(@NotNull JTree pTree, boolean pExpandOnResultFound)
+  public QuickSearchTreeCallback(@NonNull JTree pTree, boolean pExpandOnResultFound)
   {
     tree = pTree;
     expandOnResultFound = pExpandOnResultFound;
@@ -93,12 +94,12 @@ public abstract class QuickSearchTreeCallback implements QuickSearch.Callback
    * @return current string representation to search in or null if this node should be skipped
    */
   @Nullable
-  protected abstract String toString(@NotNull TreeNode pNode);
+  protected abstract String toString(@NonNull TreeNode pNode);
 
   /**
    * @return the root node of the tree to search
    */
-  @NotNull
+  @NonNull
   protected TreeNode getRootNode()
   {
     assert tree != null;
@@ -135,7 +136,7 @@ public abstract class QuickSearchTreeCallback implements QuickSearch.Callback
    * @param pPath path to check
    * @return true if visible
    */
-  protected boolean isVisible(@NotNull TreePath pPath)
+  protected boolean isVisible(@NonNull TreePath pPath)
   {
     assert tree != null;
     return tree.isVisible(pPath);

@@ -3,7 +3,6 @@ package de.adito.notification.internal;
 import com.google.common.annotations.VisibleForTesting;
 import de.adito.notification.INotificationFacade;
 import lombok.*;
-import org.jetbrains.annotations.NotNull;
 import org.mockito.Mockito;
 
 import java.lang.invoke.*;
@@ -34,7 +33,7 @@ public class NotificationFacadeTestUtil
    * @throws NoSuchFieldException   Error while accessing a field via reflections that does not exist
    * @throws IllegalAccessException Error while accessing and setting a field via reflections
    */
-  public static void verifyNotificationFacade(@NotNull Class<? extends Throwable> pClass, @NotNull String pTitle, @NotNull String pMessage, @NotNull Runnable pRunnable) throws NoSuchFieldException, IllegalAccessException
+  public static void verifyNotificationFacade(@NonNull Class<? extends Throwable> pClass, @NonNull String pTitle, @NonNull String pMessage, @NonNull Runnable pRunnable) throws NoSuchFieldException, IllegalAccessException
   {
     verifyNotificationFacade(pNotificationFacade -> Mockito.verify(pNotificationFacade).error(isA(pClass), eq(pTitle), eq(pMessage)),
                              pRunnable);
@@ -49,7 +48,7 @@ public class NotificationFacadeTestUtil
    * @throws NoSuchFieldException   Error while accessing a field via reflections that does not exist
    * @throws IllegalAccessException Error while accessing and setting a field via reflections
    */
-  public static void verifyNotificationFacade(@NotNull Class<? extends Throwable> pClass, @NotNull String pTitle, @NotNull Runnable pRunnable) throws NoSuchFieldException, IllegalAccessException
+  public static void verifyNotificationFacade(@NonNull Class<? extends Throwable> pClass, @NonNull String pTitle, @NonNull Runnable pRunnable) throws NoSuchFieldException, IllegalAccessException
   {
     verifyNotificationFacade(pNotificationFacade -> Mockito.verify(pNotificationFacade).error(isA(pClass), eq(pTitle)),
                              pRunnable);
@@ -63,7 +62,7 @@ public class NotificationFacadeTestUtil
    * @throws NoSuchFieldException   Error while accessing a field via reflections that does not exist
    * @throws IllegalAccessException Error while accessing and setting a field via reflections
    */
-  public static void verifyNotificationFacade(@NotNull Class<? extends Throwable> pClass, @NotNull Runnable pRunnable) throws NoSuchFieldException, IllegalAccessException
+  public static void verifyNotificationFacade(@NonNull Class<? extends Throwable> pClass, @NonNull Runnable pRunnable) throws NoSuchFieldException, IllegalAccessException
   {
     verifyNotificationFacade(pNotificationFacade -> Mockito.verify(pNotificationFacade).error(isA(pClass)),
                              pRunnable);
@@ -76,7 +75,7 @@ public class NotificationFacadeTestUtil
    * @throws NoSuchFieldException   Error while accessing a field via reflections that does not exist
    * @throws IllegalAccessException Error while accessing and setting a field via reflections
    */
-  public static void verifyNoInteractionsWithNotificationFacade(@NotNull Runnable pRunnable) throws NoSuchFieldException, IllegalAccessException
+  public static void verifyNoInteractionsWithNotificationFacade(@NonNull Runnable pRunnable) throws NoSuchFieldException, IllegalAccessException
   {
     verifyNotificationFacade(pNotificationFacade -> {
       // no additional checks to do
@@ -92,7 +91,7 @@ public class NotificationFacadeTestUtil
    * @throws NoSuchFieldException   Error while accessing a field via reflections that does not exist
    * @throws IllegalAccessException Error while accessing and setting a field via reflections
    */
-  public static void verifyNotificationFacadeNotify(@NotNull String pTitle, @NotNull String pMessage, @NotNull Runnable pRunnable) throws NoSuchFieldException, IllegalAccessException
+  public static void verifyNotificationFacadeNotify(@NonNull String pTitle, @NonNull String pMessage, @NonNull Runnable pRunnable) throws NoSuchFieldException, IllegalAccessException
   {
     verifyNotificationFacade(pNotificationFacade -> Mockito.verify(pNotificationFacade).notify(eq(pTitle), eq(pMessage), anyBoolean()),
                              pRunnable);
@@ -107,7 +106,7 @@ public class NotificationFacadeTestUtil
    * @throws IllegalAccessException Error while accessing and setting a field via reflections
    * @see <a href="https://stackoverflow.com/a/69362143">How to access a private final field via reflections</a>
    */
-  private static void verifyNotificationFacade(@NotNull Consumer<INotificationFacade> pVerifyCall, @NotNull Runnable pRunnable) throws NoSuchFieldException, IllegalAccessException
+  private static void verifyNotificationFacade(@NonNull Consumer<INotificationFacade> pVerifyCall, @NonNull Runnable pRunnable) throws NoSuchFieldException, IllegalAccessException
   {
     // JAVA 12+ solution for setting the static final field INSTANCE within the class INotificationFacade
     Field field = INotificationFacade.class.getDeclaredField("INSTANCE");

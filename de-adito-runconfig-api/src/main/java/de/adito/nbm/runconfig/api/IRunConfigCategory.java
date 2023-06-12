@@ -1,7 +1,7 @@
 package de.adito.nbm.runconfig.api;
 
 import io.reactivex.rxjava3.core.Observable;
-import org.jetbrains.annotations.NotNull;
+import lombok.NonNull;
 
 import java.awt.*;
 import java.util.Optional;
@@ -18,19 +18,19 @@ public interface IRunConfigCategory
   /**
    * @return Unique identifier for this category
    */
-  @NotNull
+  @NonNull
   String getName();
 
   /**
    * @return Title of this Category
    */
-  @NotNull
+  @NonNull
   Observable<String> title();
 
   /**
    * @return Icon, or <tt>null</tt>
    */
-  @NotNull
+  @NonNull
   default Observable<Optional<Image>> icon()
   {
     return Observable.just(Optional.empty());

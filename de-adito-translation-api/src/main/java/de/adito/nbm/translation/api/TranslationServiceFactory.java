@@ -1,7 +1,7 @@
 package de.adito.nbm.translation.api;
 
 import de.adito.picoservice.IPicoRegistry;
-import org.jetbrains.annotations.NotNull;
+import lombok.NonNull;
 
 import java.util.*;
 import java.util.logging.Logger;
@@ -25,8 +25,8 @@ public class TranslationServiceFactory
    * @return the translator
    * @throws TranslationException If the translator could not be found
    */
-  @NotNull
-  public static ITranslationService getTranslationService(@NotNull ETranslatorType pType) throws TranslationException
+  @NonNull
+  public static ITranslationService getTranslationService(@NonNull ETranslatorType pType) throws TranslationException
   {
     ITranslationService service = _SERVICES.get(pType);
     if (service == null)

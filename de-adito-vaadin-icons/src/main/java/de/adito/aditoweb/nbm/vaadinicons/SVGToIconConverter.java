@@ -2,6 +2,7 @@ package de.adito.aditoweb.nbm.vaadinicons;
 
 import de.adito.aditoweb.nbm.vaadinicons.download.SVGFromNPMDownloader;
 import de.adito.swing.icon.IconAttributes;
+import lombok.NonNull;
 import org.apache.batik.anim.dom.SVGDOMImplementation;
 import org.apache.batik.transcoder.*;
 import org.apache.batik.transcoder.image.ImageTranscoder;
@@ -29,8 +30,8 @@ class SVGToIconConverter
    * @return Stream with the final svg contents
    * @throws IOException if an error occurrs while reading the svg file
    */
-  @NotNull
-  static InputStream applyIconAttributesToStream(@NotNull InputStream pSvgFileStream, @NotNull IconAttributes pIconAttributes) throws IOException
+  @NonNull
+  static InputStream applyIconAttributesToStream(@NonNull InputStream pSvgFileStream, @NonNull IconAttributes pIconAttributes) throws IOException
   {
     String contents = new String(pSvgFileStream.readAllBytes());
     contents = contents.replace(SVGFromNPMDownloader.COLOR_PLACEHOLDER, String.format("%06X", 0xFFFFFF & pIconAttributes.getColor().getRGB()));
@@ -48,7 +49,7 @@ class SVGToIconConverter
    * @throws IOException if the svg file cannot be read
    */
   @Nullable
-  public static BufferedImage loadSvg(@NotNull String pSvgFile, @NotNull IconAttributes pIconAttributes) throws IOException
+  public static BufferedImage loadSvg(@NonNull String pSvgFile, @NonNull IconAttributes pIconAttributes) throws IOException
   {
     SVGImageTranscoder t = new SVGImageTranscoder();
     InputStream svgFileStream = SVGToIconConverter.class.getResourceAsStream(pSvgFile);
@@ -82,7 +83,7 @@ class SVGToIconConverter
     }
   }
 
-  @NotNull
+  @NonNull
   private static TranscodingHints getTranscodingHints()
   {
     TranscodingHints transcoderHints = new TranscodingHints();
@@ -102,8 +103,8 @@ class SVGToIconConverter
    * @param pIconAttributes iconAttributes that give the rotation in degrees
    * @return rotated image
    */
-  @NotNull
-  private static BufferedImage rotateImage(@NotNull BufferedImage pBufferedImage, @NotNull IconAttributes pIconAttributes)
+  @NonNull
+  private static BufferedImage rotateImage(@NonNull BufferedImage pBufferedImage, @NonNull IconAttributes pIconAttributes)
   {
     int w = pBufferedImage.getWidth();
     int h = pBufferedImage.getHeight();

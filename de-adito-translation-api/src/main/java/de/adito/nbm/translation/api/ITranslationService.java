@@ -1,5 +1,6 @@
 package de.adito.nbm.translation.api;
 
+import lombok.NonNull;
 import org.jetbrains.annotations.*;
 
 import java.util.Locale;
@@ -22,9 +23,9 @@ public interface ITranslationService
    * @param pLineBreakMethod    Determines the handling of line breaks / line endings
    * @param pStringsToTranslate Strings to translate
    */
-  @NotNull
-  default ITranslationResult translate(@Nullable Locale pFrom, @NotNull Locale pTo, @Nullable String pAuthCode,
-                                       @NotNull ELineBreakMethod pLineBreakMethod, @NotNull String... pStringsToTranslate)
+  @NonNull
+  default ITranslationResult translate(@Nullable Locale pFrom, @NonNull Locale pTo, @Nullable String pAuthCode,
+                                       @NonNull ELineBreakMethod pLineBreakMethod, @NonNull String... pStringsToTranslate)
       throws TranslationException
   {
     return translate(pFrom, pTo, pAuthCode, null, pLineBreakMethod, pStringsToTranslate);
@@ -40,9 +41,9 @@ public interface ITranslationService
    * @param pLineBreakMethod    Determines the handling of line breaks / line endings
    * @param pStringsToTranslate Strings to translate
    */
-  @NotNull
-  ITranslationResult translate(@Nullable Locale pFrom, @NotNull Locale pTo, @Nullable String pAuthCode, @Nullable String pProxyUrl,
-                               @NotNull ELineBreakMethod pLineBreakMethod, @NotNull String... pStringsToTranslate)
+  @NonNull
+  ITranslationResult translate(@Nullable Locale pFrom, @NonNull Locale pTo, @Nullable String pAuthCode, @Nullable String pProxyUrl,
+                               @NonNull ELineBreakMethod pLineBreakMethod, @NonNull String... pStringsToTranslate)
       throws TranslationException;
 
 }

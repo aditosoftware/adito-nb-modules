@@ -1,6 +1,7 @@
 package de.adito.aditoweb.nbm.nbide.nbaditointerface.cache;
 
 import com.google.common.hash.HashFunction;
+import lombok.NonNull;
 import org.jetbrains.annotations.*;
 
 import java.io.Serializable;
@@ -35,7 +36,7 @@ public interface ICache
    * @param pKey   the key
    * @param pValue the value written to the cache. If a value already exists under the specified key, it will be overwritten.
    */
-  void put(@NotNull Object pKey, @Nullable Serializable pValue);
+  void put(@NonNull Object pKey, @Nullable Serializable pValue);
 
   /**
    * Returns a function that can be used to only cache the hash of data. HashFunction is provided to ensure that when comparing from different caches,
@@ -44,6 +45,6 @@ public interface ICache
    * @return default HashFunction.
    */
   @SuppressWarnings("UnstableApiUsage")
-  @NotNull
+  @NonNull
   HashFunction getHashFunction();
 }
