@@ -2,7 +2,8 @@ package de.adito.aditoweb.files.jar;
 
 import com.google.common.base.Charsets;
 import com.google.common.io.Files;
-import org.jetbrains.annotations.*;
+import lombok.NonNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.*;
 import java.net.*;
@@ -19,7 +20,7 @@ public class JarFSUtil
 
   private static final Logger LOGGER = Logger.getLogger(JarFSUtil.class.getName());
 
-  public static List<String> listFilesFromNormalFolder(@NotNull File pFolder, @NotNull FileFilter pFileFilter)
+  public static List<String> listFilesFromNormalFolder(@NonNull File pFolder, @NonNull FileFilter pFileFilter)
   {
     File[] children = pFolder.listFiles(pFileFilter);
     if (children == null)
@@ -36,8 +37,8 @@ public class JarFSUtil
    * @param pFolder Ordner auf der Festplatte
    * @return Map
    */
-  @NotNull
-  public static Map<String, InputStream> loadBlueprintsFromNormalFolder(@NotNull File pFolder)
+  @NonNull
+  public static Map<String, InputStream> loadBlueprintsFromNormalFolder(@NonNull File pFolder)
   {
     File[] children = pFolder.listFiles((dir, name) -> name.endsWith(".xml")); // rekursiv
     if (children == null)
@@ -60,7 +61,7 @@ public class JarFSUtil
                                   }));
   }
 
-  public static List<String> listFilesFromInnerJar(@NotNull URL pJarFile, @NotNull FileFilter pFileFilter)
+  public static List<String> listFilesFromInnerJar(@NonNull URL pJarFile, @NonNull FileFilter pFileFilter)
   {
     // Daten können NICHT direkt aus dem Verzeichnis gelesen werden.
     // Beispielsweise wenn die XML-Dateien innerhalb einer JAR liegen
@@ -77,9 +78,9 @@ public class JarFSUtil
    * @param pJarFile URL zur Jar
    * @return Map
    */
-  @NotNull
+  @NonNull
   @Deprecated
-  public static Map<String, InputStream> loadBlueprintsFromInnerJar(@NotNull URL pJarFile)
+  public static Map<String, InputStream> loadBlueprintsFromInnerJar(@NonNull URL pJarFile)
   {
     return loadBlueprintsFromInnerJar(pJarFile, null);
   }
@@ -91,8 +92,8 @@ public class JarFSUtil
    * @param pResolver Resolver für die Blueprint-Datei-Pfade
    * @return Map
    */
-  @NotNull
-  public static Map<String, InputStream> loadBlueprintsFromInnerJar(@NotNull URL pJarFile, @Nullable BlueprintResolver pResolver)
+  @NonNull
+  public static Map<String, InputStream> loadBlueprintsFromInnerJar(@NonNull URL pJarFile, @Nullable BlueprintResolver pResolver)
   {
     // Daten können NICHT direkt aus dem Verzeichnis gelesen werden.
     // Beispielsweise wenn die XML-Dateien innerhalb einer JAR liegen
@@ -109,8 +110,8 @@ public class JarFSUtil
    * @param pSplitPath aufgesplittete URL des Pfades der Jar
    * @return Map
    */
-  @NotNull
-  public static <T> T loadFromInnerJar(@NotNull String[] pSplitPath, @NotNull ZipExtractor<T> pZipExtractor, @NotNull FileFilter pFileFilter)
+  @NonNull
+  public static <T> T loadFromInnerJar(@NonNull String[] pSplitPath, @NonNull ZipExtractor<T> pZipExtractor, @NonNull FileFilter pFileFilter)
   {
     String pathToJar = pSplitPath[0];
     if (pathToJar.startsWith("jar:file:"))
@@ -135,14 +136,14 @@ public class JarFSUtil
 
   private interface ZipExtractor<T>
   {
-    T extractEntries(@NotNull ZipInputStream pZis, @NotNull String pPathInJar, @NotNull FileFilter pFileFilter) throws IOException;
+    T extractEntries(@NonNull ZipInputStream pZis, @NonNull String pPathInJar, @NonNull FileFilter pFileFilter) throws IOException;
   }
 
   private static class FileListExtractor implements ZipExtractor<List<String>>
   {
 
     @Override
-    public List<String> extractEntries(@NotNull ZipInputStream pZis, @NotNull String pPathInJar, @NotNull FileFilter pFileFilter) throws IOException
+    public List<String> extractEntries(@NonNull ZipInputStream pZis, @NonNull String pPathInJar, @NonNull FileFilter pFileFilter) throws IOException
     {
       List<String> result = new ArrayList<>();
       for (ZipEntry entry = pZis.getNextEntry(); entry != null; entry = pZis.getNextEntry())
@@ -165,7 +166,7 @@ public class JarFSUtil
     }
 
     @Override
-    public Map<String, InputStream> extractEntries(@NotNull ZipInputStream pZis, @NotNull String pPathInJar, @NotNull FileFilter pFileFilter) throws IOException
+    public Map<String, InputStream> extractEntries(@NonNull ZipInputStream pZis, @NonNull String pPathInJar, @NonNull FileFilter pFileFilter) throws IOException
     {
       Map<String, InputStream> result = new HashMap<>();
       for (ZipEntry entry = pZis.getNextEntry(); entry != null; entry = pZis.getNextEntry())
@@ -202,6 +203,6 @@ public class JarFSUtil
      * @return the corresponding input stream
      */
     @Nullable
-    InputStream loadBlueprint(@NotNull String pPath);
+    InputStream loadBlueprint(@NonNull String pPath);
   }
 }

@@ -1,6 +1,6 @@
 package de.adito.aditoweb.nbm.nbide.nbaditointerface.common;
 
-import org.jetbrains.annotations.NotNull;
+import lombok.NonNull;
 
 /**
  * Executor for many bundled file changes, while the indexer should be disabled, for example.
@@ -15,7 +15,7 @@ public interface IBulkFileChangeExecutor
    *
    * @param pRunnable runnable, which should be executed
    */
-  <Ex extends Throwable> void execute(@NotNull IBulkFileChangeRunnable<Ex> pRunnable) throws Ex;
+  <Ex extends Throwable> void execute(@NonNull IBulkFileChangeRunnable<Ex> pRunnable) throws Ex;
 
 
   /**

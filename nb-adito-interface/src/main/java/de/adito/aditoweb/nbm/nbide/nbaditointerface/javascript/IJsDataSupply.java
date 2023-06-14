@@ -1,6 +1,6 @@
 package de.adito.aditoweb.nbm.nbide.nbaditointerface.javascript;
 
-import org.jetbrains.annotations.NotNull;
+import lombok.NonNull;
 import org.openide.filesystems.FileObject;
 
 import java.util.stream.Stream;
@@ -13,7 +13,7 @@ import java.util.stream.Stream;
 public interface IJsDataSupply
 {
 
-  @NotNull
-  Stream<String> getVariables(@NotNull FileObject pFileObject);
+  @NonNull
+  Stream<String> getVariables(@NonNull FileObject pFileObject);
 
 }

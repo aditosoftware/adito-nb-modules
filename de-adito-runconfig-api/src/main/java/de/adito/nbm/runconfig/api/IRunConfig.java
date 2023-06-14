@@ -1,7 +1,7 @@
 package de.adito.nbm.runconfig.api;
 
 import io.reactivex.rxjava3.core.Observable;
-import org.jetbrains.annotations.NotNull;
+import lombok.NonNull;
 import org.netbeans.api.progress.ProgressHandle;
 
 import java.awt.*;
@@ -18,19 +18,19 @@ public interface IRunConfig {
   /**
    * @return Category to display in, or <tt>null</tt>
    */
-  @NotNull
+  @NonNull
   Observable<Optional<IRunConfigCategory>> category();
 
   /**
    * @return DisplayName of this RunConfig. Will be displayed at least in the ComboBox in Toolbar
    */
-  @NotNull
+  @NonNull
   Observable<String> displayName();
 
   /**
    * @return Icon, or <tt>null</tt>. Default: Icon of the category
    */
-  @NotNull
+  @NonNull
   default Observable<Optional<Image>> icon() {
     return category()
         .defaultIfEmpty(Optional.empty())
@@ -46,6 +46,6 @@ public interface IRunConfig {
    * @param pProgressHandle Handle to display the progress
    * @throws Exception Exception -> Execution failed
    */
-  void executeAsnyc(@NotNull ProgressHandle pProgressHandle) throws Exception;
+  void executeAsnyc(@NonNull ProgressHandle pProgressHandle) throws Exception;
 
 }

@@ -1,6 +1,6 @@
 package de.adito.nbm.blueprints.api;
 
-import org.jetbrains.annotations.NotNull;
+import lombok.NonNull;
 
 import javax.swing.*;
 
@@ -18,5 +18,5 @@ public interface IBlueprintActionsProvider
    * @param pTypes the name of the types of the blueprints, which should be added to the ActionGroup
    * @return the ActionGroup
    */
-  Action createModelActionGroup(@NotNull String... pTypes);
+  Action createModelActionGroup(@NonNull String... pTypes);
 }

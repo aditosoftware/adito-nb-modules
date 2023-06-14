@@ -154,7 +154,7 @@ class NotificationFacadeImplTest
      * @param pMessage        the message that should be passed to the notify method
      * @param pFacadeConsumer the consumer for making the method call
      */
-    private void baseError(String pTitle, String pMessage, @NotNull Consumer<NotificationFacadeImpl> pFacadeConsumer)
+    private void baseError(String pTitle, String pMessage, @NonNull Consumer<NotificationFacadeImpl> pFacadeConsumer)
     {
       try (MockedStatic<Exceptions> exceptionsMockedStatic = Mockito.mockStatic(Exceptions.class))
       {
@@ -175,7 +175,7 @@ class NotificationFacadeImplTest
     /**
      * @return the arguments for {@link #shouldGetRootMessage(String, Throwable)}
      */
-    @NotNull
+    @NonNull
     private Stream<Arguments> shouldGetRootMessage()
     {
       String exception = "exception";
@@ -218,7 +218,7 @@ class NotificationFacadeImplTest
      */
     @ParameterizedTest
     @MethodSource
-    void shouldGetRootMessage(@NotNull String pExpected, @NotNull Throwable pThrowable)
+    void shouldGetRootMessage(@NonNull String pExpected, @NonNull Throwable pThrowable)
     {
       NotificationFacadeImpl notificationFacade = new NotificationFacadeImpl();
 
@@ -254,8 +254,8 @@ class NotificationFacadeImplTest
    * @param pFacadeConsumer the consumer for making the method call. It needs also make any verify calls except
    *                        {@link NotificationFacadeImpl#_notify(String, String, boolean, Priority, ActionListener)}
    */
-  private void baseVerifyNotify(String pTitle, String pMessage, boolean pAutoDispose, @NotNull Priority pPriority,
-                                @Nullable ActionListener pListener, @NotNull Consumer<NotificationFacadeImpl> pFacadeConsumer)
+  private void baseVerifyNotify(String pTitle, String pMessage, boolean pAutoDispose, @NonNull Priority pPriority,
+                                @Nullable ActionListener pListener, @NonNull Consumer<NotificationFacadeImpl> pFacadeConsumer)
   {
     NotificationFacadeImpl notificationFacade = Mockito.spy(new NotificationFacadeImpl());
 

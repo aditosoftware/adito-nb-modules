@@ -2,7 +2,7 @@ package de.adito.observables.netbeans;
 
 import de.adito.util.reactive.*;
 import io.reactivex.rxjava3.core.Observable;
-import org.jetbrains.annotations.NotNull;
+import lombok.NonNull;
 import org.netbeans.api.project.*;
 
 import java.beans.PropertyChangeListener;
@@ -21,8 +21,8 @@ public class ProjectObservable extends AbstractListenerObservable<PropertyChange
    * @param pProject Projekt
    * @return das Observable mit dem Projekt
    */
-  @NotNull
-  public static Observable<ProjectInformation> createInfos(@NotNull Project pProject)
+  @NonNull
+  public static Observable<ProjectInformation> createInfos(@NonNull Project pProject)
   {
     return createInfos(pProject, true);
   }
@@ -35,8 +35,8 @@ public class ProjectObservable extends AbstractListenerObservable<PropertyChange
    *                             Regulär ist der Parameter IMMER TRUE, außer man implementiert das Delegate.
    * @return das Observable mit dem Projekt
    */
-  @NotNull
-  public static Observable<ProjectInformation> createInfos(@NotNull Project pProject, boolean pUsePossibleDelegate)
+  @NonNull
+  public static Observable<ProjectInformation> createInfos(@NonNull Project pProject, boolean pUsePossibleDelegate)
   {
     if (pUsePossibleDelegate && pProject instanceof IProvider)
       return ((IProvider) pProject).create();
@@ -49,14 +49,14 @@ public class ProjectObservable extends AbstractListenerObservable<PropertyChange
         });
   }
 
-  private ProjectObservable(@NotNull ProjectInformation pProjectInformation)
+  private ProjectObservable(@NonNull ProjectInformation pProjectInformation)
   {
     super(pProjectInformation);
   }
 
-  @NotNull
+  @NonNull
   @Override
-  protected PropertyChangeListener registerListener(@NotNull ProjectInformation pProjectInformation, @NotNull IFireable<ProjectInformation> pFireable)
+  protected PropertyChangeListener registerListener(@NonNull ProjectInformation pProjectInformation, @NonNull IFireable<ProjectInformation> pFireable)
   {
     PropertyChangeListener pcl = (e) -> pFireable.fireValueChanged(pProjectInformation);
     pProjectInformation.addPropertyChangeListener(pcl);
@@ -64,14 +64,14 @@ public class ProjectObservable extends AbstractListenerObservable<PropertyChange
   }
 
   @Override
-  protected void removeListener(@NotNull ProjectInformation pProjectInformation, @NotNull PropertyChangeListener pPropertyChangeListener)
+  protected void removeListener(@NonNull ProjectInformation pProjectInformation, @NonNull PropertyChangeListener pPropertyChangeListener)
   {
     pProjectInformation.removePropertyChangeListener(pPropertyChangeListener);
   }
 
   public interface IProvider
   {
-    @NotNull
+    @NonNull
     Observable<ProjectInformation> create();
   }
 }

@@ -1,5 +1,6 @@
 package de.adito.http.proxy;
 
+import lombok.NonNull;
 import org.apache.http.HttpHost;
 import org.apache.http.auth.*;
 import org.apache.http.client.*;
@@ -40,7 +41,7 @@ public class ProxyClientProvider
    * @throws KeyStoreException        only relevant if certificates should be ignored, thrown if the keystore cannot be initalised
    * @throws KeyManagementException   only relevant if certificates should be ignored, thrown if the SSL Context cannot be initalised
    */
-  @NotNull
+  @NonNull
   public static HttpClient getClient(boolean pIgnoreCertificates) throws NoSuchAlgorithmException, KeyStoreException, KeyManagementException
   {
     HttpClientBuilder httpClientBuilder = HttpClients.custom();
@@ -118,12 +119,12 @@ public class ProxyClientProvider
     }
   }
 
-  public static void addProxySettingsListener(@NotNull PreferenceChangeListener pPreferenceChangeListener)
+  public static void addProxySettingsListener(@NonNull PreferenceChangeListener pPreferenceChangeListener)
   {
     PREFERENCES_NODE.addPreferenceChangeListener(pPreferenceChangeListener);
   }
 
-  public static void removeProxySettingsListener(@NotNull PreferenceChangeListener pPreferenceChangeListener)
+  public static void removeProxySettingsListener(@NonNull PreferenceChangeListener pPreferenceChangeListener)
   {
     PREFERENCES_NODE.removePreferenceChangeListener(pPreferenceChangeListener);
   }

@@ -1,6 +1,7 @@
 package de.adito.aditoweb.nbm.nbide.nbaditointerface.git;
 
 import de.adito.aditoweb.nbm.nbide.nbaditointerface.git.exceptions.AditoVersioningException;
+import lombok.NonNull;
 import org.jetbrains.annotations.*;
 
 import java.io.File;
@@ -22,7 +23,7 @@ public interface IGitVersioningSupport
    * @param pOptions   Options for the versioning support
    * @return <tt>true</tt> if successful
    */
-  boolean performClone(@NotNull String pRemoteURI, @NotNull File pTarget, @Nullable Map<String, String> pOptions)
+  boolean performClone(@NonNull String pRemoteURI, @NonNull File pTarget, @Nullable Map<String, String> pOptions)
       throws Exception;
 
   /**
@@ -32,8 +33,8 @@ public interface IGitVersioningSupport
    * @return a list of the available branches
    * @throws AditoVersioningException if authentication fails or no connection to the repository could be established
    */
-  @NotNull
-  List<IRemoteBranch> getBranchesInRepository(@NotNull String pRemoteUrl) throws AditoVersioningException;
+  @NonNull
+  List<IRemoteBranch> getBranchesInRepository(@NonNull String pRemoteUrl) throws AditoVersioningException;
 
   /**
    * Fetches the list of all available tags of the given repository
@@ -42,7 +43,7 @@ public interface IGitVersioningSupport
    * @return a list of the available branches
    * @throws AditoVersioningException if authentication fails or no connection to the repository could be established
    */
-  @NotNull
-  List<ITag> getTagsInRepository(@NotNull String pRemoteUrl) throws AditoVersioningException;
+  @NonNull
+  List<ITag> getTagsInRepository(@NonNull String pRemoteUrl) throws AditoVersioningException;
 
 }

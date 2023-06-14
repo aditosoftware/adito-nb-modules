@@ -1,5 +1,6 @@
 package de.adito.aditoweb.nbm.nbide.nbaditointerface.common;
 
+import lombok.NonNull;
 import org.jetbrains.annotations.*;
 import org.netbeans.api.project.Project;
 import org.openide.util.*;
@@ -19,7 +20,7 @@ public interface IProjectQuery
   /**
    * @return the currently usable instance
    */
-  @NotNull
+  @NonNull
   static IProjectQuery getInstance()
   {
     return Lookup.getDefault().lookup(IProjectQuery.class);
@@ -31,7 +32,7 @@ public interface IProjectQuery
    * @return all (currently selected) projects
    */
   @Nullable
-  default <T> T findProjectsInCurrentContext(@NotNull ReturnType<T> pType)
+  default <T> T findProjectsInCurrentContext(@NonNull ReturnType<T> pType)
   {
     return findProjects(Utilities.actionsGlobalContext(), pType);
   }
@@ -43,7 +44,7 @@ public interface IProjectQuery
    * @return all found projects
    */
   @Nullable
-  default <T> T findProjects(@NotNull Lookup.Provider pLookup, @NotNull ReturnType<T> pType)
+  default <T> T findProjects(@NonNull Lookup.Provider pLookup, @NonNull ReturnType<T> pType)
   {
     Lookup lookup = pLookup.getLookup();
     if(lookup == null)
@@ -58,7 +59,7 @@ public interface IProjectQuery
    * @return all found projects
    */
   @Nullable
-  <T> T findProjects(@NotNull Lookup pLookup, @NotNull ReturnType<T> pType);
+  <T> T findProjects(@NonNull Lookup pLookup, @NonNull ReturnType<T> pType);
 
   /**
    * Defines, what findProjects() should return
@@ -88,7 +89,7 @@ public interface IProjectQuery
 
     private final Function<Set<Project>, T> returnValueFn;
 
-    public ReturnType(@NotNull Function<Set<Project>, T> pReturnValueFn)
+    public ReturnType(@NonNull Function<Set<Project>, T> pReturnValueFn)
     {
       returnValueFn = pReturnValueFn;
     }
@@ -100,7 +101,7 @@ public interface IProjectQuery
      * @return return value
      */
     @Nullable
-    public T toReturnValue(@NotNull Set<Project> pProjects)
+    public T toReturnValue(@NonNull Set<Project> pProjects)
     {
       return returnValueFn.apply(pProjects);
     }

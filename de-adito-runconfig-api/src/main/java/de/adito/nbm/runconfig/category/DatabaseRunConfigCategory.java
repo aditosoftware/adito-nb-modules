@@ -2,7 +2,7 @@ package de.adito.nbm.runconfig.category;
 
 import de.adito.nbm.runconfig.api.IRunConfigCategory;
 import io.reactivex.rxjava3.core.Observable;
-import org.jetbrains.annotations.NotNull;
+import lombok.NonNull;
 import org.openide.util.NbBundle;
 
 /**
@@ -11,14 +11,14 @@ import org.openide.util.NbBundle;
 public class DatabaseRunConfigCategory implements IRunConfigCategory
 {
 
-  @NotNull
+  @NonNull
   @Override
   public String getName()
   {
     return "de-adito-aditoweb-nbm-editor-system-runconfig-Database-Category"; //NOI18N
   }
 
-  @NotNull
+  @NonNull
   @Override
   public Observable<String> title()
   {

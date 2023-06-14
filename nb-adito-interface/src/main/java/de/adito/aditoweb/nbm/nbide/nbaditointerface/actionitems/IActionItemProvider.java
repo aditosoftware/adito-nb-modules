@@ -1,7 +1,7 @@
 package de.adito.aditoweb.nbm.nbide.nbaditointerface.actionitems;
 
 import io.reactivex.rxjava3.core.Flowable;
-import org.jetbrains.annotations.NotNull;
+import lombok.NonNull;
 import org.openide.filesystems.FileObject;
 
 import java.util.*;
@@ -17,7 +17,7 @@ public interface IActionItemProvider
    *
    * @return Flowable with a list of all current items
    */
-  @NotNull
+  @NonNull
   Flowable<Set<IActionItem>> observeItems();
 
   /**
@@ -27,7 +27,7 @@ public interface IActionItemProvider
    * @param pFo FileObject (file or folder)
    * @return Flowable with a list of all current items
    */
-  @NotNull
-  Flowable<Set<IActionItem>> observeItems(@NotNull FileObject pFo);
+  @NonNull
+  Flowable<Set<IActionItem>> observeItems(@NonNull FileObject pFo);
 
 }

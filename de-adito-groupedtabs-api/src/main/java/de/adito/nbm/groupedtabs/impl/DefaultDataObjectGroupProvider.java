@@ -1,7 +1,7 @@
 package de.adito.nbm.groupedtabs.impl;
 
 import de.adito.nbm.groupedtabs.api.IDataObjectGroupProvider;
-import org.jetbrains.annotations.NotNull;
+import lombok.NonNull;
 import org.netbeans.api.project.*;
 import org.openide.filesystems.FileObject;
 import org.openide.loaders.DataObject;
@@ -20,9 +20,9 @@ import java.util.*;
 @ServiceProvider(service = IDataObjectGroupProvider.class)
 public final class DefaultDataObjectGroupProvider implements IDataObjectGroupProvider
 {
-  @NotNull
+  @NonNull
   @Override
-  public Optional<String> group(@NotNull DataObject pDataObject)
+  public Optional<String> group(@NonNull DataObject pDataObject)
   {
     final FileObject file = pDataObject.getPrimaryFile();
     return Optional.ofNullable(file)

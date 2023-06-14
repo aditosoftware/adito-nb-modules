@@ -3,7 +3,7 @@ package de.adito.observables.netbeans;
 import de.adito.util.reactive.*;
 import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.schedulers.Schedulers;
-import org.jetbrains.annotations.NotNull;
+import lombok.NonNull;
 import org.openide.filesystems.*;
 
 import java.io.File;
@@ -17,7 +17,7 @@ public class FileObservable extends AbstractListenerObservable<FileChangeListene
 
   private final boolean recurseInto;
 
-  private FileObservable(@NotNull File pListenableValue, boolean pRecurseInto)
+  private FileObservable(@NonNull File pListenableValue, boolean pRecurseInto)
   {
     super(pListenableValue);
     recurseInto = pRecurseInto;
@@ -30,9 +30,9 @@ public class FileObservable extends AbstractListenerObservable<FileChangeListene
    * @param pFile File to check
    * @return Observable
    */
-  @NotNull
+  @NonNull
   @Deprecated
-  public static Observable<Optional<File>> create(@NotNull File pFile)
+  public static Observable<Optional<File>> create(@NonNull File pFile)
   {
     return createForDirectory(pFile);
   }
@@ -44,8 +44,8 @@ public class FileObservable extends AbstractListenerObservable<FileChangeListene
    * @param pFile File to check
    * @return Observable
    */
-  @NotNull
-  public static Observable<Optional<File>> createForDirectory(@NotNull File pFile)
+  @NonNull
+  public static Observable<Optional<File>> createForDirectory(@NonNull File pFile)
   {
     return createForDirectory(pFile, true);
   }
@@ -59,8 +59,8 @@ public class FileObservable extends AbstractListenerObservable<FileChangeListene
    * @param pRecursiveInto true if the observable should trigger if ANY file inside pFile will trigger this observable
    * @return Observable
    */
-  @NotNull
-  public static Observable<Optional<File>> createForDirectory(@NotNull File pFile, boolean pRecursiveInto)
+  @NonNull
+  public static Observable<Optional<File>> createForDirectory(@NonNull File pFile, boolean pRecursiveInto)
   {
     return Observables.create(new FileObservable(pFile, pRecursiveInto), () -> _getValue(pFile))
         .observeOn(Schedulers.io())
@@ -74,8 +74,8 @@ public class FileObservable extends AbstractListenerObservable<FileChangeListene
    * @param pFile File to check
    * @return Observable
    */
-  @NotNull
-  public static Observable<Optional<File>> createForPlainFile(@NotNull File pFile)
+  @NonNull
+  public static Observable<Optional<File>> createForPlainFile(@NonNull File pFile)
   {
     File parentFile = pFile.getParentFile();
     Observable<Optional<File>> parentObservable;
@@ -102,9 +102,9 @@ public class FileObservable extends AbstractListenerObservable<FileChangeListene
         .map(pL -> pL == -1 ? Optional.empty() : _getValue(pFile));
   }
 
-  @NotNull
+  @NonNull
   @Override
-  protected FileChangeListener registerListener(@NotNull File pFile, @NotNull IFireable<Optional<File>> pFireable)
+  protected FileChangeListener registerListener(@NonNull File pFile, @NonNull IFireable<Optional<File>> pFireable)
   {
     FileChangeListener fcl = new _FileListenerImpl(pFireable, pFile);
     pFile = FileUtil.normalizeFile(pFile);
@@ -116,7 +116,7 @@ public class FileObservable extends AbstractListenerObservable<FileChangeListene
   }
 
   @Override
-  protected void removeListener(@NotNull File pFile, @NotNull FileChangeListener pFileChangeListener)
+  protected void removeListener(@NonNull File pFile, @NonNull FileChangeListener pFileChangeListener)
   {
     try
     {
@@ -128,8 +128,8 @@ public class FileObservable extends AbstractListenerObservable<FileChangeListene
     }
   }
 
-  @NotNull
-  private static Optional<File> _getValue(@NotNull File pFile)
+  @NonNull
+  private static Optional<File> _getValue(@NonNull File pFile)
   {
     if (pFile.exists())
       return Optional.of(pFile);
@@ -141,14 +141,14 @@ public class FileObservable extends AbstractListenerObservable<FileChangeListene
    */
   private static class _NonRecursiveFileObservable extends AbstractListenerObservable<FileChangeListener, File, Optional<File>>
   {
-    public _NonRecursiveFileObservable(@NotNull File pListenableValue)
+    public _NonRecursiveFileObservable(@NonNull File pListenableValue)
     {
       super(pListenableValue);
     }
 
-    @NotNull
+    @NonNull
     @Override
-    protected FileChangeListener registerListener(@NotNull File pFile, @NotNull IFireable<Optional<File>> pFireable)
+    protected FileChangeListener registerListener(@NonNull File pFile, @NonNull IFireable<Optional<File>> pFireable)
     {
       FileChangeListener fcl = new _FileListenerImpl(pFireable, pFile);
       FileUtil.addFileChangeListener(fcl, FileUtil.normalizeFile(pFile));
@@ -156,7 +156,7 @@ public class FileObservable extends AbstractListenerObservable<FileChangeListene
     }
 
     @Override
-    protected void removeListener(@NotNull File pFile, @NotNull FileChangeListener pFileChangeListener)
+    protected void removeListener(@NonNull File pFile, @NonNull FileChangeListener pFileChangeListener)
     {
       try
       {
@@ -174,7 +174,7 @@ public class FileObservable extends AbstractListenerObservable<FileChangeListene
     private final IFireable<Optional<File>> fireable;
     private final File file;
 
-    _FileListenerImpl(@NotNull IFireable<Optional<File>> pFireable, @NotNull File pFile)
+    _FileListenerImpl(@NonNull IFireable<Optional<File>> pFireable, @NonNull File pFile)
     {
       fireable = pFireable;
       file = pFile;

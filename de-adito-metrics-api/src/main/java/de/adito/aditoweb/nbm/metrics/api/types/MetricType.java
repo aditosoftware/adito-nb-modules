@@ -1,5 +1,6 @@
 package de.adito.aditoweb.nbm.metrics.api.types;
 
+import lombok.NonNull;
 import org.jetbrains.annotations.*;
 
 import java.lang.annotation.*;
@@ -27,7 +28,7 @@ public @interface MetricType
      * @return the name
      */
     @Nullable
-    String create(@Nullable String pBaseName, @NotNull Object[] pMethodArguments);
+    String create(@Nullable String pBaseName, @NonNull Object[] pMethodArguments);
   }
 
   /**
@@ -37,7 +38,7 @@ public @interface MetricType
   {
     @Nullable
     @Override
-    public String create(@Nullable String pBaseName, @NotNull Object[] pMethodArguments)
+    public String create(@Nullable String pBaseName, @NonNull Object[] pMethodArguments)
     {
       return pBaseName;
     }

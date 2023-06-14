@@ -1,6 +1,6 @@
 package de.adito.swing.popup;
 
-import org.jetbrains.annotations.NotNull;
+import lombok.NonNull;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -17,7 +17,7 @@ import static javax.swing.SwingConstants.CENTER;
  */
 class TitlePanel extends JPanel
 {
-  TitlePanel(@NotNull MouseDragHandler pMouseDragHandler, @NotNull String pLabelName)
+  TitlePanel(@NonNull MouseDragHandler pMouseDragHandler, @NonNull String pLabelName)
   {
     setLayout(new BorderLayout());
     if (!pLabelName.isEmpty())

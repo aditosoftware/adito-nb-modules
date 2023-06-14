@@ -3,6 +3,7 @@ package de.adito.notification;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import de.adito.aditoweb.nbm.metrics.api.types.Sampled;
+import lombok.NonNull;
 import org.jetbrains.annotations.*;
 import org.openide.awt.*;
 import org.openide.modules.Modules;
@@ -23,7 +24,7 @@ class NotificationFacadeImpl implements INotificationFacade
   private static final int _WIDTH_SQL_DIALOG = 1500;
 
   @Override
-  public void showSql(@NotNull String pSqlText)
+  public void showSql(@NonNull String pSqlText)
   {
     try
     {
@@ -66,21 +67,21 @@ class NotificationFacadeImpl implements INotificationFacade
 
   @Override
   @Sampled(name = "logging.external.error")
-  public void error(@NotNull Throwable pThrowable)
+  public void error(@NonNull Throwable pThrowable)
   {
     notifyError(pThrowable, pThrowable.getClass().getSimpleName(), getRootMessage(pThrowable));
   }
 
   @Override
   @Sampled(name = "logging.external.error")
-  public void error(@NotNull Throwable pThrowable, @NotNull String pTitle)
+  public void error(@NonNull Throwable pThrowable, @NonNull String pTitle)
   {
     notifyError(pThrowable, pTitle, getExceptionAndMessage(pThrowable));
   }
 
   @Override
   @Sampled(name = "logging.external.error")
-  public void error(@NotNull Throwable pThrowable, @NotNull String pTitle, @NotNull String pAdditionalInformation)
+  public void error(@NonNull Throwable pThrowable, @NonNull String pTitle, @NonNull String pAdditionalInformation)
   {
     String exceptionMessage = getExceptionAndMessage(pThrowable);
     notifyError(pThrowable, pTitle, exceptionMessage + "\n " + pAdditionalInformation);
@@ -94,7 +95,7 @@ class NotificationFacadeImpl implements INotificationFacade
    * @param pMessage   the message
    */
   @VisibleForTesting
-  void notifyError(@NotNull Throwable pThrowable, @NotNull String pTitle, @NotNull String pMessage)
+  void notifyError(@NonNull Throwable pThrowable, @NonNull String pTitle, @NonNull String pMessage)
   {
     _notify(pTitle, pMessage, false, NotificationDisplayer.Priority.HIGH, null);
     Exceptions.printStackTrace(pThrowable);
@@ -102,7 +103,7 @@ class NotificationFacadeImpl implements INotificationFacade
 
 
   @VisibleForTesting
-  void _notify(@Nullable String pTitle, @Nullable String pMessage, boolean pAutoDispose, @NotNull NotificationDisplayer.Priority pPriority,
+  void _notify(@Nullable String pTitle, @Nullable String pMessage, boolean pAutoDispose, @NonNull NotificationDisplayer.Priority pPriority,
                @Nullable ActionListener pActionListener)
   {
     Icon icon = pPriority.getIcon();
@@ -122,9 +123,9 @@ class NotificationFacadeImpl implements INotificationFacade
    * @param pThrowable the throwable of which the message should be created
    * @return the message containing class name of the throwable and root message
    */
-  @NotNull
+  @NonNull
   @VisibleForTesting
-  String getExceptionAndMessage(@NotNull Throwable pThrowable)
+  String getExceptionAndMessage(@NonNull Throwable pThrowable)
   {
     return pThrowable.getClass().getSimpleName() + ": " + getRootMessage(pThrowable);
   }
@@ -137,9 +138,9 @@ class NotificationFacadeImpl implements INotificationFacade
    * @param pThrowable the {@link Throwable} of which the root message should be extracted
    * @return the root message
    */
-  @NotNull
+  @NonNull
   @VisibleForTesting
-  String getRootMessage(@NotNull Throwable pThrowable)
+  String getRootMessage(@NonNull Throwable pThrowable)
   {
     Throwable cause = pThrowable.getCause();
     if (cause != null)

@@ -3,6 +3,7 @@ package de.adito.nbm.translation.gui;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import de.adito.nbm.translation.api.*;
 import de.adito.nbm.translation.spi.*;
+import lombok.NonNull;
 import org.jetbrains.annotations.*;
 import org.openide.util.Lookup;
 
@@ -25,7 +26,7 @@ public class TranslationExecutor
   /**
    * @return singleton instance
    */
-  @NotNull
+  @NonNull
   public static TranslationExecutor getInstance()
   {
     if (_INSTANCE == null)
@@ -45,8 +46,8 @@ public class TranslationExecutor
    * @param pContent the content to translate
    * @return map containing the original text as key and the translated text as value
    */
-  @NotNull
-  public CompletableFuture<Map<String, String>> scheduleTranslation(@NotNull TranslationDialog.TranslationResult pResult, @NotNull List<String> pContent)
+  @NonNull
+  public CompletableFuture<Map<String, String>> scheduleTranslation(@NonNull TranslationDialog.TranslationResult pResult, @NonNull List<String> pContent)
   {
     return scheduleTranslation(pResult.getFrom(), pResult.getTo(), pResult.getTranslatorType(), pResult.getLineBreakMethod(), pContent);
   }
@@ -58,9 +59,9 @@ public class TranslationExecutor
    * @param pContent the content to translate
    * @return map containing the original text as key and the translated text as value
    */
-  @NotNull
-  public CompletableFuture<Map<String, String>> scheduleTranslation(@NotNull TranslationDialog.TranslationResult pResult, @Nullable String pAuthCode,
-                                                                    @Nullable String pProxyUrl, @NotNull List<String> pContent)
+  @NonNull
+  public CompletableFuture<Map<String, String>> scheduleTranslation(@NonNull TranslationDialog.TranslationResult pResult, @Nullable String pAuthCode,
+                                                                    @Nullable String pProxyUrl, @NonNull List<String> pContent)
   {
     return scheduleTranslation(pResult.getFrom(), pResult.getTo(), pResult.getTranslatorType(), pAuthCode, pResult.getLineBreakMethod(),
                                pProxyUrl, pContent);
@@ -77,9 +78,9 @@ public class TranslationExecutor
    * @param pContent         the content to translate
    * @return map containing the original text as key and the translated text as value
    */
-  @NotNull
-  public CompletableFuture<Map<String, String>> scheduleTranslation(@NotNull Locale pFrom, @NotNull Locale pTo, @NotNull ETranslatorType pType,
-                                                                    @NotNull ELineBreakMethod pLineBreakMethod, @NotNull List<String> pContent)
+  @NonNull
+  public CompletableFuture<Map<String, String>> scheduleTranslation(@NonNull Locale pFrom, @NonNull Locale pTo, @NonNull ETranslatorType pType,
+                                                                    @NonNull ELineBreakMethod pLineBreakMethod, @NonNull List<String> pContent)
   {
     return CompletableFuture.supplyAsync(() -> {
       // must not be null
@@ -112,10 +113,10 @@ public class TranslationExecutor
    * @param pContent         the content to translate
    * @return map containing the original text as key and the translated text as value
    */
-  @NotNull
-  public CompletableFuture<Map<String, String>> scheduleTranslation(@NotNull Locale pFrom, @NotNull Locale pTo, @NotNull ETranslatorType pType,
-                                                                    @Nullable String pAuthCode, @NotNull ELineBreakMethod pLineBreakMethod,
-                                                                    @Nullable String pProxyUrl, @NotNull List<String> pContent)
+  @NonNull
+  public CompletableFuture<Map<String, String>> scheduleTranslation(@NonNull Locale pFrom, @NonNull Locale pTo, @NonNull ETranslatorType pType,
+                                                                    @Nullable String pAuthCode, @NonNull ELineBreakMethod pLineBreakMethod,
+                                                                    @Nullable String pProxyUrl, @NonNull List<String> pContent)
   {
     return CompletableFuture.supplyAsync(() -> _doTranslation(pFrom, pTo, pType, pAuthCode, pLineBreakMethod, pProxyUrl, pContent), executorService);
   }
@@ -132,9 +133,9 @@ public class TranslationExecutor
    * @param pContent         the content to translate
    * @return map containing the original text as key and the translated text as value
    */
-  @NotNull
-  private Map<String, String> _doTranslation(@NotNull Locale pFrom, @NotNull Locale pTo, @NotNull ETranslatorType pType, @Nullable String pAuthCode,
-                                             @NotNull ELineBreakMethod pLineBreakMethod, @Nullable String pProxyUrl, @NotNull List<String> pContent)
+  @NonNull
+  private Map<String, String> _doTranslation(@NonNull Locale pFrom, @NonNull Locale pTo, @NonNull ETranslatorType pType, @Nullable String pAuthCode,
+                                             @NonNull ELineBreakMethod pLineBreakMethod, @Nullable String pProxyUrl, @NonNull List<String> pContent)
   {
     String[] translateRequest = pContent.toArray(new String[0]);
     ITranslationService translationService = TranslationServiceFactory.getTranslationService(pType);

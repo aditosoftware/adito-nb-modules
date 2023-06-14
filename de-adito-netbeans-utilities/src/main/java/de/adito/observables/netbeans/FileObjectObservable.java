@@ -3,7 +3,7 @@ package de.adito.observables.netbeans;
 import de.adito.util.reactive.*;
 import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.schedulers.Schedulers;
-import org.jetbrains.annotations.NotNull;
+import lombok.NonNull;
 import org.openide.filesystems.*;
 
 /**
@@ -14,22 +14,22 @@ import org.openide.filesystems.*;
 public class FileObjectObservable extends AbstractListenerObservable<FileChangeListener, FileObject, FileObject>
 {
 
-  @NotNull
-  public static Observable<FileObject> create(@NotNull FileObject pFileObject)
+  @NonNull
+  public static Observable<FileObject> create(@NonNull FileObject pFileObject)
   {
     return Observables.create(new FileObjectObservable(pFileObject), () -> pFileObject)
         .observeOn(Schedulers.io())
         .subscribeOn(Schedulers.io());
   }  
   
-  private FileObjectObservable(@NotNull FileObject pListenableValue)
+  private FileObjectObservable(@NonNull FileObject pListenableValue)
   {
     super(pListenableValue);
   }
 
-  @NotNull
+  @NonNull
   @Override
-  protected FileChangeListener registerListener(@NotNull FileObject pFileObject, @NotNull IFireable<FileObject> pFireable)
+  protected FileChangeListener registerListener(@NonNull FileObject pFileObject, @NonNull IFireable<FileObject> pFireable)
   {
     FileChangeListener fcl = new _FileChangeListener(pFileObject, pFireable);
     pFileObject.addFileChangeListener(fcl);
@@ -37,7 +37,7 @@ public class FileObjectObservable extends AbstractListenerObservable<FileChangeL
   }
 
   @Override
-  protected void removeListener(@NotNull FileObject pFileObject, @NotNull FileChangeListener pFileChangeListener)
+  protected void removeListener(@NonNull FileObject pFileObject, @NonNull FileChangeListener pFileChangeListener)
   {
     pFileObject.removeFileChangeListener(pFileChangeListener);
   }

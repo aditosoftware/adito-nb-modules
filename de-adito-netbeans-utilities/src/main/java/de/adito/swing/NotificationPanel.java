@@ -3,7 +3,7 @@ package de.adito.swing;
 import com.google.common.collect.Lists;
 import com.google.common.primitives.Doubles;
 import info.clearthought.layout.*;
-import org.jetbrains.annotations.NotNull;
+import lombok.NonNull;
 import org.openide.util.ImageUtilities;
 
 import javax.swing.*;
@@ -77,7 +77,7 @@ public class NotificationPanel extends JPanel
       image = pImage;
     }
 
-    @NotNull
+    @NonNull
     public Icon toIcon()
     {
       return ImageUtilities.image2Icon(image);

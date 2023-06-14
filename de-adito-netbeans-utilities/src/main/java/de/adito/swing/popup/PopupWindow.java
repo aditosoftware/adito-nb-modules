@@ -1,7 +1,7 @@
 package de.adito.swing.popup;
 
 import de.adito.swing.quicksearch.IExtendedQuickSearchCallback;
-import org.jetbrains.annotations.NotNull;
+import lombok.NonNull;
 import org.jetbrains.annotations.Nullable;
 import org.openide.awt.QuickSearch;
 
@@ -28,7 +28,7 @@ public class PopupWindow extends JWindow
    * @param pTitle     Title the popup should have, pass an empty string for no header/title
    * @param pComponent Content that is displayed in the popup
    */
-  public PopupWindow(@Nullable Window parent, @NotNull String pTitle, @NotNull JComponent pComponent)
+  public PopupWindow(@Nullable Window parent, @NonNull String pTitle, @NonNull JComponent pComponent)
   {
     this(parent, pTitle, pComponent, null);
   }
@@ -39,7 +39,7 @@ public class PopupWindow extends JWindow
    * @param pComponent           Content that is displayed in the popup
    * @param pQuickSearchCallback Callback for the Quicksearch that should be attached to the Popup. Null if no popup is wanted
    */
-  public PopupWindow(@Nullable Window parent, @NotNull String pTitle, @NotNull JComponent pComponent, @Nullable IExtendedQuickSearchCallback pQuickSearchCallback)
+  public PopupWindow(@Nullable Window parent, @NonNull String pTitle, @NonNull JComponent pComponent, @Nullable IExtendedQuickSearchCallback pQuickSearchCallback)
   {
     super(parent);
     quickSearchCallback = pQuickSearchCallback;

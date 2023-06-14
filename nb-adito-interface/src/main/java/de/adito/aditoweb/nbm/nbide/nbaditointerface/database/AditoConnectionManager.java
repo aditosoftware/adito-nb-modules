@@ -1,5 +1,6 @@
 package de.adito.aditoweb.nbm.nbide.nbaditointerface.database;
 
+import lombok.NonNull;
 import org.jetbrains.annotations.*;
 import org.netbeans.api.project.Project;
 import org.netbeans.api.project.ui.OpenProjects;
@@ -21,7 +22,7 @@ public class AditoConnectionManager
    *
    * @return a list of all possible connections
    */
-  @NotNull
+  @NonNull
   public static List<IPossibleConnectionProvider.IPossibleDBConnection> getPossibleConnections()
   {
     if(SwingUtilities.isEventDispatchThread())
@@ -37,8 +38,8 @@ public class AditoConnectionManager
    *
    * @return a list of all possible connections
    */
-  @NotNull
-  public static List<IPossibleConnectionProvider.IPossibleDBConnection> getPossibleConnections(@NotNull Collection<Project> pProjects)
+  @NonNull
+  public static List<IPossibleConnectionProvider.IPossibleDBConnection> getPossibleConnections(@NonNull Collection<Project> pProjects)
   {
     if(SwingUtilities.isEventDispatchThread())
       throw new RuntimeException("AditoConnectionManager.getPossibleConnections() must not be called in EDT!");
@@ -56,8 +57,8 @@ public class AditoConnectionManager
    *
    * @return a list of all possible connections
    */
-  @NotNull
-  public static List<IPossibleConnectionProvider.IPossibleDBConnection> getPossibleConnections(@NotNull Project pProject)
+  @NonNull
+  public static List<IPossibleConnectionProvider.IPossibleDBConnection> getPossibleConnections(@NonNull Project pProject)
   {
     if(SwingUtilities.isEventDispatchThread())
       throw new RuntimeException("AditoConnectionManager.getPossibleConnections() must not be called in EDT!");

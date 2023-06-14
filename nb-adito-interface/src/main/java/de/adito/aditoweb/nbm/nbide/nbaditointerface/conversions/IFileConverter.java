@@ -1,5 +1,6 @@
 package de.adito.aditoweb.nbm.nbide.nbaditointerface.conversions;
 
+import lombok.NonNull;
 import org.jetbrains.annotations.*;
 
 import java.io.*;
@@ -21,7 +22,7 @@ public interface IFileConverter
    * @param pParams     Parameters for the conversion
    * @return true if the serviceProvider can accomplish the specified conversion, false otherwise
    */
-  boolean canConvert(@NotNull String pSourceType, @NotNull String pTargetType, @NotNull Map<Object, Object> pParams);
+  boolean canConvert(@NonNull String pSourceType, @NonNull String pTargetType, @NonNull Map<Object, Object> pParams);
 
   /**
    * Converts the source file to the specified type at the target location
@@ -34,8 +35,8 @@ public interface IFileConverter
    * @return conversion result, or null
    */
   @Nullable
-  default Object convert(@NotNull File pSourceLocation, @NotNull File pTargetLocation, @NotNull String pSourceType, @NotNull String pTargetType,
-                         @NotNull Map<Object, Object> pParams) throws IOException
+  default Object convert(@NonNull File pSourceLocation, @NonNull File pTargetLocation, @NonNull String pSourceType, @NonNull String pTargetType,
+                         @NonNull Map<Object, Object> pParams) throws IOException
   {
     return convert(new FileReader(pSourceLocation), new FileWriter(pTargetLocation), pSourceType, pTargetType, pParams);
   }
@@ -51,7 +52,7 @@ public interface IFileConverter
    * @return conversion result, or null
    */
   @Nullable
-  Object convert(@NotNull Reader pSource, @NotNull Writer pTarget, @NotNull String pSourceType, @NotNull String pTargetType,
-                 @NotNull Map<Object, Object> pParams) throws IOException;
+  Object convert(@NonNull Reader pSource, @NonNull Writer pTarget, @NonNull String pSourceType, @NonNull String pTargetType,
+                 @NonNull Map<Object, Object> pParams) throws IOException;
 
 }

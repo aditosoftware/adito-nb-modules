@@ -3,7 +3,7 @@ package de.adito.observables.netbeans;
 import de.adito.util.reactive.AbstractListenerObservable;
 import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.schedulers.Schedulers;
-import org.jetbrains.annotations.NotNull;
+import lombok.NonNull;
 
 import java.util.prefs.*;
 
@@ -16,8 +16,8 @@ import java.util.prefs.*;
 public class PreferencesObservable extends AbstractListenerObservable<PreferenceChangeListener, Preferences, Preferences>
 {
 
-  @NotNull
-  public static Observable<Preferences> create(@NotNull Preferences pPreferences)
+  @NonNull
+  public static Observable<Preferences> create(@NonNull Preferences pPreferences)
   {
     return Observable.create(new PreferencesObservable(pPreferences))
         .startWithItem(pPreferences)
@@ -25,14 +25,14 @@ public class PreferencesObservable extends AbstractListenerObservable<Preference
         .subscribeOn(Schedulers.computation());
   }
 
-  private PreferencesObservable(@NotNull Preferences pBase)
+  private PreferencesObservable(@NonNull Preferences pBase)
   {
     super(pBase);
   }
 
-  @NotNull
+  @NonNull
   @Override
-  protected PreferenceChangeListener registerListener(@NotNull Preferences pBase, @NotNull IFireable<Preferences> pFireable)
+  protected PreferenceChangeListener registerListener(@NonNull Preferences pBase, @NonNull IFireable<Preferences> pFireable)
   {
     PreferenceChangeListener pcl = ev -> pFireable.fireValueChanged(pBase);
     pBase.addPreferenceChangeListener(pcl);
@@ -40,7 +40,7 @@ public class PreferencesObservable extends AbstractListenerObservable<Preference
   }
 
   @Override
-  protected void removeListener(@NotNull Preferences pBase, @NotNull PreferenceChangeListener pPreferencesChangeListener)
+  protected void removeListener(@NonNull Preferences pBase, @NonNull PreferenceChangeListener pPreferencesChangeListener)
   {
     pBase.removePreferenceChangeListener(pPreferencesChangeListener);
   }

@@ -3,6 +3,7 @@ package de.adito.nbm.translation.gui;
 import de.adito.nbm.translation.api.*;
 import de.adito.nbm.translation.spi.ITranslatorAuthKeyProvider;
 import de.adito.notification.INotificationFacade;
+import lombok.NonNull;
 import org.jetbrains.annotations.*;
 import org.openide.*;
 import org.openide.util.*;
@@ -111,7 +112,7 @@ public class TranslationDialog
    * @param pUsePreviousSettings true, if the latest used settings should be set by default
    * @return the content
    */
-  @NotNull
+  @NonNull
   protected TranslationPanel createContent(@Nullable ETranslatorType[] pTypes, @Nullable Locale pDefaultTarget, boolean pUsePreviousSettings)
   {
     return createContent(pTypes, pDefaultTarget, null, pUsePreviousSettings);
@@ -126,7 +127,7 @@ public class TranslationDialog
    * @param pUsePreviousSettings true, if the latest used settings should be set by default
    * @return the content
    */
-  @NotNull
+  @NonNull
   protected TranslationPanel createContent(@Nullable ETranslatorType[] pTypes, @Nullable Locale pDefaultTarget, @Nullable Locale pDefaultSource, boolean pUsePreviousSettings)
   {
     return new TranslationPanel(pTypes, pDefaultTarget, pDefaultSource, pUsePreviousSettings);

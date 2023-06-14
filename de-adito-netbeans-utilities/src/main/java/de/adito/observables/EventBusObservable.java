@@ -3,6 +3,7 @@ package de.adito.observables;
 import com.google.common.eventbus.*;
 import de.adito.util.reactive.AbstractListenerObservable;
 import io.reactivex.rxjava3.core.Observable;
+import lombok.NonNull;
 import org.jetbrains.annotations.*;
 
 import java.util.*;
@@ -26,9 +27,9 @@ public class EventBusObservable extends AbstractListenerObservable<Object, Event
    * @param pEvent Event to listen on (multiple events possible)
    * @return Observable containing the event that happened
    */
-  @NotNull
+  @NonNull
   @SafeVarargs
-  public static <T> Observable<T> createForFixedEvent(@NotNull EventBus pBus, @NotNull T... pEvent)
+  public static <T> Observable<T> createForFixedEvent(@NonNull EventBus pBus, @NonNull T... pEvent)
   {
     List<T> events = Arrays.asList(pEvent);
 
@@ -37,15 +38,15 @@ public class EventBusObservable extends AbstractListenerObservable<Object, Event
         .map(pObj -> (T) pObj);
   }
 
-  public EventBusObservable(@NotNull EventBus pListenableValue, @NotNull Predicate<Object> pFirePredicate)
+  public EventBusObservable(@NonNull EventBus pListenableValue, @NonNull Predicate<Object> pFirePredicate)
   {
     super(pListenableValue);
     firePredicate = pFirePredicate;
   }
 
-  @NotNull
+  @NonNull
   @Override
-  protected Object registerListener(@NotNull EventBus pListenableValue, @NotNull IFireable<Object> pFireable)
+  protected Object registerListener(@NonNull EventBus pListenableValue, @NonNull IFireable<Object> pFireable)
   {
     //noinspection unused
     Object listener = new Object()
@@ -62,7 +63,7 @@ public class EventBusObservable extends AbstractListenerObservable<Object, Event
   }
 
   @Override
-  protected void removeListener(@NotNull EventBus pListenableValue, @NotNull Object pEventBusObservable)
+  protected void removeListener(@NonNull EventBus pListenableValue, @NonNull Object pEventBusObservable)
   {
     pListenableValue.unregister(pEventBusObservable);
   }

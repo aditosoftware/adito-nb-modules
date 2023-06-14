@@ -1,6 +1,7 @@
 package de.adito.swing;
 
 import info.clearthought.layout.TableLayout;
+import lombok.NonNull;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
@@ -97,7 +98,7 @@ public class TableLayoutUtil
    * @param pDefault if the component doesn't own a TableLayout it returns pDefault.
    * @return TableLayout of the component or pDefault, if there is no TableLayout
    */
-  @NotNull
+  @NonNull
   public final TableLayout getLayout(TableLayout pDefault)
   {
     if (!(container.getLayout() instanceof TableLayout))

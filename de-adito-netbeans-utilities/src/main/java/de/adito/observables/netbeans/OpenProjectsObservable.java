@@ -4,7 +4,7 @@ import com.google.common.collect.ImmutableList;
 import de.adito.util.reactive.AbstractListenerObservable;
 import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.schedulers.Schedulers;
-import org.jetbrains.annotations.NotNull;
+import lombok.NonNull;
 import org.netbeans.api.project.Project;
 import org.netbeans.api.project.ui.OpenProjects;
 
@@ -27,7 +27,7 @@ public class OpenProjectsObservable extends AbstractListenerObservable<PropertyC
    *
    * @return das Observable mit einer unmodifizierbaren Liste der Projekte
    */
-  @NotNull
+  @NonNull
   public static synchronized Observable<List<Project>> create()
   {
     if (_INSTANCE == null)
@@ -45,9 +45,9 @@ public class OpenProjectsObservable extends AbstractListenerObservable<PropertyC
     super(OpenProjects.getDefault());
   }
 
-  @NotNull
+  @NonNull
   @Override
-  protected PropertyChangeListener registerListener(@NotNull OpenProjects pOpenProjects, @NotNull IFireable<List<Project>> pFireable)
+  protected PropertyChangeListener registerListener(@NonNull OpenProjects pOpenProjects, @NonNull IFireable<List<Project>> pFireable)
   {
     PropertyChangeListener pcl = evt -> {
       if (Objects.equals(evt.getPropertyName(), OpenProjects.PROPERTY_OPEN_PROJECTS))
@@ -58,7 +58,7 @@ public class OpenProjectsObservable extends AbstractListenerObservable<PropertyC
   }
 
   @Override
-  protected void removeListener(@NotNull OpenProjects pOpenProjects, @NotNull PropertyChangeListener pPropertyChangeListener)
+  protected void removeListener(@NonNull OpenProjects pOpenProjects, @NonNull PropertyChangeListener pPropertyChangeListener)
   {
     pOpenProjects.removePropertyChangeListener(pPropertyChangeListener);
   }

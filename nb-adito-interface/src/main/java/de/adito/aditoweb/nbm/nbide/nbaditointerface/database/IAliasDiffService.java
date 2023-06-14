@@ -1,6 +1,6 @@
 package de.adito.aditoweb.nbm.nbide.nbaditointerface.database;
 
-import org.jetbrains.annotations.NotNull;
+import lombok.NonNull;
 import org.netbeans.api.project.Project;
 
 /**
@@ -17,6 +17,6 @@ public interface IAliasDiffService
    * @param pProject   Project
    * @param pAliasName Alias Name
    */
-  void executeDiffWithDB(@NotNull Project pProject, @NotNull String pAliasName);
+  void executeDiffWithDB(@NonNull Project pProject, @NonNull String pAliasName);
 
 }

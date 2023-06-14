@@ -1,6 +1,7 @@
 package de.adito.swing;
 
-import org.jetbrains.annotations.*;
+import lombok.NonNull;
+import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -14,12 +15,12 @@ import java.awt.*;
 public class LinedDecorator extends JPanel
 {
 
-  public LinedDecorator(@NotNull String pTitle)
+  public LinedDecorator(@NonNull String pTitle)
   {
     this(pTitle, null);
   }
 
-  public LinedDecorator(@NotNull String pTitle, @Nullable Integer pFixedHeight)
+  public LinedDecorator(@NonNull String pTitle, @Nullable Integer pFixedHeight)
   {
     super(new BorderLayout());
     JLabel name = new JLabel(pTitle);

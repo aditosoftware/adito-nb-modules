@@ -1,5 +1,6 @@
 package de.adito.nbm.blueprints.api;
 
+import lombok.NonNull;
 import org.jetbrains.annotations.*;
 
 import java.util.Map;
@@ -15,13 +16,13 @@ public interface IBlueprintParameter
   /**
    * @return DisplayName of this parameter, that gets visible on gui
    */
-  @NotNull
+  @NonNull
   String getName();
 
   /**
    * @return unique ID of this parameter, to reference it in other parameters / models
    */
-  @NotNull
+  @NonNull
   String getID();
 
   /**
@@ -43,7 +44,7 @@ public interface IBlueprintParameter
   /**
    * @return Attributes map
    */
-  @NotNull
+  @NonNull
   Map<String, String> getAttributes();
 
   /**

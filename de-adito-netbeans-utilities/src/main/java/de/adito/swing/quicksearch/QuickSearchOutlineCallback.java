@@ -1,5 +1,6 @@
 package de.adito.swing.quicksearch;
 
+import lombok.NonNull;
 import org.jetbrains.annotations.*;
 import org.netbeans.swing.outline.*;
 
@@ -16,19 +17,19 @@ public abstract class QuickSearchOutlineCallback extends QuickSearchTreeCallback
 
   private final Outline treeTable;
 
-  public QuickSearchOutlineCallback(@NotNull Outline pTreeTable)
+  public QuickSearchOutlineCallback(@NonNull Outline pTreeTable)
   {
     super();
     treeTable = pTreeTable;
   }
 
-  public QuickSearchOutlineCallback(@NotNull Outline pTreeTable, boolean pExpandOnResultFound)
+  public QuickSearchOutlineCallback(@NonNull Outline pTreeTable, boolean pExpandOnResultFound)
   {
     super(pExpandOnResultFound);
     treeTable = pTreeTable;
   }
 
-  @NotNull
+  @NonNull
   @Override
   protected TreeNode getRootNode()
   {
@@ -58,7 +59,7 @@ public abstract class QuickSearchOutlineCallback extends QuickSearchTreeCallback
   }
 
   @Override
-  protected boolean isVisible(@NotNull TreePath pPath)
+  protected boolean isVisible(@NonNull TreePath pPath)
   {
     return treeTable.isVisible(pPath);
   }

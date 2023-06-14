@@ -1,9 +1,8 @@
 package de.adito.aditoweb.nbm.metrics.api;
 
-import org.jetbrains.annotations.*;
+import lombok.NonNull;
+import org.jetbrains.annotations.Nullable;
 import org.openide.util.Lookup;
-
-import java.util.logging.Logger;
 
 /**
  * This proxy factory creates a "shallow" wrapper objects around a given object, so that
@@ -21,7 +20,7 @@ public interface IMetricProxyFactory
    * @param pObject Object to proxy
    * @return the proxied object that has to be used, if metrics should be evaluated
    */
-  @Contract("null -> null")
+  @Nullable
   static <T> T proxy(@Nullable T pObject)
   {
     if(pObject == null)
@@ -43,7 +42,7 @@ public interface IMetricProxyFactory
    * @param pObject Object to proxy
    * @return true, if it can be proxied by this proxy factory
    */
-  boolean canCreateProxy(@NotNull Object pObject);
+  boolean canCreateProxy(@NonNull Object pObject);
 
   /**
    * Creates a proxy around the given object
@@ -51,7 +50,7 @@ public interface IMetricProxyFactory
    * @param pObject Object to proxy
    * @return the proxied object
    */
-  @NotNull
-  <T> T createProxy(@NotNull T pObject);
+  @NonNull
+  <T> T createProxy(@NonNull T pObject);
 
 }

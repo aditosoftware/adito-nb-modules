@@ -1,6 +1,6 @@
 package de.adito.aditoweb.nbm.nbide.nbaditointerface.cache;
 
-import org.jetbrains.annotations.NotNull;
+import lombok.NonNull;
 
 /**
  * Simple CacheProvider which is contained in the global lookup
@@ -16,8 +16,8 @@ public interface ICacheProvider
    * @param pName  unique and constant name of the cache. The name must not be changed.
    * @return the cache
    */
-  @NotNull
-  ICache get(@NotNull Class<?> pClass, @NotNull String pName);
+  @NonNull
+  ICache get(@NonNull Class<?> pClass, @NonNull String pName);
 
   /**
    * Returns a cache, this cache is saved on the disk
@@ -28,6 +28,6 @@ public interface ICacheProvider
    * @param pMaxDiskSize maximum size of the cache on the disk (kB)
    * @return the cache
    */
-  @NotNull
-  ICache get(@NotNull Class<?> pClass, @NotNull String pName, long pMaxHeapSize, long pMaxDiskSize);
+  @NonNull
+  ICache get(@NonNull Class<?> pClass, @NonNull String pName, long pMaxHeapSize, long pMaxDiskSize);
 }

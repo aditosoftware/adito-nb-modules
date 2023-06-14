@@ -3,7 +3,7 @@ package de.adito.observables.netbeans;
 import de.adito.util.reactive.AbstractListenerObservable;
 import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.schedulers.Schedulers;
-import org.jetbrains.annotations.NotNull;
+import lombok.NonNull;
 import org.openide.nodes.*;
 
 import java.beans.PropertyChangeEvent;
@@ -18,8 +18,8 @@ public class NodeObservable extends AbstractListenerObservable<NodeListener, Nod
 {
   private List<String> properties;
 
-  @NotNull
-  public static Observable<Node> create(@NotNull Node pNode, @NotNull String... pProps)
+  @NonNull
+  public static Observable<Node> create(@NonNull Node pNode, @NonNull String... pProps)
   {
     return Observable.create(new NodeObservable(pNode, pProps))
         .startWithItem(pNode)
@@ -27,15 +27,15 @@ public class NodeObservable extends AbstractListenerObservable<NodeListener, Nod
         .subscribeOn(Schedulers.computation());
   }
 
-  private NodeObservable(@NotNull Node pListenableValue, @NotNull String... pProperties)
+  private NodeObservable(@NonNull Node pListenableValue, @NonNull String... pProperties)
   {
     super(pListenableValue);
     properties = Arrays.asList(pProperties);
   }
 
-  @NotNull
+  @NonNull
   @Override
-  protected NodeListener registerListener(@NotNull Node pListenableValue, @NotNull IFireable<Node> pFireable)
+  protected NodeListener registerListener(@NonNull Node pListenableValue, @NonNull IFireable<Node> pFireable)
   {
     NodeListener listener = new NodeAdapter()
     {
@@ -52,7 +52,7 @@ public class NodeObservable extends AbstractListenerObservable<NodeListener, Nod
   }
 
   @Override
-  protected void removeListener(@NotNull Node pListenableValue, @NotNull NodeListener pListener)
+  protected void removeListener(@NonNull Node pListenableValue, @NonNull NodeListener pListener)
   {
     pListenableValue.removeNodeListener(pListener);
   }
