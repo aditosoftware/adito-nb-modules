@@ -1,7 +1,8 @@
 package de.adito.nbm.blueprints.api;
 
-import io.reactivex.rxjava3.annotations.Nullable;
+
 import lombok.NonNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
