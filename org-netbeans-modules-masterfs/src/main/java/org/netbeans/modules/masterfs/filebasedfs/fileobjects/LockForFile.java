@@ -27,7 +27,7 @@ import java.io.OutputStream;
 import java.lang.ref.Reference;
 import java.lang.ref.WeakReference;
 import java.nio.file.Files;
-import java.util.Collection;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 import org.netbeans.modules.masterfs.filebasedfs.utils.FileChangedManager;
@@ -44,6 +44,7 @@ import org.openide.util.Exceptions;
  */
 public class LockForFile extends FileLock {
 
+    private static final boolean LEGACY_NAMESAKES = System.getProperty("adito.nb.file.lock.legacy") != null; //ADITO
     private static final ConcurrentHashMap<String, Namesakes> name2Namesakes =
             new ConcurrentHashMap<String, Namesakes>();
     private static final String PREFIX = ".LCK";
@@ -70,7 +71,7 @@ public class LockForFile extends FileLock {
     }
 
     public static LockForFile findValid(final File file) {
-        Namesakes namesakes = name2Namesakes.get(file.getName());
+        Namesakes namesakes = name2Namesakes.get(getNamesakesKey(file)); //ADITO
         return (namesakes != null) ? namesakes.getInstance(file) : null;
     }
 
@@ -82,7 +83,7 @@ public class LockForFile extends FileLock {
     private static LockForFile registerLock(LockForFile result) throws IOException, FileAlreadyLockedException {
         File file = result.getFile();
         Namesakes namesakes = new Namesakes();
-        Namesakes oldNamesakes = name2Namesakes.putIfAbsent(file.getName(), namesakes);
+        Namesakes oldNamesakes = name2Namesakes.putIfAbsent(getNamesakesKey(file), namesakes); //ADITO
         if (oldNamesakes != null) { 
             namesakes = oldNamesakes;
         }
@@ -130,11 +131,11 @@ public class LockForFile extends FileLock {
                 lockForFile.hardUnlock();
             }
             File file = lockForFile.getFile();
-            Namesakes namesakes = name2Namesakes.get(file.getName());
+            Namesakes namesakes = name2Namesakes.get(getNamesakesKey(file)); //ADITO
             if (namesakes != null) {
                 namesakes.remove(file);
                 if (namesakes.isEmpty()) {
-                    name2Namesakes.remove(file.getName());
+                    name2Namesakes.remove(getNamesakesKey(file)); //ADITO
                 }
             }
         }
@@ -250,7 +251,7 @@ public class LockForFile extends FileLock {
 
     @Override
     public boolean isValid() {
-        Namesakes namesakes = name2Namesakes.get(file.getName());
+        Namesakes namesakes = name2Namesakes.get(getNamesakesKey(file)); //ADITO
         Reference<LockForFile> ref = (namesakes != null) ? namesakes.get(file) : null;
         return (ref != null && super.isValid() && valid);
     }
@@ -268,6 +269,26 @@ public class LockForFile extends FileLock {
                 ((BaseFileObj) fo).getProvidedExtensions().fileUnlocked(fo);
             }
         }
+    }
+
+    // ADITO
+    /**
+     * Returns the key to use for {@link LockForFile#name2Namesakes} for the given file.
+     * I think that the NetBeans-Way here is a bit buggy, if you create multiple files with the same name at the same time.
+     * It may be, that the file in Thread A gets a lock, but does not exist on disk yet - then the next Thread creates a file
+     * with the same name, wants to lock it in {@link Namesakes#putInstance(File, LockForFile)}. There is no valid lock file, so
+     * a new one gets created during {@link Namesakes#hardLock()} -> but hardLock will lock ALL not existing files, so the file
+     * of Thread A gets created / locked too, causing a {@link FileAlreadyLockedException}.
+     * It seems that NetBeans implementend it because of symlinks. But the ADITO Designer does not need any kind of symlinks,
+     * so I think that we do not break existing features.
+     * It seems that the fix of using the {@link File#getAbsolutePath()} method as a cache key does not hit the performance too hard.
+     *
+     * @param pFile File to get the key for
+     * @return the key, not null
+     */
+    private static String getNamesakesKey(File pFile)
+    {
+        return LEGACY_NAMESAKES ? pFile.getName() : pFile.getAbsolutePath();
     }
 
     private static class Namesakes extends ConcurrentHashMap<File, Reference<LockForFile>> {
