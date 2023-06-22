@@ -17,7 +17,7 @@
 
   <properties>
     <vaadin-icons.version>23.0.1</vaadin-icons.version>
-    <vaadin-server.version>23.0.1</vaadin-server.version>
+    <vaadin-server.version>23.3.13</vaadin-server.version>
   </properties>
 
   <dependencies>
