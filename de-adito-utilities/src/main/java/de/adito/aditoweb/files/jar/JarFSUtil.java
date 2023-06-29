@@ -111,7 +111,7 @@ public class JarFSUtil
    * @return Map
    */
   @NonNull
-  public static <T> T loadFromInnerJar(@NonNull String[] pSplitPath, @NonNull ZipExtractor<T> pZipExtractor, @NonNull FileFilter pFileFilter)
+  public static <T> T loadFromInnerJar(String @NonNull [] pSplitPath, @NonNull ZipExtractor<T> pZipExtractor, @NonNull FileFilter pFileFilter)
   {
     String pathToJar = pSplitPath[0];
     if (pathToJar.startsWith("jar:file:"))

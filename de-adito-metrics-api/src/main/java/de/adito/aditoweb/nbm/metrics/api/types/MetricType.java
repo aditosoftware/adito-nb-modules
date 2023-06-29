@@ -28,7 +28,7 @@ public @interface MetricType
      * @return the name
      */
     @Nullable
-    String create(@Nullable String pBaseName, @NonNull Object[] pMethodArguments);
+    String create(@Nullable String pBaseName, Object @NonNull [] pMethodArguments);
   }
 
   /**
@@ -38,7 +38,7 @@ public @interface MetricType
   {
     @Nullable
     @Override
-    public String create(@Nullable String pBaseName, @NonNull Object[] pMethodArguments)
+    public String create(@Nullable String pBaseName, Object @NonNull [] pMethodArguments)
     {
       return pBaseName;
     }

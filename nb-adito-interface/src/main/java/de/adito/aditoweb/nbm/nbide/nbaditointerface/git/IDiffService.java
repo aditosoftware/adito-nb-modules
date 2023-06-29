@@ -26,7 +26,7 @@ public interface IDiffService
    * @param pVersionLeft  byte array to be compared to pVersionRight, will be displayed on the left side of the comparison
    * @param pVersionRight byte array to be compared to pVersionLeft, will be displayed on the right side of the comparison
    */
-  void showDiff(@NonNull byte[] pVersionLeft, @NonNull byte[] pVersionRight);
+  void showDiff(byte  @NonNull [] pVersionLeft, byte @NonNull [] pVersionRight);
 
   /**
    * Compares two Strings and then displays a Dialog that shows the differences of the two Versions
@@ -50,7 +50,7 @@ public interface IDiffService
    * @param pHeaderRight  Used to to give an origin to the right side of the comparison (e.g. commit id, file name or the like)
    * @param pHeaderLeft   Used to to give an origin to the left side of the comparison (e.g. commit id, file name or the like)
    */
-  void showDiff(@NonNull byte[] pVersionLeft, @NonNull byte[] pVersionRight, @NonNull String pTitle, @Nullable String pHeaderRight,
+  void showDiff(byte @NonNull [] pVersionLeft, byte @NonNull [] pVersionRight, @NonNull String pTitle, @Nullable String pHeaderRight,
                 @Nullable String pHeaderLeft);
 
 }

@@ -78,6 +78,6 @@ public abstract class AbstractAsyncNodeAction extends NodeAction
    * @see #asynchronous()
    * @return <tt>true</tt> wenn dies der Fall ist
    */
-  protected abstract boolean enable0(@NonNull Node[] activatedNodes);
+  protected abstract boolean enable0(Node @NonNull [] activatedNodes);
 
 }
