@@ -55,6 +55,7 @@
   <modules>
     <module>de-adito-blueprint-api</module>
     <module>de-adito-groupedtabs-api</module>
+    <module>de-adito-jditoupgrader-api</module>
     <module>de-adito-metrics-api</module>
     <module>de-adito-netbeans-utilities</module>
     <module>de-adito-runconfig-api</module>
