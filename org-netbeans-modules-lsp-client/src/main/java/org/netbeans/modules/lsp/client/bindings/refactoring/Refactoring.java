@@ -51,7 +51,7 @@ import org.eclipse.lsp4j.TextDocumentEdit;
 import org.eclipse.lsp4j.TextEdit;
 import org.eclipse.lsp4j.WorkspaceEdit;
 import org.eclipse.lsp4j.jsonrpc.messages.Either;
-import org.netbeans.api.queries.FileEncodingQuery;
+import org.netbeans.api.queries.*;
 import org.netbeans.modules.lsp.client.LSPBindings;
 import org.netbeans.modules.lsp.client.Utils;
 import org.netbeans.modules.lsp.client.bindings.refactoring.ModificationResult.Difference;
@@ -137,7 +137,7 @@ public class Refactoring {
                         break;
                     }
                     FileObject file = Utils.fromURI(l.getUri());
-                    if (file != null) {
+                    if (file != null && VisibilityQuery.getDefault().isVisible(file)) {
                         PositionBounds bounds;
                         try {
                             CloneableEditorSupport es = file.getLookup().lookup(CloneableEditorSupport.class);
