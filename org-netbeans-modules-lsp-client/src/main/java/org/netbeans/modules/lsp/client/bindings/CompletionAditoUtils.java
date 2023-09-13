@@ -116,6 +116,27 @@ class CompletionAditoUtils
   }
 
   /**
+   * The LSP returns invalid suffixes of libraries, if autocompleted manually.
+   * e.g.: import { AttributeFilterExtensionMaker$1 } from "AttributeFilter_lib";
+   * The $1 here is invalid, because there is no class "AttributeFilterExtensionMaker$1" - only "AttributeFilterExtensionMaker" exists!
+   *
+   * @param pTextToFix Text that should be fixed
+   * @return the fixed text
+   */
+  @NotNull
+  public static String removeInvalidSuffixes(@NotNull String pTextToFix)
+  {
+    if(pTextToFix.toLowerCase().startsWith("import"))
+      return pTextToFix
+          // Replace the invalid suffix if at the end of an import statement
+          .replace("$1 ", " ")
+          // Replace the invalid suffix in the middle of an import statement
+          .replace("$1,", ",");
+
+    return pTextToFix;
+  }
+
+  /**
    * Removes specific characters if there is one before the offset
    *
    * @param pDoc    the document

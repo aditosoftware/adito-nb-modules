@@ -205,8 +205,10 @@ public class CompletionProviderImpl implements CompletionProvider {
                                             int start = Utils.getOffset(doc, te.getRange().getStart());
                                             int end = Utils.getOffset(doc, te.getRange().getEnd());
                                             doc.remove(start, end - start);
-                                            doc.insertString(start, te.getNewText(), null);
-                                            endPos = start + te.getNewText().length();
+                                            //ADITO
+                                            String newText = CompletionAditoUtils.removeInvalidSuffixes(te.getNewText());
+                                            doc.insertString(start, newText, null);
+                                            endPos = start + newText.length();
                                         } else {
                                             String toAdd = completionItem.getInsertText();
                                             if (toAdd == null) {

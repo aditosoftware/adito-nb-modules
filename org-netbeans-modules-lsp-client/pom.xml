@@ -9,7 +9,7 @@
 
   <groupId>org.netbeans.api</groupId>
   <artifactId>org-netbeans-modules-lsp-client</artifactId>
-  <version>RELEASE125-1.9.15</version>
+  <version>RELEASE125-1.9.16</version>
   <packaging>nbm</packaging>
   <name>NetbeansIDE module: org-netbeans-modules-lsp-client</name>
 
